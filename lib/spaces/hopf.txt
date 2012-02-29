@@ -1,0 +1,147 @@
+Hi everyone,
+
+[Peter, Mike: yesterday, Chris gave a very exciting presentation of the
+ construction of the Hopf fibration that you all have been working on.
+ It's beautiful stuff!  As a warmup, he defined the "Hopf junior"
+ fibration Hj, which is the fibration from S1 to S1 whose fibers are S0:
+
+ S0 --> S1 --> S1
+
+ But we left it as a homework problem to prove that the total space of
+ Hj is in fact S1.  It was my understanding that you haven't done this
+ yet, but if I'm wrong, let me know!]
+
+I think I've solved this first homework problem, namely giving a
+syntactic proof that for 
+
+Hj : S1 -> U
+Hj = C-rec (2,not) 
+
+(Sigma x:S1.Hj x) (the total space of Hj) is isomorphic to S1
+
+Notation: I'll use b:S1 and loop:b ~> b and C-rec for the circle.  
+
+The main idea is really pretty. To get some intuition, let's write out
+what the canonical forms of type (Sigma x:S1.Hj x) are, to see why they
+look like the circle:
+
+== Points ==
+
+First, note that Hj b is definitionally equal to 2, and that the 
+canonical point on the circle is b.  So the canonical terms of type 
+(Sigma x:S1.Hj x) are pairs (b, x : 2) where x is a boolean; that is,
+the pairs
+
+(b, true)
+(b, false)
+
+So it looks like we have two points in (Sigma x:S1.Hj x), but in fact
+these two points are joined by a path.  Recall that a path 
+(M,N) ~> (M',N') : Sigma x:A.B is a pair
+\alpha : M ~> M' in A
+\beta  : subst_B \alpha N ~> N' in B[a']
+
+So we can make a path (b,true) ~> (b,false) if we can fill in X in
+
+(loop, X : subst_Hj loop true ~> false)
+
+The second important fact is that
+
+subst_Hj loop ~> not  because  Hj = C-rec(2,not) and 
+applying C-rec to loop gives the path you put in; in this case, 'not'.  
+
+So what we need to give is a path from (not true) ~> false, which is just
+reflexivity.  
+
+Thus, the two points (b,true) and (b,false) are equivalent, so it
+suffices to check that the loops at one of them look like the circle, to
+see that the loops of both of them do.  
+
+== Paths ==
+
+So, let's look at what the loops
+
+(b,true) ~> (b,true) 
+
+are.  Obviously we have
+
+(refl : b ~> b in S1, refl : subst_Hj refl true ~> true in 2)
+
+But if we try
+
+(loop : b ~> b, ? : subst_Hj loop true ~> true)
+
+we get stuck, because ? : false ~> true (recall the action of subst_Hj loop)	
+can't be filled in.  
+
+Same for
+
+(!loop, ?) because subst_Hj (!loop) == !(subst_Hj loop) == !not == not
+
+Here's the fun thing: if we try
+
+(loop o loop : b ~> b, ? : subst_Hj (loop o loop) true ~> true)
+
+then the action of subst is not o not, which is the identity function,
+so we can fill in the ?.  Same for any even number of loops, or even
+number of !loop's!
+
+Thus, Hj is serving as a bit that makes the type (b,true) ~> (b,true)
+inhabited exactly when the first component is some even number of loops.
+This corresponds exactly to the picture of the total space of Hj as the
+circle wound around twice, so that a loop around the total space of Hj
+is exactly 2 loops around the circle!
+
+So it's pretty clear that we should be able to show that S1 and Sigma Hj
+are isomorphic, essentially by showing that the integers and the even
+integers are isomorphic.  In fact, I imagine you could do this proof by
+showing that pi1(Sigma Hj) is 2Z, and then using Z == 2Z, if we already
+had Whitehead's principle (it should be easy to show that 
+Sigma Hj has the right h-level, since Sigma's are closed under
+h-level, which will take care of the higher levels).  
+
+== Direct proof ==
+
+However, you can just as easily write out an isomorphism directly, based
+on this intuition.  The key idea is to define
+
+double : S1 -> (Sigma Hj)
+halve : (Sigma Hj) -> S1
+
+I'll give the defintions below, but the main point is that double sends
+loop to loop^2 and halve sends loop^2 to loop:
+
+double b = (b,true)
+resp double loop = (loop o loop, \alpha) 
+     (where alpha witnesses subst_Hj (loop o loop) == not o not)
+
+halve (b,_) = b
+resp halve (loop o loop, refl true) = loop
+
+In fact, the way you define halve is by using the boolean to stutter, so 
+
+resp halve (loop, refl true) = loop
+resp halve (loop, refl false) = refl
+
+This way, every other time you see loop in the input, you return loop in
+the output, so it halves the number of loops.  This implies the above
+equation.  
+
+More formally, define 
+
+double = C-rec (b,true) (loop o loop, \alpha)
+
+halve (x,y) = halve' x y where
+  halve' : Pi x:S1, Hj x -> S1
+  halve' = C-elim[Hj x -> S1] (\_.b) (ext(\b . if b then loop else refl))
+
+I've sketched out the proof that these compose to the identity in both
+directions, but I haven't typed it in, and I'm used to equations holding
+more strictly in 2TT, so there are probably some details to fill in.  
+But the interesting parts worked out, so I'm fairly confident this works.
+
+-Dan
+
+
+
+
