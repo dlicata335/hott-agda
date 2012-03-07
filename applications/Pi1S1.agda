@@ -1,6 +1,7 @@
 {-# OPTIONS --type-in-type --without-K #-}
 open import lib.Prelude 
 open Paths
+open S¹
 
 module applications.Pi1S1 where
 
@@ -10,31 +11,33 @@ module applications.Pi1S1 where
   predA : AEq Int Int
   predA = isoToAdj (pred , isiso succ pred-succ succ-pred)
 
-  succP : Int ≃ Int
-  succP = ua succA
+  succ≃ : Int ≃ Int
+  succ≃ = ua succA
 
-  predP : Int ≃ Int
-  predP = ua predA
+  pred≃ : Int ≃ Int
+  pred≃ = ua predA
 
-  succP-! : (! succP) ≃ predP 
-  succP-! = !-adj succ (snd succA) (snd predA) 
+  succ≃-! : (! succ≃) ≃ pred≃ 
+  succ≃-! = !-adj succ (snd succA) (snd predA) 
 
   C : S¹ -> Set
-  C = S¹-rec Int succP
+  C = S¹-rec Int succ≃
 
   subst-C-loop : subst C loop ≃ succ
-  subst-C-loop = subst C loop                  ≃〈 subst-resp C loop 〉
-                 subst (λ x → x) (resp C loop) ≃〈 resp (subst (λ x → x)) (βloop/rec Int succP) 〉 
-                 subst (λ x → x) succP         ≃〈 subst-univ _ 〉 
-                 succ ∎
+  subst-C-loop = 
+    subst C loop                  ≃〈 subst-resp C loop 〉
+    subst (λ x → x) (resp C loop) ≃〈 resp (subst (λ x → x)) (βloop/rec Int succ≃) 〉 
+    subst (λ x → x) succ≃         ≃〈 subst-univ _ 〉 
+    succ ∎
 
   subst-C-!loop : subst C (! loop) ≃ pred
-  subst-C-!loop = (subst C (! loop) ≃〈 subst-resp C (! loop) 〉
-                   subst (λ x → x) (resp C (! loop)) ≃〈 resp (subst (λ x → x)) (resp-! C loop)〉
-                   subst (λ x → x) (! (resp C loop)) ≃〈 resp (λ y → subst (λ x → x) (! y)) (βloop/rec Int succP) 〉
-                   subst (λ x → x) (! succP) ≃〈 resp (subst (λ x → x)) succP-! 〉
-                   subst (λ x → x) predP ≃〈 subst-univ _ 〉 
-                   (pred ∎))
+  subst-C-!loop = 
+    subst C (! loop)                  ≃〈 subst-resp C (! loop) 〉
+    subst (λ x → x) (resp C (! loop)) ≃〈 resp (subst (λ x → x)) (resp-! C loop)〉
+    subst (λ x → x) (! (resp C loop)) ≃〈 resp (λ y → subst (λ x → x) (! y)) (βloop/rec Int succ≃) 〉
+    subst (λ x → x) (! succ≃)         ≃〈 resp (subst (λ x → x)) succ≃-! 〉
+    subst (λ x → x) pred≃             ≃〈 subst-univ _ 〉 
+    pred ∎
 
   loop^ : Int -> base ≃ base
   loop^ Zero = Refl
@@ -43,14 +46,17 @@ module applications.Pi1S1 where
   loop^ (Pos Z) = loop
   loop^ (Pos (S n)) = loop ∘ loop^ (Pos n)
 
-  encode : ∀ {a} -> base ≃ a -> C a
+  encode : {a : S¹} ->  base ≃ a  ->  C a
   encode p = subst C p Zero
+
+  encode' : base ≃ base -> Int
+  encode' = encode {base}
 
   encode-loop^ : (n : Int) -> encode (loop^ n) ≃ n
   encode-loop^ Zero = Refl
   encode-loop^ (Pos Z) = app≃ subst-C-loop
   encode-loop^ (Pos (S y)) = 
-    subst C (loop ∘ loop^ (Pos y)) Zero         ≃〈 app≃ (subst-∘ C loop (loop^ (Pos y)) ) 〉
+    subst C (loop ∘ loop^ (Pos y)) Zero ≃〈 app≃ (subst-∘ C loop (loop^ (Pos y)) ) 〉
     subst C loop (subst C (loop^ (Pos y)) Zero) ≃〈 app≃ subst-C-loop 〉
     succ (subst C (loop^ (Pos y)) Zero)         ≃〈 resp succ (encode-loop^ (Pos y)) 〉 
     succ (Pos y) ∎
@@ -62,7 +68,7 @@ module applications.Pi1S1 where
     pred (Neg y) ∎
 
   -- stuck : {p : base ≃ base} -> p ≃ loop^ (encode p)
-  -- stuck = {!!} no way to use J directly; need to generalize
+  -- stuck = {!!} -- no way to use J directly; need to generalize
 
   shift : (n : Int) -> (loop ∘ (loop^ (pred n))) ≃ loop^ n
   shift (Pos Z) = Refl
@@ -70,7 +76,7 @@ module applications.Pi1S1 where
   shift Zero = !-inv-r loop
   shift (Neg Z) = 
     ∘-unit-l _ ∘
-    resp (λ x → x ∘ ! loop) (!-inv-r loop) 
+    resp (\ x → x ∘ ! loop) (!-inv-r loop) 
     ∘ ∘-assoc loop (! loop) (! loop) 
   shift (Neg (S y)) = 
     loop ∘ ! loop ∘ ! loop ∘ loop^ (Neg y)    ≃〈 ∘-assoc loop (! loop) (! loop ∘ loop^ (Neg y)) 〉
@@ -78,22 +84,28 @@ module applications.Pi1S1 where
     Refl ∘ ! loop ∘ loop^ (Neg y)             ≃〈 ∘-unit-l _ 〉
     (! loop ∘ loop^ (Neg y) ∎) 
 
-  decode : ∀ {a} -> C a -> base ≃ a
-  decode {a} = S¹-elim {C = \ x -> C x -> base ≃ x} 
-                       loop^ 
-                       (subst (λ x' → C x' → base ≃ x') loop loop^ 
-                        ≃〈 subst-→ C (Id base) loop loop^ 〉
-                        (\ y -> subst (Id base) loop (loop^ (subst C (! loop) y))) 
-                        ≃〈 λ≃ (λ y → subst-Id-post loop (loop^ (subst C (! loop) y))) 〉
-                        (\ y -> loop ∘ (loop^ (subst C (! loop) y)))
-                        ≃〈 λ≃ (λ y → resp (λ x' → loop ∘ loop^ x') (app≃ subst-C-!loop)) 〉
-                        (\ y -> loop ∘ (loop^ (pred y)))
-                        ≃〈 λ≃ shift 〉 
-                        (λ y → loop^ y) ∎)
-                       a
+  decode : {a : S¹} -> C a -> base ≃ a
+  decode {a} = 
+    S¹-elim {\ x -> C x -> base ≃ x} 
+            loop^ 
+            (subst (\ x' →  C x' → base ≃ x') loop loop^                ≃〈 subst-→ C (Id base) loop loop^ 〉
+             (\ y -> subst (Id base) loop (loop^ (subst C (! loop) y))) ≃〈 λ≃ (λ y → subst-Id-post loop (loop^ (subst C (! loop) y))) 〉
+             (\ y -> loop ∘ (loop^ (subst C (! loop) y)))               ≃〈 λ≃ (λ y → resp (λ x' → loop ∘ loop^ x') (app≃ subst-C-!loop)) 〉
+             (\ y -> loop ∘ (loop^ (pred y)))                           ≃〈 λ≃ shift 〉 
+             (\ y → loop^ y) 
+             ∎)
+            a
+
+
 
   decode-encode : ∀ {a} -> (p : base ≃ a) -> decode (encode p) ≃ p
-  decode-encode {a} p = jay1 (λ a' p' → decode (encode p') ≃ p') p Refl
+  decode-encode {a} p = 
+    jay1 (λ a' (p' : base ≃ a') → decode (encode p') ≃ p') p Refl
+
+
+
+
+
 
   theorem : Id base base ≃ Int
   theorem = ua (isoToAdj (encode , isiso decode encode-loop^ decode-encode))

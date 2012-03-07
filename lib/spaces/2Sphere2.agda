@@ -35,14 +35,14 @@ module lib.spaces.2Sphere2 where
     S²-rec a' _ _ _ _ _ A = a'
     S²-rec _ b' _ _ _ _ B = b'
 
-    S²-elim : {C : S² -> Set} 
+    S²-elim : (C : S² -> Set)
             -> (a' : C a)(b' : C b)
             -> (n' : subst C n a' ≃ b') (s' : subst C s a' ≃ b')
             -> (fr' : subst (\ y -> Id (subst C y a') b') fr n' ≃ s') 
             -> (ba' : subst (\ y -> Id (subst C y a') b') ba n' ≃ s') 
             -> (x : S²) -> C x
-    S²-elim a' _ _ _ _ _ A = a'
-    S²-elim _ b' _ _ _ _ B = b'
+    S²-elim C a' _ _ _ _ _ A = a'
+    S²-elim C _ b' _ _ _ _ B = b'
 
     module Rec where 
      postulate

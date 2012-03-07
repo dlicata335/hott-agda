@@ -6,7 +6,7 @@ module lib.spaces.Circle where
 
   open Paths
 
-  module Circle where
+  module S¹ where
     private
       data S¹' : Set where
         Base : S¹'
@@ -41,7 +41,7 @@ module lib.spaces.Circle where
                  -> (a : C base) (p : subst C loop a ≃ a)
                  -> respd (S¹-elim{C} a p) loop ≃ p
 
-  open Circle public
+  open S¹
 
   
 
