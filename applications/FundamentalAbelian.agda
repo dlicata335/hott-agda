@@ -96,23 +96,17 @@ module applications.FundamentalAbelian (A : Set) (base : A) where
                       ≃ (resp (\ x -> x ∘ Refl) α ∘ resp (\ x -> Refl ∘ x) β) 
     bifunctor-lemma-∘ α β = bifunctor-lemma _∘_ {Refl} {Refl} {Refl} {Refl} α β
 
-    is-id-l : (\ (x : π1El) -> Refl ∘ x) ≃ (\ x -> x)
-    is-id-l = λ≃ (λ x → ∘-unit-l x) 
-
-    is-id-r : (\ (x : π1El) -> x ∘ Refl) ≃ (\ x -> x)
-    is-id-r = λ≃ (λ x → ∘-unit-r x) 
-
-    is-id-resp-1 : resp (\ (x : π1El) -> Refl ∘ x) ≃ (\ (x : π2El) -> x)
-    is-id-resp-1 = {!respd resp ?!} -- λ≃ (λ x → resp-id x ∘ respd (λ f → resp f x) is-id-l ∘ {!!})
-
-    is-id-resp-2 : resp (\ (x : π1El) -> x ∘ Refl) ≃ (\ (x : π2El) -> x)
-    is-id-resp-2 = λ≃ resp-id ∘ {!respd (\ f -> resp f) is-id-l!}
-
     commute : (α β : π2El) -> (α ∘ β) ≃ (β ∘ α)
     commute α β = α ∘ β                                              ≃〈 resp (λ f → f α ∘ β) (! is-id-resp-2) 〉
                   resp (λ x → x ∘ Refl) α ∘ β                        ≃〈 resp (λ f → resp (λ x → x ∘ Refl) α ∘ f β) (! is-id-resp-1) 〉
                   resp (λ x → x ∘ Refl) α ∘ resp (λ x → Refl ∘ x) β  ≃〈 ! (bifunctor-lemma-∘ α β) 〉 
                   resp (λ x → Refl ∘ x) β ∘ resp (\ x -> x ∘ Refl) α ≃〈 resp (λ f → f β ∘ resp (λ x → x ∘ Refl) α) is-id-resp-1 〉 
                   β ∘ resp (\ x -> x ∘ Refl) α                       ≃〈 resp (λ f → β ∘ f α) is-id-resp-2 〉 
-                  β ∘ α ∎
-            
+                  β ∘ α ∎ where
+      is-id-resp-1 : resp (\ (x : π1El) -> Refl ∘ x) ≃ (\ (x : π2El) -> x)
+      is-id-resp-1 = λ≃ (\ x → ∘-unit-l x ∘ resp-by-id (\ y → ! (∘-unit-l y)) x) 
+  
+      is-id-resp-2 : resp (\ (x : π1El) -> x ∘ Refl) ≃ (\ (x : π2El) -> x)
+      is-id-resp-2 = λ≃ resp-id -- cancels definitionally on this side
+
+ 

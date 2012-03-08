@@ -12,6 +12,8 @@ module lib.Paths where
  _≃_ : {A : Set} -> A -> A -> Set
  _≃_ = Id
 
+ infix 9 _≃_
+
  Paths : {A : Set} -> A -> A -> Set
  Paths = Id
 
@@ -129,6 +131,12 @@ module lib.Paths where
    resp-id : {A : Set} {M N : A} (α : Id M N)
            -> Id (resp (\ x -> x) α) α
    resp-id Refl = Refl 
+
+   resp-by-id : {A : Set} {f : A -> A}
+                (αf : (x : _) -> x ≃ f x) 
+             -> {M N : A} (α : M ≃ N)
+             -> (resp {_}{_}{M}{N} f α ≃ αf N ∘ α ∘ ! (αf M))
+   resp-by-id αf Refl = resp (λ x → αf _ ∘ x) (! (∘-unit-l (! (αf _)))) ∘ ! (!-inv-r (αf _)) 
 
    subst-∘ : {A : Set} (C : A -> Set) {M N P : A} (β : Id N P) (α : Id M N) 
            -> Id (subst C (β ∘ α)) (\ x -> subst C β (subst C α x))
