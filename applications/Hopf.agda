@@ -25,7 +25,7 @@ module applications.Hopf where
 
     collapse-clockwise-a-ba : (! s ∘ n) ≃ Refl
     collapse-clockwise-a-ba = !-inv-l s ∘ resp (λ x → ! s ∘ x) ba
-  
+
   module Twist2 where
     open S²2
 
@@ -36,11 +36,12 @@ module applications.Hopf where
     rotx : S² -> S²
     rotx = S²-rec a b s n (! ba) (! fr) 
 
-    roty : S² -> S²
-    roty = S²-rec b a (! s) (! n) (! (resp ! ba)) (! (resp ! fr))
-
-    rotz : S² -> S²
-    rotz = S²-rec b a (! s) (! n) (! (resp ! fr)) (! (resp ! ba)) 
+    module Unused where
+      roty : S² -> S²
+      roty = S²-rec b a (! s) (! n) (! (resp ! ba)) (! (resp ! fr))
+  
+      rotz : S² -> S²
+      rotz = S²-rec b a (! s) (! n) (! (resp ! fr)) (! (resp ! ba)) 
 
     a' = id
     b' = rotx 
@@ -68,8 +69,8 @@ module applications.Hopf where
 -}
     open Loops
 
-    n' : a' ≃ b' 
-    n' = λ≃ (S²-elim (\p -> p ≃ rotx p) 
+    n'body : (x : _) -> a' x ≃ b' x
+    n'body = (S²-elim (\p -> p ≃ rotx p) 
                      Refl
                      Refl
                      (subst (λ p → p ≃ rotx p) n Refl ≃〈 subst-Id (λ p → p) rotx n Refl 〉 
@@ -87,21 +88,53 @@ module applications.Hopf where
                      {!!}
                      {!!})
 
-    -- presumably something goes wrong if you take n' = s' ?
-    s' : a' ≃ b'
-    s' = {!!}
+    n' : a' ≃ b' 
+    n' = λ≃ n'body
 
+    -- if you take n' = s' and do Refl's all the way up, the image of loop3 is Refl; see below
+    s' : a' ≃ b'
+    s' = n'
+           
     fr' : n' ≃ s'
-    fr' = {!!} 
+    fr' = Refl 
     
     ba' : n' ≃ s'
-    ba' = {!!}
+    ba' = Refl
     
-    h' : fr' ≃ ba'
-    h' = ?
+    hfr' : fr' ≃ ba'
+    hfr' = Refl
 
-    j' : fr' ≃ ba' 
-    j' = ?
+    hba' : fr' ≃ ba' 
+    hba' = Refl
+
+    module Loop3Image where
+      -- if it's homomorphic, S³-rec will send loop3 to this
+      -- FIXME: check that this actually works
+
+      loop3-1' : Id a' b' -> Id a' a'
+      loop3-1' = \ p -> ! n' ∘ p
+    
+      loop3-1-n' : Id (loop3-1' n') Refl
+      loop3-1-n' = !-inv-l n'
+    
+      loop3-2' : Id{Id a' b'} n' s' -> Id{Id a' a'} Refl Refl 
+      loop3-2' = \ p' -> loop3-1-n' ∘ resp loop3-1' (! p' ∘ p')  ∘ ! loop3-1-n'
+    
+      loop3-2-fr' : Id (loop3-2' fr') Refl
+      loop3-2-fr' = !-inv-l n' ∘ resp (_∘_ (! n')) (! fr' ∘ fr') ∘ ! (!-inv-l n') ≃〈 resp (λ x → !-inv-l n' ∘ resp (_∘_ (! n')) x ∘ ! (!-inv-l n')) (!-inv-l fr') 〉
+                    !-inv-l n' ∘ Refl ∘ ! (!-inv-l n') ≃〈 resp (λ x → !-inv-l n' ∘ x) (∘-unit-l (!(!-inv-l n'))) 〉 
+                    !-inv-l n' ∘ ! (!-inv-l n') ≃〈 !-inv-r (!-inv-l n') 〉 
+                    Refl ∎
+    
+      loop3' : Id {Id{Id a' a'} Refl Refl} Refl Refl
+      loop3' = loop3-2-fr' ∘ resp loop3-2' (! hba' ∘ hfr') ∘ ! loop3-2-fr'
+
+      test : loop3' ≃ Refl
+      test = loop3-2-fr' ∘ resp loop3-2' (! hba' ∘ hfr') ∘ ! loop3-2-fr' ≃〈 Refl   〉 -- because hba' = hfr' = Refl
+             loop3-2-fr' ∘ Refl ∘ ! loop3-2-fr' ≃〈 resp (λ x → loop3-2-fr' ∘ x) (∘-unit-l (! loop3-2-fr')) 〉
+             loop3-2-fr' ∘ ! loop3-2-fr' ≃〈 !-inv-r loop3-2-fr' 〉 
+             Refl ∎
+      -- therefore (! hba' ∘ hfr') must be non-trivial to get a non-trivial image of loop3
 
   module Twist1 where
     open S¹2

@@ -81,6 +81,7 @@ module applications.HigherHomotopyAbelian (A : Set) (base : A) where
       -- ENH: can you relax the restriction that the base point is identity?
       -- abelian' : {loop : Id base base} {a b : Id loop loop} → Id (trans a b) (trans b a)
 
+  -- shorter proof by Favonia
   module BifunctorLemma where
 
     bifunctor-lemma : ∀ {A B C : Set} 
