@@ -36,76 +36,96 @@ module applications.Hopf where
     rotx : S² -> S²
     rotx = S²-rec a b s n (! ba) (! fr) 
 
-    module Unused where
-      roty : S² -> S²
-      roty = S²-rec b a (! s) (! n) (! (resp ! ba)) (! (resp ! fr))
+    roty : S² -> S²
+    roty = S²-rec b a (! s) (! n) (! (resp ! ba)) (! (resp ! fr))
   
-      rotz : S² -> S²
-      rotz = S²-rec b a (! s) (! n) (! (resp ! fr)) (! (resp ! ba)) 
+    rotz : S² -> S²
+    rotz = S²-rec b a (! s) (! n) (! (resp ! fr)) (! (resp ! ba)) 
 
     a' = id
-    b' = rotx 
+    b' = rotz
 
-{-  have some choices about p1 and p2
-
-    n' : a' ≃ b' 
-    n' = λ≃ (S²-elim (\p -> p ≃ rotx p) 
-                     p1
-                     p2 
-                     (subst (λ p → p ≃ rotx p) n p1 ≃〈 subst-Id (λ p → p) rotx n p1 〉 
-                      resp rotx n ∘ p1 ∘ ! (resp (λ p → p) n) ≃〈 {!!} 〉 
-                      s ∘ p1 ∘ ! (resp (λ p → p) n) ≃〈 {!!} 〉 
-                      s ∘ p1 ∘ ! n ≃〈 {!!} 〉 
-                      p2 ∎)
-                     (subst (λ p → p ≃ rotx p) s p1 ≃〈 subst-Id (λ p → p) rotx s p1 〉
-                      resp rotx s ∘ p1 ∘ ! (resp (λ p → p) s) ≃〈 {!!} 〉 
-                      n ∘ p1 ∘ ! (resp (λ p → p) s) ≃〈 {!!} 〉 
-                      n ∘ p1 ∘ ! s ≃〈 {!!} 〉 
-                      p2 ∎)
-                     {!!}
-                     {!!})
-       where p1 = {!!}
-             p2 = {!!}
--}
     open Loops
 
     n'body : (x : _) -> a' x ≃ b' x
-    n'body = (S²-elim (\p -> p ≃ rotx p) 
-                     Refl
-                     Refl
-                     (subst (λ p → p ≃ rotx p) n Refl ≃〈 subst-Id (λ p → p) rotx n Refl 〉 
-                      resp rotx n ∘ Refl ∘ ! (resp (λ p → p) n) ≃〈 resp (λ x → x ∘ ( Refl ∘ ! (resp (λ p → p) n))) (Rec.βn _ _ _ _ _ _) 〉 
-                      s ∘ Refl ∘ ! (resp (λ p → p) n) ≃〈 resp (λ x → s ∘ Refl ∘ ! x) (resp-id n) 〉 
-                      s ∘ Refl ∘ ! n ≃〈 resp (λ x → s ∘ x) (∘-unit-l (! n)) 〉 
-                      s ∘ ! n ≃〈 collapse-counterclockwise-b-fr 〉 
-                      Refl ∎)
-                     (subst (λ p → p ≃ rotx p) s Refl ≃〈 subst-Id (λ p → p) rotx s Refl 〉
-                      resp rotx s ∘ Refl ∘ ! (resp (λ p → p) s) ≃〈 resp (λ x → x ∘ Refl ∘ ! (resp (λ p → p) s)) (Rec.βs _ _ _ _ _ _) 〉 
-                      n ∘ Refl ∘ ! (resp (λ p → p) s) ≃〈 resp (λ x → n ∘ Refl ∘ ! x) (resp-id s) 〉 
-                      n ∘ Refl ∘ ! s ≃〈 resp (λ x → n ∘ x) (∘-unit-l (! s)) 〉 
-                      n ∘ ! s ≃〈 collapse-counterclockwise-a-fr 〉 
-                      Refl ∎)
-                     {!!}
+    n'body = 
+           (S²-elim (λ x → Id x (rotz x)) 
+                     n 
+                     (! s) 
+                     (subst (λ p → p ≃ rotz p) n n ≃〈 subst-Id (λ p → p) rotz n n 〉
+                      resp rotz n ∘ n ∘ ! (resp (λ p → p) n) ≃〈 resp (λ x → x ∘ n ∘ ! (resp (λ p → p) n)) (Rec.βn _ _ _ _ _ _) 〉
+                      ! s ∘ n ∘ ! (resp (λ p → p) n) ≃〈 resp (λ x → ! s ∘ n ∘ ! x) (resp-id n) 〉 
+                      ! s ∘ n ∘ ! n ≃〈 resp (λ x → ! s ∘ x) (!-inv-r n) 〉 
+                      ! s ∎)
+                     (subst (λ p → p ≃ rotz p) s n ≃〈 subst-Id (λ p → p) rotz s n 〉
+                        resp rotz s ∘ n ∘ ! (resp (λ p → p) s) ≃〈 resp (λ x → x ∘ n ∘ ! (resp (λ p → p) s)) (Rec.βs _ _ _ _ _ _) 〉
+                        ! n ∘ n ∘ ! (resp (λ p → p) s) ≃〈 ∘-assoc (! n) n (! (resp (λ x → x) s)) 〉
+                        (! n ∘ n) ∘ ! (resp (λ p → p) s) ≃〈 resp (λ x → x ∘ ! (resp (λ p → p) s)) (!-inv-l n) 〉 
+                        Refl ∘ ! (resp (λ p → p) s) ≃〈 resp (λ x → Refl ∘ ! x) (resp-id s) 〉 
+                        Refl ∘ ! s ≃〈 ∘-unit-l (! s) 〉 
+                        (! s ∎)) 
+                     {!!} 
                      {!!})
 
-    n' : a' ≃ b' 
+    n' : a' ≃ b' -- clockwise
     n' = λ≃ n'body
 
-    -- if you take n' = s' and do Refl's all the way up, the image of loop3 is Refl; see below
-    s' : a' ≃ b'
-    s' = n'
-           
-    fr' : n' ≃ s'
-    fr' = Refl 
+    s'body : (x : _) -> a' x ≃ b' x
+    s'body = 
+            (S²-elim (λ x → Id x (rotz x)) 
+                     s 
+                     (! n) 
+                     (subst (λ p → p ≃ rotz p) n s ≃〈 subst-Id (λ p → p) rotz n s 〉
+                        resp rotz n ∘ s ∘ ! (resp (λ p → p) n) ≃〈 resp (λ x → x ∘ s ∘ ! (resp (λ p → p) n)) (Rec.βn _ _ _ _ _ _) 〉
+                        ! s ∘ s ∘ ! (resp (λ p → p) n) ≃〈 resp (λ x → ! s ∘ s ∘ ! x) (resp-id n) 〉
+                        ! s ∘ s ∘ ! n ≃〈 ∘-assoc (! s) s (! n) 〉 
+                        (! s ∘ s) ∘ ! n ≃〈 resp (λ x → x ∘ ! n) (!-inv-l s) 〉 
+                        Refl ∘ ! n ≃〈 ∘-unit-l (! n) 〉 
+                        ! n ∎)
+                     (subst (λ p → p ≃ rotz p) s s ≃〈 subst-Id (λ p → p) rotz s s 〉
+                        resp rotz s ∘ s ∘ ! (resp (λ p → p) s) ≃〈 resp (λ x → x ∘ s ∘ ! (resp (λ p → p) s)) (Rec.βs _ _ _ _ _ _) 〉
+                        ! n ∘ s ∘ ! (resp (λ p → p) s) ≃〈 resp (λ x → ! n ∘ s ∘ ! x) (resp-id s) 〉
+                        ! n ∘ s ∘ ! s ≃〈 resp (λ x → ! n ∘ x) (!-inv-r s) 〉 
+                        ! n ∎)
+                     {!!} 
+                     {!!})
+
+    s' : a' ≃ b' -- counterclockwise
+    s' = λ≃ s'body
+
+    fr'body : (x : _) -> n'body x ≃ s'body x 
+    fr'body = (S²-elim (λ x → n'body x ≃ s'body x) 
+                               fr 
+                               {! resp (\ x -> ! s ∘ x ∘ ! n) fr !}
+                               ((subst (λ x → n'body x ≃ s'body x) n fr) ≃〈 {!!} 〉 
+                                respd s'body n ∘ resp (subst (λ x → a' x ≃ b' x) n) fr ∘ ! (respd n'body n) ≃〈 {!!} 〉 -- outsides are β-subst β-hit and groupoid so they should in some sense go away 
+--                                resp (subst (λ x → a' x ≃ b' x) n) fr ≃〈 def subst ≃ 〉 
+--                                (resp (\ x -> resp b' n ∘ x ∘ resp a' n) fr) ≃〈 β + unit 〉 
+--                                (resp (\ x -> ! s ∘ x) fr) ≃〈 {!!} 〉 
+                                (! (resp ! ba)) ∎)
+                               {!resp (subst (λ x → a' x ≃ b' x) n) fr!}
+                               {!!} {!!})
+
+    fr' : n' ≃ s' 
+    fr' = resp λ≃ (λ≃ fr'body)
     
-    ba' : n' ≃ s'
-    ba' = Refl
+    ba'body : (x : _) -> n'body x ≃ s'body x 
+    ba'body = (S²-elim (λ x → n'body x ≃ s'body x) 
+                              fr                   -- has to be homotopic to fr for the next level
+                              (! (resp ! ba)) 
+                              {!!} {!!} {!!} {!!})
+
+    ba' : n' ≃ s' 
+    ba' = resp λ≃ (λ≃ ba'body)
     
     hfr' : fr' ≃ ba'
-    hfr' = Refl
+    hfr' = resp (resp λ≃ o λ≃) (λ≃ (S²-elim (λ x → fr'body x ≃ ba'body x) 
+                                   Refl 
+                                   Refl 
+                                   {!!} {!!} {!!} {!!}))
 
     hba' : fr' ≃ ba' 
-    hba' = Refl
+    hba' = {!!}
 
     module Loop3Image where
       -- if it's homomorphic, S³-rec will send loop3 to this
@@ -129,12 +149,6 @@ module applications.Hopf where
       loop3' : Id {Id{Id a' a'} Refl Refl} Refl Refl
       loop3' = loop3-2-fr' ∘ resp loop3-2' (! hba' ∘ hfr') ∘ ! loop3-2-fr'
 
-      test : loop3' ≃ Refl
-      test = loop3-2-fr' ∘ resp loop3-2' (! hba' ∘ hfr') ∘ ! loop3-2-fr' ≃〈 Refl   〉 -- because hba' = hfr' = Refl
-             loop3-2-fr' ∘ Refl ∘ ! loop3-2-fr' ≃〈 resp (λ x → loop3-2-fr' ∘ x) (∘-unit-l (! loop3-2-fr')) 〉
-             loop3-2-fr' ∘ ! loop3-2-fr' ≃〈 !-inv-r loop3-2-fr' 〉 
-             Refl ∎
-      -- therefore (! hba' ∘ hfr') must be non-trivial to get a non-trivial image of loop3
 
   module Twist1 where
     open S¹2
