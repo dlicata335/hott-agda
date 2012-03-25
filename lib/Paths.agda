@@ -52,6 +52,15 @@ module lib.Paths where
 
    infixr 10 _∘_ 
 
+   infix  2 _∎
+   infixr 2 _≃〈_〉_ 
+   
+   _≃〈_〉_ : {A : Set} (x : A) {y z : A} → Id x y → Id y z → Id x z
+   _ ≃〈 p1 〉 p2 = (p2 ∘ p1)
+  
+   _∎ : ∀ {A : Set} (x : A) → Id x x
+   _∎ _ = Refl
+
    sym : {a : Set} {x y : a} -> Id x y -> Id y x 
    sym Refl = Refl
 
@@ -93,6 +102,10 @@ module lib.Paths where
 
    !-invol : {A : Set} {M N : A} (p : Id M N) -> Id (! (! p)) p
    !-invol Refl = Refl
+
+   !-∘ : {A : Set} {M N P : A} -> (q : Id N P) -> (p : Id M N)
+       -> (! (q ∘ p)) ≃ ! p ∘ ! q
+   !-∘ Refl Refl = Refl
 
    subst-Id : {Γ A : Set} (f g : Γ -> A) {M N : Γ} (p : Id M N)
               -> (p' : _) -> Id (subst (\ x -> Id (f x) (g x)) p p') ((resp g p) ∘ p' ∘ (! (resp f p)))
@@ -160,25 +173,24 @@ module lib.Paths where
    resp∘-unit-l {A}{x}{y}{p}{.p} Refl = lemma p where
      lemma : {x y : A} (q : Id x y) -> Id Refl (! (∘-unit-l q) ∘ Refl ∘ ∘-unit-l q)
      lemma Refl = Refl
-  
-   -- would be a one-liner using pattern matching
-   -- nothing about the interchange law depends on talking about loops
-   trans-resp∘-ichange : {A : Set} {x y z : A} 
-               (p q : Id x y) 
-            -> (a : Id p q) (r : Id x y) (b : Id q r) 
-               (p' q' : Id y z) (c : Id p' q') 
-               (r' : Id y z) (d : Id q' r') 
-            -> Id (resp∘ (d ∘ c) (b ∘ a)) (resp∘ d b ∘ resp∘ c a)
-   trans-resp∘-ichange {A}{x}{y}{z} p .p Refl r b p' .p' Refl .p' Refl = Refl
 
-   infix  2 _∎
-   infixr 2 _≃〈_〉_ 
-   
-   _≃〈_〉_ : {A : Set} (x : A) {y z : A} → Id x y → Id y z → Id x z
-   _ ≃〈 p1 〉 p2 = (p2 ∘ p1)
-  
-   _∎ : ∀ {A : Set} (x : A) → Id x x
-   _∎ _ = Refl
+   subst-Id-d : {Γ : Set} {A : Γ -> Set} (f g : (x : Γ) -> A x) {M N : Γ} (p : Id M N)
+              -> (p' : _) -> Id (subst (\ x -> Id (f x) (g x)) p p')
+                                (respd g p ∘ resp (subst A p) p' ∘ ! (respd f p))
+   subst-Id-d _ _ Refl p' = ! (∘-unit-l p' ∘ resp (λ x → Refl ∘ x) (resp-id p'))
+
+   -- interchange law for a particular type A
+   -- objects = terms of type A
+   -- morphisms = Id{A}
+   -- 2-cells = Id{Id}
+   -- 
+   -- see Functions.agda for the interchange law for the type theory as a whole,
+   -- viewed as a higher category
+   ichange-type : {A : Set} {x y z : A} 
+                  {p q r : Id x y} {p' q' r' : Id y z}
+                -> (a : Id p q) (b : Id q r) (c : Id p' q') (d : Id q' r') 
+                -> Id (resp∘ (d ∘ c) (b ∘ a)) (resp∘ d b ∘ resp∘ c a)
+   ichange-type Refl Refl Refl Refl = Refl
 
    module PaulinMohring where
      jayfrompm : {A : Set} (C : (x y : A) -> Id x y -> Set)
