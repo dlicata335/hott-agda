@@ -118,6 +118,10 @@ module lib.Paths where
    subst-resp : {A : Set} (C : A -> Set) {M N : A} (α : Id M N) -> Id (subst C α) (subst (\ x -> x) (resp C α))
    subst-resp C Refl = Refl 
 
+   subst-∘ : {A : Set} (C : A -> Set) {M N P : A} (α : Id M N) (β : Id N P)
+           -> Id (subst C (β ∘ α)) (\ x -> subst C β (subst C α x))
+   subst-∘ _ Refl Refl = Refl
+
    -- fire-subst-d : {Γ : Set} {A : Γ -> Set} (f g : (x : Γ) -> A x) {M N : Γ} {p : Id M N}
    --              -> {p' : Id (f M) (g M)} -> Id (subst (\ x -> Id (f x) (g x)) p p') (trans (sym (respd f p)) (trans (resp (subst A p) p') (respd g p)))
    -- fire-subst-d _ _ {p = Refl} {p'} = {!!} 
@@ -151,10 +155,6 @@ module lib.Paths where
              -> (resp {_}{_}{M}{N} f α ≃ αf N ∘ α ∘ ! (αf M))
    resp-by-id αf Refl = resp (λ x → αf _ ∘ x) (! (∘-unit-l (! (αf _)))) ∘ ! (!-inv-r (αf _)) 
 
-   subst-∘ : {A : Set} (C : A -> Set) {M N P : A} (β : Id N P) (α : Id M N) 
-           -> Id (subst C (β ∘ α)) (\ x -> subst C β (subst C α x))
-   subst-∘ C _ Refl = Refl 
-
    resp2 : ∀ {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> Id M N -> Id M' N' -> Id (f M M') (f N N')
    resp2 f Refl Refl = Refl
 
@@ -175,8 +175,9 @@ module lib.Paths where
      lemma Refl = Refl
 
    subst-Id-d : {Γ : Set} {A : Γ -> Set} (f g : (x : Γ) -> A x) {M N : Γ} (p : Id M N)
-              -> (p' : _) -> Id (subst (\ x -> Id (f x) (g x)) p p')
-                                (respd g p ∘ resp (subst A p) p' ∘ ! (respd f p))
+              -> (p' : f M ≃ g M) 
+              -> Id (subst (\ x -> Id (f x) (g x)) p p')
+                    (respd g p ∘ resp (subst A p) p' ∘ ! (respd f p))
    subst-Id-d _ _ Refl p' = ! (∘-unit-l p' ∘ resp (λ x → Refl ∘ x) (resp-id p'))
 
    -- interchange law for a particular type A

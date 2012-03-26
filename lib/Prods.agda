@@ -51,7 +51,62 @@ module lib.Prods where
          (β : (subst B α (snd p)) ≃ (snd q))
       -> (snd≃{B = B} (pair≃ α β)) ≃ (trans (resp (λ x → subst B x (snd p)) (Σ≃β1 {B = B} α β)) β)
   Σ≃β2 {p = x , y} {q = .x , .y} Refl Refl = Refl
- 
+
+  subst-Σ : {Γ : Set} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
+            (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
+            (p : Σ \(x : A θ1) -> B θ1 x)
+          -> subst (\ γ -> Σ (B γ)) δ p 
+           ≃ (subst A δ (fst p) , 
+              subst (λ (γ' : Σ A) → B (fst γ') (snd γ')) 
+                    (pair≃ δ Refl) 
+                    (snd p))
+  subst-Σ Refl A B p = Refl
+
+  subst-com-for-resp-pair :
+    {Γ : Set} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
+    (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
+    (p1 : (γ : Γ) -> A γ)
+    (p2 : (γ : Γ) -> B γ (p1 γ))
+   -> (subst (B θ2) (respd p1 δ)
+             (subst (λ γ' → B (fst γ') (snd γ'))
+                    (pair≃ {Γ}{A} δ Refl)
+                    (p2 θ1)))
+      ≃ 
+      (subst (λ z → B z (p1 z)) δ (p2 θ1))
+  subst-com-for-resp-pair Refl _ _ _ _ = Refl
+
+  resp-pair : {Γ : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
+              {A : Γ -> Set} {B : (γ : Γ) -> A γ -> Set} 
+              {p1 : (γ : Γ) -> A γ} 
+              {p2 : (γ : Γ) -> B γ (p1 γ)} 
+           -> (respd (\ γ -> (_,_ {A γ} {B γ} (p1 γ) (p2 γ))) δ)
+            ≃ pair≃ (respd p1 δ) (respd p2 δ ∘ (subst-com-for-resp-pair δ A B p1 p2))
+              ∘ subst-Σ δ A B (p1 θ1 , p2 θ1)
+  resp-pair {δ = Refl} = Refl
+
+  resp-fst : {Γ : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
+             {A : Γ -> Set} {B : (γ : Γ) -> A γ -> Set} 
+             {p : (γ : Γ) -> Σ (B γ)} 
+           -> respd (\ γ -> fst (p γ)) δ
+            ≃ fst≃ ((respd p δ) ∘ ! (subst-Σ δ A B (p θ1)))
+  resp-fst {δ = Refl} = Refl
+
+  subst-com-for-resp-snd : 
+             {Γ : Set} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
+             (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
+             (p : (γ : Γ) -> Σ (B γ))
+       -> Id (subst (λ z → B z (fst (p z))) δ (snd (p θ1)))
+             (subst (B θ2) (fst≃ (respd p δ))
+                    (snd (subst (λ z → Σe (A z) (B z)) δ (p θ1))))
+  subst-com-for-resp-snd Refl _ _ _ = Refl
+
+  resp-snd : {Γ : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
+             {A : Γ -> Set} {B : (γ : Γ) -> A γ -> Set} 
+             {p : (γ : Γ) -> Σ (B γ)} 
+           -> respd (\ γ -> snd (p γ)) δ
+            ≃ snd≃ (respd p δ) ∘ subst-com-for-resp-snd δ A B p
+  resp-snd {δ = Refl} = Refl
+
   -- done out with J
   private
    module ProdsOfficial where
