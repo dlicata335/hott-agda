@@ -180,6 +180,28 @@ module lib.Paths where
                     (respd g p ∘ resp (subst A p) p' ∘ ! (respd f p))
    subst-Id-d _ _ Refl p' = ! (∘-unit-l p' ∘ resp (λ x → Refl ∘ x) (resp-id p'))
 
+
+   subst-com-for-resp-of-subst : 
+       {Γ : Set} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
+       (A : Γ -> Set) (C : (γ : Γ) -> A γ -> Set)
+       (M1 M2 : (γ : Γ) -> A γ)
+       (α : (γ : Γ) -> M1 γ ≃ M2 γ)
+       (M : (γ : Γ) -> C γ (M1 γ))
+    -> Id (subst (λ z → C z (M2 z)) δ (subst (C θ1) (α θ1) (M θ1)))
+          (subst (λ _ → C θ2 (M2 θ2)) (respd M δ)
+                 (subst (C θ2) (α θ2) (subst (λ z → C z (M1 z)) δ (M θ1))))
+   subst-com-for-resp-of-subst Refl A C M1 M2 α M = Refl
+
+   resp-of-subst : {Γ : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
+                   {A : Γ -> Set} {C : (γ : Γ) -> A γ -> Set}
+                   {M1 M2 : (γ : Γ) -> A γ}
+                   {α : (γ : Γ) -> M1 γ ≃ M2 γ}
+                   {M : (γ : Γ) -> C γ (M1 γ)}
+                -> respd (\ γ -> subst (C γ) (α γ) (M γ)) δ 
+                   ≃ respd (λ x → subst (C θ2) (α θ2) x) (respd M δ) 
+                     ∘ subst-com-for-resp-of-subst δ A C M1 M2 α M
+   resp-of-subst {δ = Refl} = Refl 
+
    -- interchange law for a particular type A
    -- objects = terms of type A
    -- morphisms = Id{A}
