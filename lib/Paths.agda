@@ -262,7 +262,7 @@ module lib.Paths where
   
    trans : {A : Set} {M N P : A} -> Id M N -> Id N P -> Id M P
    trans {A}{M}{N}{P} a b = subst (\ x -> Id M x) b a
-  
+
    sym : {a : Set} {x y : a} -> Id x y -> Id y x 
    sym p = jay (λ x y _ → Id y x) p (λ _ → Refl)
   
