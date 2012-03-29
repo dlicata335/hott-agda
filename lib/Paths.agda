@@ -215,6 +215,9 @@ module lib.Paths where
                 -> Id (resp∘ (d ∘ c) (b ∘ a)) (resp∘ d b ∘ resp∘ c a)
    ichange-type Refl Refl Refl Refl = Refl
 
+   coe : {A B : Set} -> Id A B -> A -> B
+   coe = subst (\ x -> x)
+
    module PaulinMohring where
      jayfrompm : {A : Set} (C : (x y : A) -> Id x y -> Set)
        -> {M N : A} -> (P : Id M N)

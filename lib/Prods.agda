@@ -29,10 +29,10 @@ module lib.Prods where
   syntax Σe A (\ x  -> B) = Σ[ x ∶ A ] B
 
   fst≃ : {A : Set} {B : A -> Set} {p q : Σ[ x ∶ A ] B x} -> p ≃ q -> (fst p) ≃ (fst q)
-  fst≃ Refl = Refl
+  fst≃ = resp fst
   
   snd≃ : {A : Set} {B : A -> Set} {p q : Σ B} -> (c : p ≃ q) -> (subst B (fst≃ c) (snd p)) ≃ (snd q)
-  snd≃ {A}{B} Refl = Refl
+  snd≃ Refl = Refl
 
   pair≃ : {A : Set} {B : A -> Set} {p q : Σ B} -> (α : (fst p) ≃ (fst q)) -> (subst B α (snd p)) ≃ (snd q) -> p ≃ q
   pair≃ {p = x , y} {q = .x , .y} Refl Refl = Refl

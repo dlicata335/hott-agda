@@ -88,7 +88,15 @@ module canonicity.Reducibility where
             -> Map (tred vθ1) (tred vθ2) (subst A α)
   open Ty
 
+
   -- lift to valuables
+  -- FIXME: note that this is NOT associative on the nose; will that bite?
+  tred' : {Γ : Set} {sΓ : CTy Γ} {A : Γ -> Set} -> Ty sΓ A
+        -> {θ : Γ} -> (vθ : Valuable sΓ θ) -> CTy (A θ)
+  tred' {A = A} sA vθ = record { Value = λ x → Valuable (tred sA (sv vθ)) (subst A (ev vθ) x); 
+                                 Value≃ = λ vM vN α → {!Valuable≃ (tred sA (sv vθ))   !}; 
+                                 vRefl = {!!}; v! = {!!}; v∘ = {!!} }
+
   mred' : {A B : Set} {As : CTy A} {Bs : CTy B} {F : A -> B}
         -> Map As Bs F
         -> ({M : A} -> Valuable As M -> Valuable Bs (F M))
@@ -110,16 +118,16 @@ module canonicity.Reducibility where
 
   -- examples
 
-  id_ok : {A : Set} (As : CTy A) -> Map As As (\ x -> x)
-  id_ok As = smap (λ vM → valuable _ vM Refl evRefl) 
-                 (λ {_}{_}{α} vα → valuable≃ _ vα (resp-id α ∘ ∘-unit-l (resp (λ x → x) α)))
+  mid : {A : Set} (As : CTy A) -> Map As As (\ x -> x)
+  mid As = smap (λ vM → valuable _ vM Refl evRefl) 
+                (λ {_}{_}{α} vα → valuable≃ _ vα (resp-id α ∘ ∘-unit-l (resp (λ x → x) α)))
 
-  o_ok : {A B C : Set} (As : CTy A) (Bs : CTy B) (Cs : CTy C) 
+  mo : {A B C : Set} (As : CTy A) (Bs : CTy B) (Cs : CTy C) 
          (f : A -> B) (g : B -> C)
        -> Map Bs Cs g
        -> Map As Bs f
        -> Map As Cs (g o f)
-  o_ok As Bs Cs f g (smap go ga) (smap fo fa) = 
+  mo As Bs Cs f g (smap go ga) (smap fo fa) = 
     smap (λ vM → valuable _ 
                            (sv (go (sv (fo vM)))) 
                            (ev (go (sv (fo vM))) ∘ resp g (ev (fo vM))) 
@@ -128,6 +136,14 @@ module canonicity.Reducibility where
              valuable≃ _
                        (sv≃ (ga (sv≃ (fa vα)))) 
                        (comm (ga (sv≃ (fa vα))) ∘ {!!})) -- massage and use comm (fa M N α vM vN vα)
+
+  mto : {Γ Δ : Set} {sΓ : CTy Γ} {sΔ : CTy Δ}
+         {θ : Γ -> Δ} {A : Δ -> Set}
+       -> (sA : Ty sΔ A)
+       -> (sθ : Map sΓ sΔ θ)
+       -> Ty sΓ (A o θ)
+  mto sA sθ = ty (λ vθ' → tred' sA (mred sθ vθ')) 
+                 (λ vα → {!ssubst sA  !})
 
   Value× : {A B : Set} (As : CTy A) (Bs : CTy B)
                 -> A × B -> Set 
@@ -190,7 +206,11 @@ module canonicity.Reducibility where
   mfst :  {Γ : Set} (sΓ : CTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
        -> Map (Σc sΓ sA) sΓ fst
   mfst sΓ sA = smap (λ {(cpair v1 _) → valuable _ v1 Refl evRefl})
-                    (λ { {._} (cpair≃ {_}{_}{_}{_}{α}{β} vα vβ) → valuable≃ _ vα ((Σ≃β1 α β ∘ {!!}) ∘ ∘-unit-l (resp fst (pair≃ α β))) })
+                    (λ { {._} (cpair≃ {_}{_}{_}{_}{α}{β} vα vβ) → valuable≃ _ vα (Σ≃β1 α β ∘ ∘-unit-l (resp fst (pair≃ α β))) })
+
+  svar : {Γ : Set} (sΓ : CTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
+       -> Tm (Σc sΓ sA) {!!} snd
+  svar = {!!}
 
   -- Never use subst/resp for this!
   data IdValue {A : Set} {As : CTy A} {M N : A} (vM : Valuable As M) (vN : Valuable As N) : 
