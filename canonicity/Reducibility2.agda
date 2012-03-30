@@ -19,6 +19,8 @@ module canonicity.Reducibility2 where
   --
   -- could do it all for an encoded language to get around this
 
+  -- needs to classify individual steps, not just evaluation to a value.
+  -- or we could use a different judgement in head-expand
   data Eval : {A : Set} {M N : A} -> M ≃ N -> Set where
     evRefl : {A : _} {M : A} -> Eval (Refl{_}{M})
     FIXMEEval : {A : Set} {M N : A} -> {α : M ≃ N} -> Eval α
@@ -61,7 +63,6 @@ module canonicity.Reducibility2 where
             
   open ValueTy
 
-  -- simply typed terms
   record ValuableTy (A : Set) : Set1 where
     constructor valuablety 
     field
@@ -89,7 +90,7 @@ module canonicity.Reducibility2 where
       eval≃ : Eval ev≃
   open Valuable≃ 
 
-  -- simply typed terms
+  -- simply typed terms; call by value
   record Map {A B : Set} (vA : ValuableTy A) (vB : ValuableTy B) (F : A -> B) : Set where
     constructor smap
     field
@@ -98,6 +99,27 @@ module canonicity.Reducibility2 where
               (vα : Value≃ (valty vA) vM vN α)
            -> Valuable≃ vB (mred vM) (mred vN) (resp (F o (coe (! (evty vA)))) α)
   open Map
+
+  mred' : {A B : Set} {As : ValuableTy A} {Bs : ValuableTy B} {F : A -> B}
+        -> Map As Bs F
+        -> ({M : A} -> Valuable As M -> Valuable Bs (F M))
+  mred' {As = As} {Bs = Bs} {F = F} (smap fo fa) sM  = 
+                 valuable (v (fo (val sM)))
+                          (val (fo (val sM)))
+                          (ev (fo (val sM)) 
+                           ∘ resp (coe (evty Bs) o (F o (coe (! (evty As))))) (ev sM) 
+                           ∘ resp (λ x → coe (evty Bs) (F x)) (! (coe-inv-1 (evty As)))) 
+                          (FIXMEEval)
+
+  mresp' : {A B : Set} {vA : ValuableTy A} {vB : ValuableTy B} {F : A -> B}
+         -> (sF : Map vA vB F)
+         -> {M N : A} {α : M ≃ N} {vM : Valuable vA M} {vN : Valuable vA N}
+           (vα : Valuable≃ vA vM vN α)
+           -> Valuable≃ vB (mred' sF vM) (mred' sF vN) (resp F α)
+  mresp' = λ sF vα → valuable≃ _ (val≃ (mresp sF (val≃ vα)))
+                                 (ev≃ (mresp sF (val≃ vα)) ∘ {!ev≃ vα!}) -- and LOTS of massaging, including resp-by-id with coe-inv-1; checked on paper
+                                 FIXMEEval
+
 
   record Ty {Γ : Set} (vΓ : ValuableTy Γ) (A : Γ -> Set) : Set1 where
     constructor ty 
@@ -115,58 +137,97 @@ module canonicity.Reducibility2 where
         -> {θ : Γ} -> (vθ : Valuable vΓ θ) -> ValuableTy (A θ)
   tred' {vΓ = vΓ} {A = A} vA vθ = valuablety (vty (tred vA (val vθ))) 
                            (valty (tred vA (val vθ)))
-                           (evty (tred vA (val vθ)) ∘ resp (A o coe (! (evty vΓ))) (ev vθ) ∘ {!!})
+                           (evty (tred vA (val vθ)) 
+                            ∘ resp (A o coe (! (evty vΓ))) (ev vθ) ∘ resp A (! (coe-inv-1 (evty vΓ))))
                            FIXMEEval
 
-  mred' : {A B : Set} {As : ValuableTy A} {Bs : ValuableTy B} {F : A -> B}
-        -> Map As Bs F
-        -> ({M : A} -> Valuable As M -> Valuable Bs (F M))
-  mred' {As = As} {Bs = Bs} {F = F} sF sM  = 
-                 valuable (v (mred sF (val sM)))
-                          (val (mred sF (val sM)))
-                          (ev (mred sF (val sM)) ∘ resp (coe (evty Bs) o (F o (coe (! (evty As))))) (ev sM) ∘ {!!}) 
-                          (FIXMEEval)
+  ssubst' :  {Γ : Set} {vΓ : ValuableTy Γ} {A : Γ -> Set} -> (sA : Ty vΓ A)
+          -> {θ1 θ2 : Γ} {α : θ1 ≃ θ2}
+             {vθ1 : Valuable vΓ θ1} {vθ2 : Valuable vΓ θ2}
+             (vα  : Valuable≃ vΓ vθ1 vθ2 α)
+          -> Map (tred' sA vθ1) (tred' sA vθ2) (subst A α)
+  ssubst' = λ sA vα → smap (λ x → valuable _ (val (mred (ssubst sA (val≃ vα)) x))
+                                              (ev (mred (ssubst sA (val≃ vα)) x) ∘ {!ev≃ vα!})
+                                              FIXMEEval) 
+                           (λ vα' → valuable≃ {!!} {!!} {!!} {!!})
 
-{-
-  record Tm {Γ : Set} (Γs : ValueTy Γ) {A : Γ -> Set} (As : Ty Γs A) (M : (x : Γ) -> A x) : Set where
+  record Tm {Γ : Set} (Γs : ValuableTy Γ) {A : Γ -> Set} (As : Ty Γs A) (M : (x : Γ) -> A x) : Set where
     constructor tm 
     field
-      red   : {θ : Γ} -> (vθ : Value Γs θ) -> Valuable (tred As vθ) (M θ)
-      sresp : {θ1 θ2 : Γ} {α : θ1 ≃ θ2} {vθ1 : Value Γs θ1} {vθ2 : Value Γs θ2} (vα : Value≃ Γs vθ1 vθ2 α) 
-             → Valuable≃ _ (mred' (ssubst As vα) (red vθ1))
-                           (red vθ2)
-                           (respd M α)
+      red   : {θ : vty Γs} -> (vθ : Value (valty Γs) θ) -> Valuable (tred As vθ) (M (coe (! (evty Γs)) θ))
+      sresp : {θ1 θ2 : vty Γs} {α : θ1 ≃ θ2} {vθ1 : Value (valty Γs) θ1} {vθ2 : Value (valty Γs) θ2} 
+              (vα : Value≃ (valty Γs) vθ1 vθ2 α) 
+             → Valuable≃ (tred As vθ2)
+                         (mred' (ssubst As vα) (red vθ1))
+                         (red vθ2)
+                         (respd M (resp (coe (! (evty Γs))) α))
   open Tm
+
+
+  vRefl' : ∀ {A} {vA : ValuableTy A} {M : A} (vM : Valuable vA M) -> Valuable≃ vA vM vM (Refl{_}{M})
+  vRefl' {_}{vA} vM = valuable≃ 
+                      _ (val≃0 (vRefl (valty vA) (val vM))) (ev≃0 (vRefl (valty vA) (val vM)) ∘ {!!})
+                      FIXMEEval
+       
+  v!' : ∀ {A} (vA : ValuableTy A) {M N : A} {α : M ≃ N} {vM : Valuable vA M}{vN : Valuable vA N} 
+          (vα : Valuable≃ vA vM vN α)
+        -> Valuable≃ vA vN vM (! α)
+  v!' vA vα = valuable≃ _ (val≃0 (v! (valty vA) (val≃ vα))) 
+                          (ev≃0 (v! (valty vA) (val≃ vα)) ∘ resp ! (ev≃ vα) ∘ {!!}) -- massage
+                          FIXMEEval
+
+  v∘'     : ∀ {A} (vA : ValuableTy A)
+              {P M N : A} {β : N ≃ P} {α : M ≃ N} 
+              {vP : Valuable vA P}{vN : Valuable vA N}{vM : Valuable vA M} 
+              (vβ : Valuable≃ vA vN vP β)(vα : Valuable≃ vA vM vN α)
+            -> Valuable≃ vA vM vP (β ∘ α)
+  v∘' vA vβ vα = valuable≃ _ (val≃0 (v∘ (valty vA) (val≃ vβ) (val≃ vα))) 
+                                 (ev≃0 (v∘ (valty vA) (val≃ vβ) (val≃ vα)) ∘ resp∘ (ev≃ vβ) (ev≃ vα) ∘ {!!}) FIXMEEval
 
   -- examples
 
-  mid : {A : Set} (As : ValueTy A) -> Map As As (\ x -> x)
-  mid As = smap (λ vM → valuable _ vM Refl evRefl) 
-                (λ {_}{_}{α} vα → valuable≃ _ vα (resp-id α ∘ ∘-unit-l (resp (λ x → x) α)))
+  mid : {A : Set} (As : ValuableTy A) -> Map As As (\ x -> x)
+  mid As = smap (λ vM → valuable _ vM (coe-inv-2 (evty As)) FIXMEEval) 
+                (λ {_}{_}{α} vα → valuable≃ _ vα {!!} FIXMEEval) -- massage using resp-by-id coe-inv-2 
 
-  mo : {A B C : Set} (As : ValueTy A) (Bs : ValueTy B) (Cs : ValueTy C) 
+  mo : {A B C : Set} (As : ValuableTy A) (Bs : ValuableTy B) (Cs : ValuableTy C) 
          (f : A -> B) (g : B -> C)
        -> Map Bs Cs g
        -> Map As Bs f
        -> Map As Cs (g o f)
-  mo As Bs Cs f g (smap go ga) (smap fo fa) = 
-    smap (λ vM → valuable _ 
-                           (val (go (val (fo vM)))) 
-                           (ev (go (val (fo vM))) ∘ resp g (ev (fo vM))) 
-                           FIXMEEval) 
-           (λ vα → 
-             valuable≃ _
-                       (val≃ (ga (val≃ (fa vα)))) 
-                       (comm (ga (val≃ (fa vα))) ∘ {!!})) -- massage and use comm (fa M N α vM vN vα)
+  mo As Bs Cs f g sg sf = 
+    smap (λ vM → mred' sg (mred sf vM) ) 
+         (λ {_} {_} {α} {vM} {vN} vα → valuable≃ _ (val≃ (mresp' sg (mresp sf vα))) 
+                             (ev≃ (mresp' sg (mresp sf vα)) 
+                              ∘ resp
+                                  (λ x →
+                                     ev (mred' sg (mred sf vN)) ∘
+                                     resp (subst (λ x' → x') (evty Cs)) x ∘
+                                     ! (ev (mred' sg (mred sf vM))))
+                                  (resp-o g (f o coe (! (evty As))) α)) 
+                             FIXMEEval
+                             ) 
 
-  mto : {Γ Δ : Set} {sΓ : ValueTy Γ} {sΔ : ValueTy Δ}
+  head-expand-map : {A B : Set} {vA : ValuableTy A} {vB : ValuableTy B}
+                    {F G : A -> B}
+                  -> Map vA vB F 
+                  -> (α : F ≃ G)
+                  -> Eval α
+                  -> Map vA vB G
+  head-expand-map = λ sM α _ → smap (λ x → valuable _ (val (mred sM x)) (ev (mred sM x) ∘ {!!}) FIXMEEval) 
+                                    {!!}
+
+  mto : {Γ Δ : Set} {sΓ : ValuableTy Γ} {sΔ : ValuableTy Δ}
          {θ : Γ -> Δ} {A : Δ -> Set}
        -> (sA : Ty sΔ A)
        -> (sθ : Map sΓ sΔ θ)
        -> Ty sΓ (A o θ)
   mto sA sθ = ty (λ vθ' → tred' sA (mred sθ vθ')) 
-                 (λ vα → {!ssubst sA  !})
+                 (\ v -> head-expand-map (ssubst' sA (mresp sθ v)) 
+                                         {!!} FIXMEEval)
 
+
+{-
   Value× : {A B : Set} (As : ValueTy A) (Bs : ValueTy B)
                 -> A × B -> Set 
   Value× As Bs (x , y) = Value As x × Value Bs y  -- really want them to be EQUAL to a pair
@@ -208,82 +269,136 @@ module canonicity.Reducibility2 where
                               val≃ (Ma vα) , 
                               val≃ (Na vα)) 
                              {!!}) -- massage and use comm (Ma vα) and comm (Na vα)
+-}
 
-  -- WARNING: never use subst/resp on these
-  data ΣValue {Γ : Set} (sΓ : ValueTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) : (Σ A) -> Set where
-    cpair : ∀ {M N} -> (vM : Value sΓ M) -> Value (tred sA vM) N -> ΣValue sΓ sA (M , N)
+  -- "return" for valuabile types
+  retty : ∀ {Γ} -> ValueTy Γ -> ValuableTy Γ
+  retty v = valuablety _ v Refl evRefl
 
-  data ΣValue≃ {Γ : Set} (sΓ : ValueTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
-               : {M N : (Σ A)} (vM : ΣValue sΓ sA M) (vN : ΣValue sΓ sA N) (α : M ≃ N) -> Set where
-    cpair≃ : ∀ {M1 N1 M2 N2 α β vM1 vN1 vM2 vN2} 
-           -> (vα : Value≃ sΓ vM1 vM2 α)
-           -> Valuable≃ (tred sA vM2) (mred (ssubst sA vα) vN1) (valuable _ vN2 Refl evRefl) β
-           -> ΣValue≃ sΓ sA {(M1 , N1)} {(M2 , N2)} (cpair vM1 vN1) (cpair vM2 vN2) (pair≃ α β) 
+  move : ∀ {A} -> (vA : ValuableTy A) -> (A -> vty vA)
+  move vA = coe (evty vA)
 
-  Σc : {Γ : Set} (sΓ : ValueTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) -> ValueTy (Σ A)
-  Σc sΓ sA = record { Value = ΣValue sΓ sA; 
-                      Value≃ = ΣValue≃ sΓ sA; 
-                      vRefl = {!!}; v! = {!!}; v∘ = {!!} }
+  unmove : ∀ {A} -> (vA : ValuableTy A) -> (vty vA -> A)
+  unmove vA = coe (! (evty vA))
 
-  mfst :  {Γ : Set} (sΓ : ValueTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
-       -> Map (Σc sΓ sA) sΓ fst
-  mfst sΓ sA = smap (λ {(cpair v1 _) → valuable _ v1 Refl evRefl})
-                    (λ { {._} (cpair≃ {_}{_}{_}{_}{α}{β} vα vβ) → valuable≃ _ vα (Σ≃β1 α β ∘ ∘-unit-l (resp fst (pair≃ α β))) })
+  valuable-unmove :  ∀ {A} (vA : ValuableTy A) -> ∀ {M} 
+          -> Value (valty vA) M -> Valuable vA (unmove vA M)
+  valuable-unmove vA vM = valuable _ vM (coe-inv-2 (evty vA)) FIXMEEval
 
-  valar : {Γ : Set} (sΓ : ValueTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
-       -> Tm (Σc sΓ sA) {!!} snd
-  valar = {!!}
+  head-expand : ∀ {A M N} {vA : ValuableTy A}
+                -> (vN : Valuable vA N)
+                -> (α : M ≃ N)
+                -> Eval α 
+                -> Valuable vA M
+  head-expand {vA = vA} vN α e = valuable (v vN) (val vN) (ev vN ∘ resp (move vA) α) FIXMEEval
 
+  head-expand≃ : {A : Set} {vA : ValuableTy A} {M N : A} 
+                 {vM : Valuable vA M} {vN : Valuable vA N} {α β : M ≃ N}
+               -> Valuable≃ vA vM vN α
+               -> (g : β ≃ α)
+               -> Eval g
+               -> Valuable≃ vA vM vN β
+  head-expand≃ = λ vα g _ → valuable≃ _ (val≃ vα) {!!} FIXMEEval
+
+{-                
+  module StrictSigma where
+    -- WARNING: never use subst/resp on these
+    data ΣValue {Γ : Set} (vΓ : ValueTy Γ) {A : Γ -> Set} (sA : Ty (retty vΓ) A) : (Σ A) -> Set where
+      cpair : {M : _} 
+              -> (vM : Value vΓ M) -> {N : _} -> Value (valty (tred sA vM)) N 
+              -> ΣValue vΓ sA (M , unmove (tred sA vM) N)
+  
+    data ΣValue≃ {Γ : Set} (vΓ : ValueTy Γ) {A : Γ -> Set} (sA : Ty (retty vΓ) A) 
+                 : {M N : (Σ A)} (vM : ΣValue vΓ sA M) (vN : ΣValue vΓ sA N) (α : M ≃ N) -> Set where
+      cpair≃ : ∀ {M1 M2 α} {vM1 : Value vΓ M1} {vM2 : Value vΓ M2} 
+              -> (vα : Value≃ vΓ vM1 vM2 α)
+              -> ∀ {N1 N2 β} {vN1 : Value (valty (tred sA vM1)) N1} {vN2 : Value (valty (tred sA vM2)) N2 }
+              -> Valuable≃ (tred sA vM2) (head-expand (mred (ssubst sA vα) vN1) 
+                                                      (resp (λ x → subst A x (unmove (tred sA vM1) N1)) (! (resp-id α)))
+                                                      FIXMEEval)
+                                         (valuable-unmove (tred sA vM2) vN2)
+                                         β
+              -> ΣValue≃ vΓ sA (cpair vM1 vN1) (cpair vM2 vN2) (pair≃ α β) 
+  
+    Σval : {Γ : Set} (vΓ : ValueTy Γ) {A : Γ -> Set} (sA : Ty (retty vΓ) A) -> ValueTy (Σ A)
+    Σval vΓ sA = record { Value = ΣValue vΓ sA; 
+                          Value≃ = ΣValue≃ vΓ sA; 
+                          vRefl = {!!}; v! = {!!}; v∘ = {!!} }
+    
+    Σc : {Γ : Set} (vΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty vΓ A) -> ValuableTy (Σ A)
+    Σc {Γ} vΓ {A} sA = valuablety (Σ (\ (x : vty vΓ) -> A (unmove vΓ x)))
+                                  (Σval (valty vΓ) {!sA!}) {!!} FIXMEEval
+-}
+
+  -- both Σ itself is lazy,
+  -- and values of Σ type are lazy
+  module LazySigma where
+    -- WARNING: never use subst/resp on these
+    data ΣValue {Γ : Set} (vΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty vΓ A) : (Σ A) -> Set where
+      cpair : {M : _} 
+              -> (vM : Valuable vΓ M) -> {N : _} -> Valuable (tred' sA vM) N 
+              -> ΣValue vΓ sA (M , N)
+  
+    data ΣValue≃ {Γ : Set} (vΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty vΓ A) 
+                 : {M N : (Σ A)} (vM : ΣValue vΓ sA M) (vN : ΣValue vΓ sA N) (α : M ≃ N) -> Set where
+      cpair≃ : ∀ {M1 M2 α} {vM1 : Valuable vΓ M1} {vM2 : Valuable vΓ M2} 
+              -> (vα : Valuable≃ vΓ vM1 vM2 α)
+              -> ∀ {N1 N2 β} {vN1 : Valuable (tred' sA vM1) N1} {vN2 : Valuable (tred' sA vM2) N2 }
+              -> Valuable≃ (tred' sA vM2) (mred' (ssubst' sA vα) vN1)
+                                          vN2
+                                          β
+              -> ΣValue≃ vΓ sA (cpair vM1 vN1) (cpair vM2 vN2) (pair≃ α β) 
+  
+    Σval : {Γ : Set} (vΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty vΓ A) -> ValueTy (Σ A)
+    Σval vΓ sA = record { Value = ΣValue vΓ sA; 
+                          Value≃ = ΣValue≃ vΓ sA; 
+                          vRefl = {!!}; v! = {!!}; v∘ = {!!} }
+    
+    Σc : {Γ : Set} (vΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty vΓ A) -> ValuableTy (Σ A)
+    Σc {Γ} vΓ {A} sA = valuablety (Σ (\ (x : Γ) -> A x))
+                                  (Σval vΓ sA) Refl FIXMEEval
+
+
+    mfst :  {Γ : Set} (sΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
+         -> Map (Σc sΓ sA) sΓ fst
+    mfst sΓ sA = smap (λ {(cpair vM vN) → vM})
+                      (λ { {._} (cpair≃{_}{_}{α} vα{_}{_}{β} vβ) → head-expand≃ vα (Σ≃β1 α β) FIXMEEval}) -- head-expand
+                    
+
+    svar : {Γ : Set} (sΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
+        -> Tm (Σc sΓ sA) (mto sA (mfst sΓ sA)) snd
+    svar sΓ sA = tm (λ {(cpair vM vN) → vN})
+                    (λ { {._} (cpair≃ vα vβ) → valuable≃ _ (val≃ vβ) (ev≃ vβ ∘ {!!}) FIXMEEval})
+
+
+  -- lazy identity types:
+  -- this makes the definitions work out better, and
+  -- makes sense because type theory is missing the injection from paths to elements of the identity types;
+  -- if that were there, the path sitting under it would be lazy by
+  -- analogy to Σ
+  -- 
   -- Never use subst/resp for this!
-  data IdValue {A : Set} {As : ValueTy A} {M N : A} (vM : Valuable As M) (vN : Valuable As N) : 
-                Id M N -> Set where
-       idValue : (α : v vM ≃ v vN) 
-               -> Value≃ As (val vM) (val vN) α
-               -> IdValue vM vN (! (ev vN) ∘ α ∘ ev vM)
-
-  Idc : {A : Set} {As : ValueTy A} {M N : A} (vM : Valuable As M) (vN : Valuable As N) -> ValueTy (Id M N)
-  Idc vM vN = record { Value = IdValue vM vN; 
+  Idc : {A : Set} {vA : ValuableTy A} {M N : A} (vM : Valuable vA M) (vN : Valuable vA N) -> ValueTy (Id M N)
+  Idc {_}{vA} vM vN = record { Value = Valuable≃ vA vM vN ; 
                        Value≃ = λ _ _ _ → Unit; 
                        vRefl = λ vM' → valuable≃0 Refl <> Refl evRefl;
                        v∘ = λ vβ vα → valuable≃0 _ _ Refl evRefl;
                        v! = λ vα → valuable≃0 _ <> Refl evRefl}
-  
-  sId : {Γ : Set} {Γs : ValueTy Γ}
+
+  sId : {Γ : Set} {Γs : ValuableTy Γ}
          {A : Γ -> Set} {As : Ty Γs A} 
          {M N : (g : Γ) -> A g} (Ms : Tm Γs As M) (Ns : Tm Γs As N) 
          -> Ty Γs (\ x -> Id (M x) (N x))
   sId {Γ} {Γs} {A} {As} {M} {N} Ms Ns = 
-               ty (λ θs → Idc (red Ms θs) (red Ns θs)) 
-                  (λ {θ1} {θ2} {α} {vθ1} {vθ2} vα → 
-                     smap (λ { {._} (idValue α' α's)  → 
-                             valuable 
-                             (! (ev (red Ns vθ2)) 
-                             ∘ (v≃0 (v∘ (tred As vθ2)
-                                      (val≃ (sresp Ns vα)) 
-                                      (val≃0 (v∘ (tred As vθ2)
-                                           (val≃ (mresp (ssubst As vα) α's)) 
-                                           (val≃0 (v! (tred As vθ2) (val≃ (sresp Ms vα))))))))
-                             ∘ ev (red Ms vθ2))
-                             (idValue _ (val≃0
-                                           (v∘ (tred As vθ2) (val≃ (sresp Ns vα))
-                                            (val≃0
-                                             (v∘ (tred As vθ2) (val≃ (mresp (ssubst As vα) α's))
-                                              (val≃0 (v! (tred As vθ2) (val≃ (sresp Ms vα))))))))) -- need Value≃ to be closed under ∘ and !
-                             ({!!} ∘ subst-Id-d M N α _) 
-                             FIXMEEval }) 
-                          (λ _ → valuable≃ _ _ Refl))
+               ty (λ θs → retty (Idc (red Ms θs) (red Ns θs))) 
+                  (λ {θ1} {θ2} {α} {vθ1} {vθ2} vα → smap (λ vM → valuable _ (v∘' (tred As vθ2) (v∘' (tred As vθ2) (sresp Ns vα) (mresp' (ssubst As vα) vM)) (v!' (tred As vθ2) (sresp Ms vα)))
+                                                                         {!!} FIXMEEval)
+                                                         (λ vα' → valuable≃ _ _ Refl FIXMEEval))
+                     --         ({!!} ∘ subst-Id-d M N α _) 
   
-
-  sRefl : {Γ : Set} {Γs : ValueTy Γ}
+  sRefl : {Γ : Set} {Γs : ValuableTy Γ}
           {A : Γ -> Set} {As : Ty Γs A} 
           {M : (g : Γ) -> A g} (sM : Tm Γs As M) 
         -> Tm Γs (sId sM sM) (\ θ -> Refl{_}{M θ})
-  sRefl {As = As} sM = tm (λ vθ → valuable (! (ev (red sM vθ)) ∘
-                                              v≃0 (vRefl (tred As vθ) (val (red sM vθ))) ∘ ev (red sM vθ))
-                                           (idValue _ (val≃0 (vRefl (tred As vθ) (val (red sM vθ))))) 
-                                           {!!}  -- move the ev's to the other side and cancel, and then use (ev≃0 (vRefl (tred As vθ) (val (red sM vθ))))
-                                           FIXMEEval)
-                          (λ vα → valuable≃ _ _ Refl) -- there would need to be work here if the Value≃'s of Id didn't accept everything
-
-
--}
+  sRefl {As = As} sM = tm (λ vθ → valuable _ (vRefl' (red sM vθ)) Refl FIXMEEval)
+                          (λ vα → valuable≃ _ _ {!!} FIXMEEval) -- there would need to be work here if the Value≃'s of Id didn't accept everything

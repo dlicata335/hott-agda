@@ -149,10 +149,15 @@ module lib.Paths where
            -> Id (resp (\ x -> x) α) α
    resp-id Refl = Refl 
 
+   resp-o : {A B C : Set} (g : B -> C) (f : A -> B)
+            {M N : A} (α : M ≃ N)
+          -> resp (\ x -> g (f x)) α ≃ resp g (resp f α)
+   resp-o g f Refl = Refl
+
    resp-by-id : {A : Set} {f : A -> A}
                 (αf : (x : _) -> x ≃ f x) 
              -> {M N : A} (α : M ≃ N)
-             -> (resp {_}{_}{M}{N} f α ≃ αf N ∘ α ∘ ! (αf M))
+             -> (resp f α ≃ αf N ∘ α ∘ ! (αf M))
    resp-by-id αf Refl = resp (λ x → αf _ ∘ x) (! (∘-unit-l (! (αf _)))) ∘ ! (!-inv-r (αf _)) 
 
    resp2 : ∀ {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> Id M N -> Id M' N' -> Id (f M M') (f N N')
@@ -217,6 +222,12 @@ module lib.Paths where
 
    coe : {A B : Set} -> Id A B -> A -> B
    coe = subst (\ x -> x)
+
+   coe-inv-2 : {A B : Set} -> (α : Id A B) -> {M : _} -> coe α (coe (! α) M) ≃ M
+   coe-inv-2 Refl = Refl
+
+   coe-inv-1 : {A B : Set} -> (α : Id A B) -> {M : _} -> coe (! α) (coe α M) ≃ M
+   coe-inv-1 Refl = Refl
 
    module PaulinMohring where
      jayfrompm : {A : Set} (C : (x y : A) -> Id x y -> Set)
