@@ -27,8 +27,8 @@ module canonicity.Id where
          -> Ty Γs (\ x -> Id (M x) (N x))
   sId {Γ} {Γs} {A} {As} {M} {N} Ms Ns = 
                ty (λ θs → retty (Idc (red Ms θs) (red Ns θs))) 
-                  (λ {θ1} {θ2} {α} {vθ1} {vθ2} vα → smap (λ vM → valuable _ (v∘' (tred As vθ2) (v∘' (tred As vθ2) (sresp Ns vα) (mresp' (ssubst As vα) vM)) (v!' (tred As vθ2) (sresp Ms vα)))
-                                                                         FIXMETodo FIXMEEval)
+                  (λ {θ1} {θ2} {α} {vθ1} {vθ2} vα → smap (λ {M'} vM' → valuable _ (v∘' (tred As vθ2) (v∘' (tred As vθ2) (sresp Ns vα) (mresp' (ssubst As vα) vM')) (v!' (tred As vθ2) (sresp Ms vα)))
+                                                                                 ({!Refl!} ∘ subst-Id-d M N (resp (subst (λ x → x) (! (evty Γs))) α) M') FIXMEEval)
                                                          (λ vα' → valuable≃ _ _ Refl FIXMEEval))
                      --         ({!!} ∘ subst-Id-d M N α _) 
   
@@ -39,4 +39,4 @@ module canonicity.Id where
   sRefl {As = As} sM = tm (λ vθ → valuable _ (vRefl' (red sM vθ)) Refl FIXMEEval)
                           (λ vα → valuable≃ _ _ Refl FIXMEEval) -- there would need to be work here if the Value≃'s of Id didn't accept everything
 
-  
+--  sJ : 

@@ -208,6 +208,12 @@ module canonicity.Reducibility where
                 -> Valuable vA M
   head-expand {vA = vA} vN α e = valuable (v vN) (val vN) (ev vN ∘ resp (move vA) α) FIXMEEval
 
+  head-expand-ty : ∀ {A B} (vB : ValuableTy B)
+                 -> (α : A ≃ B)
+                 -> Eval α 
+                 -> ValuableTy A
+  head-expand-ty vB α e = valuablety _ (valty vB) (evty vB ∘ α) FIXMEEval
+
   head-expand≃ : {A : Set} {vA : ValuableTy A} {M N : A} 
                  {vM : Valuable vA M} {vN : Valuable vA N} {α β : M ≃ N}
                -> Valuable≃ vA vM vN α

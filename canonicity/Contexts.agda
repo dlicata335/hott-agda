@@ -50,4 +50,18 @@ module canonicity.Contexts where
   svar : {Γ : Set} (sΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
       -> Tm (Σc sΓ sA) (mto sA (mfst sΓ sA)) snd
   svar sΓ sA = tm (λ {(cpair vM vN) → vN})
-                  (λ { {._} (cpair≃ vα vβ) → valuable≃ _ (val≃ vβ) (ev≃ vβ ∘ {!!}) FIXMEEval})
+                  (λ { {._} (cpair≃ vα vβ) → valuable≃ _ (val≃ vβ) 
+                                             (ev≃ vβ ∘ FIXMETodo) FIXMEEval}) -- probably true; didn't check that all the adjustments work
+
+  mpair : {Γ : Set} {sΓ : ValuableTy Γ} 
+          {Δ : Set} {sΔ : ValuableTy Δ} 
+          {A : Δ -> Set} {sA : Ty sΔ A}
+          -> ∀ {θ} {M}
+        -> (sθ : Map sΓ sΔ θ)
+        -> Tm sΓ (mto sA sθ) M
+        -> Map sΓ (Σc sΔ sA) (\ x -> θ x , M x)
+  mpair {_}{sΓ} {M = M} sθ sM = smap (λ x → valuable _ (cpair (mred sθ x) (red sM x)) Refl FIXMEEval)
+                         (λ {_}{_}{α}{_}{_} vα → valuable≃ _ 
+                                           (cpair≃ (mresp sθ vα){_}{_}{respd M (resp (unmove sΓ) α) ∘ {!!}} 
+                                                   (valuable≃ (v≃ (sresp sM vα)) (val≃ (sresp sM vα)) {!!} FIXMEEval))
+                                           {!!} FIXMEEval) -- (cpair≃ (mresp sθ vα){_}{_}{v≃ (sresp sM vα)}{_}{_} (valuable≃ _ (val≃ (sresp sM vα)) {!!} FIXMEEval)) {!!} FIXMEEval)
