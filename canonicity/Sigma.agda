@@ -1,42 +1,76 @@
+{-# OPTIONS --type-in-type --without-K #-}
+
 open import lib.Prelude 
 open Paths
 open import canonicity.Reducibility
--- both Σ itself is lazy,
--- and values of Σ type are lazy
+open import canonicity.Contexts
+
 module canonicity.Sigma where
-    -- WARNING: never use subst/resp on these
-    data ΣValue {Γ : Set} (vΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty vΓ A) : (Σ A) -> Set where
-      cpair : {M : _} 
-              -> (vM : Valuable vΓ M) -> {N : _} -> Valuable (tred' sA vM) N 
-              -> ΣValue vΓ sA (M , N)
-  
-    data ΣValue≃ {Γ : Set} (vΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty vΓ A) 
-                 : {M N : (Σ A)} (vM : ΣValue vΓ sA M) (vN : ΣValue vΓ sA N) (α : M ≃ N) -> Set where
-      cpair≃ : ∀ {M1 M2 α} {vM1 : Valuable vΓ M1} {vM2 : Valuable vΓ M2} 
-              -> (vα : Valuable≃ vΓ vM1 vM2 α)
-              -> ∀ {N1 N2 β} {vN1 : Valuable (tred' sA vM1) N1} {vN2 : Valuable (tred' sA vM2) N2 }
-              -> Valuable≃ (tred' sA vM2) (mred' (ssubst' sA vα) vN1)
-                                          vN2
-                                          β
-              -> ΣValue≃ vΓ sA (cpair vM1 vN1) (cpair vM2 vN2) (pair≃ α β) 
-  
-    Σval : {Γ : Set} (vΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty vΓ A) -> ValueTy (Σ A)
-    Σval vΓ sA = record { Value = ΣValue vΓ sA; 
-                          Value≃ = ΣValue≃ vΓ sA; 
-                          vRefl = {!!}; v! = {!!}; v∘ = {!!} }
-    
-    Σc : {Γ : Set} (vΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty vΓ A) -> ValuableTy (Σ A)
-    Σc {Γ} vΓ {A} sA = valuablety (Σ (\ (x : Γ) -> A x))
-                                  (Σval vΓ sA) Refl FIXMEEval
 
+  ret : ∀ {Γ} (vΓ : ValuableTy Γ) -> ∀ {θ} -> Value (valty vΓ) θ -> Valuable vΓ (unmove vΓ θ)
+  ret vΓ vθ = valuable _ vθ (coe-inv-2 (evty vΓ)) FIXMEEval
 
-    mfst :  {Γ : Set} (sΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
-         -> Map (Σc sΓ sA) sΓ fst
-    mfst sΓ sA = smap (λ {(cpair vM vN) → vM})
-                      (λ { {._} (cpair≃{_}{_}{α} vα{_}{_}{β} vβ) → head-expand≃ vα (Σ≃β1 α β) FIXMEEval}) -- head-expand
-                    
+  ret≃ : ∀ {Γ} (vΓ : ValuableTy Γ) -> ∀ {θ1 θ2 α} -> (vθ1 : Value (valty vΓ) θ1) (vθ2 : Value (valty vΓ) θ2)
+         (vα : Value≃ (valty vΓ) vθ1 vθ2 α) 
+       -> Valuable≃ vΓ (ret vΓ vθ1) (ret vΓ vθ2) (resp (unmove vΓ) α)
+  ret≃ vΓ vα = {!!}
 
-    svar : {Γ : Set} (sΓ : ValuableTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
-        -> Tm (Σc sΓ sA) (mto sA (mfst sΓ sA)) snd
-    svar sΓ sA = tm (λ {(cpair vM vN) → vN})
-                    (λ { {._} (cpair≃ vα vβ) → valuable≃ _ (val≃ vβ) (ev≃ vβ ∘ {!!}) FIXMEEval})
+  postulate
+    ssubst-refl-cancels : 
+         ∀ {Γ A} {vΓ : ValuableTy Γ} 
+         -> (sA : Ty vΓ A)
+         -> ∀ {θ}  (vθ : Value (valty vΓ) θ)
+         -> ∀ {θ1} (vθ1 : Value (valty (tred sA vθ)) θ1)
+         -> Value≃ (valty (tred sA vθ)) (val (mred (ssubst sA (val≃0 (vRefl (valty vΓ) vθ))) vθ1)) vθ1 
+                   ((coe-inv-2 (evty (tred sA vθ)) ∘
+                       !
+                       (resp
+                        (λ x →
+                           subst (λ x' → x') (evty (tred sA vθ))
+                           (subst A (resp (subst (λ x' → x') (! (evty vΓ))) x)
+                            (subst (λ x' → x') (! (evty (tred sA vθ))) θ1)))
+                        (ev≃0 (vRefl (valty vΓ) vθ)))) ∘ ! (ev (mred (ssubst sA (val≃0 (vRefl (valty vΓ) vθ))) vθ1)))
+
+  apply1 : ∀ {Γ A B} {vΓ : ValuableTy Γ} 
+         -> (sA : Ty vΓ A)
+         -> (sB : Ty (Σc vΓ sA) B)
+         -> ∀ {θ} (vθ : Value (valty vΓ) θ)
+         -> Ty (tred sA vθ) (\ y -> B (unmove vΓ θ , y))
+  apply1 {vΓ = vΓ} sA sB {θ} vθ = 
+    ty (λ vθ' → tred sB (cpair (ret vΓ vθ) (valuable _ vθ' FIXMETodo FIXMEEval)))
+       (λ { {θ1}{θ2}{α}{vθ1}{vθ2} vα → 
+       smap (λ {M} vM → 
+             valuable _ 
+                     (val (mred (ssubst sB (cpair≃ (vRefl' (ret vΓ vθ)) {_}{_}{resp (unmove (tred sA vθ)) α} 
+                                                   (valuable≃ _
+                                                              {! vα !} -- (val≃0 (v∘ (valty (tred sA vθ)) vα (ssubst-refl-cancels sA vθ vθ1)))
+                                                              (ev≃0 (v∘ (valty (tred sA vθ)) vα (ssubst-refl-cancels sA vθ vθ1))
+                                                                 ∘ FIXMETodo) FIXMEEval))) -- doesn't mention ssubst-refl-cancels at least
+                                                   vM))
+                     FIXMEChecked -- contract α and then d:        
+                     -- (ev
+                     --    (mred
+                     --     (ssubst sB
+                     --      (cpair≃
+                     --       (valuable≃ (v≃0 (vRefl (valty vΓ) vθ))
+                     --        (val≃0 (vRefl (valty vΓ) vθ))
+                     --        (ev≃0 (vRefl (valty vΓ) vθ) ∘ FIXMEChecked) FIXMEEval)
+                     --       (valuable≃
+                     --        (v≃0 (v∘ (valty (tred sA vθ)) vα (ssubst-refl-cancels sA vθ vθ1)))
+                     --        (val≃0
+                     --         (v∘ (valty (tred sA vθ)) vα (ssubst-refl-cancels sA vθ vθ1)))
+                     --        (ev≃0 (v∘ (valty (tred sA vθ)) vα (ssubst-refl-cancels sA vθ vθ1))
+                     --         ∘ FIXMETodo)
+                     --        FIXMEEval)))
+                     --     vM))
+                     FIXMEEval)
+                    {!!} })
+
+{-
+  sΣ : ∀ {Γ A B} {vΓ : ValuableTy Γ} 
+     -> (sA : Ty vΓ A)
+     -> (sB : Ty (Σc vΓ sA) B)
+     -> Ty vΓ (\ x -> Σ \ (y : A x) -> B (x , y))
+  sΣ = λ sA sB → ty (λ vθ → Σc (tred sA vθ) (apply1 sA sB vθ)) 
+                    (λ vα → smap (λ { {._} (cpair vM1 vM2)  → valuable {!subst .A (resp (unmove .vΓ) .α) .M , _!} (cpair (mred' (ssubst sA vα) vM1) {!!}) {!!} {!!} }) {!!})
+-}

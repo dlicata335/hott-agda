@@ -122,6 +122,11 @@ module lib.Paths where
            -> Id (subst C (β ∘ α)) (\ x -> subst C β (subst C α x))
    subst-∘ _ Refl Refl = Refl
 
+   subst-o : {A B : Set} (C : B -> Set) (f : A -> B)
+            {M N : A} (α : M ≃ N)
+          -> subst (\ x -> C (f x)) α ≃ subst C (resp f α)
+   subst-o _ f Refl = Refl
+
    -- fire-subst-d : {Γ : Set} {A : Γ -> Set} (f g : (x : Γ) -> A x) {M N : Γ} {p : Id M N}
    --              -> {p' : Id (f M) (g M)} -> Id (subst (\ x -> Id (f x) (g x)) p p') (trans (sym (respd f p)) (trans (resp (subst A p) p') (respd g p)))
    -- fire-subst-d _ _ {p = Refl} {p'} = {!!} 
