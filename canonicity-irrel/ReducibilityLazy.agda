@@ -28,7 +28,7 @@ module canonicity-irrel.ReducibilityLazy where
   Eq = Id
 
   Propo : (A : Set) -> Set
-  Propo A = {M N : A} -> Eq M N
+  Propo A = (M N : A) -> Eq M N
 
   U2 : Set
   U2 = Set
@@ -53,6 +53,14 @@ module canonicity-irrel.ReducibilityLazy where
      v∘     : {P M N : A} {β : N ≃ P} {α : M ≃ N} {vP : Valuable P} {vN : Valuable N} {vM : Valuable M} 
               (vβ : Valuable≃ vN vP β)(vα : Valuable≃ vM vN α)
             -> Valuable≃ vM vP (β ∘ α)
+
+    retype≃1 : {M N : A} -> {vM1 : (Valuable M)} {vM2 : (Valuable M)} {vN : Valuable N} {α : M ≃ N}
+            -> Valuable≃ vM1 vN α -> Valuable≃ vM2 vN α 
+    retype≃1 {_}{_}{vM1}{vM2}{vN}{α} vα = subst (λ x → Valuable≃ x vN α) (propv vM1 vM2) vα
+    -- NOTE: this means we wont' be able to run the algorithm in Agda,
+    -- because this subst will be stuck.  
+    -- but it would work in OTT
+
   open ValuableTy public
 
   -- simply typed terms; call by value
@@ -130,6 +138,6 @@ module canonicity-irrel.ReducibilityLazy where
   mto {θ = θ}{A = A} sA sθ = ty (λ vθ' → tred sA (mred sθ vθ')) 
                                 (λ {_}{_}{α} vα → head-expand-map (ssubst sA (mresp sθ vα)) 
                                                                   (subst-o A θ α) FIXMETodo) -- need to put something in the signature about subst
-
+  
 
 

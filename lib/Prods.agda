@@ -49,7 +49,8 @@ module lib.Prods where
   Σ≃β2 : {A : Set} {B : A -> Set} {p q : Σ B} 
          (α : (fst p) ≃ (fst q))
          (β : (subst B α (snd p)) ≃ (snd q))
-      -> (snd≃{B = B} (pair≃ α β)) ≃ (trans (resp (λ x → subst B x (snd p)) (Σ≃β1 {B = B} α β)) β)
+      -> (snd≃{B = B} (pair≃ α β)) ≃ 
+         (β ∘ (resp (λ x → subst B x (snd p)) (Σ≃β1 {B = B} α β)))
   Σ≃β2 {p = x , y} {q = .x , .y} Refl Refl = Refl
 
   subst-Σ : {Γ : Set} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
