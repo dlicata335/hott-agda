@@ -88,33 +88,14 @@ module canonicity-prop.Contexts where
                                                   (Σ≃β2 {Γ} {A} {θ , θ1} {θ , θ2} Refl α) FIXMEEval))
                          FIXMEChecked FIXMEEval)
 
-{-
-    ty (λ vθ' → tred sB (cpair (ret vΓ vθ) (valuable _ vθ' FIXMETodo FIXMEEval)))
-       (λ { {θ1}{θ2}{α}{vθ1}{vθ2} vα → 
-       smap (λ {M} vM → 
-             valuable _ 
-                     (val (mred (ssubst sB (cpair≃ (vRefl' (ret vΓ vθ)) {_}{_}{resp (unmove (tred sA vθ)) α} 
-                                                   (valuable≃ _
-                                                              {! vα !} -- (val≃0 (v∘ (valty (tred sA vθ)) vα (ssubst-refl-cancels sA vθ vθ1)))
-                                                              (ev≃0 (v∘ (valty (tred sA vθ)) vα (ssubst-refl-cancels sA vθ vθ1))
-                                                                 ∘ FIXMETodo) FIXMEEval))) -- doesn't mention ssubst-refl-cancels at least
-                                                   vM))
-                     FIXMEChecked -- contract α and then d:        
-                     -- (ev
-                     --    (mred
-                     --     (ssubst sB
-                     --      (cpair≃
-                     --       (valuable≃ (v≃0 (vRefl (valty vΓ) vθ))
-                     --        (val≃0 (vRefl (valty vΓ) vθ))
-                     --        (ev≃0 (vRefl (valty vΓ) vθ) ∘ FIXMEChecked) FIXMEEval)
-                     --       (valuable≃
-                     --        (v≃0 (v∘ (valty (tred sA vθ)) vα (ssubst-refl-cancels sA vθ vθ1)))
-                     --        (val≃0
-                     --         (v∘ (valty (tred sA vθ)) vα (ssubst-refl-cancels sA vθ vθ1)))
-                     --        (ev≃0 (v∘ (valty (tred sA vθ)) vα (ssubst-refl-cancels sA vθ vθ1))
-                     --         ∘ FIXMETodo)
-                     --        FIXMEEval)))
-                     --     vM))
-                     FIXMEEval)
-                    {!!} })
--}
+
+  sΣ : ∀ {Γ A B} {vΓ : CTy Γ} 
+     -> (sA : Ty vΓ A)
+     -> (sB : Ty (Σc vΓ sA) B)
+     -> Ty vΓ (\ x -> Σ \ (y : A x) -> B (x , y))
+  sΣ {Γ}{A}{B}{vΓ} sA sB =
+    ty (λ vθ → Σc (tred sA vθ) (apply1 sA sB vθ)) 
+       (λ {θ1} {θ2} {α} {rθ1} {rθ2} rα → 
+         head-expand-map (smap (λ {P} rP → (mred (ssubst sA rα) (fst rP)) , coe {!!} (ssubst sB (rα , rRefl _ _))) 
+                               {!!}) 
+                         (λ≃ (subst-Σ α A (λ x y → B (x , y)))) FIXMEEval)
