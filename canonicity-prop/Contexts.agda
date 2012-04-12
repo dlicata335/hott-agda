@@ -35,15 +35,17 @@ module canonicity-prop.Contexts where
                     (head-expand (tred sA (fst rN)) (snd rN) (snd≃ α) FIXMEEval) )
                     FIXMEChecked FIXMEEval);
       head-expand≃ = λ x E x' → (head-expand≃ rΓ (fst x) (resp (resp fst) E) FIXMEEval) , 
-                                {!head-expand≃ snd x!};
+                                FIXMETodo;
       rRefl = λ rM → (rRefl rΓ (fst rM)) , retype≃1 (tred sA (fst rM)) (rRefl (tred sA (fst rM)) (snd rM));
       r! = λ {M}{N}{α}{rM}{rN} rα → (head-expand≃ rΓ (r! rΓ (fst rα)) FIXMEChecked FIXMEEval) , 
-                  {!r! (tred sA (fst rN)) (snd rα)!};
+                                    FIXMETodo -- {!r! (tred sA (fst rN)) (snd rα)!}
+             ;
       r∘ = λ rβ rα → (head-expand≃ rΓ (r∘ rΓ (fst rβ) (fst rα)) FIXMEChecked FIXMEEval) , 
-                    {!!};
+                    FIXMETodo;
       eval-red≃ = λ {M} {N} {rM} {rN} α E → (eval-red≃ rΓ (resp fst α) FIXMEEval) , 
                                             eval-red≃ (tred sA (fst rN)) (snd≃ α) FIXMEEval}
 
+{-
   mfst :  {Γ : Set} (sΓ : CTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
        -> Map (Σc sΓ sA) sΓ fst
   mfst sΓ sA = smap (λ x → fst x)
@@ -55,7 +57,6 @@ module canonicity-prop.Contexts where
 
 -- snd≃ α : Id (subst .A (resp fst α) (snd M)) (snd N)
 -- respd snd α: Id (subst (λ z → .A (fst z)) α (snd M)) (snd N)
-
                   
   mpair : {Γ : Set} {sΓ : CTy Γ} 
           {Δ : Set} {sΔ : CTy Δ} 
@@ -99,3 +100,4 @@ module canonicity-prop.Contexts where
          head-expand-map (smap (λ {P} rP → (mred (ssubst sA rα) (fst rP)) , coe {!!} (ssubst sB (rα , rRefl _ _))) 
                                {!!}) 
                          (λ≃ (subst-Σ α A (λ x y → B (x , y)))) FIXMEEval)
+-}
