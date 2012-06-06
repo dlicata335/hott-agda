@@ -164,3 +164,33 @@ module lib.Prods where
                                                                              (λ _ → Refl)))
                                                                            β0))
                                                                        β' (λ _ → Refl)) py qy β
+  module NonDep where
+
+    record Prod (A : Set) (B : Set) : Set where
+      constructor _,_
+      field
+        lproj : A
+        rproj : B
+    open Prod public
+
+    cross : Set -> Set -> Set
+    cross a b = Prod a b
+    
+    lproj≃ : {A B : Set} {p q : cross A B} -> p ≃ q -> (lproj p) ≃ (lproj q)
+    lproj≃ = resp lproj
+
+    rproj≃ : {A B : Set} {p q : cross A B} -> p ≃ q -> (rproj p) ≃ (rproj q)
+    rproj≃ = resp rproj
+
+    crosspair≃ : {A B : Set} {p q : cross A B} -> (lproj p) ≃ (lproj q) -> (rproj p) ≃ (rproj q) -> p ≃ q
+    crosspair≃ a b = resp2 _,_ a b
+
+    crosspair-l≃ : {A B : Set} {p q : cross A B} -> p ≃ q -> (lproj p) ≃ (lproj q)
+    crosspair-l≃ α = resp lproj α
+
+    crosspair-r≃ : {A B : Set} {p q : cross A B} -> p ≃ q -> (rproj p) ≃ (rproj q)
+    crosspair-r≃ α = resp rproj α
+
+    cross-∘ : {A : Set} {M N P Q R S : A} (a : N ≃ P) (b : R ≃ S) (c : M ≃ N) (d : Q ≃ R)
+            -> crosspair≃ a b ∘ crosspair≃ c d ≃ crosspair≃ (a ∘ c) (b ∘ d)
+    cross-∘ Refl Refl Refl Refl = Refl
