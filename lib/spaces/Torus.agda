@@ -22,12 +22,19 @@ module lib.spaces.Torus where
       loop₂ : base ≃ base
       f : (loop₁ ∘ loop₂) ≃ (loop₂ ∘ loop₁)
 
-    T-rec : {C : Set}
+    T-rec :  {C : Set}
           -> (a : C)
           -> (p q : a ≃ a)
           -> (f : (p ∘ q) ≃ (q ∘ p))
           -> T -> C
-    T-rec a _ _ _ A = a
+    T-rec a _ _ _ Base = a
+
+    T-elim :  {C : T -> Set}
+           -> (a : C base) 
+           -> (p : subst C loop₁ a ≃ a) (q : subst C loop₂ a ≃ a)
+           -> (f : subst C (loop₁ ∘ loop₂) a ≃ subst C (loop₂ ∘ loop₁) a)
+           -> (x : T) -> C x
+    T-elim a _ _ _ Base = a
 
     postulate
       βloop₁/rec : {C : Set}
