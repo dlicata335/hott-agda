@@ -26,7 +26,24 @@ module applications.TS1S1 where
     S¹-rec 
       (S¹-rec T.base loop₂)
       (λ≃ (S¹-elim {λ x → S¹-rec T.base loop₂ x ≃ S¹-rec T.base loop₂ x} 
-                   loop₁ 
-                   {!!}))
-             
+                   loop₁
+                   (subst (λ x → S¹-rec T.base loop₂ x ≃ S¹-rec T.base loop₂ x) loop loop₁
+
+                      ≃〈 subst-Id (S¹-rec T.base loop₂) (S¹-rec T.base loop₂) 
+                                   loop loop₁ 〉 
+
+                    resp (S¹-rec T.base loop₂) loop ∘ loop₁ ∘ ! (resp (S¹-rec T.base loop₂) loop)
+
+                      ≃〈 resp (λ x → x ∘ loop₁ ∘ ! (resp (S¹-rec T.base loop₂) loop)) 
+                               (βloop/rec T.base loop₂) 〉 
+
+                    loop₂ ∘ loop₁ ∘ ! (resp (S¹-rec T.base loop₂) loop) 
+                      
+                      ≃〈 resp (λ x → loop₂ ∘ loop₁ ∘ ! x) (βloop/rec T.base loop₂) 〉 
+                    loop₂ ∘ loop₁ ∘ ! loop₂ ≃〈 ∘-assoc loop₂ loop₁ (! loop₂) 〉 
+                    (loop₂ ∘ loop₁) ∘ ! loop₂ ≃〈 resp (λ x → x ∘ ! loop₂) (sym f) 〉
+                    (loop₁ ∘ loop₂) ∘ ! loop₂ ≃〈 sym (∘-assoc loop₁ loop₂ (! loop₂)) 〉 
+                    loop₁ ∘ loop₂ ∘ ! loop₂ ≃〈 resp (λ x → loop₁ ∘ x) (!-inv-r loop₂) 〉
+                    loop₁ ∘ Refl ≃〈 ∘-unit-r loop₁ 〉 
+                    (loop₁ ∎))))
              
