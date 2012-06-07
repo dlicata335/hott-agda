@@ -163,7 +163,7 @@ module lib.Prods where
                                                                              (λ _ → Refl)))
                                                                            β0))
                                                                        β' (λ _ → Refl)) py qy β
-  module NonDep where
+  module NDPair where
 
     nondep-snd≃ : {A B : Set} {p q : A × B} -> p ≃ q -> (snd p) ≃ (snd q)
     nondep-snd≃ Refl = Refl    

@@ -168,6 +168,14 @@ module lib.Paths where
    resp2 : ∀ {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> Id M N -> Id M' N' -> Id (f M M') (f N N')
    resp2 f Refl Refl = Refl
 
+   resp2-resps-1 : ∀ {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> (α : Id M N) (β : Id M' N')
+                   -> Id (resp2 f α β) (resp (λ x → f x N') α ∘ resp (λ y → f M y) β)
+   resp2-resps-1 f Refl Refl = Refl 
+
+   resp2-resps-2 : ∀ {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> (α : Id M N) (β : Id M' N')
+                   -> Id (resp2 f α β) (resp (λ y → f N y) β ∘ resp (λ x → f x M') α)
+   resp2-resps-2 f Refl Refl = Refl 
+
    resp∘ : {A : Set} {x y z : A} {p q : Id x y} {p' q' : Id y z} 
              -> Id p' q' -> Id p q -> Id (p' ∘ p) (q' ∘ q) 
    resp∘ a b = resp2 _∘_ a b 

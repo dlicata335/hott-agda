@@ -3,7 +3,7 @@ open import lib.Prelude
 open Paths
 open S¹
 open T
-open NonDep
+open NDPair
 
 module applications.TS1S1 where
        
@@ -61,9 +61,7 @@ module applications.TS1S1 where
       circles-fst-loop
 
   circles-to-torus : S¹ × S¹ -> T
-  circles-to-torus p = circles-to-torus' (fst p) (snd p)
-
-
+  circles-to-torus = uncurry circles-to-torus' 
 
   subst-loop₁ : subst (λ t' → circles-to-torus (torus-to-circles t') ≃ t') loop₁ Refl ≃ Refl
   subst-loop₁ = 
@@ -85,14 +83,14 @@ module applications.TS1S1 where
           ≃〈 resp (λ x → loop₁ ∘ ! (resp circles-to-torus x)) 
                    (βloop₁/rec (S¹.base , S¹.base) 
                                (nondep-pair≃ loop Refl) 
-                               (nondep-pair≃ Refl loop) S¹-f) 〉 
-    loop₁ ∘ ! (resp circles-to-torus (nondep-pair≃ loop Refl)) 
-          ≃〈 {!!} 〉 
-    {!!}
+                               (nondep-pair≃ Refl loop) S¹-f) 〉
+    loop₁ ∘ ! (resp circles-to-torus (nondep-pair≃ loop (Refl{_}{S¹.base})))
+       ≃〈 resp (λ x → loop₁ ∘ ! x) (resp-uncurry circles-to-torus' loop (Refl{_}{S¹.base})) 〉 
+    loop₁ ∘ ! (resp2 circles-to-torus' loop (Refl{_}{S¹.base})) ≃〈 {!!} 〉 
+      --use resp2-resps-1 and/or resp2-resps-2 and see where that gets you
+    (Refl{_}{T.base}) ∎
 
-
-
-
+{-
   subst-loop₂ : subst (λ t' → circles-to-torus (torus-to-circles t') ≃ t') loop₂ Refl ≃ Refl
   subst-loop₂ =
     subst (λ t' → circles-to-torus (torus-to-circles t') ≃ t') loop₂ Refl
@@ -122,10 +120,11 @@ module applications.TS1S1 where
           ≃〈 {!!} 〉 
     
     {!!}
+-}
 
   torus-circles-torus : (t : T) -> (circles-to-torus (torus-to-circles t)) ≃ t
   torus-circles-torus = T-elim {λ t' → circles-to-torus (torus-to-circles t') ≃ t'} 
                                Refl
                                subst-loop₁ 
-                               subst-loop₂
+                               {!!} --subst-loop₂
                                {!!}

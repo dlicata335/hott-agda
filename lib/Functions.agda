@@ -88,3 +88,15 @@ module lib.Functions where
               -> {M N : A} (α : M ≃ N) 
               -> resp G α ≃ ! (app≃ β {N}) ∘ resp F α ∘ app≃ β {M}
   naturality1 Refl Refl = Refl
+
+
+  uncurry : ∀ {A B C : Set} -> (A -> B -> C) -> A × B -> C
+  uncurry f = \ x -> f (fst x) (snd x)
+
+  resp-uncurry : {A B C : Set} (f : A -> B -> C) -> ∀ {M M' N N'} ->
+                 (α : M ≃ M') (β : N ≃ N') 
+                 -> resp (uncurry f) (NDPair.nondep-pair≃ α β)
+                    ≃ resp2 f α β
+  resp-uncurry f Refl Refl = Refl
+                 
+
