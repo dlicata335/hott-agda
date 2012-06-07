@@ -8,7 +8,7 @@ module canonicity-prop.Contexts where
 
   mid : {A : Set} (As : CTy A) -> Map As As (\ x -> x)
   mid As = smap (λ rM → rM)
-                (λ {_}{_}{α} rα → head-expand≃ As rα (resp-id α) FIXMEEval)
+                (λ {_}{_}{α} rα → head-expand≃ As rα (resp-id α) (ev-resp-id α))
 
   ΣRed : {Γ : Set} (rΓ : CTy Γ) {A : Γ -> Set} (sA : Ty rΓ A) (M : (Σ A)) -> Set 
   ΣRed rΓ sA M = Σ (λ (r1 : Red rΓ (fst M)) → Red (tred sA r1) (snd M))
@@ -28,24 +28,23 @@ module canonicity-prop.Contexts where
       propr = FIXMETodo; -- hprop is closed under Σ right?
       Red≃ = ΣRed≃ rΓ sA ; 
       propr≃ = FIXMEChecked;
-      head-expand = λ {M} {N} rN α E → 
-       (head-expand rΓ (fst rN) (fst≃ α) FIXMEEval , 
-        head-expand (tred sA (head-expand rΓ (fst rN) (fst≃ α) FIXMEEval))
-                    (mred (ssubst sA (eval-red≃ rΓ (! (fst≃ α)) FIXMEEval))
-                    (head-expand (tred sA (fst rN)) (snd rN) (snd≃ α) FIXMEEval) )
-                    FIXMEChecked FIXMEEval);
-      head-expand≃ = λ x E x' → (head-expand≃ rΓ (fst x) (resp (resp fst) E) FIXMEEval) , 
+      head-expand = λ {M} {N} rN E ev → 
+       (head-expand rΓ (fst rN) (fst≃ E) (ev-resp fst ev) , 
+        head-expand (tred sA (head-expand rΓ (fst rN) (fst≃ E) (ev-resp fst ev)))
+                    (mred (ssubst sA (eval-red≃ rΓ (! (fst≃ E)) (ev-! (ev-resp fst ev))))
+                    (head-expand (tred sA (fst rN)) (snd rN) (snd≃ E) (ev-snd≃ ev)) )
+                    {!!} {!!});
+      head-expand≃ = λ x E ev → (head-expand≃ rΓ (fst x) (resp (resp fst) E) (ev-resp (resp fst) ev)) , 
                                 FIXMETodo;
       rRefl = λ rM → (rRefl rΓ (fst rM)) , retype≃1 (tred sA (fst rM)) (rRefl (tred sA (fst rM)) (snd rM));
-      r! = λ {M}{N}{α}{rM}{rN} rα → (head-expand≃ rΓ (r! rΓ (fst rα)) FIXMEChecked FIXMEEval) , 
+      r! = λ {M}{N}{α}{rM}{rN} rα → (head-expand≃ rΓ (r! rΓ (fst rα)) {!!} {!!}) , 
                                     FIXMETodo -- {!r! (tred sA (fst rN)) (snd rα)!}
              ;
-      r∘ = λ rβ rα → (head-expand≃ rΓ (r∘ rΓ (fst rβ) (fst rα)) FIXMEChecked FIXMEEval) , 
+      r∘ = λ rβ rα → (head-expand≃ rΓ (r∘ rΓ (fst rβ) (fst rα)) {!!} FIXMEEval) , 
                     FIXMETodo;
-      eval-red≃ = λ {M} {N} {rM} {rN} α E → (eval-red≃ rΓ (resp fst α) FIXMEEval) , 
-                                            eval-red≃ (tred sA (fst rN)) (snd≃ α) FIXMEEval}
+      eval-red≃ = λ {M} {N} {rM} {rN} E ev → (eval-red≃ rΓ (resp fst E) (ev-resp fst ev)) , 
+                                              eval-red≃ (tred sA (fst rN)) (snd≃ E) {!!}}
 
-{-
   mfst :  {Γ : Set} (sΓ : CTy Γ) {A : Γ -> Set} (sA : Ty sΓ A) 
        -> Map (Σc sΓ sA) sΓ fst
   mfst sΓ sA = smap (λ x → fst x)
@@ -85,9 +84,9 @@ module canonicity-prop.Contexts where
                                                   (r∘ (tred sA vθ) rα 
                                                       (eval-red≃ (tred sA vθ) 
                                                          (resp (λ x → subst A x θ1) (Σ≃β1 {_} {A} Refl α)) 
-                                                         FIXMEEval)) 
-                                                  (Σ≃β2 {Γ} {A} {θ , θ1} {θ , θ2} Refl α) FIXMEEval))
-                         FIXMEChecked FIXMEEval)
+                                                         {!!})) 
+                                                  (Σ≃β2 {Γ} {A} {θ , θ1} {θ , θ2} Refl α) {!!}))
+                         {!!} {!!})
 
 
   sΣ : ∀ {Γ A B} {vΓ : CTy Γ} 
@@ -100,4 +99,3 @@ module canonicity-prop.Contexts where
          head-expand-map (smap (λ {P} rP → (mred (ssubst sA rα) (fst rP)) , coe {!!} (ssubst sB (rα , rRefl _ _))) 
                                {!!}) 
                          (λ≃ (subst-Σ α A (λ x y → B (x , y)))) FIXMEEval)
--}

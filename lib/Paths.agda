@@ -118,7 +118,7 @@ module lib.Paths where
    subst-resp : {A : Set} (C : A -> Set) {M N : A} (α : Id M N) -> Id (subst C α) (subst (\ x -> x) (resp C α))
    subst-resp C Refl = Refl 
 
-   subst-∘ : {A : Set} (C : A -> Set) {M N P : A} (α : Id M N) (β : Id N P)
+   subst-∘ : {A : Set} (C : A -> Set) {M N P : A} (β : Id N P) (α : Id M N)
            -> Id (subst C (β ∘ α)) (\ x -> subst C β (subst C α x))
    subst-∘ _ Refl Refl = Refl
 

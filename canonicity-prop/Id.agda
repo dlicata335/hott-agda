@@ -33,7 +33,7 @@ module canonicity-prop.Id where
                            (r! (tred As rθ2) (sresp Ms rα)))))
                      (λ rα' → <>))
                (λ≃ (subst-Id-d M N α)) 
-               FIXMEEval)
+               {!!})
 
   sRefl : {Γ : Set} {Γs : CTy Γ}
           {A : Γ -> Set} {As : Ty Γs A} 
