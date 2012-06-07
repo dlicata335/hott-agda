@@ -8,3 +8,5 @@ module lib.spaces.Spaces where
   open import lib.spaces.2Sphere1 public
   open import lib.spaces.3Sphere2 public
   open import lib.spaces.3Sphere1 public
+  
+  open import lib.spaces.Torus public
