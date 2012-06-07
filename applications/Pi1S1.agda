@@ -5,6 +5,8 @@ open S¹
 
 module applications.Pi1S1 where
 
+  U = Set
+
   succA : AEq Int Int
   succA = (isoToAdj (succ , isiso pred succ-pred pred-succ))
 
@@ -20,7 +22,7 @@ module applications.Pi1S1 where
   succ≃-! : (! succ≃) ≃ pred≃ 
   succ≃-! = !-adj succ (snd succA) (snd predA) 
 
-  C : S¹ -> Set
+  C : S¹ -> U
   C = S¹-rec Int succ≃
 
   subst-C-loop : subst C loop ≃ succ
@@ -41,16 +43,16 @@ module applications.Pi1S1 where
 
   loop^ : Int -> base ≃ base
   loop^ Zero = Refl
-  loop^ (Neg Z) = ! loop
-  loop^ (Neg (S n)) = ! loop ∘ loop^ (Neg n)
   loop^ (Pos Z) = loop
   loop^ (Pos (S n)) = loop ∘ loop^ (Pos n)
+  loop^ (Neg Z) = ! loop
+  loop^ (Neg (S n)) = ! loop ∘ loop^ (Neg n)
 
   encode : {a : S¹} ->  base ≃ a  ->  C a
   encode p = subst C p Zero
 
   encode' : base ≃ base -> Int
-  encode' = encode {base}
+  encode' p = subst C p Zero -- encode {base}
 
   encode-loop^ : (n : Int) -> encode (loop^ n) ≃ n
   encode-loop^ Zero = Refl
@@ -101,11 +103,6 @@ module applications.Pi1S1 where
   decode-encode : ∀ {a} -> (p : base ≃ a) -> decode (encode p) ≃ p
   decode-encode {a} p = 
     jay1 (λ a' (p' : base ≃ a') → decode (encode p') ≃ p') p Refl
-
-
-
-
-
 
   theorem : Id base base ≃ Int
   theorem = ua (isoToAdj (encode , isiso decode encode-loop^ decode-encode))
