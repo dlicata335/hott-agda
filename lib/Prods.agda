@@ -1,4 +1,3 @@
-
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Paths
@@ -164,3 +163,14 @@ module lib.Prods where
                                                                              (λ _ → Refl)))
                                                                            β0))
                                                                        β' (λ _ → Refl)) py qy β
+  module NonDep where
+
+    nondep-snd≃ : {A B : Set} {p q : A × B} -> p ≃ q -> (snd p) ≃ (snd q)
+    nondep-snd≃ Refl = Refl    
+
+    nondep-pair≃ : {A B : Set} {p q : A × B} -> (fst p) ≃ (fst q) -> (snd p) ≃ (snd q) -> p ≃ q
+    nondep-pair≃ a b = resp2 _,_ a b
+     
+    ∘-× : {A : Set} {M N P Q R S : A} (a : N ≃ P) (b : R ≃ S) (c : M ≃ N) (d : Q ≃ R)
+        -> nondep-pair≃ a b ∘ nondep-pair≃ c d ≃ nondep-pair≃ (a ∘ c) (b ∘ d)
+    ∘-× Refl Refl Refl Refl = Refl
