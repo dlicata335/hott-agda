@@ -25,7 +25,8 @@ module applications.TS1S1 where
   circles-to-torus = 
     S¹-rec 
       (S¹-rec T.base loop₂)
-      (λ≃ {!!})
-      
-      
-      
+      (λ≃ (S¹-elim {λ x → S¹-rec T.base loop₂ x ≃ S¹-rec T.base loop₂ x} 
+                   loop₁ 
+                   {!!}))
+             
+             
