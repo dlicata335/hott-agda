@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type --without-K #-}
+{-# OPTIONS --type-in-type #-}
 
 open import lib.Prelude 
 open Paths
@@ -33,12 +33,66 @@ module canonicity-prop.Reducibility where
   U2 : Set
   U2 = Set
 
+{-
+  test : {A B : Set} (C : B -> Set) (f : A -> B)
+         {M N : A} (α : M ≃ N)
+         {E' : Id (subst (λ x → C (f x)) α) (subst C (resp f α))}
+         -> (subst-o C f α) ≃ E'
+  test C f Refl = {!!}
+-}
 
   -- needs to classify individual steps, not just evaluation to a value.
   -- or we could use a different judgement in head-expand
   data Eval : {A : Set} {M N : A} -> M ≃ N -> Set where
     evRefl : {A : _} {M : A} -> Eval (Refl{_}{M})
+    ev-resp-o : {A B C : Set} (g : B -> C) (f : A -> B)
+                {M N : A} (α : M ≃ N) -> Eval (resp-o g f α)
+    ev-app≃ : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
+              -> (α : Id f g) -> {x : A} -> Eval (app≃ α {x})
+    ev-subst-o : {A B : Set} (C : B -> Set) (f : A -> B)
+                 {M N : A} (α : M ≃ N)
+                 -> Eval (subst-o C f α)
+    ev-naturality1 : {A B : Set} {F G : A -> B}
+                     -> (β : G ≃ F) 
+                     -> {M N : A} (α : M ≃ N) 
+                     -> Eval (naturality1 β α)
+    ev-resp-id : {A : Set} {M N : A} (α : Id M N) -> Eval (resp-id α)
+    ev-subst-univ : {A B : Set} (w : AEq A B) -> Eval (subst-univ w)
+    ev-! : {a : Set} {x y : a} -> {E : Id x y} -> Eval E -> Eval (! E)
+    ev-resp : {A B : Set} {M N : A}{E : M ≃ N} (f : A -> B) -> Eval E -> Eval (resp f E)
+    ev-snd≃ : {A : Set} {B : A -> Set} {p q : Σ B} -> {E : p ≃ q} -> Eval E -> Eval (snd≃ E)
     FIXMEEval : {A : Set} {M N : A} -> {α : M ≃ N} -> Eval α
+
+{-
+  eval-uip : {A : Set} {M : A} {E : M ≃ M} -> Eval E -> E ≃ Refl -- fixme and is an eval?
+  eval-uip ev = {! ev!}
+ 
+  eval-unique : {A : Set} {M N : A} {E1 E2 : M ≃ N} -> Eval E1 -> Eval E2 -> E1 ≃ E2 -- fixme and is an eval?
+  eval-unique evRefl x' = {!x'!}
+  eval-unique (ev-resp-o g f α) x' = {!x'!}
+  eval-unique (ev-app≃ α) x' = {!!}
+  eval-unique (ev-subst-o C f α) x' = {!!}
+  eval-unique (ev-naturality1 β α) x' = {!!}
+  eval-unique (ev-! y) x' = {!!}
+  eval-unique (ev-resp-id f) x' = {!!}
+  eval-unique (ev-resp f y) x' = {!!}
+  eval-unique (ev-snd≃ y) x' = {!!}
+  eval-unique (ev-subst-univ w) x' = {!!}
+  eval-unique FIXMEEval x' = {!!}
+{-
+  eval-unique {E1 = Refl}  ev2 = {!!}
+  eval-unique (ev-resp-o g f α) ev2 = {!jay1 (\ N α -> (E2 : _) -> Id (resp-o g f α) !}
+  eval-unique (ev-app≃ Refl) ev2 = {!!}
+  eval-unique (ev-subst-o C f Refl) ev2 = {!!}
+  eval-unique (ev-naturality1 Refl Refl) ev2 = {!!}
+  eval-unique (ev-resp-id Refl) ev2 = {!!}
+  eval-unique (ev-! {E = Refl} ev) ev2 = {!!}
+  eval-unique (ev-resp {E = Refl} f ev) ev2 = {!!}
+  eval-unique (ev-snd≃ {E = Refl} y) ev2 = {!!}
+  eval-unique (ev-subst-univ w) ev2 = {! ev2!}
+  eval-unique FIXMEEval ev2 = FIXMETodo
+-}  
+-}
 
   -- semantic type value
   record CTy (A : U2) : Set1 where
@@ -111,19 +165,20 @@ module canonicity-prop.Reducibility where
        -> Map As Bs f
        -> Map As Cs (g o f)
   mo As Bs Cs f g sg sf = smap (λ x → mred sg (mred sf x)) 
-                               (λ {_}{_}{α} rα → head-expand≃ Cs (mresp sg (mresp sf rα)) (resp-o g f α) FIXMEEval)
+                               (λ {_}{_}{α} rα → head-expand≃ Cs (mresp sg (mresp sf rα)) (resp-o g f α) (ev-resp-o g f α))
 
   head-expand-map : {A B : Set} {rA : CTy A} {rB : CTy B} {F G : A -> B}
                   -> (sf : Map rA rB F)
                   -> (β : G ≃ F) (E : Eval β)
                   -> Map rA rB G
   head-expand-map {rB = rB}{F}{G} sf β βcomp = 
-    smap (λ x → head-expand rB (mred sf x) (app≃ β) FIXMEEval) 
+    smap (λ x → head-expand rB (mred sf x) (app≃ β) (ev-app≃ β)) 
          (λ {M}{N}{α}{rM}{rN} rα → head-expand≃ rB 
-                                                (r∘ rB (r! rB (eval-red≃ rB (app≃ β {N}) FIXMEEval))
+                                                (r∘ rB (r! rB (eval-red≃ rB (app≃ β {N}) (ev-app≃ β)))
                                                       (r∘ rB (mresp sf rα) 
-                                                             (eval-red≃ rB (app≃ β {M}) FIXMEEval))) 
-                                                FIXMEChecked FIXMEEval) -- naturality in syntax
+                                                             (eval-red≃ rB (app≃ β {M}) (ev-app≃ β)))) 
+                                                (naturality1 β α) (ev-naturality1 β α)) -- naturality in syntax
+
   mto : {Γ Δ : Set} {sΓ : CTy Γ} {sΔ : CTy Δ}
          {θ : Γ -> Δ} {A : Δ -> Set}
        -> (sA : Ty sΔ A)
@@ -131,7 +186,7 @@ module canonicity-prop.Reducibility where
        -> Ty sΓ (A o θ)
   mto {θ = θ}{A = A} sA sθ = ty (λ rθ' → tred sA (mred sθ rθ')) 
                                 (λ {_}{_}{α} rα → head-expand-map (ssubst sA (mresp sθ rα)) 
-                                                                  (subst-o A θ α) FIXMEEval)
+                                                                  (subst-o A θ α) (ev-subst-o A θ α))
   
 
 

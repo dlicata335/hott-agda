@@ -33,6 +33,8 @@ module lib.spaces.Interval where
                   -- wouldn't need the trans if comp0 and comp1 were definitional
 
 
+  {- Nisse found a bug:
+     https://lists.chalmers.se/pipermail/agda/2012/004052.html -}
   module Interval where
     private
       data I' : Set where
@@ -74,7 +76,43 @@ module lib.spaces.Interval where
       --      -> resp (I-elim a b p) seg ≃ p
     -- FIXME : η?
 
-  open Interval public
+  {- conjectured fix: 
+     https://lists.chalmers.se/pipermail/agda/2012/004061.html -}
+  module IntervalFn where
+    private
+      data I' : Set where
+        Zero : I'
+        One  : I'
+
+      data I'' : Set where
+        mkI'' : (I' × (Unit -> Unit)) -> I''
+
+    I : Set
+    I = I''
+
+    zero : I
+    zero = mkI'' (Zero , _)
+    
+    one : I
+    one = mkI'' (One , _)
+
+    postulate
+      seg : zero ≃ one
+
+    I-rec : {C : Set} 
+           -> (a b : C)
+           -> (p : a ≃ b)
+           -> I -> C
+    I-rec a b _ (mkI'' (Zero , _)) = a
+    I-rec a b _ (mkI'' (One , _)) = b
+
+    I-elim : {C : I -> Set} 
+           -> (a : C zero) (b : C one) (p : subst C seg a ≃ b)
+           -> (x : I) -> C x
+    I-elim a b _ (mkI'' (Zero , _)) = a
+    I-elim a b _ (mkI'' (One , _)) = b
+
+  open IntervalFn public
   {-
     Interval provides:
     I : Set

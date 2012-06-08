@@ -32,8 +32,8 @@ module lib.spaces.Torus where
     T-elim :  {C : T -> Set}
            -> (a' : C base) 
            -> (p' : subst C loop₁ a' ≃ a') (q' : subst C loop₂ a' ≃ a')
-           -> (f' : subst (λ x → subst C x a' ≃ a') f (p' ∘ (resp (subst C loop₁) q') ∘ app≃ (subst-∘ C loop₂ loop₁)) 
-                    ≃ q' ∘ (resp (subst C loop₂) p') ∘ app≃ (subst-∘ C loop₁ loop₂))
+           -> (f' : subst (λ x → subst C x a' ≃ a') f (p' ∘ (resp (subst C loop₁) q') ∘ app≃ (subst-∘ C loop₁ loop₂)) 
+                    ≃ q' ∘ (resp (subst C loop₂) p') ∘ app≃ (subst-∘ C loop₂ loop₁))
            -> (x : T) -> C x
     T-elim a _ _ _ Base = a
 

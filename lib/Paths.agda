@@ -118,7 +118,7 @@ module lib.Paths where
    subst-resp : {A : Set} (C : A -> Set) {M N : A} (α : Id M N) -> Id (subst C α) (subst (\ x -> x) (resp C α))
    subst-resp C Refl = Refl 
 
-   subst-∘ : {A : Set} (C : A -> Set) {M N P : A} (α : Id M N) (β : Id N P)
+   subst-∘ : {A : Set} (C : A -> Set) {M N P : A} (β : Id N P) (α : Id M N)
            -> Id (subst C (β ∘ α)) (\ x -> subst C β (subst C α x))
    subst-∘ _ Refl Refl = Refl
 
@@ -167,6 +167,14 @@ module lib.Paths where
 
    resp2 : ∀ {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> Id M N -> Id M' N' -> Id (f M M') (f N N')
    resp2 f Refl Refl = Refl
+
+   resp2-resps-1 : ∀ {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> (α : Id M N) (β : Id M' N')
+                   -> Id (resp2 f α β) (resp (λ x → f x N') α ∘ resp (λ y → f M y) β)
+   resp2-resps-1 f Refl Refl = Refl 
+
+   resp2-resps-2 : ∀ {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> (α : Id M N) (β : Id M' N')
+                   -> Id (resp2 f α β) (resp (λ y → f N y) β ∘ resp (λ x → f x M') α)
+   resp2-resps-2 f Refl Refl = Refl 
 
    resp∘ : {A : Set} {x y z : A} {p q : Id x y} {p' q' : Id y z} 
              -> Id p' q' -> Id p q -> Id (p' ∘ p) (q' ∘ q) 

@@ -45,7 +45,7 @@ module lib.Functions where
         -> (α : (fst p) ≃ (fst q)) -> (snd p) ≃ subst B (! α) (snd q) 
         -> p ≃ q
   pair≃⁻ {A}{B}{p}{q} α β = pair≃ α 
-                                 (app≃ (resp (λ x → subst B x) (!-inv-r α) ∘ ! (subst-∘ B (! α) α)) ∘ resp (subst B α) β)
+                                 (app≃ (resp (λ x → subst B x) (!-inv-r α) ∘ ! (subst-∘ B α (! α))) ∘ resp (subst B α) β)
 
   subst-Π : ∀ {Γ} (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
             {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (x : A θ1) -> B θ1 x) 
@@ -82,4 +82,21 @@ module lib.Functions where
            -> respd (\ γ -> (F γ) (M γ)) δ 
             ≃ app≃2 (respd F δ) (respd M δ) ∘ subst-com-for-resp-app δ A B F M
   resp-app {δ = Refl} = Refl
-             
+
+  naturality1 : {A B : Set} {F G : A -> B}
+              -> (β : G ≃ F) 
+              -> {M N : A} (α : M ≃ N) 
+              -> resp G α ≃ ! (app≃ β {N}) ∘ resp F α ∘ app≃ β {M}
+  naturality1 Refl Refl = Refl
+
+
+  uncurry : ∀ {A B C : Set} -> (A -> B -> C) -> A × B -> C
+  uncurry f = \ x -> f (fst x) (snd x)
+
+  resp-uncurry : {A B C : Set} (f : A -> B -> C) -> ∀ {M M' N N'} ->
+                 (α : M ≃ M') (β : N ≃ N') 
+                 -> resp (uncurry f) (NDPair.nondep-pair≃ α β)
+                    ≃ resp2 f α β
+  resp-uncurry f Refl Refl = Refl
+                 
+

@@ -27,7 +27,8 @@ module lib.spaces.Circle where
     S¹-rec a _ Base = a
 
     S¹-elim :  {C : S¹ -> Set} 
-            -> (a : C base) (p : subst C loop a ≃ a)
+            -> (a : C base) 
+               (p : subst C loop a ≃ a)
             -> (x : S¹) -> C x
     S¹-elim a _ Base = a
 
