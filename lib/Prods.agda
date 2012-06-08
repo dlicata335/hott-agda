@@ -174,3 +174,4 @@ module lib.Prods where
     ∘-× : {A : Set} {M N P Q R S : A} (a : N ≃ P) (b : R ≃ S) (c : M ≃ N) (d : Q ≃ R)
         -> nondep-pair≃ a b ∘ nondep-pair≃ c d ≃ nondep-pair≃ (a ∘ c) (b ∘ d)
     ∘-× Refl Refl Refl Refl = Refl
+
