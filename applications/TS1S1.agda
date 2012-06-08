@@ -87,7 +87,12 @@ module applications.TS1S1 where
     loop₁ ∘ ! (resp circles-to-torus (nondep-pair≃ loop (Refl{_}{S¹.base})))
        ≃〈 resp (λ x → loop₁ ∘ ! x) (resp-uncurry circles-to-torus' loop (Refl{_}{S¹.base})) 〉 
     loop₁ ∘ ! (resp2 circles-to-torus' loop (Refl{_}{S¹.base})) ≃〈 {!!} 〉 
-      --use resp2-resps-1 and/or resp2-resps-2 and see where that gets you
+    loop₁ ∘ ! (resp (\ x -> circles-to-torus' x S¹.base) loop 
+             ∘ resp (circles-to-torus' S¹.base) (Refl{_}{S¹.base})) ≃〈 Refl 〉 
+    loop₁ ∘ ! (resp (\ x -> circles-to-torus' x S¹.base) loop 
+              ∘ Refl) ≃〈 {!!} 〉 
+    loop₁ ∘ ! (resp (\ x -> (circles-to-torus' x) S¹.base) loop) ≃〈 resp (\ x -> loop₁ ∘ ! x) (resp-app-1-nd {δ = loop} {F = circles-to-torus'}{M = S¹.base}) 〉 
+    loop₁ ∘ ! (app≃ (resp circles-to-torus' loop) {S¹.base}) ≃〈 {!(\ x -> circles-to-torus' x S¹.base)!} 〉 
     (Refl{_}{T.base}) ∎
 
 {-

@@ -34,7 +34,8 @@ module lib.Functions where
     λ≃ : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> ((x : A) -> Id (f x) (g x)) -> Id f g
     Π≃η : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : Id f g)
          -> α ≃ λ≃ (\ x -> app≃ α {x})
-    -- FIXME Π≃β
+    Π≃β : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : (x : A) -> Id (f x) (g x)) {N : A}
+         -> app≃ (λ≃ α) {N} ≃ (α N)
 
   subst-→ : ∀ {Γ} (A B : Γ -> Set) {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (A θ1) -> B θ1) 
          -> subst (\ γ -> (A γ) -> B γ) δ f ≃ (\ y -> subst B δ (f (subst A (! δ) y)))
@@ -82,6 +83,13 @@ module lib.Functions where
            -> respd (\ γ -> (F γ) (M γ)) δ 
             ≃ app≃2 (respd F δ) (respd M δ) ∘ subst-com-for-resp-app δ A B F M
   resp-app {δ = Refl} = Refl
+
+  resp-app-1-nd : {Γ A B : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
+                  {F : Γ -> A -> B}
+                  {M : A}
+               -> resp (\ x -> (F x) M) δ 
+                  ≃ app≃ (resp F δ) {M}
+  resp-app-1-nd {δ = Refl} = Refl
 
   naturality1 : {A B : Set} {F G : A -> B}
               -> (β : G ≃ F) 
