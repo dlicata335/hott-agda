@@ -33,33 +33,32 @@ module applications.TS1S1 where
           q' = nondep-pair≃ Refl loop
           f' = S¹-f 
 
-  circles-fst-loop : (x : S¹) -> S¹-rec T.base loop₂ x ≃ S¹-rec T.base loop₂ x
+  circles-fst-loop : S¹-rec T.base loop₂ ≃ S¹-rec T.base loop₂
   circles-fst-loop = 
-    S¹-elim {λ x → S¹-rec T.base loop₂ x ≃ S¹-rec T.base loop₂ x}
-            loop₁
-            (subst (λ x → S¹-rec T.base loop₂ x ≃ S¹-rec T.base loop₂ x) loop loop₁
-                   ≃〈 subst-Id (S¹-rec T.base loop₂) 
-                               (S¹-rec T.base loop₂) 
-                               loop 
-                               loop₁ 〉
-             resp (S¹-rec T.base loop₂) loop ∘ loop₁ ∘ ! (resp (S¹-rec T.base loop₂) loop)
-                  ≃〈 resp (λ x → x ∘ loop₁ ∘ ! (resp (S¹-rec T.base loop₂) loop)) 
-                           (βloop/rec T.base loop₂)〉
-             loop₂ ∘ loop₁ ∘ ! (resp (S¹-rec T.base loop₂) loop) 
-                  ≃〈 resp (λ x → loop₂ ∘ loop₁ ∘ ! x) 
-                           (βloop/rec T.base loop₂) 〉
-             loop₂ ∘ loop₁ ∘ ! loop₂   ≃〈 ∘-assoc loop₂ loop₁ (! loop₂) 〉
-             (loop₂ ∘ loop₁) ∘ ! loop₂ ≃〈 resp (λ x → x ∘ ! loop₂) (sym f) 〉
-             (loop₁ ∘ loop₂) ∘ ! loop₂ ≃〈 sym (∘-assoc loop₁ loop₂ (! loop₂)) 〉
-             loop₁ ∘ loop₂ ∘ ! loop₂   ≃〈 resp (λ x → loop₁ ∘ x) (!-inv-r loop₂) 〉
-             loop₁ ∘ Refl             ≃〈 ∘-unit-r loop₁ 〉 
-             loop₁ ∎)
+    λ≃ (S¹-elim {λ x → S¹-rec T.base loop₂ x ≃ S¹-rec T.base loop₂ x}
+                loop₁
+                (subst (λ x → S¹-rec T.base loop₂ x ≃ S¹-rec T.base loop₂ x) loop loop₁
+                       ≃〈 subst-Id (S¹-rec T.base loop₂) 
+                                    (S¹-rec T.base loop₂) 
+                                    loop 
+                                    loop₁ 〉
+                 resp (S¹-rec T.base loop₂) loop ∘ loop₁ ∘ ! (resp (S¹-rec T.base loop₂) loop)
+                       ≃〈 resp (λ x → x ∘ loop₁ ∘ ! (resp (S¹-rec T.base loop₂) loop)) 
+                                (βloop/rec T.base loop₂)〉
+                 loop₂ ∘ loop₁ ∘ ! (resp (S¹-rec T.base loop₂) loop) 
+                       ≃〈 resp (λ x → loop₂ ∘ loop₁ ∘ ! x) 
+                                (βloop/rec T.base loop₂) 〉
+                 loop₂ ∘ loop₁ ∘ ! loop₂   ≃〈 ∘-assoc loop₂ loop₁ (! loop₂) 〉
+                 (loop₂ ∘ loop₁) ∘ ! loop₂ ≃〈 resp (λ x → x ∘ ! loop₂) (sym f) 〉
+                 (loop₁ ∘ loop₂) ∘ ! loop₂ ≃〈 sym (∘-assoc loop₁ loop₂ (! loop₂)) 〉
+                 loop₁ ∘ loop₂ ∘ ! loop₂   ≃〈 resp (λ x → loop₁ ∘ x) (!-inv-r loop₂) 〉
+                 loop₁ ∘ Refl              ≃〈 ∘-unit-r loop₁ 〉 (loop₁ ∎)))
 
   circles-to-torus' : S¹ -> S¹ -> T
   circles-to-torus' = 
     S¹-rec 
       (S¹-rec T.base loop₂)
-      (λ≃ circles-fst-loop)
+      circles-fst-loop
 
   circles-to-torus : S¹ × S¹ -> T
   circles-to-torus = uncurry circles-to-torus' 
@@ -87,12 +86,8 @@ module applications.TS1S1 where
                                (nondep-pair≃ Refl loop) S¹-f) 〉
     loop₁ ∘ ! (resp circles-to-torus (nondep-pair≃ loop (Refl{_}{S¹.base})))
        ≃〈 resp (λ x → loop₁ ∘ ! x) (resp-uncurry circles-to-torus' loop (Refl{_}{S¹.base})) 〉 
-    loop₁ ∘ ! (resp2 circles-to-torus' loop (Refl{_}{S¹.base})) 
-       ≃〈 resp (λ x → loop₁ ∘ ! x) (resp2-resps-1 circles-to-torus' loop (Refl {_} {S¹.base})) 〉 
+    loop₁ ∘ ! (resp2 circles-to-torus' loop (Refl{_}{S¹.base})) ≃〈 {!!} 〉 
       --use resp2-resps-1 and/or resp2-resps-2 and see where that gets you
-    loop₁ ∘ ! (resp (λ x → circles-to-torus' x S¹.base) loop ∘ 
-              resp (circles-to-torus' S¹.base) (Refl{_}{S¹.base})) 
-       ≃〈 {!!} 〉
     (Refl{_}{T.base}) ∎
 
 {-
