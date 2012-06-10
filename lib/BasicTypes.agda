@@ -11,4 +11,8 @@ module lib.BasicTypes where
   open import lib.Functions public
   open import lib.Nat public
   open import lib.Int public
+  open import lib.Maybe public
+  open import lib.Sums public
+  open import lib.List public
+  open import lib.Monoid public
   
