@@ -209,12 +209,6 @@ module applications.TS1S1 where
   torus-circles-torus = T-elim {λ t' → circles-to-torus (torus-to-circles t') ≃ t'} 
                                Refl
                                subst-loop₁ 
-<<<<<<< HEAD
                                subst-loop₂ --subst-loop₂
                                subst-loops-commute
 
-  
-=======
-                               {!!} --subst-loop₂
-                               {!!}
->>>>>>> 0eea5086b31f423b5ec64f028639f4fe18bf1a0f
