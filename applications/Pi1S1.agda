@@ -58,13 +58,13 @@ module applications.Pi1S1 where
   encode-loop^ Zero = Refl
   encode-loop^ (Pos Z) = app≃ subst-C-loop
   encode-loop^ (Pos (S y)) = 
-    subst C (loop ∘ loop^ (Pos y)) Zero ≃〈 app≃ (subst-∘ C (loop^ (Pos y)) loop) 〉 
+    subst C (loop ∘ loop^ (Pos y)) Zero ≃〈 app≃ (subst-∘ C loop (loop^ (Pos y))) 〉 
     subst C loop (subst C (loop^ (Pos y)) Zero) ≃〈 app≃ subst-C-loop 〉
     succ (subst C (loop^ (Pos y)) Zero)         ≃〈 resp succ (encode-loop^ (Pos y)) 〉 
     succ (Pos y) ∎
   encode-loop^ (Neg Z) = app≃ subst-C-!loop
   encode-loop^ (Neg (S y)) = 
-    subst C (! loop ∘ loop^ (Neg y)) Zero            ≃〈 app≃ (subst-∘ C (loop^ (Neg y)) (! loop)) 〉
+    subst C (! loop ∘ loop^ (Neg y)) Zero            ≃〈 app≃ (subst-∘ C (! loop) (loop^ (Neg y))) 〉
     subst C (! loop) (subst C (loop^ (Neg y)) Zero) ≃〈 app≃ subst-C-!loop 〉
     pred (subst C (loop^ (Neg y)) Zero)             ≃〈 resp pred (encode-loop^ (Neg y)) 〉 
     pred (Neg y) ∎
@@ -97,8 +97,6 @@ module applications.Pi1S1 where
              (\ y → loop^ y) 
              ∎)
             a
-
-
 
   decode-encode : ∀ {a} -> (p : base ≃ a) -> decode (encode p) ≃ p
   decode-encode {a} p = 

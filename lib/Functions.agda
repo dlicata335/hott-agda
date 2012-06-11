@@ -8,6 +8,7 @@ module lib.Functions where
  
   _o_ : {A B C : Set} -> (B -> C) -> (A -> B) -> A -> C
   g o f = \ x -> g (f x)
+  infixr 10 _o_
 
   -- interchange law for the type theory as a whole:
   -- objects = types
@@ -26,6 +27,10 @@ module lib.Functions where
        -> Id f g -> ({x : A} -> Id (f x) (g x))
   app≃ α {x} = resp (\ f -> f x) α
 
+  app≃i : ∀ {A} {B : A -> Set} {f g : {x : A} -> B x} 
+       -> Id (\ {x} -> f {x}) (\ {x} -> g {x}) -> ({x : A} -> Id (f {x}) (g {x}))
+  app≃i α {x} = resp (\ f -> f {x}) α
+
   app≃2 : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
        -> Id f g -> ({x y : A} -> (α : Id x y) -> Id (subst B α (f x)) (g y))
   app≃2 {A} {B} {f} {.f} Refl Refl = Refl 
@@ -34,7 +39,8 @@ module lib.Functions where
     λ≃ : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> ((x : A) -> Id (f x) (g x)) -> Id f g
     Π≃η : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : Id f g)
          -> α ≃ λ≃ (\ x -> app≃ α {x})
-    -- FIXME Π≃β
+    Π≃β : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : (x : A) -> Id (f x) (g x)) {N : A}
+         -> app≃ (λ≃ α) {N} ≃ (α N)
 
   subst-→ : ∀ {Γ} (A B : Γ -> Set) {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (A θ1) -> B θ1) 
          -> subst (\ γ -> (A γ) -> B γ) δ f ≃ (\ y -> subst B δ (f (subst A (! δ) y)))
@@ -50,10 +56,24 @@ module lib.Functions where
   subst-Π : ∀ {Γ} (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
             {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (x : A θ1) -> B θ1 x) 
          -> subst (\ γ -> (x : A γ) -> B γ x) δ f ≃ 
-            (\ γ -> subst (\ (p : Σ \ (γ : Γ) -> A γ) -> B (fst p) (snd p))
+            (\ x -> subst (\ (p : Σ \ (γ : Γ) -> A γ) -> B (fst p) (snd p))
                           (pair≃⁻ δ Refl)
-                          (f (subst A (! δ) γ)))
+                          (f (subst A (! δ) x)))
   subst-Π _ _ Refl f = Refl
+
+  -- only the range depends on the predicate
+  subst-Π2 : ∀ {Γ} (A : Set) (B : (γ : Γ) -> A -> Set)
+            {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (x : A) -> B θ1 x) 
+         -> subst (\ γ -> (x : A) -> B γ x) δ f ≃ 
+            (\ x -> subst (\ γ -> B γ x) δ (f x))
+  subst-Π2 _ _ Refl f = Refl
+
+  subst-Π2i : ∀ {Γ} (A : Set) (B : (γ : Γ) -> A -> Set)
+            {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : {x : A} -> B θ1 x) 
+         -> Id{ {x : A} -> B θ2 x }
+            (subst (\ γ -> {x : A} -> B γ x) δ f)
+            (\ {x} -> subst (\ γ -> B γ x) δ (f {x}))
+  subst-Π2i _ _ Refl f = Refl
 
   resp-λ : {Γ : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
            {A : Γ -> Set} {B : (γ : Γ) -> A γ -> Set}
@@ -82,6 +102,13 @@ module lib.Functions where
            -> respd (\ γ -> (F γ) (M γ)) δ 
             ≃ app≃2 (respd F δ) (respd M δ) ∘ subst-com-for-resp-app δ A B F M
   resp-app {δ = Refl} = Refl
+
+  resp-app-1-nd : {Γ A B : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
+                  {F : Γ -> A -> B}
+                  {M : A}
+               -> resp (\ x -> (F x) M) δ 
+                  ≃ app≃ (resp F δ) {M}
+  resp-app-1-nd {δ = Refl} = Refl
 
   naturality1 : {A B : Set} {F G : A -> B}
               -> (β : G ≃ F) 
