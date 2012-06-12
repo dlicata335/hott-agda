@@ -6,7 +6,7 @@ open T
 open NDPair
 
 module applications.TS1S1 where
-       
+  
   S¹-f : nondep-pair≃ loop Refl ∘ nondep-pair≃ Refl loop ≃ nondep-pair≃ Refl loop ∘ nondep-pair≃ loop Refl
   S¹-f = nondep-pair≃ loop Refl ∘ nondep-pair≃ Refl loop 
                       ≃〈 ∘-× loop Refl Refl loop 〉
@@ -26,6 +26,7 @@ module applications.TS1S1 where
                       ≃〈 sym (∘-× Refl loop loop Refl) 〉
          nondep-pair≃ Refl loop ∘ nondep-pair≃ loop Refl ∎
 
+  -- Mapping from Torus to Two Circles
   torus-to-circles : T -> S¹ × S¹
   torus-to-circles = T-rec a' p' q' f'
     where a' = S¹.base , S¹.base
@@ -54,15 +55,19 @@ module applications.TS1S1 where
                  loop₁ ∘ loop₂ ∘ ! loop₂   ≃〈 resp (λ x → loop₁ ∘ x) (!-inv-r loop₂) 〉
                  loop₁ ∘ Refl              ≃〈 ∘-unit-r loop₁ 〉 (loop₁ ∎)))
 
+
+  -- Mapping from Two Circles to Torus
   circles-to-torus' : S¹ -> S¹ -> T
   circles-to-torus' = 
     S¹-rec 
       (S¹-rec T.base loop₂)
       (λ≃ circles-fst-loop)
 
+  -- The uncurried version of the above
   circles-to-torus : S¹ × S¹ -> T
   circles-to-torus = uncurry circles-to-torus' 
 
+  -- Lemmas for proving the torus identity
   subst-loop₁ : subst (λ t' → circles-to-torus (torus-to-circles t') ≃ t') loop₁ Refl ≃ Refl
   subst-loop₁ = 
     subst (λ t' → circles-to-torus (torus-to-circles t') ≃ t') loop₁ Refl
@@ -94,7 +99,9 @@ module applications.TS1S1 where
              ∘ Refl) 
           ≃〈 resp (λ x → loop₁ ∘ ! x) 
                    (∘-unit-r (resp (λ x → circles-to-torus' x S¹.base) loop)) 〉 
-    loop₁ ∘ ! (resp (\ x -> (circles-to-torus' x) S¹.base) loop) ≃〈 resp (\ x -> loop₁ ∘ ! x) (resp-app-1-nd {δ = loop} {F = circles-to-torus'}{M = S¹.base}) 〉 
+    loop₁ ∘ ! (resp (\ x -> (circles-to-torus' x) S¹.base) loop) 
+          ≃〈 resp (\ x -> loop₁ ∘ ! x) 
+                   (resp-app-1-nd {δ = loop} {F = circles-to-torus'}{M = S¹.base}) 〉 
     loop₁ ∘ ! (app≃ (resp circles-to-torus' loop) {S¹.base}) 
           ≃〈 resp (λ x → loop₁ ∘ ! (app≃ x {S¹.base})) 
                    (βloop/rec (S¹-rec T.base loop₂) 
@@ -146,17 +153,10 @@ module applications.TS1S1 where
     loop₂ ∘ ! loop₂ ≃〈 !-inv-r loop₂ 〉
     Refl{_}{T.base} ∎
 
-  subst-loops-commute : subst (λ x → subst (λ t' → circles-to-torus (torus-to-circles t') ≃ t') x Refl ≃ Refl)
-                              f (subst-loop₁ ∘
-                                (resp (subst (λ t' → circles-to-torus (torus-to-circles t') ≃ t') loop₁)
-                                      subst-loop₂) ∘
-                                (app≃ (subst-∘ (λ t' → circles-to-torus (torus-to-circles t') ≃ t')
-                                               loop₁ loop₂)))
-                      ≃ subst-loop₂ ∘
-                        (resp (subst (λ t' → circles-to-torus (torus-to-circles t') ≃ t') loop₂) subst-loop₁) ∘
-                        app≃ (subst-∘ (λ t' → circles-to-torus (torus-to-circles t') ≃ t') loop₂ loop₁)
-  subst-loops-commute = {!!}
-  {-
+    
+{-
+  subst-loops-commute : CommutatorDep {(λ t' → circles-to-torus (torus-to-circles t') ≃ t')} 
+                        Refl subst-loop₁ subst-loop₂
   subst-loops-commute = 
     subst
       (λ x →
@@ -172,14 +172,23 @@ module applications.TS1S1 where
        (subst-∘ (λ t' → circles-to-torus (torus-to-circles t') ≃ t') loop₁ loop₂))
       ≃〈 {!!} 〉 
      {!!}
-   -}
-
-  
+  -}
   torus-circles-torus : (t : T) -> (circles-to-torus (torus-to-circles t)) ≃ t
   torus-circles-torus = T-elim {λ t' → circles-to-torus (torus-to-circles t') ≃ t'} 
                                Refl
                                subst-loop₁ 
-                               subst-loop₂ --subst-loop₂
-                               subst-loops-commute
+                               subst-loop₂
+                               {!!} --subst-loops-commute
 
-  
+  circles-torus-circles' : (s₁ s₂ : S¹) -> (torus-to-circles (circles-to-torus' s₁ s₂)) ≃ (s₁ , s₂)
+  circles-torus-circles' = S¹-elim
+                             {λ s₁ →
+                                (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂)}
+                             (S¹-elim
+                                {λ s₂ →
+                                   torus-to-circles (circles-to-torus' S¹.base s₂) ≃ (S¹.base , s₂)}
+                                Refl {!!}) 
+                             {!!}
+
+  circles-torus-circles : (s : S¹ × S¹) -> (torus-to-circles (circles-to-torus s)) ≃ s
+  circles-torus-circles s = circles-torus-circles' (fst s) (snd s)
