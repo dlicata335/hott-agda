@@ -174,4 +174,16 @@ module lib.Prods where
     ∘-× : {A : Set} {M N P Q R S : A} (a : N ≃ P) (b : R ≃ S) (c : M ≃ N) (d : Q ≃ R)
         -> nondep-pair≃ a b ∘ nondep-pair≃ c d ≃ nondep-pair≃ (a ∘ c) (b ∘ d)
     ∘-× Refl Refl Refl Refl = Refl
+    
+    -- "placeholder" lemmas until I figure out how to formulate a more general lemma
+
+    resp-×-fst : {A B : Set} {N M : A} -> (α : N ≃ M) -> (f : A -> B) -> (y : B) ->
+                 resp (λ x → f (x) , y) α ≃ 
+                 nondep-pair≃ (resp (λ x → f x) α) (resp (λ _ → y) α)
+    resp-×-fst Refl f y = Refl
+
+    resp-×-snd : {A B : Set} {N M : A} -> (α : N ≃ M) -> (f : A -> B) -> (y : B) ->
+                 resp (λ x → y , f (x)) α ≃
+                 nondep-pair≃ (resp (λ _ → y) α) (resp (λ x → f (x)) α)
+    resp-×-snd Refl f y = Refl
 
