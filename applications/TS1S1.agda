@@ -317,6 +317,14 @@ module applications.TS1S1 where
       ≃〈 !-inv-r (nondep-pair≃ loop Refl) 〉
     Refl ∎
 
+
+  -- Typechecker won't let me do a ≃ of ≃'s. Need some sort of equivalent concept to λ≃.
+  circles-loop-loop : subst (λ x → subst (λ s₁ → (s₂ : S¹) → 
+                                         torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
+                                         loop circles-base x ≃  circles-base x)
+                            loop circles-loop-base ≃ circles-loop-base
+  circles-loop-loop = {!!}
+
   circles-loop : (x : S¹) -> subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
                  loop circles-base x ≃ circles-base x
   circles-loop = S¹-elim
