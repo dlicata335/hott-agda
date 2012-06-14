@@ -212,7 +212,7 @@ module applications.TS1S1 where
                            S¹-f) 〉
     resp (λ x → S¹.base , x) loop ∘ (! (nondep-pair≃ (Refl{_}{S¹.base}) loop))
       ≃〈 resp (λ x → x ∘ ! (nondep-pair≃ Refl loop)) 
-               (resp-×-snd loop (λ x → x) S¹.base) 〉
+               (resp-×-snd (λ x → x) S¹.base loop) 〉
     nondep-pair≃ (resp (λ _ → S¹.base) loop) (resp (λ x → x) loop) ∘ (! (nondep-pair≃ Refl loop))
       ≃〈 resp (λ y → nondep-pair≃ y (resp (λ x → x) loop) ∘ ! (nondep-pair≃ Refl loop)) 
               (resp-constant S¹.base loop) 〉
@@ -244,16 +244,97 @@ module applications.TS1S1 where
                      Refl 
                      circles-base-loop)  
 
-  circles-loop : subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
-                       loop circles-base ≃ circles-base
-  circles-loop = {!!}
+  circles-loop-base : subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
+                      loop circles-base S¹.base ≃ circles-base S¹.base
+  circles-loop-base = 
+    subst
+      (λ s₁ →
+         (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
+      loop circles-base S¹.base
+      ≃〈 resp (λ y → y S¹.base) 
+               (subst-Π2 S¹ (λ s₁ s₂ → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂)) loop 
+               circles-base) 〉
+    (λ s₂ → subst (λ s₁ → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂)) loop (circles-base s₂)) 
+      S¹.base
+      ≃〈 Refl 〉
+    subst (λ s₁ → torus-to-circles (circles-to-torus' s₁ S¹.base) ≃ (s₁ , S¹.base)) loop (circles-base S¹.base)
+      ≃〈 Refl 〉
+    subst (λ s₁ → torus-to-circles (circles-to-torus' s₁ S¹.base) ≃ (s₁ , S¹.base)) loop Refl
+      ≃〈 subst-Id (λ s₁ → torus-to-circles (circles-to-torus' s₁ S¹.base)) 
+                   (λ s₁ → s₁ , S¹.base) 
+                   loop Refl 〉
+    resp (λ s₁ → s₁ , S¹.base) loop ∘ Refl ∘ 
+    ! (resp (λ s₁ → torus-to-circles (circles-to-torus' s₁ S¹.base)) loop) 
+      ≃〈 resp (λ x → resp (λ s₁ → s₁ , S¹.base) loop ∘ x) 
+               (∘-unit-l (!
+                            (resp (λ s₁ → torus-to-circles (circles-to-torus' s₁ S¹.base))
+                             loop))) 〉
+    resp (λ s₁ → s₁ , S¹.base) loop ∘
+    ! (resp (λ s₁ → torus-to-circles (circles-to-torus' s₁ S¹.base)) loop)
+      ≃〈 resp (λ x → resp (λ s₁ → s₁ , S¹.base) loop ∘ ! x) 
+              (resp-o torus-to-circles (λ s₁ → circles-to-torus' s₁ S¹.base) loop) 〉
+    resp (λ s₁ → s₁ , S¹.base) loop ∘
+    ! (resp torus-to-circles (resp (λ s₁ → circles-to-torus' s₁ S¹.base) loop))
+      ≃〈 resp
+            (λ x →
+               resp (λ s₁ → s₁ , S¹.base) loop ∘ ! (resp torus-to-circles x))
+            (resp-app-1-nd {δ = loop} {F = circles-to-torus'} {M = S¹.base}) 〉
+    resp (λ s₁ → s₁ , S¹.base) loop ∘
+    ! (resp torus-to-circles (app≃ (resp circles-to-torus' loop) {S¹.base}))
+      ≃〈 resp
+            (λ x →
+               resp (λ s₁ → s₁ , S¹.base) loop ∘
+               ! (resp torus-to-circles (app≃ x {S¹.base})))
+            (βloop/rec (S¹-rec T.base loop₂) (λ≃ circles-fst-loop)) 〉
+    resp (λ s₁ → s₁ , S¹.base) loop ∘
+    ! (resp torus-to-circles (app≃ (λ≃ circles-fst-loop) {S¹.base}))
+      ≃〈 resp
+            (λ x →
+               resp (λ s₁ → s₁ , S¹.base) loop ∘ ! (resp torus-to-circles x))
+            (Π≃β circles-fst-loop {N = S¹.base}) 〉
+    resp (λ s₁ → s₁ , S¹.base) loop ∘
+    ! (resp torus-to-circles (circles-fst-loop S¹.base))
+      ≃〈 Refl 〉
+    resp (λ s₁ → s₁ , S¹.base) loop ∘ ! (resp torus-to-circles loop₁)
+      ≃〈 resp (λ x → resp (λ s₁ → s₁ , S¹.base) loop ∘ ! x) 
+               (βloop₁/rec (S¹.base , S¹.base) 
+                           (nondep-pair≃ loop Refl) 
+                           (nondep-pair≃ Refl loop) 
+                           S¹-f) 〉
+    resp (λ s₁ → s₁ , S¹.base) loop ∘ ! (nondep-pair≃ loop Refl)
+      ≃〈 resp (λ x → x ∘ ! (nondep-pair≃ loop Refl)) 
+               (resp-×-fst (λ x → x) S¹.base loop) 〉
+    nondep-pair≃ (resp (λ x → x) loop) (resp (λ _ → S¹.base) loop) ∘ ! (nondep-pair≃ loop Refl)
+      ≃〈 resp
+            (λ x →
+               nondep-pair≃ (resp (λ x' → x') loop) x ∘
+               ! (nondep-pair≃ loop Refl))
+            (resp-constant S¹.base loop) 〉
+    nondep-pair≃ (resp (λ x → x) loop) Refl ∘ ! (nondep-pair≃ loop Refl)
+      ≃〈 resp (λ x → nondep-pair≃ x Refl ∘ ! (nondep-pair≃ loop Refl)) 
+               (resp-id loop) 〉
+    nondep-pair≃ loop Refl ∘ ! (nondep-pair≃ loop Refl)
+      ≃〈 !-inv-r (nondep-pair≃ loop Refl) 〉
+    Refl ∎
+
+  circles-loop : (x : S¹) -> subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
+                 loop circles-base x ≃ circles-base x
+  circles-loop = S¹-elim
+                   {λ x →
+                      subst
+                      (λ s₁ →
+                         (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
+                      loop circles-base x
+                      ≃ circles-base x}
+                   circles-loop-base 
+                   {!!}
 
   circles-torus-circles' : (s₁ s₂ : S¹) -> (torus-to-circles (circles-to-torus' s₁ s₂)) ≃ (s₁ , s₂)
   circles-torus-circles' = S¹-elim
                              {λ s₁ →
                                 (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂)}
                              circles-base
-                             circles-loop
+                             (λ≃ circles-loop)
 
   circles-torus-circles : (s : S¹ × S¹) -> (torus-to-circles (circles-to-torus s)) ≃ s
   circles-torus-circles s = circles-torus-circles' (fst s) (snd s)

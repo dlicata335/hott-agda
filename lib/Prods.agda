@@ -170,20 +170,18 @@ module lib.Prods where
 
     nondep-pair≃ : {A B : Set} {p q : A × B} -> (fst p) ≃ (fst q) -> (snd p) ≃ (snd q) -> p ≃ q
     nondep-pair≃ a b = resp2 _,_ a b
-     
+ 
     ∘-× : {A : Set} {M N P Q R S : A} (a : N ≃ P) (b : R ≃ S) (c : M ≃ N) (d : Q ≃ R)
         -> nondep-pair≃ a b ∘ nondep-pair≃ c d ≃ nondep-pair≃ (a ∘ c) (b ∘ d)
     ∘-× Refl Refl Refl Refl = Refl
     
-    -- "placeholder" lemmas until I figure out how to formulate a more general lemma
-
-    resp-×-fst : {A B : Set} {N M : A} -> (α : N ≃ M) -> (f : A -> B) -> (y : B) ->
+    resp-×-fst : {A B : Set} {N M : A} -> (f : A -> B) -> (y : B) -> (α : M ≃ N) ->
                  resp (λ x → f (x) , y) α ≃ 
                  nondep-pair≃ (resp (λ x → f x) α) (resp (λ _ → y) α)
-    resp-×-fst Refl f y = Refl
+    resp-×-fst _ _ Refl = Refl
 
-    resp-×-snd : {A B : Set} {N M : A} -> (α : N ≃ M) -> (f : A -> B) -> (y : B) ->
+    resp-×-snd : {A B : Set} {N M : A} -> (f : A -> B) -> (y : B) -> (α : M ≃ N) ->
                  resp (λ x → y , f (x)) α ≃
                  nondep-pair≃ (resp (λ _ → y) α) (resp (λ x → f (x)) α)
-    resp-×-snd Refl f y = Refl
+    resp-×-snd _ _ Refl = Refl
 
