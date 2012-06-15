@@ -237,6 +237,7 @@ module applications.TS1S1 where
       ≃〈 !-inv-r (resp (λ x → S¹.base , x) loop) 〉
     Refl ∎
 -}
+
   circles-base : (s₂ : S¹) -> torus-to-circles (circles-to-torus' S¹.base s₂) ≃ (S¹.base , s₂) 
   circles-base = (S¹-elim
                      {λ s₂ →
@@ -317,23 +318,59 @@ module applications.TS1S1 where
       ≃〈 !-inv-r (nondep-pair≃ loop Refl) 〉
     Refl ∎
 
-
-  -- Typechecker won't let me do a ≃ of ≃'s. Need some sort of equivalent concept to λ≃.
-  circles-loop-loop : subst (λ x → ((subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
+  circles-loop-loop : subst (λ x → ((subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) 
+                                                               ≃ (s₁ , s₂))
                                          loop 
                                          circles-base) x)
                                    ≃ (circles-base x))
                             loop 
                             circles-loop-base 
                       ≃ circles-loop-base
-  circles-loop-loop = subst (λ x → ((subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
-                                         loop 
-                                         circles-base) x)
-                                   ≃ (circles-base x))
-                            loop 
-                            circles-loop-base 
-                        ≃〈 {!!} 〉 
-                      circles-loop-base ∎
+  circles-loop-loop = 
+    subst (λ x → ((subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
+                         loop circles-base) x)
+                 ≃ (circles-base x))
+          loop 
+          circles-loop-base 
+      ≃〈 subst-Id-d (subst
+                        (λ s₁ →
+                           (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
+                        loop circles-base) 
+                     circles-base 
+                     loop 
+                     circles-loop-base 〉
+    respd circles-base loop ∘
+    resp (subst (λ s₂ → torus-to-circles (circles-to-torus' S¹.base s₂) ≃ (S¹.base , s₂)) loop) 
+         circles-loop-base ∘
+    ! (respd  (subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) 
+                      ≃ (s₁ , s₂)) loop circles-base) loop)
+      ≃〈 resp
+            (λ x →
+               x ∘
+               resp
+               (subst
+                (λ s₂ →
+                   torus-to-circles (circles-to-torus' S¹.base s₂) ≃ (S¹.base , s₂))
+                loop)
+               circles-loop-base
+               ∘
+               !
+               (respd
+                (subst
+                 (λ s₁ →
+                    (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
+                 loop circles-base)
+                loop))
+            (βloop/elim {λ s₂ →
+                       torus-to-circles (circles-to-torus' S¹.base s₂) ≃ (S¹.base , s₂)} 
+              (Refl{_}{S¹.base , S¹.base}) circles-base-loop) 〉
+    circles-base-loop ∘
+    resp (subst (λ s₂ → torus-to-circles (circles-to-torus' S¹.base s₂) ≃ (S¹.base , s₂)) loop) 
+         circles-loop-base ∘
+    ! (respd  (subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) 
+                      ≃ (s₁ , s₂)) loop circles-base) loop)
+      ≃〈 {!!} 〉
+    circles-loop-base ∎
 
   circles-loop : (x : S¹) -> subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
                  loop circles-base x ≃ circles-base x
