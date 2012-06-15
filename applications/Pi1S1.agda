@@ -1,4 +1,5 @@
 {-# OPTIONS --type-in-type --without-K #-}
+
 open import lib.Prelude 
 open Paths
 open S¹
@@ -91,9 +92,9 @@ module applications.Pi1S1 where
     S¹-elim {\ x -> C x -> base ≃ x} 
             loop^ 
             (subst (\ x' →  C x' → base ≃ x') loop loop^                ≃〈 subst-→ C (Id base) loop loop^ 〉
-             (\ y -> subst (Id base) loop (loop^ (subst C (! loop) y))) ≃〈 λ≃ (λ y → subst-Id-post loop (loop^ (subst C (! loop) y))) 〉
-             (\ y -> loop ∘ (loop^ (subst C (! loop) y)))               ≃〈 λ≃ (λ y → resp (λ x' → loop ∘ loop^ x') (app≃ subst-C-!loop)) 〉
-             (\ y -> loop ∘ (loop^ (pred y)))                           ≃〈 λ≃ shift 〉 
+             (\ y -> subst (\ x' → base ≃ x') loop (loop^ (subst C (! loop) y))) ≃〈 λ≃ (λ y → subst-Id-post loop (loop^ (subst C (! loop) y))) 〉
+             (\ y -> loop ∘ (loop^ (subst C (! loop) y)))                ≃〈 λ≃ (λ y → resp (λ x' → loop ∘ loop^ x') (app≃ subst-C-!loop)) 〉
+             (\ y -> loop ∘ (loop^ (pred y)))                            ≃〈 λ≃ shift 〉 
              (\ y → loop^ y) 
              ∎)
             a
@@ -151,4 +152,3 @@ module applications.Pi1S1 where
       loop ∎
              
 
-    

@@ -36,11 +36,13 @@ module lib.Functions where
   app≃2 {A} {B} {f} {.f} Refl Refl = Refl 
 
   postulate 
-    λ≃ : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> ((x : A) -> Id (f x) (g x)) -> Id f g
+    λ≃  : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> ((x : A) -> Id (f x) (g x)) -> Id f g
     Π≃η : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : Id f g)
          -> α ≃ λ≃ (\ x -> app≃ α {x})
     Π≃β : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : (x : A) -> Id (f x) (g x)) {N : A}
          -> app≃ (λ≃ α) {N} ≃ (α N)
+
+    λ≃i : ∀ {A} {B : A -> Set} {f g : {x : A} -> B x} -> ((x : A) -> Id (f {x}) (g {x})) -> Id{ {x : A} -> B x } f g
 
   subst-→ : ∀ {Γ} (A B : Γ -> Set) {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (A θ1) -> B θ1) 
          -> subst (\ γ -> (A γ) -> B γ) δ f ≃ (\ y -> subst B δ (f (subst A (! δ) y)))
@@ -50,8 +52,8 @@ module lib.Functions where
   pair≃⁻ : {A : Set} {B : A -> Set} {p q : Σ B} 
         -> (α : (fst p) ≃ (fst q)) -> (snd p) ≃ subst B (! α) (snd q) 
         -> p ≃ q
-  pair≃⁻ {A}{B}{p}{q} α β = pair≃ α 
-                                 (app≃ (resp (λ x → subst B x) (!-inv-r α) ∘ ! (subst-∘ B α (! α))) ∘ resp (subst B α) β)
+  pair≃⁻ {A}{B}{p}{q} α β = 
+         pair≃ α (app≃ (resp (λ x → subst B x) (!-inv-r α) ∘ ! (subst-∘ B α (! α))) ∘ resp (subst B α) β)
 
   subst-Π : ∀ {Γ} (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
             {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (x : A θ1) -> B θ1 x) 
@@ -60,6 +62,15 @@ module lib.Functions where
                           (pair≃⁻ δ Refl)
                           (f (subst A (! δ) x)))
   subst-Π _ _ Refl f = Refl
+
+  subst-Πi : ∀ {Γ} (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
+            {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : {x : A θ1} -> B θ1 x) 
+         -> Id{ {x : A θ2} -> B θ2 x}
+              (subst (\ γ -> {x : A γ} -> B γ x) δ f)
+              (\ {x} -> subst (\ (p : Σ \ (γ : Γ) -> A γ) -> B (fst p) (snd p))
+                              (pair≃⁻ δ Refl)
+                              (f {(subst A (! δ) x)}))
+  subst-Πi _ _ Refl f = Refl
 
   -- only the range depends on the predicate
   subst-Π2 : ∀ {Γ} (A : Set) (B : (γ : Γ) -> A -> Set)
@@ -73,7 +84,7 @@ module lib.Functions where
          -> Id{ {x : A} -> B θ2 x }
             (subst (\ γ -> {x : A} -> B γ x) δ f)
             (\ {x} -> subst (\ γ -> B γ x) δ (f {x}))
-  subst-Π2i _ _ Refl f = Refl
+  subst-Π2i _ _ Refl f = Refl 
 
   resp-λ : {Γ : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
            {A : Γ -> Set} {B : (γ : Γ) -> A γ -> Set}

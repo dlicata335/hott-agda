@@ -165,6 +165,12 @@ module lib.Prods where
                                                                        β' (λ _ → Refl)) py qy β
   module NDPair where
 
+    subst-× : {Γ : Set} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
+            (A : Γ -> Set) (B : (γ : Γ) -> Set)
+          -> subst (\ γ -> A γ × B γ) δ 
+           ≃ (\ p -> (subst A δ (fst p) , subst B δ (snd p)))
+    subst-× Refl A B = Refl
+
     nondep-snd≃ : {A B : Set} {p q : A × B} -> p ≃ q -> (snd p) ≃ (snd q)
     nondep-snd≃ Refl = Refl    
 
