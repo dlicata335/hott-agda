@@ -29,13 +29,19 @@ module lib.spaces.Torus where
           -> T -> C
     T-rec a _ _ _ Base = a
 
+    CommutatorDep : {C : T -> Set}
+             (a' : C base) 
+             (p' : subst C loop₁ a' ≃ a') 
+             (q' : subst C loop₂ a' ≃ a') -> Set
+    CommutatorDep {C} a' p' q' = subst (λ x → subst C x a' ≃ a') f 
+                           (p' ∘ (resp (subst C loop₁) q') ∘ app≃ (subst-∘ C loop₁ loop₂)) 
+                   ≃ q' ∘ (resp (subst C loop₂) p') ∘ app≃ (subst-∘ C loop₂ loop₁)
+
     T-elim : {C : T -> Set}
              (a' : C base) 
              (p' : subst C loop₁ a' ≃ a') 
              (q' : subst C loop₂ a' ≃ a')
-             (f' :   subst (λ x → subst C x a' ≃ a') f 
-                           (p' ∘ (resp (subst C loop₁) q') ∘ app≃ (subst-∘ C loop₁ loop₂)) 
-                   ≃ q' ∘ (resp (subst C loop₂) p') ∘ app≃ (subst-∘ C loop₂ loop₁))
+             (f' : CommutatorDep {C} a' p' q') 
           -> (x : T) -> C x
     T-elim a _ _ _ Base = a
 
