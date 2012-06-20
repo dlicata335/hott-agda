@@ -170,9 +170,8 @@ module applications.TS1S1 where
        app≃
        (subst-∘ (λ t' → circles-to-torus (torus-to-circles t') ≃ t') loop₁ loop₂))
       ≃〈 {!!} 〉 
-     {!!}
-  -}
-
+     {!subst-loop₂ ∘ ? ∘ ?!}
+-}
   torus-circles-torus : (t : T) -> (circles-to-torus (torus-to-circles t)) ≃ t
   torus-circles-torus = T-elim {λ t' → circles-to-torus (torus-to-circles t') ≃ t'} 
                                Refl
@@ -369,6 +368,21 @@ module applications.TS1S1 where
          circles-loop-base ∘
     ! (respd  (subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) 
                       ≃ (s₁ , s₂)) loop circles-base) loop)
+      ≃〈 Refl 〉 -- η-expansion
+    circles-base-loop ∘
+    resp (λ x → subst (λ s₂ → torus-to-circles (circles-to-torus' S¹.base s₂) ≃ (S¹.base , s₂))
+                      loop x)
+         circles-loop-base ∘
+    ! (respd (λ x → subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
+                          loop circles-base x) loop)
+      ≃〈 {!!} 〉
+    circles-base-loop ∘
+    resp (λ x → resp (λ s₂ → S¹.base , {!!}) loop ∘ 
+                x ∘ 
+                ! (resp (λ s₂ → torus-to-circles (circles-to-torus' S¹.base s₂)) loop)) 
+         circles-loop-base ∘
+    ! (respd (λ x → subst (λ s₁ → (s₂ : S¹) → torus-to-circles (circles-to-torus' s₁ s₂) ≃ (s₁ , s₂))
+                          loop circles-base x) loop)
       ≃〈 {!!} 〉
     circles-loop-base ∎
 
