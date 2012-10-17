@@ -1,0 +1,94 @@
+1) There's a lemma that says that if you have                                                                                                                           
+f : B -> A                                                                                                                                                              
+and for all X, precomposition with f is an equivalence A -> X == B
+-> X                                                                                                 
+then f is an equivalence:                                                                                                                                               
+                                                                                                                                                                        
+Given f : B -> A, if you have                                                                                                                                           
+\alpha : Pi X. (A -> X) == (B -> X)                                                                                                                                     
+such that                                                                                                                                                               
+subst (x.x) (\alpha X) == (\g. g . f)                                                                                                                                   
+then                                                                                                                                                                    
+A == B                                                                                                                                                                  
+                                                                                                                                                                        
+This is a consequence of something called the Yoneda lemma in
+category theory.                                                                                          
+                                                                                                                                                                        
+It's not generally true that if you have an equivalence                                                                                                                 
+A -> X == B -> X                                                                                                                                                        
+then A == B                                                                                                                                                             
+but if the equivalence is given by pre-composition, then it is.                                                                                                         
+
+Proof: 
+                                                                                                                                                                            
+Given f : B -> A, if you have                                                                                                                                               
+\alpha : Pi X. (A -> X) == (B -> X)                                                                                                                                         
+such that                                                                                                                                                                   
+subst (x.x) (\alpha X) == (\g. g . f)                                                                                                                                       
+then                                                                                                                                                                        
+A == B                                                                                                                                                                      
+                                                                                                                                                                            
+(a) define                                                                                                                                                                  
+                                                                                                                                                                            
+g : A -> B = subst (x.x) (alpha[B] ^-1) (\x:B.x)                                                                                                                            
+                                                                                                                                                                            
+(b) show g . f = (\x:B.x) as follows:                                                                                                                                       
+                                                                                                                                                                            
+   g o f                                                                                                                                                                    
+== subst (x.x) (alpha B) g    [def alpha]                                                                                                                                   
+== subst (x.x) (alpha B) (subst (x.x) (alpha B)^1 (\x.x)) [def g]                                                                                                           
+== \x.x [fuse substs, cancel inverses so subst cancels]                                                                                                                     
+                                                                                                                                                                            
+(c) To show f . g = (\x:A.x)                                                                                                                                                
+                                                                                                                                                                            
+Start with f . (g . f) = f  [by (b)]                                                                                                                                        
+Therefore  (f . g) . f = f  [assoc]                                                                                                                                         
+Therefore subst (x.x) (alpha A) (f . g) = subst (x.x) (alpha A) (\x:A.x) [def alpha]                                                           
+Therefore                                                                                                                                                                   
+   subst (x.x) (alpha A)^-1 (subst (x.x) (alpha A) (f . g))                                                                                                                 
+=  subst (x.x) (alpha A)^-1 (subst (x.x) (alpha A) (\x:A.x))                                                                                                                
+[resp subst (x.x) (alpha A)^-1 onto both sides]                                                                                                                             
+Therefore (f . g) = (\x:A.x)  [Cancel inverses]
+                                                                                                                                                                        
+
+2) It's easy to see that there is an equivalence                                                                                                                        
+                                                                                                                                                                        
+T -> X == (S1 x S1) -> X                                                                                                                                                
+                                                                                                                                                                        
+The reason this form is helpful is that, in general, the space of
+functions from a higher inductive type is equivalent to the premises of                                                                                                 
+the elim rule.                                                                                                                                                          
+                                                                                                                                                                        
+So                                                                                                                                                                      
+                                                                                                                                                                        
+S1 x S1 -> X                                                                                                                                                            
+== S1 -> (S1 -> X) [currying]                                                                                                                                           
+== S1 -> (Sigma x:X.Id x x) [S1->X is equiv. premises of S1-rec]                                                                                                        
+== Sigma p:(Sigma x:X.Id x x). Id p p [again]                                                                                                                           
+== Sigma x:X.Sigma l1 : Id x x. Id (x,l1) (x, l1) [associativity]                                                                                                       
+== Sigma x:X.Sigma l1 : Id x x. Sigma l2: Id x x. Id (subst (x.Id x x) l2 l1) l1 [def Id_\Sigma]                                                                        
+== ... . Id (l2 o l1 o l1^-1) l1 [def subst for Id]                                                                                                                     
+== ... . Id (l2 o l1) (l1 o l2) [move l2 to the right]                                                                                                                  
+== T -> X [exactly the premises of T-rec]                                                                                                                               
+
+                                                                                                                                                                        
+3) Then you just have to check that the above equivalence is given by                                                                                                   
+precomposition with some function. I worked out the easy bits (not                                                                                                      
+the paths between paths part ;)) and it looks like it is given by                                                                                                       
+                                                                                                                                                                        
+\g.g o torus_to_circles                                                                                                                                                 
+                                                                                                                                                                        
+as you would hope. That is, calling the above equivalence \alpha,                                                                                                       
+you want to prove that                                                                                                                                                  
+ subst (x.x) \alpha == \g.g o torus_to_circles                                                                                                                           
+                                                                                                                                                                         
+Then part 1) tells you that torus_to_circles is an equivalence.
+
+Also, to prove that the equivalence is post-composition with                                                                                                                
+torus_to_circles, you're going to need an eta law for T-rec:                                                                                                                
+                                                                                                                                                                            
+f . T-rec(x,l1,l2,comm) ==                                                                                                                                                  
+T-rec(f x, resp f l1, resp f l2, resp (resp f) comm + some adjustments)                                                                                                     
+                                                                                                                                                                            
+This eta law might be useful for proving that T -> X is <premises of                                                                                                        
+T-rec> as well. 
