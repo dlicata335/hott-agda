@@ -37,7 +37,8 @@ module lib.Functions where
 
   postulate 
     λ≃  : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> ((x : A) -> Id (f x) (g x)) -> Id f g
-    Π≃η : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : Id f g)
+    Π≃η : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
+         -> (α : Id f g)
          -> α ≃ λ≃ (\ x -> app≃ α {x})
     Π≃β : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : (x : A) -> Id (f x) (g x)) {N : A}
          -> app≃ (λ≃ α) {N} ≃ (α N)
@@ -136,5 +137,11 @@ module lib.Functions where
                  -> resp (uncurry f) (NDPair.nondep-pair≃ α β)
                     ≃ resp2 f α β
   resp-uncurry f Refl Refl = Refl
-                 
 
+{-                 
+  λ≃-refl : ∀ {A B} {f : A -> B} -> 
+          Id{Id {A -> B} f f} 
+            (λ≃ (\ x -> Refl{_}{f x})) 
+            (Refl{_}{f})
+  λ≃-refl = {!!}
+-}  

@@ -150,6 +150,10 @@ module lib.Paths where
            -> Id (resp F (β ∘ α)) (resp F β ∘ resp F α)
    resp-∘ _ _ Refl = Refl 
 
+   respd-∘ : {A : Set} {B : A -> Set} (F : (x : A) -> B x) {M N P : A} (β : Id N P) (α : Id M N)
+           -> Id (respd F (β ∘ α)) (respd F β ∘ resp (λ x → subst B β x) (respd F α) ∘ resp (λ f → f (F M)) (subst-∘ B β α))
+   respd-∘ _ Refl Refl = Refl
+
    resp-id : {A : Set} {M N : A} (α : Id M N)
            -> Id (resp (\ x -> x) α) α
    resp-id Refl = Refl 
@@ -247,7 +251,17 @@ module lib.Paths where
        -> {M N : A} -> (P : Id M N)
        -> ((x : A) -> C x x Refl)
        -> C M N P
-     jayfrompm {A} C {M}{N} P b = jay1 (λ x p → C M x p) {N} P (b M)
+     jayfrompm {A} C {M}{N} P b = jay1 (λ x (p : Id M x) → C M x p) P (b M)
+
+     pmfromjay : {A : Set} {M : A} (C : (N' : A) -> Id M N' -> Set)
+       -> {N : A} -> (P : Id M N)
+       -> (C M Refl)
+       -> C N P
+     pmfromjay {A}{M} C {N} P b = 
+       (jay (λ M' N' (P' : Id M' N') → (C' : (N'' : A) → Id M' N'' → Set) → C' M' Refl → C' N' P') 
+            P 
+            (λ M' C' b' → b'))
+       C b
 
      jayfrompm2 : {A : Set} (C : (x y : A) -> Id x y -> Set)
        -> {M N : A} -> (P : Id M N)
