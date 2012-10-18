@@ -1,0 +1,401 @@
+
+{-# OPTIONS --type-in-type --without-K #-}
+
+-- identity types that never use K
+-- homotopically, Id M N is thought of as a path from M to N
+-- we also use M œôøã N and Paths M N as notation for Id M N
+
+module lib.Paths where
+ data Id {A : Set} : A -> A -> Set where
+   Refl : {a : A} -> Id a a
+
+ _œôøã_ : {A : Set} -> A -> A -> Set
+ _œôøã_ = Id
+
+ infix 9 _œôøã_
+
+ Paths : {A : Set} -> A -> A -> Set
+ Paths = Id
+
+ -- type-indepdendent operations on paths
+
+ module Paths where
+   -- define the operations using pattern-matching 
+   -- this version makes it much easier to read normalized goals
+
+   jay : {A : Set} (C : (x y : A) -> Id x y -> Set)
+       -> {M N : A} -> (P : Id M N)
+       -> ((x : A) -> C x x Refl)
+       -> C M N P
+   jay _ Refl b = b _
+
+   jay1 : {A : Set} {M : A} (C : (x : A) -> Id M x -> Set)
+       -> {N : A} -> (P : Id M N)
+       -> (C M Refl)
+       -> C N P
+   jay1 _ Refl b = b
+
+   subst : {A : Set} (p : A -> Set) {x y : A} -> Id x y -> p x -> p y
+   subst C Refl =  œô§» x' œôöò x'
+
+   resp : {A C : Set} {M N : A} (f : A -> C) -> Id M N -> Id (f M) (f N)
+   resp f Refl = Refl
+
+   respd : {A : Set} {C : A -> Set} {M N : A} (f : (x : A) -> C x) -> (p : Id M N) -> Id (subst C p (f M)) (f N)
+   respd f Refl = Refl
+
+   trans : {A : Set} {M N P : A} -> Id M N -> Id N P -> Id M P
+   trans Refl p = p
+
+   _œôø¸_ : {A : Set} {M N P : A} -> Id N P -> Id M N -> Id M P
+   œô§² œôø¸ Refl = œô§²
+
+   infixr 10 _œôø¸_ 
+
+   infix  2 _œôø®
+   infixr 2 _œôøãœôû©_œôûª_ 
+   
+   _œôøãœôû©_œôûª_ : {A : Set} (x : A) {y z : A} œôöò Id x y œôöò Id y z œôöò Id x z
+   _ œôøãœôû© p1 œôûª p2 = (p2 œôø¸ p1)
+  
+   _œôø® : œôø  {A : Set} (x : A) œôöò Id x x
+   _œôø® _ = Refl
+
+   sym : {a : Set} {x y : a} -> Id x y -> Id y x 
+   sym Refl = Refl
+
+   ! : {a : Set} {x y : a} -> Id x y -> Id y x 
+   ! Refl = Refl
+
+   trans-unit-l : {A : Set} {M N : A} -> (p : Id M N) -> Id (trans Refl p) p
+   trans-unit-l Refl = Refl
+
+   trans-unit-r : {A : Set} {M N : A} -> (p : Id M N) -> Id (trans p Refl) p
+   trans-unit-r Refl = Refl
+
+   œôø¸-unit-l : {A : Set} {M N : A} -> (p : Id M N) -> Id (Refl œôø¸ p) p
+f    œôø¸-unit-l Refl = Refl
+
+   œôø¸-unit-r : {A : Set} {M N : A} -> (p : Id M N) -> Id (p œôø¸ Refl) p
+   œôø¸-unit-r Refl = Refl
+
+   trans-assoc : {A : Set} {M N P Q : A} -> (p : Id M N) (q : Id N P) (r : Id P Q) -> Id (trans (trans p q) r) (trans p (trans q r))
+   trans-assoc Refl Refl Refl = Refl
+
+   œôø¸-assoc : {A : Set} {M N P Q : A} -> (r : Id P Q) (q : Id N P) (p : Id M N) -> Id (r œôø¸ (q œôø¸ p)) ((r œôø¸ q) œôø¸ p)
+   œôø¸-assoc Refl Refl Refl = Refl
+
+   sym-inv : {A : Set} {M N : A} (p : Id M N) -> Id (trans p (sym p)) Refl
+   sym-inv Refl = Refl
+
+   sym-inv2 : {A : Set} {M N : A} (p : Id M N) -> Id (trans (sym p) p) Refl
+   sym-inv2 Refl = Refl
+
+   !-inv-l : {A : Set} {M N : A} (p : Id M N) -> Id ((! p) œôø¸ p) Refl
+   !-inv-l Refl = Refl
+
+   !-inv-r : {A : Set} {M N : A} (p : Id M N) -> Id (p œôø¸ (! p)) Refl
+   !-inv-r Refl = Refl
+
+   sym-invol : {A : Set} {M N : A} (p : Id M N) -> Id (sym (sym p)) p
+   sym-invol Refl = Refl
+
+   !-invol : {A : Set} {M N : A} (p : Id M N) -> Id (! (! p)) p
+   !-invol Refl = Refl
+
+   !-œôø¸ : {A : Set} {M N P : A} -> (q : Id N P) -> (p : Id M N)
+       -> (! (q œôø¸ p)) œôøã ! p œôø¸ ! q
+   !-œôø¸ Refl Refl = Refl
+
+   subst-Id : {œô¦ó A : Set} (f g : œô¦ó -> A) {M N : œô¦ó} (p : Id M N)
+              -> (p' : _) -> Id (subst (\ x -> Id (f x) (g x)) p p') ((resp g p) œôø¸ p' œôø¸ (! (resp f p)))
+   subst-Id _ _ Refl p' = ! (œôø¸-unit-l p')
+
+   subst-Id-post : {A : Set} {M N P : A} (p' : Id N P) (p : Id M N)
+                 -> Id (subst (\ x -> Id M x) p' p) (p' œôø¸ p)
+   subst-Id-post Refl Refl = Refl -- FIXME J
+
+   subst-resp : {A : Set} (C : A -> Set) {M N : A} (œô§± : Id M N) -> Id (subst C œô§±) (subst (\ x -> x) (resp C œô§±))
+   subst-resp C Refl = Refl 
+
+   subst-œôø¸ : {A : Set} (C : A -> Set) {M N P : A} (œô§² : Id N P) (œô§± : Id M N)
+           -> Id (subst C (œô§² œôø¸ œô§±)) (\ x -> subst C œô§² (subst C œô§± x))
+   subst-œôø¸ _ Refl Refl = Refl
+
+   subst-o : {A B : Set} (C : B -> Set) (f : A -> B)
+            {M N : A} (œô§± : M œôøã N)
+          -> subst (\ x -> C (f x)) œô§± œôøã subst C (resp f œô§±)
+   subst-o _ f Refl = Refl
+
+   -- fire-subst-d : {œô¦ó : Set} {A : œô¦ó -> Set} (f g : (x : œô¦ó) -> A x) {M N : œô¦ó} {p : Id M N}
+   --              -> {p' : Id (f M) (g M)} -> Id (subst (\ x -> Id (f x) (g x)) p p') (trans (sym (respd f p)) (trans (resp (subst A p) p') (respd g p)))
+   -- fire-subst-d _ _ {p = Refl} {p'} = {!!} 
+
+   swap-left : {A : Set} {M N P : A} {p1 : Id M N} {p2 : Id M P} {p3 : Id N P}
+                -> Id p3 ((trans (sym p1)) p2)
+                -> Id (trans p1 p3) p2
+   swap-left {p1 = Refl} p = trans (trans-unit-l _) (trans p (trans-unit-l _)) 
+
+   resp-constant : {A C : Set} {M N : A} (v : C) -> (p : Id M N) -> Id (resp (\ _ -> v) p) Refl
+   resp-constant v Refl = Refl 
+
+   subst-constant : {A C : Set} {M N : A} -> (p : Id M N) -> Id (subst (\ _ -> C) p) (\ x -> x)
+   subst-constant Refl = Refl 
+
+   resp-! : {A B : Set} (F : A -> B) {M N : A} (œô§± : Id M N)
+           -> Id (resp F (! œô§±)) (! (resp F œô§±))
+   resp-! _ Refl = Refl 
+
+   resp-œôø¸ : {A B : Set} (F : A -> B) {M N P : A} (œô§² : Id N P) (œô§± : Id M N)
+           -> Id (resp F (œô§² œôø¸ œô§±)) (resp F œô§² œôø¸ resp F œô§±)
+   resp-œôø¸ _ _ Refl = Refl 
+
+   resp-id : {A : Set} {M N : A} (œô§± : Id M N)
+           -> Id (resp (\ x -> x) œô§±) œô§±
+   resp-id Refl = Refl 
+
+   resp-o : {A B C : Set} (g : B -> C) (f : A -> B)
+            {M N : A} (œô§± : M œôøã N)
+          -> resp (\ x -> g (f x)) œô§± œôøã resp g (resp f œô§±)
+   resp-o g f Refl = Refl
+
+   resp-by-id : {A : Set} {f : A -> A}
+                (œô§±f : (x : _) -> x œôøã f x) 
+             -> {M N : A} (œô§± : M œôøã N)
+             -> (resp f œô§± œôøã œô§±f N œôø¸ œô§± œôø¸ ! (œô§±f M))
+   resp-by-id œô§±f Refl = resp (œô§» x œôöò œô§±f _ œôø¸ x) (! (œôø¸-unit-l (! (œô§±f _)))) œôø¸ ! (!-inv-r (œô§±f _)) 
+
+   resp2 : œôø  {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> Id M N -> Id M' N' -> Id (f M M') (f N N')
+   resp2 f Refl Refl = Refl
+
+   resp2-resps-1 : œôø  {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> (œô§± : Id M N) (œô§² : Id M' N')
+                   -> Id (resp2 f œô§± œô§²) (resp (œô§» x œôöò f x N') œô§± œôø¸ resp (œô§» y œôöò f M y) œô§²)
+   resp2-resps-1 f Refl Refl = Refl 
+
+   resp2-resps-2 : œôø  {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> (œô§± : Id M N) (œô§² : Id M' N')
+                   -> Id (resp2 f œô§± œô§²) (resp (œô§» y œôöò f N y) œô§² œôø¸ resp (œô§» x œôöò f x M') œô§±)
+   resp2-resps-2 f Refl Refl = Refl 
+
+   respœôø¸ : {A : Set} {x y z : A} {p q : Id x y} {p' q' : Id y z} 
+             -> Id p' q' -> Id p q -> Id (p' œôø¸ p) (q' œôø¸ q) 
+   respœôø¸ a b = resp2 _œôø¸_ a b 
+  
+   respœôø¸-unit-r : {A : Set} {x y : A} {p q : Id x y} 
+                    -> (a : Id p q) -> Id (respœôø¸ a (Refl{_}{Refl})) a -- definitional equalities work out such that this works unadjusted
+   respœôø¸-unit-r a = jay (œô§» _ _ p œôöò Id (respœôø¸ p (Refl {_} {Refl})) p) a (œô§» _ œôöò Refl)
+  
+   respœôø¸-unit-l : {A : Set} {x y : A} {p q : Id x y} 
+                    -> (a : Id p q) -> Id (respœôø¸ (Refl{_}{Refl}) a)
+                                          (! (œôø¸-unit-l q) œôø¸ a œôø¸ œôø¸-unit-l p)
+               -- definitional equalities work out such that you need an adjustment on the right
+   respœôø¸-unit-l {A}{x}{y}{p}{.p} Refl = lemma p where
+     lemma : {x y : A} (q : Id x y) -> Id Refl (! (œôø¸-unit-l q) œôø¸ Refl œôø¸ œôø¸-unit-l q)
+     lemma Refl = Refl
+
+   subst-Id-d : {œô¦ó : Set} {A : œô¦ó -> Set} (f g : (x : œô¦ó) -> A x) {M N : œô¦ó} (p : Id M N)
+              -> (p' : f M œôøã g M) 
+              -> Id (subst (\ x -> Id (f x) (g x)) p p')
+                    (respd g p œôø¸ resp (subst A p) p' œôø¸ ! (respd f p))
+   subst-Id-d _ _ Refl p' = ! (œôø¸-unit-l p' œôø¸ resp (œô§» x œôöò Refl œôø¸ x) (resp-id p'))
+
+
+   subst-com-for-resp-of-subst : 
+       {œô¦ó : Set} {œô§¸1 œô§¸2 : œô¦ó} (œô§´ : œô§¸1 œôøã œô§¸2)
+       (A : œô¦ó -> Set) (C : (œô§³ : œô¦ó) -> A œô§³ -> Set)
+       (M1 M2 : (œô§³ : œô¦ó) -> A œô§³)
+       (œô§± : (œô§³ : œô¦ó) -> M1 œô§³ œôøã M2 œô§³)
+       (M : (œô§³ : œô¦ó) -> C œô§³ (M1 œô§³))
+    -> Id (subst (œô§» z œôöò C z (M2 z)) œô§´ (subst (C œô§¸1) (œô§± œô§¸1) (M œô§¸1)))
+          (subst (œô§» _ œôöò C œô§¸2 (M2 œô§¸2)) (respd M œô§´)
+                 (subst (C œô§¸2) (œô§± œô§¸2) (subst (œô§» z œôöò C z (M1 z)) œô§´ (M œô§¸1))))
+   subst-com-for-resp-of-subst Refl A C M1 M2 œô§± M = Refl
+
+   resp-of-subst : {œô¦ó : Set} {œô§¸1 œô§¸2 : œô¦ó} {œô§´ : œô§¸1 œôøã œô§¸2}
+                   {A : œô¦ó -> Set} {C : (œô§³ : œô¦ó) -> A œô§³ -> Set}
+                   {M1 M2 : (œô§³ : œô¦ó) -> A œô§³}
+                   {œô§± : (œô§³ : œô¦ó) -> M1 œô§³ œôøã M2 œô§³}
+                   {M : (œô§³ : œô¦ó) -> C œô§³ (M1 œô§³)}
+                -> respd (\ œô§³ -> subst (C œô§³) (œô§± œô§³) (M œô§³)) œô§´ 
+                   œôøã respd (œô§» x œôöò subst (C œô§¸2) (œô§± œô§¸2) x) (respd M œô§´) 
+                     œôø¸ subst-com-for-resp-of-subst œô§´ A C M1 M2 œô§± M
+   resp-of-subst {œô§´ = Refl} = Refl 
+
+   -- interchange law for a particular type A
+   -- objects = terms of type A
+   -- morphisms = Id{A}
+   -- 2-cells = Id{Id}
+   -- 
+   -- see Functions.agda for the interchange law for the type theory as a whole,
+   -- viewed as a higher category
+   ichange-type : {A : Set} {x y z : A} 
+                  {p q r : Id x y} {p' q' r' : Id y z}
+                -> (a : Id p q) (b : Id q r) (c : Id p' q') (d : Id q' r') 
+                -> Id (respœôø¸ (d œôø¸ c) (b œôø¸ a)) (respœôø¸ d b œôø¸ respœôø¸ c a)
+   ichange-type Refl Refl Refl Refl = Refl
+
+   coe : {A B : Set} -> Id A B -> A -> B
+   coe = subst (\ x -> x)
+
+   coe-inv-2 : {A B : Set} -> (œô§± : Id A B) -> {M : _} -> coe œô§± (coe (! œô§±) M) œôøã M
+   coe-inv-2 Refl = Refl
+
+   coe-inv-1 : {A B : Set} -> (œô§± : Id A B) -> {M : _} -> coe (! œô§±) (coe œô§± M) œôøã M
+   coe-inv-1 Refl = Refl
+
+   module PaulinMohring where
+     jayfrompm : {A : Set} (C : (x y : A) -> Id x y -> Set)
+       -> {M N : A} -> (P : Id M N)
+       -> ((x : A) -> C x x Refl)
+       -> C M N P
+     jayfrompm {A} C {M}{N} P b = jay1 (œô§» x p œôöò C M x p) {N} P (b M)
+
+     jayfrompm2 : {A : Set} (C : (x y : A) -> Id x y -> Set)
+       -> {M N : A} -> (P : Id M N)
+       -> ((x : A) -> C x x Refl)
+       -> C M N P
+     jayfrompm2 {A} C {M}{N} P b = subst (œô§» p œôöò C M N p) (sym-invol P)
+                                     (jay1 (œô§» x p œôöò C x N (sym p)) {M} (sym P) (b N))
+
+     fire-jay-const1 : {A : Set} {B : Set} 
+          {M N : A} -> (P : Id M N)
+       -> (f : A -> B)
+       -> Id (jayfrompm (\ _ _ _ -> B) P f) (f M)
+     fire-jay-const1 {A}{B} P f = jay (œô§» x y p œôöò Id (jayfrompm (œô§» _ _ _ œôöò B) p f) (f x)) P (\ _ -> Refl)
+
+     fire-jay-const2 : {A : Set} {B : Set} 
+          {M N : A} -> (P : Id M N)
+       -> (f : A -> B)
+       -> Id (jayfrompm2 (\ _ _ _ -> B) P f) (f N)
+     fire-jay-const2 {A}{B} P f = jay (œô§» x y p œôöò Id (jayfrompm2 (œô§» _ _ _ œôöò B) p f) (f y)) P (\ _ -> Refl)
+
+ module PathsOfficial where
+   -- derive everything from J
+ 
+   jay : {A : Set} (C : (x y : A) -> Id x y -> Set)
+       -> {M N : A} -> (P : Id M N)
+       -> ((x : A) -> C x x Refl)
+       -> C M N P
+   jay _ Refl b = b _
+  
+   subst : {A : Set} (p : A -> Set) {x y : A} -> Id x y -> p x -> p y
+   subst C p = jay (œô§» x y _ œôöò C x œôöò C y) p (œô§» x œôöò œô§» x' œôöò x')
+  
+   resp : {A C : Set} {M N : A} (f : A -> C) -> Id M N -> Id (f M) (f N)
+   resp {A}{C}{M}{N} f a = subst (\ x -> Id (f M) (f x)) a Refl
+  
+   resp2 : œôø  {A B C} {M N : A} {M' N' : B} (f : A -> B -> C) -> Id M N -> Id M' N' -> Id (f M M') (f N N')
+   resp2 {A}{B}{C}{M}{N}{M'}{N'} f a b = 
+     subst (\ x -> Id (f M M') (f x N')) a (subst (œô§» x œôöò Id (f M M') (f M x)) b Refl) 
+  
+   trans : {A : Set} {M N P : A} -> Id M N -> Id N P -> Id M P
+   trans {A}{M}{N}{P} a b = subst (\ x -> Id M x) b a
+
+   sym : {a : Set} {x y : a} -> Id x y -> Id y x 
+   sym p = jay (œô§» x y _ œôöò Id y x) p (œô§» _ œôöò Refl)
+  
+   trans-unit-l : {A : Set} {M N : A} -> (p : Id M N) -> Id (trans Refl p) p
+   trans-unit-l p = jay (œô§» _ _ p' œôöò Id (trans Refl p') p') p (œô§» _ œôöò Refl)
+  
+   trans-unit-r : {A : Set} {M N : A} -> (p : Id M N) -> Id (trans p Refl) p
+   trans-unit-r p = Refl
+  
+   sym-inv : {A : Set} {M N : A} (p : Id M N) -> Id (trans p (sym p)) Refl
+   sym-inv p = jay (œô§» x y p' œôöò Id (trans p' (sym p')) Refl) p (\ _ -> Refl)
+
+   resptrans : {A : Set} {x y z : A} {p q : Id x y} {p' q' : Id y z} 
+             -> Id p q -> Id p' q' -> Id (trans p p') (trans q q') 
+   resptrans a b = resp2 trans a b 
+  
+   resptrans-unit-r : {A : Set} {x y : A} {p q : Id x y} 
+                    -> (a : Id p q) -> Id (resptrans a (Refl{_}{Refl})) a -- definitional equalities work out such that this works unadjusted
+   resptrans-unit-r a = jay (œô§» _ _ p œôöò Id (resptrans p (Refl {_} {Refl})) p) a (œô§» _ œôöò Refl)
+  
+   resptrans-unit-l : {A : Set} {x y : A} {p q : Id x y} 
+                    -> (a : Id p q) -> Id (resptrans (Refl{_}{Refl}) a)
+                                          ((trans (trans-unit-l p) (trans a (sym (trans-unit-l q)))) )
+               -- definitional equalities work out such that you need an adjustment on the right
+   resptrans-unit-l a = jay {_}
+                          (œô§» p' q' a' œôöò
+                             Id (resp (trans Refl) a')
+                             (trans (trans-unit-l p') (trans a' (sym (trans-unit-l q')))))
+                          {_} {_} a
+                          (œô§» x œôöò
+                             jay
+                             (œô§» xend _ x' œôöò
+                                Id Refl
+                                (subst (Id (subst (Id xend) x' Refl))
+                                 (subst (Id x')
+                                  (jay (œô§» x0 y _ œôöò Id y x0)
+                                   (jay (œô§» _ _ p' œôöò Id (subst (Id _) p' Refl) p') x' (œô§» _ œôöò Refl))
+                                   (œô§» _ œôöò Refl))
+                                  Refl)
+                                 (jay (œô§» _ _ p' œôöò Id (subst (Id _) p' Refl) p') x' (œô§» _ œôöò Refl))))
+                             x (œô§» _ œôöò Refl))
+  
+   -- would be a one-liner using pattern matching
+   -- nothing about the interchange law depends on talking about loops
+   trans-resptrans-ichange : {A : Set} {x y z : A} 
+               (p q : Id x y) 
+            -> (a : Id p q) (r : Id x y) (b : Id q r) 
+               (p' q' : Id y z) (c : Id p' q') 
+               (r' : Id y z) (d : Id q' r') 
+            -> Id (resptrans (trans a b) (trans c d)) (trans (resptrans a c) (resptrans b d))
+   trans-resptrans-ichange {A}{x}{y}{z} p q a = jay
+                   (œô§» p' q' a' œôöò
+                      (r : Id x y) (b : Id q' r) (p0 q0 : Id y z) (c : Id p0 q0) (r' : Id y z)
+                      (d : Id q0 r') œôöò
+                      Id (resptrans (trans a' b) (trans c d))
+                      (trans (resptrans a' c) (resptrans b d)))
+                   a
+                   (œô§» pq r b œôöò
+                      jay
+                      (œô§» pq' r' b' œôöò
+                         (p' q' : Id y z) (c : Id p' q') (r0 : Id y z) (d : Id q' r0) œôöò
+                         Id (resptrans (trans Refl b') (trans c d))
+                         (trans (resptrans Refl c) (resptrans b' d)))
+                      b
+                      (œô§» pqr p' q' c œôöò
+                         jay
+                         (œô§» p0 q0 c' œôöò
+                            (r' : Id y z) (d : Id q0 r') œôöò
+                            Id (resptrans Refl (trans c' d))
+                            (trans (resptrans Refl c') (resptrans Refl d)))
+                         c
+                         (œô§» p'q' r' d œôöò
+                            jay
+                            (œô§» p'q0 r0 d' œôöò
+                               Id (resptrans Refl (trans Refl d'))
+                               (trans Refl (resptrans Refl d')))
+                            d (œô§» _ œôöò Refl))))
+
+
+   {- more general interchange?
+   hcomp : {œô¦ó : Set} {œô¦ô : Set} {œô§¸1' œô§¸2' : œô¦ó -> œô¦ô} {œô§¸1 œô§¸2 : œô¦ó} 
+           -> (œô§´1 : Id œô§¸1' œô§¸2')
+           -> (œô§´2 : Id œô§¸1 œô§¸2)
+           -> Id (œô§¸1' œô§¸1) (œô§¸2' œô§¸2)
+   hcomp œô§´1 œô§´2 = resp2 (œô§» x y œôöò x y) œô§´1 œô§´2
+  
+   ichange : {œô¦ó : Set} {œô¦ô : Set} {œô§¸1' œô§¸2' œô§¸3' : œô¦ó -> œô¦ô} {œô§¸1 œô§¸2 œô§¸3 : œô¦ó} 
+           -> (œô§´1' : Id œô§¸1' œô§¸2')
+           -> (œô§´1 : Id œô§¸1 œô§¸2)
+           -> (œô§´2' : Id œô§¸2' œô§¸3')
+           -> (œô§´2 : Id œô§¸2 œô§¸3)
+           -> Id (hcomp (trans œô§´1' œô§´2') (trans œô§´1 œô§´2)) (trans (hcomp œô§´1' œô§´1) (hcomp œô§´2' œô§´2))
+   ichange œô§´1' œô§´1 œô§´2' œô§´2 = {!!}
+   -}
+  
+   -- fire-subst : {œô¦ó A : Set} (f g : œô¦ó -> A) {M N : œô¦ó} {p : Id M N}
+   --            -> (p' : Id (f M) (g M)) -> Id (subst (\ x -> Id (f x) (g x)) p p') (trans (sym (resp f p)) (trans {!!} (resp g p)))
+   -- fire-subst _ _ {p = Refl} p' = sym (trans (trans-unit-l (trans p' Refl)) (trans-unit-r _)) -- FIXME do with J
+
+   -- syntax for equality chain reasoning
+  
+   infix  2 _œôø®
+   infixr 2 _œôøãœôû©_œôûª_ 
+   
+   _œôøãœôû©_œôûª_ : {A : Set} (x : A) {y z : A} œôöò Id x y œôöò Id y z œôöò Id x z
+   _ œôøãœôû© p1 œôûª p2 = (trans p1 p2)
+  
+   _œôø® : œôø  {A : Set} (x : A) œôöò Id x x
+   _œôø® _ = Refl
