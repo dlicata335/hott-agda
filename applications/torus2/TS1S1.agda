@@ -10,25 +10,30 @@ open import applications.torus2.TS1S1-helpers
 
 module applications.torus2.TS1S1 where
 
-  -- Associativity proof for dependent sums
+  -- Generalized associativity proof for dependent sums
   dep-sum-assoc : {X : Set} 
-                -> (Σe (Σe X (\ x → Id x x)) (\ p → Id p p))
-                -> Σe X (λ x → Σe (Id x x) (λ l1 → Id (x , l1) (x , l1)))
-  dep-sum-assoc ((fst , snd) , snd') = fst , snd , snd'
+                -> {A : X -> Set}
+                -> {B : (Σ[ x ∶ X ] (A x)) -> Set}
+                -> (Σ[ p ∶ (Σ[ x ∶ X ] (A x)) ] (B p))
+                -> Σ[ x  ∶ X ] (Σ[ l1 ∶ A x ] (B (x , l1)))
+  dep-sum-assoc ((fst , snd) , snd') = fst , (snd , snd')
 
   dep-sum-unassoc : {X : Set}
-                 -> Σe X (λ x → Σe (Id x x) (λ l1 → Id (x , l1) (x , l1)))
-                 -> (Σe (Σe X (\ x → Id x x)) (\ p → Id p p))
+                 -> {A : X -> Set}
+                 -> {B : (Σ[ x ∶ X ] (A x)) -> Set}
+                 -> Σ[ x ∶ X ] (Σ[ l1 ∶ A x ] (B (x , l1)))
+                 -> (Σ[ p ∶ (Σ[ x ∶ X ] (A x)) ] (B p))
   dep-sum-unassoc (fst , fst' , snd) = (fst , fst') , snd
 
   dep-sum-assoc-equiv : {X : Set}
-                      -> (Σe (Σe X (\ x → Id x x)) (\ p → Id p p))
-                      ≃ Σe X (λ x → Σe (Id x x) (λ l1 → Id (x , l1) (x , l1)))
+                      -> {A : X -> Set}
+                      -> {B : (Σ[ x ∶ X ] (A x)) -> Set}
+                      -> (Σ[ p ∶ (Σ[ x ∶ X ] (A x)) ] (B p))
+                      ≃ (Σ[ x  ∶ X ] (Σ[ l1 ∶ A x ] (B (x , l1))))
   dep-sum-assoc-equiv = ua (isoToAdj (dep-sum-assoc , 
                                       isiso dep-sum-unassoc 
                                             (λ y → Refl) 
                                             (λ x → Refl)))
-
 
   precomp-torus-circles-equiv : {X : Set} -> (T -> X) ≃ (S¹ × S¹ -> X)
   precomp-torus-circles-equiv {X} = sym 
@@ -38,18 +43,22 @@ module applications.torus2.TS1S1 where
     (S¹ -> (S¹ -> X)) 
            -- S¹ -> X is equivalent to the premises of S¹-rec
            ≃〈 resp (λ t → S¹ → t) circle-X-rec 〉
-    (S¹ -> Σe X (\ x → Id x x))
+    (S¹ -> Σ[ x ∶ X ] (Id x x))
            -- Same step as above
            ≃〈 circle-X-rec 〉
-    Σe (Σe X (\ x → Id x x)) (\ p → Id p p)
+    (Σ[ p ∶ (Σ[ x ∶ X ] (Id x x)) ] (Id p p))
            -- Associativity of dependent sums
            ≃〈 dep-sum-assoc-equiv 〉
-    Σe X (λ x → Σe (Id x x) (λ l1 → Id (x , l1) (x , l1)))
+    (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Id (x , l1) (x , l1))))
+           -- Id-Σ ?
            ≃〈 {!!} 〉
-    Σe X (λ x → Σe (Id x x) (λ l1 → Σe (Id x x) (λ l2 → Id (subst (λ x → Id x x) l2 l1) l1)))
+    (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] (Id (subst (λ x → Id x x) l2 l1) l1))))
+           -- Subst-Id
            ≃〈 {!!} 〉
-    Σe X (λ x → Σe (Id x x) (λ l1 → Σe (Id x x) (λ l2 → Id (l2 ∘ l1 ∘ (! l1)) l1)))
+    (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1 ∘ (! l2)) l1)))
+           -- !-to-left
            ≃〈 {!!} 〉
-    Σe X (λ x → Σe (Id x x) (λ l1 → Σe (Id x x) (λ l2 → Id (l2 ∘ l1) (l1 ∘ l2))))
+    (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1) (l1 ∘ l2))))
+           -- Premises of T-rec is equivalent to T -> X
            ≃〈 {!!} 〉
     Refl {_} {T → X})
