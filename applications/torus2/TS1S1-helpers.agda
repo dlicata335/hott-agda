@@ -99,6 +99,7 @@ module applications.torus2.TS1S1-helpers where
 
 
   -- This is probably already implemented somewhere, but more practice is good
+  -- Basically the proof that (A × B -> C) ≃ (A -> C^B)
   curry : ∀ {A B C : Set} -> (A × B -> C) -> (A -> B -> C)
   curry f = \ x y → f (x , y)
 
@@ -112,3 +113,28 @@ module applications.torus2.TS1S1-helpers where
 
   curry-iso : ∀ {A B C : Set} -> (A × B -> C) ≃ (A -> B -> C)
   curry-iso = ua (isoToAdj (curry , isiso uncurry curry-uncurry-id uncurry-curry-id))
+
+  -- Generalized associativity proof for dependent sums
+  dep-sum-assoc : {X : Set} 
+                -> {A : X -> Set}
+                -> {B : (Σ[ x ∶ X ] (A x)) -> Set}
+                -> (Σ[ p ∶ (Σ[ x ∶ X ] (A x)) ] (B p))
+                -> Σ[ x  ∶ X ] (Σ[ l1 ∶ A x ] (B (x , l1)))
+  dep-sum-assoc ((fst , snd) , snd') = fst , (snd , snd')
+
+  dep-sum-unassoc : {X : Set}
+                 -> {A : X -> Set}
+                 -> {B : (Σ[ x ∶ X ] (A x)) -> Set}
+                 -> Σ[ x ∶ X ] (Σ[ l1 ∶ A x ] (B (x , l1)))
+                 -> (Σ[ p ∶ (Σ[ x ∶ X ] (A x)) ] (B p))
+  dep-sum-unassoc (fst , fst' , snd) = (fst , fst') , snd
+
+  dep-sum-assoc-equiv : {X : Set}
+                      -> {A : X -> Set}
+                      -> {B : (Σ[ x ∶ X ] (A x)) -> Set}
+                      -> (Σ[ p ∶ (Σ[ x ∶ X ] (A x)) ] (B p))
+                      ≃ (Σ[ x  ∶ X ] (Σ[ l1 ∶ A x ] (B (x , l1))))
+  dep-sum-assoc-equiv = ua (isoToAdj (dep-sum-assoc , 
+                                      isiso dep-sum-unassoc 
+                                            (λ y → Refl) 
+                                            (λ x → Refl)))
