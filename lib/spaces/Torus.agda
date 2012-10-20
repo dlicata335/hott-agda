@@ -43,7 +43,7 @@ module lib.spaces.Torus where
              (q' : subst C loop₂ a' ≃ a')
              (f' : CommutatorDep {C} a' p' q') 
           -> (x : T) -> C x
-    T-elim a _ _ _ Base = a
+    T-elim a _ _ _ Base = a    
 
     postulate
       βloop₁/rec : {C : Set}
@@ -57,7 +57,7 @@ module lib.spaces.Torus where
         -> (p q : a ≃ a)
         -> (f : (p ∘ q) ≃ (q ∘ p))
         -> resp (T-rec a p q f) loop₂ ≃ q
-    
+
     resp-f : {X : Set}
           -> (p : T -> X)
           -> Id (resp p (loop₁ ∘ loop₂)) (resp p (loop₂ ∘ loop₁)) ≃
@@ -68,6 +68,33 @@ module lib.spaces.Torus where
                         (resp-∘ p loop₁ loop₂) 
                         (resp-∘ p loop₂ loop₁) 〉
       Id (resp p loop₁ ∘ resp p loop₂) (resp p loop₂ ∘ resp p loop₁) ∎
+
+    f-resps : {C : Set}
+           -> (a : C)
+           -> (p q : a ≃ a)
+           -> (f' : (p ∘ q) ≃ (q ∘ p))
+           -> Id (resp (T-rec a p q f') (loop₁ ∘ loop₂)) (resp (T-rec a p q f') (loop₂ ∘ loop₁))
+            ≃ Id (p ∘ q) (q ∘ p)
+    f-resps a p q f' = 
+      (Id (resp (T-rec a p q f') (loop₁ ∘ loop₂))
+          (resp (T-rec a p q f') (loop₂ ∘ loop₁)))
+          ≃〈 resp-f (T-rec a p q f') 〉
+      (Id (resp (T-rec a p q f') loop₁ ∘ resp (T-rec a p q f') loop₂)
+          (resp (T-rec a p q f') loop₂ ∘ resp (T-rec a p q f') loop₁))
+          ≃〈 resp2 (λ x y → Id x y) 
+                   (resp2 (λ x x' → x ∘ x') (βloop₁/rec a p q f') (βloop₂/rec a p q f')) 
+                   (resp2 (λ x x' → x ∘ x') (βloop₂/rec a p q f') (βloop₁/rec a p q f')) 〉
+      (Id (p ∘ q) (q ∘ p)) ∎
+    
+    postulate
+      βf/rec : {C : Set}
+        -> (a : C)
+        -> (p q : a ≃ a)
+        -> (f' : (p ∘ q) ≃ (q ∘ p))
+        -> resp (resp (T-rec a p q f')) f ≃ subst (λ x → x) (! (f-resps a p q f')) f'
+    
+
+    
 
     torus-X-to-rec : {X : Set}
                   -> (T -> X)
@@ -98,7 +125,7 @@ module lib.spaces.Torus where
                      (λ (f : Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1) (l1 ∘ l2)))) → f)
     rec-torus-X-id = λ≃ (λ x → 
       (torus-X-to-rec o rec-to-torus-X) x 
-                      ≃〈 {!!} 〉 
+                      ≃〈 Refl 〉 
       ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
       , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
       , subst (λ x' → x')
@@ -117,7 +144,31 @@ module lib.spaces.Torus where
          (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
           (snd (snd (snd x)))))
         f))
-        ≃〈 {!!} 〉
+        ≃〈 resp (λ p →
+                      fst x ,
+                      resp
+                      (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                       (snd (snd (snd x))))
+                      loop₂
+                      ,
+                      resp
+                      (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                       (snd (snd (snd x))))
+                      loop₁
+                      , subst (λ x' → x') p (resp
+                                               (resp
+                                                (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                                                 (snd (snd (snd x)))))
+                                               f))
+                     (∘-unit-l (resp2 Id
+                                   (resp-∘
+                                    (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                                     (snd (snd (snd x))))
+                                    loop₁ loop₂)
+                                   (resp-∘
+                                    (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                                     (snd (snd (snd x))))
+                                    loop₂ loop₁))) 〉
       ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
       , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
       , subst (λ x' → x')
@@ -135,16 +186,418 @@ module lib.spaces.Torus where
          (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
           (snd (snd (snd x)))))
         f))
-       ≃〈 {!!} 〉
+       ≃〈 resp (λ p →
+                     fst x ,
+                     resp
+                     (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                      (snd (snd (snd x))))
+                     loop₂
+                     ,
+                     resp
+                     (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                      (snd (snd (snd x))))
+                     loop₁
+                     ,
+                     subst (λ x' → x')
+                     (resp2 Id
+                      (resp-∘
+                       (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                        (snd (snd (snd x))))
+                       loop₁ loop₂)
+                      (resp-∘
+                       (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                        (snd (snd (snd x))))
+                       loop₂ loop₁))
+                     p) 
+                  (βf/rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) 〉
+      ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
+      , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
+      , subst (λ x' → x')
+        (resp2 Id
+        (resp-∘
+         (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+          (snd (snd (snd x))))
+         loop₁ loop₂)
+        (resp-∘
+         (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+          (snd (snd (snd x))))
+         loop₂ loop₁))
+        (subst (λ x' → x') 
+               (! (f-resps (fst x) 
+                           (fst (snd (snd x))) 
+                           (fst (snd x)) 
+                           (snd (snd (snd x))))) 
+                           (snd (snd (snd x)))))
+       ≃〈 resp (λ p →
+                     fst x ,
+                     resp
+                     (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                      (snd (snd (snd x))))
+                     loop₂
+                     ,
+                     resp
+                     (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                      (snd (snd (snd x))))
+                     loop₁
+                     , p (snd (snd (snd x)))) (sym (subst-∘ (λ x' → x') 
+                                                   (resp2 Id
+                                                    (resp-∘
+                                                    (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                                                           (snd (snd (snd x))))
+                                                           loop₁ loop₂)
+                                                    (resp-∘
+                                                           (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                                                           (snd (snd (snd x))))
+                                                           loop₂ loop₁)) (!
+                                                                 (f-resps (fst x) (fst (snd (snd x))) (fst (snd x))
+                                                                          (snd (snd (snd x))))))) 〉
+      ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
+      , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
+      , subst (λ x' → x')
+        (resp2 Id (resp-∘ (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁ loop₂)
+                  (resp-∘ (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂ loop₁)
+        ∘ (! (f-resps (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))))) 
+        (snd (snd (snd x))))
+        ≃〈 resp (λ p →
+                      fst x ,
+                      resp
+                      (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                       (snd (snd (snd x))))
+                      loop₂
+                      ,
+                      resp
+                      (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                       (snd (snd (snd x))))
+                      loop₁
+                      ,
+                      subst (λ x' → x')
+                      (resp2 Id
+                       (resp-∘
+                        (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                         (snd (snd (snd x))))
+                        loop₁ loop₂)
+                       (resp-∘
+                        (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                         (snd (snd (snd x))))
+                        loop₂ loop₁)
+                       ∘ ! p)
+                      (snd (snd (snd x)))) 
+                     (resp2 (λ x' x0 → x' ∘ x0) (∘-unit-l (resp2 Id
+                                                             (resp2 _∘_
+                                                              (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                                                               (snd (snd (snd x))))
+                                                              (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                                                               (snd (snd (snd x)))))
+                                                             (resp2 _∘_
+                                                              (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                                                               (snd (snd (snd x))))
+                                                              (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                                                               (snd (snd (snd x))))))) 
+                                                (∘-unit-l (resp2 Id
+                                                             (resp-∘
+                                                              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                                                               (snd (snd (snd x))))
+                                                              loop₁ loop₂)
+                                                             (resp-∘
+                                                              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                                                               (snd (snd (snd x))))
+                                                              loop₂ loop₁)))) 〉
+      ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
+      , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
+      , subst (λ x' → x')
+        (resp2 Id (resp-∘ (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁ loop₂)
+                  (resp-∘ (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂ loop₁)
+        ∘ !
+            ( resp2 Id
+              (resp2 _∘_
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))
+              (resp2 _∘_
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))
+             ∘
+             resp2 Id
+             (resp-∘
+              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+               (snd (snd (snd x))))
+              loop₁ loop₂)
+             (resp-∘
+              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+               (snd (snd (snd x))))
+              loop₂ loop₁)))
+        (snd (snd (snd x))))
+        ≃〈 resp (λ p →
+                      fst x ,
+                      resp
+                      (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                       (snd (snd (snd x))))
+                      loop₂
+                      ,
+                      resp
+                      (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                       (snd (snd (snd x))))
+                      loop₁
+                      ,
+                      subst (λ x' → x')
+                      (resp2 Id
+                       (resp-∘
+                        (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                         (snd (snd (snd x))))
+                        loop₁ loop₂)
+                       (resp-∘
+                        (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                         (snd (snd (snd x))))
+                        loop₂ loop₁)
+                       ∘ p)
+                      (snd (snd (snd x)))) 
+           (!-∘ (resp2 Id
+                   (resp2 _∘_
+                    (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                     (snd (snd (snd x))))
+                    (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                     (snd (snd (snd x)))))
+                   (resp2 _∘_
+                    (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                     (snd (snd (snd x))))
+                    (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                     (snd (snd (snd x)))))) 
+                (resp2 Id
+                   (resp-∘
+                    (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                     (snd (snd (snd x))))
+                    loop₁ loop₂)
+                   (resp-∘
+                    (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                     (snd (snd (snd x))))
+                    loop₂ loop₁))) 〉
+      ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
+      , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
+      , subst (λ x' → x')
+        (resp2 Id (resp-∘ (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁ loop₂)
+                  (resp-∘ (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂ loop₁)
+        ∘ ! (resp2 Id
+             (resp-∘
+              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+               (snd (snd (snd x))))
+              loop₁ loop₂)
+             (resp-∘
+              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+               (snd (snd (snd x))))
+              loop₂ loop₁))
+        ∘ ! (resp2 Id
+              (resp2 _∘_
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))
+              (resp2 _∘_
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))))
+        (snd (snd (snd x))))
+       ≃〈 Refl 〉
+      ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
+      , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
+      , subst (λ x' → x')
+        (resp2 Id (resp-∘ (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁ loop₂)
+                  (resp-∘ (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂ loop₁)
+        ∘ ! (resp2 Id
+             (resp-∘
+              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+               (snd (snd (snd x))))
+              loop₁ loop₂)
+             (resp-∘
+              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+               (snd (snd (snd x))))
+              loop₂ loop₁))
+        ∘ ! (resp2 Id
+              (resp2 _∘_
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))
+              (resp2 _∘_
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))))
+        (snd (snd (snd x))))
+        ≃〈 resp (λ p →
+                      fst x ,
+                      resp
+                      (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                       (snd (snd (snd x))))
+                      loop₂
+                      ,
+                      resp
+                      (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                       (snd (snd (snd x))))
+                      loop₁
+                      , subst (λ x' → x') p (snd (snd (snd x)))) 
+                (∘-assoc (resp2 Id
+                            (resp-∘
+                             (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                              (snd (snd (snd x))))
+                             loop₁ loop₂)
+                            (resp-∘
+                             (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                              (snd (snd (snd x))))
+                             loop₂ loop₁)) 
+                         (!
+                            (resp2 Id
+                             (resp-∘
+                              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                               (snd (snd (snd x))))
+                              loop₁ loop₂)
+                             (resp-∘
+                              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                               (snd (snd (snd x))))
+                              loop₂ loop₁))) 
+                         (!
+                            (resp2 Id
+                             (resp2 _∘_
+                              (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                               (snd (snd (snd x))))
+                              (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                               (snd (snd (snd x)))))
+                             (resp2 _∘_
+                              (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                               (snd (snd (snd x))))
+                              (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                               (snd (snd (snd x)))))))) 〉
+      ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
+      , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
+      , subst (λ x' → x')
+        ((resp2 Id (resp-∘ (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁ loop₂)
+                  (resp-∘ (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂ loop₁)
+        ∘ ! (resp2 Id
+             (resp-∘
+              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+               (snd (snd (snd x))))
+              loop₁ loop₂)
+             (resp-∘
+              (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+               (snd (snd (snd x))))
+              loop₂ loop₁)))
+        ∘ ! (resp2 Id
+              (resp2 _∘_
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))
+              (resp2 _∘_
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))))
+        (snd (snd (snd x))))
+        ≃〈 resp (λ p →
+                      fst x ,
+                      resp
+                      (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                       (snd (snd (snd x))))
+                      loop₂
+                      ,
+                      resp
+                      (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                       (snd (snd (snd x))))
+                      loop₁
+                      ,
+                      subst (λ x' → x')
+                      (p ∘
+                       !
+                       (resp2 Id
+                        (resp2 _∘_
+                         (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                          (snd (snd (snd x))))
+                         (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                          (snd (snd (snd x)))))
+                        (resp2 _∘_
+                         (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                          (snd (snd (snd x))))
+                         (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                          (snd (snd (snd x)))))))
+                      (snd (snd (snd x)))) 
+                (!-inv-r (resp2 Id
+                           (resp-∘
+                            (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                             (snd (snd (snd x))))
+                            loop₁ loop₂)
+                           (resp-∘
+                            (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                             (snd (snd (snd x))))
+                            loop₂ loop₁))) 〉
+      ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
+      , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
+      , subst (λ x' → x')
+        (Refl ∘ ! (resp2 Id
+              (resp2 _∘_
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))
+              (resp2 _∘_
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))))
+         (snd (snd (snd x))))
+       ≃〈 resp (λ p →
+                     fst x ,
+                     resp
+                     (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                      (snd (snd (snd x))))
+                     loop₂
+                     ,
+                     resp
+                     (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                      (snd (snd (snd x))))
+                     loop₁
+                     , subst (λ x' → x') p (snd (snd (snd x)))) (∘-unit-l 
+               (!
+                  (resp2 Id
+                   (resp2 _∘_
+                    (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                     (snd (snd (snd x))))
+                    (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                     (snd (snd (snd x)))))
+                   (resp2 _∘_
+                    (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                     (snd (snd (snd x))))
+                    (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                     (snd (snd (snd x)))))))) 〉
+       ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
+      , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
+      , subst (λ x' → x')
+        (! (resp2 Id
+              (resp2 _∘_
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))
+              (resp2 _∘_
+               (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))))
+         (snd (snd (snd x))))
+        ≃〈 {!!} 〉
       ( fst x , (fst (snd x))
       , (fst (snd (snd x)))
       , snd (snd (snd x)))
-       ≃〈 {!!} 〉
+       ≃〈 Refl 〉
       (x ∎))
 
     torus-X-rec : {X : Set}
-               -> (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1) (l1 ∘ l2))))
-               ≃ (T -> X)
-    torus-X-rec = {!!}
+               -> (T -> X) ≃ (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1) (l1 ∘ l2))))
+
+    torus-X-rec = ua (isoToAdj (torus-X-to-rec , isiso rec-to-torus-X 
+                                                       (λ y → app≃ rec-torus-X-id) 
+                                                       (λ x → app≃ torus-X-rec-id)))
   open T
 
