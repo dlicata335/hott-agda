@@ -32,7 +32,7 @@ module applications.torus2.TS1S1-helpers where
     subst (λ x → x) (α {B} ∘ (! (α {B}))) (λ x → x) b
              -- Cancel the (α {B})'s
              ≃〈 resp (λ y → subst (λ x → x) y (λ z → z) b) (!-inv-r (α {B})) 〉
-    Refl{_}{b})
+    b ∎)
 
   f-o-g-o-f : {A B : Set} (f : B -> A)
             -> (α : ∀{X} -> (A -> X) ≃ (B -> X))
@@ -42,7 +42,7 @@ module applications.torus2.TS1S1-helpers where
     (f o (g α o f)) b
             -- By g-o-f-id
             ≃〈 resp (λ x → (f o x) b) (g-o-f-id {A} {B} f α s) 〉
-    Refl {_} {f b})
+    (f b) ∎)
 
   subst-fg-id : {A B : Set} (f : B -> A)
              -> (α : ∀{X} -> (A -> X) ≃ (B -> X))
@@ -59,7 +59,7 @@ module applications.torus2.TS1S1-helpers where
     f b
             -- By assumption
             ≃〈 sym (resp (λ f' → f' (λ x → x) b) (s {A})) 〉
-    Refl {_} {subst (λ x → x) (α {A}) (λ (x : A) → x) b})
+    (subst (λ x → x) (α {A}) (λ (x : A) → x) b) ∎)
 
   f-o-g-id : {A B : Set} (f : B -> A)
            -> (α : ∀ {X} -> (A -> X) ≃ (B -> X))
@@ -87,7 +87,7 @@ module applications.torus2.TS1S1-helpers where
             -- cancel the (α {A})'s
             ≃〈 resp (λ p → subst (λ x → x) p (λ x → x) a)
                     (!-inv-l (α {A})) 〉
-    Refl {_} {a})
+    a ∎)
 
   precomp-equiv : {A B : Set} (f : B -> A) 
                 -> (α : ∀{X} -> (A -> X) ≃ (B -> X))
@@ -138,3 +138,59 @@ module applications.torus2.TS1S1-helpers where
                                       isiso dep-sum-unassoc 
                                             (λ y → Refl) 
                                             (λ x → Refl)))
+
+  -- Isomorphism to perform a resp inside Σ's
+  Σ-A-A' : {X : Set}
+        -> {A A' : X -> Set}
+        -> (c : A ≃ A')
+        -> (Σ[ x ∶ X ] A x)
+        -> (Σ[ x ∶ X ] A' x)
+  Σ-A-A' c (fst , snd) = fst , (subst (λ f' → f' fst) c snd)
+
+  Σ-A-A'-id : {X : Set}
+           -> {A A' : X -> Set}
+           -> (c : A ≃ A')
+           -> (Σ-A-A' c) o (Σ-A-A' (! c)) ≃ (λ x → x)
+  Σ-A-A'-id c = λ≃ (λ x → 
+    (fst x ,
+       subst (λ f' → f' (fst x)) c
+       (subst (λ f' → f' (fst x)) (! c) (snd x)))
+              ≃〈 resp (λ p → fst x , p (snd x)) 
+                      (sym (subst-∘ (λ f' → f' (fst x)) c (! c))) 〉 
+    (fst x , subst (λ f' → f' (fst x)) (c ∘ (! c)) (snd x))
+              ≃〈 resp (λ p → fst x , subst (λ f' → f' (fst x)) p (snd x)) 
+                      (!-inv-r c) 〉
+    x ∎)
+
+  Σ-A'-A-id : {X : Set}
+           -> {A A' : X -> Set}
+           -> (c : A ≃ A')
+           -> (Σ-A-A' (! c)) o (Σ-A-A' c) ≃ (λ x → x)
+  Σ-A'-A-id c = λ≃ (λ x → 
+    (fst x ,
+       subst (λ f' → f' (fst x)) (! c)
+       (subst (λ f' → f' (fst x)) c (snd x)))
+              ≃〈 resp (λ p → fst x , p (snd x)) 
+                      (sym (subst-∘ (λ f' → f' (fst x)) (! c) c)) 〉 
+    (fst x , subst (λ f' → f' (fst x)) ((! c) ∘ c) (snd x))
+              ≃〈 resp (λ p → fst x , subst (λ f' → f' (fst x)) p (snd x)) 
+                      (!-inv-l c) 〉
+    x ∎)
+
+  Σ-resp : {X : Set}
+             -> {A A' : X -> Set}
+             -> (c : A ≃ A')
+             -> (Σ[ x ∶ X ] A x) ≃ (Σ[ x ∶ X ] A' x)
+  Σ-resp c = ua (isoToAdj (Σ-A-A' c , 
+                           isiso (Σ-A-A' (! c)) 
+                                 (λ y → app≃ (Σ-A-A'-id c)) 
+                                 (λ x → app≃ (Σ-A'-A-id c))))
+
+  -- Moving ! between sides of an Id
+  !-left : {X : Set}
+        -> {M N : X}
+        -> (p : Id M N)
+        -> (q : Id M M)
+        -> (r : Id N N)
+        -> Id (p ∘ q ∘ ! p) r ≃ Id (p ∘ q) (r ∘ p)
+  !-left Refl q r = Refl

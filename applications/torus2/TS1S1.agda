@@ -26,14 +26,30 @@ module applications.torus2.TS1S1 where
            ≃〈 dep-sum-assoc-equiv 〉
     (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Id (x , l1) (x , l1))))
            -- snd-≃
-           ≃〈 {!!} 〉
+           ≃〈 Σ-resp (λ≃ (λ x → 
+                         Σ-resp (λ≃ (λ l1 → 
+                                {!!})))) 〉
     (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] (Id (subst (λ x → Id x x) l2 l1) l1))))
            -- Subst-Id
-           ≃〈 {!!} 〉
+           ≃〈 Σ-resp (λ≃ (λ x → 
+              Σ-resp (λ≃ (λ l1 → 
+              Σ-resp (λ≃ (λ l2 → 
+                     resp (λ y → Id y l1) 
+                          (subst-Id (λ x' → x') (λ x' → x') l2 l1))))))) 〉
+    (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] 
+                Id ((resp (λ x → x) l2) ∘ l1 ∘ (! (resp (λ x → x) l2))) l1)))
+           ≃〈 Σ-resp (λ≃ (λ x → 
+              Σ-resp (λ≃ (λ l1 → 
+              Σ-resp (λ≃ (λ l2 → 
+                     resp (λ y → Id (y ∘ l1 ∘ ! y) l1) 
+                          Refl)))))) 〉
     (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1 ∘ (! l2)) l1)))
            -- !-to-left
-           ≃〈 {!!} 〉
+           ≃〈 Σ-resp (λ≃ (λ x → 
+              Σ-resp (λ≃ (λ l1 → 
+              Σ-resp (λ≃ (λ l2 → 
+                     !-left l2 l1 l1)))))) 〉
     (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1) (l1 ∘ l2))))
            -- Premises of T-rec is equivalent to T -> X
            ≃〈 {!!} 〉
-    Refl {_} {T → X})
+    (T → X) ∎)
