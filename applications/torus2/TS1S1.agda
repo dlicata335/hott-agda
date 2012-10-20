@@ -42,7 +42,7 @@ module applications.torus2.TS1S1 where
            ≃〈 Σ-resp (λ≃ (λ x → 
               Σ-resp (λ≃ (λ l1 → 
               Σ-resp (λ≃ (λ l2 → 
-                     resp (λ y → Id (y ∘ l1 ∘ ! y) l1) 
+                     resp{X} (λ y → Id (y ∘ l1 ∘ ! y) l1) 
                           Refl)))))) 〉
     (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1 ∘ (! l2)) l1)))
            -- !-to-left

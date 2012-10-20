@@ -92,9 +92,6 @@ module lib.spaces.Torus where
         -> (p q : a ≃ a)
         -> (f' : (p ∘ q) ≃ (q ∘ p))
         -> resp (resp (T-rec a p q f')) f ≃ subst (λ x → x) (! (f-resps a p q f')) f'
-    
-
-    
 {-
     torus-X-to-rec : {X : Set}
                   -> (T -> X)
@@ -587,6 +584,32 @@ module lib.spaces.Torus where
                 (snd (snd (snd x)))))))
          (snd (snd (snd x))))
         ≃〈 {!!} 〉
+      ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
+      , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
+      , subst (λ x' → x')
+        (! (resp2 Id
+              (resp (λ x' → x' ∘ (fst (snd x))) 
+                (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               ∘
+               resp (λ y → resp
+                             (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                              (snd (snd (snd x))))
+                             loop₁ ∘ y)
+                (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))) 
+              (resp (λ x' → x' ∘ fst (snd (snd x))) 
+                (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x))))
+               ∘
+               resp (λ y → resp
+                             (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                              (snd (snd (snd x))))
+                             loop₂ ∘ y)
+                (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
+                (snd (snd (snd x)))))))
+         (snd (snd (snd x))))
+         ≃〈 {!!} 〉
       ( fst x , (fst (snd x))
       , (fst (snd (snd x)))
       , snd (snd (snd x)))
@@ -595,7 +618,6 @@ module lib.spaces.Torus where
 
     torus-X-rec : {X : Set}
                -> (T -> X) ≃ (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1) (l1 ∘ l2))))
-
     torus-X-rec = ua (isoToAdj (torus-X-to-rec , isiso rec-to-torus-X 
                                                        (λ y → app≃ rec-torus-X-id) 
                                                        (λ x → app≃ torus-X-rec-id)))
