@@ -195,6 +195,7 @@ module applications.torus2.TS1S1-helpers where
         -> Id (p ∘ q ∘ ! p) r ≃ Id (p ∘ q) (r ∘ p)
   !-left Refl q r = Refl
 
+{-
   Id-Σ-subst : {X : Set}
             -> (x : X)
             -> (l1 : Id x x)
@@ -208,3 +209,4 @@ module applications.torus2.TS1S1-helpers where
             -> (Σ[ l2 ∶ Id x x ] Id (subst (λ x → Id x x) l2 l1) l1)
             -> Id (x , l1) (x , l1)
   subst-Id-Σ x l1 (fst , snd) = pair≃ fst snd
+-}
