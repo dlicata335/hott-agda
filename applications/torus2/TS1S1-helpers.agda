@@ -198,9 +198,9 @@ module applications.torus2.TS1S1-helpers where
   Id-Σ-subst : {X : Set}
             -> (x : X)
             -> (l1 : Id x x)
-            -> Id (x , l1) (x , l1)
+            -> Id{Σ \ x -> Id x x} (x , l1) (x , l1)
             -> (Σ[ l2 ∶ Id x x ] Id (subst (λ x → Id x x) l2 l1) l1)
-  Id-Σ-subst x l1 p = l1 , (snd≃ (resp snd p))
+  Id-Σ-subst x l1 p = l1 , (snd≃ (respd snd p))
 
   subst-Id-Σ : {X : Set}
             -> (x : X)
