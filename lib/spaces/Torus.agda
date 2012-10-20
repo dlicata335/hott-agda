@@ -95,7 +95,7 @@ module lib.spaces.Torus where
     
 
     
-
+{-
     torus-X-to-rec : {X : Set}
                   -> (T -> X)
                   -> (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1) (l1 ∘ l2))))
@@ -599,5 +599,6 @@ module lib.spaces.Torus where
     torus-X-rec = ua (isoToAdj (torus-X-to-rec , isiso rec-to-torus-X 
                                                        (λ y → app≃ rec-torus-X-id) 
                                                        (λ x → app≃ torus-X-rec-id)))
+    -}
   open T
 
