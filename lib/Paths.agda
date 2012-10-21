@@ -107,6 +107,11 @@ module lib.Paths where
        -> (! (q ∘ p)) ≃ ! p ∘ ! q
    !-∘ Refl Refl = Refl
 
+    -- Moving ! between sides of an Id
+   !-left : {X : Set} {M N : X} -> (p : Id M N) -> (q : Id M M) -> (r : Id N N)
+         -> Id (p ∘ q ∘ ! p) r ≃ Id (p ∘ q) (r ∘ p)
+   !-left Refl q r = Refl
+   
    subst-Id : {Γ A : Set} (f g : Γ -> A) {M N : Γ} (p : Id M N)
               -> (p' : _) -> Id (subst (\ x -> Id (f x) (g x)) p p') ((resp g p) ∘ p' ∘ (! (resp f p)))
    subst-Id _ _ Refl p' = ! (∘-unit-l p')

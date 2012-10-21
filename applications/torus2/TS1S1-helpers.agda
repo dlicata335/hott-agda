@@ -186,14 +186,7 @@ module applications.torus2.TS1S1-helpers where
                                  (λ y → app≃ (Σ-A-A'-id c)) 
                                  (λ x → app≃ (Σ-A'-A-id c))))
 
-  -- Moving ! between sides of an Id
-  !-left : {X : Set}
-        -> {M N : X}
-        -> (p : Id M N)
-        -> (q : Id M M)
-        -> (r : Id N N)
-        -> Id (p ∘ q ∘ ! p) r ≃ Id (p ∘ q) (r ∘ p)
-  !-left Refl q r = Refl
+ 
 
 {-
   Id-Σ-subst : {X : Set}

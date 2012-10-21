@@ -1,6 +1,7 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude
+open import lib.ProdPaths
 open Paths
 open S¹
 open T
@@ -27,8 +28,8 @@ module applications.torus2.TS1S1 where
     (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Id (x , l1) (x , l1))))
            -- snd-≃
            ≃〈 Σ-resp (λ≃ (λ x → 
-                         Σ-resp (λ≃ (λ l1 → 
-                                {!!})))) 〉
+              Σ-resp (λ≃ (λ l1 → 
+                     sym (ua (isoToAdj Σ≃Iso)))))) 〉
     (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] (Id (subst (λ x → Id x x) l2 l1) l1))))
            -- Subst-Id
            ≃〈 Σ-resp (λ≃ (λ x → 
@@ -41,7 +42,7 @@ module applications.torus2.TS1S1 where
            ≃〈 Σ-resp (λ≃ (λ x → 
               Σ-resp (λ≃ (λ l1 → 
               Σ-resp (λ≃ (λ l2 → 
-                     resp (λ y → Id (y ∘ l1 ∘ ! y) l1) 
+                     resp{X} (λ y → Id (y ∘ l1 ∘ ! y) l1) 
                           Refl)))))) 〉
     (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1 ∘ (! l2)) l1)))
            -- !-to-left
