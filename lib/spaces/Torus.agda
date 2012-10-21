@@ -124,7 +124,14 @@ module lib.spaces.Torus where
                                        resp g' loop₂ ,
                                        resp-∘ g' loop₂ loop₁ ∘
                                        resp (resp g') f ∘ ! (resp-∘ g' loop₁ loop₂)))
-                                   p (pair≃ Refl (pair≃ (! (βloop₁/rec x l1' l2' comm')) (pair≃ (! (βloop₂/rec x l1' l2' comm') ∘ {! easy!}) {! βf/rec x l1' l2' comm'!}))))
+                                   p (pair≃ Refl (pair≃ (! (βloop₁/rec x l1' l2' comm')) 
+                                            (pair≃ (! (βloop₂/rec x l1' l2' comm') ∘ 
+                                            (fst
+                                               (subst (λ l1 → Σe (Id x x) (λ l2 → Id (l1 ∘ l2) (l2 ∘ l1)))
+                                                (! (βloop₁/rec x l1' l2' comm')) (l2' , comm'))
+                                               ≃〈 {!!} 〉 
+                                            (l2' ∎))) 
+                                   {! βf/rec x l1' l2' comm'!}))))
                                  {! !}})
 
 {-
