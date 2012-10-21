@@ -1,6 +1,7 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.BasicTypes 
+open import lib.WEq 
 
 module lib.spaces.Torus where
 
@@ -57,23 +58,17 @@ module lib.spaces.Torus where
         -> (p q : a ≃ a)
         -> (f : (p ∘ q) ≃ (q ∘ p))
         -> resp (T-rec a p q f) loop₂ ≃ q
-    
-      
-  
 
-    resp-f : {A X : Set}
-          -> {M : A}
-          -> (g : A -> X)
-          -> (p q : Id M M)
-          -> Id (resp g (p ∘ q)) (resp g (q ∘ p)) ≃
-             Id (resp g p ∘ resp g q) (resp g q ∘ resp g p)
-    resp-f g p q = 
-      Id (resp g (p ∘ q)) (resp g (q ∘ p)) 
-         ≃〈 resp2 (λ x x' → Id x x') 
-                  (resp-∘ g p q) 
-                  (resp-∘ g q p) 〉 
-      (Id (resp g p ∘ resp g q) (resp g q ∘ resp g p) ∎)
-
+    resp-f : {X : Set}
+          -> (p : T -> X)
+          -> Id (resp p (loop₁ ∘ loop₂)) (resp p (loop₂ ∘ loop₁)) ≃
+             Id (resp p loop₁ ∘ resp p loop₂) (resp p loop₂ ∘ resp p loop₁)
+    resp-f p = 
+      Id (resp p (loop₁ ∘ loop₂)) (resp p (loop₂ ∘ loop₁)) 
+               ≃〈 resp2 (λ x x' → Id x x') 
+                        (resp-∘ p loop₁ loop₂) 
+                        (resp-∘ p loop₂ loop₁) 〉
+      Id (resp p loop₁ ∘ resp p loop₂) (resp p loop₂ ∘ resp p loop₁) ∎
 
     f-resps : {C : Set}
            -> (a : C)
@@ -84,34 +79,60 @@ module lib.spaces.Torus where
     f-resps a p q f' = 
       (Id (resp (T-rec a p q f') (loop₁ ∘ loop₂))
           (resp (T-rec a p q f') (loop₂ ∘ loop₁)))
-          ≃〈 resp-f (T-rec a p q f') loop₁ loop₂ 〉
+          ≃〈 resp-f (T-rec a p q f') 〉
       (Id (resp (T-rec a p q f') loop₁ ∘ resp (T-rec a p q f') loop₂)
           (resp (T-rec a p q f') loop₂ ∘ resp (T-rec a p q f') loop₁))
           ≃〈 resp2 (λ x y → Id x y) 
                    (resp2 (λ x x' → x ∘ x') (βloop₁/rec a p q f') (βloop₂/rec a p q f')) 
                    (resp2 (λ x x' → x ∘ x') (βloop₂/rec a p q f') (βloop₁/rec a p q f')) 〉
       (Id (p ∘ q) (q ∘ p)) ∎
-
+    
     postulate
-      etaf/rec : {C X : Set}
-        -> (a : C)
-        -> (p q : a ≃ a)
-        -> (comm : (p ∘ q) ≃ (q ∘ p))
-        -> (g : C → X)
-        -> (g o (T-rec a p q comm)) ≃ T-rec (g a) (resp g p) (resp g q) 
-                                            (subst (λ x → x) (resp-f g p q) (resp (resp g) comm))
-  
       βf/rec : {C : Set}
         -> (a : C)
         -> (p q : a ≃ a)
         -> (f' : (p ∘ q) ≃ (q ∘ p))
         -> resp (resp (T-rec a p q f')) f ≃ subst (λ x → x) (! (f-resps a p q f')) f'
 
+    postulate 
+      -- FIXME: prove using dependent elim instead
+      Tη : {X : Set} {g : T -> X} -> 
+           g ≃ (T-rec (g base) (resp g loop₁) (resp g loop₂) (resp-∘ g loop₂ loop₁ ∘ resp (resp g) f ∘ ! (resp-∘ g loop₁ loop₂))) 
+
+    rec-to-torus-X : {X : Set}
+                  -> (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l1 ∘ l2) (l2 ∘ l1))))
+                  -> (T -> X)
+    rec-to-torus-X (x , l1 , l2 , comm) = T-rec x l1 l2 comm
+
+    rec-to-torus-X-isWEq : ∀ {X} -> WEqBy _ _ (rec-to-torus-X{X})
+    rec-to-torus-X-isWEq{X} g = (((g base) , ((resp g loop₁) , ((resp g loop₂) , 
+                              resp-∘ g loop₂ loop₁ ∘ resp (resp g) f ∘ ! (resp-∘ g loop₁ loop₂))))
+                              , ! Tη) 
+                             , 
+                             (λ { ((x , l1' , l2' , comm') , p) → 
+                                pair≃ 
+                                (subst
+                                   (λ g' →
+                                      Id
+                                      {Σe X
+                                       (λ x' →
+                                          Σe (Id x' x')
+                                          (λ l1 → Σe (Id x' x') (λ l2 → Id (l1 ∘ l2) (l2 ∘ l1))))}
+                                      (x , l1' , l2' , comm')
+                                      (g' base ,
+                                       resp g' loop₁ ,
+                                       resp g' loop₂ ,
+                                       resp-∘ g' loop₂ loop₁ ∘
+                                       resp (resp g') f ∘ ! (resp-∘ g' loop₁ loop₂)))
+                                   p (pair≃ Refl (pair≃ (! (βloop₁/rec x l1' l2' comm')) (pair≃ (! (βloop₂/rec x l1' l2' comm') ∘ {! easy!}) {! βf/rec x l1' l2' comm'!}))))
+                                 {! !}})
+
+{-
     torus-X-to-rec : {X : Set}
                   -> (T -> X)
                   -> (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1) (l1 ∘ l2))))
     torus-X-to-rec p = p Base , resp p loop₂ , 
-                       (resp p loop₁ , subst (λ x → x) (resp-f p loop₁ loop₂) (resp (resp p) f))
+                       (resp p loop₁ , subst (λ x → x) (resp-f p) (resp (resp p) f))
                                         
     
     rec-to-torus-X : {X : Set}
@@ -130,7 +151,7 @@ module lib.spaces.Torus where
                   -> (rec-to-torus-X o torus-X-to-rec) ≃ (λ (f : T -> X) → f)
     torus-X-rec-id = λ≃ (λ t → 
                      λ≃ (λ x → torus-X-rec-id-base t x))
-    
+
     rec-torus-X-id : {X : Set}
                   -> (torus-X-to-rec o rec-to-torus-X) ≃ 
                      (λ (f : Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l2 ∘ l1) (l1 ∘ l2)))) → f)
@@ -597,28 +618,7 @@ module lib.spaces.Torus where
                (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
                 (snd (snd (snd x)))))))
          (snd (snd (snd x))))
-        ≃〈 resp
-              (λ p →
-                 fst x ,
-                 resp
-                 (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
-                  (snd (snd (snd x))))
-                 loop₂
-                 ,
-                 resp
-                 (T-rec (fst x) (fst (snd (snd x))) (fst (snd x))
-                  (snd (snd (snd x))))
-                 loop₁
-                 , subst (λ x' → x') p (snd (snd (snd x))))
-              (resp2 (λ x' x0 → resp2 Id x' x0) 
-                     (resp2-resps-1 _∘_ 
-                                    (βloop₁/rec (fst x) (fst (snd (snd x))) (fst (snd x))
-                                           (snd (snd (snd x)))) 
-                                    {!!}) 
-                     (resp2-resps-1 _∘_ 
-                                    (βloop₂/rec (fst x) (fst (snd (snd x))) (fst (snd x))
-                                       (snd (snd (snd x)))) 
-                                    {!!})) 〉
+        ≃〈 {!!} 〉
       ( fst x , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₂
       , resp (T-rec (fst x) (fst (snd (snd x))) (fst (snd x)) (snd (snd (snd x)))) loop₁
       , subst (λ x' → x')
@@ -656,6 +656,5 @@ module lib.spaces.Torus where
     torus-X-rec = ua (isoToAdj (torus-X-to-rec , isiso rec-to-torus-X 
                                                        (λ y → app≃ rec-torus-X-id) 
                                                        (λ x → app≃ torus-X-rec-id)))
- 
+    -}
   open T
-

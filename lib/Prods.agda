@@ -176,6 +176,22 @@ module lib.Prods where
 
     nondep-pair≃ : {A B : Set} {p q : A × B} -> (fst p) ≃ (fst q) -> (snd p) ≃ (snd q) -> p ≃ q
     nondep-pair≃ a b = resp2 _,_ a b
+
+    ×≃η : {A B : Set} {p q : A × B} -> (α : p ≃ q) -> (nondep-pair≃ (fst≃ α) (nondep-snd≃ α)) ≃ α
+    ×≃η Refl = Refl
+  
+    ×≃β1 : {A B : Set} {p q : A × B} 
+          (α : Id (fst p) (fst q)) 
+          (β : Id (snd p) (snd q))
+          -> Id (fst≃{B = \ _ -> B} (nondep-pair≃ α β)) α
+    ×≃β1 {p = x , y} {q = .x , .y} Refl Refl = Refl
+  
+    ×≃β2 : {A B : Set} {p q : A × B} 
+          (α : Id (fst p) (fst q)) 
+          (β : Id (snd p) (snd q))
+        -> (nondep-snd≃ (nondep-pair≃ α β)) ≃ 
+           β
+    ×≃β2 {p = x , y} {q = .x , .y} Refl Refl = Refl
  
     ∘-× : {A : Set} {M N P Q R S : A} (a : N ≃ P) (b : R ≃ S) (c : M ≃ N) (d : Q ≃ R)
         -> nondep-pair≃ a b ∘ nondep-pair≃ c d ≃ nondep-pair≃ (a ∘ c) (b ∘ d)
@@ -191,3 +207,5 @@ module lib.Prods where
                  nondep-pair≃ (resp (λ _ → y) α) (resp (λ x → f (x)) α)
     resp-×-snd _ _ Refl = Refl
 
+
+      
