@@ -1,6 +1,7 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.BasicTypes 
+open import lib.WEq 
 
 module lib.spaces.Torus where
 
@@ -93,6 +94,39 @@ module lib.spaces.Torus where
         -> (f' : (p ∘ q) ≃ (q ∘ p))
         -> resp (resp (T-rec a p q f')) f ≃ subst (λ x → x) (! (f-resps a p q f')) f'
     
+
+    postulate 
+      -- could derive from dependent elim instead
+      Tη : {X : Set} {g : T -> X} -> 
+           g ≃ (T-rec (g base) (resp g loop₁) (resp g loop₂) (resp-∘ g loop₂ loop₁ ∘ resp (resp g) f ∘ ! (resp-∘ g loop₁ loop₂))) 
+
+    rec-to-torus-X : {X : Set}
+                  -> (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l1 ∘ l2) (l2 ∘ l1))))
+                  -> (T -> X)
+    rec-to-torus-X (x , l1 , l2 , comm) = T-rec x l1 l2 comm
+
+    rec-to-torus-X-isWEq : ∀ {X} -> WEqBy _ _ (rec-to-torus-X{X})
+    rec-to-torus-X-isWEq{X} g = (((g base) , ((resp g loop₁) , ((resp g loop₂) , 
+                              resp-∘ g loop₂ loop₁ ∘ resp (resp g) f ∘ ! (resp-∘ g loop₁ loop₂))))
+                              , ! Tη) 
+                             , 
+                             (λ { ((x , l1' , l2' , comm') , p) → 
+                                pair≃ 
+                                (subst
+                                   (λ g' →
+                                      Id
+                                      {Σe X
+                                       (λ x' →
+                                          Σe (Id x' x')
+                                          (λ l1 → Σe (Id x' x') (λ l2 → Id (l1 ∘ l2) (l2 ∘ l1))))}
+                                      (x , l1' , l2' , comm')
+                                      (g' base ,
+                                       resp g' loop₁ ,
+                                       resp g' loop₂ ,
+                                       resp-∘ g' loop₂ loop₁ ∘
+                                       resp (resp g') f ∘ ! (resp-∘ g' loop₁ loop₂)))
+                                   p (pair≃ Refl (pair≃ (! (βloop₁/rec x l1' l2' comm')) (pair≃ (! (βloop₂/rec x l1' l2' comm') ∘ {!!}) {!!}))))
+                                 {!!}})
 
     
 {-
