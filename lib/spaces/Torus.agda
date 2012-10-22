@@ -129,7 +129,6 @@ module lib.spaces.Torus where
                                             (fst
                                                (subst (λ l1 → Σe (Id x x) (λ l2 → Id (l1 ∘ l2) (l2 ∘ l1)))
                                                 (! (βloop₁/rec x l1' l2' comm')) (l2' , comm'))
-                                               ≃〈 {!!} 〉 
                                                ≃〈 resp fst 
                                                        (subst-Σ (! (βloop₁/rec x l1' l2' comm')) 
                                                                 (λ _ → Id x x) 
