@@ -130,6 +130,22 @@ module lib.spaces.Torus where
                                                (subst (λ l1 → Σe (Id x x) (λ l2 → Id (l1 ∘ l2) (l2 ∘ l1)))
                                                 (! (βloop₁/rec x l1' l2' comm')) (l2' , comm'))
                                                ≃〈 {!!} 〉 
+                                               ≃〈 resp fst 
+                                                       (subst-Σ (! (βloop₁/rec x l1' l2' comm')) 
+                                                                (λ _ → Id x x) 
+                                                                (λ γ x' → Id (γ ∘ x') (x' ∘ γ)) 
+                                                                (l2' , comm')) 〉
+                                            (fst
+                                               (subst (λ _ → Id x x) (! (βloop₁/rec x l1' l2' comm')) l2' ,
+                                                subst (λ γ → Id (fst γ ∘ snd γ) (snd γ ∘ fst γ)) 
+                                                      (pair≃ (! (βloop₁/rec x l1' l2' comm')) Refl)
+                                                      comm'))
+                                               ≃〈 Refl 〉
+                                            subst (λ _ → Id x x) (! (βloop₁/rec x l1' l2' comm')) l2'
+                                               ≃〈 resp (λ g' → g' l2') 
+                                                       (subst-constant (! (βloop₁/rec x l1' l2' comm'))) 〉
+                                            (λ x → x) l2'
+                                               ≃〈 Refl 〉
                                             (l2' ∎))) 
                                    {! βf/rec x l1' l2' comm'!}))))
                                  {! !}})
