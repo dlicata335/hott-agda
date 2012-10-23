@@ -138,8 +138,44 @@ module lib.spaces.Torus where
                                                ≃〈 resp (λ g' → g' l2') 
                                                        (subst-constant (! (βloop₁/rec x l1' l2' comm'))) 〉
                                             (l2' ∎))) 
-                                   {! βf/rec x l1' l2' comm'!}))))
-                                 {! !}})
+                                   (subst
+                                      (λ l2 →
+                                         Id (resp (T-rec x l1' l2' comm') loop₁ ∘ l2)
+                                         (l2 ∘ resp (T-rec x l1' l2' comm') loop₁))
+                                      (! (βloop₂/rec x l1' l2' comm') ∘
+                                       (Refl ∘
+                                        resp (λ g' → g' l2')
+                                        (subst-constant (! (βloop₁/rec x l1' l2' comm'))))
+                                       ∘
+                                       resp fst
+                                       (subst-Σ (! (βloop₁/rec x l1' l2' comm')) (λ _ → Id x x)
+                                        (λ γ x' → Id (γ ∘ x') (x' ∘ γ)) (l2' , comm')))
+                                      (snd
+                                       (subst (λ l1 → Σe (Id x x) (λ l2 → Id (l1 ∘ l2) (l2 ∘ l1)))
+                                        (! (βloop₁/rec x l1' l2' comm')) (l2' , comm')))
+                                      ≃〈 {!!} 〉 
+                                   subst
+                                      (λ l2 →
+                                         Id (resp (T-rec x l1' l2' comm') loop₁ ∘ l2)
+                                         (l2 ∘ resp (T-rec x l1' l2' comm') loop₁))
+                                      (! (βloop₂/rec x l1' l2' comm') ∘
+                                       (Refl ∘
+                                        resp (λ g' → g' l2')
+                                        (subst-constant (! (βloop₁/rec x l1' l2' comm'))))
+                                       ∘
+                                       resp fst
+                                       (subst-Σ (! (βloop₁/rec x l1' l2' comm')) (λ _ → Id x x)
+                                        (λ γ x' → Id (γ ∘ x') (x' ∘ γ)) (l2' , comm')))
+                                        (subst (λ γ → Id (fst γ ∘ snd γ) (snd γ ∘ fst γ))
+                                              (pair≃ (! (βloop₁/rec x l1' l2' comm')) Refl)
+                                              comm')
+                                      ≃〈 {!!} 〉 
+                                      
+                                   (resp-∘ (T-rec x l1' l2' comm') loop₂ loop₁ ∘
+                                      resp (resp (T-rec x l1' l2' comm')) f ∘
+                                      ! (resp-∘ (T-rec x l1' l2' comm') loop₁ loop₂)
+                                      ∎))))))
+                                 {!!}})
 
 {-
     torus-X-to-rec : {X : Set}
