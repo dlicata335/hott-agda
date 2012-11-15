@@ -104,6 +104,7 @@ module lib.spaces.Torus where
                   -> (T -> X)
     rec-to-torus-X (x , l1 , l2 , comm) = T-rec x l1 l2 comm
 
+{-
     rec-to-torus-X-isWEq : ∀ {X} -> WEqBy _ _ (rec-to-torus-X{X})
     rec-to-torus-X-isWEq{X} g = (((g base) , ((resp g loop₁) , ((resp g loop₂) , 
                               resp-∘ g loop₂ loop₁ ∘ resp (resp g) f ∘ ! (resp-∘ g loop₁ loop₂))))
@@ -190,6 +191,7 @@ module lib.spaces.Torus where
                                       ! (resp-∘ (T-rec x l1' l2' comm') loop₁ loop₂)
                                       ∎))))))
                                  {!!}})
+-}
 
 {-
     torus-X-to-rec : {X : Set}

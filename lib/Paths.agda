@@ -123,6 +123,10 @@ module lib.Paths where
    subst-resp : {A : Set} (C : A -> Set) {M N : A} (α : Id M N) -> Id (subst C α) (subst (\ x -> x) (resp C α))
    subst-resp C Refl = Refl 
 
+   subst-resp' : {A A' : Set} (C : A' -> Set) (f : A -> A') 
+                 {M N : A} (α : Id M N) -> Id (subst C (resp f α)) (subst (\ x -> C (f x)) α)
+   subst-resp' C f Refl = Refl 
+
    subst-∘ : {A : Set} (C : A -> Set) {M N P : A} (β : Id N P) (α : Id M N)
            -> Id (subst C (β ∘ α)) (\ x -> subst C β (subst C α x))
    subst-∘ _ Refl Refl = Refl
@@ -185,9 +189,26 @@ module lib.Paths where
                    -> Id (resp2 f α β) (resp (λ y → f N y) β ∘ resp (λ x → f x M') α)
    resp2-resps-2 f Refl Refl = Refl 
 
+   resp2-β1 : ∀ {A B} {M N : A} {M' N' : B} -> (α : Id M N) -> (β : Id M' N')
+            -> Id (resp2 (\ x y -> x) α β) α
+   resp2-β1 Refl Refl = Refl
+
    resp∘ : {A : Set} {x y z : A} {p q : Id x y} {p' q' : Id y z} 
              -> Id p' q' -> Id p q -> Id (p' ∘ p) (q' ∘ q) 
    resp∘ a b = resp2 _∘_ a b 
+
+   resp-resp : {A B : Set} {f g : A -> B}
+                (α : f ≃ g) 
+             -> {M N : A} (β : M ≃ N)
+             -> (resp f β ≃ ! (resp (\ f -> f N) α)  ∘ resp g β ∘ resp (\ f -> f M) α)
+   resp-resp Refl Refl = Refl
+
+   resp2-resp : {A B C : Set} {f g : A -> B -> C}
+                (α : f ≃ g) 
+             -> {M N : A} (β : M ≃ N)
+             -> {M' N' : B} (β' : M' ≃ N')
+             -> (resp2 f β β' ≃ ! (resp (\ f -> f N N') α)  ∘ resp2 g β β' ∘ resp (\ f -> f M M') α)
+   resp2-resp Refl Refl Refl = Refl
   
    resp∘-unit-r : {A : Set} {x y : A} {p q : Id x y} 
                     -> (a : Id p q) -> Id (resp∘ a (Refl{_}{Refl})) a -- definitional equalities work out such that this works unadjusted
