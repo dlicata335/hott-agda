@@ -4,7 +4,7 @@
 open import lib.Prelude
 open Paths
 
-module misc.SubsetModel where
+module polymorphism.SubsetModel where
 
   record Ctx : Type where
     constructor ctx
@@ -173,11 +173,11 @@ module misc.SubsetModel where
   HSet = Σ UIP
   HProp = Σ Irrel
 
-  Um : ∀ {Γ} -> Ty Γ
-  Um = ty (λ _ → HSet) (λ _ _ A → fst A → HProp)
+  hset : ∀ {Γ} -> Ty Γ
+  hset = ty (λ _ → HSet) (λ _ _ A → fst A → HProp)
 
-  Elm : ∀ {Γ} -> Tm Um -> Ty Γ
-  Elm (tm A0 A1) = ty (\ g0 -> fst (A0 g0)) (\ g0 g1 a0 -> fst (A1 g0 g1 a0))
+  El-hset : ∀ {Γ} -> Tm hset -> Ty Γ
+  El-hset (tm A0 A1) = ty (\ g0 -> fst (A0 g0)) (\ g0 g1 a0 -> fst (A1 g0 g1 a0))
 
 
   -- proof irrelevant universe --
@@ -226,16 +226,16 @@ module misc.SubsetModel where
   module ExampleHSet where
 
     idty : ∀ {Γ} -> Ty Γ
-    idty {Γ} = Π Um (Π (Elm (v{Γ} Um)) (Elm (tmsubst (v {Γ} Um) (p (Elm (v {Γ} Um)))))) 
+    idty {Γ} = Π hset (Π (El-hset (v{Γ} hset)) (El-hset (tmsubst (v {Γ} hset) (p (El-hset (v {Γ} hset)))))) 
   
     idfun : ∀ {Γ} -> Tm (idty{Γ})
-    idfun {Γ} = lam Um
-                    (Π (Elm (v {Γ} Um)) (Elm (tmsubst (v {Γ} Um) (p (Elm (v {Γ} Um)))))) 
-                    (lam (Elm (v {Γ} Um)) (Elm (tmsubst (v {Γ} Um) (p (Elm (v {Γ} Um))))) 
-                     (v (Elm (v {Γ} Um))))
+    idfun {Γ} = lam hset
+                    (Π (El-hset (v {Γ} hset)) (El-hset (tmsubst (v {Γ} hset) (p (El-hset (v {Γ} hset)))))) 
+                    (lam (El-hset (v {Γ} hset)) (El-hset (tmsubst (v {Γ} hset) (p (El-hset (v {Γ} hset))))) 
+                     (v (El-hset (v {Γ} hset))))
 
 
     eta : ∀ {Γ} 
         -> Tm{Γ} (Π (idty{Γ}) (# (ID idty (v (idty{Γ})) idfun)))
     eta {Γ} = tm _ (λ g0 g1 f0 f1 → (λ≃ (λ A → λ≃ (λ x → f1 A (λ y → Id y x , (snd A _ _)) x Refl))) , 
-                                    λ≃ (λ a0 → λ≃ (λ a1 → λ≃ (λ a2 → λ≃ (λ a23 → snd (a1 a2) _ _)))))
+                                     λ≃ (λ a0 → λ≃ (λ a1 → λ≃ (λ a2 → λ≃ (λ a23 → snd (a1 a2) _ _)))))
