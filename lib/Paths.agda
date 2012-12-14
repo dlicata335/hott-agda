@@ -120,6 +120,10 @@ module lib.Paths where
                  -> Id (subst (\ x -> Id M x) p' p) (p' ∘ p)
    subst-Id-post Refl Refl = Refl -- FIXME J
 
+   subst-Id-pre : {A : Set} {M N P : A} (p' : Id N M) (p : Id N P)
+                 -> Id (subst (\ x -> Id x P) p' p) (p ∘ ! p')
+   subst-Id-pre Refl Refl = Refl -- FIXME J
+
    subst-resp : {A : Set} (C : A -> Set) {M N : A} (α : Id M N) -> Id (subst C α) (subst (\ x -> x) (resp C α))
    subst-resp C Refl = Refl 
 
@@ -271,6 +275,12 @@ module lib.Paths where
 
    coe-inv-1 : {A B : Set} -> (α : Id A B) -> {M : _} -> coe (! α) (coe α M) ≃ M
    coe-inv-1 Refl = Refl
+
+   subst-inv-1 : {A : Set} (B : A -> Set) {M N : A} (α : M ≃ N) -> (\y -> subst B (! α) (subst B α y)) ≃ (\ x -> x)
+   subst-inv-1 _ Refl = Refl
+
+   subst-inv-2 : {A : Set} (B : A -> Set) {M N : A} (α : M ≃ N) -> (\y -> subst B α (subst B (! α) y)) ≃ (\ x -> x)
+   subst-inv-2 _ Refl = Refl
 
    module PaulinMohring where
      jayfrompm : {A : Set} (C : (x y : A) -> Id x y -> Set)

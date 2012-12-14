@@ -35,6 +35,10 @@ module lib.Functions where
        -> Id f g -> ({x y : A} -> (α : Id x y) -> Id (subst B α (f x)) (g y))
   app≃2 {A} {B} {f} {.f} Refl Refl = Refl 
 
+  app≃2' : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
+       -> Id f g -> ({x y : A} -> (α : Id x y) -> Id (f x) (subst B (! α) (g y)))
+  app≃2' {A} {B} {f} {.f} Refl Refl = Refl 
+
   postulate 
     λ≃  : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> ((x : A) -> Id (f x) (g x)) -> Id f g
     Π≃η : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
@@ -48,6 +52,10 @@ module lib.Functions where
   subst-→ : ∀ {Γ} (A B : Γ -> Set) {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (A θ1) -> B θ1) 
          -> subst (\ γ -> (A γ) -> B γ) δ f ≃ (\ y -> subst B δ (f (subst A (! δ) y)))
   subst-→ _ _ Refl f = Refl 
+
+  subst-→-pre : ∀ {C A B : Set} (δ : A ≃ B) (f : A -> C) 
+         -> subst (\ X -> X -> C) δ f ≃ (f o (subst (\ X -> X) (! δ)))
+  subst-→-pre Refl f = Refl 
 
   -- substitution extension for Γ,x:A⁻ in DTT
   pair≃⁻ : {A : Set} {B : A -> Set} {p q : Σ B} 

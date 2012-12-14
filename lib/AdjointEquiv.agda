@@ -36,8 +36,9 @@ module lib.AdjointEquiv where
   Iso A B = Σ \ (f : A -> B) -> IsIso f
 
   isoToAdj : ∀ {A B} -> Iso A B -> AEq A B
-  isoToAdj (f , isiso g α β) = (f , isadj g α β improve) where
-    postulate improve : _ 
+  isoToAdj (f , isiso g α β) = (f , isadj g α improveβ improveδ) where
+    postulate improveβ : _ 
+              improveδ : _
   
   id⊣ : ∀ {A} -> AEq A A
   id⊣ = ( (\ x -> x) , isadj (λ x → x) (\ _ -> Refl) (\ _ -> Refl) (\ _ -> Refl))
@@ -49,3 +50,13 @@ module lib.AdjointEquiv where
       FIXME2 : _
       FIXME3 : _
 
+  aeq-inv : ∀ {A B} -> AEq A B -> AEq B A
+  aeq-inv (f , isadj g α β δ) = g , isadj f β α FIXME1 where
+    postulate 
+      FIXME1 : _
+
+  subst-is-AEq : {A B : Set} (α : A ≃ B) -> IsAEq (subst (\ x -> x) α)
+  subst-is-AEq Refl = snd id⊣
+                   -- depending on where in the computational interpretation this happens,
+                   -- we might need to write this out by hand, but that works too
+                   -- isadj (subst (λ x → x) (! α)) {!!} {!!} {!!}

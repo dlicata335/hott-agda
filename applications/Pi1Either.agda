@@ -63,4 +63,3 @@ module applications.Pi1Either where
 
     inlinr : {a : A} -> (Inr{A}{B} b ≃ Inl a) ≃ Void
     inlinr {a} = ua (isoToAdj(encode , isiso decode (encode-decode {Inl a}) decode-encode))
-    

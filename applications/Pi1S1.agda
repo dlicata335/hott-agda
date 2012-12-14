@@ -9,10 +9,10 @@ module applications.Pi1S1 where
   U = Set
 
   succA : AEq Int Int
-  succA = (isoToAdj (succ , isiso pred succ-pred pred-succ))
+  succA = (succ , isadj pred succ-pred pred-succ succ-pred-triangle)
 
   predA : AEq Int Int
-  predA = isoToAdj (pred , isiso succ pred-succ succ-pred)
+  predA = (pred , isadj succ pred-succ succ-pred pred-succ-triangle)
 
   succ≃ : Int ≃ Int
   succ≃ = ua succA

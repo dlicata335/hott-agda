@@ -2,6 +2,7 @@
 
 open import lib.Nat public
 open import lib.Paths public
+open Paths
 
 module lib.Int where
 
@@ -34,4 +35,15 @@ module lib.Int where
   pred-succ (Neg Z) = Refl
   pred-succ (Neg (S y)) = Refl
 
-  
+  succ-pred-triangle : (x : _) → Id (succ-pred (succ x)) (resp succ (pred-succ x))
+  succ-pred-triangle (Pos y) = Refl
+  succ-pred-triangle Zero = Refl
+  succ-pred-triangle (Neg Z) = Refl
+  succ-pred-triangle (Neg (S y)) = Refl
+
+  pred-succ-triangle : (x : _) → Id (pred-succ (pred x)) (resp pred (succ-pred x))
+  pred-succ-triangle (Pos Z) = Refl
+  pred-succ-triangle (Pos (S _)) = Refl
+  pred-succ-triangle Zero = Refl
+  pred-succ-triangle (Neg y) = Refl
+
