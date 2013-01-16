@@ -32,9 +32,6 @@ module lib.spaces.Circle where
             -> (x : S¹) -> C x
     S¹-elim a _ Base = a
 
-
-    
-
     postulate 
       βloop/rec : {C : Set} 
            -> (a : C)
@@ -73,6 +70,19 @@ module lib.spaces.Circle where
                                      isiso rec-to-circle-X 
                                            (λ y → app≃ rec-SX-rec-id) 
                                            (λ x → app≃ SX-rec-SX-id)))
+
+    
+    S¹η : {C : S¹ -> Set} 
+          (M : (x : S¹) -> C x)
+          (N : S¹)
+        -> M N ≃ (S¹-elim{C} (M base) (respd M loop) N)
+    S¹η {C} M N = S¹-elim {(λ x → M x ≃ S¹-elim {C} (M base) (respd M loop) x)} 
+                          Refl 
+                          (!-inv-r (respd M loop) 
+                           ∘ resp (λ x → respd M loop ∘ x) (∘-unit-l (! (respd M loop)))
+                           ∘ resp (λ x → x ∘ Refl ∘ ! (respd M loop)) (βloop/elim {C} (M base) (respd M loop))
+                           ∘ subst-Id-d M (S¹-elim (M Base) (respd M loop)) loop Refl)
+                          N 
 
   open S¹
 

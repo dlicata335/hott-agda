@@ -23,7 +23,7 @@ module polymorphism.SubsetModel where
     constructor ty
     field
       TOb : Ob Γ -> Type
-      TGood : (x0 : Ob Γ) (x1 : Good Γ x0) → TOb x0 → Type
+      TGood : (x0 : Ob Γ) (x1 : Good Γ x0) → (TOb x0 → Type)
   open Ty
 
   record Tm {Γ : Ctx} (A : Ty Γ) : Type where
@@ -125,6 +125,12 @@ module polymorphism.SubsetModel where
   U : ∀ {Γ} -> Ty Γ
   U = ty (λ _ → Type) (λ _ _ A → A → Type)
 
+  test : Tm (U{1c})
+  test = tm (λ _ → t) {!!} where
+    postulate
+      t : TOb (U{1c}) <>
+
+
   El : ∀ {Γ} -> Tm (U{Γ}) -> Ty Γ
   El (tm A0 A1) = ty A0 A1
 
@@ -219,7 +225,7 @@ module polymorphism.SubsetModel where
     eta : ∀ {Γ} 
         -> Tm{Γ} (Π (idty{Γ}) (# (ID idty (v (idty{Γ})) idfun)))
     eta {Γ} = tm _ (λ g0 g1 f0 f1 → (λ≃ (λ A → λ≃ (λ x → f1 A (λ y → Id y x) x Refl))) , 
-                                    {!!}) -- FIXME need some higher-dimensional naturality?  
+                                    {!f1!}) -- FIXME need some higher-dimensional naturality?  
 
 
   -- if you restrict to hsets it goes through

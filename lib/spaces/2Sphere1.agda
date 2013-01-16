@@ -28,7 +28,7 @@ module lib.spaces.2Sphere1 where
 
     S²-elim : (C : S² -> Set)
             -> (base' : C base)
-            -> (loop' : subst (\ y -> Id (subst C y base') base') loop (Refl{_}{base'}) ≃ (Refl{_}{base'}))
+            -> (loop' : subst (\ y -> Id (subst C y base') base') loop (Refl{_}{base'}) ≃ {! (Refl{_}{base'}) !})
             -> (x : S²) -> C x
     S²-elim C base' _ Base = base'
 

@@ -1,3 +1,7 @@
+oldlib
+ a bunch of stuff using an older version of lib/
+ some of this needs to be resuccitated
+
 lib
   basic constructions of homotopy type theory
 
