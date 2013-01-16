@@ -34,7 +34,7 @@ module lib.spaces.1Sphere2 where
 
     S¹-elim : {C : S¹ -> Set} 
             -> (a' : C a)(b' : C b)
-            -> (_ : subst C n a' ≃ b') (_ : subst C s a' ≃ b')
+            -> (_ : transport C n a' ≃ b') (_ : transport C s a' ≃ b')
             -> (x : S¹) -> C x
     S¹-elim a' _ _ _ A = a'
     S¹-elim _ b' _ _ B = b'
@@ -43,14 +43,14 @@ module lib.spaces.1Sphere2 where
       βn/rec :  {C : Set} 
              -> (a' : C)(b' : C)
              -> (n' : a' ≃ b') (s' : a' ≃ b')
-             -> resp (S¹-rec a' b' n' s') n ≃ n' 
+             -> ap (S¹-rec a' b' n' s') n ≃ n' 
       βs/rec :  {C : Set} 
              -> (a' : C)(b' : C)
              -> (n' : a' ≃ b') (s' : a' ≃ b')
-             -> resp (S¹-rec a' b' n' s') s ≃ s' 
+             -> ap (S¹-rec a' b' n' s') s ≃ s' 
 
 {-
       βloop/elim : {C : S¹ -> Set} 
-                 -> (a : C base) (p : subst C loop a ≃ a)
-                 -> respd (S¹-elim{C} a p) loop ≃ p
+                 -> (a : C base) (p : transport C loop a ≃ a)
+                 -> apd (S¹-elim{C} a p) loop ≃ p
 -} 

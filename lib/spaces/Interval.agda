@@ -1,6 +1,6 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
-open import lib.BasicTypes hiding (Zero)
+open import lib.BasicTypes 
 
 module lib.spaces.Interval where
 
@@ -29,7 +29,7 @@ module lib.spaces.Interval where
         compβseg : {C : Set} 
                -> (a b : C)
                -> (p : a ≃ b)
-               -> resp (I-rec a b p) seg ≃ trans (compβ0 _ _ _) (trans p (sym (compβ1 _ _ _))) 
+               -> ap (I-rec a b p) seg ≃ (! (compβ1 _ _ _)) ∘  p ∘ (compβ0 _ _ _)
                   -- wouldn't need the trans if comp0 and comp1 were definitional
 
 
@@ -61,7 +61,7 @@ module lib.spaces.Interval where
     I-rec a b _ One = b
 
     I-elim : {C : I -> Set} 
-           -> (a : C zero) (b : C one) (p : subst C seg a ≃ b)
+           -> (a : C zero) (b : C one) (p : transport C seg a ≃ b)
            -> (x : I) -> C x
     I-elim a b _ Zero = a
     I-elim a b _ One = b
@@ -70,10 +70,10 @@ module lib.spaces.Interval where
       compβseg/rec : {C : Set} 
            -> (a b : C)
            -> (p : a ≃ b)
-           -> resp (I-rec a b p) seg ≃ p
+           -> ap (I-rec a b p) seg ≃ p
       -- compβseg/elim : {C : I -> Set} 
       --      -> (a : C zero) (b : C one) (p : subst C seg a ≃ b)
-      --      -> resp (I-elim a b p) seg ≃ p
+      --      -> ap (I-elim a b p) seg ≃ p
     -- FIXME : η?
 
   {- conjectured fix: 
@@ -107,7 +107,7 @@ module lib.spaces.Interval where
     I-rec a b _ (mkI'' (One , _)) = b
 
     I-elim : {C : I -> Set} 
-           -> (a : C zero) (b : C one) (p : subst C seg a ≃ b)
+           -> (a : C zero) (b : C one) (p : transport C seg a ≃ b)
            -> (x : I) -> C x
     I-elim a b _ (mkI'' (Zero , _)) = a
     I-elim a b _ (mkI'' (One , _)) = b
@@ -128,17 +128,17 @@ module lib.spaces.Interval where
     βseg : {C : Set} 
            -> (a b : C)
            -> (p : a ≃ b)
-           -> resp (I-rec a b p) seg ≃ p
+           -> ap (I-rec a b p) seg ≃ p
   -}
 
   ext-from-I : (A B : Set) (f g : A -> B) (α : (x : A) -> f x ≃ g x) -> f ≃ g
-  ext-from-I A B f g α = resp h seg where
+  ext-from-I A B f g α = ap h seg where
     h : (I -> A -> B)
     h = (λ i x → I-rec (f x) (g x) (α x) i)
 
     -- can you prove the computation rule?
-    -- compute : (x : A) -> resp (\ f -> f x) ext ≃ (α x)
-    -- compute x = {!Stuck.resp' (\ f -> f x) ext ≃⟨ ? ⟩ !}
+    -- compute : (x : A) -> ap (\ f -> f x) ext ≃ (α x)
+    -- compute x = {!Stuck.ap' (\ f -> f x) ext ≃⟨ ? ⟩ !}
 
 {-
 
@@ -184,7 +184,7 @@ module lib.spaces.Interval where
       compβ1=0 : {C : Set} 
            -> (l r : I -> C)
            -> (pres : _)
-           -> resp (I+I/1=0-rec l r pres) 1=0 ≃ pres
+           -> ap (I+I/1=0-rec l r pres) 1=0 ≃ pres
   open Pushout
   {-
     I+I/1=0 : Set
@@ -201,7 +201,7 @@ module lib.spaces.Interval where
     compβ1=0 : {C : Set} 
            -> (l r : I -> C)
            -> (pres : _)
-           -> resp (I+I/1=0-rec l r pres) 1=0 ≃ pres
+           -> ap (I+I/1=0-rec l r pres) 1=0 ≃ pres
   -}
 
   module CoGroupoid where
@@ -209,10 +209,10 @@ module lib.spaces.Interval where
     corefl = \ _ -> <>
 
     cosym : I -> I
-    cosym = I-rec one zero (sym seg) 
+    cosym = I-rec one zero (! seg) 
 
     cotrans : I -> I+I/1=0 
-    cotrans p = I-rec (left zero) (right one) (trans (resp left seg) (trans 1=0 (resp right seg))) p
+    cotrans p = I-rec (left zero) (right one) ((ap right seg) ∘ 1=0 ∘ (ap left seg)) p
 
     {-
       meet : I x I -> I
@@ -230,13 +230,13 @@ module lib.spaces.Interval where
   nat : {A B : Set} {f g : A -> B} 
       -> (funpath : (x : A) -> Id (f x) (g x))
       -> {x y : A} (argpath : Id x y)
-      -> Id (trans (funpath x) (resp g argpath)) (trans (resp f argpath) (funpath y))
+      -> Id (trans (funpath x) (ap g argpath)) (trans (ap f argpath) (funpath y))
   nat funpath Refl = sym (trans-unit-l (funpath _))  
 
   -- should be a consequence of above and nat
   compute : {A B : Set} {f g : A -> B} 
             -> (funpath : (x : A) -> Id (f x) (g x))
             -> {x y : A} (argpath : Id x y)
-            -> Id (resp2 (\ x y -> x y) (ext funpath) argpath) (trans (funpath x) (resp g argpath))
+            -> Id (ap2 (\ x y -> x y) (ext funpath) argpath) (trans (funpath x) (ap g argpath))
   compute = {!!}
 -}

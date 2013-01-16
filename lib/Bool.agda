@@ -1,5 +1,6 @@
 {-# OPTIONS --type-in-type #-}
 
+open import lib.First
 open import lib.Paths
 open import lib.Prods
 open import lib.Functions
@@ -8,62 +9,62 @@ open Paths
 
 module lib.Bool where
 
-  data Bool : Set where
+  data Bool : Type where
     True : Bool
     False : Bool
   {-# COMPILED_DATA Bool Bool True False #-}
 
   module BoolM where
-      if_/_then_else : (p : Bool -> Set) -> (b : Bool) -> p True -> p False -> p b
+      if_/_then_else : (p : Bool -> Type) -> (b : Bool) -> p True -> p False -> p b
       if _ / True then b1 else b2 = b1
       if _ / False then b1 else b2 = b2
 
-      aborttf : ∀ {A : Set} 
+      aborttf : ∀ {A : Type} 
               -> True ≃ False -> A
-      aborttf{A} α = subst
+      aborttf{A} α = transport
                       (λ x →
-                         if (λ _ → Set) / x then Unit else A)
+                         if (λ _ → Type) / x then Unit else A)
                       α <>
 
-      subst-if : {A B : Set} {M N : Bool} ->
-               subst (\ x -> if (\ _ -> Set) / x then A else B) 
+      transport-if : {A B : Type} {M N : Bool} ->
+               transport (\ x -> if (\ _ -> Type) / x then A else B) 
              ≃ (if
                  (λ M' →
                     M' ≃ N ->
-                    if (λ _ → Set) / M' then A else B →
-                    if (λ _ → Set) / N then A else B)
+                    if (λ _ → Type) / M' then A else B →
+                    if (λ _ → Type) / N then A else B)
                  / M 
-                 then if (λ N' → Id True N' → A → if (λ _ → Set) / N' then A else B) / N
+                 then if (λ N' → Path True N' → A → if (λ _ → Type) / N' then A else B) / N
                         then (λ _ x → x) 
                         else (λ α _ → aborttf α) 
-                 else (if (λ N' → Id False N' → B → if (λ _ → Set) / N' then A else B) / N 
+                 else (if (λ N' → Path False N' → B → if (λ _ → Type) / N' then A else B) / N 
                        then (λ α _ → aborttf (! α)) 
                        else (λ _ x → x)))
-      subst-if {A}{B}{M}{N}= λ≃ pf where
-        pf : ∀ {M N} -> (α : Id M N) 
-          -> Id (subst (λ x → if (λ _ → Set) / x then A else B) α) 
+      transport-if {A}{B}{M}{N}= λ≃ pf where
+        pf : ∀ {M N} -> (α : Path M N) 
+          -> Path (transport (λ x → if (λ _ → Type) / x then A else B) α) 
                 ((if
                  (λ M' →
                     M' ≃ N ->
-                    if (λ _ → Set) / M' then A else B →
-                    if (λ _ → Set) / N then A else B)
+                    if (λ _ → Type) / M' then A else B →
+                    if (λ _ → Type) / N then A else B)
                  / M 
-                 then if (λ N' → Id True N' → A → if (λ _ → Set) / N' then A else B) / N
+                 then if (λ N' → Path True N' → A → if (λ _ → Type) / N' then A else B) / N
                         then (λ _ x → x) 
                         else (λ α _ → aborttf α) 
-                 else (if (λ N' → Id False N' → B → if (λ _ → Set) / N' then A else B) / N 
+                 else (if (λ N' → Path False N' → B → if (λ _ → Type) / N' then A else B) / N 
                        then (λ α _ → aborttf (! α)) 
                        else (λ _ x → x))) α)
-        pf {M} {.M} Refl with M 
-        ... | True  = Refl
-        ... | False = Refl
+        pf {M} {.M} id with M 
+        ... | True  = id
+        ... | False = id
 
-      Check : Bool -> Set 
+      Check : Bool -> Type 
       Check True  = Unit
       Check False = Void
 
-      check : (b : Bool) -> Either (Check b) (Id b False)
-      check False = Inr Refl
+      check : (b : Bool) -> Either (Check b) (Path b False)
+      check False = Inr id
       check True = Inl <>
       
       _andalso_ : Bool -> Bool -> Bool 
@@ -82,8 +83,8 @@ module lib.Bool where
       check-andE {False} ()  
       check-andE {True} {False} () 
 
-      check-id-not : {b1 : Bool} -> Id b1 False -> Check (if (\ _ -> Bool) / b1 then False else True)
-      check-id-not Refl = _
+      check-id-not : {b1 : Bool} -> Path b1 False -> Check (if (\ _ -> Bool) / b1 then False else True)
+      check-id-not id = _
 
       check-noncontra : (b : Bool) -> Check b -> Check (if (\ _ -> Bool) / b then False else True) -> Void
       check-noncontra True _ v = v
@@ -94,11 +95,11 @@ module lib.Bool where
       {-# BUILTIN FALSE False #-}
 
 {-
-  respif : {Γ : Set} {θ1 θ2 : Γ} {P : Id θ1 θ2} {C : Γ -> Bool -> Set} {M : Γ -> Bool} {M1 : (x : Γ) -> C x True} {M2 : (x : Γ) -> C x False} 
-         -> Id (respd (\ x -> if C x / (M x) then (M1 x) else (M2 x)) P) 
-               {!!} -- (if {!\ y -> Id (subst (\ x -> C x True)!} / M N' then respd M1 P else (respd M2 P))
+  respif : {Γ : Type} {θ1 θ2 : Γ} {P : Path θ1 θ2} {C : Γ -> Bool -> Type} {M : Γ -> Bool} {M1 : (x : Γ) -> C x True} {M2 : (x : Γ) -> C x False} 
+         -> Path (respd (\ x -> if C x / (M x) then (M1 x) else (M2 x)) P) 
+               {!!} -- (if {!\ y -> Path (transport (\ x -> C x True)!} / M N' then respd M1 P else (respd M2 P))
   respif = {!!}
 -}
 
--- true  branch: Id (subst (λ x → C x True) P (M1 N)) (M1 N')
--- false branch: Id (subst (λ x → C x False) P (M2 N)) (M2 N')
+-- true  branch: Path (transport (λ x → C x True) P (M1 N)) (M1 N')
+-- false branch: Path (transport (λ x → C x False) P (M2 N)) (M2 N')

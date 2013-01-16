@@ -1,14 +1,11 @@
 {-# OPTIONS --type-in-type --without-K --allow-unsolved-metas #-}
 
+open import lib.First
 open import lib.Paths 
 open import lib.Prods
 open Paths
 
 module lib.Functions where 
- 
-  _o_ : {A B C : Set} -> (B -> C) -> (A -> B) -> A -> C
-  g o f = \ x -> g (f x)
-  infixr 10 _o_
 
   -- interchange law for the type theory as a whole:
   -- objects = types
@@ -19,137 +16,139 @@ module lib.Functions where
                    {θ1' θ2' θ3' : Γ2 -> Γ3} 
                    (δ1 : θ1 ≃ θ2) (δ2 : θ2 ≃ θ3)
                    (δ1' : θ1' ≃ θ2') (δ2' : θ2' ≃ θ3')
-                 -> resp2 _o_ (δ2' ∘ δ1') (δ2 ∘ δ1) ≃ resp2 _o_ δ2' δ2 ∘ resp2 _o_ δ1' δ1 
-  ichange-theory Refl Refl Refl Refl = Refl
+                 -> ap2 _o_ (δ2' ∘ δ1') (δ2 ∘ δ1) ≃ ap2 _o_ δ2' δ2 ∘ ap2 _o_ δ1' δ1 
+  ichange-theory id id id id = id
   
+  ap≃ : ∀ {A} {B : A → Type} {f g : (x : A) → B x} 
+         → Path f g → {x : A} → Path (f x) (g x)
+  ap≃ α {x} = ap (\ f → f x) α
 
-  app≃ : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
-       -> Id f g -> ({x : A} -> Id (f x) (g x))
-  app≃ α {x} = resp (\ f -> f x) α
+  ap≃i : ∀ {A} {B : A -> Set} {f g : {x : A} -> B x} 
+       -> Path (\ {x} -> f {x}) (\ {x} -> g {x}) -> ({x : A} -> Path (f {x}) (g {x}))
+  ap≃i α {x} = ap (\ f -> f {x}) α
 
-  app≃i : ∀ {A} {B : A -> Set} {f g : {x : A} -> B x} 
-       -> Id (\ {x} -> f {x}) (\ {x} -> g {x}) -> ({x : A} -> Id (f {x}) (g {x}))
-  app≃i α {x} = resp (\ f -> f {x}) α
+  -- apply a path to a 1-cell (path)
+  ap≃₁ : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
+       -> Path f g -> ({x y : A} -> (α : Path x y) -> Path (transport B α (f x)) (g y))
+  ap≃₁ {A} {B} {f} {.f} id id = id 
 
-  app≃2 : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
-       -> Id f g -> ({x y : A} -> (α : Id x y) -> Id (subst B α (f x)) (g y))
-  app≃2 {A} {B} {f} {.f} Refl Refl = Refl 
-
-  app≃2' : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
-       -> Id f g -> ({x y : A} -> (α : Id x y) -> Id (f x) (subst B (! α) (g y)))
-  app≃2' {A} {B} {f} {.f} Refl Refl = Refl 
+  ap≃₁' : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
+       -> Path f g -> ({x y : A} -> (α : Path x y) -> Path (f x) (transport B (! α) (g y)))
+  ap≃₁' {A} {B} {f} {.f} id id = id 
 
   postulate 
-    λ≃  : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> ((x : A) -> Id (f x) (g x)) -> Id f g
+    λ≃  : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> ((x : A) -> Path (f x) (g x)) -> Path f g
     Π≃η : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
-         -> (α : Id f g)
-         -> α ≃ λ≃ (\ x -> app≃ α {x})
-    Π≃β : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : (x : A) -> Id (f x) (g x)) {N : A}
-         -> app≃ (λ≃ α) {N} ≃ (α N)
+         -> (α : Path f g)
+         -> α ≃ λ≃ (\ x -> ap≃ α {x})
+    Π≃β : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : (x : A) -> Path (f x) (g x)) {N : A}
+         -> ap≃ (λ≃ α) {N} ≃ (α N)
 
-    λ≃i : ∀ {A} {B : A -> Set} {f g : {x : A} -> B x} -> ((x : A) -> Id (f {x}) (g {x})) -> Id{ {x : A} -> B x } f g
+    λ≃i : ∀ {A} {B : A -> Set} {f g : {x : A} -> B x} -> ((x : A) -> Path (f {x}) (g {x})) -> Path{ {x : A} -> B x } f g
 
-  subst-→ : ∀ {Γ} (A B : Γ -> Set) {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (A θ1) -> B θ1) 
-         -> subst (\ γ -> (A γ) -> B γ) δ f ≃ (\ y -> subst B δ (f (subst A (! δ) y)))
-  subst-→ _ _ Refl f = Refl 
+  transport-→ :  {Γ : Type} (A B : Γ → Type) {θ1 θ2 : Γ} 
+                  (δ : θ1 ≃ θ2) (f : A θ1 → B θ1) 
+     → Path  (transport (\ γ → (A γ) → B γ) δ f) 
+             (transport B δ o f o (transport A (! δ)))
+  transport-→ _ _ id f = id 
+   
+  transport-→-pre : ∀ {C A B : Set} (δ : A ≃ B) (f : A -> C) 
+         -> transport (\ X -> X -> C) δ f ≃ (f o (transport (\ X -> X) (! δ)))
+  transport-→-pre id f = id 
 
-  subst-→-pre : ∀ {C A B : Set} (δ : A ≃ B) (f : A -> C) 
-         -> subst (\ X -> X -> C) δ f ≃ (f o (subst (\ X -> X) (! δ)))
-  subst-→-pre Refl f = Refl 
-
-  -- substitution extension for Γ,x:A⁻ in DTT
+  -- transportitution extension for Γ,x:A⁻ in DTT
   pair≃⁻ : {A : Set} {B : A -> Set} {p q : Σ B} 
-        -> (α : (fst p) ≃ (fst q)) -> (snd p) ≃ subst B (! α) (snd q) 
+        -> (α : (fst p) ≃ (fst q)) -> (snd p) ≃ transport B (! α) (snd q) 
         -> p ≃ q
   pair≃⁻ {A}{B}{p}{q} α β = 
-         pair≃ α (app≃ (resp (λ x → subst B x) (!-inv-r α) ∘ ! (subst-∘ B α (! α))) ∘ resp (subst B α) β)
+         pair≃ α (ap≃ (ap (λ x → transport B x) (!-inv-r α) ∘ ! (transport-∘ B α (! α))) ∘ ap (transport B α) β)
 
-  subst-Π : ∀ {Γ} (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
+  transport-Π : ∀ {Γ} (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
             {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (x : A θ1) -> B θ1 x) 
-         -> subst (\ γ -> (x : A γ) -> B γ x) δ f ≃ 
-            (\ x -> subst (\ (p : Σ \ (γ : Γ) -> A γ) -> B (fst p) (snd p))
-                          (pair≃⁻ δ Refl)
-                          (f (subst A (! δ) x)))
-  subst-Π _ _ Refl f = Refl
+         -> transport (\ γ -> (x : A γ) -> B γ x) δ f ≃ 
+            (\ x -> transport (\ (p : Σ \ (γ : Γ) -> A γ) -> B (fst p) (snd p))
+                          (pair≃⁻ δ id)
+                          (f (transport A (! δ) x)))
+  transport-Π _ _ id f = id
 
-  subst-Πi : ∀ {Γ} (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
+  transport-Πi : ∀ {Γ} (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
             {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : {x : A θ1} -> B θ1 x) 
-         -> Id{ {x : A θ2} -> B θ2 x}
-              (subst (\ γ -> {x : A γ} -> B γ x) δ f)
-              (\ {x} -> subst (\ (p : Σ \ (γ : Γ) -> A γ) -> B (fst p) (snd p))
-                              (pair≃⁻ δ Refl)
-                              (f {(subst A (! δ) x)}))
-  subst-Πi _ _ Refl f = Refl
+         -> Path{ {x : A θ2} -> B θ2 x}
+              (transport (\ γ -> {x : A γ} -> B γ x) δ f)
+              (\ {x} -> transport (\ (p : Σ \ (γ : Γ) -> A γ) -> B (fst p) (snd p))
+                              (pair≃⁻ δ id)
+                              (f {(transport A (! δ) x)}))
+  transport-Πi _ _ id f = id
 
   -- only the range depends on the predicate
-  subst-Π2 : ∀ {Γ} (A : Set) (B : (γ : Γ) -> A -> Set)
+  transport-Π2 : ∀ {Γ} (A : Set) (B : (γ : Γ) -> A -> Set)
             {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (x : A) -> B θ1 x) 
-         -> subst (\ γ -> (x : A) -> B γ x) δ f ≃ 
-            (\ x -> subst (\ γ -> B γ x) δ (f x))
-  subst-Π2 _ _ Refl f = Refl
+         -> transport (\ γ -> (x : A) -> B γ x) δ f ≃ 
+            (\ x -> transport (\ γ -> B γ x) δ (f x))
+  transport-Π2 _ _ id f = id
 
-  subst-Π2i : ∀ {Γ} (A : Set) (B : (γ : Γ) -> A -> Set)
+  transport-Π2i : ∀ {Γ} (A : Set) (B : (γ : Γ) -> A -> Set)
             {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : {x : A} -> B θ1 x) 
-         -> Id{ {x : A} -> B θ2 x }
-            (subst (\ γ -> {x : A} -> B γ x) δ f)
-            (\ {x} -> subst (\ γ -> B γ x) δ (f {x}))
-  subst-Π2i _ _ Refl f = Refl 
+         -> Path{ {x : A} -> B θ2 x }
+            (transport (\ γ -> {x : A} -> B γ x) δ f)
+            (\ {x} -> transport (\ γ -> B γ x) δ (f {x}))
+  transport-Π2i _ _ id f = id 
 
-  resp-λ : {Γ : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
+  ap-λ : {Γ : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
            {A : Γ -> Set} {B : (γ : Γ) -> A γ -> Set}
            {M : (γ : Γ) -> (x : A γ) -> B γ x}
-        -> (respd (\ γ -> (λ x -> M γ x)) δ) 
-         ≃ λ≃ (λ γ → respd (λ (p : Σ (λ (γ' : Γ) → A γ')) → M (fst p) (snd p))
-                           (pair≃⁻ δ Refl))
-           ∘ subst-Π A B δ (M θ1)
-  resp-λ {δ = Refl} = Π≃η Refl
+        -> (apd (\ γ -> (λ x -> M γ x)) δ) 
+         ≃ λ≃ (λ γ → apd (λ (p : Σ (λ (γ' : Γ) → A γ')) → M (fst p) (snd p))
+                           (pair≃⁻ δ id))
+           ∘ transport-Π A B δ (M θ1)
+  ap-λ {δ = id} = Π≃η id
 
-  subst-com-for-resp-app : 
+  transport-com-for-ap-app : 
     {Γ : Set} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
     (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
     (F : (γ : Γ) -> (x : A γ) -> B γ x)
     (M : (γ : Γ) -> A γ)
-   -> Id (subst (λ z → B z (M z)) δ (F θ1 (M θ1)))
-        (subst (λ z → B θ2 z) (respd M δ)
-         (subst (λ z → (x : A z) → B z x) δ (F θ1)
-          (subst (λ z → A z) δ (M θ1))))
-  subst-com-for-resp-app Refl _ _ _ _ = Refl
+   -> Path (transport (λ z → B z (M z)) δ (F θ1 (M θ1)))
+        (transport (λ z → B θ2 z) (apd M δ)
+         (transport (λ z → (x : A z) → B z x) δ (F θ1)
+          (transport (λ z → A z) δ (M θ1))))
+  transport-com-for-ap-app id _ _ _ _ = id
 
-  resp-app : {Γ : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
+  ap-app : {Γ : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
              {A : Γ -> Set} {B : (γ : Γ) -> A γ -> Set}
              {F : (γ : Γ) -> (x : A γ) -> B γ x}
              {M : (γ : Γ) -> A γ}
-           -> respd (\ γ -> (F γ) (M γ)) δ 
-            ≃ app≃2 (respd F δ) (respd M δ) ∘ subst-com-for-resp-app δ A B F M
-  resp-app {δ = Refl} = Refl
+           -> apd (\ γ -> (F γ) (M γ)) δ 
+            ≃ ap≃₁ (apd F δ) (apd M δ) ∘ transport-com-for-ap-app δ A B F M
+  ap-app {δ = id} = id
 
-  resp-app-1-nd : {Γ A B : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
+  ap-app-1-nd : {Γ A B : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
                   {F : Γ -> A -> B}
                   {M : A}
-               -> resp (\ x -> (F x) M) δ 
-                  ≃ app≃ (resp F δ) {M}
-  resp-app-1-nd {δ = Refl} = Refl
+               -> ap (\ x -> (F x) M) δ 
+                  ≃ ap≃ (ap F δ) {M}
+  ap-app-1-nd {δ = id} = id
 
   naturality1 : {A B : Set} {F G : A -> B}
               -> (β : G ≃ F) 
               -> {M N : A} (α : M ≃ N) 
-              -> resp G α ≃ ! (app≃ β {N}) ∘ resp F α ∘ app≃ β {M}
-  naturality1 Refl Refl = Refl
+              -> ap G α ≃ ! (ap≃ β {N}) ∘ ap F α ∘ ap≃ β {M}
+  naturality1 id id = id
 
 
   uncurry : ∀ {A B C : Set} -> (A -> B -> C) -> A × B -> C
   uncurry f = \ x -> f (fst x) (snd x)
 
-  resp-uncurry : {A B C : Set} (f : A -> B -> C) -> ∀ {M M' N N'} ->
+  ap-uncurry : {A B C : Set} (f : A -> B -> C) -> ∀ {M M' N N'} ->
                  (α : M ≃ M') (β : N ≃ N') 
-                 -> resp (uncurry f) (NDPair.nondep-pair≃ α β)
-                    ≃ resp2 f α β
-  resp-uncurry f Refl Refl = Refl
+                 -> ap (uncurry f) (pair×≃ α β)
+                    ≃ ap2 f α β
+  ap-uncurry f id id = id
 
 {-                 
   λ≃-refl : ∀ {A B} {f : A -> B} -> 
-          Id{Id {A -> B} f f} 
-            (λ≃ (\ x -> Refl{_}{f x})) 
-            (Refl{_}{f})
+          Path{Path {A -> B} f f} 
+            (λ≃ (\ x -> id{_}{f x})) 
+            (id{_}{f})
   λ≃-refl = {!!}
 -}  

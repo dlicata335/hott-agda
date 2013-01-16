@@ -17,9 +17,9 @@ module lib.Monoid where
 
   MonoidB : ∀ {A B} -> (α : Id A B) -> (M : Monoid A) -> Monoid B
   MonoidB {A}{B} α M = 
-                 record { _⊙_ = subst (λ A' → A' → A' → A') α (Monoid._⊙_ M); 
-                                 `1 = subst (λ A' → A') α (Monoid.`1 M); 
-                                 assoc = subst{Σ (λ (A' : Set) → (A' → A' → A') × A')}
+                 record { _⊙_ = transport (λ A' → A' → A' → A') α (Monoid._⊙_ M); 
+                                 `1 = transport (λ A' → A') α (Monoid.`1 M); 
+                                 assoc = transport{Σ (λ (A' : Set) → (A' → A' → A') × A')}
                                            (λ (p : Σ (λ (A' : Set) → (A' → A' → A') × A')) →
                                               let A' : Set
                                                   A' = fst p
@@ -29,10 +29,10 @@ module lib.Monoid where
                                                   `1 = snd (snd p)
                                               in {x y z : A'} → (x ⊙ y) ⊙ z ≃ x ⊙ (y ⊙ z))
                                            {(A , Monoid._⊙_ M , Monoid.`1 M)}
-                                           {(B , subst (λ A' → A' → A' → A') α (Monoid._⊙_ M) , subst (λ A' → A') α (Monoid.`1 M))} 
-                                           (pair≃ α (app≃ (NDPair.subst-× α (λ A' → A' → A' → A') (λ A' → A'))))
+                                           {(B , transport (λ A' → A' → A' → A') α (Monoid._⊙_ M) , transport (λ A' → A') α (Monoid.`1 M))} 
+                                           (pair≃ α (ap≃ (transport-× α (λ A' → A' → A' → A') (λ A' → A'))))
                                            (Monoid.assoc M); 
-                                 unitl = subst {Σ (λ (A' : Set) → (A' → A' → A') × A')}
+                                 unitl = transport {Σ (λ (A' : Set) → (A' → A' → A') × A')}
                                            (λ (p : Σ (λ (A' : Set) → (A' → A' → A') × A')) →
                                               let A' : Set
                                                   A' = fst p
@@ -43,12 +43,12 @@ module lib.Monoid where
                                               in {x : A'} → `1 ⊙ x ≃ x)
                                            {A , Monoid._⊙_ M , Monoid.`1 M}
                                            {B ,
-                                            subst (λ A' → A' → A' → A') α (Monoid._⊙_ M) ,
-                                            subst (λ A' → A') α (Monoid.`1 M)}
+                                            transport (λ A' → A' → A' → A') α (Monoid._⊙_ M) ,
+                                            transport (λ A' → A') α (Monoid.`1 M)}
                                            (pair≃ α
-                                            (app≃ (NDPair.subst-× α (λ A' → A' → A' → A') (λ A' → A'))))
+                                            (ap≃ (transport-× α (λ A' → A' → A' → A') (λ A' → A'))))
                                            (Monoid.unitl M); 
-                                 unitr = subst {Σ (λ (A' : Set) → (A' → A' → A') × A')}
+                                 unitr = transport {Σ (λ (A' : Set) → (A' → A' → A') × A')}
                                            (λ (p : Σ (λ (A' : Set) → (A' → A' → A') × A')) →
                                               let A' : Set
                                                   A' = fst p
@@ -59,41 +59,41 @@ module lib.Monoid where
                                               in {x : A'} → x ⊙ `1 ≃ x)
                                            {A , Monoid._⊙_ M , Monoid.`1 M}
                                            {B ,
-                                            subst (λ A' → A' → A' → A') α (Monoid._⊙_ M) ,
-                                            subst (λ A' → A') α (Monoid.`1 M)}
+                                            transport (λ A' → A' → A' → A') α (Monoid._⊙_ M) ,
+                                            transport (λ A' → A') α (Monoid.`1 M)}
                                            (pair≃ α
-                                            (app≃ (NDPair.subst-× α (λ A' → A' → A' → A') (λ A' → A'))))
+                                            (ap≃ (transport-× α (λ A' → A' → A' → A') (λ A' → A'))))
                                            (Monoid.unitr M) }
 
-  subst-Monoid : ∀ {A B} -> (α : Id A B) -> 
-                 subst Monoid α
+  transport-Monoid : ∀ {A B} -> (α : Id A B) -> 
+                 transport Monoid α
                ≃ MonoidB α
-  subst-Monoid Refl = Refl
+  transport-Monoid id = id
 
-  -- snd-pair≃⁻-Refl : {A : Set} {B : A -> Set} {x q : Σ B} 
+  -- snd-pair≃⁻-id : {A : Set} {B : A -> Set} {x q : Σ B} 
   --       -> (α : x ≃ (fst q)) 
   --       -> respd (snd{A}{B}) (pair≃⁻ α () ≃ {!β!}
-  -- snd-pair≃⁻-Refl = {!!}
+  -- snd-pair≃⁻-id = {!!}
 
 {-
 roughly (modulo adjustments)
-  Refl at backmap
+  id at backmap
 ∘ resp blah (Monoid.unitl M)
 ∘ 
 respd snd
    (pair≃⁻
     (pair≃ α
      (resp (λ f → f ((λ v v' → Monoid._⊙_ M v v') , Monoid.`1 M))
-      (NDPair.subst-× α (λ A' → A' → A' → A') (λ A' → A'))))
-    Refl)
+      (NDPair.transport-× α (λ A' → A' → A' → A') (λ A' → A'))))
+    id)
    ∘
    resp
-   (subst (λ z → fst (fst z))
+   (transport (λ z → fst (fst z))
     (pair≃⁻
      (pair≃ α
       (resp (λ f → f ((λ v v' → Monoid._⊙_ M v v') , Monoid.`1 M))
-       (NDPair.subst-× α (λ A' → A' → A' → A') (λ A' → A'))))
-     Refl))
+       (NDPair.transport-× α (λ A' → A' → A' → A') (λ A' → A'))))
+     id))
    (Monoid.unitl M)
    ∘
    !
@@ -101,31 +101,31 @@ respd snd
     (pair≃⁻
      (pair≃ α
       (resp (λ f → f ((λ v v' → Monoid._⊙_ M v v') , Monoid.`1 M))
-       (NDPair.subst-× α (λ A' → A' → A' → A') (λ A' → A'))))
-     Refl))
+       (NDPair.transport-× α (λ A' → A' → A' → A') (λ A' → A'))))
+     id))
 -}
 
 {-
-  subst-unitl : ∀ {A B} (α : A ≃ B) (M : Monoid A) ->
+  transport-unitl : ∀ {A B} (α : A ≃ B) (M : Monoid A) ->
                 Id{ {x : B} -> (Monoid._⊙_ (MonoidB α M) (Monoid.`1 (MonoidB α M)) x) ≃ x }
                   (Monoid.unitl (MonoidB α M))
                   (Monoid.unitl (MonoidB α M))
-  subst-unitl {A}{B} α M = {!!} ∘ 
-    λ≃i (λ x → subst-Id-d{Σ \ (p : Σ \ (A : Set) -> (A -> A -> A) × A) -> fst p} 
+  transport-unitl {A}{B} α M = {!!} ∘ 
+    λ≃i (λ x → transport-Id-d{Σ \ (p : Σ \ (A : Set) -> (A -> A -> A) × A) -> fst p} 
                          (λ p → fst (snd (fst p)) (snd (snd (fst p))) (snd p))
                          snd (pair≃⁻
                                 (pair≃ α
-                                 (app≃ (NDPair.subst-× α (λ A' → A' → A' → A') (λ A' → A'))))
-                                (Refl {_})) (Monoid.unitl M))
-    -- (λ≃i (λ x → subst-Id (λ p → fst (snd (fst p)) (snd (snd (fst p))) (snd p)) 
+                                 (ap≃ (NDPair.transport-× α (λ A' → A' → A' → A') (λ A' → A'))))
+                                (id {_})) (Monoid.unitl M))
+    -- (λ≃i (λ x → transport-Id (λ p → fst (snd (fst p)) (snd (snd (fst p))) (snd p)) 
     --                                              snd
-    --                                              (pair≃⁻ (pair≃ α (app≃ (NDPair.subst-× α (λ A' → A' → A' → A') (λ A' → A')))) (Refl {_}))
+    --                                              (pair≃⁻ (pair≃ α (ap≃ (NDPair.transport-× α (λ A' → A' → A' → A') (λ A' → A')))) (id {_}))
     --                                              (Monoid.unitl M {x})))
-    ∘ subst-Πi{Σ \ (A : Set) -> (A -> A -> A) × A}
+    ∘ transport-Πi{Σ \ (A : Set) -> (A -> A -> A) × A}
                      fst 
                      (λ p x → fst (snd p) (snd (snd p)) x ≃ x)
                      (pair≃ α
-                        (app≃ (NDPair.subst-× α (λ A' → A' → A' → A') (λ A' → A')))) (Monoid.unitl M)
+                        (ap≃ (NDPair.transport-× α (λ A' → A' → A' → A') (λ A' → A')))) (Monoid.unitl M)
 -}
                  
               

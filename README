@@ -1,18 +1,18 @@
 oldlib
  a bunch of stuff using an older version of lib/
- some of this needs to be resuccitated
+ some of this needs to be resuccitated, like joseph's code in applications/torus2
 
 lib
   basic constructions of homotopy type theory
 
-applications
-  applications of homotopy type theory to proving/formalizing/reasoning
-  Currently includes:
-  (1) a proof that higher fundamental groups are abelian
+homotopy
+  applications of homotopy type theory to formalizing homotopy theory
+
+programming
+  applications of homotopy type theory to programming
+
+computational-interp
+  code having to do with the computational interpretation or 2tt
 
 misc
   miscellaneous little experiments
-  Currently includes:
-  (1) a proof that set extensionality (univalence) implies functional extensionality
-  (2) a start at a translation of Voevodsky's basic definitions into Agda
-  (3) working out the contradiction between univalence and UIP

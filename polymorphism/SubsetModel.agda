@@ -1,4 +1,6 @@
 
+-- FIXME: something went wrong in the library update---runs out of memory now
+
 {-# OPTIONS --type-in-type #-}
 
 open import lib.Prelude
@@ -44,8 +46,8 @@ module polymorphism.SubsetModel where
   ∫ : {Γ : Ctx} (A : Ty Γ) -> Ctx
   ∫ {(ctx Γ0 Γ1)} (ty A0 A1) = ctx (Σ A0) (λ p → Σ (λ (p0 : Γ1 (fst p)) → A1 (fst p) p0 (snd p)))
 
-  id : {Γ : Ctx} -> Subst Γ Γ
-  id = sub (λ x → x) (λ x y → y)
+  ids : {Γ : Ctx} -> Subst Γ Γ
+  ids = sub (λ x → x) (λ x y → y)
 
   p : {Γ : Ctx} (A : Ty Γ) -> Subst (∫ A) Γ
   p _ = sub fst (λ x0 x1 → fst x1)
@@ -73,15 +75,15 @@ module polymorphism.SubsetModel where
 
   -- should check these, but they're really definitional! 
   Πη : {Γ : Ctx} -> (A : Ty Γ) (B : Ty (∫ A)) -> (f : Tm (Π A B)) -> f ≃ lam A B (unlam A B f)
-  Πη (ty A0 A1) (ty B0 B1) (tm f0 f1) = Refl
+  Πη (ty A0 A1) (ty B0 B1) (tm f0 f1) = id
 
   Πβ : {Γ : Ctx} -> (A : Ty Γ) (B : Ty (∫ A)) -> (M : Tm B) -> M ≃ unlam A B (lam A B M)
-  Πβ (ty A0 A1) (ty B0 B1) (tm f0 f1) = Refl
+  Πβ (ty A0 A1) (ty B0 B1) (tm f0 f1) = id
 
   -- can derive application
   app : {Γ : Ctx} -> (A : Ty Γ) (B : Ty (∫ A)) -> Tm (Π A B) -> (M : Tm A)
-      -> Tm (tysubst B (id ,, M))
-  app A B f a = tmsubst (unlam A B f) (id ,, a)
+      -> Tm (tysubst B (ids ,, M))
+  app A B f a = tmsubst (unlam A B f) (ids ,, a)
 
 
   -- Sigma types --
@@ -89,7 +91,7 @@ module polymorphism.SubsetModel where
   Σt : {Γ : Ctx} -> (A : Ty Γ) (B : Ty (∫ A)) -> Ty Γ 
   Σt (ty A0 A1) (ty B0 B1) = ty (λ g0 → Σ (λ x → B0 (g0 , x))) (λ g0 g1 p → Σ (λ (a1 : A1 g0 g1 (fst p)) → B1 (g0 , fst p) (g1 , a1) (snd p)))
 
-  pair : {Γ : Ctx} -> (A : Ty Γ) (B : Ty (∫ A)) -> (M : Tm A) -> Tm (tysubst B (id ,, M)) -> Tm (Σt A B)
+  pair : {Γ : Ctx} -> (A : Ty Γ) (B : Ty (∫ A)) -> (M : Tm A) -> Tm (tysubst B (ids ,, M)) -> Tm (Σt A B)
   pair _ _ (tm M0 M1) (tm N0 N1) = tm (λ g0 → M0 g0 , N0 g0) (λ g0 g1 → M1 g0 g1 , N1 g0 g1)
 
   -- FIXME projections and beta/eta
@@ -98,23 +100,23 @@ module polymorphism.SubsetModel where
 
   ID : {Γ : Ctx} (A : Ty Γ) (M N : Tm A) -> Ty Γ
   ID (ty A0 A1) (tm M0 M1) (tm N0 N1) =
-    ty (λ g0 → Id (M0 g0) (N0 g0)) (λ g0 g1 α → Id (subst (A1 g0 g1) α (M1 g0 g1)) (N1 g0 g1))
+    ty (λ g0 → Id (M0 g0) (N0 g0)) (λ g0 g1 α → Id (transport (A1 g0 g1) α (M1 g0 g1)) (N1 g0 g1))
 
   refl : {Γ : Ctx} {A : Ty Γ} (M : Tm A) -> Tm (ID A M M)
-  refl M = tm (λ _ → Refl) (λ _ _ → Refl)
+  refl M = tm (λ _ → id) (λ _ _ → id)
 
   sbst :  {Γ : Ctx} {A : Ty Γ} (B : Ty (∫ A)) {M1 M2 : Tm A} (α : Tm (ID A M1 M2))
-       -> Tm (tysubst B (id ,, M1))
-       -> Tm (tysubst B (id ,, M2))
+       -> Tm (tysubst B (ids ,, M1))
+       -> Tm (tysubst B (ids ,, M2))
   sbst {ctx Γ0 Γ1} {(ty A0 A1)} (ty B0 B1) (tm α0 α1) (tm s0 s1) = 
-       tm (λ g0 → subst (λ x → B0 (g0 , x)) (α0 g0) (s0 g0))
-          (λ g0 g1 → subst (λ (p' : Σ \ (x0 : Σ A0) → Σ (λ p0 → A1 (fst x0) p0 (snd x0)) × B0 x0) -> B1 (fst p') (fst (snd p')) (snd (snd p'))) 
-                        (pair≃ (pair≃ Refl (α0 g0)) {!!})
+       tm (λ g0 → transport (λ x → B0 (g0 , x)) (α0 g0) (s0 g0))
+          (λ g0 g1 → transport (λ (p' : Σ \ (x0 : Σ A0) → Σ (λ p0 → A1 (fst x0) p0 (snd x0)) × B0 x0) -> B1 (fst p') (fst (snd p')) (snd (snd p'))) 
+                        (pair≃ (pair≃ id (α0 g0)) {!!})
                         (s1 g0 g1))
 
   contract : {Γ : Ctx} {A : Ty Γ} (M N : Tm A) (P : Tm (ID A M N)) 
            -> Tm (ID (Σt A (ID (tysubst A (p A)) (tmsubst M (p A)) (v A))) (pair A (ID (tysubst A (p A)) (tmsubst M (p A)) (v A)) M (refl M)) (pair A (ID (tysubst A (p A)) (tmsubst M (p A)) (v A)) N P))
-  contract (tm M0 M1) (tm N0 N1) (tm P0 P1) = tm (λ g0 → pair≃ (P0 g0) (subst-Id-post (P0 g0) Refl)) 
+  contract (tm M0 M1) (tm N0 N1) (tm P0 P1) = tm (λ g0 → pair≃ (P0 g0) (transport-Path-right (P0 g0) id)) 
                                                  (λ g0 g1 → {!!})
 
   -- FIXME: finish and check computation rules
@@ -143,29 +145,29 @@ module polymorphism.SubsetModel where
   univalencet : ∀ {Γ} {A B : Tm (U{Γ})} -> Equivt A B -> Tm (ID U A B)
   univalencet {Γ}{tm A0 A1}{tm B0 B1} (tm l0 l1 , tm r0 r1 , tm α0 α1 , tm β0 β1) =
               tm (\ g0 -> (ua (equiv1 g0)))
-                 (λ g0 g1 → λ≃ (λ b0 → ua (isoToAdj 
-                                           (      (λ a1 → subst (B1 g0 g1) (α0 (g0 , b0))
+                 (λ g0 g1 → λ≃ (λ b0 → ua (improve (hequiv 
+                                                  (λ a1 → transport (B1 g0 g1) (α0 (g0 , b0))
                                                                 (l1 (g0 , r0 (g0 , b0)) 
-                                                                (g1 , subst (A1 g0 g1) (app≃ subst-univ-back) a1))) ,
-                                            isiso (λ b1 → subst (A1 g0 g1) (! (app≃ subst-univ-back))
+                                                                (g1 , transport (A1 g0 g1) (ap≃ transport-ua-back) a1)))
+                                                  (λ b1 → transport (A1 g0 g1) (! (ap≃ transport-ua-back))
                                                                 (r1 (g0 , b0) (g1 , b1)))
-                                                  (λ b1 → α1 (g0 , b0) (g1 , b1) 
-                                                          ∘ resp (λ x → subst (B1 g0 g1) (α0 (g0 , b0)) (l1 (g0 , r0 (g0 , b0)) (g1 , x)))
-                                                                (app≃ (subst-inv-2 (A1 g0 g1) (app≃ (subst-univ-back {_} {_} {(equiv1 g0)}))))) 
-                                                  (λ a1 → app≃
-                                                            (subst-inv-1 (A1 g0 g1) (app≃ (subst-univ-back {_} {_}))) ∘
-                                                            resp (subst (A1 g0 g1) (! (app≃ subst-univ-back)))
+                                                  (λ a1 → ap≃
+                                                            (transport-inv-1 (A1 g0 g1) (ap≃ (transport-ua-back {_} {_}))) ∘
+                                                            ap (transport (A1 g0 g1) (! (ap≃ transport-ua-back)))
                                                             (β1 (g0 , r0 (g0 , b0))
-                                                             (g1 , subst (A1 g0 g1) (app≃ subst-univ-back) a1))
-                                                            ∘ resp (subst (A1 g0 g1) (! (app≃ subst-univ-back))) 
-                                                                   ({! (! (respd r1 (pair≃ Refl (α0 (g0 , b0))))) !}))))) 
+                                                             (g1 , transport (A1 g0 g1) (ap≃ transport-ua-back) a1))
+                                                            ∘ ap (transport (A1 g0 g1) (! (ap≃ transport-ua-back))) 
+                                                                   ({! (! (respd r1 (pair≃ id (α0 (g0 , b0))))) !})) 
+                                                  (λ b1 → α1 (g0 , b0) (g1 , b1) 
+                                                          ∘ ap (λ x → transport (B1 g0 g1) (α0 (g0 , b0)) (l1 (g0 , r0 (g0 , b0)) (g1 , x)))
+                                                              (ap≃ (transport-inv-2 (A1 g0 g1) (ap≃ (transport-ua-back {_} {_} {(equiv1 g0)}))))))))
                             -- ENH avoid copying and pasting the whole above term
-                            ∘ subst-→-pre (ua (equiv1 g0)) _)
-              where equiv1 : (g0 : Ob Γ) -> AEq (A0 g0) (B0 g0)
-                    equiv1 g0 =  (isoToAdj (      (λ a0 → l0 (g0 , a0)) , 
-                                            isiso (λ b0 → r0 (g0 , b0))
-                                                  (λ b0 → α0 (g0 , b0))
-                                                  (λ a0 → β0 (g0 , a0))))
+                            ∘ transport-→-pre (ua (equiv1 g0)) _)
+              where equiv1 : (g0 : Ob Γ) -> Equiv (A0 g0) (B0 g0)
+                    equiv1 g0 =  (improve (hequiv (λ a0 → l0 (g0 , a0)) 
+                                                  (λ b0 → r0 (g0 , b0))
+                                                  (λ a0 → β0 (g0 , a0))
+                                                  (λ b0 → α0 (g0 , b0))))
 
 
   -- universe of with h-prop valued relations
@@ -195,7 +197,7 @@ module polymorphism.SubsetModel where
   Prf (tm P0 P1) = ty (λ _ → Unit) (λ x0 _ _ → P0 x0)
 
   -- irrel : ∀ {Γ} {P : Tm {Γ} Propo} -> (M N : Tm (Prf P)) -> Tm (ID (Prf P) M N)
-  -- irrel {Γ} {tm P0 P1} (tm M0 M1) (tm N0 N1) = tm (λ _ → Refl) (λ g0 g1 → {!!}) -- would need Propo to be hprops
+  -- irrel {Γ} {tm P0 P1} (tm M0 M1) (tm N0 N1) = tm (λ _ → id) (λ g0 g1 → {!!}) -- would need Propo to be hprops
 
   -- could define irrel for leibniz equality, following hofmann
 
@@ -224,7 +226,7 @@ module polymorphism.SubsetModel where
 
     eta : ∀ {Γ} 
         -> Tm{Γ} (Π (idty{Γ}) (# (ID idty (v (idty{Γ})) idfun)))
-    eta {Γ} = tm _ (λ g0 g1 f0 f1 → (λ≃ (λ A → λ≃ (λ x → f1 A (λ y → Id y x) x Refl))) , 
+    eta {Γ} = tm _ (λ g0 g1 f0 f1 → (λ≃ (λ A → λ≃ (λ x → f1 A (λ y → Id y x) x id))) , 
                                     {!f1!}) -- FIXME need some higher-dimensional naturality?  
 
 
@@ -243,5 +245,5 @@ module polymorphism.SubsetModel where
 
     eta : ∀ {Γ} 
         -> Tm{Γ} (Π (idty{Γ}) (# (ID idty (v (idty{Γ})) idfun)))
-    eta {Γ} = tm _ (λ g0 g1 f0 f1 → (λ≃ (λ A → λ≃ (λ x → f1 A (λ y → Id y x , (snd A _ _)) x Refl))) , 
+    eta {Γ} = tm _ (λ g0 g1 f0 f1 → (λ≃ (λ A → λ≃ (λ x → f1 A (λ y → Id y x , (snd A _ _)) x id))) , 
                                      λ≃ (λ a0 → λ≃ (λ a1 → λ≃ (λ a2 → λ≃ (λ a23 → snd (a1 a2) _ _)))))

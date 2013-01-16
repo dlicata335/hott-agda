@@ -18,11 +18,11 @@ module lib.spaces.3Sphere1 where
     base = Base
 
     postulate
-      loop : Id{Id {Id base base} Refl Refl} Refl Refl
+      loop : Id{Id {Id base base} id id} id id
 
     S³-rec : {C : Set} 
            -> (base' : C)
-           -> (loop' : Id{Id {Id base' base'} Refl Refl} Refl Refl)
+           -> (loop' : Id{Id {Id base' base'} id id} id id)
            -> S³ -> C
     S³-rec base' _ Base  = base'
 

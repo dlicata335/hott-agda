@@ -1,29 +1,32 @@
 
 {-# OPTIONS --type-in-type --without-K #-}
 
+open import lib.First
 open import lib.Paths 
 open import lib.Prods
 open Paths
 
 module lib.WEq where
 
-  Contractible : Set -> Set
-  Contractible A = Σ \(t : A) -> (x : A) -> Id x t
+  Contractible : Type -> Type
+  Contractible A = Σ \(t : A) -> (x : A) -> Path x t
   
-  HFiber : {A B : Set} -> (A -> B) -> B -> Set
-  HFiber f y = Σ \x -> Id (f x) y
+  HFiber : {A B : Type} -> (A -> B) -> B -> Type
+  HFiber f y = Σ \x -> Path (f x) y
   
-  WEqBy : (A B : Set) -> (f : A -> B) -> Set
-  WEqBy A B f = (y : _) -> Contractible (HFiber f y)
+  IsWEq : (A B : Type) -> (f : A -> B) -> Type
+  IsWEq A B f = (y : _) -> Contractible (HFiber f y)
   
-  WEq : (A B : Set) -> Set
-  WEq A B = Σ \f -> WEqBy A B f
+  WEq : (A B : Type) -> Type
+  WEq A B = Σ \f -> IsWEq A B f
 
+{-
   _☆_ : {A B : Set} -> WEq A B -> A -> B
   w ☆ x = (fst w) x
+-}
 
-  -- contrIdIfContr : (A : Set) -> Contractible A -> (a b : A) -> Contractible (Id a b)
-  -- contrIdIfContr A (x , c) a b = trans ((c a)) (sym (c b)) , \ x' -> {!respd c x'!} 
-    -- gives subst{\ x0 -> Id x0 x} x' (c a) ≃ c b
+  -- contrPathIfContr : (A : Set) -> Contractible A -> (a b : A) -> Contractible (Path a b)
+  -- contrPathIfContr A (x , c) a b = trans ((c a)) (sym (c b)) , \ x' -> {!respd c x'!} 
+    -- gives subst{\ x0 -> Path x0 x} x' (c a) ≃ c b
     -- by def subst is   (c a) o (sym x') ≃ c b
     -- rearrange to      (sym (c b)) o (c a) ≃ x'

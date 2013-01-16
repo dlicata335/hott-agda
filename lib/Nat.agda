@@ -1,9 +1,11 @@
 
 {-# OPTIONS --type-in-type --without-K #-}
 
+open import lib.First
+
 module lib.Nat where
 
-  data Nat : Set where
+  data Nat : Type where
     Z : Nat
     S : Nat -> Nat
 
@@ -13,7 +15,7 @@ module lib.Nat where
 
   module NatM where
   
-    natrec : {p : Nat -> Set} -> 
+    natrec : {p : Nat -> Type} -> 
               p Z -> 
               ((n : Nat) -> p n -> p (S n)) -> 
               (n : Nat) -> p n

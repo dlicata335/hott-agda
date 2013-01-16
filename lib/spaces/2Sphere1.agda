@@ -18,17 +18,17 @@ module lib.spaces.2Sphere1 where
     base = Base
 
     postulate
-      loop : Refl{_}{base} ≃ Refl{_}{base}
+      loop : id{_}{base} ≃ id{_}{base}
 
     S²-rec : {C : Set} 
            -> (base' : C)
-           -> (loop' : Refl{_}{base'} ≃ Refl{_}{base'})
+           -> (loop' : id{_}{base'} ≃ id{_}{base'})
            -> S² -> C
     S²-rec base' _ Base = base'
 
     S²-elim : (C : S² -> Set)
             -> (base' : C base)
-            -> (loop' : subst (\ y -> Id (subst C y base') base') loop (Refl{_}{base'}) ≃ {! (Refl{_}{base'}) !})
+            -> (loop' : transport (\ y -> Path (transport C y base') base') loop (id{_}{base'}) ≃ id {_} {base'})
             -> (x : S²) -> C x
     S²-elim C base' _ Base = base'
 
