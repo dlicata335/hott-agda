@@ -3,6 +3,7 @@
 open import lib.First
 open import lib.Paths 
 open import lib.Prods
+open import lib.Truncations
 open Paths
 
 module lib.AdjointEquiv where
@@ -103,3 +104,9 @@ module lib.AdjointEquiv where
                    -- depending on where in the computational interpretation this happens,
                    -- we might need to write this out by hand, but that works too
                    -- isadj (subst (λ x → x) (! α)) {!!} {!!} {!!}
+ 
+ -- FIXME prove
+ postulate 
+   IsEquiv-HProp : {A B : Type} (f : A → B) → HProp (IsEquiv f)
+
+ 

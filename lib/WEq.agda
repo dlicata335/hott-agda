@@ -4,13 +4,11 @@
 open import lib.First
 open import lib.Paths 
 open import lib.Prods
+open import lib.Truncations
 open Paths
 
 module lib.WEq where
 
-  Contractible : Type -> Type
-  Contractible A = Σ \(t : A) -> (x : A) -> Path x t
-  
   HFiber : {A B : Type} -> (A -> B) -> B -> Type
   HFiber f y = Σ \x -> Path (f x) y
   

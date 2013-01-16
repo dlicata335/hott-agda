@@ -101,6 +101,12 @@ module lib.Paths where
               → Path α (! β ∘ γ)
               → Path (β ∘ α) γ
    move-left-! id id γ x = ∘-unit-l γ ∘ x
+
+   move-left-right :  {A : Type} {M N P : A}
+                 (α : Path M P) (β : Path N P) (γ : Path M N)
+              → Path α (β ∘ γ) 
+              → Path (α ∘ ! γ) β 
+   move-left-right id β id x = x
    
    move-right-! :  {A : Type} {M N P : A}
                   (β : Path P N) (α : Path M N) (γ : Path M P)
@@ -108,6 +114,12 @@ module lib.Paths where
                → Path α (β ∘ γ)
    move-right-! id id γ x = ! (∘-unit-l γ) ∘ x
    
+   move-right-right :  {A : Type} {M N P : A}
+                         (β : Path N P) (α : Path M N) (γ : Path M P)
+                      → Path (β ∘ α) γ
+                      → Path β (γ ∘ ! α)
+   move-right-right id id γ x = x
+
    move-right-right-! :  {A : Type} {M N P : A}
                          (β : Path N P) (α : Path N M) (γ : Path M P)
                       → Path (β ∘ ! α) γ
@@ -192,6 +204,13 @@ module lib.Paths where
                → {M N : A} (α : M ≃ N)
                → (ap f α ≃ αf N ∘ α ∘ ! (αf M))
    ap-by-id αf id = ap (λ x → αf _ ∘ x) (! (∘-unit-l (! (αf _)))) ∘ ! (!-inv-r (αf _)) 
+
+   -- FIXME: relation to ap≃2 ?
+   ap-by-equals : {A B : Type} {f g : A → B}
+                  (α : (x : _) → f x ≃ g x) 
+                → {M N : A} (β : M ≃ N)
+                → (ap f β ≃ ! (α N) ∘ ap g β ∘ (α M))
+   ap-by-equals α id = ! (!-inv-l (α _) ∘ ap (λ x → ! (α _) ∘ x) (∘-unit-l (α _)))
 
    ap-constant : {A C : Type} {M N : A} (v : C) -> (p : Path M N) -> Path (ap (\ _ -> v) p) id
    ap-constant v id = id 

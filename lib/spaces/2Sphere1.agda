@@ -26,11 +26,17 @@ module lib.spaces.2Sphere1 where
            -> S² -> C
     S²-rec base' _ Base = base'
 
-    S²-elim : (C : S² -> Set)
+    S²-elim :  (C : S² -> Set)
             -> (base' : C base)
             -> (loop' : transport (\ y -> Path (transport C y base') base') loop (id{_}{base'}) ≃ id {_} {base'})
             -> (x : S²) -> C x
     S²-elim C base' _ Base = base'
+
+    postulate
+      βloop/rec : {C : Set} 
+                -> (base' : C)
+                -> (loop' : id{_}{base'} ≃ id{_}{base'})
+                -> ap (ap (S²-rec base' loop')) loop ≃ loop'
 
 {-
     module Rec where 
