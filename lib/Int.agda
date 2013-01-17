@@ -4,6 +4,7 @@ open import lib.First public
 open import lib.Paths public
 open import lib.AdjointEquiv public
 open Paths
+open import lib.Truncations public
 
 module lib.Int where
 
@@ -62,5 +63,7 @@ module Int where
  
   succEquiv : Equiv Int Int
   succEquiv = improve (hequiv succ pred pred-succ succ-pred)
-
-
+  
+  postulate
+    HSet-Int : HSet Int
+  

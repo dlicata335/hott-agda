@@ -2,6 +2,7 @@
 
 open import lib.Prelude 
 open import homotopy.HigherHomotopyAbelian 
+open import homotopy.Pi1S1 
 open Paths
 
 module homotopy.Hopf where
@@ -46,6 +47,15 @@ module homotopy.Hopf where
 
   H : S² → Type
   H = S²-fibration S¹ S¹-loops
+
+  S¹-is-Gpd : HGpd S¹
+  S¹-is-Gpd x y = hset-path where
+    hset-path : HSet (Path{S¹} x y)
+    hset-path = transport HSet (! (ua (improve Path-S¹-is-Int))) Int.HSet-Int
+
+  H-is-1-truncated : (x : S²) → HGpd (H x)
+  H-is-1-truncated = S²-elim (λ x → HGpd (H x)) S¹-is-Gpd
+                             (fst ((IsTrunc-Path {S -2} _ (IsTrunc-is-HProp {S (S (S -2))} S¹) _ _) _ _)) 
 
   module Encode where
     module A1 = homotopy.HigherHomotopyAbelian S² base

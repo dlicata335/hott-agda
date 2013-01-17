@@ -18,12 +18,6 @@ module homotopy.Pi2S2 where
   open S² using (S² ; S²-rec ; S²-elim)
   open S¹ using (S¹ ; S¹-rec ; S¹-elim)
 
-  H-is-1-truncated : (x : S²) → HGpd (H x)
-  H-is-1-truncated = S²-elim (λ x → HGpd (H x)) S¹-is-Gpd
-                                    {! (IsTrunc-is-HProp{(S (S (S -2)))} S¹) !} where
-    postulate 
-      S¹-is-Gpd : HGpd S¹
-
   encode : {x : S²} -> τ₁ (Path{S²} S².base x) -> H x
   encode {x} α = Trunc-rec (H-is-1-truncated x) R.encode α
 
@@ -81,37 +75,23 @@ module homotopy.Pi2S2 where
                                            (ap (\ β -> transport H (! β) x) S².loop) ≃ id)
                              (ap≃₁→
                                 (ap (λ α' → transport (τ₁ o Path S².base) α' o decode') S².loop)
-                                (ap (λ β → transport H (! β) S¹.base) S².loop) ≃〈 {!STS3!} 〉 
+                                (ap (λ β → transport H (! β) S¹.base) S².loop) ≃〈 ap (λ x' → ap≃₁→ (ap (λ α' → transport (τ₁ o Path S².base) α' o decode') S².loop) x') STS3 〉 
                              (ap≃₁→
                                   (ap (λ α' → transport (τ₁ o Path S².base) α' o decode') S².loop)
-                                  (! S¹.loop)) ≃〈 {!STS4!} 〉 
+                                  (! S¹.loop))                                 ≃〈 ap (λ x' → ap≃₁→ x' (! S¹.loop)) STS4 〉 
                              (ap≃₁→
                                   (λ≃ (λ y → ap (λ α' → transport (τ₁ o Path S².base) α' (decode' y)) S².loop))
-                                  (! S¹.loop)) ≃〈 {! naturality!} 〉
+                                  (! S¹.loop)) ≃〈 ap≃₁→-β1 (λ y → ap (λ α' → transport (τ₁ o Path S².base) α' (decode' y)) S².loop) (! S¹.loop) 〉
                              (ap decode' (! S¹.loop)
-                              ∘ ap (λ α' → transport (τ₁ o Path S².base) α' (decode' S¹.base)) S².loop) ≃〈 {!!} 〉 
+                              ∘ ap (λ α' → transport (τ₁ o Path S².base) α' (decode' S¹.base)) S².loop) ≃〈 ap (λ x' → x' ∘ ap (λ α' → transport (τ₁ o Path S².base) α' (decode' S¹.base)) S².loop) (ap-! decode' S¹.loop) 〉 
                              (! (ap decode' S¹.loop)
-                              ∘ ap (λ α' → transport (τ₁ o Path S².base) α' (decode' S¹.base)) S².loop) ≃〈 {!!} 〉 
+                              ∘ ap (λ α' → transport (τ₁ o Path S².base) α' (decode' S¹.base)) S².loop) ≃〈 ap (λ x' → ! x' ∘ ap (λ α' → transport (τ₁ o Path S².base) α' (decode' S¹.base)) S².loop) (ap-o [_] R.decode' S¹.loop) 〉 
                              (! (ap [_] (ap R.decode' S¹.loop))
-                              ∘ ap (λ α' → transport (τ₁ o Path S².base) α' [ id ]) S².loop) ≃〈 {!!} 〉 
+                              ∘ ap (λ α' → transport (τ₁ o Path S².base) α' [ id ]) S².loop) ≃〈 ap (λ x' → ! (ap [_] x') ∘ ap (λ α' → transport (τ₁ o Path S².base) α' (decode' S¹.base)) S².loop) (S¹.βloop/rec id S².loop) 〉 
                              (! (ap [_] S².loop)
-                              ∘ ap (λ α' → transport (τ₁ o Path S².base) α' [ id ]) S².loop) ≃〈 {!!} 〉 
+                              ∘ ap (λ α' → transport (τ₁ o Path S².base) α' [ id ]) S².loop) ≃〈 ap (λ x' → ! (ap [_] S².loop) ∘ x') STS5 〉 
                              (! (ap [_] S².loop)
-                              ∘ ap (λ α' → transport (τ₁ o Path S².base) α' [ id ]) S².loop) ≃〈 {!!} 〉 
-                             (! (ap [_] S².loop)
-                              ∘ ap (λ α' → transport (τ₁ o Path S².base) α' [ id ]) S².loop) ≃〈 {!!} 〉 
-                             (! (ap [_] S².loop)
-                              ∘ ap (λ α' → [ transport (Path S².base) α' id ]) S².loop) ≃〈 {!!} 〉 
-                             (! (ap [_] S².loop)
-                              ∘ ap ([_] o (λ α' → transport (Path S².base) α' id)) S².loop) ≃〈 {!!} 〉 
-                             (! (ap [_] S².loop)
-                              ∘ ap [_] (ap (λ α' → transport (Path S².base) α' id) S².loop)) ≃〈 {!!} 〉 
-                             (! (ap [_] S².loop)
-                              ∘ ap [_] (ap (λ α' → α' ∘ id) S².loop)) ≃〈 {!!} 〉 
-                             (! (ap [_] S².loop)
-                              ∘ ap [_] (ap (λ α' → α') S².loop)) ≃〈 {!!} 〉 
-                             (! (ap [_] S².loop)
-                              ∘ ap [_] S².loop) ≃〈 {!!} 〉 
+                              ∘ ap [_] S².loop) ≃〈 !-inv-l (ap [_] S².loop) 〉 
                              id ∎)
                              (fst (Trunc-is {S (S (S -2))} {Path S².base S².base} _ _ _ _ _ _))
                where 
@@ -132,6 +112,16 @@ module homotopy.Pi2S2 where
                                         {(decode' y)}))) ≃〈 {!!} 〉
                        (λ≃ (\ y -> (ap (\ α' → transport (τ₁ o Path S².base) α' (decode' y)) S².loop))) ∎
 
+                STS5 : ap (λ α' → transport (τ₁ o Path S².base) α' [ id ]) S².loop ≃ ap [_] S².loop
+                STS5 = ap (λ α' → transport (τ₁ o Path S².base) α' [ id ]) S².loop ≃〈 ap-by-equals (λ α' → transport-Trunc' (Path S².base) α' [ id ]) S².loop 〉 
+                       id ∘ ap (λ α' → [ transport (Path S².base) α' id ]) S².loop ≃〈 ∘-unit-l _ 〉 
+                       ap ([_] o (λ α' → transport (Path S².base) α' id)) S².loop ≃〈 ap-o [_] (λ α' → transport (Path S².base) α' id) S².loop 〉 
+                       ap [_] (ap (λ α' → transport (Path S².base) α' id) S².loop) ≃〈 ap (λ x' → ap [_] x') (ap-by-id STS6 S².loop) 〉 
+                       ap [_] (id ∘ S².loop)                                       ≃〈 ap (ap [_]) (∘-unit-l S².loop) 〉 
+                       ap [_] S².loop ∎ where
+
+                  STS6 : (α' : _) → α' ≃ transport (Path S².base) α' id  -- and important that it reduces to id when called above
+                  STS6 α' = ! (transport-Path-right α' id)
 {-
   decode-encode : {x : S²} (α : τ₁(Path S².base x)) → decode{x} (encode{x} α) ≃ α
   decode-encode{x} tα = Trunc-elim (\ α → decode{x} (encode{x} α) ≃ α)

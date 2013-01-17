@@ -117,8 +117,7 @@ module homotopy.Pi1S1 where
   encode-decode {x} = S¹-induction
      (\ (x : S¹) →  (c : Cover x) 
                     → Path (encode{x} (decode{x} c)) c)
-     encode-loop^ hedberg x where
-       postulate hedberg : _
+     encode-loop^ (λ≃ (λ x' → fst (HSet-Int _ _ _ _))) x 
   
   decode-encode  : {x : S¹} (α : Path base x)
                  → Path (decode (encode α)) α
@@ -134,6 +133,12 @@ module homotopy.Pi1S1 where
   Ω₁[S¹]-is-Int : HEquiv (Path base base) Int
   Ω₁[S¹]-is-Int = 
      hequiv encode decode decode-encode encode-loop^
+
+  -- more generally:
+  postulate -- FIXME: TODO
+    Path-S¹-is-Int : ∀ {x y} → HEquiv (Path{S¹} x y) Int 
+
+  -- preserves composition
   
   loop^-preserves-succ : (n : Int) 
                        → Path (loop^ (succ n)) (loop ∘ loop^ n)

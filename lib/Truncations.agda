@@ -60,7 +60,9 @@ module lib.Truncations where
   -}
   postulate
     IsTrunc-is-HProp   : {n : TLevel} (A : Type) -> HProp (IsTrunc n A)
-    increment-IsTrunc : {n : TLevel} {A : Type} -> (IsTrunc n A) → (IsTrunc (S n) A)
+  
+  increment-IsTrunc : {n : TLevel} {A : Type} -> (IsTrunc n A) → (IsTrunc (S n) A)
+  increment-IsTrunc {n}{A} tA x y = IsTrunc-Path {n} A tA x y
 
   module Truncation where
 
@@ -108,12 +110,20 @@ module lib.Truncations where
        encode-decode' : encode' o decode' ≃ (\ x -> x)
        decode-encode' : decode' o encode' ≃ (\ x -> x)
 
-   Trunc-simple-η : ∀ {n A} → Trunc-rec{A}{Trunc n A}{n} (Trunc-is{n}{A}) [_] ≃ (\ x -> x)
-   Trunc-simple-η {n}{A} = λ≃ (Trunc-elim (λ z → Path (Trunc-rec (Trunc-is{n}{A}) [_] z) z) 
-                              (λ x → IsTrunc-Path{n} _ (Trunc-is {n} {A}) _ _)
-                              (λ _ → id))
-   
+   Trunc-simple-η : ∀ {n A} {y : Trunc n A} 
+                  → Trunc-rec{A}{Trunc n A}{n} (Trunc-is{n}{A}) [_] y ≃ y
+   Trunc-simple-η {n}{A}{y} = Trunc-elim (λ z → Path (Trunc-rec (Trunc-is{n}{A}) [_] z) z) 
+                                      (λ x → IsTrunc-Path{n} _ (Trunc-is {n} {A}) _ _)
+                                      (λ _ → id)
+                                      y
+                                      
    transport-Trunc : {n : TLevel} {Γ : Type} (A : Γ → Type) {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
                    →  transport (\ x -> Trunc n (A x)) δ 
                     ≃ Trunc-rec (Trunc-is {n} {A θ2}) (λ x → [ transport A δ x ])
-   transport-Trunc A id = ! Trunc-simple-η
+   transport-Trunc A id = λ≃ (\ y -> ! (Trunc-simple-η {_} {_} {y}))
+
+   -- avoid the λ≃ because it's annoying to unpack later
+   transport-Trunc' : {n : TLevel} {Γ : Type} (A : Γ → Type) {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (y : Trunc n (A θ1))
+                     →  transport (\ x -> Trunc n (A x)) δ y
+                    ≃ Trunc-rec (Trunc-is {n} {A θ2}) (λ x → [ transport A δ x ]) y
+   transport-Trunc' A id y = ! (Trunc-simple-η {_} {_} {y})
