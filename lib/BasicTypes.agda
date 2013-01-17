@@ -16,5 +16,5 @@ module lib.BasicTypes where
   open import lib.Monoid public
   open import lib.WEq public
   open import lib.Univalence public
-
+  open import lib.Truncations public
   

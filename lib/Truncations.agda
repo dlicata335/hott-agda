@@ -55,10 +55,12 @@ module lib.Truncations where
   Contractible-is-HProp A = λ c1 c2 → (pair≃ (fst (Contractible-Path c1 (fst c1) (fst c2))) {!snd (Contractible-Path c1 (fst c1) (fst c2)) !}) , 
                                       {!!}
 
-  Trunc-is-HProp : {n : TLevel} (A : Type) -> HProp (IsTrunc n A)
   Trunc-is-HProp { -2 } A = Contractible-is-HProp A
   Trunc-is-HProp {S n} A = {!Trunc-is-HProp {n}  !}
   -}
+  postulate
+    IsTrunc-is-HProp   : {n : TLevel} (A : Type) -> HProp (IsTrunc n A)
+    increment-IsTrunc : {n : TLevel} {A : Type} -> (IsTrunc n A) → (IsTrunc (S n) A)
 
   module Truncation where
 
@@ -81,11 +83,11 @@ module lib.Truncations where
           → (Trunc n A) → C
     Trunc-rec _ f (trunc' x) = f x
 
-    Trunc-elim : {A : Type} {n : TLevel} {C : Trunc n A → Type} 
+    Trunc-elim : {A : Type} {n : TLevel} (C : Trunc n A → Type)
                 (tC : (x : Trunc n A) → IsTrunc n (C x))
           -> ((x : A) → C [ x ])
           → (x : (Trunc n A)) → C x
-    Trunc-elim _ f (trunc' x) = f x
+    Trunc-elim _ _ f (trunc' x) = f x
    open T public
 
    τ₋₁ = Trunc (S -2)
@@ -103,8 +105,8 @@ module lib.Truncations where
            Path {(Trunc (S n) A)} [ x ] [ y ]
          → (Trunc n (Path x y))
 
-       encode-decode : encode' o decode' ≃ (\ x -> x)
-       decode-encode : decode' o encode' ≃ (\ x -> x)
+       encode-decode' : encode' o decode' ≃ (\ x -> x)
+       decode-encode' : decode' o encode' ≃ (\ x -> x)
 
 
     
