@@ -173,7 +173,7 @@ module homotopy.Pi2S2 where
                   STS3 = {!!} -- by analogy with above; can we derive it from that?
 
                   STS4 :   (ap (λ α' → transport (Path S².base) α' o decode') S².loop)
-                         ≃ {! λ≃ (λ y → ap (λ α' → transport (Path S².base) α' (decode' y)) S².loop) !}
+                         ≃ λ≃ (λ y → ap (λ α' → transport (Path S².base) α' (decode' y)) S².loop)
                   STS4 = (ap (λ α' → transport (Path S².base) α' o decode') S².loop) ≃〈 {!!} 〉
                          (ap (λ α' → (\ (y : S¹) → transport (Path S².base) α' (decode' y))) S².loop) ≃〈 {!!} 〉
                          (λ≃ (\ y -> (ap (\α' → transport (Path S².base) α' (decode' y))) S².loop)) ≃〈 {!!} 〉

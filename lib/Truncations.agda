@@ -59,3 +59,32 @@ module lib.Truncations where
   Trunc-is-HProp { -2 } A = Contractible-is-HProp A
   Trunc-is-HProp {S n} A = {!Trunc-is-HProp {n}  !}
   -}
+
+  module Truncation where
+
+   module T where
+    private
+      data Trunc' (n : TLevel) (A : Type) : Type where
+        trunc' : A -> Trunc' n A
+
+    Trunc : (n : TLevel) (A : Type) → Type
+    Trunc = Trunc' 
+
+    [_] : {n : TLevel} {A : Type} → A -> Trunc n A
+    [ x ] = trunc' x
+
+    postulate 
+      Trunc-is : {n : TLevel} {A : Type} → IsTrunc n (Trunc n A)
+
+    Trunc-rec : {A C : Type} {n : TLevel} (tC : IsTrunc n C)
+          -> (A → C)
+          → (Trunc n A) → C
+    Trunc-rec _ f (trunc' x) = f x
+
+    Trunc-elim : {A : Type} {n : TLevel} {C : Trunc n A → Type} 
+                (tC : (x : Trunc n A) → IsTrunc n (C x))
+          -> ((x : A) → C [ x ])
+          → (x : (Trunc n A)) → C x
+    Trunc-elim _ f (trunc' x) = f x
+   open T public
+    
