@@ -194,6 +194,10 @@ module lib.Paths where
    ap-∘ : {A B : Type} (F : A → B) {M N P : A} (β : Path N P) (α : Path M N)
         → Path (ap F (β ∘ α)) (ap F β ∘ ap F α)
    ap-∘ _ _ id = id
+
+   ap-∘3 : {A B : Type} (F : A → B) {M N P Q : A} (γ : Path P Q) (β : Path N P) (α : Path M N)
+        → Path (ap F (γ ∘ β ∘ α)) (ap F γ ∘ ap F β ∘ ap F α)
+   ap-∘3 _ _ id id = id
    
    apd-∘ : {A : Type} {B : A -> Type} (F : (x : A) -> B x) {M N P : A} (β : Path N P) (α : Path M N)
            -> Path (apd F (β ∘ α)) (apd F β ∘ ap (λ x → transport B β x) (apd F α) ∘ ap (λ f → f (F M)) (transport-∘ B β α))
