@@ -36,6 +36,10 @@ module lib.Functions where
        -> Path f g -> ({x y : A} -> (α : Path x y) -> Path (f x) (transport B (! α) (g y)))
   ap≃₁' {A} {B} {f} {.f} id id = id 
 
+  -- non-dependent version
+  ap≃₁→ : {A B : Type} {f g : A → B} {x y : A} → f ≃ g → x ≃ y → f x ≃ g y
+  ap≃₁→ α β = ap2 (\ f x -> f x) α β
+
   postulate 
     λ≃  : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> ((x : A) -> Path (f x) (g x)) -> Path f g
     Π≃η : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
@@ -94,6 +98,22 @@ module lib.Functions where
             (\ {x} -> transport (\ γ -> B γ x) δ (f {x}))
   transport-Π2i _ _ id f = id 
 
+  -- could have →≃β for application to a single term, and
+  -- →≃β2 for the other way to go around the square
+  →≃β1 : {A B : Type} {f g : A → B} {x y : A} → (α : (x : _) → f x ≃ g x) (β : x ≃ y) 
+             → ap≃₁→ (λ≃ α) β ≃ ap g β ∘ (α x) 
+  →≃β1 α id = ap2 (λ f x → f x) (λ≃ α) id ≃〈 ap2-aps-1 (λ f x → f x) (λ≃ α) id 〉
+                  ap≃ (λ≃ α) ≃〈 Π≃β α 〉
+                  (α _) ≃〈 ! (∘-unit-l _) 〉
+                  (id ∘ α _ ∎)
+
+  -- →≃β1 and →≃β2 cohere
+  naturality1 : {A B : Set} {F G : A -> B}
+              -> (β : G ≃ F) 
+              -> {M N : A} (α : M ≃ N) 
+              -> ap G α ≃ ! (ap≃ β {N}) ∘ ap F α ∘ ap≃ β {M}
+  naturality1 id id = id
+
   ap-λ : {Γ : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
            {A : Γ -> Set} {B : (γ : Γ) -> A γ -> Set}
            {M : (γ : Γ) -> (x : A γ) -> B γ x}
@@ -102,6 +122,13 @@ module lib.Functions where
                            (pair≃⁻ δ id))
            ∘ transport-Π A B δ (M θ1)
   ap-λ {δ = id} = Π≃η id
+
+  -- when they're independent, it looks like a kind of exchange 
+  ap-λ-range-nd : {Γ : Set} {A B : Set} 
+                  (M : Γ -> A -> B) {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
+           -> (ap (\ γ -> (λ x -> M γ x)) δ) 
+            ≃ λ≃ (λ x → ap (\ γ -> M γ x) δ)
+  ap-λ-range-nd M id = Π≃η id
 
   transport-com-for-ap-app : 
     {Γ : Set} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
@@ -122,19 +149,16 @@ module lib.Functions where
             ≃ ap≃₁ (apd F δ) (apd M δ) ∘ transport-com-for-ap-app δ A B F M
   ap-app {δ = id} = id
 
-  ap-app-1-nd : {Γ A B : Set} {θ1 θ2 : Γ} {δ : θ1 ≃ θ2}
-                  {F : Γ -> A -> B}
-                  {M : A}
-               -> ap (\ x -> (F x) M) δ 
-                  ≃ ap≃ (ap F δ) {M}
-  ap-app-1-nd {δ = id} = id
+  ap-app-1-nd : {Γ A B : Set} 
+                  (F : Γ -> A -> B)
+                  {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (M : A)
+               -> ap (\ x -> (F x) M) δ ≃ ap≃ (ap F δ) {M}
+  ap-app-1-nd _ id _ = id
 
-  naturality1 : {A B : Set} {F G : A -> B}
-              -> (β : G ≃ F) 
-              -> {M N : A} (α : M ≃ N) 
-              -> ap G α ≃ ! (ap≃ β {N}) ∘ ap F α ∘ ap≃ β {M}
-  naturality1 id id = id
-
+  -- NOTE: special case of ap-λ and ap-app 
+  ap-of-o : {A B C D : _} (f : A → B → C) (g : A → D → B) {M N : A} (α : M ≃ N)
+          → ap (\ x -> f x o g x) α ≃ λ≃ (λ x → ap2 (λ f' x' → f' x') (ap f α) (ap (λ y → g y x) α))
+  ap-of-o f g id = Π≃η id
 
   uncurry : ∀ {A B C : Set} -> (A -> B -> C) -> A × B -> C
   uncurry f = \ x -> f (fst x) (snd x)
