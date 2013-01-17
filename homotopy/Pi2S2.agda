@@ -99,15 +99,94 @@ module homotopy.Pi2S2 where
                        (ap encode (S².loop))            ≃〈 transport-H-loop2 〉 
                        S¹.loop ∎
 
-  decode : {x : S²} -> H x → Path{S²} S².base x
-  decode{x} = S²-elim (λ x' → H x' → Path {S²} S².base x')
-                      decode'
-                      {!!} 
-                      x
+  module NeedTruncation where
 
-  decode-encode : {x : S²} (α : _) → decode{x} (encode{x} α) ≃ α
-  decode-encode id = id
+    -- FIXME: special case of ap-λ and ap-app ?
+    ap-of-o : {A B C D : _} (f : A → B → C) (g : A → D → B) {M N : A} (α : M ≃ N)
+            → ap (\ x -> f x o g x) α ≃ λ≃ (λ x → ap2 (λ f' x' → f' x') (ap f α) (ap (λ y → g y x) α))
+    ap-of-o f g id = Π≃η id
 
-  impossible : HEquiv (Path{S²} S².base S².base) S¹
-  impossible = hequiv encode decode decode-encode encode-decode'
+    ap≃₁→ : {A B : Type} {f g : A → B} {x y : A} → f ≃ g → x ≃ y → f x ≃ g y
+    ap≃₁→ α β = ap2 (\ f x -> f x) α β
+
+    ap≃₁→-β1 : {A B : Type} {f g : A → B} {x y : A} → (α : (x : _) → f x ≃ g x) (β : x ≃ y) 
+               → ap≃₁→ (λ≃ α) β ≃ ap g β ∘ (α x) 
+    ap≃₁→-β1 α id = {!!}
+
+    decode : {x : S²} -> H x → Path{S²} S².base x
+    decode{x} = S²-elim (λ x' → H x' → Path {S²} S².base x')
+                        decode'
+                        (transport (λ y → Path (transport (λ x' → H x' → Path S².base x') y decode') decode') S².loop id ≃〈 transport-Path (λ y → transport (λ x' → H x' → Path S².base x') y decode') (λ y → decode') S².loop id 〉 
+                         (ap (\ _ -> decode') S².loop)
+                         ∘ id
+                         ∘ ! (ap (\ y -> (transport (λ x' → H x' → Path S².base x') y decode')) S².loop) ≃〈 ap (λ x' → ap (λ _ → decode') S².loop ∘ x') (∘-unit-l (! (ap (λ y → transport (λ x' → H x' → Path S².base x') y decode') S².loop))) 〉 
+                         (ap (\ _ -> decode') S².loop)
+                         ∘ ! (ap (\ y -> (transport (λ x' → H x' → Path S².base x') y decode')) S².loop) ≃〈 ap (λ x' → x' ∘ ! (ap (λ y → transport (λ x0 → H x0 → Path S².base x0) y decode') S².loop)) (ap-constant decode' S².loop) 〉 
+                         id
+                         ∘ ! (ap (\ y -> (transport (λ x' → H x' → Path S².base x') y decode')) S².loop) ≃〈 ∘-unit-l (! (ap (λ y → transport (λ x' → H x' → Path S².base x') y decode') S².loop)) 〉 
+                         ! (ap (\ y -> (transport (λ x' → H x' → Path S².base x') y decode')) S².loop) ≃〈 ap ! STS 〉 
+                         id ∎)
+                        x where
+
+              STS : (ap (\ y -> (transport (λ x' → H x' → Path S².base x') y decode')) S².loop) ≃ id {_} {decode'}
+              STS = ap (λ y → transport (λ x' → H x' → Path S².base x') y decode') S².loop ≃〈 ap-by-equals (λ α → transport-→ H (Path S².base) α decode') S².loop 〉 
+                    id ∘ ap (λ α → transport (Path S².base) α o decode' o transport H (! α)) S².loop ≃〈 ∘-unit-l (ap (λ α → transport (Path S².base) α o decode' o transport H (! α)) S².loop) 〉 
+                    ap (λ α → transport (Path S².base) α o decode' o transport H (! α)) S².loop ≃〈 ap-of-o (λ α → transport (Path S².base) α o decode') (λ α → transport H (! α)) S².loop 〉 
+                    λ≃ (\ (x : S¹) → ap2 (\ f x -> f x) (ap (\ α' -> transport (Path S².base) α' o decode') S².loop)
+                                                        (ap (\ β -> transport H (! β) x) S².loop)) ≃〈 ap λ≃ (λ≃ STS2) 〉 
+                    λ≃ (\ x -> id) ≃〈 ! (Π≃η id) 〉 
+                    id ∎ 
+               where
+                STS2 : (x : S¹) → ap2 (\ f x -> f x) (ap (\ α' -> transport (Path S².base) α' o decode') S².loop)
+                                                         (ap (\ β -> transport H (! β) x) S².loop)
+                                 ≃ id
+                STS2 = S¹-elim (\ x -> ap2 (\ f x -> f x) (ap (\ α' -> transport (Path S².base) α' o decode') S².loop)
+                                                          (ap (\ β -> transport H (! β) x) S².loop) ≃ id) 
+                               (ap2 (λ f x' → f x')
+                                  (ap (λ α' → transport (Path S².base) α' o decode') S².loop)
+                                  (ap (λ β → transport H (! β) S¹.base) S².loop) ≃〈 {!STS3!} 〉 
+                               (ap2 (λ f x' → f x')
+                                    (ap (λ α' → transport (Path S².base) α' o decode') S².loop)
+                                    (! S¹.loop)) ≃〈 {!STS4!} 〉 
+                               (ap2 (λ f x' → f x')
+                                    (λ≃ (λ y → ap (λ α' → transport (Path S².base) α' (decode' y)) S².loop))
+                                    (! S¹.loop)) ≃〈 {! naturality!} 〉
+                               (ap decode' (! S¹.loop)
+                                ∘ ap (λ α' → transport (Path S².base) α' (decode' S¹.base)) S².loop) ≃〈 {!!} 〉 
+                               (! (ap decode' S¹.loop)
+                                ∘ ap (λ α' → transport (Path S².base) α' (decode' S¹.base)) S².loop) ≃〈 {!!} 〉 
+                               (! S².loop
+                                ∘ ap (λ α' → transport (Path S².base) α' (decode' S¹.base)) S².loop) ≃〈 {!!} 〉 
+                               (! S².loop
+                                ∘ ap (λ α' → transport (Path S².base) α' id) S².loop) ≃〈 {!!} 〉 
+                               (! S².loop
+                                ∘ ap (λ α' → α' ∘ id) S².loop) ≃〈 {!!} 〉 
+                               (! S².loop
+                                ∘ S².loop) ≃〈 {!!} 〉 
+                               (! S².loop
+                                ∘ ap (λ α' → α') S².loop) ≃〈 {!!} 〉 
+                               id ∎)
+                               {!!}  -- ?1 is a Path{Path {Path {Path {S²} base base} (id {_} {base}) (id {_} {base})} something somethingelse} tra lala
+                                     -- is that trivial in the truncation?
+                 where 
+                  STS3 : (ap (λ β → transport H (! β) S¹.base) S².loop) ≃ ! S¹.loop
+                  STS3 = {!!} -- by analogy with above; can we derive it from that?
+
+                  STS4 :   (ap (λ α' → transport (Path S².base) α' o decode') S².loop)
+                         ≃ {! λ≃ (λ y → ap (λ α' → transport (Path S².base) α' (decode' y)) S².loop) !}
+                  STS4 = (ap (λ α' → transport (Path S².base) α' o decode') S².loop) ≃〈 {!!} 〉
+                         (ap (λ α' → (\ (y : S¹) → transport (Path S².base) α' (decode' y))) S².loop) ≃〈 {!!} 〉
+                         (λ≃ (\ y -> (ap (\α' → transport (Path S².base) α' (decode' y))) S².loop)) ≃〈 {!!} 〉
+                         (λ≃ (\ y -> (ap≃ (ap (\α' → transport (Path S².base) α') S².loop)
+                                          {(decode' y)}))) ≃〈 {!!} 〉
+                         (λ≃ (\ y -> (ap≃ (λ≃ (\β → ap (\ α' → transport (Path S².base) α' β) S².loop))
+                                          {(decode' y)}))) ≃〈 {!!} 〉
+                         (λ≃ (\ y -> (ap (\ α' → transport (Path S².base) α' (decode' y)) S².loop))) ∎
+
+
+    decode-encode : {x : S²} (α : _) → decode{x} (encode{x} α) ≃ α
+    decode-encode id = id
+  
+    impossible : HEquiv (Path{S²} S².base S².base) S¹
+    impossible = hequiv encode decode decode-encode encode-decode'
   
