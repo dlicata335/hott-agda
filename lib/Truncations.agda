@@ -46,9 +46,9 @@ module lib.Truncations where
              (λ α → move-left-right (apaths y) α (apaths x)
                       (! (apd apaths α ∘ ! (transport-Path-right α (apaths x)))))
 
-  Trunc-Path : {n : TLevel} (A : Type) -> IsTrunc n A -> (x y : A) -> IsTrunc n (Path x y)
-  Trunc-Path { -2 } A tA x y = Contractible-Path tA x y
-  Trunc-Path { S n } A tA x y = λ p q → Trunc-Path {n} (Path x y) (tA x y) p q
+  IsTrunc-Path : {n : TLevel} (A : Type) -> IsTrunc n A -> (x y : A) -> IsTrunc n (Path x y)
+  IsTrunc-Path { -2 } A tA x y = Contractible-Path tA x y
+  IsTrunc-Path { S n } A tA x y = λ p q → IsTrunc-Path {n} (Path x y) (tA x y) p q
 
   {-
   Contractible-is-HProp : (A : Type) -> HProp (Contractible A)
@@ -87,4 +87,24 @@ module lib.Truncations where
           → (x : (Trunc n A)) → C x
     Trunc-elim _ f (trunc' x) = f x
    open T public
+
+   τ₋₁ = Trunc (S -2)
+   τ₀ = Trunc (S (S -2))
+   τ₁ = Trunc (S (S (S -2)))
+
+   module TruncPath {n : _} {A : _} {x y : A} where
+     decode' : 
+          (Trunc n (Path x y))
+        → Path {(Trunc (S n) A)} [ x ] [ y ]
+     decode' = Trunc-rec (Trunc-is {S n} {A} [ x ] [ y ]) (ap [_]) 
+
+     postulate
+       encode' : 
+           Path {(Trunc (S n) A)} [ x ] [ y ]
+         → (Trunc n (Path x y))
+
+       encode-decode : encode' o decode' ≃ (\ x -> x)
+       decode-encode : decode' o encode' ≃ (\ x -> x)
+
+
     
