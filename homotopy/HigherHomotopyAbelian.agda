@@ -43,6 +43,23 @@ module homotopy.HigherHomotopyAbelian (A : Set) (base : A) where
                    (b ∘ a) 
                    ∎
   
+  ⊙-inv-l : (p : Ω2) → (ap ! p ⊙ p) ≃ id
+  ⊙-inv-l p = ap ! p ⊙ p ≃〈 ap2-ap-assoc-1 _∘_ ! p p  〉 
+              ap2 (λ x y → ! x ∘ y) p p ≃〈 ap2-same-is-ap (λ x y → ! x ∘ y) p 〉 
+              ap (\ x -> ! x ∘ x) p ≃〈 ap-by-equals !-inv-l p 〉 
+              id ∘ ap (\ x -> id) p ≃〈 ∘-unit-l _ 〉 
+              ap (\ x -> id) p ≃〈 ap-constant id p 〉 
+              id ∎
+  {- TODO
+  ⊙-inv-r : (a : Ω2) → (a ⊙ ap ! a) ≃ id
+  ⊙-inv-r a = {!!}
+  -}
+
+  inverse-same : (a : Ω2) → ! a ≃ ap ! a
+  inverse-same a = ! (cancels-is-inverse (ap ! a ∘ a ≃〈 same _ _ 〉 
+                                          ap ! a ⊙ a ≃〈 ⊙-inv-l _ 〉 
+                                          id ∎))
+
   {-
       -- for reference, this is the minimal generalization of the IH that goes through
       -- for proving the interchange law

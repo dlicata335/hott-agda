@@ -108,5 +108,12 @@ module lib.Truncations where
        encode-decode' : encode' o decode' ≃ (\ x -> x)
        decode-encode' : decode' o encode' ≃ (\ x -> x)
 
-
-    
+   Trunc-simple-η : ∀ {n A} → Trunc-rec{A}{Trunc n A}{n} (Trunc-is{n}{A}) [_] ≃ (\ x -> x)
+   Trunc-simple-η {n}{A} = λ≃ (Trunc-elim (λ z → Path (Trunc-rec (Trunc-is{n}{A}) [_] z) z) 
+                              (λ x → IsTrunc-Path{n} _ (Trunc-is {n} {A}) _ _)
+                              (λ _ → id))
+   
+   transport-Trunc : {n : TLevel} {Γ : Type} (A : Γ → Type) {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
+                   →  transport (\ x -> Trunc n (A x)) δ 
+                    ≃ Trunc-rec (Trunc-is {n} {A θ2}) (λ x → [ transport A δ x ])
+   transport-Trunc A id = ! Trunc-simple-η

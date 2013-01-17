@@ -131,6 +131,10 @@ module lib.Paths where
                 → Path (a56 ∘ (a45 ∘ a34 ∘ a23) ∘ a12) (a56 ∘ a45 ∘ a34 ∘ a23 ∘ a12)
    rassoc-1-3-1 id id id id id = id
 
+   cancels-is-inverse : ∀ {A} {M N : A} {p : Path M N} {q : Path N M}
+                      -> Path (q ∘ p) id
+                      -> Path q (! p)
+   cancels-is-inverse {_}{_}{_}{p}{q} α = ∘-unit-l (! p) ∘ move-right-right q p id α
 
    -- transport and ap
    
@@ -269,6 +273,15 @@ module lib.Paths where
                    -> Path (ap2 f α β) (ap (λ y → f N y) β ∘ ap (λ x → f x M') α)
    ap2-aps-2 f id id = id 
 
+   ap2-same-is-ap : ∀ {A C} {M N : A} (f : A -> A -> C) 
+                    (α : Path M N) -> ap2 f α α ≃ ap (\ x -> f x x) α
+   ap2-same-is-ap f id = id
+
+   ap2-ap-assoc-1 : {A A' B  C : Type} (f : A → B → C) 
+                    (g : A' → A) {M1 M2 : A'} (α : M1 ≃ M2) {N1 N2 : B} (β : N1 ≃ N2)
+                  → ap2 f (ap g α) β ≃ ap2 (λ x y → f (g x) y) α β
+   ap2-ap-assoc-1 f g id id = id
+
    ap2-β1 : ∀ {A B} {M N : A} {M' N' : B} -> (α : Path M N) -> (β : Path M' N')
             -> Path (ap2 (\ x y -> x) α β) α
    ap2-β1 id id = id
@@ -315,8 +328,7 @@ module lib.Paths where
                 -> Path (ap∘ (d ∘ c) (b ∘ a)) (ap∘ d b ∘ ap∘ c a)
    ichange-type id id id id = id
 
-
-   -- interderivability
+      -- interderivability
    module PaulinMohring where
      jayfrompm : {A : Type} (C : (x y : A) -> Path x y -> Type)
        -> {M N : A} -> (P : Path M N)
