@@ -17,4 +17,5 @@ module lib.BasicTypes where
   open import lib.WEq public
   open import lib.Univalence public
   open import lib.Truncations public
+  open import lib.Paths2 public
   

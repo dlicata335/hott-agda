@@ -27,9 +27,17 @@ module lib.Truncations where
   contract : {A : Type} -> (x : A) -> ((y : A) -> Path x y) -> Contractible A
   contract = _,_
 
-  IsTrunc : TLevel -> Type -> Type
-  IsTrunc -2 A = Contractible A
-  IsTrunc (S n) A = (x y : A) → IsTrunc n (Path x y)
+  -- want some control over unfolding
+  mutual
+    data IsTrunc : TLevel -> Type -> Type where
+      istrunc  : ∀ {n} {A} → IsTrunc' n A -> IsTrunc n A
+  
+    IsTrunc' : TLevel -> Type -> Type 
+    IsTrunc' -2 A = Contractible A
+    IsTrunc' (S n) A = (x y : A) → IsTrunc n (Path x y)
+
+  use-trunc : ∀ {n A} → IsTrunc n A -> IsTrunc' n A
+  use-trunc (istrunc p) = p
 
   HProp : Type -> Type
   HProp A = IsTrunc (S -2) A
@@ -47,8 +55,8 @@ module lib.Truncations where
                       (! (apd apaths α ∘ ! (transport-Path-right α (apaths x)))))
 
   IsTrunc-Path : {n : TLevel} (A : Type) -> IsTrunc n A -> (x y : A) -> IsTrunc n (Path x y)
-  IsTrunc-Path { -2 } A tA x y = Contractible-Path tA x y
-  IsTrunc-Path { S n } A tA x y = λ p q → IsTrunc-Path {n} (Path x y) (tA x y) p q
+  IsTrunc-Path { -2 } A tA x y = istrunc (Contractible-Path (use-trunc tA) x y)
+  IsTrunc-Path { S n } A tA x y = istrunc (λ p q → IsTrunc-Path {n} (Path x y) (use-trunc tA x y) p q)
 
   {-
   Contractible-is-HProp : (A : Type) -> HProp (Contractible A)
@@ -60,9 +68,9 @@ module lib.Truncations where
   -}
   postulate
     IsTrunc-is-HProp   : {n : TLevel} (A : Type) -> HProp (IsTrunc n A)
-  
+
   increment-IsTrunc : {n : TLevel} {A : Type} -> (IsTrunc n A) → (IsTrunc (S n) A)
-  increment-IsTrunc {n}{A} tA x y = IsTrunc-Path {n} A tA x y
+  increment-IsTrunc {n}{A} tA = istrunc (λ x y → IsTrunc-Path {n} A tA x y)
 
   module Truncation where
 
@@ -100,7 +108,7 @@ module lib.Truncations where
      decode' : 
           (Trunc n (Path x y))
         → Path {(Trunc (S n) A)} [ x ] [ y ]
-     decode' = Trunc-rec (Trunc-is {S n} {A} [ x ] [ y ]) (ap [_]) 
+     decode' = Trunc-rec (use-trunc (Trunc-is {S n} {A}) [ x ] [ y ]) (ap [_]) 
 
      postulate
        encode' : 

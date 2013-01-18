@@ -16,7 +16,7 @@ module homotopy.Hopf where
   loop-family->id-equiv-loop : {A : Type} 
                              → ((x : A) → Path x x)
                              → Path {Equiv A A} id-equiv id-equiv
-  loop-family->id-equiv-loop α = (pair≃ (λ≃ α) (fst (IsEquiv-HProp _ _ _)))
+  loop-family->id-equiv-loop α = (pair≃ (λ≃ α) (fst (use-trunc (use-trunc (IsEquiv-HProp _) _ _))))
 
   loop-family->id-loop : {A : Type} 
                        → ((x : A) → Path x x)
@@ -49,13 +49,13 @@ module homotopy.Hopf where
   H = S²-fibration S¹ S¹-loops
 
   S¹-is-Gpd : HGpd S¹
-  S¹-is-Gpd x y = hset-path where
-    hset-path : HSet (Path{S¹} x y)
-    hset-path = transport HSet (! (ua (improve Path-S¹-is-Int))) Int.HSet-Int
+  S¹-is-Gpd = istrunc hset-path where
+    hset-path : (x y : _) → HSet (Path{S¹} x y)
+    hset-path x y = transport HSet (! (ua (improve Path-S¹-is-Int))) Int.HSet-Int
 
   H-is-1-truncated : (x : S²) → HGpd (H x)
   H-is-1-truncated = S²-elim (λ x → HGpd (H x)) S¹-is-Gpd
-                             (fst ((IsTrunc-Path {S -2} _ (IsTrunc-is-HProp {S (S (S -2))} S¹) _ _) _ _)) 
+                             (fst (use-trunc (use-trunc (IsTrunc-Path {S -2} _ (IsTrunc-is-HProp {S (S (S -2))} S¹) _ _) _ _)))
 
   module Encode where
     module A1 = homotopy.HigherHomotopyAbelian S² base

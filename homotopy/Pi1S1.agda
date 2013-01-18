@@ -117,7 +117,7 @@ module homotopy.Pi1S1 where
   encode-decode {x} = S¹-induction
      (\ (x : S¹) →  (c : Cover x) 
                     → Path (encode{x} (decode{x} c)) c)
-     encode-loop^ (λ≃ (λ x' → fst (HSet-Int _ _ _ _))) x 
+     encode-loop^ (λ≃ (λ x' → fst (use-trunc (use-trunc (use-trunc HSet-Int _ _) _ _)))) x 
   
   decode-encode  : {x : S¹} (α : Path base x)
                  → Path (decode (encode α)) α

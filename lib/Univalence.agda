@@ -32,3 +32,4 @@ module lib.Univalence where
   transport-ua-back : {A B : Type} {a : Equiv A B}
                     -> transport (\ x -> x) (! (ua a)) ≃ IsEquiv.g (snd a)
   transport-ua-back {a = a} = transport-ua _ ∘ ap (transport (λ X → X)) (!-ua a)
+
