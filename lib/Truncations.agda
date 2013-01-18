@@ -103,6 +103,7 @@ module lib.Truncations where
    τ₋₁ = Trunc (S -2)
    τ₀ = Trunc (S (S -2))
    τ₁ = Trunc (S (S (S -2)))
+   τ₂ = Trunc (S (S (S (S -2))))
 
    module TruncPath {n : _} {A : _} {x y : A} where
      decode' : 
@@ -135,3 +136,6 @@ module lib.Truncations where
                      →  transport (\ x -> Trunc n (A x)) δ y
                     ≃ Trunc-rec (Trunc-is {n} {A θ2}) (λ x → [ transport A δ x ]) y
    transport-Trunc' A id y = ! (Trunc-simple-η {_} {_} {y})
+
+   Trunc-func : {n : TLevel} {A B : Type} -> (A -> B) -> (Trunc n A -> Trunc n B)
+   Trunc-func f = Trunc-rec Trunc-is ([_] o f)
