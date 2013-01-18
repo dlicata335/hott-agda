@@ -16,7 +16,7 @@ module homotopy.Pi1S2 where
   Codes-Contractible : {x : S²} -> IsTrunc -2 (Codes x)
   Codes-Contractible {x} = (S²-elim (\ x -> IsTrunc -2 (Codes x))
                                     (istrunc (<> , (λ _ → id)))
-                                    (HSet-UIP (increment-IsTrunc (IsTrunc-is-HProp _)) _ _ _ _) -- (fst (use-trunc (use-trunc (IsTrunc-Path { -1} ((Contractible o Codes) S².base) (istrunc {!\ x y → !}) _ _) _ _)))
+                                    (HSet-UIP (increment-IsTrunc (IsTrunc-is-HProp _)) _ _ _ _)
                                     x)
   
   Codes-HSet : (x : S²) -> HSet (Codes x)
@@ -38,11 +38,8 @@ module homotopy.Pi1S2 where
   decode : {x : S²} → Codes x → P x
   decode {x} = S²-elim (λ x' → Codes x' → P x') 
                        decode'
-                       (HSet-UIP hset _ _ _ _)
+                       (HSet-UIP (ΠIsTrunc (λ _ → Trunc-is)) _ _ _ _)
                        x
-     where 
-       hset : ∀ {A} → HSet (Unit → τ₀ A)
-       hset = ΠIsTrunc (λ _ → Trunc-is)
        
   decode-encode : {x : S²} (α : P x) → decode (encode α) ≃ α
   decode-encode{x} α = Trunc-elim (λ α' → decode {x} (encode {x} α') ≃ α')
