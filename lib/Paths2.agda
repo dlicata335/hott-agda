@@ -9,6 +9,7 @@ open import lib.AdjointEquiv
 open import lib.Prods
 open import lib.Univalence
 open import lib.Functions
+open import lib.Truncations
 
 module lib.Paths2 where
 
@@ -24,3 +25,15 @@ module lib.Paths2 where
                                           (coe (Path-equiv α))
                                           (ap (coe α))
   run-Path-equiv id = ! (λ≃ ap-id)
+
+  loop-family->id-equiv-loop : {A : Type} 
+                             → ((x : A) → Path x x)
+                             → Path {Equiv A A} id-equiv id-equiv
+  loop-family->id-equiv-loop α = (pair≃ (λ≃ α) (fst (use-trunc (use-trunc (IsEquiv-HProp _) _ _))))
+ 
+  loop-family->id-loop : {A : Type} 
+                       → ((x : A) → Path x x)
+                       → Path {Path{Type} A A} id id
+  loop-family->id-loop α = 
+    id-ua ∘ ap ua (loop-family->id-equiv-loop α) ∘ ! id-ua
+  

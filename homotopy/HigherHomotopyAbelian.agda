@@ -55,6 +55,13 @@ module homotopy.HigherHomotopyAbelian (A : Set) (base : A) where
   ⊙-inv-r a = {!!}
   -}
 
+  ⊙-inv-r-! : (a : Ω2) -> a ⊙ (! a) ≃ id 
+  ⊙-inv-r-! a = !-inv-r a ∘ ! (same a (! a))
+  
+  ⊙-inv-l-! : (a : Ω2) -> (! a) ⊙ a ≃ id 
+  ⊙-inv-l-! a = !-inv-l a ∘ ! (same (! a) a)
+  
+
   inverse-same : (a : Ω2) → ! a ≃ ap ! a
   inverse-same a = ! (cancels-is-inverse (ap ! a ∘ a ≃〈 same _ _ 〉 
                                           ap ! a ⊙ a ≃〈 ⊙-inv-l _ 〉 

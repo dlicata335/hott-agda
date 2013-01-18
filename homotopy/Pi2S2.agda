@@ -1,3 +1,5 @@
+
+
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude 
@@ -22,8 +24,8 @@ module homotopy.Pi2S2 where
   τ₁Ω[S²]-is-S¹ : Path (τ₁ (Path{S²} S².base S².base)) S¹
   τ₁Ω[S²]-is-S¹ = ua (improve (hequiv encode decode' decode-encode encode-decode'))
 
-  π2S²-is-Z : Path (τ₀ (Path{Path{S²} S².base S².base} id id)) Int
-  π2S²-is-Z = (τ₀ (Path{Path{S²} S².base S².base} id id))                     ≃〈 ua (improve (hequiv TruncPath.decode' TruncPath.encode' (λ _ → ap≃ TruncPath.encode-decode') (λ _ → ap≃ TruncPath.decode-encode'))) 〉 
+  π₂S²-is-Z : Path (τ₀ (Path{Path{S²} S².base S².base} id id)) Int
+  π₂S²-is-Z = (τ₀ (Path{Path{S²} S².base S².base} id id))                     ≃〈 ua (improve (hequiv TruncPath.decode' TruncPath.encode' (λ _ → ap≃ TruncPath.encode-decode') (λ _ → ap≃ TruncPath.decode-encode'))) 〉 
               Path{τ₁ (Path{S²} S².base S².base)} [ id ] [ id ]               ≃〈 Path-equiv τ₁Ω[S²]-is-S¹ {[ id ]} {[ id ]} 〉
               Path{S¹} (coe τ₁Ω[S²]-is-S¹ [ id ]) (coe τ₁Ω[S²]-is-S¹  [ id ]) ≃〈 ap (λ x → Path {S¹} x x) (ap≃ (transport-ua _)) 〉 
               Path{S¹} S¹.base S¹.base                                       ≃〈 ua (improve homotopy.Pi1S1.Ω₁[S¹]-is-Int) 〉 

@@ -6,12 +6,20 @@ open import lib.Paths
 open Paths
 open import lib.Prods
 open import lib.Functions
+open import lib.Nat
 
 module lib.Truncations where
 
   data TLevel : Type where
     -2 : TLevel 
     S : TLevel -> TLevel
+
+  -1 : TLevel
+  -1 = S -2
+
+  tl : Nat -> TLevel
+  tl Z = (S (S -2))
+  tl (S n) = (S (tl n))
   
   {-
   record Contractible (A : Type) : Type where
@@ -40,13 +48,16 @@ module lib.Truncations where
   use-trunc (istrunc p) = p
 
   HProp : Type -> Type
-  HProp A = IsTrunc (S -2) A
+  HProp A = IsTrunc -1 A
 
   HSet : Type -> Type
-  HSet A = IsTrunc (S (S -2)) A
+  HSet A = IsTrunc (tl 0) A
+
+  postulate
+    HSet-UIP : ∀ {A} -> HSet A -> (x y : A) (p q : x ≃ y) -> p ≃ q
 
   HGpd : Type -> Type
-  HGpd A = IsTrunc (S (S (S -2))) A
+  HGpd A = IsTrunc (tl 1) A
 
   Contractible-Path : ∀ {A} -> Contractible A → (x y : A) -> Contractible (Path x y)
   Contractible-Path (acenter , apaths) x y = 
@@ -71,6 +82,9 @@ module lib.Truncations where
 
   increment-IsTrunc : {n : TLevel} {A : Type} -> (IsTrunc n A) → (IsTrunc (S n) A)
   increment-IsTrunc {n}{A} tA = istrunc (λ x y → IsTrunc-Path {n} A tA x y)
+
+  postulate 
+    ΠIsTrunc : ∀{A n}{B : A → Type} → ((x : A) -> IsTrunc n (B x)) → IsTrunc n ((x : A) → B x)
 
   module Truncation where
 
@@ -100,10 +114,10 @@ module lib.Truncations where
     Trunc-elim _ _ f (trunc' x) = f x
    open T public
 
-   τ₋₁ = Trunc (S -2)
-   τ₀ = Trunc (S (S -2))
-   τ₁ = Trunc (S (S (S -2)))
-   τ₂ = Trunc (S (S (S (S -2))))
+   τ₋₁ = Trunc -1
+   τ₀ = Trunc (tl 0)
+   τ₁ = Trunc (tl 1)
+   τ₂ = Trunc (tl 2)
 
    module TruncPath {n : _} {A : _} {x y : A} where
      decode' : 
@@ -139,3 +153,5 @@ module lib.Truncations where
 
    Trunc-func : {n : TLevel} {A B : Type} -> (A -> B) -> (Trunc n A -> Trunc n B)
    Trunc-func f = Trunc-rec Trunc-is ([_] o f)
+
+  

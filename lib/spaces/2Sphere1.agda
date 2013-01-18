@@ -7,6 +7,8 @@ module lib.spaces.2Sphere1 where
   open Paths
 
   module S²1 where
+
+   module S where
     private
       data S2 : Set where
         Base : S2
@@ -38,6 +40,20 @@ module lib.spaces.2Sphere1 where
                 -> (loop' : id{_}{base'} ≃ id{_}{base'})
                 -> ap (ap (S²-rec base' loop')) loop ≃ loop'
 
+   open S public
+
+   S²-fibration : (A : Type) 
+                  → ((x : A) → Path x x)
+                  → S² → Type
+   S²-fibration A α = S²-rec A (loop-family->id-loop α)
+ 
+   S²-fibration/βloop : {A : Type}
+                        (α : (x : A) → Path x x)
+                      → ap (ap (S²-fibration A α)) loop ≃ 
+                        (loop-family->id-loop α)
+   S²-fibration/βloop α = βloop/rec _ _
+
+
 {-
     module Rec where 
      postulate
@@ -63,11 +79,3 @@ module lib.spaces.2Sphere1 where
              -> resp (resp (S²-rec a' b' n' s' fr' ba')) ba ≃ (! (βs _ _ _ _ _ _) ∘ ba' ∘ βn _ _ _ _ _ _)
 -}
 
-    module Elim where
-      -- FIXME
-
-{-
-      βloop/elim : {C : S² -> Set} 
-                 -> (a : C base) (p : subst C loop a ≃ a)
-                 -> respd (S²-elim{C} a p) loop ≃ p
--} 
