@@ -8,7 +8,7 @@ module homotopy.Pi2S2-retract where
 
   private 
     module S² = S²1
-  open S² using (S² ; S²-rec ; S²-elim)
+  open S² using (S² ; S²-rec ; S²-elim; S²-fibration/βloop)
   open S¹ using (S¹ ; S¹-rec ; S¹-elim)
 
   encode : {x : S²} -> Path{S²} S².base x -> H x

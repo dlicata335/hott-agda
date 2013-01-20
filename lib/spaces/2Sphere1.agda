@@ -30,7 +30,10 @@ module lib.spaces.2Sphere1 where
 
     S²-elim :  (C : S² -> Set)
             -> (base' : C base)
-            -> (loop' : transport (\ y -> Path (transport C y base') base') loop (id{_}{base'}) ≃ id {_} {base'})
+            -> (loop' : transport (\ y -> Path (transport C y base') base')
+                                  loop 
+                                  (id{_}{base'})
+                        ≃ {! id {_} {base'} !})
             -> (x : S²) -> C x
     S²-elim C base' _ Base = base'
 

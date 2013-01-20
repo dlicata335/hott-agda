@@ -18,4 +18,6 @@ module lib.BasicTypes where
   open import lib.Univalence public
   open import lib.Truncations public
   open import lib.Paths2 public
+  open import lib.Suspension public
+  open import lib.LoopSpace public
   

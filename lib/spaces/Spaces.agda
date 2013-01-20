@@ -9,3 +9,5 @@ module lib.spaces.Spaces where
   open import lib.spaces.3Sphere2 public
   open import lib.spaces.3Sphere1 public
   open import lib.spaces.Torus public
+  open import lib.spaces.NSphere public
+  open import lib.spaces.NSphere1 public

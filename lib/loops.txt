@@ -1,0 +1,109 @@
+For the one base point and one-loop-at-the-higheest-level version of the
+spheres, with
+                                                                                                                                                                                  
+Sn : Type
+base : Sn
+loop : <appropriate loop>
+                                                                                                                                                                                  
+X : Sn -> Type
+x : X base
+                                                                                                                                                                                  
+do these look like the right types for the second component of the
+dependent elim?  (They're machine-generated.)   
+
+
+2: (this one is right)
+
+Id (transport (λ x' → Id (transport X x' x) x) loop id) id
+
+or, with implicit arguments on:
+
+Id {Id {X base} x x}
+(transport {Id {Sn} base base}
+ (λ x' → Id {X base} (transport {Sn} X {base} {base} x' x) x)
+ {id {_} {base}} {id {_} {base}} loop (id {_} {x}))
+(id {_} {x})
+
+
+3: 
+
+Id
+(transport
+ (λ x' → Id (transport (λ x0 → Id (transport X x0 x) x) x' id) id)
+ loop id)
+id
+
+or, 
+
+Id {Id {Id {X base} x x} (id {_} {x}) (id {_} {x})}
+(transport {Id {Id {Sn} base base} (id {_} {base}) (id {_} {base})}
+ (λ x' →
+    Id {Id {X base} x x}
+    (transport {Id {Sn} base base}
+     (λ x0 → Id {X base} (transport {Sn} X {base} {base} x0 x) x)
+     {id {_} {base}} {id {_} {base}} x' (id {_} {x}))
+    (id {_} {x}))
+ {id {_} {id {_} {base}}} {id {_} {id {_} {base}}} loop
+ (id {_} {id {_} {x}}))
+(id {_} {id {_} {x}})
+
+
+4: 
+
+Id
+(transport
+ (λ x' →
+    Id
+    (transport
+     (λ x0 → Id (transport (λ x1 → Id (transport X x1 x) x) x0 id) id)
+     x' id)
+    id)
+ loop id)
+id
+
+or 
+
+Id
+{Id {Id {Id {X base} x x} (id {_} {x}) (id {_} {x})}
+ (id {_} {id {_} {x}}) (id {_} {id {_} {x}})}
+(transport
+ {Id {Id {Id {Sn} base base} (id {_} {base}) (id {_} {base})}
+  (id {_} {id {_} {base}}) (id {_} {id {_} {base}})}
+ (λ x' →
+    Id {Id {Id {X base} x x} (id {_} {x}) (id {_} {x})}
+    (transport {Id {Id {Sn} base base} (id {_} {base}) (id {_} {base})}
+     (λ x0 →
+        Id {Id {X base} x x}
+        (transport {Id {Sn} base base}
+         (λ x1 → Id {X base} (transport {Sn} X {base} {base} x1 x) x)
+         {id {_} {base}} {id {_} {base}} x0 (id {_} {x}))
+        (id {_} {x}))
+     {id {_} {id {_} {base}}} {id {_} {id {_} {base}}} x'
+     (id {_} {id {_} {x}}))
+    (id {_} {id {_} {x}}))
+ {id {_} {id {_} {id {_} {base}}}} {id {_} {id {_} {id {_} {base}}}}
+ loop (id {_} {id {_} {id {_} {x}}}))
+(id {_} {id {_} {id {_} {x}}})
+
+
+5:
+
+Id
+(transport
+ (λ x' →
+    Id
+    (transport
+     (λ x0 →
+        Id
+        (transport
+         (λ x1 → Id (transport (λ x2 → Id (transport X x2 x) x) x1 id) id)
+         x0 id)
+        id)
+     x' id)
+    id)
+ loop id)
+id
+
+or
+
+I'll spare you

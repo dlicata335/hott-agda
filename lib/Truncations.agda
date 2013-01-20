@@ -20,7 +20,7 @@ module lib.Truncations where
   tl : Nat -> TLevel
   tl Z = (S (S -2))
   tl (S n) = (S (tl n))
-  
+
   {-
   record Contractible (A : Type) : Type where
     constructor 

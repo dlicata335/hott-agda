@@ -67,3 +67,6 @@ module Int where
   postulate
     HSet-Int : HSet Int
   
+  tlp : Positive -> TLevel
+  tlp One = tl 1
+  tlp (S n) = S (tlp n)
