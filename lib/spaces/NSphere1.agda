@@ -12,37 +12,39 @@ module lib.spaces.NSphere1 where
 
   module NSphere1 where
     private
-      data S' (n : Positive) : Set where
+      data S' (n : Positive) : Type where
         Base : S' n
   
-    S^ : Positive -> Set
+    S^ : Positive -> Type
     S^ n = S' n
   
     base : ∀ {n} → S^ n
     base = Base
   
     postulate
-      loop : (n : Positive) → Loop (S^ n) base n
+      loop : (n : Positive) → Loop n (S^ n) base
   
-    S-rec : {n : Positive} {C : Set} 
+    S-rec : {n : Positive} {C : Type} 
            -> (c : C)
-           -> (α : Loop C c n)
+           -> (α : Loop n C c)
            -> S^ n -> C
     S-rec a _ Base = a
 
     postulate 
-      βloop/rec : ∀ {n} {C : Set} 
+      βloop/rec : ∀ {n} {C : Type} 
            -> (c : C)
-           -> (α : Loop C c n)
+           -> (α : Loop n C c)
            -> Path (ap^ n (S-rec c α) (loop n)) α
   
-    {-
-    S¹-elim :  (C : S¹ -> Set)
+    S-elim :   ∀ {n} (C : S^ n -> Type)
             -> (c : C base) 
-               (α : Path (transport C loop c) c)
-            -> (x : S¹) -> C x
-    S¹-elim _ x _ Base = x
+               (α : LoopOver n (loop n) C c)
+            -> (x : S^ n) -> C x
+    S-elim _ x _ Base = x
 
+    -- FIXME: need to define apd^, but fortunately this
+    -- doesn't come up very often (e.g. pi2(s2) doesn't use it)
+    {-
       βloop/elim : {C : S¹ -> Set} 
                  -> (c : C base) (α : Path (transport C loop c) c)
                  -> Path (apd (S¹-induction C c α) loop) α
