@@ -57,7 +57,7 @@ module homotopy.Pi2S2-encdec where
              where
               STS2 : (x : S¹) → ap≃₁→ (ap (\ α' -> transport (τ₁ o Path S².base) α' o decode') S².loop)
                                       (ap (\ β -> transport H (! β) x) S².loop)
-                               ≃ id
+                               ≃ id{_}{decode' x}
               STS2 = 
                      S¹-elim (\ x -> ap≃₁→ (ap (\ α' -> transport (τ₁ o Path S².base) α' o decode') S².loop)
                                            (ap (\ β -> transport H (! β) x) S².loop) ≃ id)

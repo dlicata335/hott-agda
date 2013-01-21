@@ -33,6 +33,12 @@ Id
  loop id)
 id
 
+Id
+(transport
+ (λ x → Id (transport (λ x1 → Id (transport X x1 h) h) x id) id)
+ loop id)
+id
+
 or, 
 
 Id {Id {Id {X base} x x} (id {_} {x}) (id {_} {x})}
