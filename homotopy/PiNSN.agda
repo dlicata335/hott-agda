@@ -27,11 +27,11 @@ module homotopy.PiNSN where
                           NEED_TRUNCATION) where
             postulate 
              NEED_TRUNCATION : _ 
+             -- would be a Path in (Loop n (Trunc n (S^ n)) -) between two things,
+             -- and therefore high enough to get killed by truncation.  
 
-  endo : ∀ n -> Loop (S n) Set (S^ n)
-  endo n = coe (! (LoopPath {n})) 
-               (coe (! (LoopPathType n))
-                    (S-loops n))
+  endo : ∀ n -> Loop (S n) Type (S^ n)
+  endo n = λt n (S-loops n)
 
   Codes : ∀ n -> (S^ (S n)) → Type
   Codes n = S-rec (S^ n) (endo n)
@@ -75,23 +75,52 @@ module homotopy.PiNSN where
                           x 
    where 
      pl : ∀ {n} → LoopOver (S n) (S.loop (S n)) (λ x' → Codes n x' → P x') promote
-     pl {n} = {!\ x -> ap (\ f -> transport (LoopOver n f (Codes n) x))!}
-
-     -- coe
-     --            (Loop→PathOver (S n) (S.loop (S n)) (Codes n) (λ _ → S.base) (λ x' → x') promote)
-     --            {!!}
-
-     probablySTS : (c : S^ n) → rebase (S n) (promote c) (id^ (S n)) ≃ S.loop (S n)
-     probablySTS = S-elim (λ c → rebase (S n) (promote c) (id^ (S n)) ≃ S.loop (S n))
-                          {!!} {!!}
-     {-
-     sts? : ∀ {n} → 
-          {x : Codes S.base}
-          {α : LoopOver (S n) {(S^ n)} (S.loop (S n)) (Codes n) x} 
-          → LoopOver (S n) {S^ n × Codes S.base} (S.loop (S n) ,, α) (Path {S^ (S n)} S.base o fst) (promote x)
-     sts? = {!!}
-     -}
-
+     pl {n} = coe (Loop→OverS n (S.loop (S n)) {Codes n} {P} promote) 
+                  (ap (λl n) (λ≃ STS))
+        where 
+          STS : (x' : _) →
+                        ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (promote x'))
+                             (ap^ n promote (apt n (!^ (S n) (ap^ (S n) (Codes n) (S.loop (S n)))) x'))
+                      ≃ (id^ n)
+          STS x' = ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (promote x'))
+                        (ap^ n promote (apt n (!^ (S n) (ap^ (S n) (Codes n) (S.loop (S n)))) x')) ≃〈 {!β Codes!} 〉 
+                  ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (promote x'))
+                       (ap^ n promote (apt n (!^ (S n) (λt n (S-loops n))) x')) ≃〈 {!apt-!!} 〉 
+                  ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (promote x'))
+                       (ap^ n promote (!^ n (apt n (λt n (S-loops n)) x'))) ≃〈 {!β!} 〉 
+                  ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (promote x'))
+                       (ap^ n promote (!^ n (S-loops n x'))) ≃〈 {!ap^-!!} 〉
+                  ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (promote x'))
+                       (!^ n (ap^ n promote (S-loops n x'))) ≃〈 {!ap^PathPost!} 〉 
+                  ∘^ n (apt n (λt n (λ β → rebase n (∘-unit-l β)
+                               (ap^ n (λ x → x ∘ β) 
+                                (coe (LoopPath {n}) (S.loop (S n))))))
+                              (promote x'))
+                       (!^ n (ap^ n promote (S-loops n x'))) ≃〈 {!β!} 〉 
+                  ∘^ n (rebase n (∘-unit-l (promote x'))
+                                 (ap^ n (λ x → x ∘ (promote x')) 
+                                  (coe (LoopPath {n}) (S.loop (S n)))))
+                       (!^ n (ap^ n promote (S-loops n x'))) ≃〈 {!STS2!} 〉 
+                  (id^ n) ∎ where
+           STS2 : (x' : _) → (ap^ n promote (S-loops n x'))
+                           ≃ (rebase n (∘-unit-l (promote x'))
+                                       (ap^ n (λ x → x ∘ (promote x')) 
+                                             (coe (LoopPath {n}) (S.loop (S n)))))
+           STS2 = S-elim _ 
+                  (ap^ n promote (S-loops n S.base) ≃〈 id 〉
+                   ap^ n promote (S.loop n) ≃〈 {! S.βloop/rec n (coe (LoopPath {n}) (S.loop (S n))) !} 〉
+                   (coe (LoopPath{n}) (S.loop (S n))) ≃〈 {!ap^-by-id!} 〉
+                   (ap^ n (λ x0 → x0 ∘ id)
+                          (coe (LoopPath {n}) (S.loop (S n)))) ≃〈 id 〉 
+                   (ap^ n (λ x0 → x0 ∘ promote S.base)
+                          (coe (LoopPath {n}) (S.loop (S n)))) ≃〈 {!rebase-id!} 〉 
+                   rebase n (∘-unit-l (promote S.base))
+                            (ap^ n (λ x0 → x0 ∘ promote S.base)
+                              (coe (LoopPath {n}) (S.loop (S n)))) ∎) 
+                  FIXME-CHECK-TRUNCATION where
+            postulate
+                FIXME-CHECK-TRUNCATION : _
+                       
   decode-encode : {n : _} {x : S^ (S n)} (α : P x) → decode{n}{x} (encode{n}{x} α) ≃ α
   decode-encode id = id
    

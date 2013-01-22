@@ -61,6 +61,11 @@ module lib.LoopSpace where
   postulate 
     ap^-idfunc : ∀ {A} {a : A} → (n : _) (α : Loop n A a) → ap^ n (\ (x : A) -> x) α ≃ α
 
+    ap^-! : ∀ n → ∀ {A B} {a : A} → (f : A → B) → (α : Loop n A a)
+          → ap^ n f (!^ n α) ≃ !^ n (ap^ n f α)
+  -- ap^-! One f α = ap-! f α
+  -- ap^-! (S n) f α = {!!} -- push ! inside
+    
 {-
   ap^-o : ∀ {A B C} → (n : _) → (g : B → C) (f : A → B)
         → {a : A} (α : Loop n A a)
@@ -94,10 +99,16 @@ module lib.LoopSpace where
             ((x : A) → Loop n (B x) (f x))
           ≃ (Loop n ((x : A) -> B x) f)
 
-  Loop→ : ∀ n → ∀ {A B} {f : A → B} → 
-            ((x : A) → Loop n B (f x))
-          ≃ (Loop n (A -> B) f)
-  Loop→ n {A}{B} = LoopΠ n {A} {\ _ -> B}
+  λl : ∀ n → ∀ {A} {B : A → Type} {f : _} → 
+          ((x : A) → Loop n (B x) (f x))
+       -> (Loop n ((x : A) -> B x) f)
+  λl n h = coe (LoopΠ n) h
+
+  apl : ∀ n → ∀ {A} {B : A → Type} {f : _} → 
+          (Loop n ((x : A) -> B x) f)
+       -> ((x : A) → Loop n (B x) (f x))
+  apl n h = coe (! (LoopΠ n)) h
+
 
 {-
    LoopΠ n {A} {B} {m} = improve (hequiv (i n) (e n) {!!} {!!}) where
@@ -166,47 +177,98 @@ module lib.LoopSpace where
     --                    Loop (S n) Type A    ≃〈 {!!} 〉 
     --                    ((x : A) -> Loop n A x) ∎
     -- forward direction should be \ x -> (ap^ n (λ x → coe x a))
-
-  LoopSType : ∀ n {A} -> Loop (S n) Type A ≃ ((a : A) -> Loop n A a)
-  LoopSType n = ua (improve (hequiv (λ α y → (ap^ n (λ x → coe x y) α))
-                                    (λ h → {! (coe (Loop→ n) h) !})
+  
+  postulate
+    LoopSType : ∀ n {A} -> ((a : A) -> Loop n A a) ≃ (Loop (S n) Type A)
+  {-
+  LoopSType n = (! (LoopPath{n})) ∘ 
+                ua (improve (hequiv (λ h → {! (coe (Loop→ n) h) !})
+                                    (λ α y → (ap^ n (λ x → coe x y) α))
                                     {!!}
                                     {!!}))
-                ∘ (LoopPath{n})
-  
+  -}
+
+  apt : ∀ n {A} -> Loop (S n) Type A → ((a : A) -> Loop n A a)
+  apt n l a = coe (! (LoopSType n)) l a
+
+  λt : ∀ n {A} -> ((a : A) -> Loop n A a) -> Loop (S n) Type A
+  λt n l = coe (LoopSType n) l
+
+  postulate
+    apt-! : ∀ n {A} -> (α : Loop (S n) Type A) (a : _) →
+              apt n (!^ (S n) α) a
+            ≃ !^ n (apt n α a)
 
   postulate
     ap^-ap-assoc : ∀ {A B} → (n : _) → (f : A → B) → {a : A} 
                    (α : Loop n (Path a a) id)
                  → (ap^ n (ap f) α) ≃ coe (LoopPath{n}) (ap^ (S n) f (coe (! (LoopPath{n})) α))
 
-  LoopOver' :  (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) 
+
+  LoopOverS :  (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) 
              → (B : A -> Type) (b : B a) → Type
-  LoopOver' n {A}{a} α B b = 
+  LoopOverS n {A}{a} α B b = 
     Path{Loop n (B a) b} 
-        (coe (LoopSType n) (ap^ (S n) B α) b)
+        (apt n (ap^ (S n) B α) b)
         (id^ n)
-            -- where 
-            --   loop1 : Loop (S n) Type (B a)
-            --   loop1 : (ap^ (S n) B α)
-            
-            --   coe (LoopPath {n}) loop1 : Loop n (Path Type Type) (B a)
-            -- \ α y → ap^ n (\ x -> coe x y) α : Loop n (Path Type Type) (B a) → ((y : B a) → Loop n (B a) y)
 
   postulate 
-    LoopOverS : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) → (B : A -> Type) (b : B a) 
-              → LoopOver (S n) α B b ≃ LoopOver' n α B b 
-
+    LoopOver-is-S : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) → (B : A -> Type) (b : B a) 
+                  → LoopOver (S n) α B b ≃ LoopOverS n α B b 
 
   LoopType→ : ∀ n {A B} → (Loop (S n) Type A) -> Loop (S n) Type B -> Loop (S n) Type (A → B)
-  LoopType→ n lA lB = coe (! (LoopSType n)) 
-                          (λ f → coe (Loop→ n) (λ x → ∘^ n (coe (LoopSType n) lB (f x)) 
-                                                           (ap^ n f (coe (LoopSType n) (!^ (S n) lA) x))))
+  LoopType→ n lA lB = λt n (λ f → λl n (λ x → ∘^ n (apt n lB (f x)) 
+                                                   (ap^ n f (apt n (!^ (S n) lA) x))))
 
   postulate
     ap^→ : ∀ {A} → (n : _) → (C D : A → Type) → {base : A} {α : Loop (S n) A base} →
            ap^ (S n) (\ x -> C x → D x) α 
          ≃ LoopType→ n (ap^ (S n) C α) (ap^ (S n) D α)
+
+  -- intended to to be "α ∘ β"
+  LoopTypePathPost : ∀ n {A} {a : A} (α : Loop (S n) A a) (a0 : A) 
+                   → Loop (S n) Type (Path{A} a0 a)
+  LoopTypePathPost n α a0 = 
+    λt n (λ β → rebase n (∘-unit-l β)
+                         (ap^ n (λ x → x ∘ β) 
+                                (coe (LoopPath {n}) α)))
+
+  postulate
+    ap^PathPost : ∀ n {A} {a : A} {α : Loop (S n) A a} {a0 : A}
+                → 
+                Path{Loop (S n) Type (Path{A} a0 a)}
+                    (ap^ (S n) (\ x -> Path a0 x) α)
+                    (LoopTypePathPost n α a0)
+  postulate
+   Loop→OverS : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) 
+              → {B C : A → Type} (f : B a → C a)
+              →   Path {Loop n (B a → C a) f}
+                    (λl n
+                     (λ x →
+                        ∘^ n (apt n (ap^ (S n) C α) (f x))
+                             (ap^ n f (apt n (!^ (S n) (ap^ (S n) B α)) x))))
+                    (λl n (λ x → id^ n))
+                ≃ (LoopOver (S n) α (\ x -> B x → C x) f) 
+  {-
+  Loop→OverS n {A} {a} α {B}{C} f = 
+    ! ((LoopOver (S n) α (\ x -> B x → C x) f) ≃〈 {!!} 〉 
+       LoopOverS n α (\ x -> B x → C x) f ≃〈 id 〉 
+       Path{Loop n (B a → C a) f} 
+           (apt n (ap^ (S n) (\ x → B x → C x) α) f)
+           (id^ n) ≃〈 {!!} 〉 
+       Path{Loop n (B a → C a) f} 
+           (apt n (LoopType→ n (ap^ (S n) B α) (ap^ (S n) C α)) f)
+           (id^ n) ≃〈 {!!} 〉 
+       Path{Loop n (B a → C a) f} 
+           (λl n (λ x → ∘^ n (apt n (ap^ (S n) C α) (f x)) 
+                            (ap^ n f (apt n (!^ (S n) (ap^ (S n) B α)) x))))
+           (id^ n) ≃〈 eta 〉 
+       Path{Loop n (B a → C a) f} 
+           (λl n (λ x → ∘^ n (apt n (ap^ (S n) C α) (f x)) 
+                            (ap^ n f (apt n (!^ (S n) (ap^ (S n) B α)) x))))
+           (λl (\ _ -> id^ n))
+    ∎)
+  -}
 
   -- note: non-dependent 
   postulate
@@ -246,71 +308,4 @@ module lib.LoopSpace where
           → (Path {Loop n B (g a)} (rebase n β (ap^ n f α)) (ap^ n g α))
     e = {!!}
   -}
-
-  {-
-  n = S One
-  test : (Γ : Type) (A B : Γ → Set) (g : Γ) (α : Loop n Γ g) (f : A(g) → B(g)) -> Type
-  test Γ A B g α f = {!LoopOver n α (\ x -> A (x) → B x) f !}
-  -}
-
-  Loop→Over' : (n : Positive) {A : Type} {a : A} (α : Loop n A a) 
-            → {B : Type} (C D : A → Type) (h : C a → D a) → (x : C a) → Type
-  Loop→Over' n{A}{a} α {B} C D h x = 
-                         Path{Loop n (_) (_)} 
-                             {!coe (LoopPathType (S n) ∘ (! (LoopPath {n}))) (ap^ (S n) C α)
-                                     !}
-                             (id^ n)
-             where 
-               arg : Loop n Type (C a)
-               arg = (ap^ n C (!^ n α))
-
-               res : Loop n Type (D a)
-               res = (ap^ n D α)
-
-
-  Loop→Over : (n : Positive) {A : Type} {a : A} (α : Loop n A a) 
-                → {B : Type} (C D : A → Type) (h : C a → D a) 
-                → Path ((x : _) → Loop→Over' n α C D h x)
-                       (LoopOver n α (\ x -> C x → D x) h) 
-  Loop→Over One α C D h = ua (improve (hequiv (λ p → {!!}) {!!} {!!} {!!}))
-  Loop→Over (S One) α C D h = ua (improve (hequiv (λ p → {!!}) {!!} {!!} {!!}))
-  Loop→Over n α C D h = ua (improve (hequiv (λ p → {!!}) {!!} {!!} {!!}))
-
-
-  {-
-   -- ENH: should be derivable from a general rule for LoopOver - - (\x -> A(x) -> B(x)) -
-   -- but I can't figure out what that would be
-  Loop→PathOver : (n : Positive) {A : Type} {a : A} (α : Loop n A a) 
-                → {B : Type} (C : A → Type) (f g : A → B) (h : C a → Path {B} (f a) (g a)) 
-                → Path ((x : C a) → 
-                         Path{Loop n (Path {B} (f a) (g a)) (h x)} 
-                             (ap≃→^ n {!ap^ n (transport (\ x -> ) α)!} {!!})
-                             (id^ n))
-                       (LoopOver n α (\ x -> C x → f x ≃ g x) h) 
-  Loop→PathOver n α C f g h = ua (improve (hequiv (λ p → {!!}) {!!} {!!} {!!}))
-  -}
-  {-
-  Loop→PathOver One α C f g h = ua (improve (hequiv (λ p → {!!}) {!!} {!!} {!!}))
-  Loop→PathOver (S n) α C f g h = {!!}
-  -}
-  {-
-  postulate
-   LoopΣ : (n : Positive) {A : Type}{B : A → Type}{p : Σ B} →
-           (Σ \ (x : Loop n A (fst p)) → LoopOver n x B (snd p))
-        ≃ Loop n (Σ B) p
-  
-  Loop→PathOverD : (n : Positive) {A : Type} {a : A} (α : Loop n A a) 
-                → {B : Type} (C : A → Type) (f g : (x : A) → C x → B) (h : (c : C a) → Path {B} (f a c) (g a c)) 
-                → Path ((c : C a) (γ : LoopOver n α C c) 
-                        → (Path {Loop n B (f a c)} 
-                                 (ap^ n (λ (p : Σ C) → f (fst p) (snd p)) (coe (LoopΣ n) (α , γ))) 
-                                 ({! (ap^ n (f a)) !} )))
--- (rebase n (! (h c))
---                                     (ap^ n (λ (p : Σ C) → g (fst p) (snd p)) (coe (LoopΣ n) (α , γ))))
---                                   ∘[ n ] 
-                       (LoopOver n α (\ x -> (c : C x) → f x c ≃ g x c) h) 
-  Loop→PathOverD One α C f g h = {!!} -- ua (improve (hequiv (λ p → {!!}) {!!} {!!} {!!}))
-  Loop→PathOverD (S n) α C f g h = {!!}
-  -}
-  
 
