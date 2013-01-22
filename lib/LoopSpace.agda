@@ -9,6 +9,8 @@ open Int
 open import lib.AdjointEquiv
 open import lib.Functions
 open import lib.Univalence
+open import lib.Truncations
+open Truncation
 
 module lib.LoopSpace where
 
@@ -225,20 +227,6 @@ module lib.LoopSpace where
            ap^ (S n) (\ x -> C x → D x) α 
          ≃ LoopType→ n (ap^ (S n) C α) (ap^ (S n) D α)
 
-  -- intended to to be "α ∘ β"
-  LoopTypePathPost : ∀ n {A} {a : A} (α : Loop (S n) A a) (a0 : A) 
-                   → Loop (S n) Type (Path{A} a0 a)
-  LoopTypePathPost n α a0 = 
-    λt n (λ β → rebase n (∘-unit-l β)
-                         (ap^ n (λ x → x ∘ β) 
-                                (coe (LoopPath {n}) α)))
-
-  postulate
-    ap^PathPost : ∀ n {A} {a : A} {α : Loop (S n) A a} {a0 : A}
-                → 
-                Path{Loop (S n) Type (Path{A} a0 a)}
-                    (ap^ (S n) (\ x -> Path a0 x) α)
-                    (LoopTypePathPost n α a0)
   postulate
    Loop→OverS : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) 
               → {B C : A → Type} (f : B a → C a)
@@ -309,3 +297,36 @@ module lib.LoopSpace where
     e = {!!}
   -}
 
+  postulate
+    IsNTrunc-Loop : ∀ n {A a} -> IsTrunc (tlp n) A → IsTrunc (tlp n) (Loop n A a)
+
+    trivial-LoopOver : ∀ n {A a} {α : Loop n A a} {B : A → Type} {b : B a}
+                     -> ((x : A) → IsTrunc (tlp n) (B x))
+                     → (LoopOver n α B b)
+
+    LoopOver-HProp : ∀ n {A a} {α : Loop n A a} {B : A → Type} {b : B a}
+                   -> ((x : A) → IsTrunc (tlp n) (B x))
+                   → HProp (LoopOver n α B b)
+
+    -- FIXME should probably go somewhere else
+    IsTrunc-is-PosTrunc : {n : Positive} (A : Type) → IsTrunc (tlp n) (IsTrunc (tlp n) A)
+
+
+  -- FIXME: should be able to derive these compositionally from a rule for 
+  -- truncation and a rule for Path in general
+
+  -- intended to to be "α ∘ β"
+  LoopTypeTruncPathPost : ∀ n {A} {a : A} (α : Loop (S n) A a) (a0 : A) 
+                   → Loop (S n) Type (Trunc (tlp n)(Path{A} a0 a))
+  LoopTypeTruncPathPost n α a0 = λt n (Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path a0 _)) tβ) 
+                                                  (λ _ → IsNTrunc-Loop n Trunc-is) 
+                                                  (λ β → ap^ n [_]
+                                                        (rebase n (∘-unit-l β)
+                                                           (ap^ n (λ x → x ∘ β) (coe (LoopPath {n}) α)))))
+
+  postulate
+    ap^TruncPathPost : ∀ n {A} {a : A} {α : Loop (S n) A a} {a0 : A}
+                → 
+                Path{Loop (S n) Type (Trunc (tlp n) (Path{A} a0 a))}
+                    (ap^ (S n) (\ x -> Trunc (tlp n) (Path a0 x)) α)
+                    (LoopTypeTruncPathPost n α a0)

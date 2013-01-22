@@ -55,6 +55,7 @@ module lib.Truncations where
 
   postulate
     HSet-UIP : ∀ {A} -> HSet A -> (x y : A) (p q : x ≃ y) -> p ≃ q
+    HProp-unique : ∀ {A} -> HProp A -> (x y : A) -> x ≃ y
 
   HGpd : Type -> Type
   HGpd A = IsTrunc (tl 1) A
