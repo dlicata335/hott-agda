@@ -35,10 +35,20 @@ module lib.LoopSpace where
     rebase-id One α = collapse α id
     rebase-id (S n) α = collapse (rebase-id n α) id
 
-  transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
-                        transport (Loop n A) α ≃ rebase n α
-  transport-Loop-base One α = {!(transport (λ b → Id b b) α) ≃〈 ? 〉 (λ l → α ∘ l ∘ ! α)!}
-  transport-Loop-base (S n) α = {!!}
+  mutual
+    transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
+                          transport (Loop n A) α ≃ rebase n α
+    transport-Loop-base One α = λ≃ (λ l →
+                                    (transport (λ b → Id b b) α l) ≃〈 {!!} 〉
+                                    (α ∘ l ∘ ! α)∎)
+    transport-Loop-base (S n) α = λ≃ (λ l →
+                           (transport (λ b → Id (id^ n) (id^ n)) α l) ≃〈 {!!} 〉
+                           (apd (λ b → id^ n {_} {b}) α ∘ ap (transport (Loop n _) α) l ∘ ! (apd (λ b → id^ n {_} {b}) α)) ≃〈 {!!} 〉
+                           (rebase-id n α ∘ ap (rebase n α) l ∘ ! (rebase-id n α))∎)
+
+    apd-id^ : ∀ n {A} {a} (α : Loop (S n) A a) → apd (λ b → id^ n {_} {b}) α ≃ rebase-id n α ∘ ap≃ (transport-Loop-base n α)
+    apd-id^ = {!!}
+
   postulate 
     rebase-idpath : ∀ n → {A : Type} {a : A} -> rebase n (id{_}{a}) ≃ \ x -> x
 
