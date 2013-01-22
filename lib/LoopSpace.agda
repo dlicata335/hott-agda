@@ -35,9 +35,11 @@ module lib.LoopSpace where
     rebase-id One α = collapse α id
     rebase-id (S n) α = collapse (rebase-id n α) id
 
+  transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
+                        transport (Loop n A) α ≃ rebase n α
+  transport-Loop-base One α = {!(transport (λ b → Id b b) α) ≃〈 ? 〉 (λ l → α ∘ l ∘ ! α)!}
+  transport-Loop-base (S n) α = {!!}
   postulate 
-    transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
-                          transport (Loop n A) α ≃ rebase n α
     rebase-idpath : ∀ n → {A : Type} {a : A} -> rebase n (id{_}{a}) ≃ \ x -> x
 
   mutual 
@@ -60,8 +62,9 @@ module lib.LoopSpace where
   !^ One q = ! q
   !^ (S n) q = ! q
 
-  postulate
-    !^-invol : ∀ n → ∀ {A a} → (α : Loop n A a) → !^ n (!^ n α) ≃ α
+  !^-invol : ∀ n → ∀ {A a} → (α : Loop n A a) → !^ n (!^ n α) ≃ α
+  !^-invol One α = !-invol α
+  !^-invol (S n) α = !-invol α
 
   postulate 
     ap^-idfunc : ∀ {A} {a : A} → (n : _) (α : Loop n A a) → ap^ n (\ (x : A) -> x) α ≃ α
@@ -146,10 +149,6 @@ module lib.LoopSpace where
     -}
 -}
 
-  -- lots of other definitions should be equivalent
-  ap≃→^ : ∀ n {A B} {f x} → Loop n (A → B) f → Loop n A x → Loop n B (f x)
-  ap≃→^ n {A}{B}{f}{x} α β = ∘^ n (coe (! (LoopΠ n)) α x) (ap^ n f β)
-
   LoopPath : ∀ {n A a} 
              → (Loop (S n) A a) ≃ (Loop n (Path a a) id) -- what about for non-id?
   LoopPath {n} {A} {α} = ua (improve (hequiv (i n) (e n) β η)) where
@@ -175,14 +174,6 @@ module lib.LoopSpace where
      β : _
      η : _
 
-  postulate
-    -- FIXME: works for non-id base?  
-    LoopPathType : ∀ n {A} -> Loop n (Path{Type} A A) id ≃ ((a : A) -> Loop n A a)
-    -- LoopPathType n {A} = Loop n (Path A A) id ≃〈 ! (LoopPath{n}) 〉 
-    --                    Loop (S n) Type A    ≃〈 {!!} 〉 
-    --                    ((x : A) -> Loop n A x) ∎
-    -- forward direction should be \ x -> (ap^ n (λ x → coe x a))
-  
   postulate
     LoopSType : ∀ n {A} -> ((a : A) -> Loop n A a) ≃ (Loop (S n) Type A)
   {-
@@ -227,7 +218,9 @@ module lib.LoopSpace where
                   → LoopOver (S n) α B b ≃ LoopOverS n α B b 
 
   LoopType→ : ∀ n {A B} → (Loop (S n) Type A) -> Loop (S n) Type B -> Loop (S n) Type (A → B)
-  LoopType→ n lA lB = λt n (λ f → λl n (λ x → ∘^ n (apt n lB (f x)) 
+  LoopType→ n {A} {B} lA lB = λt n (λ (f : A → B) →
+                                      λl n (λ (x : A) →
+                                              ∘^ n (apt n lB (f x)) 
                                                    (ap^ n f (apt n (!^ (S n) lA) x))))
 
   postulate
@@ -244,7 +237,11 @@ module lib.LoopSpace where
                         ∘^ n (apt n (ap^ (S n) C α) (f x))
                              (ap^ n f (apt n (!^ (S n) (ap^ (S n) B α)) x))))
                     (λl n (λ x → id^ n))
-                ≃ (LoopOver (S n) α (\ x -> B x → C x) f) 
+                ≃ (LoopOver (S n) α (\ x -> B x → C x) f)
+
+  -- postulate
+  --   ap^Loop : ∀ n k {A} {a : A} (α : Loop (S n) A a) → ap^ (S n) (λ x → Loop k A x) α ≃ λt n (λ x → rebase n (ap≃ (rebase-idpath k)) (ap^ n (λ p → rebase k p x) (coe (LoopPath {n}) α)))
+--  ap^Loop n k α = {!!}
   {-
   Loop→OverS n {A} {a} α {B}{C} f = 
     ! ((LoopOver (S n) α (\ x -> B x → C x) f) ≃〈 {!!} 〉 
@@ -306,18 +303,13 @@ module lib.LoopSpace where
   -}
 
   postulate
+    HSet-Loop : ∀ n {A} {a} → IsTrunc (tlp n) A → HSet (Loop n A a)
+
+    IsTrunc-LoopOver : ∀ n k {A} {a} (α : Loop n A a) {B} {b} → ((x : A) → IsTrunc (S k) (B x)) → IsTrunc k (LoopOver n α B b)
+
     IsNTrunc-Loop : ∀ n {A a} -> IsTrunc (tlp n) A → IsTrunc (tlp n) (Loop n A a)
+  
 
-    trivial-LoopOver : ∀ n {A a} {α : Loop n A a} {B : A → Type} {b : B a}
-                     -> ((x : A) → IsTrunc (tlp n) (B x))
-                     → (LoopOver n α B b)
-
-    LoopOver-HProp : ∀ n {A a} {α : Loop n A a} {B : A → Type} {b : B a}
-                   -> ((x : A) → IsTrunc (tlp n) (B x))
-                   → HProp (LoopOver n α B b)
-
-    -- FIXME should probably go somewhere else
-    IsTrunc-is-PosTrunc : {n : Positive} (A : Type) → IsTrunc (tlp n) (IsTrunc (tlp n) A)
 
 
   -- FIXME: should be able to derive these compositionally from a rule for 
@@ -342,3 +334,4 @@ module lib.LoopSpace where
   postulate -- transport plus inverses
    ∘^-inv-l≃ : ∀ n {A} {a : A} {α β : Loop n A a} -> 
                  α ≃ !^ n β -> (∘^ n α β) ≃ id^ n
+

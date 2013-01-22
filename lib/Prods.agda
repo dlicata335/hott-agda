@@ -32,13 +32,13 @@ module lib.Prods where
   fst≃ = ap fst
   
   snd≃ : {A : Type} {B : A -> Type} {p q : Σ B} -> (c : p ≃ q) -> (transport B (fst≃ c) (snd p)) ≃ (snd q)
-  snd≃ id = id
+  snd≃ {p = p} {q = .p} id = id
 
   pair≃ : {A : Type} {B : A -> Type} {p q : Σ B} -> (α : (fst p) ≃ (fst q)) -> (transport B α (snd p)) ≃ (snd q) -> p ≃ q
   pair≃ {p = x , y} {q = .x , .y} id id = id
 
   Σ≃η : {A : Type} {B : A -> Type} {p q : Σ B} -> (α : p ≃ q) -> (pair≃ (fst≃ α) (snd≃ α)) ≃ α
-  Σ≃η {p = x , y} {q = .x , .y} id = id
+  Σ≃η {p = p} {q = .p} id = id
 
   Σ≃β1 : {A : Type} {B : A -> Type} {p q : Σ B} 
        (α : Path (fst p) (fst q)) 
@@ -118,13 +118,13 @@ module lib.Prods where
   transport-× id A B = id
 
   snd×≃ : {A B : Type} {p q : A × B} -> p ≃ q -> (snd p) ≃ (snd q)
-  snd×≃ id = id    
+  snd×≃ {p = p} {q = .p} id = id    
 
   pair×≃ : {A B : Type} {p q : A × B} -> (fst p) ≃ (fst q) -> (snd p) ≃ (snd q) -> p ≃ q
   pair×≃ a b = ap2 _,_ a b
 
   ×≃η : {A B : Type} {p q : A × B} -> (α : p ≃ q) -> (pair×≃ (fst≃ α) (snd×≃ α)) ≃ α
-  ×≃η id = id
+  ×≃η {p = p} {q = .p} id = id
 
   ×≃β1 : {A B : Type} {p q : A × B} 
         (α : Path (fst p) (fst q)) 

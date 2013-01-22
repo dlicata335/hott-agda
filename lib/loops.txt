@@ -15,6 +15,11 @@ dependent elim?  (They're machine-generated.)
 2: (this one is right)
 
 Id (transport (λ x' → Id (transport X x' x) x) loop id) id
+= Id (ap (λ x' → x) loop ∘ id ∘ ! (ap (λ x' → transport X x' x) loop)) id
+= Id (ap (λ x' → transport X x' x) loop) id
+= Id (ap (λ p → coe p x) (ap (ap X) loop)) id
+= Id (apt 1 (ap (ap X) loop) x) id
+= Id (apt 1 (ap^ 2 X loop) x) id
 
 or, with implicit arguments on:
 
