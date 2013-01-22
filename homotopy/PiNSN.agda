@@ -63,15 +63,23 @@ module homotopy.PiNSN where
     resp n = coe (LoopPathOver n (S.loop n) (encode o decode' o [_]) [_] id) 
                  (rebase n id (ap^ n (encode o decode' o [_]) (S.loop n)) ≃〈 ap≃ (rebase-idpath n) 〉
                   ap^ n (encode o decode' o [_]) (S.loop n)             ≃〈 id 〉 
-                  ap^ n (demote o promote) (S.loop n)                   ≃〈 {!ap-o!} 〉
-                  ap^ n demote (ap^ n promote (S.loop n))               ≃〈 {!beta for promote!} 〉
+                  ap^ n (demote o promote) (S.loop n)                   ≃〈 ap^-o n demote promote (S.loop n) 〉
+                  ap^ n demote (ap^ n promote (S.loop n))               ≃〈 ap (ap^ n demote) (S.βloop/rec n id (coe (LoopPath{n}) (S.loop (S n)))) 〉
                   ap^ n demote (coe (LoopPath{n}) (S.loop (S n)))       ≃〈 id 〉
                   ap^ n (\ x -> coe (ap (Codes n) x) [ S.base ]) (coe (LoopPath{n}) (S.loop (S n)))  ≃〈 id 〉
-                  ap^ n ((\ x -> coe x [ S.base ]) o (ap (Codes n))) (coe (LoopPath{n}) (S.loop (S n)))  ≃〈 {!ap^-o!} 〉
-                  ap^ n (\ x -> coe x [ S.base ]) (ap^ n (ap (Codes n)) (coe (LoopPath{n}) (S.loop (S n))))  ≃〈 {!ap^-ap-assoc!} 〉 
-                  ap^ n (\ x -> coe x [ S.base ]) (coe (LoopPath{n}) (ap^ (S n) (Codes n) (S.loop (S n))))  ≃〈 {!definition of apt!} 〉 -- STATE LEMMA
-                  apt n (ap^ (S n) (Codes n) (S.loop (S n))) [ S.base ]           ≃〈 {!β!} 〉
-                  apt n (λt n (S-loops n)) [ S.base ]                             ≃〈 {!β!} 〉
+                  ap^ n ((\ x -> coe x [ S.base ]) o (ap (Codes n))) (coe (LoopPath{n}) (S.loop (S n)))  ≃〈 ap^-o n (λ x → coe x [ S.base ]) (ap (Codes n)) (coe (LoopPath {n}) (S.loop (S n))) 〉
+                  -- ENH: define ap^-ap-assoc' that does the next two steps
+                  ap^ n (\ x -> coe x [ S.base ]) (ap^ n (ap (Codes n)) (coe (LoopPath{n}) (S.loop (S n))))  ≃〈 ap (ap^ n (λ x → coe x [ S.base ])) (ap^-ap-assoc n (Codes n) (coe (LoopPath {n}) (S.loop (S n)))) 〉 
+                  ap^ n (\ x -> coe x [ S.base ]) (coe (LoopPath{n}) 
+                    (ap^ (S n) (Codes n) 
+                      (coe (! (LoopPath{n})) 
+                           (coe (LoopPath{n}) 
+                                (S.loop (S n))))))  ≃〈 ap (λ x → ap^ n (λ x' → coe x' [ S.base ]) (coe (LoopPath {n}) (ap^ (S n) (Codes n) x))) (coe-inv-1 (LoopPath {n}) {S.loop (S n)}) 〉 
+                  ap^ n (\ x -> coe x [ S.base ]) (coe (LoopPath{n}) 
+                    (ap^ (S n) (Codes n) 
+                                (S.loop (S n))))  ≃〈 ! (apt-def n (ap^ (S n) (Codes n) (S.loop (S n))) [ S.base ]) 〉 
+                  apt n (ap^ (S n) (Codes n) (S.loop (S n))) [ S.base ]           ≃〈 ap (λ x → apt n x [ S.base ]) (S.βloop/rec (S n) (Trunc (tlp n) (S^ n)) (endo n)) 〉
+                  apt n (λt n (S-loops n)) [ S.base ]                             ≃〈 ap≃ (coe-inv-1 (LoopSType n)) 〉
                   ap^ n [_] (S.loop n) ∎)
 
   decode : {n : _} {x : S^ (S n)} → Codes n x → P x 
@@ -82,72 +90,81 @@ module homotopy.PiNSN where
    where 
      pl : ∀ {n} → LoopOver (S n) (S.loop (S n)) (λ x' → Codes n x' → P x') decode'
      pl {n} = coe (Loop→OverS n (S.loop (S n)) {Codes n} {P} decode') 
-                  (ap (λl n) (λ≃ STS))
+                  (ap (λl n) (λ≃ STS0)) -- move-right for ∘^n
         where 
-          STS : (x' : _) →
+         STS0 : (x' : _) →
                         ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (decode' x'))
                              (ap^ n decode' (apt n (!^ (S n) (ap^ (S n) (Codes n) (S.loop (S n)))) x'))
-                      ≃ (id^ n)
-          STS x' = ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (decode' x'))
-                        (ap^ n decode' (apt n (!^ (S n) (ap^ (S n) (Codes n) (S.loop (S n)))) x')) ≃〈 {!β Codes!} 〉 
-                  ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (decode' x'))
-                       (ap^ n decode' (apt n (!^ (S n) (λt n (S-loops n))) x')) ≃〈 {!apt-!!} 〉 
-                  ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (decode' x'))
-                       (ap^ n decode' (!^ n (apt n (λt n (S-loops n)) x'))) ≃〈 {!β!} 〉 
-                  ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (decode' x'))
-                       (ap^ n decode' (!^ n (S-loops n x'))) ≃〈 {!ap^-!!} 〉
-                  ∘^ n (apt n (ap^ (S n) P (S.loop (S n))) (decode' x'))
-                       (!^ n (ap^ n decode' (S-loops n x'))) ≃〈 {!ap^TruncPathPost!} 〉 
-                  ∘^ n (apt n (λt n (Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
-                                               (λ _ → IsNTrunc-Loop n Trunc-is) 
-                                               (λ β → ap^ n [_]
+                        ≃ id^ n
+         STS0 x' = ∘^-inv-l≃ n (STS1 x') where
+          STS1 : (x' : _) →
+                        (apt n (ap^ (S n) P (S.loop (S n))) (decode' x'))
+                      ≃ (!^ n (ap^ n decode' (apt n (!^ (S n) (ap^ (S n) (Codes n) (S.loop (S n)))) x')))
+          STS1 x' = 
+                  (apt n (ap^ (S n) P (S.loop (S n))) (decode' x')) ≃〈 ap (λ x0 → apt n x0 (decode' x')) (ap^TruncPathPost n (S.loop (S n)) _) 〉 
+                  (apt n (λt n (Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
+                                           (λ _ → IsNTrunc-Loop n Trunc-is) 
+                                           (λ β → ap^ n [_]
                                                     (rebase n (∘-unit-l β)
                                                     (ap^ n (λ x → x ∘ β) (coe (LoopPath {n}) (S.loop (S n))))))))
-                              (decode' x'))
-                       (!^ n (ap^ n decode' (S-loops n x'))) ≃〈 {!β!} 〉
-                  ∘^ n ((Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
+                              (decode' x')) ≃〈 ap≃ (coe-inv-1 (LoopSType n)) {decode' x'} 〉
+                  ((Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
                                                (λ _ → IsNTrunc-Loop n Trunc-is) 
                                                (λ β → ap^ n [_]
                                                     (rebase n (∘-unit-l β)
                                                     (ap^ n (λ x → x ∘ β) (coe (LoopPath {n}) (S.loop (S n)))))))
-                        (decode' x'))
-                       (!^ n (ap^ n decode' (S-loops n x'))) ≃〈 {!STS2 and inverses!} 〉 
-                  (id^ n) ∎ where
-            STS2 : (x' : _) → ((Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
-                                               (λ _ → IsNTrunc-Loop n Trunc-is) 
-                                               (λ β → ap^ n [_]
-                                                    (rebase n (∘-unit-l β)
-                                                    (ap^ n (λ x → x ∘ β) (coe (LoopPath {n}) (S.loop (S n)))))))
-                              (decode' x'))
-                            ≃ (ap^ n decode' (S-loops n x'))
-            STS2 = Trunc-elim _ (λ _ → IsTrunc-Path _ (IsNTrunc-Loop n Trunc-is) _ _)
-                                (λ x0 → ! (STS3 x0)) where
-             STS3 : (s : _) → (ap^ n decode' (S-loops n [ s ]))
-                              ≃ (ap^ n [_]
-                                  (rebase n (∘-unit-l (promote s))
-                                  (ap^ n (λ x → x ∘ (promote s)) (coe (LoopPath {n}) (S.loop (S n))))))
-             STS3 = 
-              S-elim _ 
-                   (ap^ n decode' (S-loops n [ S.base ]) ≃〈 {! S.βloop/rec n (coe (LoopPath {n}) (S.loop (S n))) !} 〉
-                    ap^ n decode' (ap^ n [_] (S.loop n)) ≃〈 {!ap^-o!} 〉
-                    ap^ n (decode' o [_]) (S.loop n) ≃〈 id 〉
-                    ap^ n ([_] o promote) (S.loop n) ≃〈 {!ap^-o!} 〉
-                    ap^ n [_] (ap^ n promote (S.loop n)) ≃〈 {!β!} 〉
-                    ap^ n [_] (coe (LoopPath{n}) (S.loop (S n))) ≃〈 {!ap^-by-id!} 〉
-                    -- start expanding back to the other side
-                    ap^ n [_] (ap^ n (λ x0 → x0 ∘ id)
-                                     (coe (LoopPath {n}) (S.loop (S n)))) ≃〈 id 〉 
-                    ap^ n [_] (ap^ n (λ x0 → x0 ∘ promote S.base)
-                                     (coe (LoopPath {n}) (S.loop (S n)))) ≃〈 {!rebase-id!} 〉 
-                    ap^ n [_]
-                     (rebase n id
-                               (ap^ n (λ x0 → x0 ∘ promote S.base)
-                               (coe (LoopPath {n}) (S.loop (S n))))) ≃〈 id 〉 
-                    ap^ n [_]
-                     (rebase n (∘-unit-l (promote S.base))
-                               (ap^ n (λ x0 → x0 ∘ promote S.base)
-                               (coe (LoopPath {n}) (S.loop (S n))))) ∎)
-                   (trivial-LoopOver n (λ x0 → IsTrunc-Path _ (IsNTrunc-Loop n Trunc-is) _ _))
+                   (decode' x')) ≃〈 STS2 x' 〉 
+                  (ap^ n decode' (S-loops n x')) ≃〈 ! (ap (ap^ n decode') (ap≃ (coe-inv-1 (LoopSType n)) {x'})) 〉 
+                  -- start expanding back to the other side
+                  (ap^ n decode' (apt n (λt n (S-loops n)) x')) ≃〈 ! (ap (λ x0 → ap^ n decode' (apt n x0 x')) (S.βloop/rec (S n) (Trunc (tlp n) (S^ n)) (endo n))) 〉 
+                  (ap^ n decode' (apt n (ap^ (S n) (Codes n) (S.loop (S n))) x')) ≃〈 ! (!^-invol n (ap^ n decode' (apt n (ap^ (S n) (Codes n) (S.loop (S n))) x'))) 〉 
+                  !^ n (!^ n (ap^ n decode' (apt n (ap^ (S n) (Codes n) (S.loop (S n))) x'))) ≃〈 ap (!^ n) (! (ap^-! n decode' (apt n (ap^ (S n) (Codes n) (S.loop (S n))) x'))) 〉 
+                  (!^ n (ap^ n decode' (!^ n (apt n (ap^ (S n) (Codes n) (S.loop (S n))) x')))) ≃〈 ap (λ x0 → !^ n (ap^ n decode' x0)) (! (apt-! n (ap^ (S n) (Codes n) (S.loop (S n))) x')) 〉 
+                  (!^ n (ap^ n decode' (apt n (!^ (S n) (ap^ (S n) (Codes n) (S.loop (S n)))) x')))
+                  ∎ where
+             STS2 : (x' : _) → ((Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
+                                                (λ _ → IsNTrunc-Loop n Trunc-is) 
+                                                (λ β → ap^ n [_]
+                                                     (rebase n (∘-unit-l β)
+                                                     (ap^ n (λ x → x ∘ β) (coe (LoopPath {n}) (S.loop (S n)))))))
+                               (decode' x'))
+                             ≃ (ap^ n decode' (S-loops n x'))
+             STS2 = Trunc-elim _ (λ _ → IsTrunc-Path _ (IsNTrunc-Loop n Trunc-is) _ _)
+                                 (λ x0 → ! (STS3 x0)) where
+              STS3 : (s : _) → (ap^ n decode' (S-loops n [ s ]))
+                               ≃ (ap^ n [_]
+                                   (rebase n (∘-unit-l (promote s))
+                                   (ap^ n (λ x → x ∘ (promote s)) (coe (LoopPath {n}) (S.loop (S n))))))
+              STS3 = 
+               S-elim _ 
+                    (ap^ n decode' (S-loops n [ S.base ]) ≃〈 id 〉
+                     ap^ n decode' (ap^ n [_] (S.loop n)) ≃〈 ! (ap^-o n decode' [_] (S.loop n)) 〉
+                     ap^ n (decode' o [_]) (S.loop n) ≃〈 id 〉
+                     ap^ n ([_] o promote) (S.loop n) ≃〈 ap^-o n [_] promote (S.loop n) 〉
+                     ap^ n [_] (ap^ n promote (S.loop n)) ≃〈 ap (ap^ n [_]) STS4 〉
+                     ap^ n [_]
+                      (rebase n (∘-unit-l (promote S.base))
+                                (ap^ n (λ x0 → x0 ∘ promote S.base)
+                                (coe (LoopPath {n}) (S.loop (S n))))) ∎)
+                    (trivial-LoopOver n (λ x0 → IsTrunc-Path _ (IsNTrunc-Loop n Trunc-is) _ _))
+                 where
+                  STS4 : (ap^ n promote (S.loop n)) ≃
+                         (rebase n (∘-unit-l (promote S.base))
+                                (ap^ n (λ x0 → x0 ∘ promote S.base)
+                                (coe (LoopPath {n}) (S.loop (S n))))) 
+                  STS4 = (ap^ n promote (S.loop n)) ≃〈 S.βloop/rec n id (coe (LoopPath {n}) (S.loop (S n))) 〉 
+                         (coe (LoopPath{n}) (S.loop (S n))) ≃〈 ! (ap^-idfunc n (coe (LoopPath {n}) (S.loop (S n)))) 〉
+                         -- start expanding back to the other side
+                         (ap^ n (λ x0 → x0 ∘ id)
+                                (coe (LoopPath {n}) (S.loop (S n)))) ≃〈 id 〉 
+                         (ap^ n (λ x0 → x0 ∘ promote S.base)
+                                (coe (LoopPath {n}) (S.loop (S n)))) ≃〈 ap≃ (! (rebase-idpath n)) 〉 
+                         (rebase n id
+                                    (ap^ n (λ x0 → x0 ∘ promote S.base)
+                                    (coe (LoopPath {n}) (S.loop (S n))))) ≃〈 id 〉 
+                         (rebase n (∘-unit-l (promote S.base))
+                                    (ap^ n (λ x0 → x0 ∘ promote S.base)
+                                    (coe (LoopPath {n}) (S.loop (S n))))) ∎
 
   decode-encode : {n : _} {x : S^ (S n)} (α : P x) → decode{n}{x} (encode{n}{x} α) ≃ α
   decode-encode {n}{x} = Trunc-elim _ (λ x' → IsTrunc-Path _ Trunc-is _ _) 
@@ -158,4 +175,3 @@ module homotopy.PiNSN where
   τn[Ω[S^n+1]]-is-τn[S^n] : ∀ {n} → Trunc (tlp n) (Path{S^ (S n)} S.base S.base)
                                   ≃ Trunc (tlp n) (S^ n)
   τn[Ω[S^n+1]]-is-τn[S^n] = (ua (improve (hequiv encode decode decode-encode encode-decode')))
-   

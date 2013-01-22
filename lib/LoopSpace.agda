@@ -60,6 +60,9 @@ module lib.LoopSpace where
   !^ One q = ! q
   !^ (S n) q = ! q
 
+  postulate
+    !^-invol : ∀ n → ∀ {A a} → (α : Loop n A a) → !^ n (!^ n α) ≃ α
+
   postulate 
     ap^-idfunc : ∀ {A} {a : A} → (n : _) (α : Loop n A a) → ap^ n (\ (x : A) -> x) α ≃ α
 
@@ -68,10 +71,10 @@ module lib.LoopSpace where
   -- ap^-! One f α = ap-! f α
   -- ap^-! (S n) f α = {!!} -- push ! inside
     
+    ap^-o : ∀ {A B C} → (n : _) → (g : B → C) (f : A → B)
+          → {a : A} (α : Loop n A a)
+          → ap^ n (g o f) α ≃ ap^ n g (ap^ n f α) 
 {-
-  ap^-o : ∀ {A B C} → (n : _) → (g : B → C) (f : A → B)
-        → {a : A} (α : Loop n A a)
-        → ap^ n (g o f) α ≃ ap^ n g (ap^ n f α) 
   ap^-o One g f α = ap-o g f α
   ap^-o (S n) g f α = {!!}
 -}
@@ -192,6 +195,11 @@ module lib.LoopSpace where
 
   apt : ∀ n {A} -> Loop (S n) Type A → ((a : A) -> Loop n A a)
   apt n l a = coe (! (LoopSType n)) l a
+
+  postulate
+    apt-def : ∀ n {A} -> (l : Loop (S n) Type A) → (a : A) 
+            → apt n l a ≃ ap^ n (\ x -> coe x a) (coe (LoopPath{n}) l) 
+
 
   λt : ∀ n {A} -> ((a : A) -> Loop n A a) -> Loop (S n) Type A
   λt n l = coe (LoopSType n) l
@@ -325,8 +333,12 @@ module lib.LoopSpace where
                                                            (ap^ n (λ x → x ∘ β) (coe (LoopPath {n}) α)))))
 
   postulate
-    ap^TruncPathPost : ∀ n {A} {a : A} {α : Loop (S n) A a} {a0 : A}
+    ap^TruncPathPost : ∀ n {A} {a : A} (α : Loop (S n) A a) (a0 : A)
                 → 
                 Path{Loop (S n) Type (Trunc (tlp n) (Path{A} a0 a))}
                     (ap^ (S n) (\ x -> Trunc (tlp n) (Path a0 x)) α)
                     (LoopTypeTruncPathPost n α a0)
+
+  postulate -- transport plus inverses
+   ∘^-inv-l≃ : ∀ n {A} {a : A} {α β : Loop n A a} -> 
+                 α ≃ !^ n β -> (∘^ n α β) ≃ id^ n

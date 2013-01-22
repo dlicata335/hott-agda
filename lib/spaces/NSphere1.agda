@@ -31,7 +31,7 @@ module lib.spaces.NSphere1 where
     S-rec a _ Base = a
 
     postulate 
-      βloop/rec : ∀ {n} {C : Type} 
+      βloop/rec : (n : _) {C : Type} 
            -> (c : C)
            -> (α : Loop n C c)
            -> Path (ap^ n (S-rec c α) (loop n)) α
