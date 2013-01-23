@@ -131,6 +131,15 @@ module lib.Paths where
                 → Path (a56 ∘ (a45 ∘ a34 ∘ a23) ∘ a12) (a56 ∘ a45 ∘ a34 ∘ a23 ∘ a12)
    rassoc-1-3-1 id id id id id = id
 
+   assoc-131->212 : ∀ {A} {M1 M2 M3 M4 M5 M6 : A}
+                  (a56 : Path M5 M6) (a45 : Path M4 M5) (a34 : Path M3 M4) (a23 : Path M2 M3) (a12 : Path M1 M2)
+                → Path (a56 ∘ (a45 ∘ a34 ∘ a23) ∘ a12) ((a56 ∘ a45) ∘ a34 ∘ (a23 ∘ a12))
+   assoc-131->212 id id id id id = id
+
+   !-∘3 : ∀ {A} {M1 M2 M3 M4 : A} (a34 : Path M3 M4) (a23 : Path M2 M3) (a12 : Path M1 M2)
+       → ! (a34 ∘ a23 ∘ a12) ≃ (! a12 ∘ ! a23 ∘ ! a34)
+   !-∘3 id id id = id
+
    cancels-is-inverse : ∀ {A} {M N : A} {p : Path M N} {q : Path N M}
                       -> Path (q ∘ p) id
                       -> Path q (! p)

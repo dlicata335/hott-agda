@@ -35,9 +35,10 @@ module lib.LoopSpace where
     rebase-id One α = collapse α id
     rebase-id (S n) α = collapse (rebase-id n α) id
 
-  mutual
+  postulate
     transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
                           transport (Loop n A) α ≃ rebase n α
+    {-
     transport-Loop-base One α = λ≃ (λ l →
                                     (transport (λ b → Id b b) α l) ≃〈 {!!} 〉
                                     (α ∘ l ∘ ! α)∎)
@@ -48,9 +49,11 @@ module lib.LoopSpace where
 
     apd-id^ : ∀ n {A} {a} (α : Loop (S n) A a) → apd (λ b → id^ n {_} {b}) α ≃ rebase-id n α ∘ ap≃ (transport-Loop-base n α)
     apd-id^ = {!!}
+    -}
 
   postulate 
     rebase-idpath : ∀ n → {A : Type} {a : A} -> rebase n (id{_}{a}) ≃ \ x -> x
+    -- follows from transport-Loop-base
 
   mutual 
     ap^ : ∀ {A B} → (n : _) → (f : A → B) → {base : A} → Loop n A base → Loop n B (f base)
@@ -76,14 +79,30 @@ module lib.LoopSpace where
   !^-invol One α = !-invol α
   !^-invol (S n) α = !-invol α
 
-  postulate 
+  mutual
     ap^-idfunc : ∀ {A} {a : A} → (n : _) (α : Loop n A a) → ap^ n (\ (x : A) -> x) α ≃ α
+    ap^-idfunc One α = ap-id α
+    ap^-idfunc (S n) α = ap^-id n (λ x → x) ∘ ap (ap^ n (λ x → x)) α ∘ ! (ap^-id n (λ x → x)) ≃〈 ap (λ x → ap^-id n (λ x' → x') ∘ x ∘ ! (ap^-id n (λ x' → x'))) (ap-by-id{_}{(ap^ n (λ x → x))} (λ x → ! (ap^-idfunc n x)) α) 〉 
+                         ap^-id n (λ x → x) ∘ (! (ap^-idfunc n (id^ n)) ∘ α ∘ ! (! (ap^-idfunc n (id^ n)))) ∘ ! (ap^-id n (λ x → x)) ≃〈 assoc-131->212 (ap^-id n (λ x → x)) (! (ap^-idfunc n (id^ n))) α (! (! (ap^-idfunc n (id^ n)))) (! (ap^-id n (λ x → x))) 〉 
+                         (ap^-id n (λ x → x) ∘ (! (ap^-idfunc n (id^ n)))) ∘ α ∘ (! (! (ap^-idfunc n (id^ n))) ∘ ! (ap^-id n (λ x → x))) ≃〈 ap (λ z → (ap^-id n (λ x → x) ∘ ! z) ∘ α ∘ ! (! z) ∘ ! (ap^-id n (λ x → x))) (ap^-idfunc-id n) 〉 
+                         (ap^-id n (λ x → x) ∘ ! (ap^-id n (\ x -> x))) ∘ α ∘ (! (! (ap^-id n (λ x → x))) ∘ ! (ap^-id n (λ x → x))) ≃〈 ap (λ x → x ∘ α ∘ ! (! (ap^-id n (λ x' → x'))) ∘ ! (ap^-id n (λ x' → x'))) (!-inv-r (ap^-id n (λ x → x))) 〉 
+                         id ∘ α ∘ (! (! (ap^-id n (\ x -> x))) ∘ ! (ap^-id n (λ x → x))) ≃〈 ∘-unit-l (α ∘ ! (! (ap^-id n (λ x → x))) ∘ ! (ap^-id n (λ x → x))) 〉 
+                         α ∘ (! (! (ap^-id n (\ x -> x))) ∘ ! (ap^-id n (λ x → x))) ≃〈 ap (λ x → α ∘ x) (!-inv-l (! (ap^-id n (λ x → x)))) 〉 
+                         (α ∎)
 
-    ap^-! : ∀ n → ∀ {A B} {a : A} → (f : A → B) → (α : Loop n A a)
-          → ap^ n f (!^ n α) ≃ !^ n (ap^ n f α)
-  -- ap^-! One f α = ap-! f α
-  -- ap^-! (S n) f α = {!!} -- push ! inside
-    
+    ap^-idfunc-id : ∀ {A} {a : A} → (n : _) → ap^-idfunc{A}{a} n (id^ n) ≃ ap^-id n (λ x → x)
+    ap^-idfunc-id One = id
+    ap^-idfunc-id{A}{a} (S n) = {!  !} -- not gonna work... 
+
+  ap^-! : ∀ n → ∀ {A B} {a : A} → (f : A → B) → (α : Loop n A a)
+        → ap^ n f (!^ n α) ≃ !^ n (ap^ n f α)
+  ap^-! One f α = ap-! f α
+  ap^-! (S n) f α = ! (! (ap^-id n f ∘ ap (ap^ n f) α ∘ ! (ap^-id n f)) ≃〈 !-∘3 (ap^-id n f)  (ap (ap^ n f) α) (! (ap^-id n f)) 〉
+                       (! (! (ap^-id n f)) ∘ ! (ap (ap^ n f) α) ∘ ! (ap^-id n f)) ≃〈 ap (λ x → ! (! (ap^-id n f)) ∘ x ∘ ! (ap^-id n f)) (! (ap-! (ap^ n f) α)) 〉 
+                       (! (! (ap^-id n f)) ∘ (ap (ap^ n f) (! α)) ∘ ! (ap^-id n f)) ≃〈 ap (λ x → x ∘ ap (ap^ n f) (! α) ∘ ! (ap^-id n f)) (!-invol (ap^-id n f)) 〉 
+                       (ap^-id n f ∘ ap (ap^ n f) (! α) ∘ ! (ap^-id n f) ∎))
+  
+  postulate
     ap^-o : ∀ {A B C} → (n : _) → (g : B → C) (f : A → B)
           → {a : A} (α : Loop n A a)
           → ap^ n (g o f) α ≃ ap^ n g (ap^ n f α) 
@@ -215,6 +234,21 @@ module lib.LoopSpace where
                    (α : Loop n (Path a a) id)
                  → (ap^ n (ap f) α) ≃ coe (LoopPath{n}) (ap^ (S n) f (coe (! (LoopPath{n})) α))
 
+  add-!-≃ : ∀ {A} {M : A} (p : Path M M) → (! p ≃ id) ≃ (p ≃ id)
+  add-!-≃ {A} {M} p = ua (improve (hequiv (λ α → ap ! α ∘ ! (!-invol p))
+                                            (λ β → ap ! β) 
+                                            (λ x → ap ! (ap ! x ∘ ! (!-invol p)) ≃〈 {!!} 〉
+                                                   ap ! (ap ! x) ∘ ap ! (! (!-invol p)) ≃〈 {!!} 〉 
+                                                   ap (! o !) x ∘ ap ! (! (!-invol p)) ≃〈 ap (λ y → y ∘ ap ! (! (!-invol p))) (ap-by-id (λ x' → ! (!-invol x')) x) 〉 
+                                                   (! (!-invol id) ∘ x ∘ ! (! (!-invol (! p)))) ∘ ap ! (! (!-invol p)) ≃〈 {!! (!-invol id)!} 〉 
+                                                   (id ∘ x ∘ ! (! (!-invol (! p)))) ∘ ap ! (! (!-invol p)) ≃〈 {!!} 〉 
+                                                   (x ∘ ! (! (!-invol (! p)))) ∘ ap ! (! (!-invol p)) ≃〈 {!!} 〉 
+                                                   (x ∘ (! (! (!-invol (! p))) ∘ ap ! (! (!-invol p)))) ≃〈 ap (λ y → x ∘ y ∘ ap ! (! (!-invol p))) coh 〉 
+                                                   (x ∘ (! (ap ! (! (!-invol p))) ∘ ap ! (! (!-invol p)))) ≃〈 ap (λ y → x ∘ y) (!-inv-l (ap ! (! (!-invol p)))) 〉 
+                                                   (x ∎))
+                                            {!probably similar!})) where
+          coh : ∀ {A} {M N : A} {p : Path M N} → ! (! (!-invol (! p))) ≃ ! (ap ! (! (!-invol p)))
+          coh {p = id} = id
 
   LoopOverS :  (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) 
              → (B : A -> Type) (b : B a) → Type
@@ -223,9 +257,22 @@ module lib.LoopSpace where
         (apt n (ap^ (S n) B α) b)
         (id^ n)
 
-  postulate 
-    LoopOver-is-S : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) → (B : A -> Type) (b : B a) 
+  LoopOver-is-S : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) → (B : A -> Type) (b : B a) 
                   → LoopOver (S n) α B b ≃ LoopOverS n α B b 
+  LoopOver-is-S One α B b = add-!-≃
+                              (apt One (id ∘ ap (λ l → ap B l) α) b)
+                              ∘ ap (λ x → Id x id) 
+                                   (transport (λ x → Id (transport B x b) b) α id ≃〈 {!!} 〉
+                                    ap (\_ -> b) α ∘ id ∘ ! (ap (\ x -> transport B x b) α) ≃〈 {!!} 〉 
+                                    id ∘ id ∘ ! (ap (\ x -> transport B x b) α) ≃〈 {!!} 〉 
+                                    ! (ap (\ x -> transport B x b) α) ≃〈 {!!} 〉
+                                    ! (ap (\ x -> coe (ap B x) b) α) ≃〈 {!!} 〉  
+                                    ! (ap (\ x -> coe x b) (ap (ap B) α)) ≃〈 {!!} 〉 
+                                    ! (ap (\ x -> coe x b) (coe (LoopPath{One}) (ap (ap B) α))) ≃〈 id 〉 
+                                    ! (ap^ One (\ x -> coe x b) (coe (LoopPath{One}) (ap (ap B) α))) ≃〈 {!!} 〉 
+                                    ! ((apt One (ap (ap B) α) b)) ≃〈 {!!} 〉 
+                                    (! (apt One (id ∘ ap (ap B) α) b) ∎))
+  LoopOver-is-S (S n) α B b = {!!} 
 
   LoopType→ : ∀ n {A B} → (Loop (S n) Type A) -> Loop (S n) Type B -> Loop (S n) Type (A → B)
   LoopType→ n {A} {B} lA lB = λt n (λ (f : A → B) →
