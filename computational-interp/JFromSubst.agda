@@ -13,6 +13,10 @@ module computational-interp.JFromSubst where
     transport (\ (p : Σ \ y -> Path M y) -> C (fst p) (snd p))
           (pair≃ α (transport-Path-right α id))
 
+-- need:
+-- Id {Id {A} M N}
+--    (transport (λ y → Id {A} M y) α (id {_} {M}))
+--    α
   
   j-transport-compute : {A : Set} {M : A} (C : (x : A) -> Path M x -> Set)
        -> (M0 : C M id)

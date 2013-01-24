@@ -67,6 +67,18 @@ module homotopy.HigherHomotopyAbelian (A : Set) (base : A) where
                                           ap ! a ⊙ a ≃〈 ⊙-inv-l _ 〉 
                                           id ∎))
 
+  -- equate-wrappers : {l : Path{A} base base} (a1 a2 : Path{Path{A} base base} id l)
+  --                   (b : Path{Path{A} base base} l l) 
+  --                 -> a1 @ b @ ! a1 ≃ a2 @ b @ ! a2
+
+  equate-wrappers : ∀ {l} (α1 α2 : Path{Path{A} base base} id l) (β : Path{Path{A} base base} l l) 
+                  -> ! α1 ∘ β ∘ α1 ≃ ! α2 ∘ β ∘ α2
+  equate-wrappers{l} = path-induction (\ l α1 -> (α2 : Path{Ω1} id l) (β : Path{Ω1} l l) -> ! α1 ∘ β ∘ α1 ≃ ! α2 ∘ β ∘ α2)
+                                      (λ α2 β → ! (! α2 ∘ β ∘ α2 ≃〈 ap (λ x → ! α2 ∘ x) (abelian β α2) 〉 
+                                                   ! α2 ∘ α2 ∘ β ≃〈 ∘-assoc (! α2) α2 β 〉
+                                                   (! α2 ∘ α2) ∘ β ≃〈 ap (λ x → x ∘ β) (!-inv-l α2) 〉  
+                                                   id ∘ β ∎))
+
   {-
       -- for reference, this is the minimal generalization of the IH that goes through
       -- for proving the interchange law

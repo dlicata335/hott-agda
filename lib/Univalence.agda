@@ -29,7 +29,7 @@ module lib.Univalence where
     -- also needed this fact:
     id-ua-transport-ua : ∀ {A} -> (ap (transport (λ x → x)) id-ua) ≃ transport-ua (id-equiv{A})
 
-  transport-ua-back : {A B : Type} {a : Equiv A B}
+  transport-ua-back : {A B : Type} (a : Equiv A B)
                     -> transport (\ x -> x) (! (ua a)) ≃ IsEquiv.g (snd a)
-  transport-ua-back {a = a} = transport-ua _ ∘ ap (transport (λ X → X)) (!-ua a)
+  transport-ua-back a = transport-ua _ ∘ ap (transport (λ X → X)) (!-ua a)
 
