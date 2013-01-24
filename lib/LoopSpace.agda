@@ -26,6 +26,25 @@ module lib.LoopSpace where
     id^ One = id
     id^ (S n) = id{_}{id^ n}
 
+  ∘^ : ∀ n {A a} → Loop n A a → Loop n A a → Loop n A a
+  ∘^ One p q = p ∘ q
+  ∘^ (S n) p q = p ∘ q
+
+  infixr 10 ∘^
+
+  !^ : ∀ n → ∀ {A a} → Loop n A a → Loop n A a 
+  !^ One q = ! q
+  !^ (S n) q = ! q
+
+  data WrapPath (A : Type) (a : A) : Type {- +1 -} where
+       wrap : {a' : A} (wrapper : Path a a') (center : Path a' a') → WrapPath A a
+
+  unwrap : ∀ {A a} → WrapPath A a → Path a a 
+  unwrap (wrap wrapper center) = ! wrapper ∘ center ∘ wrapper
+
+{-
+
+
   mutual
     rebase : ∀ n → ∀ {A a a'} (α : a ≃ a') -> Loop n A a → Loop n A a'
     rebase One α l = α ∘ l ∘ ! α
@@ -64,16 +83,6 @@ module lib.LoopSpace where
              ap^ n f (id^ n) ≃ id^ n {_} {f base} 
     ap^-id One f = id
     ap^-id (S n) f = collapse (ap^-id n f) id
-
-  ∘^ : ∀ n {A a} → Loop n A a → Loop n A a → Loop n A a
-  ∘^ One p q = p ∘ q
-  ∘^ (S n) p q = p ∘ q
-
-  infixr 10 ∘^
-
-  !^ : ∀ n → ∀ {A a} → Loop n A a → Loop n A a 
-  !^ One q = ! q
-  !^ (S n) q = ! q
 
   !^-invol : ∀ n → ∀ {A a} → (α : Loop n A a) → !^ n (!^ n α) ≃ α
   !^-invol One α = !-invol α
@@ -146,7 +155,6 @@ module lib.LoopSpace where
   -- abc : ∀ n {A} {a} (α : Loop (S (S n)) A a) → (ap (loopSN1 n) α) ≃ coe (LoopPath (S n)) α
   -- abc = ?
 
-  {-
   ap^-S' : ∀ {A B} → (n : _) → (f : A → B) → {a : A} 
                    (α : Loop (S n) A a)
                  → ap^ (S n) f α ≃ loopN1S n (ap^ n (ap f) (loopSN1 n α))
@@ -180,40 +188,39 @@ module lib.LoopSpace where
                       ∘ ap (loopN1S n) (ap^-id n (ap f))
                       ∘ ap (loopN1S n) (ap (ap^ n (ap f)) (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n))))!} 〉
 
-                     ( LoopPathEquiv.e-id n ∘ ap≃ (transport-ua-back (LoopPathEquiv.Eq n)) 
+                     ( {! LoopPathEquiv.e-id n ∘ ap≃ (transport-ua-back (LoopPathEquiv.Eq n)) 
                       ∘ ap (loopN1S n) 
                           (  ap^-id n (ap f) 
                             ∘ ap (ap^ n (ap f)) (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n)))
                             ∘ ap (ap^ n (ap f)) (ap (loopSN1 n) α)
                             ∘ ap (ap^ n (ap f)) (! (ap≃ (transport-ua (LoopPathEquiv.Eq n))) ∘ ! (LoopPathEquiv.i-id n))
                             ∘ ! (ap^-id n (ap f)))
-                      ∘ ! (ap≃ (transport-ua-back (LoopPathEquiv.Eq n))) ∘ ! (LoopPathEquiv.e-id n))
+                      ∘ ! (ap≃ (transport-ua-back (LoopPathEquiv.Eq n))) ∘ ! (LoopPathEquiv.e-id n)
+                       !} )
                       ≃〈 {!!} 〉
 
                      loopN1S (S n) 
-                     (  ap^-id n (ap f) 
+                     ( {! ap^-id n (ap f) 
                       ∘ ap (ap^ n (ap f)) (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n)))
                       ∘ ap (ap^ n (ap f)) (ap (loopSN1 n) α)
                       ∘ ap (ap^ n (ap f)) (! (ap≃ (transport-ua (LoopPathEquiv.Eq n))) ∘ ! (LoopPathEquiv.i-id n))
-                      ∘ ! (ap^-id n (ap f))) ≃〈 {!!} 〉
+                      ∘ ! (ap^-id n (ap f))
+                       !} ) ≃〈 {!!} 〉
 
                      loopN1S (S n) 
                      (ap^-id n (ap f) 
                       ∘ ap (ap^ n (ap f)) 
-                           (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n)) 
-                            ∘ ap (loopSN1 n) α 
-                            ∘ ! (ap≃ (transport-ua (LoopPathEquiv.Eq n))) ∘ ! (LoopPathEquiv.i-id n))
+                           {! (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n)) 
+                              ∘ ap (loopSN1 n) α 
+                              ∘ ! (ap≃ (transport-ua (LoopPathEquiv.Eq n))) ∘ ! (LoopPathEquiv.i-id n)) !}
                       ∘ ! (ap^-id n (ap f))) ≃〈 {!!} 〉
 
                      loopN1S (S n) 
-                     (ap^-id n (ap f) 
-                      ∘ ap (ap^ n (ap f)) 
-                           (loopSN1 (S n) α) 
-                      ∘ ! (ap^-id n (ap f))) ≃〈 {!!} 〉
+                     ({! ap^-id n (ap f) 
+                      ∘ ap (ap^ n (ap f)) (loopSN1 (S n) α) ∘ ! (ap^-id n (ap f)) !}) ≃〈 {!!} 〉
 
                      loopN1S (S n) (ap^ (S n) (ap f) (loopSN1 (S n) α)) ∎
 --                 → (ap^ n (ap f) α) ≃ loopSN1 n (ap^ (S n) f (loopN1S n α))
-  -}
 
   ap^-by-equals : ∀ n {A} {B} {f g : A → B} (α : f ≃ g) {a : A} (β : Loop n A a) → ap^ n f β ≃ rebase n (ap≃ (! α)) (ap^ n g β)
   ap^-by-equals n {f = f} id β = ! (ap≃ (rebase-idpath n) {ap^ n f β})
@@ -506,3 +513,4 @@ module lib.LoopSpace where
    ∘^-inv-l≃ : ∀ n {A} {a : A} {α β : Loop n A a} -> 
                  α ≃ !^ n β -> (∘^ n α β) ≃ id^ n
 
+-}
