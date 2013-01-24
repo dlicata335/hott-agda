@@ -35,7 +35,7 @@ module lib.LoopSpace where
     ap^-id : ∀ {A B} → (n : _) → (f : A → B) → {base : A} →
              ap^ n f (id^ n) ≃ id^ n {_} {f base} 
     ap^-id One f = id
-    ap^-id (S n) f = {!!} -- collapse (ap^-id n f) id
+    ap^-id (S n) f = collapse (ap^-id n f) id
 
   ∘^ : ∀ n {A a} → Loop n A a → Loop n A a → Loop n A a
   ∘^ One p q = p ∘ q
@@ -79,7 +79,7 @@ module lib.LoopSpace where
     
     rebase-id : ∀ n → ∀ {A} {a a' : A} (α : a ≃ a') -> rebase n α (id^ n) ≃ id^ n
     rebase-id One α = collapse α id
-    rebase-id (S n) α = {!!} -- collapse (rebase-id n α) id
+    rebase-id (S n) α = collapse (rebase-id n α) id
 
   postulate
     transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
@@ -110,7 +110,7 @@ module lib.LoopSpace where
   
       i-id : ∀ n → i n id ≃ id^ n
       i-id One = id
-      i-id (S n) = {!!} -- collapse (i-id n) id
+      i-id (S n) = collapse (i-id n) id
   
      mutual
       e : ∀ n → Loop n (Path a a) id → Loop (S n) A a
@@ -119,7 +119,7 @@ module lib.LoopSpace where
   
       e-id : ∀ n  → e n (id^ n) ≃ id
       e-id One = id
-      e-id (S n) = {!!} -- collapse (e-id n) id
+      e-id (S n) = collapse (e-id n) id
   
      postulate 
        β : ∀ n x → e n (i n x) ≃ x
@@ -170,28 +170,24 @@ module lib.LoopSpace where
                    (α : Loop (S n) A a)
                  → ap^ (S n) f α ≃ loopN1S n (ap^ n (ap f) (loopSN1 n α))
   ap^-S' One f α = {!!}
-  ap^-S' (S n) f α = ap^ (S (S n)) f α ≃〈 id 〉
-                     unwrap (wrap _ (ap (ap^ (S n) f) α)) ≃〈 {!ap (\ x -> unwrap (wrap _ (ap x α))) 
-                                                                 (ap-by-equals ? α)!} 〉
+  ap^-S' (S n) f α = ap^ (S (S n)) f α ≃〈 ! (uww-def (ap^-id (S n) f) _) 〉
+                     uww _ (ap (ap^ (S n) f) α) ≃〈 uww-ap-loop-by-equals (λ x → ! (ap^-S' n f x)) α _ 〉
+                     uww _ (ap (\ α' -> loopN1S n (ap^ n (ap f) (loopSN1 n α'))) α) ≃〈 ap (uww _) (ap-o (loopN1S n) (λ α' → ap^ n (ap f) (loopSN1 n α')) α) 〉
+                     -- ap^-id (S n) f
+                     -- ∘ (! (ap^-S' n f (id^ (S n)))
+                     --    ∘ ap (λ α → loopN1S n
+                     --                    (ap^ n (ap f) 
+                     --                           (loopSN1 n α)))
+                     --          α
+                     --     ∘ ap^-S' n f (id^ (S n)))
+                     -- ∘ ! (ap^-id (S n) f) ≃〈 {!!} 〉
 
-                     unwrap (wrap _ 
-                             (unwrap (wrap _
-                                          (ap (\ α' -> loopN1S n (ap^ n (ap f) (loopSN1 n α'))) α)))) ≃〈 {!!} 〉
-
-                     ap^-id (S n) f
-                     ∘ (! (ap^-S' n f (id^ (S n)))
-                        ∘ ap (λ α → loopN1S n
-                                        (ap^ n (ap f) 
-                                               (loopSN1 n α)))
-                              α
-                         ∘ ap^-S' n f (id^ (S n)))
-                     ∘ ! (ap^-id (S n) f) ≃〈 {!!} 〉
-
-                       ap^-id (S n) f
-                     ∘ (! (ap^-S' n f (id^ (S n)))
-                     ∘ (ap (loopN1S n) (ap (ap^ n (ap f)) (ap (loopSN1 n) α)))
-                     ∘ ap^-S' n f (id^ (S n)))
-                     ∘ ! (ap^-id (S n) f) ≃〈 {!!} 〉
+                     --   ap^-id (S n) f
+                     -- ∘ (! (ap^-S' n f (id^ (S n)))
+                     uww _ (ap (loopN1S n) (ap (λ α → ap^ n (ap f) (loopSN1 n α)) α)) ≃〈 ap (uww _ o (ap (loopN1S n))) (ap-o (ap^ n (ap f)) (loopSN1 n) α) 〉
+                     uww _ (ap (loopN1S n) (ap (ap^ n (ap f)) (ap (loopSN1 n) α))) ≃〈 {!!} 〉
+                     -- ∘ ap^-S' n f (id^ (S n)))
+                     -- ∘ ! (ap^-id (S n) f) ≃〈 {!!} 〉
 
                      (  LoopPathEquiv.e-id n ∘ ap≃ (transport-ua-back (LoopPathEquiv.Eq n)) 
                       ∘ ap (loopN1S n) (ap^-id n (ap f))
