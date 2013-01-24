@@ -107,6 +107,12 @@ module lib.Paths where
               → Path α (β ∘ γ) 
               → Path (α ∘ ! γ) β 
    move-left-right id β id x = x
+
+   move-left-right-! :  {A : Type} {M N P : A}
+                 (α : Path M P) (β : Path N P) (γ : Path N M)
+              → Path α (β ∘ ! γ) 
+              → Path (α ∘ γ) β 
+   move-left-right-! id β id x = x
    
    move-right-! :  {A : Type} {M N P : A}
                   (β : Path P N) (α : Path M N) (γ : Path M P)
