@@ -6,7 +6,8 @@ open import lib.Int
 open import lib.Paths
 open Paths
 open Int
-open import lib.LoopSpace
+
+open import lib.loopspace.Basics
 
 module lib.spaces.NSphere1 where
 
