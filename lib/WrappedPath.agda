@@ -26,9 +26,6 @@ module lib.WrappedPath where
     adj-def : {A : Type} {outs ins : A} (w : Path ins outs) (m : Path ins ins) → adj w m ≃ adjust w m
     adj-def w m = id
 
-  postulate
-    comp-adj : {A : Type} {outs mid ins : A} (w : Path mid outs) (w' : Path ins mid) (m : Path ins ins) → adj w (adj w' m) ≃ adj (w ∘ w') m
-
   -- can ignore wrappers in a doubly iterated identity type
   postulate
     ignore-wrappers : ∀ {A}{a : A} {ins out : Path a a} 
@@ -55,21 +52,37 @@ module lib.WrappedPath where
                     → (ap f β ≃ adj (α M) (ap g β))
   ap-loop-by-equals α id = ! (!-inv-r (α _) ∘ ap (λ x → α _ ∘ x) (∘-unit-l (! (α _))) ∘ adj-def _ _) 
 
-  adj-return : {A : Type} {a : A} (α : Path a a) ->
+  postulate
+    adj-∘ : {A : Type} {outs mid ins : A} (w : Path mid outs) (w' : Path ins mid) (m : Path ins ins)
+          → adj w (adj w' m) ≃ adj (w ∘ w') m
+
+  adj-bind : {A : Type} {outs mid ins : A} {w : Path mid outs} {w' : Path ins mid} {m : Path ins ins} {α : _}
+            → α ≃ (adj w' m)
+            → adj w α ≃ adj (w ∘ w') m
+  adj-bind β = adj-∘ _ _ _ ∘ ap (adj _) β 
+
+  adj-id : {A : Type} {a : A} (α : Path a a) ->
              α ≃ adj id α
-  adj-return α = ! (∘-unit-l α ∘ adj-def id _)
+  adj-id α = ! (∘-unit-l α ∘ adj-def id _)
+
+  ap-adj : ∀ {A B}{a a1} → (f : A → B) (α : Path a a) (q : Path _ a1)
+             -> (ap f (adj q α)) ≃ adj (ap f q) (ap f α)
+  ap-adj f α id = ! (adj-def id (ap f α)) ∘ ! (ap (ap f) (adj-id α) ∘ ∘-unit-l (ap f α))
+
+  adj-! : {A : Type} {outs ins : A} → (w : Path ins outs) (m : Path ins ins)
+        → adj w (! m) ≃ ! (adj w m)
+  adj-! w m = ap ! (! (adj-def w m)) ∘ (! (!-∘3 w m (! w)) ∘ ap (λ x → x ∘ ! m ∘ ! w) (! (!-invol w))) ∘ adj-def w (! m)
+
+  {- don't need these--just use adj-bind at the call site! it's easy!
+  adj-ap-adj : ∀ {A B}{a a1 b} → (f : A → B) (α : Path a a) (p : Id _ b) (q : Path _ a1)
+             -> adj p (ap f (adj q α)) ≃ adj (p ∘ ap f q) (ap f α)
+  adj-ap-adj f α p q = adj-bind (ap-adj f α q) 
 
   adj-ap-loop-by-equals : {A B : Type} {f g : A → B}
                           (α : (x : _) → g x ≃ f x) 
                           → {M : A} (β : M ≃ M) {b : B}
                           → (p : Path (f M) b)
                           → adj p (ap f β) ≃ adj (p ∘ α M) (ap g β)
-  adj-ap-loop-by-equals α β p = comp-adj _ (α _) _ ∘ ap (adj p) (ap-loop-by-equals α β)
-
-  ap-adj : ∀ {A B}{a a1} → (f : A → B) (α : Path a a) (q : Path _ a1)
-             -> (ap f (adj q α)) ≃ adj (ap f q) (ap f α)
-  ap-adj f α id = ! (adj-def id (ap f α)) ∘ ! (ap (ap f) (adj-return α) ∘ ∘-unit-l (ap f α))
-
-  adj-ap-adj : ∀ {A B}{a a1 b} → (f : A → B) (α : Path a a) (p : Id _ b) (q : Path _ a1)
-             -> adj p (ap f (adj q α)) ≃ adj (p ∘ ap f q) (ap f α)
-  adj-ap-adj f α id id = ((adj-return _ ∘ ap (ap f) (! (adj-return _))) ∘ ∘-unit-l (ap f (adj id α))) ∘ adj-def _ _
+  adj-ap-loop-by-equals α β p = adj-∘ _ (α _) _ ∘ ap (adj p) (ap-loop-by-equals α β)
+  -}
+ 
