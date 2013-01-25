@@ -17,6 +17,17 @@ open import lib.loopspace.Basics
 
 module lib.loopspace.Groupoid where
 
+  -- need this for paths between loops, not just paths between paths
+  adj-eq-loop : ∀ n {A}{a : A} {ins outs : Loop n A a} 
+          → (wrapper : Path ins outs) (middle : Path ins ins)
+          → (wrapper' : Path ins outs) (middle' : Path ins ins)
+          → middle ≃ middle'  
+          → adj wrapper middle ≃ adj wrapper' middle'
+  adj-eq-loop One w m w' m' α = adj-eq w m w' m' α
+  adj-eq-loop (S n) w m w' m' α = adj-eq w m w' m' α
+
+  -- groupoid structure
+
   ∘^ : ∀ n {A a} → Loop n A a → Loop n A a → Loop n A a
   ∘^ One p q = p ∘ q
   ∘^ (S n) p q = p ∘ q
@@ -27,9 +38,27 @@ module lib.loopspace.Groupoid where
   !^ One q = ! q
   !^ (S n) q = ! q
 
+
+  -- basic groupoid properties;
+  -- mostly we just use properties of ∘ ! etc after unfolding,
+  -- but sometimes it's useful to use them at arbitrary n.
+  -- add as needed.
+
+  !^-inv-l : ∀ n {A} {a : A} (α : Loop n A a) -> 
+           (∘^ n (!^ n α) α) ≃ id^ n  
+  !^-inv-l One α = !-inv-l α
+  !^-inv-l (S n) α = !-inv-l α
+
+  !^-inv-l≃ : ∀ n {A} {a : A} {α β : Loop n A a} -> 
+            α ≃ !^ n β -> (∘^ n α β) ≃ id^ n
+  !^-inv-l≃ n {β = β} p = transport (λ x → ∘^ n x β ≃ id^ n) (! p) (!^-inv-l n β)
+
   !^-invol : ∀ n → ∀ {A a} → (α : Loop n A a) → !^ n (!^ n α) ≃ α
   !^-invol One α = !-invol α
   !^-invol (S n) α = !-invol α
+
+ 
+  -- action of transporting at Loop n A -
 
   mutual
     rebase : ∀ n → ∀ {A a a'} (α : a ≃ a') -> Loop n A a → Loop n A a'
@@ -58,6 +87,11 @@ module lib.loopspace.Groupoid where
 
   rebase-idpath : ∀ n → {A : Type} {a : A} -> rebase n (id{_}{a}) ≃ \ x -> x
   rebase-idpath n = λ≃ (\ x -> ! (ap≃ (transport-Loop-base n id)))
+
+
+  -- associate Ω^(n+1) as Ω^(Ω^n)
+  -- instead of (Ω^n(Ω)), which is what you get by unfolding;
+  -- useful for below
 
   module LoopPathEquiv {A : _} {a : A} where
      mutual
@@ -120,6 +154,9 @@ module lib.loopspace.Groupoid where
                       (ap (loopN1S n) α) ∎
 
 
+  -- properties of n-functors
+
+  abstract
     ap^-S' : ∀ {A B} → (n : _) → (f : A → B) → {a : A} 
                     (α : Loop (S n) A a)
                   → ap^ (S n) f α ≃ loopN1S n (ap^ n (ap f) (loopSN1 n α))
@@ -178,18 +215,16 @@ module lib.loopspace.Groupoid where
                      adj _ (! (ap (ap^ n f) α)) ≃〈 adj-! _ (ap (ap^ n f) α) 〉 
                      (! (adj _ (ap (ap^ n f) α))) ≃〈 ap ! (adj-def (ap^-id n f) _) 〉 
                      !^ (S n) (ap^ (S n) f α) ∎ 
-    postulate
-     ap^-o : ∀ {A B C} → (n : _) → (g : B → C) (f : A → B)
-           → {a : A} (α : Loop n A a)
-           → ap^ n (g o f) α ≃ ap^ n g (ap^ n f α) 
---     ap^-o One g f α = ap-o g f α
- --    ap^-o (S n) g f α = {!!}
 
-    !^-inv-l : ∀ n {A} {a : A} (α : Loop n A a) -> 
-             (∘^ n (!^ n α) α) ≃ id^ n  
-    !^-inv-l One α = !-inv-l α
-    !^-inv-l (S n) α = !-inv-l α
-
-    !^-inv-l≃ : ∀ n {A} {a : A} {α β : Loop n A a} -> 
-              α ≃ !^ n β -> (∘^ n α β) ≃ id^ n
-    !^-inv-l≃ n {β = β} p = transport (λ x → ∘^ n x β ≃ id^ n) (! p) (!^-inv-l n β)
+    ap^-o : ∀ {A B C} → (n : _) → (g : B → C) (f : A → B)
+          → {a : A} (α : Loop n A a)
+          → ap^ n (g o f) α ≃ ap^ n g (ap^ n f α) 
+    ap^-o One g f α = ap-o g f α
+    ap^-o (S n) g f α = ap^ (S n) (g o f) α ≃〈 ! (adj-def (ap^-id n (g o f)) _) 〉
+                        adj _ (ap (ap^ n (g o f)) α) ≃〈 adj-bind (ap-loop-by-equals {f = ap^ n (g o f)} {g = ap^ n g o ap^ n f} (λ x → ! (ap^-o n g f x)) _) 〉 
+                        adj _ (ap (ap^ n g o ap^ n f) α) ≃〈 ap (adj _) (ap-o (ap^ n g) (ap^ n f) _) 〉 
+                        adj _ (ap (ap^ n g) (ap (ap^ n f) α)) ≃〈 adj-eq-loop n _ _ _ _ id 〉 
+                        adj _ (ap (ap^ n g) (ap (ap^ n f) α)) ≃〈 ! (adj-bind (ap-adj (ap^ n g) _ _)) 〉 
+                        adj _ (ap (ap^ n g) (adj _ (ap  (ap^ n f) α))) ≃〈 ap (adj _ o (ap (ap^ n g))) (adj-def (ap^-id n f) _) 〉 
+                        adj _ (ap (ap^ n g) (ap^ (S n) f α)) ≃〈 (adj-def (ap^-id n g) _) 〉 
+                        ap^ (S n) g (ap^ (S n) f α) ∎
