@@ -30,7 +30,7 @@ module lib.LoopSpace where
   mutual 
     ap^ : ∀ {A B} → (n : _) → (f : A → B) → {base : A} → Loop n A base → Loop n B (f base)
     ap^ One   f {base} l = ap f l 
-    ap^ (S n) f {base} l = unwrap (wrap (ap^-id n f) (ap (ap^ n f) l))  -- FIXME: could change ap^-id to avoid the bang
+    ap^ (S n) f {base} l = adjust (ap^-id n f) (ap (ap^ n f) l)
 
     ap^-id : ∀ {A B} → (n : _) → (f : A → B) → {base : A} →
              ap^ n f (id^ n) ≃ id^ n {_} {f base} 
@@ -74,8 +74,7 @@ module lib.LoopSpace where
   mutual
     rebase : ∀ n → ∀ {A a a'} (α : a ≃ a') -> Loop n A a → Loop n A a'
     rebase One α l = α ∘ l ∘ ! α
-    rebase (S n) α l = unwrap (wrap (rebase-id n α) 
-                                    (ap (rebase n α) l))
+    rebase (S n) α l = adjust (rebase-id n α) (ap (rebase n α) l)
     
     rebase-id : ∀ n → ∀ {A} {a a' : A} (α : a ≃ a') -> rebase n α (id^ n) ≃ id^ n
     rebase-id One α = collapse α id
@@ -105,8 +104,7 @@ module lib.LoopSpace where
      mutual
       i : ∀ n → Loop (S n) A a → Loop n (Path a a) id
       i One l = l
-      i (S n) l = unwrap (wrap (i-id n)
-                               (ap (i n) l))
+      i (S n) l = adjust (i-id n) (ap (i n) l)
   
       i-id : ∀ n → i n id ≃ id^ n
       i-id One = id
@@ -115,7 +113,7 @@ module lib.LoopSpace where
      mutual
       e : ∀ n → Loop n (Path a a) id → Loop (S n) A a
       e One l = l
-      e (S n) l = unwrap (wrap (e-id n) (ap (e n) l))
+      e (S n) l = adjust (e-id n) (ap (e n) l)
   
       e-id : ∀ n  → e n (id^ n) ≃ id
       e-id One = id
@@ -138,16 +136,29 @@ module lib.LoopSpace where
   loopN1S : ∀ n {A a} -> (Loop n (Path a a) id) → (Loop (S n) A a) 
   loopN1S n = coe (! (LoopPath n))
 
+  -- these are useful because loopSN1 (S n) does not directly compute to adjust - -, or
+  -- else we could just use adj-def instead of these specialized ones
+  -- but since we need lemmas anyway... 
   postulate 
     loopSN1-S : ∀ n {A a} (α : (Loop (S (S n)) A a)) →
                   loopSN1 (S n) α 
-                ≃ unwrap (wrap (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n)))
-                               (ap (loopSN1 n) α))
+                ≃ adj (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n)))
+                      (ap (loopSN1 n) α)
+
+    adj-loopSN1-S : ∀ n {A a} {l : _} (p : Id (id^ n) l) (α : (Loop (S (S n)) A a)) →
+                    adj p (loopSN1 (S n) α)
+                  ≃ adj (p ∘ LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n)))
+                        (ap (loopSN1 n) α)
 
     loopN1S-S : ∀ n {A a} (α : (Loop (S n) (Path{A} a a) id)) →
                   loopN1S (S n) α 
-                ≃ unwrap (wrap (LoopPathEquiv.e-id n ∘ ap≃ (transport-ua-back (LoopPathEquiv.Eq n)))
-                               (ap (loopN1S n) α))
+                ≃ adj (LoopPathEquiv.e-id n ∘ ap≃ (transport-ua-back (LoopPathEquiv.Eq n)))
+                      (ap (loopN1S n) α)
+
+    adj-loopN1S-S : ∀ n {A a} {l : _} (p : Path _ l) (α : (Loop (S n) (Path{A} a a) id)) →
+                     adj p (loopN1S (S n) α)
+                   ≃ adj (p ∘ LoopPathEquiv.e-id n ∘ ap≃ (transport-ua-back (LoopPathEquiv.Eq n)))
+                         (ap (loopN1S n) α)
 
   {-
   ap^-ap-assoc : ∀ {A B} → (n : _) → (f : A → B) → {a : A} 
@@ -170,61 +181,21 @@ module lib.LoopSpace where
                    (α : Loop (S n) A a)
                  → ap^ (S n) f α ≃ loopN1S n (ap^ n (ap f) (loopSN1 n α))
   ap^-S' One f α = {!!}
-  ap^-S' (S n) f α = ap^ (S (S n)) f α ≃〈 ! (uww-def (ap^-id (S n) f) _) 〉
-                     uww _ (ap (ap^ (S n) f) α) ≃〈 uww-ap-loop-by-equals (λ x → ! (ap^-S' n f x)) α _ 〉
-                     uww _ (ap (\ α' -> loopN1S n (ap^ n (ap f) (loopSN1 n α'))) α) ≃〈 ap (uww _) (ap-o (loopN1S n) (λ α' → ap^ n (ap f) (loopSN1 n α')) α) 〉
-                     -- ap^-id (S n) f
-                     -- ∘ (! (ap^-S' n f (id^ (S n)))
-                     --    ∘ ap (λ α → loopN1S n
-                     --                    (ap^ n (ap f) 
-                     --                           (loopSN1 n α)))
-                     --          α
-                     --     ∘ ap^-S' n f (id^ (S n)))
-                     -- ∘ ! (ap^-id (S n) f) ≃〈 {!!} 〉
-
-                     --   ap^-id (S n) f
-                     -- ∘ (! (ap^-S' n f (id^ (S n)))
-                     uww _ (ap (loopN1S n) (ap (λ α → ap^ n (ap f) (loopSN1 n α)) α)) ≃〈 ap (uww _ o (ap (loopN1S n))) (ap-o (ap^ n (ap f)) (loopSN1 n) α) 〉
-                     uww _ (ap (loopN1S n) (ap (ap^ n (ap f)) (ap (loopSN1 n) α))) ≃〈 {!!} 〉
-                     -- ∘ ap^-S' n f (id^ (S n)))
-                     -- ∘ ! (ap^-id (S n) f) ≃〈 {!!} 〉
-
-                     (  LoopPathEquiv.e-id n ∘ ap≃ (transport-ua-back (LoopPathEquiv.Eq n)) 
-                      ∘ ap (loopN1S n) (ap^-id n (ap f))
-                      ∘ ap (loopN1S n) (ap (ap^ n (ap f)) (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n))))
-                      ∘ ap (loopN1S n) (ap (ap^ n (ap f)) (ap (loopSN1 n) α))
-                      ∘ ap (loopN1S n) (ap (ap^ n (ap f)) (! (ap≃ (transport-ua (LoopPathEquiv.Eq n))) ∘ ! (LoopPathEquiv.i-id n)))
-                      ∘ ap (loopN1S n) (! (ap^-id n (ap f)))
-                      ∘ ! (ap≃ (transport-ua-back (LoopPathEquiv.Eq n))) ∘ ! (LoopPathEquiv.e-id n))
-                      ≃〈 {!LoopPathEquiv.e-id n ∘ ap≃ (transport-ua-back (LoopPathEquiv.Eq n)) 
-                      ∘ ap (loopN1S n) (ap^-id n (ap f))
-                      ∘ ap (loopN1S n) (ap (ap^ n (ap f)) (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n))))!} 〉
-
-                     ( _ )
-                      ≃〈 {!!} 〉
-
-                     loopN1S (S n) 
-                     ( {! ap^-id n (ap f) 
-                      ∘ ap (ap^ n (ap f)) (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n)))
-                      ∘ ap (ap^ n (ap f)) (ap (loopSN1 n) α)
-                      ∘ ap (ap^ n (ap f)) (! (ap≃ (transport-ua (LoopPathEquiv.Eq n))) ∘ ! (LoopPathEquiv.i-id n))
-                      ∘ ! (ap^-id n (ap f))
-                       !} ) ≃〈 {!!} 〉
-
-                     loopN1S (S n) 
-                     (ap^-id n (ap f) 
-                      ∘ ap (ap^ n (ap f)) 
-                           {! (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n)) 
-                              ∘ ap (loopSN1 n) α 
-                              ∘ ! (ap≃ (transport-ua (LoopPathEquiv.Eq n))) ∘ ! (LoopPathEquiv.i-id n)) !}
-                      ∘ ! (ap^-id n (ap f))) ≃〈 {!!} 〉
-
-                     loopN1S (S n) 
-                     ({! ap^-id n (ap f) 
-                      ∘ ap (ap^ n (ap f)) (loopSN1 (S n) α) ∘ ! (ap^-id n (ap f)) !}) ≃〈 {!!} 〉
-
+  ap^-S' (S n) f α = ap^ (S (S n)) f α ≃〈 ! (adj-def (ap^-id (S n) f) _) 〉 
+                      -- note : could avoid having to mention (ap^-id ...) by defining
+                      -- ap^ with adj, but then we'd lose definitional behavior, so this seems better
+                     adj _ (ap (ap^ (S n) f) α)                                       ≃〈 adj-ap-loop-by-equals (λ x → ! (ap^-S' n f x)) α _ 〉
+                     adj _ (ap (\ α' -> loopN1S n (ap^ n (ap f) (loopSN1 n α'))) α)   ≃〈 ap (adj _) (ap-o (loopN1S n) (λ α' → ap^ n (ap f) (loopSN1 n α')) α) 〉
+                     adj _ (ap (loopN1S n) (ap (λ α → ap^ n (ap f) (loopSN1 n α)) α)) ≃〈 ap (adj _ o (ap (loopN1S n))) (ap-o (ap^ n (ap f)) (loopSN1 n) α) 〉
+                     adj _ (ap (loopN1S n) (ap (ap^ n (ap f)) (ap (loopSN1 n) α)))    ≃〈 adj-eq _ _ _ _ id 〉
+                     adj _ (ap (loopN1S n) (ap (ap^ n (ap f)) (ap (loopSN1 n) α)))    ≃〈 ! (adj-ap-adj (loopN1S n) _ _ _) 〉
+                     adj _ (ap (loopN1S n) (adj _ (ap (ap^ n (ap f)) (ap (loopSN1 n) α)))) ≃〈 ap (adj _) (ap (\ x -> ap (loopN1S n) x) (! (ap-adj (ap^ n (ap f)) _ _)))  〉
+                     adj _ (ap (loopN1S n) (ap (ap^ n (ap f)) (adj _ (ap (loopSN1 n) α)))) ≃〈 ap (adj _) (ap (\ x -> ap (loopN1S n) (ap (ap^ n (ap f)) x)) (! (loopSN1-S n α)))  〉
+                                                                                             -- agda has trouble with the (adj _)'s when they occur under a binder
+                     adj _ (ap (loopN1S n) (ap (ap^ n (ap f)) (loopSN1 (S n) α))) ≃〈 ! (adj-ap-adj (loopN1S n) _ _ _)  〉
+                     adj _ (ap (loopN1S n) (adj _ (ap (ap^ n (ap f)) (loopSN1 (S n) α)))) ≃〈 ap (adj _ o (ap (loopN1S n))) (adj-def (ap^-id n (ap f)) _)  〉
+                     adj _ (ap (loopN1S n) (ap^ (S n) (ap f) (loopSN1 (S n) α)))  ≃〈 ! (loopN1S-S n (ap^ (S n) (ap f) (loopSN1 (S n) α))) 〉 
                      loopN1S (S n) (ap^ (S n) (ap f) (loopSN1 (S n) α)) ∎
---                 → (ap^ n (ap f) α) ≃ loopSN1 n (ap^ (S n) f (loopN1S n α))
 
   ap^-by-equals : ∀ n {A} {B} {f g : A → B} (α : f ≃ g) {a : A} (β : Loop n A a) → ap^ n f β ≃ rebase n (ap≃ (! α)) (ap^ n g β)
   ap^-by-equals n {f = f} id β = ! (ap≃ (rebase-idpath n) {ap^ n f β})
