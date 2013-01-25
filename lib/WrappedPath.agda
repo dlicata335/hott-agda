@@ -4,6 +4,7 @@ open import lib.First
 open import lib.Paths
 open Paths
 open import lib.HigherHomotopyAbelian
+open import lib.Functions
 
 module lib.WrappedPath where
 
@@ -67,6 +68,10 @@ module lib.WrappedPath where
   ap-adj : ∀ {A B}{a a1} → (f : A → B) (α : Path a a) (q : Path _ a1)
              -> (ap f (adj q α)) ≃ adj (ap f q) (ap f α)
   ap-adj f α id = ! (adj-def id (ap f α)) ∘ ! (ap (ap f) (adj-id α) ∘ ∘-unit-l (ap f α))
+
+  postulate
+    adj-ap≃ : ∀ {A : Type} {B : A → Type} {x : A} {f g : (x : A) → B x} (α : Path f f) (q : (x : A) → Path (f x) (g x)) → adj (q x) (ap≃ α {x}) ≃ ap≃ (adj (λ≃ q) α) {x}
+  -- adj-ap≃ α q = {!!}
 
   adj-! : {A : Type} {outs ins : A} → (w : Path ins outs) (m : Path ins ins)
         → adj w (! m) ≃ ! (adj w m)

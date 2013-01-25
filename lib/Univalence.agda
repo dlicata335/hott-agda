@@ -4,6 +4,7 @@ open import lib.First
 open import lib.Paths 
 open import lib.AdjointEquiv
 open import lib.Prods
+open import lib.Functions
 open Paths
 
 module lib.Univalence where
@@ -17,6 +18,9 @@ module lib.Univalence where
   ua : ∀ {A B} -> Equiv A B -> Path A B
   ua = IsEquiv.g univalence
 
+  univalence≃ : ∀ {A B} → Path A B ≃ Equiv A B
+  univalence≃ = ua (pathToEquiv , univalence)
+ 
   -- FIXME prove from univalence
   postulate
     transport-Equiv-post : ∀ {A B C} {b : Equiv B C} {a : Equiv A B} -> Path (transport (\ X -> Equiv A X) (ua b) a) (b ∘equiv a)
@@ -28,6 +32,9 @@ module lib.Univalence where
     id-ua : {A : Type} → (ua id-equiv) ≃ id{_}{A}
     -- also needed this fact:
     id-ua-transport-ua : ∀ {A} -> (ap (transport (λ x → x)) id-ua) ≃ transport-ua (id-equiv{A})
+
+  univalence≃-id : ∀ {A} → coe (univalence≃ {A} {A}) id ≃ id-equiv
+  univalence≃-id {A} = ap≃ (transport-ua (pathToEquiv , univalence)) {id}
 
   transport-ua-back : {A B : Type} (a : Equiv A B)
                     -> transport (\ x -> x) (! (ua a)) ≃ IsEquiv.g (snd a)
