@@ -76,60 +76,9 @@ module lib.HigherHomotopyAbelian (A : Set) (base : A) where
   -- ----------------------------------------------------------------------
   -- some consequences about canceling wrappers
 
-  -- these next two are an instance of equate-wrappers below,
-  -- but they're useful for proving rebase, which is useful for proving the
-  -- more general form
-  equate-wrappers' : ∀ {l} (α1 α2 : Path{Path{A} base base} id l) (β : Path{Path{A} base base} l l) 
-                  -> ! α1 ∘ β ∘ α1 ≃ ! α2 ∘ β ∘ α2
-  equate-wrappers'{l} = path-induction (\ l α1 -> (α2 : Path{Ω1} id l) (β : Path{Ω1} l l) -> ! α1 ∘ β ∘ α1 ≃ ! α2 ∘ β ∘ α2)
-                                      (λ α2 β → ! (! α2 ∘ β ∘ α2 ≃〈 ap (λ x → ! α2 ∘ x) (abelian β α2) 〉 
-                                                   ! α2 ∘ α2 ∘ β ≃〈 ∘-assoc (! α2) α2 β 〉
-                                                   (! α2 ∘ α2) ∘ β ≃〈 ap (λ x → x ∘ β) (!-inv-l α2) 〉  
-                                                   id ∘ β ∎))
-
-  equate-wrappers-!R' : ∀ {l} (α1 α2 : Path{Path{A} base base} l id) (β : Path{Path{A} base base} l l ) 
-                    -> α1 ∘ β ∘ ! α1 ≃ α2 ∘ β ∘ ! α2
-  equate-wrappers-!R' α1 α2 β = ap (λ x → x ∘ β ∘ ! α2) (!-invol α2) ∘ equate-wrappers' (! α1) (! α2) β ∘ ! (ap (λ x → x ∘ β ∘ ! α1) (!-invol α1))
-
-  rebase-PathPath : (l : Ω1) → Equiv (Path{Path{A} base base} id id) (Path{Path{A} base base} l l)
-  rebase-PathPath l = improve (hequiv (ap (λ x → l ∘ x))
-                                      (λ α → !-inv-l l ∘ ap (λ x → ! l ∘ x) α ∘ ! (!-inv-l l))
-                                      (λ x → !-inv-l l ∘ ap (λ x' → ! l ∘ x') (ap (λ x' → l ∘ x') x) ∘ ! (!-inv-l l) ≃〈 ap (λ x' → !-inv-l l ∘ x' ∘ ! (!-inv-l l)) (! (ap-o (λ x' → ! l ∘ x') (λ x' → l ∘ x') x)) 〉 
-                                             !-inv-l l ∘ ap (λ x' → ! l ∘ l ∘ x') x ∘ ! (!-inv-l l) ≃〈 ap (λ x' → !-inv-l l ∘ x' ∘ ! (!-inv-l l)) (ap-by-id{f = \ x' -> (! l ∘ l ∘ x')}  (λ x' → ! (∘-assoc (! l) l x') ∘ ! (ap (λ z → z ∘ x') (!-inv-l l)) ∘ ! (∘-unit-l x')) x) 〉 
-                                             !-inv-l l ∘ ((! (∘-assoc (! l) l id) ∘ ! (ap (λ z → z) (!-inv-l l))) ∘ x ∘ ! (! (∘-assoc (! l) l id) ∘ ! (ap (λ z → z) (!-inv-l l)))) ∘ ! (!-inv-l l) ≃〈 FIXME _ 〉 
-                                              (!-inv-l l ∘ (! (∘-assoc (! l) l id)) ∘ ! (ap (λ z → z) (!-inv-l l))) 
-                                             ∘ x 
-                                             ∘ ! (!-inv-l l ∘ ! (∘-assoc (! l) l id) ∘ ! (ap (λ z → z) (!-inv-l l))) ≃〈 equate-wrappers-!R' (!-inv-l l ∘ ! (∘-assoc (! l) l id) ∘ ! (ap (λ z → z) (!-inv-l l))) id x 〉 
-                                             id ∘ x ∘ id ≃〈 ∘-unit-l x 〉 
-                                             x ∎)
-                                      (λ x → ap (λ x' → l ∘ x') (!-inv-l l ∘ ap (λ x' → ! l ∘ x') x ∘ ! (!-inv-l l)) ≃〈 FIXME _ 〉 
-                                             (ap (λ x' → l ∘ x') (!-inv-l l) ∘ ap (λ x' → l ∘ x') (ap (λ x' → ! l ∘ x') x) ∘ ap (λ x' → l ∘ x') (! (!-inv-l l))) ≃〈 FIXME _ 〉 
-                                             (ap (λ x' → l ∘ x') (!-inv-l l) ∘ ap (λ x' → l ∘ (! l ∘ x')) x ∘ ap (λ x' → l ∘ x') (! (!-inv-l l))) ≃〈 FIXME _ 〉 
-                                             -- (ap (λ x' → l ∘ x') (!-inv-l l) ∘ ap (λ x' → l ∘ (! l ∘ x')) x ∘ ap (λ x' → l ∘ x') (! (!-inv-l l))) ≃〈 {!!} 〉 
-                                             x ∎)) where
-                  postulate FIXME : (A : Type) → A
-
-  postulate -- FIXME just need to fill in the proof term
-    rebase-PathPath-∘-back : ∀ {l} (α β : _) -> coe (! (ua (rebase-PathPath l))) (α ∘ β) ≃ coe (! (ua (rebase-PathPath l))) α ∘ coe (! (ua (rebase-PathPath l))) β
-  -- rebase-PathPath-∘-back{l} α β = coe (! (ua (rebase-PathPath l))) (α ∘ β) ≃〈 ap≃ (transport-ua-back (rebase-PathPath l)) 〉 
-  --                                (!-inv-l l ∘ ap (λ x → ! l ∘ x) (α ∘ β) ∘ ! (!-inv-l l)) ≃〈 {!!} 〉
-  --                                (!-inv-l l ∘ (ap (λ x → ! l ∘ x) α ∘ ap (λ x → ! l ∘ x) β) ∘ ! (!-inv-l l)) ≃〈 {!!} 〉
-  --                                ((!-inv-l l ∘ ap (λ x → ! l ∘ x) α ∘ ! (!-inv-l l)) ∘
-  --                                 (!-inv-l l ∘ ap (λ x → ! l ∘ x) β ∘ ! (!-inv-l l))) ≃〈 {!!} 〉 
-  --                                (coe (! (ua (rebase-PathPath l))) α ∘
-  --                                    coe (! (ua (rebase-PathPath l))) β ∎)
-
   -- works for any l
-  abelian-gen : ∀ {l} (a b : Path{Ω1} l l) → (a ∘ b) ≃ (b ∘ a)
-  abelian-gen{l} a b = (coe-inv-2 (ua (rebase-PathPath l)) ∘
-                          ap (λ x → coe (ua (rebase-PathPath l)) x)
-                          (! (rebase-PathPath-∘-back b a))) ∘
-                         ap (coe (ua (rebase-PathPath l)))
-                         (abelian (coe (! (ua (rebase-PathPath l))) a)
-                          (coe (! (ua (rebase-PathPath l))) b))
-                         ∘ ! (coe-inv-2 (ua (rebase-PathPath l)) ∘
-                              ap (λ x → coe (ua (rebase-PathPath l)) x)
-                              (! (rebase-PathPath-∘-back a b)))
+  abelian-gen : ∀ {y : A} {l : Path base y} (a b : Path l l) → (a ∘ b) ≃ (b ∘ a)
+  abelian-gen {l = id} a b = abelian a b
 
   equate-wrappers : ∀ {l1 l2} (α1 α2 : Path{Path{A} base base} l1 l2) (β : Path{Path{A} base base} l2 l2) 
                          -> ! α1 ∘ β ∘ α1 ≃ ! α2 ∘ β ∘ α2
@@ -142,46 +91,7 @@ module lib.HigherHomotopyAbelian (A : Set) (base : A) where
   equate-wrappers-!R : ∀ {l1 l2} (α1 α2 : Path{Path{A} base base} l2 l1) (β : Path{Path{A} base base} l2 l2) 
                     -> α1 ∘ β ∘ ! α1 ≃ α2 ∘ β ∘ ! α2
   equate-wrappers-!R α1 α2 β = ap (λ x → x ∘ β ∘ ! α2) (!-invol α2) ∘ equate-wrappers (! α1) (! α2) β ∘ ! (ap (λ x → x ∘ β ∘ ! α1) (!-invol α1))
-
-  {-
-      -- for reference, this is the minimal generalization of the IH that goes through
-      -- for proving the interchange law
-      ichange : (p q : Ω1) 
-               → (a : Path p q) (r : Ω1) (b : Path q r) (p' q' : Ω1) 
-                 (c : Path p' q') (r' : Ω1) (d : Path q' r') 
-               → Path (aptrans (trans a b) (trans c d)) (trans (aptrans a c) (aptrans b d))
-      ichange p q a = jay
-                        (λ p' q' a' →
-                           (r : Ω1) (b : Path q' r) (p0 q0 : Ω1) (c : Path p0 q0) (r' : Ω1)
-                           (d : Path q0 r') →
-                           Path (aptrans (trans a' b) (trans c d))
-                           (trans (aptrans a' c) (aptrans b d)))
-                        a
-                        (λ pq r b →
-                           jay
-                           (λ pq' r' b' →
-                              (p' q' : Ω1) (c : Path p' q') (r0 : Ω1) (d : Path q' r0) →
-                              Path (aptrans (trans id b') (trans c d))
-                              (trans (aptrans id c) (aptrans b' d)))
-                           b
-                           (λ pqr p' q' c →
-                              jay
-                              (λ p0 q0 c' →
-                                 (r' : Ω1) (d : Path q0 r') →
-                                 Path (aptrans id (trans c' d))
-                                 (trans (aptrans id c') (aptrans id d)))
-                              c
-                              (λ p'q' r' d →
-                                 jay
-                                 (λ p'q0 r0 d' →
-                                    Path (aptrans id (trans id d'))
-                                    (trans id (aptrans id d')))
-                                 d (λ _ → id))))
-  -}
       
-      -- ENH: can you relax the restriction that the base point is identity?
-      -- abelian' : {loop : Path base base} {a b : Path loop loop} → Path (trans a b) (trans b a)
-
   -- shorter proof by Favonia
   module BifunctorLemma where
 

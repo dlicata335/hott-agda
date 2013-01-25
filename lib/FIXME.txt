@@ -1,5 +1,3 @@
-HigherHomotopyAbelian: manually checked; just need proof terms
-
 Univalence: should be true, but haven't thought about the proofs
 
 Truncation: other people have proved them

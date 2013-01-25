@@ -69,25 +69,18 @@ module lib.loopspace.Groupoid where
     rebase-id One α = !-inv-with-middle-r α id
     rebase-id (S n) α = !-inv-with-middle-r (rebase-id n α) id
 
-  postulate
-    transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
-                          transport (Loop n A) α ≃ rebase n α
-    {-
-    transport-Loop-base One α = λ≃ (λ l →
-                                    (transport (λ b → Id b b) α l) ≃〈 {!!} 〉
-                                    (α ∘ l ∘ ! α)∎)
-    transport-Loop-base (S n) α = λ≃ (λ l →
-                           (transport (λ b → Id (id^ n) (id^ n)) α l) ≃〈 {!!} 〉
-                           (apd (λ b → id^ n {_} {b}) α ∘ ap (transport (Loop n _) α) l ∘ ! (apd (λ b → id^ n {_} {b}) α)) ≃〈 {!!} 〉
-                           (rebase-id n α ∘ ap (rebase n α) l ∘ ! (rebase-id n α))∎)
-
-    apd-id^ : ∀ n {A} {a} (α : Loop (S n) A a) → apd (λ b → id^ n {_} {b}) α ≃ rebase-id n α ∘ ap≃ (transport-Loop-base n α)
-    apd-id^ = {!!}
-    -}
-
   rebase-idpath : ∀ n → {A : Type} {a : A} -> rebase n (id{_}{a}) ≃ \ x -> x
-  rebase-idpath n = λ≃ (\ x -> ! (ap≃ (transport-Loop-base n id)))
+  rebase-idpath One = λ≃ (λ x → ∘-unit-l x)
+  rebase-idpath (S n) = λ≃ (λ x → (rebase-id n id ∘ ap (rebase n id) x ∘ ! (rebase-id n id)) ≃〈 ! (adj-def (rebase-id n id) _) 〉
+                                  adj _ (ap (rebase n id) x) ≃〈 adj-bind (ap-loop-by-equals {f = rebase n id} {g = λ x → x} (λ _ → ap≃ (! (rebase-idpath n))) x) 〉
+                                  adj _ (ap (λ x → x) x) ≃〈 ap (adj _) (ap-id x) 〉
+                                  adj _ x ≃〈 adj-eq-loop n _ _ _ _ id 〉
+                                  adj id x ≃〈 ! (adj-id x) 〉
+                                  x ∎)
 
+  transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
+                        transport (Loop n A) α ≃ rebase n α
+  transport-Loop-base n id = ! (rebase-idpath n)
 
   -- associate Ω^(n+1) as Ω^(Ω^n)
   -- instead of (Ω^n(Ω)), which is what you get by unfolding;
@@ -112,9 +105,29 @@ module lib.loopspace.Groupoid where
       e-id One = id
       e-id (S n) = !-inv-with-middle-r (e-id n) id
   
-     postulate 
-       β : ∀ n x → e n (i n x) ≃ x
-       η : ∀ n x → i n (e n x) ≃ x
+      β : ∀ n x → e n (i n x) ≃ x
+      β One x = id
+      β (S n) x = (e-id n ∘ ap (e n) (i-id n ∘ ap (i n) x ∘ ! (i-id n)) ∘ ! (e-id n)) ≃〈 ! (ap (λ α → e-id n ∘ ap (e n) α ∘ ! (e-id n)) (adj-def (i-id n) _)) 〉
+                  (e-id n ∘ ap (e n) (adj _ (ap (i n) x)) ∘ ! (e-id n)) ≃〈 ! (adj-def (e-id n) _) 〉
+                  adj _ (ap (e n) (adj _ (ap (i n) x))) ≃〈 adj-bind (ap-adj (e n) _ _) 〉
+                  adj _ (ap (e n) (ap (i n) x)) ≃〈 ! (ap (adj _) (ap-o (e n) (i n) x)) 〉
+                  adj _ (ap ((e n) o (i n)) x) ≃〈 adj-bind (ap-loop-by-equals {f = (e n) o (i n)} {g = λ x → x} (λ x → ! (β n x)) x) 〉
+                  adj _ (ap (λ x → x) x) ≃〈 ap (adj _) (ap-id x) 〉
+                  adj _ x ≃〈 adj-eq _ _ _ _ id 〉
+                  adj id x ≃〈 ! (adj-id x) 〉
+                  x ∎
+
+      η : ∀ n x → i n (e n x) ≃ x
+      η One x = id
+      η (S n) x = (i-id n ∘ ap (i n) (e-id n ∘ ap (e n) x ∘ ! (e-id n)) ∘ ! (i-id n)) ≃〈 ! (ap (λ α → i-id n ∘ ap (i n) α ∘ ! (i-id n)) (adj-def (e-id n) _)) 〉
+                  (i-id n ∘ ap (i n) (adj _ (ap (e n) x)) ∘ ! (i-id n)) ≃〈 ! (adj-def (i-id n) _) 〉
+                  adj _ (ap (i n) (adj _ (ap (e n) x))) ≃〈 adj-bind (ap-adj (i n) _ _) 〉
+                  adj _ (ap (i n) (ap (e n) x)) ≃〈 ! (ap (adj _) (ap-o (i n) (e n) x)) 〉
+                  adj _ (ap ((i n) o (e n)) x) ≃〈 adj-bind (ap-loop-by-equals {f = (i n) o (e n)} {g = λ x → x} (λ x → ! (η n x)) x) 〉
+                  adj _ (ap (λ x → x) x) ≃〈 ap (adj _) (ap-id x) 〉
+                  adj _ x ≃〈 adj-eq-loop n _ _ _ _ id 〉
+                  adj id x ≃〈 ! (adj-id x) 〉
+                  x ∎
 
      Eq : ∀ n → Equiv (Loop (S n) A a) (Loop n (Path a a) id) 
      Eq n = improve (hequiv (i n) (e n) (β n) (η n)) 

@@ -26,21 +26,24 @@ module lib.WrappedPath where
     adj-def : {A : Type} {outs ins : A} (w : Path ins outs) (m : Path ins ins) → adj w m ≃ adjust w m
     adj-def w m = id
 
+    adj-∘ : {A : Type} {outs mid ins : A} (w : Path mid outs) (w' : Path ins mid) (m : Path ins ins)
+          → adj w (adj w' m) ≃ adj (w ∘ w') m
+    adj-∘ id id m = ∘-unit-l (id ∘ m)
+
   -- can ignore wrappers in a doubly iterated identity type
-  postulate
-    ignore-wrappers : ∀ {A}{a : A} {ins out : Path a a} 
-          → (w w' : WrapPath (Path a a) out ins)
-          → inside w ≃ inside w'  
-          → unwrap w ≃ unwrap w'
-    -- ignore-wrappers {A}{a} (wrap w1 i1) (wrap w2 i2) α = 
-    --     w1 ∘ i1 ∘ ! w1 ≃〈 ap (λ x → w1 ∘ x ∘ ! w1) α 〉 
-    --     w1 ∘ i2 ∘ ! w1 ≃〈 equate-wrappers-!R A a w1 w2 i2 〉 
-    --     w2 ∘ i2 ∘ ! w2 ∎ 
+  ignore-wrappers : ∀ {A}{a : A} {ins out : Path a a} 
+        → (w w' : WrapPath (Path a a) out ins)
+        → inside w ≃ inside w'  
+        → unwrap w ≃ unwrap w'
+  ignore-wrappers {A}{a} (wrap w1 i1) (wrap w2 i2) α = 
+      w1 ∘ i1 ∘ ! w1 ≃〈 ap (λ x → w1 ∘ x ∘ ! w1) α 〉 
+      w1 ∘ i2 ∘ ! w1 ≃〈 equate-wrappers-!R A a w1 w2 i2 〉 
+      w2 ∘ i2 ∘ ! w2 ∎ 
 
   adj-eq : ∀ {A}{a : A} {ins outs : Path a a} 
           → (wrapper : Path ins outs) (middle : Path ins ins)
           → (wrapper' : Path ins outs) (middle' : Path ins ins)
-          → middle ≃ middle'  
+          → middle ≃ middle'
           → adj wrapper middle ≃ adj wrapper' middle'
   adj-eq wrapper middle wrapper' middle' α = ! (adj-def _ _) ∘
                                                ignore-wrappers (wrap wrapper middle) (wrap wrapper' middle') α ∘
@@ -51,10 +54,6 @@ module lib.WrappedPath where
                     → {M : A} (β : M ≃ M)
                     → (ap f β ≃ adj (α M) (ap g β))
   ap-loop-by-equals α id = ! (!-inv-r (α _) ∘ ap (λ x → α _ ∘ x) (∘-unit-l (! (α _))) ∘ adj-def _ _) 
-
-  postulate
-    adj-∘ : {A : Type} {outs mid ins : A} (w : Path mid outs) (w' : Path ins mid) (m : Path ins ins)
-          → adj w (adj w' m) ≃ adj (w ∘ w') m
 
   adj-bind : {A : Type} {outs mid ins : A} {w : Path mid outs} {w' : Path ins mid} {m : Path ins ins} {α : _}
             → α ≃ (adj w' m)
