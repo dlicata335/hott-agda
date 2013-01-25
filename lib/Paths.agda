@@ -146,6 +146,9 @@ module lib.Paths where
        → ! (a34 ∘ a23 ∘ a12) ≃ (! a12 ∘ ! a23 ∘ ! a34)
    !-∘3 id id id = id
 
+   !-inv-with-middle-r : ∀ {A} {a b : A} (α : Path a b) {β : Path a a} → (β ≃ id) → (α ∘ β ∘ ! α) ≃ id
+   !-inv-with-middle-r id δ = δ ∘ (∘-unit-l _)
+
    cancels-is-inverse : ∀ {A} {M N : A} {p : Path M N} {q : Path N M}
                       -> Path (q ∘ p) id
                       -> Path q (! p)

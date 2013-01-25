@@ -15,9 +15,6 @@ open import lib.WrappedPath
 
 module lib.LoopSpace where
 
-  collapse : ∀ {A} {a b : A} (α : Path a b) {β : Path a a} → (β ≃ id) → (α ∘ β ∘ ! α) ≃ id
-  collapse α δ = (!-inv-r α ∘ ap (λ x → α ∘ x) (∘-unit-l (! α))) ∘ ap (λ x → α ∘ x ∘ ! α) δ
-
   mutual
     Loop : (n : Positive) (A : Type) (base : A) → Type
     Loop One A b = Path b b
@@ -35,7 +32,7 @@ module lib.LoopSpace where
     ap^-id : ∀ {A B} → (n : _) → (f : A → B) → {base : A} →
              ap^ n f (id^ n) ≃ id^ n {_} {f base} 
     ap^-id One f = id
-    ap^-id (S n) f = collapse (ap^-id n f) id
+    ap^-id (S n) f = !-inv-r-with-middle (ap^-id n f) id
 
   ∘^ : ∀ n {A a} → Loop n A a → Loop n A a → Loop n A a
   ∘^ One p q = p ∘ q
@@ -77,8 +74,8 @@ module lib.LoopSpace where
     rebase (S n) α l = adjust (rebase-id n α) (ap (rebase n α) l)
     
     rebase-id : ∀ n → ∀ {A} {a a' : A} (α : a ≃ a') -> rebase n α (id^ n) ≃ id^ n
-    rebase-id One α = collapse α id
-    rebase-id (S n) α = collapse (rebase-id n α) id
+    rebase-id One α = !-inv-r-with-middle α id
+    rebase-id (S n) α = !-inv-r-with-middle (rebase-id n α) id
 
   postulate
     transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
@@ -107,7 +104,7 @@ module lib.LoopSpace where
   
       i-id : ∀ n → i n id ≃ id^ n
       i-id One = id
-      i-id (S n) = collapse (i-id n) id
+      i-id (S n) = !-inv-r-with-middle (i-id n) id
   
      mutual
       e : ∀ n → Loop n (Path a a) id → Loop (S n) A a
@@ -116,7 +113,7 @@ module lib.LoopSpace where
   
       e-id : ∀ n  → e n (id^ n) ≃ id
       e-id One = id
-      e-id (S n) = collapse (e-id n) id
+      e-id (S n) = !-inv-r-with-middle (e-id n) id
   
      postulate 
        β : ∀ n x → e n (i n x) ≃ x
@@ -218,12 +215,12 @@ module lib.LoopSpace where
                      adj _ (! (ap (ap^ n f) α)) ≃〈 adj-! _ (ap (ap^ n f) α) 〉 
                      (! (adj _ (ap (ap^ n f) α))) ≃〈 ap ! (adj-def (ap^-id n f) _) 〉 
                      !^ (S n) (ap^ (S n) f α) ∎ 
-   
-    ap^-o : ∀ {A B C} → (n : _) → (g : B → C) (f : A → B)
-          → {a : A} (α : Loop n A a)
-          → ap^ n (g o f) α ≃ ap^ n g (ap^ n f α) 
-    ap^-o One g f α = ap-o g f α
-    ap^-o (S n) g f α = {!!}
+    postulate
+     ap^-o : ∀ {A B C} → (n : _) → (g : B → C) (f : A → B)
+           → {a : A} (α : Loop n A a)
+           → ap^ n (g o f) α ≃ ap^ n g (ap^ n f α) 
+--     ap^-o One g f α = ap-o g f α
+ --    ap^-o (S n) g f α = {!!}
 
     !^-inv-l : ∀ n {A} {a : A} (α : Loop n A a) -> 
              (∘^ n (!^ n α) α) ≃ id^ n  
@@ -232,7 +229,7 @@ module lib.LoopSpace where
 
     !^-inv-l≃ : ∀ n {A} {a : A} {α β : Loop n A a} -> 
               α ≃ !^ n β -> (∘^ n α β) ≃ id^ n
-    !^-inv-l≃ n {β = β} p = transport (λ x → ∘^ n x β ≃ id^ n) (! p) (!^-inv-l β)
+    !^-inv-l≃ n {β = β} p = transport (λ x → ∘^ n x β ≃ id^ n) (! p) (!^-inv-l n β)
 
   postulate
     HSet-Loop : ∀ n {A} {a} → IsTrunc (tlp n) A → HSet (Loop n A a)
@@ -266,7 +263,7 @@ module lib.LoopSpace where
 
     i-id : ∀ n → i n (\ x -> (id^ n)) ≃ (id^ n)
     i-id One = ! (Π≃η id)
-    i-id (S n') = collapse (i-id n') (ap (ap (i n')) (! (Π≃η id)))
+    i-id (S n') = !-inv-r-with-middle (i-id n') (ap (ap (i n')) (! (Π≃η id)))
 
    mutual  
     e : ∀ n → Loop n ((x : A) → B x) m → (x : A) → Loop n (B x) (m x)
@@ -275,7 +272,7 @@ module lib.LoopSpace where
 
     e-id : ∀ n → ∀ {x} → e n (id^ n) x ≃ (id^ n)
     e-id One = id
-    e-id (S n') = collapse (e-id n') id
+    e-id (S n') = !-inv-r-with-middle (e-id n') id
 
    mutual
     β : ∀ n → (a : (x' : A) → Loop n (B x') (m x')) → (e n (i n a)) ≃ a
