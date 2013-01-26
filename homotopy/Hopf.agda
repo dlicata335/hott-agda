@@ -1,7 +1,6 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude 
-open import homotopy.HigherHomotopyAbelian 
 open import homotopy.Pi1S1 
 open Paths
 
@@ -35,7 +34,7 @@ module homotopy.Hopf where
   H-is-1-truncated = S²-elim (λ x → HGpd (H x)) S¹-is-Gpd
                              (fst (use-trunc (use-trunc (IsTrunc-Path { -1 } _ (IsTrunc-is-HProp {tl 1} S¹) _ _) _ _)))
 
-  module A = homotopy.HigherHomotopyAbelian S² S².base
+  module A = HigherHomotopyAbelian S² S².base
 
   module Four where
     ichange : Path {Path {Path base base} id id}

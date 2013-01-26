@@ -3,7 +3,6 @@
 open import lib.Prelude 
 open import homotopy.Hopf
 import homotopy.Pi1S1
-import homotopy.HigherHomotopyAbelian
 import homotopy.Pi2S2-retract
 open Paths
 open Int
@@ -85,7 +84,7 @@ module homotopy.Pi2S2-encdec where
                where 
                 STS3 : (ap (λ β → transport H (! β) S¹.base) S².loop) ≃ ! S¹.loop
                 STS3 = (ap (λ β → transport H (! β) S¹.base) S².loop)    ≃〈 ap-o (λ z → transport H z S¹.base) ! S².loop 〉 
-                       (ap (λ β → transport H β S¹.base) (ap ! S².loop)) ≃〈 ap (λ y → ap (λ β → transport H β S¹.base) y) (! (homotopy.HigherHomotopyAbelian.inverse-same S² S².base S².loop)) 〉 
+                       (ap (λ β → transport H β S¹.base) (ap ! S².loop)) ≃〈 ap (λ y → ap (λ β → transport H β S¹.base) y) (! (HigherHomotopyAbelian.inverse-same S² S².base S².loop)) 〉 
                        (ap (λ β → transport H β S¹.base) (! S².loop))    ≃〈 R.transport-H-!loop2 〉 
                        ! S¹.loop ∎
 

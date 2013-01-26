@@ -148,19 +148,19 @@ module polymorphism.SubsetModel where
                  (λ g0 g1 → λ≃ (λ b0 → ua (improve (hequiv 
                                                   (λ a1 → transport (B1 g0 g1) (α0 (g0 , b0))
                                                                 (l1 (g0 , r0 (g0 , b0)) 
-                                                                (g1 , transport (A1 g0 g1) (ap≃ transport-ua-back) a1)))
-                                                  (λ b1 → transport (A1 g0 g1) (! (ap≃ transport-ua-back))
+                                                                (g1 , transport (A1 g0 g1) (ap≃ type≃β!) a1)))
+                                                  (λ b1 → transport (A1 g0 g1) (! (ap≃ type≃β!))
                                                                 (r1 (g0 , b0) (g1 , b1)))
                                                   (λ a1 → ap≃
-                                                            (transport-inv-1 (A1 g0 g1) (ap≃ (transport-ua-back {_} {_}))) ∘
-                                                            ap (transport (A1 g0 g1) (! (ap≃ transport-ua-back)))
+                                                            (transport-inv-1 (A1 g0 g1) (ap≃ (type≃β! {_} {_}))) ∘
+                                                            ap (transport (A1 g0 g1) (! (ap≃ type≃β!)))
                                                             (β1 (g0 , r0 (g0 , b0))
-                                                             (g1 , transport (A1 g0 g1) (ap≃ transport-ua-back) a1))
-                                                            ∘ ap (transport (A1 g0 g1) (! (ap≃ transport-ua-back))) 
+                                                             (g1 , transport (A1 g0 g1) (ap≃ type≃β!) a1))
+                                                            ∘ ap (transport (A1 g0 g1) (! (ap≃ type≃β!))) 
                                                                    ({! (! (respd r1 (pair≃ id (α0 (g0 , b0))))) !})) 
                                                   (λ b1 → α1 (g0 , b0) (g1 , b1) 
                                                           ∘ ap (λ x → transport (B1 g0 g1) (α0 (g0 , b0)) (l1 (g0 , r0 (g0 , b0)) (g1 , x)))
-                                                              (ap≃ (transport-inv-2 (A1 g0 g1) (ap≃ (transport-ua-back {_} {_} {(equiv1 g0)}))))))))
+                                                              (ap≃ (transport-inv-2 (A1 g0 g1) (ap≃ (type≃β! {_} {_} {(equiv1 g0)}))))))))
                             -- ENH avoid copying and pasting the whole above term
                             ∘ transport-→-pre (ua (equiv1 g0)) _)
               where equiv1 : (g0 : Ob Γ) -> Equiv (A0 g0) (B0 g0)

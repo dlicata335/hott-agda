@@ -3,7 +3,6 @@
 open import lib.Prelude 
 open import homotopy.Hopf
 import homotopy.Pi1S1
-import homotopy.HigherHomotopyAbelian
 import homotopy.Pi2S2-retract
 open import homotopy.Pi2S2-encdec
 open Paths

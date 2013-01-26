@@ -28,44 +28,44 @@ module homotopy.Pi2S2-retract where
      (ap coe-base
          (loop-family->id-loop S¹-loops)) ≃〈 id 〉
      (ap coe-base
-       (id-ua
+       ((type≃η id)
         ∘ ap ua (loop-family->id-equiv-loop S¹-loops)
-        ∘ ! id-ua))                         ≃〈 ap-∘3 coe-base id-ua (ap ua (loop-family->id-equiv-loop S¹-loops)) (! id-ua) 〉
-     (ap coe-base id-ua ∘
+        ∘ ! (type≃η id)))                         ≃〈 ap-∘3 coe-base (type≃η id) (ap ua (loop-family->id-equiv-loop S¹-loops)) (! (type≃η id)) 〉
+     (ap coe-base (type≃η id) ∘
       ap coe-base (ap ua (loop-family->id-equiv-loop S¹-loops)) ∘ 
-      ap coe-base (! id-ua))                ≃〈 ap (λ x → ap coe-base id-ua ∘ x ∘ ap coe-base (! id-ua)) (! (ap-o coe-base ua (loop-family->id-equiv-loop S¹-loops))) 〉
-     (ap coe-base id-ua ∘
+      ap coe-base (! (type≃η id)))                ≃〈 ap (λ x → ap coe-base (type≃η id) ∘ x ∘ ap coe-base (! (type≃η id))) (! (ap-o coe-base ua (loop-family->id-equiv-loop S¹-loops))) 〉
+     (ap coe-base (type≃η id) ∘
       ap (coe-base o ua) (loop-family->id-equiv-loop S¹-loops) ∘
-      ap coe-base (! id-ua))                ≃〈 ap (λ x → ap coe-base id-ua ∘ x ∘ ap coe-base (! id-ua)) (ap-by-equals (λ e → ap≃ (transport-ua e) {S¹.base}) (loop-family->id-equiv-loop S¹-loops)) 〉
-     (ap coe-base id-ua ∘
-      (! (ap≃ (transport-ua id-equiv)) ∘ 
+      ap coe-base (! (type≃η id)))                ≃〈 ap (λ x → ap coe-base (type≃η id) ∘ x ∘ ap coe-base (! (type≃η id))) (ap-by-equals (λ e → ap≃ (type≃β e) {S¹.base}) (loop-family->id-equiv-loop S¹-loops)) 〉
+     (ap coe-base (type≃η id) ∘
+      (! (ap≃ (type≃β id-equiv)) ∘ 
        ap (\ (e : Equiv S¹ S¹) -> (fst e) S¹.base) (loop-family->id-equiv-loop S¹-loops) ∘
-       ap≃ (transport-ua id-equiv)) ∘ 
-      ap coe-base (! id-ua))                ≃〈 rassoc-1-3-1 (ap coe-base id-ua)  (! (ap≃ (transport-ua id-equiv))) (ap (\ (e : Equiv S¹ S¹) -> (fst e) S¹.base) (loop-family->id-equiv-loop S¹-loops)) (ap≃ (transport-ua id-equiv)) (ap coe-base (! id-ua)) 〉 
-     (ap coe-base id-ua ∘
-      ! (ap≃ (transport-ua id-equiv)) ∘ 
+       ap≃ (type≃β id-equiv)) ∘ 
+      ap coe-base (! (type≃η id)))                ≃〈 rassoc-1-3-1 (ap coe-base (type≃η id))  (! (ap≃ (type≃β id-equiv))) (ap (\ (e : Equiv S¹ S¹) -> (fst e) S¹.base) (loop-family->id-equiv-loop S¹-loops)) (ap≃ (type≃β id-equiv)) (ap coe-base (! (type≃η id))) 〉 
+     (ap coe-base (type≃η id) ∘
+      ! (ap≃ (type≃β id-equiv)) ∘ 
       ap (\ (e : Equiv S¹ S¹) -> (fst e) S¹.base) (loop-family->id-equiv-loop S¹-loops) ∘
-      ap≃ (transport-ua id-equiv) ∘ 
-      ap coe-base (! id-ua))                 ≃〈 ap (λ z → ap coe-base id-ua ∘ ! (ap≃ (transport-ua id-equiv)) ∘ z ∘ ap≃ (transport-ua id-equiv) ∘ ap coe-base (! id-ua)) sts 〉
-     (ap coe-base id-ua ∘
-      ! (ap≃ (transport-ua id-equiv)) ∘ 
+      ap≃ (type≃β id-equiv) ∘ 
+      ap coe-base (! (type≃η id)))                 ≃〈 ap (λ z → ap coe-base (type≃η id) ∘ ! (ap≃ (type≃β id-equiv)) ∘ z ∘ ap≃ (type≃β id-equiv) ∘ ap coe-base (! (type≃η id))) sts 〉
+     (ap coe-base (type≃η id) ∘
+      ! (ap≃ (type≃β id-equiv)) ∘ 
       S¹.loop ∘
-      ap≃ (transport-ua id-equiv) ∘ 
-      ap coe-base (! id-ua))                 ≃〈 ap (λ x → x ∘ ! (ap≃ (transport-ua id-equiv)) ∘ S¹.loop ∘ ap≃ (transport-ua id-equiv) ∘ ap coe-base (! id-ua)) rewrite-β 〉
-     ((ap≃ (transport-ua id-equiv)) ∘
-      ! (ap≃ (transport-ua id-equiv)) ∘ 
+      ap≃ (type≃β id-equiv) ∘ 
+      ap coe-base (! (type≃η id)))                 ≃〈 ap (λ x → x ∘ ! (ap≃ (type≃β id-equiv)) ∘ S¹.loop ∘ ap≃ (type≃β id-equiv) ∘ ap coe-base (! (type≃η id))) rewrite-β 〉
+     ((ap≃ (type≃β id-equiv)) ∘
+      ! (ap≃ (type≃β id-equiv)) ∘ 
       S¹.loop ∘
-      ap≃ (transport-ua id-equiv) ∘ 
-      ap coe-base (! id-ua))                 ≃〈 !-inv-r-front _ _ 〉
+      ap≃ (type≃β id-equiv) ∘ 
+      ap coe-base (! (type≃η id)))                 ≃〈 !-inv-r-front _ _ 〉
      (S¹.loop ∘
-      ap≃ (transport-ua id-equiv) ∘ 
-      ap coe-base (! id-ua))                 ≃〈 ap (λ x → S¹.loop ∘ ap≃ (transport-ua id-equiv) ∘ x) (ap-! coe-base id-ua) 〉
+      ap≃ (type≃β id-equiv) ∘ 
+      ap coe-base (! (type≃η id)))                 ≃〈 ap (λ x → S¹.loop ∘ ap≃ (type≃β id-equiv) ∘ x) (ap-! coe-base (type≃η id)) 〉
      (S¹.loop ∘
-      ap≃ (transport-ua id-equiv) ∘ 
-      ! (ap coe-base id-ua))                 ≃〈 ap (λ x → S¹.loop ∘ ap≃ (transport-ua id-equiv) ∘ ! x) rewrite-β 〉
+      ap≃ (type≃β id-equiv) ∘ 
+      ! (ap coe-base (type≃η id)))                 ≃〈 ap (λ x → S¹.loop ∘ ap≃ (type≃β id-equiv) ∘ ! x) rewrite-β 〉
      (S¹.loop ∘
-      ap≃ (transport-ua id-equiv) ∘ 
-      ! (ap≃ (transport-ua id-equiv)))       ≃〈 !-inv-r-back S¹.loop (ap≃ (transport-ua id-equiv)) 〉
+      ap≃ (type≃β id-equiv) ∘ 
+      ! (ap≃ (type≃β id-equiv)))       ≃〈 !-inv-r-back S¹.loop (ap≃ (type≃β id-equiv)) 〉
      S¹.loop ∎ 
     where coe-base = (λ α → transport (\ x -> x) α S¹.base)
      
@@ -77,12 +77,12 @@ module homotopy.Pi2S2-retract where
                 ap (λ f → f S¹.base) (λ≃ S¹-loops) ≃〈 Π≃β S¹-loops 〉 
                 S¹.loop ∎
   
-          rewrite-β : (ap (λ α → transport (\ x -> x) α S¹.base) id-ua) ≃ ap≃ (transport-ua id-equiv)
-          rewrite-β = ap (λ α → transport (λ x → x) α S¹.base) id-ua ≃〈 id 〉
-           ap ((\ f → f S¹.base) o (\ α → transport (λ x → x) α)) id-ua ≃〈 ap-o (λ f → f S¹.base) (λ α → transport (λ x → x) α) id-ua 〉
-           ap (\ f → f S¹.base) (ap (transport (λ x → x)) id-ua) ≃〈 ap (λ x → ap≃ x) id-ua-transport-ua 〉
-           ap (\ f -> f S¹.base) (transport-ua id-equiv) ≃〈 id 〉 
-           ap≃ (transport-ua id-equiv) ∎
+          rewrite-β : (ap (λ α → transport (\ x -> x) α S¹.base) (type≃η id)) ≃ ap≃ (type≃β id-equiv)
+          rewrite-β = ap (λ α → transport (λ x → x) α S¹.base) (type≃η id) ≃〈 id 〉
+           ap ((\ f → f S¹.base) o (\ α → transport (λ x → x) α)) (type≃η id) ≃〈 ap-o (λ f → f S¹.base) (λ α → transport (λ x → x) α) (type≃η id) 〉
+           ap (\ f → f S¹.base) (ap (transport (λ x → x)) (type≃η id)) ≃〈 ap (λ x → ap≃ x) (type≃-coh id) 〉
+           ap (\ f -> f S¹.base) (type≃β id-equiv) ≃〈 id 〉 
+           ap≃ (type≃β id-equiv) ∎
 
   abstract
    transport-H-loop2 : (ap encode' S².loop) ≃ S¹.loop

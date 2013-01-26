@@ -10,6 +10,7 @@ open import lib.Prods
 open import lib.Univalence
 open import lib.Functions
 open import lib.Truncations
+open import lib.WrappedPath
 
 module lib.Paths2 where
 
@@ -26,6 +27,8 @@ module lib.Paths2 where
                                           (ap (coe α))
   run-Path-equiv id = ! (λ≃ ap-id)
 
+
+  -- special case of λt and apt from LoopSpace
   loop-family->id-equiv-loop : {A : Type} 
                              → ((x : A) → Path x x)
                              → Path {Equiv A A} id-equiv id-equiv
@@ -34,6 +37,5 @@ module lib.Paths2 where
   loop-family->id-loop : {A : Type} 
                        → ((x : A) → Path x x)
                        → Path {Path{Type} A A} id id
-  loop-family->id-loop α = 
-    id-ua ∘ ap ua (loop-family->id-equiv-loop α) ∘ ! id-ua
+  loop-family->id-loop α = adjust (type≃η id) (ap ua (loop-family->id-equiv-loop α))
   

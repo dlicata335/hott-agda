@@ -7,8 +7,9 @@ open Paths
 open import lib.AdjointEquiv
 open import lib.Univalence
 
-module lib.HigherHomotopyAbelian (A : Set) (base : A) where
-
+module lib.HigherHomotopyAbelian where
+ 
+ module HigherHomotopyAbelian (A : Set) (base : A) where
   Ω1 : Set
   Ω1 = base ≃ base
 

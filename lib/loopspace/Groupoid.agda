@@ -1,5 +1,5 @@
 
-{-# OPTIONS --type-in-type #-}
+{-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.First
 open import lib.Paths
@@ -148,22 +148,22 @@ module lib.loopspace.Groupoid where
     -- but since we need lemmas anyway... 
     loopSN1-S : ∀ n {A a} (α : (Loop (S (S n)) A a)) →
                   loopSN1 (S n) α 
-                ≃ adj (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n)))
+                ≃ adj (LoopPathEquiv.i-id n ∘ ap≃ (type≃β (LoopPathEquiv.Eq n)))
                       (ap (loopSN1 n) α)
-    loopSN1-S n α = loopSN1 (S n) α ≃〈 ap≃ (transport-ua (LoopPathEquiv.Eq (S n))) 〉 
+    loopSN1-S n α = loopSN1 (S n) α ≃〈 ap≃ (type≃β (LoopPathEquiv.Eq (S n))) 〉 
                     adjust (LoopPathEquiv.i-id n) (ap (LoopPathEquiv.i n) α) ≃〈 ! (adj-def (LoopPathEquiv.i-id n) _) 〉 
-                    adj    (LoopPathEquiv.i-id n) (ap (LoopPathEquiv.i n) α) ≃〈 adj-bind (ap-loop-by-equals{f = (LoopPathEquiv.i n)}{g = (loopSN1 n)}   (λ x → ap≃ (transport-ua (LoopPathEquiv.Eq n))) α) 〉 
-                    adj (LoopPathEquiv.i-id n ∘ ap≃ (transport-ua (LoopPathEquiv.Eq n)))
+                    adj    (LoopPathEquiv.i-id n) (ap (LoopPathEquiv.i n) α) ≃〈 adj-bind (ap-loop-by-equals{f = (LoopPathEquiv.i n)}{g = (loopSN1 n)}   (λ x → ap≃ (type≃β (LoopPathEquiv.Eq n))) α) 〉 
+                    adj (LoopPathEquiv.i-id n ∘ ap≃ (type≃β (LoopPathEquiv.Eq n)))
                       (ap (loopSN1 n) α) ∎
 
     loopN1S-S : ∀ n {A a} (α : (Loop (S n) (Path{A} a a) id)) →
                   loopN1S (S n) α 
-                ≃ adj (LoopPathEquiv.e-id n ∘ ap≃ (transport-ua-back (LoopPathEquiv.Eq n)))
+                ≃ adj (LoopPathEquiv.e-id n ∘ ap≃ (type≃β! (LoopPathEquiv.Eq n)))
                       (ap (loopN1S n) α)
-    loopN1S-S n α = loopN1S (S n) α ≃〈 ap≃ (transport-ua-back (LoopPathEquiv.Eq (S n))) 〉 
+    loopN1S-S n α = loopN1S (S n) α ≃〈 ap≃ (type≃β! (LoopPathEquiv.Eq (S n))) 〉 
                     adjust (LoopPathEquiv.e-id n) (ap (LoopPathEquiv.e n) α) ≃〈 ! (adj-def (LoopPathEquiv.e-id n) _) 〉 
-                    adj    (LoopPathEquiv.e-id n) (ap (LoopPathEquiv.e n) α) ≃〈 adj-bind (ap-loop-by-equals{f = (LoopPathEquiv.e n)}{g = (loopN1S n)}   (λ x → ap≃ (transport-ua-back (LoopPathEquiv.Eq n))) α) 〉 
-                    adj (LoopPathEquiv.e-id n ∘ ap≃ (transport-ua-back (LoopPathEquiv.Eq n)))
+                    adj    (LoopPathEquiv.e-id n) (ap (LoopPathEquiv.e n) α) ≃〈 adj-bind (ap-loop-by-equals{f = (LoopPathEquiv.e n)}{g = (loopN1S n)}   (λ x → ap≃ (type≃β! (LoopPathEquiv.Eq n))) α) 〉 
+                    adj (LoopPathEquiv.e-id n ∘ ap≃ (type≃β! (LoopPathEquiv.Eq n)))
                       (ap (loopN1S n) α) ∎
 
 
@@ -176,9 +176,9 @@ module lib.loopspace.Groupoid where
     ap^-S' One f α = ap^ (S One) f α ≃〈 ! (adj-def (ap^-id One f) _) 〉
                      adj _ (ap (ap f) α) ≃〈 adj-eq _ _ _ _ id 〉 
                      adj _ (ap (ap f) α) ≃〈 ! (adj-id _) 〉 
-                     (ap (ap f) α) ≃〈 ap (ap (ap f)) (! (ap≃ (transport-ua (LoopPathEquiv.Eq One)) {α})) 〉 
+                     (ap (ap f) α) ≃〈 ap (ap (ap f)) (! (ap≃ (type≃β (LoopPathEquiv.Eq One)) {α})) 〉 
                      (ap (ap f) (loopSN1 One α)) ≃〈 id 〉 
-                     (ap^ One (ap f) (loopSN1 One α)) ≃〈 ! (ap≃ (transport-ua-back (LoopPathEquiv.Eq One))) 〉 
+                     (ap^ One (ap f) (loopSN1 One α)) ≃〈 ! (ap≃ (type≃β! (LoopPathEquiv.Eq One))) 〉 
                      (loopN1S One (ap^ One (ap f) (loopSN1 One α)) ∎)
     ap^-S' (S n) f α = ap^ (S (S n)) f α ≃〈 ! (adj-def (ap^-id (S n) f) _) 〉 
                         -- note : could avoid having to mention (ap^-id ...) by defining

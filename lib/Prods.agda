@@ -34,6 +34,9 @@ module lib.Prods where
   snd≃ : {A : Type} {B : A -> Type} {p q : Σ B} -> (c : p ≃ q) -> (transport B (fst≃ c) (snd p)) ≃ (snd q)
   snd≃ {p = p} {q = .p} id = id
 
+  snd≃' : {A : Type} {B : A -> Type} {p q : Σ B} -> (c : p ≃ q) -> (transport (B o fst) c (snd p)) ≃ (snd q)
+  snd≃' α = apd snd α
+
   pair≃ : {A : Type} {B : A -> Type} {p q : Σ B} -> (α : (fst p) ≃ (fst q)) -> (transport B α (snd p)) ≃ (snd q) -> p ≃ q
   pair≃ {p = x , y} {q = .x , .y} id id = id
 
@@ -52,6 +55,16 @@ module lib.Prods where
       -> (snd≃{B = B} (pair≃ α β)) ≃ 
          (β ∘ (ap (λ x → transport B x (snd p)) (Σ≃β1 {B = B} α β)))
   Σ≃β2 {p = x , y} {q = .x , .y} id id = id
+
+  {-
+  -- adjust on the other side
+  Σ≃β2' : {A : Type} {B : A -> Type} {p q : Σ B} 
+         (α : (fst p) ≃ (fst q))
+         (β : (transport B α (snd p)) ≃ (snd q))
+      -> {! (snd≃' {B = B} (pair≃ α β))  !} ≃ 
+         β 
+  Σ≃β2' {p = x , y} {q = .x , .y} id id = id
+  -}
 
   transport-Σ : {Γ : Type} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
             (A : Γ -> Type) (B : (γ : Γ) -> A γ -> Type)

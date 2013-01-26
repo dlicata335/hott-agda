@@ -19,7 +19,7 @@ module homotopy.Pi1S1 where
       ≃〈 ap   (transport (λ x → x))
               (βloop/rec Int (ua succEquiv)) 〉 
     transport (λ x → x) (ua succEquiv)
-      ≃〈 transport-ua _ 〉 
+      ≃〈 type≃β _ 〉 
     succ ∎
   
   transport-Cover-!loop : Path (transport Cover (! loop)) pred
@@ -34,7 +34,7 @@ module homotopy.Pi1S1 where
     transport (λ x → x) (! (ua succEquiv))                     
       ≃〈 ap (transport (λ x → x)) (!-ua succEquiv) 〉
     transport (λ x → x) (ua (!equiv succEquiv)) 
-      ≃〈 transport-ua _ 〉
+      ≃〈 type≃β _ 〉
     pred ∎
   
   encode : {x : S¹} →  Path base x  →  Cover x

@@ -7,7 +7,7 @@ module lib.spaces.Torus where
 
   open Paths
 
-  module T where
+  module Torus where
     private
       data T' : Set where
         Base : T'
@@ -37,7 +37,7 @@ module lib.spaces.Torus where
     CommutatorDep {C} a' p' q' = 
                       transport (λ x → transport C x a' ≃ a') f 
                             (p' ∘ (ap (transport C loop₁) q') ∘ ap≃ (transport-∘ C loop₁ loop₂)) 
-                   ≃ q' ∘ (ap (transport C loop₂) p') ∘ ap≃ (transport-∘ C loop₂ loop₁)
+                    ≃ q' ∘ (ap (transport C loop₂) p') ∘ ap≃ (transport-∘ C loop₂ loop₁)
 
     T-elim : {C : T -> Set}
              (a' : C base) 
@@ -102,7 +102,7 @@ module lib.spaces.Torus where
 
 
   module T-Lemmas where
-    open T
+    open Torus
 
     rec-to-torus-X : {X : Set}
                    -> (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l1 ∘ l2) (l2 ∘ l1))))
@@ -728,4 +728,3 @@ module lib.spaces.Torus where
                                                        (λ y → ap≃ rec-torus-X-id) 
                                                        (λ x → ap≃ torus-X-rec-id)))
     -}
-  open T

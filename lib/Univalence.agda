@@ -11,32 +11,64 @@ module lib.Univalence where
 
   pathToEquiv : ∀ {A B} → Path A B → Equiv A B
   pathToEquiv {A} α = transport(\ x -> Equiv A x) α id-equiv
-  
+
+
+  -- eta-expanded version; makes the later definitions easier
+  -- and is maybe better for the computational interp,
+  -- at least if it's based on groupoids.
+  -- conceptual order is backwards here; J should come
+  -- from these, rather than the other way around?
+  coe-is-equiv : ∀ {A B} (p : Path A B) → IsEquiv (coe p)
+  coe-is-equiv {A}{B} p = isequiv (coe (! p)) (λ _ → coe-inv-1 p) (λ _ → coe-inv-2 p) (triangle p) where
+    triangle : ∀ {B} (p : Path A B) → (x : A) → Path (coe-inv-2 p) (ap (transport (λ x' → x') p) (coe-inv-1 p))
+    triangle id = λ _ → id
+
+  coe-equiv : ∀ {A B} (p : Path A B) → Equiv A B
+  coe-equiv p = (coe p , coe-is-equiv p)
+
+  pathToEquiv' : ∀ {A B} → Path A B → Equiv A B
+  pathToEquiv' α = (coe α , coe-is-equiv α)
+
+  -- really the same thing
+  pathToEquiv-is-' : ∀ {A B} (α : Path A B) → pathToEquiv α ≃ pathToEquiv' α
+  pathToEquiv-is-' id = id
+
   postulate 
-    univalence : ∀ {A B} -> IsEquiv {Path A B} {Equiv A B} pathToEquiv
+    -- Dan version, using pathToEquiv'
+    univalence : ∀ {A B} -> IsEquiv {Path A B} {Equiv A B} pathToEquiv'
   
+  -- ua is the intro form; coe is the elim
+
   ua : ∀ {A B} -> Equiv A B -> Path A B
   ua = IsEquiv.g univalence
 
   univalence≃ : ∀ {A B} → Path A B ≃ Equiv A B
-  univalence≃ = ua (pathToEquiv , univalence)
- 
-  -- FIXME prove from univalence
+  univalence≃ = ua (pathToEquiv' , univalence)
+
+  type≃β : {A B : Type} (e : Equiv A B) -> Path (coe (ua e)) (fst e)
+  type≃β e = ap fst (IsEquiv.β univalence e)
+
+  type≃β! : {A B : Type} (a : Equiv A B) -> coe (! (ua a)) ≃ IsEquiv.g (snd a)
+  type≃β! a = ap (λ x → IsEquiv.g (snd x)) (IsEquiv.β univalence a)
+
+  type≃η : ∀ {A B} (p : Path A B) → ua (coe-equiv p) ≃ p
+  type≃η p = IsEquiv.α univalence p
+
+  type≃-coh : ∀ {A B} (p : Path A B) -> (ap coe (type≃η p)) ≃ type≃β (coe-equiv p)
+  type≃-coh p = ap (ap fst) (! (IsEquiv.γ univalence p)) ∘ ap-o fst pathToEquiv' (IsEquiv.α univalence p) 
+
+  {- use type≃η instead
+  id-ua : {A : Type} → (ua id-equiv) ≃ id{_}{A}
+  id-ua-type≃β : ∀ {A} -> (ap coe id-ua) ≃ type≃β (id-equiv{A})
+  -}
+
+  -- FIXME prove from univalence; would be easy with equivalence induction
   postulate
     transport-Equiv-post : ∀ {A B C} {b : Equiv B C} {a : Equiv A B} -> Path (transport (\ X -> Equiv A X) (ua b) a) (b ∘equiv a)
-
-    transport-ua : {A B : Type} (e : Equiv A B) -> Path (transport (\ A -> A) (ua e)) (fst e)
-
     !-ua : {A B : Type} (e : Equiv A B) → (! (ua e)) ≃ (ua (!equiv e))
 
-    id-ua : {A : Type} → (ua id-equiv) ≃ id{_}{A}
-    -- also needed this fact:
-    id-ua-transport-ua : ∀ {A} -> (ap (transport (λ x → x)) id-ua) ≃ transport-ua (id-equiv{A})
 
   univalence≃-id : ∀ {A} → coe (univalence≃ {A} {A}) id ≃ id-equiv
-  univalence≃-id {A} = ap≃ (transport-ua (pathToEquiv , univalence)) {id}
+  univalence≃-id {A} = ap≃ (type≃β (pathToEquiv' , univalence)) {id}
 
-  transport-ua-back : {A B : Type} (a : Equiv A B)
-                    -> transport (\ x -> x) (! (ua a)) ≃ IsEquiv.g (snd a)
-  transport-ua-back a = transport-ua _ ∘ ap (transport (λ X → X)) (!-ua a)
 

@@ -1,14 +1,16 @@
-{-# OPTIONS --type-in-type #-}
+{-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.First
 open import lib.Paths
 open Paths
 open import lib.HigherHomotopyAbelian
+open HigherHomotopyAbelian
 open import lib.Functions
+open import lib.Prods
 
 module lib.WrappedPath where
 
-  data WrapPath (A : Type) (outs : A) (ins : A) : Type {- +1 -} where
+  data WrapPath (A : Type) (outs : A) (ins : A) : Type where
        wrap : (wrapper : Path ins outs) (middle : Path ins ins) → WrapPath A outs ins
 
   unwrap : ∀ {A outs ins} → WrapPath A outs ins → Path outs outs
@@ -50,11 +52,12 @@ module lib.WrappedPath where
                                                ignore-wrappers (wrap wrapper middle) (wrap wrapper' middle') α ∘
                                                adj-def _ _
 
-  ap-loop-by-equals  : {A B : Type} {f g : A → B}
-                      (α : (x : _) → g x ≃ f x) 
-                    → {M : A} (β : M ≃ M)
-                    → (ap f β ≃ adj (α M) (ap g β))
-  ap-loop-by-equals α id = ! (!-inv-r (α _) ∘ ap (λ x → α _ ∘ x) (∘-unit-l (! (α _))) ∘ adj-def _ _) 
+  postulate
+    ap-loop-by-equals  : {A B : Type} {f g : A → B}
+                        (α : (x : _) → g x ≃ f x) 
+                      → {M : A} (β : M ≃ M)
+                      → (ap f β ≃ adj (α M) (ap g β))
+--  ap-loop-by-equals α id = ! (!-inv-r (α _) ∘ ap (λ x → α _ ∘ x) (∘-unit-l (! (α _))) ∘ adj-def _ _) 
 
   adj-bind : {A : Type} {outs mid ins : A} {w : Path mid outs} {w' : Path ins mid} {m : Path ins ins} {α : _}
             → α ≃ (adj w' m)
@@ -73,11 +76,18 @@ module lib.WrappedPath where
     adj-ap≃ : ∀ {A : Type} {B : A → Type} {x : A} {f g : (x : A) → B x} (α : Path f f) (q : (x : A) → Path (f x) (g x)) → adj (q x) (ap≃ α {x}) ≃ ap≃ (adj (λ≃ q) α) {x}
   -- adj-ap≃ α q = {!!}
 
+  -- adj-split : ∀ {A : Type}{B : A → Type} {p q : Σ B} (α : p ≃ p) (a : Path p q)
+  --           -> Path{Σ \ (α : Path{A} (fst q) (fst q)) → Path{B (fst q)} (transport B α (snd q)) (snd q)} 
+  --                 (let γ = adj a α in (fst≃ γ , snd≃ γ))
+  --                 (adj (fst≃ a) (fst≃ α) , {!(snd≃ α)!})
+  -- adj-split = {!!}
+
   adj-! : {A : Type} {outs ins : A} → (w : Path ins outs) (m : Path ins ins)
         → adj w (! m) ≃ ! (adj w m)
   adj-! w m = ap ! (! (adj-def w m)) ∘ (! (!-∘3 w m (! w)) ∘ ap (λ x → x ∘ ! m ∘ ! w) (! (!-invol w))) ∘ adj-def w (! m)
 
   {- don't need these--just use adj-bind at the call site! it's easy!
+ 
   adj-ap-adj : ∀ {A B}{a a1 b} → (f : A → B) (α : Path a a) (p : Id _ b) (q : Path _ a1)
              -> adj p (ap f (adj q α)) ≃ adj (p ∘ ap f q) (ap f α)
   adj-ap-adj f α p q = adj-bind (ap-adj f α q) 
