@@ -19,6 +19,6 @@ module lib.BasicTypes where
   open import lib.Truncations public
   open import lib.Paths2 public
   open import lib.Suspension public
-  -- open import lib.LoopSpace public
+  open import lib.LoopSpace public
   open import lib.WrappedPath public
   open import lib.HigherHomotopyAbelian public
