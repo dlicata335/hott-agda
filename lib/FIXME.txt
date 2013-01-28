@@ -1,10 +1,16 @@
+High risk:
+
+WrappedPath
+loopspace/OverTypes
+loopspace/Truncations
+
+Low risk:
+
 Univalence: should be true, but haven't thought about the proofs
-
 Truncation: other people have proved them
-
 AdjointEquiv: manually checked or other people have proved them
-
 Int: other people have proved
+
 
 Just sketchy; not exported:
 

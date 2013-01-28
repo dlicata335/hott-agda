@@ -84,7 +84,14 @@ module lib.loopspace.Types where
       ual (S n) α = adjust (ual-id n) (ap (ual n) α)
 
       ual-id : ∀ n → ual n (id^ n) ≃ id^ n
-      ual-id One = {!!}
+      ual-id One = transport
+                     (λ β →
+                        Id
+                        (IsEquiv.α univalence p ∘
+                         ap (IsEquiv.g univalence) (pair≃ id β) ∘
+                         ! (IsEquiv.α univalence p))
+                        id)
+                     {id} (HSet-UIP (increment-IsTrunc (IsEquiv-HProp (coe p))) _ _ _ _) (!-inv-with-middle-r (IsEquiv.α univalence p) id)  
       ual-id (S n) = !-inv-with-middle-r (ual-id n) id 
 
     coel : ∀ n → Loop n (Path{Type} A A) p → Loop n (A → A) (coe p) 
@@ -113,15 +120,23 @@ module lib.loopspace.Types where
                 l ∎
 
     η : ∀ n (l : Loop n (Path{Type} A A) p) → (ual n (coel n l)) ≃ l
-    η One l = adjust (type≃η p)
-                (ap {M = coe-equiv p} {N = coe-equiv p} ua
-                 (pair≃ (ap coe l) (HProp-unique (IsEquiv-HProp (coe p)) _ _))) ≃〈 !
-                                                                                      (adj-def (type≃η p)
-                                                                                       (ap {M = coe-equiv p} {N = coe-equiv p} ua
-                                                                                        (pair≃ (ap coe l) (HProp-unique (IsEquiv-HProp (coe p)) _ _)))) 〉 
-              adj _ (ap ua (pair≃ (ap coe l) (HProp-unique (IsEquiv-HProp (coe p)) _ _))) ≃〈 {!Loop One (Path{Type} A A) p!} 〉 
-              adj _ (ap ua (pair≃ (ap coe l) {! ? !})) ≃〈 {!!} 〉               
-              l ∎
+    η One l = lemma p p l _ where
+       -- ENH: way to do this without using J?
+       lemma : ∀ {A B : Type} (p q : Path{Type} A B) (l : Path p q)
+               (β : transport IsEquiv (ap coe l) (coe-is-equiv p) ≃ coe-is-equiv q)
+             -> (type≃η q) ∘ (ap ua (pair≃ (ap coe l) β)) ∘ (! (type≃η p)) ≃ l
+       lemma id q l = path-induction (\ q l → 
+                                        (β : transport IsEquiv (ap coe l) (coe-is-equiv id) ≃ coe-is-equiv q)
+                                      → ((type≃η q) ∘ (ap ua (pair≃ (ap coe l) β)) ∘ (! (type≃η id))) ≃ l)
+                                      (λ β' → transport
+                                                (λ β0 →
+                                                   IsEquiv.α univalence id ∘
+                                                   ap (IsEquiv.g univalence) (pair≃ id β0) ∘
+                                                   ! (IsEquiv.α univalence id)
+                                                   ≃ id) {id}{β'}
+                                                (fst (use-trunc (use-trunc (IsTrunc-Path _ (IsEquiv-HProp (λ x → x)) _ _) _ _))) 
+                                                (!-inv-with-middle-r (IsEquiv.α univalence id) id))
+                                      l
     η (S n) l = ual (S n) (coel (S n) l) ≃〈 id 〉 
                 ual (S n) (adjust (ap^-id n coe{p}) (ap (coel n) l)) ≃〈 ap (ual (S n)) (! (adj-def (ap^-id n coe{p}) (ap (coel n) l))) 〉 
                 ual (S n) (adj    (ap^-id n coe{p}) (ap (coel n) l)) ≃〈 id 〉 
