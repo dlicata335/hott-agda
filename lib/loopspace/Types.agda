@@ -232,7 +232,7 @@ module lib.loopspace.Types where
 
     apt : ∀ n {A} -> Loop (S n) Type A → ((a : A) -> Loop n A a)
     apt n = IsEquiv.g (snd (eqv n))
-    -- apt n α a = ap^ n (\ x -> f a) (ap^ n coe (loopSN1 n α) )
+    -- apt n α a = ap^ n (\ x -> f a) (ap^ n coe (loopSN1 n α))
     -- ap^ n (\ x -> coe x a) (loopSN1 n α) by fusion
 
     β : ∀ n {A} (α : (a : A) -> Loop n A a) (a : A) -> 
@@ -243,6 +243,14 @@ module lib.loopspace.Types where
     η n α = (IsEquiv.β (snd (eqv n)) α)
 
   open LoopSType public using (apt ; λt)
+
+  apt-id : ∀ n {A} (a : A) → apt n id a ≃ id^ n
+  apt-id One a = id
+  apt-id (S n) {A} a = apt (S n) id a ≃〈 id 〉
+                       ap^ (S n) (λ f → f a) (ap^ (S n) coe (loopSN1 (S n) id)) ≃〈 ap (λ x → ap^ (S n) (λ f → f a) (ap^ (S n) coe x)) (loopSN1-id (S n) A) 〉
+                       ap^ (S n) (λ f → f a) (ap^ (S n) coe (id^ (S n) {_} {id})) ≃〈 ! (ap^-o (S n) (λ f → f a) coe (id^ (S n) {_} {id})) 〉
+                       ap^ (S n) (λ f → coe f a) (id^ (S n) {_} {id}) ≃〈 ap^-id (S n) (λ f → coe f a) {id} 〉
+                       id^ (S n) ∎
 
   apt-! : ∀ n {A} -> (α : Loop (S n) Type A) (a : _) →
               apt n (!^ (S n) α) a

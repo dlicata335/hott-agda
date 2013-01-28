@@ -139,6 +139,10 @@ module lib.loopspace.Groupoid where
 
   open LoopPath public using (loopN1S ; loopSN1)
 
+  loopSN1-id : ∀ n {A : Type} (a : A) → loopSN1 n id ≃ id^ n {_} {id {_} {a}}
+  loopSN1-id One a = id
+  loopSN1-id (S n) a = !-inv-with-middle-r (LoopPath.loopSN1-id n) id
+
   loopSN1-! : ∀ n{A}{a} → (a : Loop (S n) A a) → loopSN1 n (! a) ≃ !^ n (loopSN1 n a)
   loopSN1-! One a' = id
   loopSN1-! (S n) a' = loopSN1 (S n) (! a') ≃〈 id 〉 

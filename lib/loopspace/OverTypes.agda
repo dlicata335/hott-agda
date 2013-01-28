@@ -22,6 +22,9 @@ module lib.loopspace.OverTypes where
 
   postulate
     add-!-≃ : ∀ {A} {M : A} (p : Path M M) → (! p ≃ id) ≃ (p ≃ id)
+
+  -- add-!-≃' : ∀ {A} {M N P : A} (p : Path M N) (q : Path N M) → (! p ≃ q) ≃ (p ≃ ! q)
+  -- add-!-≃' id = {!!}
   {-
   add-!-≃ {A} {M} p = ua (improve (hequiv (λ α → ap ! α ∘ ! (!-invol p))
                                             (λ β → ap ! β) 
@@ -46,25 +49,64 @@ module lib.loopspace.OverTypes where
         (apt n (ap^ (S n) B α) b)
         (id^ n)
 
-  postulate
+  idOverS : ∀ n {A} {a} (B : A → Type) (b : B a) → LoopOverS n id B b
+  idOverS n B b = apt n (ap^ (S n) B id) b ≃〈 ap (λ x → apt n x b) (ap^-id (S n) B) 〉
+                  apt n id b ≃〈 apt-id n b 〉
+                  id^ n ∎
+
+  transport-≃Paths : ∀ {A} {B} → {f g : A → B} (P : A → Type) (α : (a : A) → P a ≃ (f a ≃ g a)) {a b : A} (p : a ≃ b) (u : P a) → transport P p u ≃ coe (! (α b)) (ap g p ∘ coe (α a) u ∘ ! (ap f p))
+  transport-≃Paths P α id u = {!!}
+
+
+  mutual
     LoopOver-is-S : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) → (B : A -> Type) (b : B a) 
                     → LoopOver (S n) α B b ≃ LoopOverS n α B b 
-    {- One case should be done
+    -- One case should be done
     LoopOver-is-S One α B b = add-!-≃
-                                (apt One (id ∘ ap (λ l → ap B l) α) b)
-                                ∘ ap (λ x → Id x id) 
-                                     (transport (λ x → Id (transport B x b) b) α id ≃〈 {!!} 〉
-                                      ap (\_ -> b) α ∘ id ∘ ! (ap (\ x -> transport B x b) α) ≃〈 {!!} 〉 
-                                      id ∘ id ∘ ! (ap (\ x -> transport B x b) α) ≃〈 {!!} 〉 
-                                      ! (ap (\ x -> transport B x b) α) ≃〈 {!!} 〉
-                                      ! (ap (\ x -> coe (ap B x) b) α) ≃〈 {!!} 〉  
-                                      ! (ap (\ x -> coe x b) (ap (ap B) α)) ≃〈 {!!} 〉 
-                                      ! (ap (\ x -> coe x b) (coe (LoopPath One) (ap (ap B) α))) ≃〈 id 〉 
-                                      ! (ap^ One (\ x -> coe x b) (coe (LoopPath One) (ap (ap B) α))) ≃〈 {!!} 〉 
-                                      ! ((apt One (ap (ap B) α) b)) ≃〈 {!!} 〉 
-                                      (! (apt One (id ∘ ap (ap B) α) b) ∎))
-    LoopOver-is-S (S n) α B b = {!!} 
-    -}
+                                  (apt One (id ∘ ap (λ l → ap B l) α) b)
+                                  ∘ ap (λ x → Id x id) 
+                                       (transport (λ x → Id (transport B x b) b) α id ≃〈 {!!} 〉
+                                        ap (\_ -> b) α ∘ id ∘ ! (ap (\ x -> transport B x b) α) ≃〈 {!!} 〉 
+                                        id ∘ id ∘ ! (ap (\ x -> transport B x b) α) ≃〈 {!!} 〉 
+                                        ! (ap (\ x -> transport B x b) α) ≃〈 {!!} 〉
+                                        ! (ap (\ x -> coe (ap B x) b) α) ≃〈 {!!} 〉  
+                                        ! (ap (\ x -> coe x b) (ap (ap B) α)) ≃〈 id 〉 
+                                        ! (ap^ One (\ x -> coe x b) (ap (ap B) α)) ≃〈 {!!} 〉 
+                                        ! ((apt One (ap (ap B) α) b)) ≃〈 {!!} 〉
+                                        (! (apt One (id ∘ ap (ap B) α) b) ∎))
+    LoopOver-is-S (S n) α B b = (transport (λ x → LoopOver (S n) x B b) α id ≃ id) ≃〈 {!!} 〉
+                                (coe (! (LoopOver-is-S n id B b)) (ap (λ _ → id^ n) α ∘ coe (LoopOver-is-S n id B b) id ∘ ! (ap (λ x → apt n (ap^ (S n) B x) b) α)) ≃ id) ≃〈 {!!} 〉
+                                (coe (! (LoopOver-is-S n id B b)) (coe (LoopOver-is-S n id B b) id ∘ ! (ap (λ x → apt n (ap^ (S n) B x) b) α)) ≃ id) ≃〈 {!!} 〉
+                                (coe (! (LoopOver-is-S n id B b)) (idOverS n B b ∘ ! (ap (λ x → apt n (ap^ (S n) B x) b) α)) ≃ id) ≃〈 {!!} 〉
+                                (coe (! (LoopOver-is-S n id B b)) (idOverS n B b ∘ ! (adj _ (ap ((ap^ n (λ x → coe x b)) o (loopSN1 n) o (ap^ (S n) B)) α))) ≃ id) ≃〈 {!!} 〉
+                                -- (coe (ap (λ x → LoopOver (S n) x B b) α) id ≃ id) ≃〈 {!!} 〉
+                                -- (coe (adj _ (ap (λ x → (apt n (ap^ (S n) B x) b ≃ id^ n)) α)) id ≃ id) ≃〈 {!!} 〉
+                                -- (coe (adj _ (ap (λ x → ap^ n (λ x' → coe x' b) (loopSN1 n (ap^ (S n) B x)) ≃ id^ n) α)) id ≃ id) ≃〈 {!!} 〉
+  
+                                -- (transport (λ x → transport (λ x' → LoopOver n x' B b) x (idOver n B b) ≃ idOver n B b) α id ≃ id) ≃〈 {!!} 〉
+                                -- (ap (λ x → idOver n B b) α ∘ id ∘ ! (ap (λ x → transport (λ x' → LoopOver n x' B b) x (idOver n B b)) α) ≃ id) ≃〈 {!!} 〉
+                                -- (! (ap (λ x → transport (λ x' → LoopOver n x' B b) x (idOver n B b)) α) ≃ id) ≃〈 {!!} 〉
+                                -- (ap (λ x → transport (λ x' → LoopOver n x' B b) x (idOver n B b)) α ≃ id) ≃〈 {!!} 〉
+                                -- (ap (λ p → coe p (idOver n B b)) (ap (ap (λ x' → LoopOver n x' B b)) α) ≃ id) ≃〈 {!!} 〉
+  
+  -- apt n α a = ap^ n (\ x -> coe x a) (loopSN1 n α)
+                                (adj _ (ap ((ap^ n (λ p → coe p b)) o (loopSN1 n) o (ap^ (S n) B)) α) ≃ id)    ≃〈 {!!} 〉
+                                (adj _ (ap (ap^ n (λ p → coe p b)) (ap (loopSN1 n) (ap (ap^ (S n) B) α))) ≃ id)    ≃〈 {!!} 〉
+                                (adj _ (ap (ap^ n (λ p → coe p b)) (adj _ (ap (loopSN1 n) (ap^ (S (S n)) B α)))) ≃ id)    ≃〈 ap (λ y → y ≃ id) (ap (adj _) (ap (λ x → ap (ap^ n (λ p → coe p b)) x) (adj-def (LoopPath.loopSN1-id n) _))) 〉
+                                (adj _ (ap (ap^ n (λ p → coe p b)) (loopSN1 (S n) (ap^ (S (S n)) B α))) ≃ id)             ≃〈 ap (λ x → x ≃ id) (adj-def (ap^-id n (λ p → coe p b) {id}) _)〉
+                                (ap^ (S n) (λ p → coe p b) (loopSN1 (S n) (ap^ (S (S n)) B α)) ≃ id)                      ≃〈 {!!} 〉
+                                (apt (S n) (ap^ (S (S n)) B α) b ≃ id^ (S n)) ∎  where
+      f : (transport (λ x → LoopOver (S n) x B b) α (idOver (S n) B b) ≃ idOver (S n) B b)
+          → (apt (S n) (ap^ (S (S n)) B α) b ≃ id^ (S n))
+      f p = apt (S n) (ap^ (S (S n)) B α) b ≃〈 {!!} 〉
+            id ∎
+
+      g : transport (λ x → LoopOver (S n) x B b) α id ≃ apt (S n) (ap^ (S (S n)) B α) b
+      g = {!!}
+  
+    LoopOver-is-S-id : ∀ n {A} {a} (B : A → Type) (b : B a) → coe (LoopOver-is-S n id B b) id ≃ idOverS n B b
+    LoopOver-is-S-id One B b = {!!}
+    LoopOver-is-S-id (S n) B b = {!!}
 
   LoopType→ : ∀ n {A B} → (Loop (S n) Type A) -> Loop (S n) Type B -> Loop (S n) Type (A → B)
   LoopType→ n {A} {B} lA lB = λt n (λ (f : A → B) →
