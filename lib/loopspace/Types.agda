@@ -85,7 +85,7 @@ module lib.loopspace.Types where
 
       ual-id : ∀ n → ual n (id^ n) ≃ id^ n
       ual-id One = {!!}
-      ual-id (S n) = !-inv-with-middle-r (ual-id n) id
+      ual-id (S n) = !-inv-with-middle-r (ual-id n) id 
 
     coel : ∀ n → Loop n (Path{Type} A A) p → Loop n (A → A) (coe p) 
     coel n α = ap^ n coe α
@@ -100,11 +100,47 @@ module lib.loopspace.Types where
               adj _  l ≃〈 ap (λ x → adj x l) (!-inv-r (ap coe (type≃η p)) ∘ ap (λ x → ap coe (type≃η p) ∘ ! x) (! (type≃-coh p))) 〉 
               adj id  l ≃〈 !(adj-id _) 〉 
               (l ∎)
-    β (S n) l = {!!}
-  
-    path : ∀ n → Loop n (A → A) (coe p) ≃ Loop n (Path{Type} A A) p
-    path n = ua (improve (hequiv (ual n) (coel n) {!!} {!!}))
+    β (S n) l = coel (S n) (ual (S n) l) ≃〈 id 〉 
+                coel (S n) (adjust (ual-id n) (ap (ual n) l)) ≃〈 ap (coel (S n)) (! (adj-def (ual-id n) (ap (ual n) l))) 〉 
+                coel (S n) (adj    (ual-id n) (ap (ual n) l)) ≃〈 id 〉 
+                adjust (ap^-id n coe{p}) (ap (coel n) (adj    (ual-id n) (ap (ual n) l)))  ≃〈 ! (adj-def (ap^-id n coe{p}) (ap (ap^ n coe) (adj    (ual-id n) (ap (ual n) l)))) 〉 
+                adj  (ap^-id n coe{p}) (ap (coel n) (adj    (ual-id n) (ap (ual n) l)))  ≃〈 adj-bind (ap-adj (coel n) (ap (ual n) l) _) 〉 
+                adj  _ (ap (coel n) (ap (ual n) l))  ≃〈 ap (adj _) (! (ap-o (coel n) (ual n) l)) 〉 
+                adj  _ (ap (coel n o ual n) l)  ≃〈 adj-bind (ap-loop-by-equals {f = coel n o ual n} {g = λ x → x} (λ x → ! (β n x)) l) 〉 
+                adj  _ (ap (\ x -> x) l)  ≃〈 ap (adj _) (ap-id l) 〉 
+                adj  _ l   ≃〈 adj-eq-loop n _ _ _ _ id 〉 
+                adj  id l  ≃〈 ! (adj-id l) 〉 
+                l ∎
 
+    η : ∀ n (l : Loop n (Path{Type} A A) p) → (ual n (coel n l)) ≃ l
+    η One l = adjust (type≃η p)
+                (ap {M = coe-equiv p} {N = coe-equiv p} ua
+                 (pair≃ (ap coe l) (HProp-unique (IsEquiv-HProp (coe p)) _ _))) ≃〈 !
+                                                                                      (adj-def (type≃η p)
+                                                                                       (ap {M = coe-equiv p} {N = coe-equiv p} ua
+                                                                                        (pair≃ (ap coe l) (HProp-unique (IsEquiv-HProp (coe p)) _ _)))) 〉 
+              adj _ (ap ua (pair≃ (ap coe l) (HProp-unique (IsEquiv-HProp (coe p)) _ _))) ≃〈 {!Loop One (Path{Type} A A) p!} 〉 
+              adj _ (ap ua (pair≃ (ap coe l) {! ? !})) ≃〈 {!!} 〉               
+              l ∎
+    η (S n) l = ual (S n) (coel (S n) l) ≃〈 id 〉 
+                ual (S n) (adjust (ap^-id n coe{p}) (ap (coel n) l)) ≃〈 ap (ual (S n)) (! (adj-def (ap^-id n coe{p}) (ap (coel n) l))) 〉 
+                ual (S n) (adj    (ap^-id n coe{p}) (ap (coel n) l)) ≃〈 id 〉 
+                adjust (ual-id n) (ap (ual n) (adj    _ (ap (coel n) l)))  ≃〈 ! (adj-def (ual-id n) (ap (ual n) (adj _ (ap (coel n) l)))) 〉 
+                adj    (ual-id n) (ap (ual n) (adj    _  (ap (coel n) l)))  ≃〈 adj-bind (ap-adj (ual n) (ap (coel n) l) _) 〉 
+                adj  _ (ap (ual n) (ap (coel n) l))  ≃〈 ap (adj _) (! (ap-o (ual n) (coel n) l)) 〉 
+                adj  _ (ap (ual n o coel n) l)  ≃〈 adj-bind (ap-loop-by-equals {f = ual n o coel n} {g = λ x → x} (λ x → ! (η n x)) l) 〉 
+                adj  _ (ap (\ x -> x) l)  ≃〈 ap (adj _) (ap-id l) 〉 
+                adj  _ l   ≃〈 adj-eq-loop n _ _ _ _ id 〉 
+                adj  id l  ≃〈 ! (adj-id l) 〉 
+                l ∎
+  
+    eqv : ∀ n → Equiv (Loop n (A → A) (coe p)) (Loop n (Path{Type} A A) p)
+    eqv n = (improve (hequiv (ual n) (coel n) (β n) (η n)))
+
+    path : ∀ n → Loop n (A → A) (coe p) ≃ Loop n (Path{Type} A A) p
+    path n = ua (eqv n)
+
+  open LoopPathType public using (coel; ual) 
     
   {-
   can get alway without Σ's for now; 
@@ -169,37 +205,39 @@ module lib.loopspace.Types where
   sndl n α = snd (coe (! (LoopΣ n _ _)) α)
   -}
 
-  postulate
-    LoopSType : ∀ n {A} -> ((a : A) -> Loop n A a) ≃ (Loop (S n) Type A)
-  {-
-  LoopSType n = (! (LoopPath n)) ∘
-                ua (improve (hequiv 
-                  (λ h → coe (ap (λ (B : Σ (λ A → A))
-                                    → Loop n (fst B) (snd B))
-                             (! (pair≃ univalence≃ univalence≃-id)))
-                         (pairl n (λl n h) 
-                                (fst (use-trunc (IsTrunc-LoopOver n -2 
-                                                   (λl n h)
-                                                   (λ f → IsEquiv-HProp f))))))
-                  (λ α y → (ap^ n (λ x → coe x y) α))
-                  {!!}
-                  {!!}))
-  -}
+  module LoopSType where
+    eqv : ∀ n {A} -> Equiv ((a : A) -> Loop n A a) (Loop (S n) Type A)
+    eqv n = (!equiv (LoopPath.eqv n) ∘equiv LoopPathType.eqv n ∘equiv LoopΠ.eqv n)
 
-  apt : ∀ n {A} -> Loop (S n) Type A → ((a : A) -> Loop n A a)
-  apt n l a = coe (! (LoopSType n)) l a
+    path : ∀ n {A} -> ((a : A) -> Loop n A a) ≃ (Loop (S n) Type A)
+    path n = ua (eqv n)
 
-  postulate
-    apt-def : ∀ n {A} -> (l : Loop (S n) Type A) → (a : A) 
-            → apt n l a ≃ ap^ n (\ x -> coe x a) (loopSN1 n l) 
+    λt : ∀ n {A} -> ((a : A) -> Loop n A a) -> Loop (S n) Type A
+    λt n = fst (eqv n)
 
+    apt : ∀ n {A} -> Loop (S n) Type A → ((a : A) -> Loop n A a)
+    apt n = IsEquiv.g (snd (eqv n))
+    -- apt n α a = ap^ n (\ x -> f a) (ap^ n coe (loopSN1 n α) )
+    -- ap^ n (\ x -> coe x a) (loopSN1 n α) by fusion
 
-  λt : ∀ n {A} -> ((a : A) -> Loop n A a) -> Loop (S n) Type A
-  λt n l = coe (LoopSType n) l
+    β : ∀ n {A} (α : (a : A) -> Loop n A a) (a : A) -> 
+      apt n (λt n α) a ≃ α a
+    β n α a = ap≃ (IsEquiv.α (snd (eqv n)) α){a}
 
-  postulate
-    apt-! : ∀ n {A} -> (α : Loop (S n) Type A) (a : _) →
+    η : ∀ n {A} (α : Loop (S n) Type A) → (λt n (\ x -> apt n α x)) ≃ α
+    η n α = (IsEquiv.β (snd (eqv n)) α)
+
+  open LoopSType public using (apt ; λt)
+
+  apt-! : ∀ n {A} -> (α : Loop (S n) Type A) (a : _) →
               apt n (!^ (S n) α) a
             ≃ !^ n (apt n α a)
+  apt-! One α a = ap-! (λ f → f a) (ap coe α) ∘ ap (ap (λ f → f a)) (ap-! coe α)
+  apt-! (S n) α a = apt (S n) (! α) a ≃〈 id 〉 
+                    ap^ (S n) (\ f -> f a) (ap^ (S n) coe (loopSN1 (S n) (! α))) ≃〈 ap (\ x -> ap^ (S n) (\ f -> f a) (ap^ (S n) coe x)) (loopSN1-! (S n) α) 〉 
+                    ap^ (S n) (\ f -> f a) (ap^ (S n) coe (! (loopSN1 (S n) α))) ≃〈 ap (λ x → ap^ (S n) (λ f → f a) x) (ap^-! (S n) coe (loopSN1 (S n) α)) 〉
+                    ap^ (S n) (\ f -> f a) (! (ap^ (S n) coe (loopSN1 (S n) α))) ≃〈 ap^-! (S n) (λ f → f a) (ap^ (S n) coe (loopSN1 (S n) α)) 〉
+                    ! (ap^ (S n) (\ f -> f a) (ap^ (S n) coe (loopSN1 (S n) α))) ≃〈 id 〉 
+                    (! (apt (S n) α a) ∎)
 
 
