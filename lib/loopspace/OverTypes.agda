@@ -109,7 +109,7 @@ module lib.loopspace.OverTypes where
                                                                                 (ap-by-equals {f = λ x → transport B x b}
                                                                                  {g = (λ f → f b) o coe o ap B} (λ x → ap≃ (transport-ap-assoc B x)) α) 〉
                                         ! (id ∘ ap ((\ f -> f b) o coe o (ap B)) α ) ≃〈 ap ! (∘-unit-l (ap ((λ f → f b) o coe o ap B) α)) 〉
-                                        ! (ap ((\ f -> f b) o coe o (ap B)) α ) ≃〈 {!ap ! (ap-o3 (\ f -> f b) coe (ap B) α)!} 〉
+                                        ! (ap ((\ f -> f b) o coe o (ap B)) α ) ≃〈 ap ! (ap-o3 (λ f → f b) coe (ap B) α) 〉
                                         ! (ap (\ f -> f b) (ap coe ((ap (ap B)) α))) ≃〈 id 〉
                                         ! ((apt One (ap (ap B) α) b)) ≃〈 ap (λ x → ! (apt One x b)) (! (∘-unit-l (ap (ap B) α))) 〉
                                         (! (apt One (id ∘ ap (ap B) α) b) ∎))
@@ -220,8 +220,7 @@ module lib.loopspace.OverTypes where
   ap^→ (S n) C D = {!!}
   -}
 
-  postulate
-   Loop→OverS : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) 
+  Loop→OverS : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) 
               → {B C : A → Type} (f : B a → C a)
               →   Path {Loop n (B a → C a) f}
                     (λl n
@@ -230,7 +229,11 @@ module lib.loopspace.OverTypes where
                              (ap^ n f (apt n (!^ (S n) (ap^ (S n) B α)) x))))
                     (λl n (λ x → id^ n))
                 ≃ (LoopOver (S n) α (\ x -> B x → C x) f)
-
+  Loop→OverS n α{B}{C} f = ! (LoopOver-is-S n α (λ x → B x → C x) f) 
+                          ∘ ap (λ x → Id (apt n x f) (id^ n)) (! (ap^→ n B C {_} {α})) 
+                          ∘ ap (λ x → Id x (id^ n)) (! (LoopSType.β n _ _))
+                          ∘ ap (Id _) (LoopΠ.η n (id^ n) ∘ ap (λl n) (λ≃ (λ x → ! (ap^-id n (λ f' → f' x)))))
+ 
   -- postulate
   --   ap^Loop : ∀ n k {A} {a : A} (α : Loop (S n) A a) → ap^ (S n) (λ x → Loop k A x) α ≃ λt n (λ x → rebase n (ap≃ (rebase-idpath k)) (ap^ n (λ p → rebase k p x) (coe (LoopPath {n}) α)))
 --  ap^Loop n k α = {!!}

@@ -22,3 +22,4 @@ module lib.BasicTypes where
   open import lib.LoopSpace public
   open import lib.WrappedPath public
   open import lib.HigherHomotopyAbelian public
+  open import lib.TypeEquivalence public
