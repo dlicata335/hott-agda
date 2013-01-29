@@ -218,6 +218,11 @@ module lib.Paths where
             → ap (\ x → g (f x)) α ≃ ap g (ap f α)
    ap-o g f id = id
 
+   ap-o3 : {A B C D : Type} (h : C → D) (g : B → C) (f : A → B)
+              {M N : A} (α : Path M N)
+            → ap (h o g o f) α ≃ (ap h (ap g (ap f α)))
+   ap-o3 _ _ _ id = id
+
    ap-o4 : {A B C D E : Type} (i : D -> E) (h : C → D) (g : B → C) (f : A → B)
               {M N : A} (α : Path M N)
             → ap (i o h o g o f) α ≃ ap i (ap h (ap g (ap f α)))
