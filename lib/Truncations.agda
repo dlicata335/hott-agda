@@ -66,10 +66,6 @@ module lib.Truncations where
              (λ α → move-left-right (apaths y) α (apaths x)
                       (! (apd apaths α ∘ ! (transport-Path-right α (apaths x)))))
 
-  IsTrunc-Path : {n : TLevel} (A : Type) -> IsTrunc n A -> (x y : A) -> IsTrunc n (Path x y)
-  IsTrunc-Path { -2 } A tA x y = istrunc (Contractible-Path (use-trunc tA) x y)
-  IsTrunc-Path { S n } A tA x y = istrunc (λ p q → IsTrunc-Path {n} (Path x y) (use-trunc tA x y) p q)
-
   {-
   Contractible-is-HProp : (A : Type) -> HProp (Contractible A)
   Contractible-is-HProp A = λ c1 c2 → (pair≃ (fst (Contractible-Path c1 (fst c1) (fst c2))) {!snd (Contractible-Path c1 (fst c1) (fst c2)) !}) , 
@@ -81,8 +77,15 @@ module lib.Truncations where
   postulate
     IsTrunc-is-HProp   : {n : TLevel} (A : Type) -> HProp (IsTrunc n A)
 
+
+  -- in fact, it decrements, but often you want this lemma
+  path-preserves-IsTrunc : {n : TLevel} {A : Type} -> IsTrunc n A -> {x y : A} -> IsTrunc n (Path x y)
+  path-preserves-IsTrunc { -2 } {A} tA {x} {y} = istrunc (Contractible-Path (use-trunc tA) x y)
+  path-preserves-IsTrunc { S n } {A} tA {x} {y} = istrunc (λ p q → path-preserves-IsTrunc (use-trunc tA x y))
+
   increment-IsTrunc : {n : TLevel} {A : Type} -> (IsTrunc n A) → (IsTrunc (S n) A)
-  increment-IsTrunc {n}{A} tA = istrunc (λ x y → IsTrunc-Path {n} A tA x y)
+  increment-IsTrunc {n}{A} tA = istrunc (λ x y → path-preserves-IsTrunc tA)
+
 
   postulate 
     ΠIsTrunc : ∀{A n}{B : A → Type} → ((x : A) -> IsTrunc n (B x)) → IsTrunc n ((x : A) → B x)
@@ -137,7 +140,7 @@ module lib.Truncations where
    Trunc-simple-η : ∀ {n A} {y : Trunc n A} 
                   → Trunc-rec{A}{Trunc n A}{n} (Trunc-is{n}{A}) [_] y ≃ y
    Trunc-simple-η {n}{A}{y} = Trunc-elim (λ z → Path (Trunc-rec (Trunc-is{n}{A}) [_] z) z) 
-                                      (λ x → IsTrunc-Path{n} _ (Trunc-is {n} {A}) _ _)
+                                      (λ x → path-preserves-IsTrunc (Trunc-is {n} {A}) )
                                       (λ _ → id)
                                       y
                                       

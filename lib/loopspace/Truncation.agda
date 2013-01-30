@@ -38,9 +38,11 @@ module lib.loopspace.Truncation where
 
     HSet-Loop : ∀ n {A} {a} → IsTrunc (tlp n) A → HSet (Loop n A a)
 
-    IsNTrunc-Loop : ∀ n {A a} -> IsTrunc (tlp n) A → IsTrunc (tlp n) (Loop n A a)
-
     IsTrunc-LoopOver : ∀ n k {A} {a} (α : Loop n A a) {B} {b} → ((x : A) → IsTrunc (S k) (B x)) → IsTrunc k (LoopOver n α B b)
   -- IsTrunc-LoopOver One k α p = use-trunc (p _) _ _
   -- IsTrunc-LoopOver (S n) k α p = {!use-trunc (p _) _ _!}
    
+  IsKTrunc-Loop : ∀ n k {A a} -> IsTrunc k A → IsTrunc k (Loop n A a)
+  IsKTrunc-Loop One k tA = path-preserves-IsTrunc tA
+  IsKTrunc-Loop (S n) k tA = path-preserves-IsTrunc (IsKTrunc-Loop n k tA)
+

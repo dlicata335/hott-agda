@@ -134,7 +134,7 @@ module lib.loopspace.Types where
                                                    ap (IsEquiv.g univalence) (pair≃ id β0) ∘
                                                    ! (IsEquiv.α univalence id)
                                                    ≃ id) {id}{β'}
-                                                (fst (use-trunc (use-trunc (IsTrunc-Path _ (IsEquiv-HProp (λ x → x)) _ _) _ _))) 
+                                                (fst (use-trunc (use-trunc (path-preserves-IsTrunc (IsEquiv-HProp (λ x → x))) _ _))) 
                                                 (!-inv-with-middle-r (IsEquiv.α univalence id) id))
                                       l
     η (S n) l = ual (S n) (coel (S n) l) ≃〈 id 〉 
@@ -229,11 +229,14 @@ module lib.loopspace.Types where
 
     λt : ∀ n {A} -> ((a : A) -> Loop n A a) -> Loop (S n) Type A
     λt n = fst (eqv n)
+    -- λt n f = (loopN1S n (ual n (λl n f)))
 
     apt : ∀ n {A} -> Loop (S n) Type A → ((a : A) -> Loop n A a)
     apt n = IsEquiv.g (snd (eqv n))
     -- apt n α a = ap^ n (\ x -> f a) (ap^ n coe (loopSN1 n α))
-    -- ap^ n (\ x -> coe x a) (loopSN1 n α) by fusion
+
+    apt-def : ∀ n {A} (α : Loop (S n) Type A) (a : A) → apt n α a ≃ ap^ n (\ x -> coe x a) (loopSN1 n α)
+    apt-def n α a = ! (ap^-o n (λ f → f a) coe (loopSN1 n α))
 
     β : ∀ n {A} (α : (a : A) -> Loop n A a) (a : A) -> 
       apt n (λt n α) a ≃ α a
@@ -241,6 +244,12 @@ module lib.loopspace.Types where
 
     η : ∀ n {A} (α : Loop (S n) Type A) → (λt n (\ x -> apt n α x)) ≃ α
     η n α = (IsEquiv.β (snd (eqv n)) α)
+
+    -- useful corollary
+    ext : ∀ n {A} {α β : Loop (S n) Type A}
+        -> ((x : A) → apt n α x ≃ apt n β x)
+        → α ≃ β
+    ext n {_} {a} {b} p = η n b ∘ ap (λt n) (λ≃ p) ∘ ! (η n a)
 
   open LoopSType public using (apt ; λt)
 

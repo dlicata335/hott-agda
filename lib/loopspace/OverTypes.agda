@@ -13,6 +13,7 @@ open import lib.Truncations
 open Truncation
 open import lib.WrappedPath
 open import lib.TypeEquivalence
+open import lib.Prods
 
 open import lib.loopspace.Basics
 open import lib.loopspace.Groupoid
@@ -301,13 +302,74 @@ module lib.loopspace.OverTypes where
   -- FIXME: should be able to derive these compositionally from a rule for 
   -- truncation and a rule for Path in general
 
+  apt-ap : ∀ n {A} (B : A → Type) {a : A} (α : Loop (S n) A a) (b : B a)
+         -> apt n (ap^ (S n) B α) b ≃ ap^ n (λ x → transport B x b) (loopSN1 n α)
+  apt-ap n B α b = apt n (ap^ (S n) B α) b ≃〈 ap (λ x → apt n x b) (ap^-S' n B α) 〉 
+                   apt n (loopN1S n (ap^ n (ap B) (loopSN1 n α))) b ≃〈 LoopSType.apt-def n (loopN1S n (ap^ n (ap B) (loopSN1 n α))) b 〉
+                   ap^ n (λ x → coe x b) (loopSN1 n (loopN1S n (ap^ n (ap B) (loopSN1 n α)))) ≃〈 ap (ap^ n (λ x → coe x b)) (LoopPath.η n (ap^ n (ap B) (loopSN1 n α))) 〉
+                   ap^ n (λ x → coe x b) (ap^ n (ap B) (loopSN1 n α)) ≃〈 ! (ap^-o n (λ x → coe x b) (ap B) (loopSN1 n α)) 〉
+                   ap^ n (λ x → coe (ap B x) b) (loopSN1 n α) ≃〈 ap^-by-equals n {f = λ x → coe (ap B x) b} {g = λ x → transport B x b} (λ≃ (λ x → ! (ap≃ (transport-ap-assoc B x)))) (loopSN1 n α) 〉
+                   rebase n _ (ap^ n (λ x → transport B x b) (loopSN1 n α)) ≃〈 ap
+                                                                                  (λ x → rebase n x (ap^ n (λ x' → transport B x' b) (loopSN1 n α)))
+                                                                                  ((ap
+                                                                                      {M =
+                                                                                       ap (λ f → f id)
+                                                                                       (λ≃ (λ x → ! (ap (λ f → f b) (transport-ap-assoc B x))))}
+                                                                                      {N = id} ! (Π≃β (λ x → ! (ap (λ f → f b) (transport-ap-assoc B x))) {id}) ∘ 
+                                                                                     ap-! (λ f → f id)
+                                                                                     (λ≃ (λ x → ! (ap (λ f → f b) (transport-ap-assoc B x)))))) 〉
+                   rebase n id (ap^ n (λ x → transport B x b) (loopSN1 n α)) ≃〈 ap≃ (rebase-idpath n) 〉
+                   ap^ n (λ x → transport B x b) (loopSN1 n α) ∎
+
+              
+  ap^-Path : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) 
+           → {B : Type} (f g : A → B) 
+           → (ap^ (S n) (\ x -> f x ≃ g x) α) ≃ λt n (λ p → rebase n (∘-unit-l p)
+                                                            (ap^ n (λ x → ap g x ∘ p ∘ ! (ap f x))
+                                                                   (loopSN1 n α)))
+  ap^-Path n α f g = {!!}
+     
+
+
+  -- do it for S n so we can use λt and apt
+  ap^-Trunc : ∀ n k {A} (α : Loop (S n) Type A) → 
+              ap^ (S n) (\ A -> Trunc k A) α ≃ λt n (Trunc-elim (λ tβ → Loop n (Trunc k A) tβ)
+                                                  (λ _ → IsKTrunc-Loop n k Trunc-is) 
+                                                  (λ x → ap^ n [_] (apt n α x))) 
+  ap^-Trunc n k α = LoopSType.ext n (λ x → apt n (ap^ (S n) (Trunc k) α) x ≃〈 STS x 〉
+                                           (Trunc-elim (Loop n (Trunc k _)) (λ z → IsKTrunc-Loop n k Trunc-is)
+                                                (λ x' → ap^ n [_] (apt n α x'))
+                                              x) ≃〈 ! (LoopSType.β n _ _)〉 
+                                           (apt n
+                                              (λt n
+                                               (Trunc-elim (Loop n (Trunc k _)) (λ z → IsKTrunc-Loop n k Trunc-is)
+                                                (λ x' → ap^ n [_] (apt n α x'))))
+                                              x
+                                              ∎)) where 
+            STS : ∀ x -> apt n (ap^ (S n) (Trunc k) α) x ≃
+                           (Trunc-elim (Loop n (Trunc k _)) (λ z → IsKTrunc-Loop n k Trunc-is)
+                                       (λ x' → ap^ n [_] (apt n α x'))
+                                       x) 
+            STS = Trunc-elim _ (λ x → path-preserves-IsTrunc (IsKTrunc-Loop n k Trunc-is)) 
+                               (STS1) where
+               STS1 : ∀ x' -> apt n (ap^ (S n) (Trunc k) α) [ x' ] ≃
+                              ap^ n [_] (apt n α x')
+               STS1 x' = apt n (ap^ (S n) (Trunc k) α) [ x' ]                       ≃〈 apt-ap n (Trunc k) α [ x' ] 〉 
+                         ap^ n (λ a → transport (Trunc k) a [ x' ]) (loopSN1 n α)   ≃〈 ap^-by-equals n {f = λ a → transport (Trunc k) a [ x' ]} {g = λ a → [ coe a x' ]} (λ≃ (λ a → transport-Trunc' (λ x → x) a [ x' ])) (loopSN1 n α) 〉
+                         rebase n _ (ap^ n (λ a → [ coe a x' ]) (loopSN1 n α))      ≃〈 ap (λ x → rebase n x (ap^ n (λ a → [ coe a x' ]) (loopSN1 n α))) ((ap {M = ap (λ f → f id) (λ≃ (λ a → transport-Trunc'{k} (λ x → x) a [ x' ]))} {N = id} ! (Π≃β (λ a → transport-Trunc' {k} (λ x → x) a [ x' ]){id})) ∘ ap-! (λ f → f id) (λ≃ (λ a → transport-Trunc' {k} (λ x → x) a [ x' ]))) 〉 
+                         rebase n id (ap^ n (λ a → [ coe a x' ]) (loopSN1 n α))      ≃〈 ap≃ (rebase-idpath n) 〉 
+                         ap^ n (λ a → [ coe a x' ]) (loopSN1 n α)                    ≃〈 ap^-o n [_] (λ p → coe p x') (loopSN1 n α) 〉
+                         ap^ n [_] (ap^ n (\ p -> coe p x') (loopSN1 n α))          ≃〈 ap (ap^ n [_]) (! (LoopSType.apt-def n α x'))  〉
+                         (ap^ n [_] (apt n α x') ∎)
+
+
   -- intended to to be "α ∘ β"
   LoopTypeTruncPathPost : ∀ n {A} {a : A} (α : Loop (S n) A a) (a0 : A) 
                    → Loop (S n) Type (Trunc (tlp n)(Path{A} a0 a))
   LoopTypeTruncPathPost n α a0 = λt n (Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path a0 _)) tβ) 
-                                                  (λ _ → IsNTrunc-Loop n Trunc-is) 
+                                                  (λ _ → IsKTrunc-Loop n (tlp n) Trunc-is) 
                                                   (λ β → ap^ n [_]
-                                                        (rebase n (∘-unit-l β)
+                                                  (rebase n (∘-unit-l β)
                                                            (ap^ n (λ x → x ∘ β) (loopSN1 n α)))))
 
   postulate
