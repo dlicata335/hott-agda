@@ -27,7 +27,7 @@ module homotopy.PiNSN where
 
   S-loops : ∀ n -> (x : Trunc (tlp n) (S^ n)) → Loop n (Trunc (tlp n) (S^ n)) x
   S-loops n = Trunc-elim (\ x ->  Loop n (Trunc (tlp n) (S^ n)) x)
-                         (λ x → IsNTrunc-Loop n Trunc-is)
+                         (λ x → IsKTrunc-Loop n Trunc-is)
                          (S-elim {n} (λ x → Loop n (Trunc (tlp n) (S^ n)) [ x ])
                                      (ap^ n [_] (S.loop n)) 
                                      (preserves n))
@@ -69,7 +69,7 @@ module homotopy.PiNSN where
                                          id
                                          (resp n)) where
     resp : ∀ n → LoopOver n (S.loop n) (λ c' → encode (decode' [ c' ]) ≃ [ c' ]) id
-    resp n = coe (LoopPathOver n (S.loop n) (encode o decode' o [_]) [_] id) 
+    resp n = coe (LoopPathOver n (S.loop n) (encode o decode' o [_]) [_] id)
                  (rebase n id (ap^ n (encode o decode' o [_]) (S.loop n)) ≃〈 ap≃ (rebase-idpath n) 〉
                   ap^ n (encode o decode' o [_]) (S.loop n)             ≃〈 id 〉 
                   ap^ n (demote o promote) (S.loop n)                   ≃〈 ap^-o n demote promote (S.loop n) 〉

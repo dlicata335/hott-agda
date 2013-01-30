@@ -32,7 +32,7 @@ module homotopy.Hopf where
 
   H-is-1-truncated : (x : S²) → HGpd (H x)
   H-is-1-truncated = S²-elim (λ x → HGpd (H x)) S¹-is-Gpd
-                             (fst (use-trunc (use-trunc (IsTrunc-Path { -1 } _ (IsTrunc-is-HProp {tl 1} S¹) _ _) _ _)))
+                             (fst (use-trunc (use-trunc (path-preserves-IsTrunc (IsTrunc-is-HProp {tl 1} S¹)) _ _)))
 
   module A = HigherHomotopyAbelian S² S².base
 

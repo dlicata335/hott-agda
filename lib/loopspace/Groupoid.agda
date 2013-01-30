@@ -57,31 +57,6 @@ module lib.loopspace.Groupoid where
   !^-invol One α = !-invol α
   !^-invol (S n) α = !-invol α
 
- 
-  -- action of transporting at Loop n A -
-
-  mutual
-    rebase : ∀ n → ∀ {A a a'} (α : a ≃ a') -> Loop n A a → Loop n A a'
-    rebase One α l = α ∘ l ∘ ! α
-    rebase (S n) α l = adjust (rebase-id n α) (ap (rebase n α) l)
-    
-    rebase-id : ∀ n → ∀ {A} {a a' : A} (α : a ≃ a') -> rebase n α (id^ n) ≃ id^ n
-    rebase-id One α = !-inv-with-middle-r α id
-    rebase-id (S n) α = !-inv-with-middle-r (rebase-id n α) id
-
-  rebase-idpath : ∀ n → {A : Type} {a : A} -> rebase n (id{_}{a}) ≃ \ x -> x
-  rebase-idpath One = λ≃ (λ x → ∘-unit-l x)
-  rebase-idpath (S n) = λ≃ (λ x → (rebase-id n id ∘ ap (rebase n id) x ∘ ! (rebase-id n id)) ≃〈 ! (adj-def (rebase-id n id) _) 〉
-                                  adj _ (ap (rebase n id) x) ≃〈 adj-bind (ap-loop-by-equals {f = rebase n id} {g = λ x → x} (λ _ → ap≃ (! (rebase-idpath n))) x) 〉
-                                  adj _ (ap (λ x → x) x) ≃〈 ap (adj _) (ap-id x) 〉
-                                  adj _ x ≃〈 adj-eq-loop n _ _ _ _ id 〉
-                                  adj id x ≃〈 ! (adj-id x) 〉
-                                  x ∎)
-
-  transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
-                        transport (Loop n A) α ≃ rebase n α
-  transport-Loop-base n id = ! (rebase-idpath n)
-
   -- associate Ω^(n+1) as Ω^(Ω^n)
   -- instead of (Ω^n(Ω)), which is what you get by unfolding;
   -- useful for below
@@ -152,7 +127,34 @@ module lib.loopspace.Groupoid where
                        ! (adj _ (ap (loopSN1 n) a')) ≃〈 ap ! (adj-def (LoopPath.loopSN1-id n) _) 〉
                        (! (loopSN1 (S n) a') ∎)
 
+   
+  -- action of transporting at Loop n A -
+
+  mutual
+    rebase : ∀ n → ∀ {A a a'} (α : a ≃ a') -> Loop n A a → Loop n A a'
+    rebase One α l = α ∘ l ∘ ! α
+    rebase (S n) α l = adjust (rebase-id n α) (ap (rebase n α) l)
+
+    rebase-id : ∀ n → ∀ {A} {a a' : A} (α : a ≃ a') -> rebase n α (id^ n) ≃ id^ n
+    rebase-id One α = !-inv-with-middle-r α id
+    rebase-id (S n) α = !-inv-with-middle-r (rebase-id n α) id
   
+  rebase-idpath : ∀ n → {A : Type} {a : A} -> rebase n (id{_}{a}) ≃ \ x -> x
+  rebase-idpath One = λ≃ (λ x → ∘-unit-l x)
+  rebase-idpath (S n) = λ≃ (λ x → (rebase-id n id ∘ ap (rebase n id) x ∘ ! (rebase-id n id)) ≃〈 ! (adj-def (rebase-id n id) _) 〉
+                                  adj _ (ap (rebase n id) x) ≃〈 adj-bind (ap-loop-by-equals {f = rebase n id} {g = λ x → x} (λ _ → ap≃ (! (rebase-idpath n))) x) 〉
+                                  adj _ (ap (λ x → x) x) ≃〈 ap (adj _) (ap-id x) 〉
+                                  adj _ x ≃〈 adj-eq-loop n _ _ _ _ id 〉
+                                  adj id x ≃〈 ! (adj-id x) 〉
+                                  x ∎)
+  
+  postulate
+    rebase-S' : ∀ n {A a a'} (α : a ≃ a') (l : Loop (S n) A a) → rebase (S n) α l ≃ loopN1S n (rebase n (!-inv-with-middle-r α id) (ap^ n (λ β → α ∘ β ∘ ! α) (loopSN1 n l)))
+
+  transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
+                        transport (Loop n A) α ≃ rebase n α
+  transport-Loop-base n id = ! (rebase-idpath n)
+
   -- properties of n-functors
 
   abstract
@@ -195,6 +197,10 @@ module lib.loopspace.Groupoid where
     ap^-by-equals : ∀ n {A} {B} {f g : A → B} (α : f ≃ g) {a : A} (β : Loop n A a) 
                   → ap^ n f β ≃ rebase n (ap≃ (! α)) (ap^ n g β)
     ap^-by-equals n {f = f} id β = ! (ap≃ (rebase-idpath n) {ap^ n f β})
+    
+    ap^-by-equals-pointwise : ∀ n {A} {B} {f g : A → B} (α : (x : A) → g x ≃ f x) {a : A} (β : Loop n A a) 
+                  → ap^ n f β ≃ rebase n (α a) (ap^ n g β)
+    ap^-by-equals-pointwise n {f = f} {g = g} α β = ap (λ x → rebase n x (ap^ n g β)) (Π≃β α ∘ ap (ap (λ f → f _)) (!-invol (λ≃ α))) ∘ ap^-by-equals n (! (λ≃ α)) β
     
     ap^-idfunc : ∀ {A} {a : A} → (n : _) (α : Loop n A a) → ap^ n (\ (x : A) -> x) α ≃ α
     ap^-idfunc One α = ap-id α
