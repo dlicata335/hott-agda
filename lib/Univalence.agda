@@ -54,7 +54,7 @@ module lib.Univalence where
   type≃η : ∀ {A B} (p : Path A B) → ua (coe-equiv p) ≃ p
   type≃η p = IsEquiv.α univalence p
 
-  type≃-coh : ∀ {A B} (p : Path A B) -> (ap coe (type≃η p)) ≃ type≃β (coe-equiv p)
+  type≃-coh : ∀ {A B} (p : Path A B) -> ap coe (type≃η p) ≃ type≃β (coe-equiv p)
   type≃-coh p = ap (ap fst) (! (IsEquiv.γ univalence p)) ∘ ap-o fst pathToEquiv' (IsEquiv.α univalence p) 
 
   {- use type≃η instead

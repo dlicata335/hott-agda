@@ -273,3 +273,21 @@ module lib.loopspace.Types where
                     (! (apt (S n) α a) ∎)
 
 
+  apt-apS : ∀ n {A} (B : A → Type) {a : A} (α : Loop (S n) A a) (b : B a)
+         -> apt n (ap^ (S n) B α) b ≃ ap^ n (λ x → transport B x b) (loopSN1 n α)
+  apt-apS n B α b = apt n (ap^ (S n) B α) b ≃〈 ap (λ x → apt n x b) (ap^-S' n B α) 〉 
+                   apt n (loopN1S n (ap^ n (ap B) (loopSN1 n α))) b ≃〈 LoopSType.apt-def n (loopN1S n (ap^ n (ap B) (loopSN1 n α))) b 〉
+                   ap^ n (λ x → coe x b) (loopSN1 n (loopN1S n (ap^ n (ap B) (loopSN1 n α)))) ≃〈 ap (ap^ n (λ x → coe x b)) (LoopPath.η n (ap^ n (ap B) (loopSN1 n α))) 〉
+                   ap^ n (λ x → coe x b) (ap^ n (ap B) (loopSN1 n α)) ≃〈 ! (ap^-o n (λ x → coe x b) (ap B) (loopSN1 n α)) 〉
+                   ap^ n (λ x → coe (ap B x) b) (loopSN1 n α) ≃〈 ap^-by-equals n {f = λ x → coe (ap B x) b} {g = λ x → transport B x b} (λ≃ (λ x → ! (ap≃ (transport-ap-assoc B x)))) (loopSN1 n α) 〉
+                   rebase n _ (ap^ n (λ x → transport B x b) (loopSN1 n α)) ≃〈 ap
+                                                                                  (λ x → rebase n x (ap^ n (λ x' → transport B x' b) (loopSN1 n α)))
+                                                                                  ((ap
+                                                                                      {M =
+                                                                                       ap (λ f → f id)
+                                                                                       (λ≃ (λ x → ! (ap (λ f → f b) (transport-ap-assoc B x))))}
+                                                                                      {N = id} ! (Π≃β (λ x → ! (ap (λ f → f b) (transport-ap-assoc B x))) {id}) ∘ 
+                                                                                     ap-! (λ f → f id)
+                                                                                     (λ≃ (λ x → ! (ap (λ f → f b) (transport-ap-assoc B x)))))) 〉
+                   rebase n id (ap^ n (λ x → transport B x b) (loopSN1 n α)) ≃〈 ap≃ (rebase-idpath n) 〉
+                   ap^ n (λ x → transport B x b) (loopSN1 n α) ∎

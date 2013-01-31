@@ -1,14 +1,14 @@
 High risk:
 
-WrappedPath
+WrappedPath -- have sketches; need proof terms
+loopspace/Truncations -- have sketches; need proof terms
 loopspace/OverTypes
-loopspace/Truncations
 
 Low risk:
 
-Univalence: should be true, but haven't thought about the proofs
+Univalence: follow from equivalence induction
 Truncation: other people have proved them
-AdjointEquiv: manually checked or other people have proved them
+AdjointEquiv: other people have proved them
 Int: other people have proved
 
 

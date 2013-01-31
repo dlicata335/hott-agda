@@ -42,3 +42,18 @@ module lib.TypeEquivalence where
   adj-middle-id : ∀ {A} {m1 m2 : A} (w : m1 ≃ m2) (m : m1 ≃ m1)
                 ->  (m ≃ id) ≃ (adj w m ≃ id)
   adj-middle-id id m = ap (λ x → Id x id) (adj-id m)
+
+  move-adj≃ : ∀ {A} {a1 a2 a3 : A} 
+             {w : a1 ≃ a2} (m : a1 ≃ a1)
+             {w' : a3 ≃ a2} (m' : a3 ≃ a3)
+           -> (adj w m ≃ adj w' m') ≃ (m ≃ adj (! w ∘ w') m')
+  move-adj≃ {w = id} m1 {w' = id} m1' = ap (λ x → Path x (adj id m1')) (∘-unit-l m1 ∘ (adj-def _ _))
+
+  rotate3≃ : ∀ {A} {x y z t : A} (b : y ≃ z) (f : x ≃ y) (c : x ≃ t) (g : t ≃ z) 
+           → (b ∘ f ∘ (! c) ≃ g) ≃ (g ∘ c ∘ ! f ≃ b)
+  rotate3≃ id id id g = flip≃
+
+  rotate3≃-2 : ∀ {A} {w z : A} (a : z ≃ z) (b : w ≃ z) (c : w ≃ w)
+             -> (a ∘ b ∘ ! c ≃ b) ≃ (a ≃ b ∘ c ∘ ! b)
+  rotate3≃-2 a b c = flip≃ ∘ rotate3≃ a b c b 
+  
