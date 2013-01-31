@@ -6,6 +6,7 @@ open Paths
 open import lib.Univalence
 open import lib.AdjointEquiv
 open import lib.WrappedPath
+open import lib.Functions
 
 module lib.TypeEquivalence where
 
@@ -57,3 +58,8 @@ module lib.TypeEquivalence where
              -> (a ∘ b ∘ ! c ≃ b) ≃ (a ≃ b ∘ c ∘ ! b)
   rotate3≃-2 a b c = flip≃ ∘ rotate3≃ a b c b 
   
+  transport-by-equals≃ : ∀ {A : Type} {a1 a2 : A} (α : a1 ≃ a2) {B B' : A → Type} (b1 : B a1) (b2 : B a2)
+                         -> (β : B ≃ B')
+                         -> (transport B α b1 ≃ b2) ≃ (transport B' α (coe (ap≃ β) b1) ≃ coe (ap≃ β) b2)
+  transport-by-equals≃ _ _ _ id  = id
+

@@ -27,14 +27,6 @@ module lib.loopspace.OverTypes where
   -- why do we have it only for a path type,
   -- whereas for all types there is LoopOverS≃ plus equations for (ap^ n B α)
 
-  transport-by-equals≃ : ∀ {A : Type} {a1 a2 : A} (α : a1 ≃ a2) {B B' : A → Type} (b1 : B a1) (b2 : B a2)
-                         -> (β : B ≃ B')
-                         -> (transport B α b1 ≃ b2) ≃ (transport B' α (coe (ap≃ β) b1) ≃ coe (ap≃ β) b2)
-  transport-by-equals≃ _ _ _ id  = id
-
-  BackPath : {A : Type} (M N : A) → Type
-  BackPath M N = N ≃ M
-
   -- note: non-dependent
   LoopPathOver : (n : Positive) {A : Type} {a : A} (α : Loop n A a) 
               → {B : Type} (f g : A → B) (β : Path {B} (f a) (g a))
@@ -97,30 +89,6 @@ module lib.loopspace.OverTypes where
             (idOver n (\ x -> f x ≃ g x) β) ≃〈 id 〉 
 
        LoopOver (S n) α (λ x → f x ≃ g x) β ∎
-
-
-
-{-
-    (rebase (S n) β (ap^ (S n) f α) ≃ ap^ (S n) g α) ≃〈 {!!} 〉
-    (loopN1S n (rebase n (!-inv-with-middle-r β id) (ap^ n (λ γ → β ∘ γ ∘ ! β) (loopSN1 n (ap^ (S n) f α)))) ≃ ap^ (S n) g α) ≃〈 {!!} {-ap (_≃_ _) (ap^-S' n g α)-} 〉
-    (loopN1S n (rebase n (!-inv-with-middle-r β id) (ap^ n (λ γ → β ∘ γ ∘ ! β) (ap^ n (ap f) (loopSN1 n α)))) ≃ ap^ (S n) g α) ≃〈 {!!}  〉
-    (loopN1S n (rebase n (!-inv-with-middle-r β id) (ap^ n (λ γ → β ∘ γ ∘ ! β) (ap^ n (ap f) (loopSN1 n α)))) ≃ loopN1S n (ap^ n (ap g) (loopSN1 n α))) ≃〈 {!!}  〉
-    (rebase n (!-inv-with-middle-r β id) (ap^ n (λ γ → β ∘ γ ∘ ! β) (ap^ n (ap f) (loopSN1 n α))) ≃ ap^ n (ap g) (loopSN1 n α)) ≃〈 {!!}  〉
-    (rebase n (!-inv-with-middle-r β id) (ap^ n (λ γ → β ∘ (ap f γ) ∘ ! β)      (loopSN1 n α)) ≃ ap^ n (ap g) (loopSN1 n α)) ≃〈 {!rebase n (!-inv-with-middle-r β id) (ap^ n (λ γ → β ∘ (ap f γ) ∘ ! β) (loopSN1 n α))!}  〉
---    (rebase n (!-inv-with-middle-r β id) (ap^ n (λ p → β ∘ p ∘ ! β) (ap^ n (ap f) (loopSN1 n α))) ≃ ap^ n (ap g) (loopSN1 n α)) ≃〈 {!loopN1S n (ap^ n (ap f) (loopSN1 n α))!}  〉
-
-    (ap^ n (λ x → ap g x ∘ β ∘ ! (ap f x)) (loopSN1 n α) ≃ id^ n)                                                            ≃〈 {!(ap^ n (λ x → ap g x ∘ β ∘ ! (ap f x)) (loopSN1 n α))!} 〉
---  also: 
---    (ap^ n (λ x → ap g x ∘ β ∘ ! (ap f x)) (loopSN1 n α) ≃ rebase n (! (∘-unit-l β)) (ap^ n (λ x → β) (loopSN1 n α)))        ≃〈 {!rebase n (∘-unit-l β) (ap^ n (λ x → ap g x ∘ β ∘ ! (ap f x)) (loopSN1 n α))!} 〉
-    (rebase n (∘-unit-l β) (ap^ n (λ x → ap g x ∘ β ∘ ! (ap f x)) (loopSN1 n α)) ≃ id^ n)                      ≃〈 ap (λ x → x ≃ id^ n) (! (LoopSType.β n _ _)) 〉
-    (apt n (λt n (λ p → rebase n (∘-unit-l p)
-                                 (ap^ n (λ x → ap g x ∘ p ∘ ! (ap f x))
-                                        (loopSN1 n α)))) β ≃ id^ n) ≃〈 ap (λ u → apt n u β ≃ id^ n) (! (ap^-Path n α f g)) 〉
-    (apt n (ap^ (S n) (λ x → f x ≃ g x) α) β ≃ id^ n) ≃〈 id 〉
-    LoopOverS n α (λ x → f x ≃ g x) β ≃〈 ! (LoopOver-is-S n _ _ _) 〉
-    LoopOver (S n) α (λ x → f x ≃ g x) β ∎
--}
-
 
 
 

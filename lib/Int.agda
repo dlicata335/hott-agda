@@ -5,6 +5,7 @@ open import lib.Paths public
 open import lib.AdjointEquiv public
 open Paths
 open import lib.Truncations public
+open import lib.Nat
 
 module lib.Int where
 
@@ -66,7 +67,31 @@ module Int where
   
   postulate
     HSet-Int : HSet Int
+
+
+  -- relating Int to other kinds of numbers
   
   tlp : Positive -> TLevel
   tlp One = tl 1
   tlp (S n) = S (tlp n)
+
+  _+1np : Nat → Positive
+  Z +1np = One
+  (S n) +1np = S (n +1np)
+
+  _+pn_ : Positive → Nat → Positive
+  One +pn k = k +1np
+  S n +pn k = S (n +pn k)
+
+  +pn-rh-Z : ∀ n -> n +pn Z ≃ n
+  +pn-rh-Z One = id
+  +pn-rh-Z (S n) = ap S (+pn-rh-Z n)
+
+  +pn-rh-S : ∀ n k -> n +pn (S k) ≃ S (n +pn k)
+  +pn-rh-S One k = id
+  +pn-rh-S (S n) k = ap S (+pn-rh-S n k)
+
+  tlp+1 : (k : Nat) → tlp (k +1np) ≃ S (tl k)
+  tlp+1 Z = id
+  tlp+1 (S k) = ap S (tlp+1 k)
+

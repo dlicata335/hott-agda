@@ -15,6 +15,10 @@ module lib.Paths where
  Path : {A : Type} → A → A → Type
  Path = Id
 
+ -- useful for ap because (BackPath _) will get inferred when (\x -> Path x _) won't
+ BackPath : {A : Type} (M N : A) → Type
+ BackPath M N = Path N M
+
  _≃_ : {A : Type} → A → A → Type
  _≃_ = Path
 

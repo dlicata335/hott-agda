@@ -1,7 +1,5 @@
 High risk:
 
-WrappedPath -- have sketches; need proof terms
-loopspace/Truncations -- have sketches; need proof terms
 loopspace/OverTypes
 
 Low risk:

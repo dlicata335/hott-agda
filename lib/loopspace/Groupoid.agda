@@ -147,9 +147,9 @@ module lib.loopspace.Groupoid where
                                   adj _ x ≃〈 adj-eq-loop n _ _ _ _ id 〉
                                   adj id x ≃〈 ! (adj-id x) 〉
                                   x ∎)
-  
-  postulate
-    rebase-S' : ∀ n {A a a'} (α : a ≃ a') (l : Loop (S n) A a) → rebase (S n) α l ≃ loopN1S n (rebase n (!-inv-with-middle-r α id) (ap^ n (λ β → α ∘ β ∘ ! α) (loopSN1 n l)))
+
+  -- should be true but didn't end up needing it
+  -- rebase-S' : ∀ n {A a a'} (α : a ≃ a') (l : Loop (S n) A a) → rebase (S n) α l ≃ loopN1S n (rebase n (!-inv-with-middle-r α id) (ap^ n (λ β → α ∘ β ∘ ! α) (loopSN1 n l)))
 
   transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
                         transport (Loop n A) α ≃ rebase n α

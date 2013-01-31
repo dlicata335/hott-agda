@@ -69,14 +69,14 @@ module lib.WrappedPath where
                                                 (ap-by-equals α β)))
 
     adj-ap≃ : ∀ {A : Type} {B : A → Type} {x : A} {f g : (x : A) → B x}
+              (α : Path f f) (q : Path f g)
+            → adj (ap≃ q{x}) (ap≃ α {x}) ≃ ap≃ (adj q α) {x}
+    adj-ap≃ {x = x} α id = ap (ap (λ f → f x)) (! (∘-unit-l α)) ∘ ∘-unit-l (ap≃ α)
+
+    adj-ap≃-pointwise : ∀ {A : Type} {B : A → Type} {x : A} {f g : (x : A) → B x}
               (α : Path f f) (q : (x : A) → Path (f x) (g x))
             → adj (q x) (ap≃ α {x}) ≃ ap≃ (adj (λ≃ q) α) {x}
-    adj-ap≃ {x = x} α q = 
-     transport (\ α -> adj (q x) (ap≃ α {x}) ≃ ap≃ (adj (λ≃ q) α) {x})
-      {λ≃ (\ x -> ap≃ α{x})}{α} (! (Π≃η α))
-      (! (ap≃ (λ≃ q ∘ λ≃ (\ x -> ap≃ α{x}) ∘ ! (λ≃ q)) ≃〈 annoying 〉 
-         (q x ∘ ap≃ (λ≃ (\ x -> ap≃ α{x})){x} ∘ ! (q x) ∎))) where 
-     postulate annoying : _
+    adj-ap≃-pointwise {x = x} α q = adj-ap≃ α (λ≃ q) ∘ ap (λ y → adj y (ap≃ α)) (! (Π≃β q))
 
     -- adj-split : ∀ {A : Type}{B : A → Type} {p q : Σ B} (α : p ≃ p) (a : Path p q)
     --           -> Path{Σ \ (α : Path{A} (fst q) (fst q)) → Path{B (fst q)} (transport B α (snd q)) (snd q)} 

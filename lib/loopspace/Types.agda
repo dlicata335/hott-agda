@@ -52,7 +52,7 @@ module lib.loopspace.Types where
                 adj (λl-id n) (ap (λl n) (λ≃ (λ x → adj _ (ap (λ f → apl n f x) a)))) ≃〈 id 〉
                 adj _ (ap (λl n) (λ≃ (λ x → adj _ (ap (λ f → apl n f x) a)))) ≃〈 id 〉 
                 adj _ (ap (λl n) (λ≃ (λ x → adj _ (ap ((λ f → f x) o (apl n)) a)))) ≃〈 ap (adj _) (ap (λ y → ap (λl n) (λ≃ y)) (λ≃ (\ x -> ap (adj _) (ap-o (λ a' → a' x) (apl n) a)))) 〉 
-                adj _ (ap (λl n) (λ≃ (λ x → adj _ (ap≃ (ap (apl n) a)))))     ≃〈 ap (adj _) (ap (λ α → ap (λl n) (λ≃ α)) (λ≃ (λ x → adj-ap≃ {x = x} (ap (apl n) a) (λ x → ap^-id n (\f -> f x) {f})))) 〉
+                adj _ (ap (λl n) (λ≃ (λ x → adj _ (ap≃ (ap (apl n) a)))))     ≃〈 ap (adj _) (ap (λ α → ap (λl n) (λ≃ α)) (λ≃ (λ x → adj-ap≃-pointwise {x = x} (ap (apl n) a) (λ x → ap^-id n (\f -> f x) {f})))) 〉
                 adj _ (ap (λl n) (λ≃ (λ x → ap≃ (adj _ (ap (apl n) a)) {x}))) ≃〈 ap (adj _ o ap (λl n)) (! (Π≃η _)) 〉
                 adj _ (ap (λl n) (adj _ (ap (apl n) a))) ≃〈 adj-bind (ap-adj (λl n) _ _) 〉
                 adj _ (ap (λl n) (ap (apl n) a)) ≃〈 ap (adj _) (! (ap-o (λl n) (apl n) a)) 〉
