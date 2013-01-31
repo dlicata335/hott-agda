@@ -14,6 +14,7 @@ open Truncation
 open import lib.WrappedPath
 open import lib.TypeEquivalence
 open import lib.Prods
+open import lib.HigherHomotopyAbelian
 
 open import lib.loopspace.Basics
 open import lib.loopspace.Groupoid
@@ -212,19 +213,55 @@ module lib.loopspace.OverTypes where
 
   -- rule for functions
 
+  ap^-of-o3 : ∀ n {A B2 B3} {a : A} {α : Loop n A a}
+              (g1 : A → B2 → B2) (f : B2 -> B3) (g2 : A -> B3 -> B3)
+            -> ap^ n (\ a -> g2 a o f o g1 a) α ≃
+               λl n (λ x → ∘^ n {! (ap^ n (λ a' → g2 a' (f x)) α) !} {!(ap^ n (λ a' → f (g1 a' x)) α)!})
+  ap^-of-o3 = {!!}
+               
+
+
   LoopType→ : ∀ n {A B} → (Loop (S n) Type A) -> Loop (S n) Type B -> Loop (S n) Type (A → B)
   LoopType→ n {A} {B} lA lB = λt n (λ (f : A → B) →
                                       λl n (λ (x : A) →
                                               ∘^ n (apt n lB (f x)) 
                                                    (ap^ n f (apt n (!^ (S n) lA) x))))
-  postulate
-   ap^→ : ∀ {A} → (n : _) → (C D : A → Type) → {base : A} {α : Loop (S n) A base} →
+  ap^→ : ∀ {A} → (n : _) → (C D : A → Type) → {base : A} (α : Loop (S n) A base) →
            ap^ (S n) (\ x -> C x → D x) α 
          ≃ LoopType→ n (ap^ (S n) C α) (ap^ (S n) D α)
-  {-
-  ap^→ One C D = {!!}
-  ap^→ (S n) C D = {!!}
-  -}
+  ap^→ n C D α = LoopSType.ext n (λ f → 
+    apt n (ap^ (S n) (λ x → C x → D x) α) f ≃〈 apt-apS n (λ x → C x → D x) _ _ 〉
+
+    ap^ n (\ a -> transport (λ x → C x → D x) a f) (loopSN1 n α) ≃〈 {!ap^-by-equals-pointwise!} 〉
+
+    rebase n id (ap^ n (\ a -> transport D a o f o transport C (! a)) (loopSN1 n α)) ≃〈 {! rebase-idpath!} 〉
+
+    (ap^ n (\ a -> transport D a o f o transport C (! a)) (loopSN1 n α)) ≃〈 {!transport D !} 〉
+
+    (λl n (λ x → ∘^ n (ap^ n (\ a -> transport D a (f x)) (loopSN1 n α))
+                     (ap^ n (\ a -> f (transport C (! a) x)) (loopSN1 n α)))) ≃〈 {!loopSN1 n α!} 〉 
+
+    (λl n (λ x → ∘^ n (ap^ n (\ a -> transport D a (f x)) (loopSN1 n α))
+                      (ap^ n (\ a -> f (transport C a x)) (ap^ n ! (loopSN1 n α))))) ≃〈 {!!^-ap^!} 〉 
+
+    (λl n (λ x → ∘^ n (ap^ n (\ a -> transport D a (f x)) (loopSN1 n α))
+                      (ap^ n (\ a -> f (transport C a x)) (!^ n (loopSN1 n α))))) ≃〈 {!ap^-o!} 〉 
+
+    (λl n (λ x → ∘^ n (ap^ n (\ a -> transport D a (f x)) (loopSN1 n α))
+                      (ap^ n f (ap^ n (\ a -> transport C a x) (!^ n (loopSN1 n α)))))) ≃〈 {!ap^-!!} 〉 
+
+    (λl n (λ x → ∘^ n (ap^ n (\ a -> transport D a (f x)) (loopSN1 n α))
+                      (ap^ n f (!^ n (ap^ n (\ a -> transport C a x) (loopSN1 n α)))))) ≃〈 {!ap^-!!} 〉 
+
+    (λl n (λ x → ∘^ n (ap^ n (\ a -> transport D a (f x)) (loopSN1 n α))
+                      (ap^ n f (!^ n (apt n (ap^ (S n) C α) x))))) ≃〈 {!apt-apS!} 〉 
+
+    (λl n (λ x → ∘^ n (apt n (ap^ (S n) D α) (f x))
+                      (ap^ n f (!^ n (apt n (ap^ (S n) C α) x))))) ≃〈 {!apt-apS!} 〉 
+
+    (λl n (λ x → ∘^ n (apt n (ap^ (S n) D α) (f x))
+                      (ap^ n f (apt n (!^ (S n) (ap^ (S n) C α)) x)))) ≃〈 ! (LoopSType.β n _ _) 〉 
+    apt n (LoopType→ n (ap^ (S n) C α) (ap^ (S n) D α)) f ∎)
 
   -- corollary: 
   -- could just use LoopOverS≃ and ap^→ in clients, but
@@ -239,7 +276,7 @@ module lib.loopspace.OverTypes where
                     (λl n (λ x → id^ n))
                 ≃ (LoopOver (S n) α (\ x -> B x → C x) f)
   Loop→OverS n α{B}{C} f = ! (LoopOverS≃ n α (λ x → B x → C x) f) 
-                          ∘ ap (λ x → Id (apt n x f) (id^ n)) (! (ap^→ n B C {_} {α})) 
+                          ∘ ap (λ x → Id (apt n x f) (id^ n)) (! (ap^→ n B C {_} α)) 
                           ∘ ap (λ x → Id x (id^ n)) (! (LoopSType.β n _ _))
                           ∘ ap (Id _) (LoopΠ.η n (id^ n) ∘ ap (λl n) (λ≃ (λ x → ! (ap^-id n (λ f' → f' x)))))
 

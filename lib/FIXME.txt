@@ -4,11 +4,10 @@ loopspace/OverTypes
 
 Low risk:
 
-Univalence: follow from equivalence induction
-Truncation: other people have proved them
-AdjointEquiv: other people have proved them
-Int: other people have proved
-
+(all about truncations; other people have proved them)
+Truncation
+AdjointEquiv
+Int
 
 Just sketchy; not exported:
 

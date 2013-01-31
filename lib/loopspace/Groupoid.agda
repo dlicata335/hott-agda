@@ -12,6 +12,7 @@ open import lib.Univalence
 open import lib.Truncations
 open Truncation
 open import lib.WrappedPath
+open import lib.HigherHomotopyAbelian
 
 open import lib.loopspace.Basics
 
@@ -235,3 +236,21 @@ module lib.loopspace.Groupoid where
                         adj _ (ap (ap^ n g) (ap^ (S n) f α)) ≃〈 (adj-def (ap^-id n g) _) 〉 
                         ap^ (S n) g (ap^ (S n) f α) ∎
 
+
+    !^-id^ : ∀ n {A} {a : A} → !^ n (id^ n {A}{a}) ≃ (id^ n {A}{a})
+    !^-id^ One = id
+    !^-id^ (S n) = id
+    
+    ap-!^ : ∀ n {A} {a : A} (α : Path {(Loop n (Path a a) id)} (id^ n) (id^ n)) 
+          -> ap (!^ n) α ≃ adj (! (!^-id^ n)) (! α)
+    ap-!^ One α = adj-id _ ∘ ! (HigherHomotopyAbelian.inverse-same _ _ α)
+    ap-!^ (S n) α = adj-id _ ∘ ! (HigherHomotopyAbelian.inverse-same _ _ α)
+    
+    !^-ap^! : ∀ n {A} {a : A} (α : Loop n (Path a a) id) -> !^ n α ≃ ap^ n ! α
+    !^-ap^! One α = HigherHomotopyAbelian.inverse-same _ _ α
+    !^-ap^! (S n) α = ! (ap^-id n ! ∘ ap (ap^ n !) α ∘ ! (ap^-id n !) ≃〈 !(adj-def (ap^-id n !) _) 〉
+                         adj _ (ap (ap^ n !) α) ≃〈 adj-bind (ap-loop-by-equals {f = ap^ n !} {g = !^ n} (λ x → !^-ap^! n x) α) 〉
+                         adj _ (ap (!^ n) α) ≃〈 adj-bind (ap-!^ n α) 〉
+                         adj _ (! α) ≃〈 adj-eq-loop n _ _ _ _ id 〉
+                         adj id (! α) ≃〈 ! (adj-id _) 〉
+                         ! α ∎)

@@ -5,6 +5,7 @@ open import lib.Paths
 open import lib.AdjointEquiv
 open import lib.Prods
 open import lib.Functions
+open import lib.Truncations
 open Paths
 
 module lib.Univalence where
@@ -16,8 +17,7 @@ module lib.Univalence where
   -- eta-expanded version; makes the later definitions easier
   -- and is maybe better for the computational interp,
   -- at least if it's based on groupoids.
-  -- conceptual order is backwards here; J should come
-  -- from these, rather than the other way around?
+  -- is the conceptual order backwards here? should J come from these, rather than the other way around?
   coe-is-equiv : ∀ {A B} (p : Path A B) → IsEquiv (coe p)
   coe-is-equiv {A}{B} p = isequiv (coe (! p)) (λ _ → coe-inv-1 p) (λ _ → coe-inv-2 p) (triangle p) where
     triangle : ∀ {B} (p : Path A B) → (x : A) → Path (coe-inv-2 p) (ap (transport (λ x' → x') p) (coe-inv-1 p))
@@ -57,16 +57,14 @@ module lib.Univalence where
   type≃-coh : ∀ {A B} (p : Path A B) -> ap coe (type≃η p) ≃ type≃β (coe-equiv p)
   type≃-coh p = ap (ap fst) (! (IsEquiv.γ univalence p)) ∘ ap-o fst pathToEquiv' (IsEquiv.α univalence p) 
 
-  {- use type≃η instead
-  id-ua : {A : Type} → (ua id-equiv) ≃ id{_}{A}
-  id-ua-type≃β : ∀ {A} -> (ap coe id-ua) ≃ type≃β (id-equiv{A})
-  -}
+  type≃-ext : ∀ {A B} (p q : Path A B) → ((x : A) -> coe p x ≃ coe q x) -> p ≃ q
+  type≃-ext p q α = type≃η q ∘ ap ua (pair≃ (λ≃ α) (HProp-unique (IsEquiv-HProp (coe q)) _ _)) ∘ ! (type≃η p)
 
-  -- FIXME prove from univalence; would be easy with equivalence induction
-  postulate
-    transport-Equiv-post : ∀ {A B C} {b : Equiv B C} {a : Equiv A B} -> Path (transport (\ X -> Equiv A X) (ua b) a) (b ∘equiv a)
-    !-ua : {A B : Type} (e : Equiv A B) → (! (ua e)) ≃ (ua (!equiv e))
-
+  -- true but don't need it right now
+  -- transport-Equiv-post : ∀ {A B C} {b : Equiv B C} {a : Equiv A B} -> Path (transport (\ X -> Equiv A X) (ua b) a) (b ∘equiv a)
+  
+  !-ua : {A B : Type} (e : Equiv A B) → (! (ua e)) ≃ (ua (!equiv e))
+  !-ua e = type≃-ext (! (ua e)) (ua (!equiv e)) (λ x → ap≃ (! (type≃β (!equiv e)) ∘ type≃β! e))
 
   univalence≃-id : ∀ {A} → coe (univalence≃ {A} {A}) id ≃ id-equiv
   univalence≃-id {A} = ap≃ (type≃β (pathToEquiv' , univalence)) {id}
