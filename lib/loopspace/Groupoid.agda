@@ -58,6 +58,14 @@ module lib.loopspace.Groupoid where
   !^-invol One α = !-invol α
   !^-invol (S n) α = !-invol α
 
+  ∘^-unit-l : ∀ n {A a} (α : Loop n A a) → ∘^ n (id^ n) α ≃ α
+  ∘^-unit-l One α = ∘-unit-l α
+  ∘^-unit-l (S n) α = ∘-unit-l α
+
+  ∘^-unit-r : ∀ n {A a} (α : Loop n A a) → ∘^ n α (id^ n) ≃ α
+  ∘^-unit-r One α = id
+  ∘^-unit-r (S n) α = id
+
   -- associate Ω^(n+1) as Ω^(Ω^n)
   -- instead of (Ω^n(Ω)), which is what you get by unfolding;
   -- useful for below

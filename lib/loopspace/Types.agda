@@ -71,7 +71,10 @@ module lib.loopspace.Types where
               ((x : A) → Loop n (B x) (f x))
             ≃ (Loop n ((x : A) -> B x) f)
     path n = ua (eqv n) 
-  open LoopΠ public using (λl ; apl) 
+
+    ext : ∀ n → (α α' : Loop n ((x : A) → B x) f) (p : (x : A) → apl n α x ≃ apl n α' x) → α ≃ α'
+    ext n α α' p = η n α' ∘ ap (λl n) (λ≃ p) ∘ ! (η n α)
+  open LoopΠ public using (λl ; apl)
 
 
 
