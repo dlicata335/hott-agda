@@ -184,18 +184,21 @@ module homotopy.PiNSN where
       case-for-[] : {x : S^ (S n)} (α : Path S.base x) → decode{n}{x} (encode{n}{x} [ α ]) ≃ [ α ]
       case-for-[] = path-induction (λ x α → decode{n}{x} (encode{n}{x} [ α ]) ≃ [ α ]) id
 
+  τn[Ω[S^n+1]]-Equiv-τn[S^n] : ∀ {n} → Equiv (Trunc (tlp n) (Path{S^ (S n)} S.base S.base))
+                                             (Trunc (tlp n) (S^ n))
+  τn[Ω[S^n+1]]-Equiv-τn[S^n] = (improve (hequiv encode decode decode-encode encode-decode'))
+
   τn[Ω[S^n+1]]-is-τn[S^n] : ∀ {n} → Trunc (tlp n) (Path{S^ (S n)} S.base S.base)
                                   ≃ Trunc (tlp n) (S^ n)
-  τn[Ω[S^n+1]]-is-τn[S^n] = (ua (improve (hequiv encode decode decode-encode encode-decode')))
+  τn[Ω[S^n+1]]-is-τn[S^n] = (ua τn[Ω[S^n+1]]-Equiv-τn[S^n])
 
   preserves-point : ∀ {n} → coe (τn[Ω[S^n+1]]-is-τn[S^n] {n}) [ id ] ≃ [ S.base ]
-  preserves-point {n} = ap≃ (type≃β (improve (hequiv encode decode decode-encode encode-decode'))) {[ id ]}
+  preserves-point {n} = ap≃ (type≃β τn[Ω[S^n+1]]-Equiv-τn[S^n]) {[ id ]}
 
   πnSⁿ-diagonal : ∀ n → π (S n) (S^ (S n)) S.base ≃ π n (S^ n) S.base
   πnSⁿ-diagonal n = π (S n) (S^ (S n)) S.base ≃〈 id 〉
                     τ₀ (Loop (S n) (S^ (S n)) S.base) ≃〈 ap τ₀ (LoopPath.path n) 〉
-                    τ₀ (Loop n (Path {S^ (S n)} S.base S.base) id) ≃〈 ! (Loop-Trunc n Z) 〉
-                    Loop n (Trunc (tlp (n +pn Z)) (Path {S^ (S n)} S.base S.base)) [ id ] ≃〈 ap-Loop-Trunc-tlevel≃ n (ap tlp (+pn-rh-Z n)) 〉
+                    τ₀ (Loop n (Path {S^ (S n)} S.base S.base) id) ≃〈 ! (Loop-Trunc0 n) 〉
                     Loop n (Trunc (tlp n) (Path {S^ (S n)} S.base S.base)) [ id ] ≃〈 ap-Loop≃ n τn[Ω[S^n+1]]-is-τn[S^n] preserves-point 〉
                     Loop n (Trunc (tlp n) (S^ n)) [ S.base ] ≃〈 {!!} 〉
                     τ₀ (Loop n (S^ n) S.base) ≃〈 id 〉

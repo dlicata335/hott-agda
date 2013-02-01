@@ -47,6 +47,9 @@ module lib.loopspace.Truncation where
     -- Loop-Trunc-id One k = {!!}
     -- Loop-Trunc-id (S n) k = {!!}
 
+  Loop-Trunc0 : ∀ n {A} {a} → Loop n (Trunc (tlp n) A) [ a ] ≃ τ₀ (Loop n A a)
+  Loop-Trunc0 n = Loop-Trunc n 0 ∘ ap-Loop-Trunc-tlevel≃ n (! (ap tlp (+pn-rh-Z n)))
+
   HProp-Loop-in-Trunc< : ∀ k n {A t} → k <tl (tlp n) → HProp (Loop n (Trunc k A) t)
   HProp-Loop-in-Trunc< -2 One lt = increment-IsTrunc (path-preserves-IsTrunc Trunc-is)
   HProp-Loop-in-Trunc< -2 (S n) y = increment-IsTrunc (path-preserves-IsTrunc (IsKTrunc-Loop n -2 (Trunc-is { -2})))
