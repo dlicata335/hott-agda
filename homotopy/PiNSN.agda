@@ -11,7 +11,7 @@ module homotopy.PiNSN where
   module S = NSphere1
   open S using (S^ ; S-rec; S-elim)
        
-  -- πn(S^ n) = τ₀(Ω^n S^ n) = Ω^n-1(τ^n-1 (Ω(S^n))) 
+  -- πn(S^ n) = τ₀(Ω^n S^ n) = Ω^n-1(τ^n-1 (Ω(S^n)))
   -- πn-1(S^ n-1) = Ω^n-1(τ^n-1 (S^ n -1))
   -- so STS τ^n-1 (Ω(S^n)) = τ^n-1 (S^ n -1)
   -- so STS τ^n (Ω(S^n+1)) = τ^n (S^ n)
@@ -27,7 +27,7 @@ module homotopy.PiNSN where
 
   S-loops : ∀ n -> (x : Trunc (tlp n) (S^ n)) → Loop n (Trunc (tlp n) (S^ n)) x
   S-loops n = Trunc-elim (\ x ->  Loop n (Trunc (tlp n) (S^ n)) x)
-                         (λ x → IsKTrunc-Loop n Trunc-is)
+                         (λ x → IsKTrunc-Loop n (tlp n) Trunc-is)
                          (S-elim {n} (λ x → Loop n (Trunc (tlp n) (S^ n)) [ x ])
                                      (ap^ n [_] (S.loop n)) 
                                      (preserves n))
@@ -64,7 +64,7 @@ module homotopy.PiNSN where
                   → (c : Codes n S.base)
                   → encode (decode' c) ≃ c
   encode-decode'{n} = Trunc-elim (\ c -> encode (decode' c) ≃ c) 
-                                 (λ x → IsTrunc-Path _ Trunc-is _ _) 
+                                 (λ x → path-preserves-IsTrunc Trunc-is)
                                  (S-elim (λ c' → encode (decode' [ c' ]) ≃ [ c' ]) 
                                          id
                                          (resp n)) where
@@ -110,15 +110,15 @@ module homotopy.PiNSN where
                         (apt n (ap^ (S n) P (S.loop (S n))) (decode' x'))
                       ≃ (!^ n (ap^ n decode' (apt n (!^ (S n) (ap^ (S n) (Codes n) (S.loop (S n)))) x')))
           STS1 x' = 
-                  (apt n (ap^ (S n) P (S.loop (S n))) (decode' x')) ≃〈 ap (λ x0 → apt n x0 (decode' x')) (ap^TruncPathPost n (S.loop (S n)) _) 〉 
+                  (apt n (ap^ (S n) P (S.loop (S n))) (decode' x')) ≃〈 ap (λ x0 → apt n x0 (decode' x')) (ap^TruncPathPost n (tlp n) (S.loop (S n)) _) 〉 
                   (apt n (λt n (Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
-                                           (λ _ → IsNTrunc-Loop n Trunc-is) 
+                                           (λ _ → IsKTrunc-Loop n (tlp n) Trunc-is)
                                            (λ β → ap^ n [_]
                                                     (rebase n (∘-unit-l β)
                                                     (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n))))))))
                               (decode' x')) ≃〈 LoopSType.β n _ _ 〉
                   ((Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
-                                               (λ _ → IsNTrunc-Loop n Trunc-is) 
+                                               (λ _ → IsKTrunc-Loop n (tlp n) Trunc-is)
                                                (λ β → ap^ n [_]
                                                     (rebase n (∘-unit-l β)
                                                     (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n)))))))
@@ -132,13 +132,13 @@ module homotopy.PiNSN where
                   (!^ n (ap^ n decode' (apt n (!^ (S n) (ap^ (S n) (Codes n) (S.loop (S n)))) x')))
                   ∎ where
              STS2 : (x' : _) → ((Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
-                                                (λ _ → IsNTrunc-Loop n Trunc-is) 
+                                                (λ _ → IsKTrunc-Loop n (tlp n) Trunc-is)
                                                 (λ β → ap^ n [_]
                                                      (rebase n (∘-unit-l β)
                                                      (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n)))))))
                                (decode' x'))
                              ≃ (ap^ n decode' (S-loops n x'))
-             STS2 = Trunc-elim _ (λ _ → IsTrunc-Path _ (IsNTrunc-Loop n Trunc-is) _ _)
+             STS2 = Trunc-elim _ (λ _ → path-preserves-IsTrunc (IsKTrunc-Loop n (tlp n) Trunc-is))
                                  (λ x0 → ! (STS3 x0)) where
               STS3 : (s : _) → (ap^ n decode' (S-loops n [ s ]))
                                ≃ (ap^ n [_]
@@ -176,7 +176,7 @@ module homotopy.PiNSN where
                                     (loopSN1 n (S.loop (S n))))) ∎
 
   decode-encode : {n : _} {x : S^ (S n)} (α : P x) → decode{n}{x} (encode{n}{x} α) ≃ α
-  decode-encode {n}{x} = Trunc-elim _ (λ x' → IsTrunc-Path _ Trunc-is _ _) 
+  decode-encode {n}{x} = Trunc-elim _ (λ _ → path-preserves-IsTrunc Trunc-is)
                                       case-for-[] where
     case-for-[] : {x : S^ (S n)} (α : Path S.base x) → decode{n}{x} (encode{n}{x} [ α ]) ≃ [ α ]
     case-for-[] = path-induction (λ x α → decode{n}{x} (encode{n}{x} [ α ]) ≃ [ α ]) id
@@ -184,3 +184,24 @@ module homotopy.PiNSN where
   τn[Ω[S^n+1]]-is-τn[S^n] : ∀ {n} → Trunc (tlp n) (Path{S^ (S n)} S.base S.base)
                                   ≃ Trunc (tlp n) (S^ n)
   τn[Ω[S^n+1]]-is-τn[S^n] = (ua (improve (hequiv encode decode decode-encode encode-decode')))
+
+  preserves-point : ∀ {n} → coe (τn[Ω[S^n+1]]-is-τn[S^n] {n}) [ id ] ≃ [ S.base ]
+  preserves-point {n} = {!!}
+
+  Loop-preserves-pointed-≃ : ∀ {n A B a b} (e : A ≃ B) (p : coe e a ≃ b) → Loop n A a ≃ Loop n B b
+  Loop-preserves-pointed-≃ e p = {!!}
+
+  πnSⁿ-is-Z : ∀ n → τ₀ (Loop n (S^ n) S.base) ≃ Int
+  πnSⁿ-is-Z One = τ₀ (Loop One (S^ One) S.base) ≃〈 {!!} 〉
+                  Int ∎
+  πnSⁿ-is-Z (S n) = τ₀ (Loop (S n) (S^ (S n)) S.base) ≃〈 ap τ₀ (LoopPath.path n) 〉
+                    τ₀ (Loop n (Loop One (S^ (S n)) S.base) id) ≃〈 {!!} 〉
+                    Loop n (Trunc (tlp n) (Path {S^ (S n)} S.base S.base)) [ id ] ≃〈 Loop-preserves-pointed-≃ (τn[Ω[S^n+1]]-is-τn[S^n] {n}) (preserves-point {n}) 〉
+                    Loop n (Trunc (tlp n) (S^ n)) [ S.base ] ≃〈 {!!} 〉
+                    τ₀ (Loop n (S^ n) S.base) ≃〈 πnSⁿ-is-Z n 〉
+                    Int ∎
+
+  -- πn(S^ n) = τ₀(Ω^n S^ n) = Ω^n-1(τ^n-1 (Ω(S^n)))
+  -- πn-1(S^ n-1) = Ω^n-1(τ^n-1 (S^ n -1))
+  -- so STS τ^n-1 (Ω(S^n)) = τ^n-1 (S^ n -1)
+  -- so STS τ^n (Ω(S^n+1)) = τ^n (S^ n)

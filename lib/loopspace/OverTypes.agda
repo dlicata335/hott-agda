@@ -219,27 +219,29 @@ module lib.loopspace.OverTypes where
 
   -- rule for functions
 
-  ap^-of-o3 : ∀ n {A B2 B3} {a : A} {α : Loop n A a}
-              (g1 : A → B2 → B2) (f : B2 -> B3) (g2 : A -> B3 -> B3)
-            -> ap^ n (\ a -> g2 a o f o g1 a) α ≃
-               λl n (λ x → ∘^ n (ap^ n (λ a' → g2 a' (f (g1 a x))) α) (ap^ n (λ a' → g2 a (f (g1 a' x))) α))
-  ap^-of-o3 n {a = a} {α = α} g1 f g2 = LoopΠ.ext n _ _ (λ x → ! (ap≃ (LoopΠ.β n (λ x → ∘^ n (ap^ n (λ a' → g2 a' (f (g1 a x))) α) (ap^ n (λ a' → g2 a (f (g1 a' x))) α))))
-                                                              ∘ lemma n a α (λ t → f (g1 t x)) g2 ∘ ! (ap^-o n (λ f → f x) (λ a x₁ → g2 a (f (g1 a x₁))) α)) where
-    lemma : ∀ n {A B C} (a : A) (α : Loop n A a) (f : A → B) (g : A → B → C) →
-          ap^ n (λ a → g a (f a)) α ≃ (∘^ n (ap^ n (λ t → g t (f a)) α)
-                                            (ap^ n (λ t → g a (f t)) α))
-    lemma One a α f g = (! (ap∘ (ap-o (λ x → x (f a)) g α) (ap-o (g a) f α)) ∘ ap2-aps-1 (λ f x → f x) (ap g α) (ap f α)) ∘ ap2-ap-assoc (λ f x → f x) g f α
-    lemma (S n) a α f g = ap^ (S n) (λ a₁ → g a₁ (f a₁)) α ≃〈 ! (adj-def (ap^-id n (λ a₁ → g a₁ (f a₁))) _) 〉
-                          adj _ (ap (ap^ n (λ a₁ → g a₁ (f a₁))) α) ≃〈 adj-bind (ap-loop-by-equals {f = (ap^ n (λ a₁ → g a₁ (f a₁)))} {g = (λ β → ∘^ n (ap^ n (λ t → g t (f a)) β) (ap^ n (λ t → g a (f t)) β))} (λ x → ! (lemma n a x f g)) α) 〉
-                          adj _ (ap (λ β → ∘^ n (ap^ n (λ t → g t (f a)) β)
-                                                (ap^ n (λ t → g a (f t)) β)) α) ≃〈 ap (adj _) (ap2-ap-assoc (∘^ n) (ap^ n (λ t → g t (f a))) (ap^ n (λ t → g a (f t))) α) 〉
-                          adj _ (ap2 (∘^ n) (ap (ap^ n (λ t → g t (f a))) α) (ap (ap^ n (λ t → g a (f t))) α)) ≃〈 ap (adj _) (ex n (ap (ap^ n (λ t → g t (f a))) α) (ap (ap^ n (λ t → g a (f t))) α)) 〉
-                          adj _ (ap (λ x → ∘^ n x (ap^ n (λ t → g a (f t)) (id^ n))) (ap (ap^ n (λ t → g t (f a))) α) ∘ ap (∘^ n (ap^ n (λ t → g t (f a)) (id^ n))) (ap (ap^ n (λ t → g a (f t))) α))
-                                ≃〈 ap (adj _) (ap∘ (ap-loop-by-equals {f = (λ x → ∘^ n x (ap^ n (λ t → g a (f t)) (id^ n)))} {g = λ x → x} (λ x → ap (∘^ n x) (! (ap^-id n (λ t → g a (f t)))) ∘ ! (∘^-unit-r n x)) (ap (ap^ n (λ t → g t (f a))) α)) (ap-loop-by-equals {f = (∘^ n (ap^ n (λ t → g t (f a)) (id^ n)))} {g = λ x → x} (λ x → ap (λ t → ∘^ n t x) (! (ap^-id n (λ t → g t (f a)))) ∘ ! (∘^-unit-l n x)) (ap (ap^ n (λ t → g a (f t))) α))) 〉
-                          adj _ (adj _ (ap (λ x → x) (ap (ap^ n (λ t → g t (f a))) α)) ∘ adj _ (ap (λ x → x) (ap (ap^ n (λ t → g a (f t))) α))) ≃〈 {!!} 〉
-                          adj _ (adj _ (ap (ap^ n (λ t → g t (f a))) α) ∘ adj _ (ap (ap^ n (λ t → g a (f t))) α)) ≃〈 {!!} 〉
-                          (adj _ (ap (ap^ n (λ t → g t (f a))) α)) ∘ (adj _ (ap (ap^ n (λ t → g a (f t))) α)) ≃〈 {!!} 〉
-                          (ap^ (S n) (λ t → g t (f a)) α) ∘ (ap^ (S n) (λ t → g a (f t)) α) ∎
+  postulate
+    ap^-of-o3 : ∀ n {A B2 B3} {a : A} {α : Loop n A a}
+                (g1 : A → B2 → B2) (f : B2 -> B3) (g2 : A -> B3 -> B3)
+              -> ap^ n (\ a -> g2 a o f o g1 a) α ≃
+                 λl n (λ x → ∘^ n (ap^ n (λ a' → g2 a' (f (g1 a x))) α) (ap^ n (λ a' → g2 a (f (g1 a' x))) α))
+  -- To finish
+  -- ap^-of-o3 n {a = a} {α = α} g1 f g2 = LoopΠ.ext n _ _ (λ x → ! (ap≃ (LoopΠ.β n (λ x → ∘^ n (ap^ n (λ a' → g2 a' (f (g1 a x))) α) (ap^ n (λ a' → g2 a (f (g1 a' x))) α))))
+  --                                                             ∘ lemma n a α (λ t → f (g1 t x)) g2 ∘ ! (ap^-o n (λ f → f x) (λ a x₁ → g2 a (f (g1 a x₁))) α)) where
+  --   lemma : ∀ n {A B C} (a : A) (α : Loop n A a) (f : A → B) (g : A → B → C) →
+  --         ap^ n (λ a → g a (f a)) α ≃ (∘^ n (ap^ n (λ t → g t (f a)) α)
+  --                                           (ap^ n (λ t → g a (f t)) α))
+  --   lemma One a α f g = (! (ap∘ (ap-o (λ x → x (f a)) g α) (ap-o (g a) f α)) ∘ ap2-aps-1 (λ f x → f x) (ap g α) (ap f α)) ∘ ap2-ap-assoc (λ f x → f x) g f α
+  --   lemma (S n) a α f g = ap^ (S n) (λ a₁ → g a₁ (f a₁)) α ≃〈 ! (adj-def (ap^-id n (λ a₁ → g a₁ (f a₁))) _) 〉
+  --                         adj _ (ap (ap^ n (λ a₁ → g a₁ (f a₁))) α) ≃〈 adj-bind (ap-loop-by-equals {f = (ap^ n (λ a₁ → g a₁ (f a₁)))} {g = (λ β → ∘^ n (ap^ n (λ t → g t (f a)) β) (ap^ n (λ t → g a (f t)) β))} (λ x → ! (lemma n a x f g)) α) 〉
+  --                         adj _ (ap (λ β → ∘^ n (ap^ n (λ t → g t (f a)) β)
+  --                                               (ap^ n (λ t → g a (f t)) β)) α) ≃〈 ap (adj _) (ap2-ap-assoc (∘^ n) (ap^ n (λ t → g t (f a))) (ap^ n (λ t → g a (f t))) α) 〉
+  --                         adj _ (ap2 (∘^ n) (ap (ap^ n (λ t → g t (f a))) α) (ap (ap^ n (λ t → g a (f t))) α)) ≃〈 ap (adj _) (ex n (ap (ap^ n (λ t → g t (f a))) α) (ap (ap^ n (λ t → g a (f t))) α)) 〉
+  --                         adj _ (ap (λ x → ∘^ n x (ap^ n (λ t → g a (f t)) (id^ n))) (ap (ap^ n (λ t → g t (f a))) α) ∘ ap (∘^ n (ap^ n (λ t → g t (f a)) (id^ n))) (ap (ap^ n (λ t → g a (f t))) α))
+  --                               ≃〈 ap (adj _) (ap∘ (ap-loop-by-equals {f = (λ x → ∘^ n x (ap^ n (λ t → g a (f t)) (id^ n)))} {g = λ x → x} (λ x → ap (∘^ n x) (! (ap^-id n (λ t → g a (f t)))) ∘ ! (∘^-unit-r n x)) (ap (ap^ n (λ t → g t (f a))) α)) (ap-loop-by-equals {f = (∘^ n (ap^ n (λ t → g t (f a)) (id^ n)))} {g = λ x → x} (λ x → ap (λ t → ∘^ n t x) (! (ap^-id n (λ t → g t (f a)))) ∘ ! (∘^-unit-l n x)) (ap (ap^ n (λ t → g a (f t))) α))) 〉
+  --                         adj _ (adj _ (ap (λ x → x) (ap (ap^ n (λ t → g t (f a))) α)) ∘ adj _ (ap (λ x → x) (ap (ap^ n (λ t → g a (f t))) α))) ≃〈 {!!} 〉
+  --                         adj _ (adj _ (ap (ap^ n (λ t → g t (f a))) α) ∘ adj _ (ap (ap^ n (λ t → g a (f t))) α)) ≃〈 {!!} 〉
+  --                         (adj _ (ap (ap^ n (λ t → g t (f a))) α)) ∘ (adj _ (ap (ap^ n (λ t → g a (f t))) α)) ≃〈 {!!} 〉
+  --                         (ap^ (S n) (λ t → g t (f a)) α) ∘ (ap^ (S n) (λ t → g a (f t)) α) ∎
 
 
   LoopType→ : ∀ n {A B} → (Loop (S n) Type A) -> Loop (S n) Type B -> Loop (S n) Type (A → B)
