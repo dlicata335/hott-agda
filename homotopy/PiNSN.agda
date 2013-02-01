@@ -204,6 +204,13 @@ module homotopy.PiNSN where
                     τ₀ (Loop n (S^ n) S.base) ≃〈 id 〉
                     π n (S^ n) S.base ∎
 
+  module S¹-is-S^One where
+    path : S¹.S¹ ≃ S^ One
+    path = ua (improve (hequiv (S¹.S¹-rec S.base (S.loop One))
+                               (S-rec S¹.base S¹.loop)
+                               (S¹.S¹-elim _ id {!? ∘ transport-Path ((S¹.S¹-rec S.base (S.loop One)) o (S-rec S¹.base S¹.loop)) (\ x -> x) S¹.loop id !})
+                               {!!}))
+
   πnSⁿ-is-Z : ∀ n → π n (S^ n) S.base ≃ Int
   πnSⁿ-is-Z One = {!!}
   πnSⁿ-is-Z (S n) = πnSⁿ-is-Z n ∘ πnSⁿ-diagonal n
