@@ -9,8 +9,8 @@ open import lib.First
 
 module lib.Paths where
 
- data Id {A : Type} : A → A → Type where
-   id : {M : A} → Id M M
+ data Id {A : Type} (M : A) : A → Type where
+   id : Id M M
 
  Path : {A : Type} → A → A → Type
  Path = Id

@@ -5,6 +5,7 @@ open Truncation
 open Int
 open Paths
 open LoopSpace
+open import homotopy.Pi1S1 using (Ω₁[S¹]-is-Int)
 
 module homotopy.PiNSN where
 
@@ -200,19 +201,23 @@ module homotopy.PiNSN where
                     τ₀ (Loop (S n) (S^ (S n)) S.base) ≃〈 ap τ₀ (LoopPath.path n) 〉
                     τ₀ (Loop n (Path {S^ (S n)} S.base S.base) id) ≃〈 ! (Loop-Trunc0 n) 〉
                     Loop n (Trunc (tlp n) (Path {S^ (S n)} S.base S.base)) [ id ] ≃〈 ap-Loop≃ n τn[Ω[S^n+1]]-is-τn[S^n] preserves-point 〉
-                    Loop n (Trunc (tlp n) (S^ n)) [ S.base ] ≃〈 {!!} 〉
+                    Loop n (Trunc (tlp n) (S^ n)) [ S.base ] ≃〈 Loop-Trunc0 n 〉
                     τ₀ (Loop n (S^ n) S.base) ≃〈 id 〉
                     π n (S^ n) S.base ∎
 
   module S¹-is-S^One where
+    eqv : Equiv (S¹.S¹) (S^ One)
+    eqv = improve (hequiv (S¹.S¹-rec S.base (S.loop One))
+                          (S-rec S¹.base S¹.loop)
+                          (S¹.S¹-elim _ id ((!-inv-r S¹.loop ∘ ap∘ (ap-id S¹.loop) (ap ! ((S.βloop/rec One S¹.base S¹.loop ∘ ap (ap (S-rec S¹.base S¹.loop)) (S¹.βloop/rec S.base (S.loop One))) ∘ ap-o (S-rec S¹.base S¹.loop) (S¹.S¹-rec S.base (S.loop One)) S¹.loop) ∘ ∘-unit-l (! (ap (S-rec S¹.base S¹.loop o S¹.S¹-rec S.base (S.loop One)) S¹.loop)))) ∘ transport-Path ((S-rec S¹.base S¹.loop) o (S¹.S¹-rec S.base (S.loop One))) (\ x -> x) S¹.loop id ))
+                          (S.S-elim _ id ((!-inv-r (S.loop One) ∘ ap∘ (ap-id (S.loop One)) (ap ! ((S¹.βloop/rec S.base (S.loop One) ∘ ap (ap (S¹.S¹-rec S.base (S.loop One))) (S.βloop/rec One S¹.base (S¹.loop))) ∘ ap-o (S¹.S¹-rec S.base (S.loop One)) (S.S-rec S¹.base (S¹.loop)) (S.loop One)) ∘ ∘-unit-l (! (ap (S¹.S¹-rec S.base (S.loop One) o S.S-rec S¹.base (S¹.loop)) (S.loop One))))) ∘ transport-Path ((S¹.S¹-rec S.base (S.loop One)) o (S.S-rec S¹.base (S¹.loop))) (\ x -> x) (S.loop One) id )))
+
+
     path : S¹.S¹ ≃ S^ One
-    path = ua (improve (hequiv (S¹.S¹-rec S.base (S.loop One))
-                               (S-rec S¹.base S¹.loop)
-                               (S¹.S¹-elim _ id {!? ∘ transport-Path ((S¹.S¹-rec S.base (S.loop One)) o (S-rec S¹.base S¹.loop)) (\ x -> x) S¹.loop id !})
-                               {!!}))
+    path = ua eqv
 
   πnSⁿ-is-Z : ∀ n → π n (S^ n) S.base ≃ Int
-  πnSⁿ-is-Z One = {!!}
+  πnSⁿ-is-Z One = (τ₀Int-is-Int ∘ ap τ₀ (ua (improve (Ω₁[S¹]-is-Int)))) ∘ ap τ₀ (ap-Loop≃ One (! S¹-is-S^One.path) (ap≃ (type≃β! S¹-is-S^One.eqv)))
   πnSⁿ-is-Z (S n) = πnSⁿ-is-Z n ∘ πnSⁿ-diagonal n
 
   -- πn(S^ n) = τ₀(Ω^n S^ n) = Ω^n-1(τ^n-1 (Ω(S^n)))

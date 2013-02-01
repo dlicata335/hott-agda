@@ -68,6 +68,7 @@ module Int where
   postulate
     HSet-Int : HSet Int
 
+    τ₀Int-is-Int : τ₀ Int ≃ Int
 
   -- relating Int to other kinds of numbers
   
