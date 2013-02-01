@@ -6,6 +6,7 @@ open import lib.AdjointEquiv
 open import lib.Prods
 open import lib.Functions
 open Paths
+open import lib.Truncations
 
 module lib.Univalence where
 
