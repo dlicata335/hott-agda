@@ -7,6 +7,7 @@ open import lib.Prods
 open import lib.Functions
 open import lib.Truncations
 open Paths
+open import lib.Truncations
 
 module lib.Univalence where
 

@@ -243,7 +243,6 @@ module lib.loopspace.OverTypes where
   --                         (adj _ (ap (ap^ n (λ t → g t (f a))) α)) ∘ (adj _ (ap (ap^ n (λ t → g a (f t))) α)) ≃〈 {!!} 〉
   --                         (ap^ (S n) (λ t → g t (f a)) α) ∘ (ap^ (S n) (λ t → g a (f t)) α) ∎
 
-
   LoopType→ : ∀ n {A B} → (Loop (S n) Type A) -> Loop (S n) Type B -> Loop (S n) Type (A → B)
   LoopType→ n {A} {B} lA lB = λt n (λ (f : A → B) →
                                       λl n (λ (x : A) →
