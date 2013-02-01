@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type --without-K #-}
+{-# OPTIONS --type-in-type #-}
 
 open import lib.Prelude
 open Truncation
@@ -15,6 +15,7 @@ module homotopy.PiKSNLess where
   -- so STS τ^k-1 (Ω(S^n)) = 1
   -- so STS τ^k (Ω(S^n+1)) = 1 for k < n
 
+  -- done out in encode/decode style
   module Proof (k : TLevel) (n : Positive) 
                (lt : ∀ A t → HProp (Loop n (Trunc k A) t))
          where
@@ -57,39 +58,41 @@ module homotopy.PiKSNLess where
     decode-encode = Trunc-elim _ 
                                (λ x → path-preserves-IsTrunc Trunc-is) 
                                (path-induction (λ y' α → decode {y'} (encode [ α ]) ≃ [ α ]) id)
-    
 
-  data _<t_ : TLevel -> TLevel -> Type where
-    lt-2 : ∀ {m} → -2 <t (S m)
-    ltS  : ∀ {n m} → n <t m → (S n) <t (S m)
-
-  lt->hprop : ∀ n k {A t} → k <t (tlp n) → HProp (Loop n (Trunc k A) t)
-  lt->hprop One .-2 lt-2 = increment-IsTrunc (path-preserves-IsTrunc Trunc-is)
-  lt->hprop One .(S -2) (ltS lt-2) = {!!}
-  lt->hprop One .(S (S -2)) (ltS (ltS lt-2)) = {!!}
-  lt->hprop One .(S (S (S n))) (ltS (ltS (ltS {n} ())))
-  lt->hprop (S n) k lt = {!!}
-
-  module Proof2 (k : TLevel) (n : Positive) 
-                (lt : ∀ A t → HProp (Loop n (Trunc k A) t)) where
+  -- drop the units
+  module Proof2 (k : TLevel) (n : Positive) (lt : k <tl (tlp n)) where
 
     P : (S^ (S n)) → Type
     P y = Trunc k (Path{S^ (S n)} S.base y)
 
-    decode : (y : S^ (S n)) → P y
-    decode = S-elim (λ y' → Trunc k (Path S.base y')) 
+    center : (y : S^ (S n)) → P y
+    center = S-elim (λ y' → Trunc k (Path S.base y')) 
                     [ id ] 
                     (coe (! (LoopOverS≃ n (S.loop (S n)) (λ y' → Trunc k (Path S.base y')) [ id ]))
-                         (HProp-unique (lt _ _) _ _)) -- need Id{Loop n (Trunc k _) _} _ _ 
+                         (HProp-unique (HProp-Loop-in-Trunc< k n lt) _ _)) -- need Id{Loop n (Trunc k _) _} _ _ 
 
-    decode-encode : {y : S^ (S n)} (p : P y) → decode y ≃ p
-    decode-encode = Trunc-elim _ (λ x → path-preserves-IsTrunc Trunc-is) 
-                                 (path-induction (λ y' α → decode y' ≃ [ α ]) id)
+    paths : {y : S^ (S n)} (p : P y) → center y ≃ p
+    paths = Trunc-elim _ (λ x → path-preserves-IsTrunc Trunc-is) 
+                         (path-induction (λ y' α → center y' ≃ [ α ]) id)
     
     contra : Contractible (Trunc k (Path{S^ (S n)} S.base S.base))
-    contra = decode S.base , decode-encode {S.base}
+    contra = center S.base , paths {S.base}
 
-    {- why it doesn't work for arbitrary k
+
+  -- works for k at least 2
+  -- separately should do π1(S^n) for 1 < n
+
+  theorem : (k : Positive) (n : Positive) → (tlp k <tl tlp n) 
+          → π (S k) (S^ (S n)) S.base ≃ Unit
+  theorem k n lt = π (S k) (S^ (S n)) S.base                                          ≃〈 id 〉
+                   Trunc (tl 0) (Loop (S k) (S^ (S n)) S.base)                        ≃〈 ap (Trunc (tl 0)) (LoopPath.path k) 〉
+                   Trunc (tl 0) (Loop k (Loop One (S^ (S n)) S.base) id)              ≃〈 ! (Loop-Trunc k 0) 〉
+                   Loop k (Trunc (tlp (k +pn 0)) (Loop One (S^ (S n)) S.base)) [ id ] ≃〈 ap-Loop-Trunc-tlevel k (ap tlp (+pn-rh-Z k)) 〉
+                   Loop k (Trunc (tlp k) (Loop One (S^ (S n)) S.base)) [ id ]         ≃〈 ap-Loop≃ k (Contractible≃Unit (Proof2.contra _ _ lt)) id 〉
+                   Loop k Unit <>                                                     ≃〈 ! (LoopUnit.path k) 〉 
+                   Unit ∎
+
+  {- why the above argument doesn't work for arbitrary k
     (apt n (ap^ (S n) (λ y' → Trunc k (Path S.base y')) (S.loop (S n))) [ id ] ≃〈 {!!} 〉 
     (apt n (λt n (Trunc-elim (λ tβ → Loop n (Trunc k (Path S.base _)) tβ) 
                  (λ _ → IsKTrunc-Loop n k Trunc-is) 

@@ -2,11 +2,13 @@
 
 open import lib.First
 open import lib.Paths
+open import lib.Prods
 open Paths
 open import lib.Univalence
 open import lib.AdjointEquiv
 open import lib.WrappedPath
 open import lib.Functions
+open import lib.Truncations
 
 module lib.TypeEquivalence where
 
@@ -63,3 +65,14 @@ module lib.TypeEquivalence where
                          -> (transport B α b1 ≃ b2) ≃ (transport B' α (coe (ap≃ β) b1) ≃ coe (ap≃ β) b2)
   transport-by-equals≃ _ _ _ id  = id
 
+
+  -- FIXME: put these somewhere else 
+  
+  ContractibleEquivUnit : ∀ {A} → Contractible A → Equiv A Unit
+  ContractibleEquivUnit c = (improve (hequiv (λ _ → <>) (λ _ → fst c) (λ x → snd c x) (\ _ -> id)))
+
+  Contractible≃Unit : ∀ {A} → Contractible A → A ≃ Unit
+  Contractible≃Unit c = ua (ContractibleEquivUnit c)
+
+  Contractible-Unit : Contractible Unit
+  Contractible-Unit = (<> , \ _ -> id) 

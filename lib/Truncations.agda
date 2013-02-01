@@ -1,5 +1,5 @@
 
-{-# OPTIONS --no-termination-check --type-in-type #-}
+{-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.First
 open import lib.Paths
@@ -20,6 +20,13 @@ module lib.Truncations where
   tl : Nat -> TLevel
   tl Z = (S (S -2))
   tl (S n) = (S (tl n))
+
+  data _<tl_ : TLevel -> TLevel -> Type where
+    lt-2 : ∀ {m} → -2 <tl (S m)
+    ltS  : ∀ {n m} → n <tl m → n <tl (S m)
+
+  un-ltS : ∀ {n m} → (S n) <tl (S m) →  (S n) <tl m
+  un-ltS (ltS y) = y
 
   {-
   record Contractible (A : Type) : Type where
@@ -204,4 +211,4 @@ module lib.Truncations where
      -- eqv : {y : A} -> Equiv (Trunc n (Path x y)) (Path {(Trunc (S n) A)} [ x ] [ y ])
      -- eqv {y} = improve (hequiv decode encode ? ?)
 
-  
+

@@ -191,9 +191,6 @@ module homotopy.PiNSN where
   preserves-point : ∀ {n} → coe (τn[Ω[S^n+1]]-is-τn[S^n] {n}) [ id ] ≃ [ S.base ]
   preserves-point {n} = ap≃ (type≃β (improve (hequiv encode decode decode-encode encode-decode'))) {[ id ]}
 
-  π : ∀ n A (a : A) → Type
-  π n A a = τ₀ (Loop n A a)
-
   πnSⁿ-diagonal : ∀ n → π (S n) (S^ (S n)) S.base ≃ π n (S^ n) S.base
   πnSⁿ-diagonal n = π (S n) (S^ (S n)) S.base ≃〈 id 〉
                     τ₀ (Loop (S n) (S^ (S n)) S.base) ≃〈 ap τ₀ (LoopPath.path n) 〉

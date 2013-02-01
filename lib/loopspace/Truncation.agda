@@ -35,9 +35,6 @@ module lib.loopspace.Truncation where
   IsKTrunc-Loop One k tA = path-preserves-IsTrunc tA
   IsKTrunc-Loop (S n) k tA = path-preserves-IsTrunc (IsKTrunc-Loop n k tA)
 
-  Loop-preserves-pointed-≃ : ∀ n {A B a b} (e : A ≃ B) (p : transport (λ x → x) e a ≃ b) → Loop n A a ≃ Loop n B b
-  Loop-preserves-pointed-≃ n e p = ap (λ (p : Σ (λ X → X)) → Loop n (fst p) (snd p)) (pair≃ e p)
-
   Path-Trunc : ∀ n {A} {x y : A} → Trunc n (Path x y) ≃ Path {(Trunc (S n) A)} [ x ] [ y ]
   Path-Trunc n = ua (improve (hequiv TruncPath.decode TruncPath.encode TruncPath.encode-decode' TruncPath.decode-encode))
 
@@ -49,3 +46,10 @@ module lib.loopspace.Truncation where
     Loop-Trunc-id : ∀ n k {A a} → coe (Loop-Trunc n k {A} {a}) (id^ n) ≃ [ id^ n ]
     -- Loop-Trunc-id One k = {!!}
     -- Loop-Trunc-id (S n) k = {!!}
+
+  HProp-Loop-in-Trunc< : ∀ k n {A t} → k <tl (tlp n) → HProp (Loop n (Trunc k A) t)
+  HProp-Loop-in-Trunc< -2 One lt = increment-IsTrunc (path-preserves-IsTrunc Trunc-is)
+  HProp-Loop-in-Trunc< -2 (S n) y = increment-IsTrunc (path-preserves-IsTrunc (IsKTrunc-Loop n -2 (Trunc-is { -2})))
+  HProp-Loop-in-Trunc< (S k) One (ltS (ltS (ltS ()))) 
+  HProp-Loop-in-Trunc< (S k) (S n) lt = path-preserves-IsTrunc (HProp-Loop-in-Trunc< (S k) n (un-ltS lt))
+

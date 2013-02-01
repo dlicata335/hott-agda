@@ -13,6 +13,7 @@ open import lib.Univalence
 open import lib.Truncations
 open Truncation
 open import lib.WrappedPath
+open import lib.TypeEquivalence
 
 open import lib.loopspace.Basics
 open import lib.loopspace.Groupoid
@@ -294,3 +295,10 @@ module lib.loopspace.Types where
                                                                                      (λ≃ (λ x → ! (ap (λ f → f b) (transport-ap-assoc B x)))))) 〉
                    rebase n id (ap^ n (λ x → transport B x b) (loopSN1 n α)) ≃〈 ap≃ (rebase-idpath n) 〉
                    ap^ n (λ x → transport B x b) (loopSN1 n α) ∎
+
+
+  module LoopUnit where
+
+    path : ∀ n → Unit ≃ Loop n Unit <> 
+    path n = ! (Contractible≃Unit (use-trunc (IsKTrunc-Loop n -2 (istrunc Contractible-Unit))))
+

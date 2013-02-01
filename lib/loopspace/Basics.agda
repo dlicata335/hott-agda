@@ -3,6 +3,7 @@
 
 open import lib.First
 open import lib.Paths
+open import lib.Prods
 open Paths
 open import lib.Functions
 open import lib.Int
@@ -53,3 +54,15 @@ module lib.loopspace.Basics where
   test : {S : Type} {base : S} (loop : Loop n S base) → (B : S → Type) (b : B base) → Type 
   test {Sn} {base} loop X x = {!LoopOver n loop X x !}
   -}
+
+  ap-Loop≃ : ∀ n {A B a b} (e : A ≃ B) (p : coe e a ≃ b) → Loop n A a ≃ Loop n B b
+  ap-Loop≃ n e p = ap (λ (p : Σ (λ X → X)) → Loop n (fst p) (snd p)) (pair≃ e p)
+
+  ap-Loop-Trunc-tlevel : ∀ n {A} {a : A} {k1 k2 : _} → k1 ≃ k2
+                       → Loop n (Trunc k1 A) [ a ]
+                       ≃ Loop n (Trunc k2 A) [ a ]
+  ap-Loop-Trunc-tlevel n id = id 
+
+  π : ∀ n A (a : A) → Type
+  π n A a = τ₀ (Loop n A a)
+
