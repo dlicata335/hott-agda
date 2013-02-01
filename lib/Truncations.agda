@@ -53,9 +53,11 @@ module lib.Truncations where
   HSet : Type -> Type
   HSet A = IsTrunc (tl 0) A
 
-  postulate
-    HSet-UIP : ∀ {A} -> HSet A -> (x y : A) (p q : x ≃ y) -> p ≃ q
-    HProp-unique : ∀ {A} -> HProp A -> (x y : A) -> x ≃ y
+  HSet-UIP : ∀ {A} -> HSet A -> (x y : A) (p q : x ≃ y) -> p ≃ q
+  HSet-UIP h x y p q = fst (use-trunc (use-trunc (use-trunc h x y) p q))
+
+  HProp-unique : ∀ {A} -> HProp A -> (x y : A) -> x ≃ y
+  HProp-unique h x y = fst (use-trunc (use-trunc h x y))
 
   HGpd : Type -> Type
   HGpd A = IsTrunc (tl 1) A
@@ -66,17 +68,22 @@ module lib.Truncations where
              (λ α → move-left-right (apaths y) α (apaths x)
                       (! (apd apaths α ∘ ! (transport-Path-right α (apaths x)))))
 
-  {-
-  Contractible-is-HProp : (A : Type) -> HProp (Contractible A)
-  Contractible-is-HProp A = λ c1 c2 → (pair≃ (fst (Contractible-Path c1 (fst c1) (fst c2))) {!snd (Contractible-Path c1 (fst c1) (fst c2)) !}) , 
-                                      {!!}
+  postulate 
+    ΠIsTrunc : ∀{A n}{B : A → Type} → ((x : A) -> IsTrunc n (B x)) → IsTrunc n ((x : A) → B x)
 
-  Trunc-is-HProp { -2 } A = Contractible-is-HProp A
-  Trunc-is-HProp {S n} A = {!Trunc-is-HProp {n}  !}
-  -}
   postulate
-    IsTrunc-is-HProp   : {n : TLevel} (A : Type) -> HProp (IsTrunc n A)
+    use-trunc≃ : ∀ {n A} -> IsTrunc n A ≃ IsTrunc' n A
+    -- arrange modules so we can use univalence here 
 
+  postulate
+    Contractible-is-HProp : (A : Type) -> HProp (Contractible A)
+    -- Contractible-is-HProp A = {!!} 
+    -- λ c1 c2 → (pair≃ (fst (Contractible-Path c1 (fst c1) (fst c2))) {!snd (Contractible-Path c1 (fst c1) (fst c2)) !}) , 
+    --           {!!}
+
+  IsTrunc-is-HProp   : {n : TLevel} (A : Type) -> HProp (IsTrunc n A)
+  IsTrunc-is-HProp { -2 } A = transport (HProp) (! use-trunc≃) (Contractible-is-HProp A)
+  IsTrunc-is-HProp {S n} A = transport HProp (! use-trunc≃) (ΠIsTrunc (λ _ → ΠIsTrunc (λ _ → IsTrunc-is-HProp {n} _)))
 
   -- in fact, it decrements, but often you want this lemma
   path-preserves-IsTrunc : {n : TLevel} {A : Type} -> IsTrunc n A -> {x y : A} -> IsTrunc n (Path x y)
@@ -86,9 +93,6 @@ module lib.Truncations where
   increment-IsTrunc : {n : TLevel} {A : Type} -> (IsTrunc n A) → (IsTrunc (S n) A)
   increment-IsTrunc {n}{A} tA = istrunc (λ x y → path-preserves-IsTrunc tA)
 
-
-  postulate 
-    ΠIsTrunc : ∀{A n}{B : A → Type} → ((x : A) -> IsTrunc n (B x)) → IsTrunc n ((x : A) → B x)
 
   module Truncation where
 
@@ -103,7 +107,7 @@ module lib.Truncations where
     [_] : {n : TLevel} {A : Type} → A -> Trunc n A
     [ x ] = trunc' x
 
-    postulate 
+    postulate {- HoTT Axiom -}
       Trunc-is : {n : TLevel} {A : Type} → IsTrunc n (Trunc n A)
 
     Trunc-rec : {A C : Type} {n : TLevel} (tC : IsTrunc n C)
@@ -123,26 +127,18 @@ module lib.Truncations where
    τ₁ = Trunc (tl 1)
    τ₂ = Trunc (tl 2)
 
-   module TruncPath {n : _} {A : _} {x y : A} where
-     decode' : 
-          (Trunc n (Path x y))
-        → Path {(Trunc (S n) A)} [ x ] [ y ]
-     decode' = Trunc-rec (use-trunc (Trunc-is {S n} {A}) [ x ] [ y ]) (ap [_]) 
+   NType : TLevel -> Type
+   NType n = Σ \ (A : Type) → IsTrunc n A
 
-     postulate
-       encode' : 
-           Path {(Trunc (S n) A)} [ x ] [ y ]
-         → (Trunc n (Path x y))
-
-       encode-decode' : encode' o decode' ≃ (\ x -> x)
-       decode-encode' : decode' o encode' ≃ (\ x -> x)
+   postulate
+     IsTrunc-NType : ∀ n → IsTrunc (S n) (NType n)
 
    Trunc-simple-η : ∀ {n A} {y : Trunc n A} 
                   → Trunc-rec{A}{Trunc n A}{n} (Trunc-is{n}{A}) [_] y ≃ y
    Trunc-simple-η {n}{A}{y} = Trunc-elim (λ z → Path (Trunc-rec (Trunc-is{n}{A}) [_] z) z) 
-                                      (λ x → path-preserves-IsTrunc (Trunc-is {n} {A}) )
-                                      (λ _ → id)
-                                      y
+                                         (λ x → path-preserves-IsTrunc (Trunc-is {n} {A}) )
+                                         (λ _ → id)
+                                         y
                                       
    transport-Trunc : {n : TLevel} {Γ : Type} (A : Γ → Type) {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
                    →  transport (\ x -> Trunc n (A x)) δ 
@@ -157,5 +153,47 @@ module lib.Truncations where
 
    Trunc-func : {n : TLevel} {A B : Type} -> (A -> B) -> (Trunc n A -> Trunc n B)
    Trunc-func f = Trunc-rec Trunc-is ([_] o f)
+
+   module TruncPath {n : _} {A : _} {x : A} where
+
+     decode' : {y : _} → (Trunc n (Path x y)) → Path {(Trunc (S n) A)} [ x ] [ y ]
+     decode' {y} = Trunc-rec (use-trunc (Trunc-is {S n} {A}) [ x ] [ y ]) (ap [_]) 
+
+     Codes : Trunc (S n) A → NType n
+     Codes = Trunc-rec (IsTrunc-NType n) 
+                       (λ y → Trunc n (Path x y) , Trunc-is) 
+     
+     encode : {y : Trunc (S n) A}
+           → Path {(Trunc (S n) A)} [ x ] y
+           → fst (Codes y)
+     encode α = transport (fst o Codes) α [ id ]
+
+     encode' : {y : A}
+           → Path {(Trunc (S n) A)} [ x ] [ y ]
+           → (Trunc n (Path x y))
+     encode'{y} = encode {[ y ]}
+
+     encode-decode' : {y : A} (c : fst (Codes [ y ]))
+                    → encode'{y} (decode'{y} c) ≃ c
+     encode-decode' = Trunc-elim _ (λ x' → path-preserves-IsTrunc Trunc-is) 
+       (λ α → transport (λ x' → fst (Trunc-rec (IsTrunc-NType n) (λ y → Trunc n (Id x y) , Trunc-is) x')) (ap [_] α) [ id ] ≃〈 ! (ap≃ (transport-ap-assoc' (λ x' → fst (Trunc-rec (IsTrunc-NType n) (λ y → Trunc n (Id x y) , Trunc-is) x')) [_] α)) 〉 
+              transport (λ y → Trunc n (Id x y)) α [ id ] ≃〈 ap≃ (transport-Trunc (λ y → Id x y) α) 〉
+              [ transport (\ y -> (Id x y)) α id ] ≃〈 ap [_] (transport-Path-right α id) 〉
+              [ α ] ∎)
+
+     decode : {y : Trunc (S n) A}
+           → fst (Codes y)
+           → Path {(Trunc (S n) A)} [ x ] y
+     decode {y} = Trunc-elim (\ y -> fst (Codes y) → Path {(Trunc (S n) A)} [ x ] y)
+                             (λ x' → ΠIsTrunc (λ x'' → path-preserves-IsTrunc Trunc-is))
+                             (λ y' → decode' {y'})
+                             y
+ 
+     decode-encode : {y : _} (p : Path [ x ] y) → decode{y} (encode{y} p) ≃ p
+     decode-encode id = id
+
+     -- need to change module structure so we can wrap it up
+     -- eqv : {y : A} -> Equiv (Trunc n (Path x y)) (Path {(Trunc (S n) A)} [ x ] [ y ])
+     -- eqv {y} = improve (hequiv decode encode ? ?)
 
   
