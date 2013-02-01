@@ -7,6 +7,7 @@ open Paths
 open import lib.Functions
 open import lib.Nat
 open import lib.Int
+open import lib.Prods
 open Int
 open import lib.AdjointEquiv
 open import lib.Univalence
@@ -34,3 +35,17 @@ module lib.loopspace.Truncation where
   IsKTrunc-Loop One k tA = path-preserves-IsTrunc tA
   IsKTrunc-Loop (S n) k tA = path-preserves-IsTrunc (IsKTrunc-Loop n k tA)
 
+  Loop-preserves-pointed-≃ : ∀ n {A B a b} (e : A ≃ B) (p : transport (λ x → x) e a ≃ b) → Loop n A a ≃ Loop n B b
+  Loop-preserves-pointed-≃ n e p = ap (λ (p : Σ (λ X → X)) → Loop n (fst p) (snd p)) (pair≃ e p)
+
+  Path-Trunc : ∀ n {A} {x y : A} → Trunc n (Path x y) ≃ Path {(Trunc (S n) A)} [ x ] [ y ]
+  Path-Trunc n = ua (improve (hequiv TruncPath.decode TruncPath.encode TruncPath.encode-decode' TruncPath.decode-encode))
+
+  postulate
+    Loop-Trunc : ∀ (n : Positive) (k : Nat) {A} {a} → Loop n (Trunc (tlp (n +pn k)) A) [ a ] ≃ Trunc (tl k) (Loop n A a)
+    -- Loop-Trunc One k {A} {a} = ! (Path-Trunc (tl k)) ∘ Loop-preserves-pointed-≃ One (ap (λ u → Trunc u A) (tlp+1 k)) (transport-Trunc-tlevel _ _ (tlp+1 k) ∘ ! (ap≃ (transport-ap-assoc (λ u → Trunc u A) (tlp+1 k))))
+    -- Loop-Trunc (S n) k {A} {a} = ! (Path-Trunc (tl k)) ∘ Loop-preserves-pointed-≃ One (Loop-Trunc n (S k) ∘ ap (λ t → Loop n (Trunc (tlp t) A) [ a ]) (! (+pn-rh-S n k))) {!!} ∘ id
+  postulate
+    Loop-Trunc-id : ∀ n k {A a} → coe (Loop-Trunc n k {A} {a}) (id^ n) ≃ [ id^ n ]
+    -- Loop-Trunc-id One k = {!!}
+    -- Loop-Trunc-id (S n) k = {!!}

@@ -249,6 +249,9 @@ module lib.loopspace.Groupoid where
     !^-id^ One = id
     !^-id^ (S n) = id
     
+    ap2-∘^ : ∀ n {A a} {α α' β β' : Loop n A a} (p : α ≃ α') (q : β ≃ β') → ap2 (∘^ n) p q ≃ ap (λ x → ∘^ n x β') p ∘ ap (∘^ n α) q
+    ap2-∘^ n id id = id
+
     ap-!^ : ∀ n {A} {a : A} (α : Path {(Loop n (Path a a) id)} (id^ n) (id^ n)) 
           -> ap (!^ n) α ≃ adj (! (!^-id^ n)) (! α)
     ap-!^ One α = adj-id _ ∘ ! (HigherHomotopyAbelian.inverse-same _ _ α)
@@ -262,3 +265,20 @@ module lib.loopspace.Groupoid where
                          adj _ (! α) ≃〈 adj-eq-loop n _ _ _ _ id 〉
                          adj id (! α) ≃〈 ! (adj-id _) 〉
                          ! α ∎)
+
+    ap^-app : ∀ n {A B C} (a : A) (α : Loop n A a) (f : A → B) (g : A → B → C) →
+          ap^ n (λ a → g a (f a)) α ≃ (∘^ n (ap^ n (λ t → g t (f a)) α)
+                                            (ap^ n (λ t → g a (f t)) α))
+    ap^-app One a α f g = (! (ap∘ (ap-o (λ x → x (f a)) g α) (ap-o (g a) f α)) ∘ ap2-aps-1 (λ f x → f x) (ap g α) (ap f α)) ∘ ap2-ap-assoc (λ f x → f x) g f α
+    ap^-app (S n) {C = C} a α f g = ap^ (S n) (λ a₁ → g a₁ (f a₁)) α ≃〈 ! (adj-def (ap^-id n (λ a₁ → g a₁ (f a₁))) _) 〉
+                          adj _ (ap (ap^ n (λ a₁ → g a₁ (f a₁))) α) ≃〈 adj-bind (ap-loop-by-equals {f = (ap^ n (λ a₁ → g a₁ (f a₁)))} {g = (λ β → ∘^ n (ap^ n (λ t → g t (f a)) β) (ap^ n (λ t → g a (f t)) β))} (λ x → ! (ap^-app n a x f g)) α) 〉
+                          adj _ (ap (λ β → ∘^ n (ap^ n (λ t → g t (f a)) β)
+                                                (ap^ n (λ t → g a (f t)) β)) α) ≃〈 ap (adj _) (ap2-ap-assoc (∘^ n) (ap^ n (λ t → g t (f a))) (ap^ n (λ t → g a (f t))) α) 〉
+                          adj _ (ap2 (∘^ n) (ap (ap^ n (λ t → g t (f a))) α) (ap (ap^ n (λ t → g a (f t))) α)) ≃〈 ap (adj _) (ap2-∘^ n (ap (ap^ n (λ t → g t (f a))) α) (ap (ap^ n (λ t → g a (f t))) α)) 〉
+                          adj _ (ap (λ x → ∘^ n x (ap^ n (λ t → g a (f t)) (id^ n))) (ap (ap^ n (λ t → g t (f a))) α) ∘ ap (∘^ n (ap^ n (λ t → g t (f a)) (id^ n))) (ap (ap^ n (λ t → g a (f t))) α))
+                                ≃〈 ap (adj _) (ap∘ (ap-loop-by-equals {f = (λ x → ∘^ n x (ap^ n (λ t → g a (f t)) (id^ n)))} {g = λ x → x} (λ x → ap (∘^ n x) (! (ap^-id n (λ t → g a (f t)))) ∘ ! (∘^-unit-r n x)) (ap (ap^ n (λ t → g t (f a))) α)) (ap-loop-by-equals {f = (∘^ n (ap^ n (λ t → g t (f a)) (id^ n)))} {g = λ x → x} (λ x → ap (λ t → ∘^ n t x) (! (ap^-id n (λ t → g t (f a)))) ∘ ! (∘^-unit-l n x)) (ap (ap^ n (λ t → g a (f t))) α))) 〉
+                          adj _ (adj _ (ap (λ x → x) (ap (ap^ n (λ t → g t (f a))) α)) ∘ adj _ (ap (λ x → x) (ap (ap^ n (λ t → g a (f t))) α))) ≃〈 ap (adj _) (ap∘ (ap (adj _) (ap-id (ap (ap^ n (λ t → g t (f a))) α))) (ap (adj _) (ap-id (ap (ap^ n (λ t → g a (f t))) α)))) 〉
+                          adj _ (adj _ (ap (ap^ n (λ t → g t (f a))) α) ∘ adj _ (ap (ap^ n (λ t → g a (f t))) α)) ≃〈 adj-∘-adjs _ _ _ (ap (ap^ n (λ t → g t (f a))) α) (ap (ap^ n (λ t → g a (f t))) α) 〉
+                          (adj _ (ap (ap^ n (λ t → g t (f a))) α)) ∘ (adj _ (ap (ap^ n (λ t → g a (f t))) α)) ≃〈 ap∘ (adj-eq-loop n _ _ _ _ id) (adj-eq-loop n _ _ _ _ id) 〉
+                          (adj _ (ap (ap^ n (λ t → g t (f a))) α)) ∘ (adj _ (ap (ap^ n (λ t → g a (f t))) α)) ≃〈 ap∘ (adj-def (ap^-id n (λ t → g t (f a))) _) (adj-def (ap^-id n (λ t → g a (f t))) _) 〉
+                          (ap^ (S n) (λ t → g t (f a)) α) ∘ (ap^ (S n) (λ t → g a (f t)) α) ∎

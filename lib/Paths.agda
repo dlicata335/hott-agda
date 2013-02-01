@@ -322,6 +322,9 @@ module lib.Paths where
                     (α : Path M N) -> ap2 f α α ≃ ap (\ x -> f x x) α
    ap2-same-is-ap f id = id
 
+   ap2-ap-assoc : ∀ {A B C D} {a b : A} (f : B → C → D) (g1 : A → B) (g2 : A → C) (α : a ≃ b) → ap (λ a → f (g1 a) (g2 a)) α ≃ ap2 f (ap g1 α) (ap g2 α)
+   ap2-ap-assoc f g1 g2 id = id
+
    ap2-ap-assoc-1 : {A A' B  C : Type} (f : A → B → C) 
                     (g : A' → A) {M1 M2 : A'} (α : M1 ≃ M2) {N1 N2 : B} (β : N1 ≃ N2)
                   → ap2 f (ap g α) β ≃ ap2 (λ x y → f (g x) y) α β

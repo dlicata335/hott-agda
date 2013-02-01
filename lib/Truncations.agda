@@ -145,6 +145,14 @@ module lib.Truncations where
                     ≃ Trunc-rec (Trunc-is {n} {A θ2}) (λ x → [ transport A δ x ])
    transport-Trunc A id = λ≃ (\ y -> ! (Trunc-simple-η {_} {_} {y}))
 
+   transport-Trunc-tlevel : {n k : TLevel} (A : Type) (a : A) (δ : n ≃ k)
+                   →  transport (\ x -> Trunc x A) δ [ a ] ≃ [ a ]
+   transport-Trunc-tlevel A a id = id
+
+   coe-Trunc-tlevel : {n k : TLevel} (A : Type) (a : A) (δ : n ≃ k)
+                   →  coe (ap (\ x -> Trunc x A) δ) [ a ] ≃ [ a ]
+   coe-Trunc-tlevel A a id = id
+
    -- avoid the λ≃ because it's annoying to unpack later
    transport-Trunc' : {n : TLevel} {Γ : Type} (A : Γ → Type) {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (y : Trunc n (A θ1))
                      →  transport (\ x -> Trunc n (A x)) δ y

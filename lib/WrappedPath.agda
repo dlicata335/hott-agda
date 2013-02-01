@@ -88,7 +88,7 @@ module lib.WrappedPath where
           → adj w (! m) ≃ ! (adj w m)
     adj-! w m = (! (!-∘3 w m (! w)) ∘ ap (λ x → x ∘ ! m ∘ ! w) (! (!-invol w)))
 
-    adj-∘-adjs : {A : Type} {a1 a1' a2 a2' a3 : A} 
+    adj-∘-adjs : {A : Type} {a1 a1' a2 a2' : A} 
                (w : Path a1' a2') (w1 : Path a1 a1') (w2 : Path a2 a1') 
                (m1 : Path a1 a1) (m2 : Path a2 a2)
                → adj w ((adj w1 m1) ∘ (adj w2 m2))  ≃ (adj (w ∘ w1) m1) ∘ (adj (w ∘ w2) m2)
