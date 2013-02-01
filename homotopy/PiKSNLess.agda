@@ -87,7 +87,7 @@ module homotopy.PiKSNLess where
   theorem k n lt = π (S k) (S^ (S n)) S.base                                          ≃〈 id 〉
                    Trunc (tl 0) (Loop (S k) (S^ (S n)) S.base)                        ≃〈 ap (Trunc (tl 0)) (LoopPath.path k) 〉
                    Trunc (tl 0) (Loop k (Loop One (S^ (S n)) S.base) id)              ≃〈 ! (Loop-Trunc k 0) 〉
-                   Loop k (Trunc (tlp (k +pn 0)) (Loop One (S^ (S n)) S.base)) [ id ] ≃〈 ap-Loop-Trunc-tlevel k (ap tlp (+pn-rh-Z k)) 〉
+                   Loop k (Trunc (tlp (k +pn 0)) (Loop One (S^ (S n)) S.base)) [ id ] ≃〈 ap-Loop-Trunc-tlevel≃ k (ap tlp (+pn-rh-Z k)) 〉
                    Loop k (Trunc (tlp k) (Loop One (S^ (S n)) S.base)) [ id ]         ≃〈 ap-Loop≃ k (Contractible≃Unit (Proof2.contra _ _ lt)) id 〉
                    Loop k Unit <>                                                     ≃〈 ! (LoopUnit.path k) 〉 
                    Unit ∎

@@ -58,10 +58,10 @@ module lib.loopspace.Basics where
   ap-Loop≃ : ∀ n {A B a b} (e : A ≃ B) (p : coe e a ≃ b) → Loop n A a ≃ Loop n B b
   ap-Loop≃ n e p = ap (λ (p : Σ (λ X → X)) → Loop n (fst p) (snd p)) (pair≃ e p)
 
-  ap-Loop-Trunc-tlevel : ∀ n {A} {a : A} {k1 k2 : _} → k1 ≃ k2
+  ap-Loop-Trunc-tlevel≃ : ∀ n {A} {a : A} {k1 k2 : _} → k1 ≃ k2
                        → Loop n (Trunc k1 A) [ a ]
                        ≃ Loop n (Trunc k2 A) [ a ]
-  ap-Loop-Trunc-tlevel n id = id 
+  ap-Loop-Trunc-tlevel≃ n id = id 
 
   π : ∀ n A (a : A) → Type
   π n A a = τ₀ (Loop n A a)

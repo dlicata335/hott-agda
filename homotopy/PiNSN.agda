@@ -195,8 +195,8 @@ module homotopy.PiNSN where
   πnSⁿ-diagonal n = π (S n) (S^ (S n)) S.base ≃〈 id 〉
                     τ₀ (Loop (S n) (S^ (S n)) S.base) ≃〈 ap τ₀ (LoopPath.path n) 〉
                     τ₀ (Loop n (Path {S^ (S n)} S.base S.base) id) ≃〈 ! (Loop-Trunc n Z) 〉
-                    Loop n (Trunc (tlp (n +pn Z)) (Path {S^ (S n)} S.base S.base)) [ id ] ≃〈 Loop-preserves-pointed-≃ n {A = (Trunc (tlp (n +pn Z)) (Path {S^ (S n)} S.base S.base))} {B = (Trunc (tlp n) (Path {S^ (S n)} S.base S.base))} {a = [ id ]} {b = [ id ]} (ap {M = tlp (n +pn Z)} {N = tlp n} (λ t → Trunc t (Path S.base S.base)) (ap tlp (+pn-rh-Z n))) (coe-Trunc-tlevel _ _ (ap tlp (+pn-rh-Z n))) 〉
-                    Loop n (Trunc (tlp n) (Path {S^ (S n)} S.base S.base)) [ id ] ≃〈 Loop-preserves-pointed-≃ n τn[Ω[S^n+1]]-is-τn[S^n] preserves-point 〉
+                    Loop n (Trunc (tlp (n +pn Z)) (Path {S^ (S n)} S.base S.base)) [ id ] ≃〈 ap-Loop-Trunc-tlevel≃ n (ap tlp (+pn-rh-Z n)) 〉
+                    Loop n (Trunc (tlp n) (Path {S^ (S n)} S.base S.base)) [ id ] ≃〈 ap-Loop≃ n τn[Ω[S^n+1]]-is-τn[S^n] preserves-point 〉
                     Loop n (Trunc (tlp n) (S^ n)) [ S.base ] ≃〈 {!!} 〉
                     τ₀ (Loop n (S^ n) S.base) ≃〈 id 〉
                     π n (S^ n) S.base ∎
