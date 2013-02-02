@@ -6,6 +6,8 @@ open Paths
 
 module homotopy.Hopf where
 
+  -- Hopf fibration as a dependent type
+
   private 
     module S² = S²1
 
@@ -34,33 +36,39 @@ module homotopy.Hopf where
   H-is-1-truncated = S²-elim (λ x → HGpd (H x)) S¹-is-Gpd
                              (fst (use-trunc (use-trunc (path-preserves-IsTrunc (IsTrunc-is-HProp {tl 1} S¹)) _ _)))
 
-  module A = HigherHomotopyAbelian S² S².base
+  -- Hopf fibration as a higher cell in S^2
 
-  module Four where
-    ichange : Path {Path {Path base base} id id}
-                (ap∘ (loop ∘ loop) (loop ∘ loop))
-                (ap∘ loop loop ∘ ap∘ loop loop)
-    ichange = ichange-type loop loop loop loop
-  
-    loop4 = ((loop ∘ loop) ∘ (loop ∘ loop))
-  
-    nontriv-loop4 : loop4 ≃ loop4
-    nontriv-loop4 = loop4 ≃〈 A.same (loop ∘ loop) (loop ∘ loop) 〉
-                    ap∘ (loop ∘ loop) (loop ∘ loop) ≃〈 ichange 〉 
-                    ap∘ loop loop ∘ ap∘ loop loop ≃〈 ap∘ (! (A.same loop loop)) (! (A.same loop loop))  〉
-                    loop4 ∎
-  
-  hopf-cell : Path {Path {Path{S²} base base} id id} id id
-  hopf-cell = id ≃〈 ! (ap2 ap∘ (!-inv-r loop) (!-inv-r loop)) 〉
-              ap∘ (loop ∘ ! loop) (loop ∘ ! loop) ≃〈 ichange-type (! loop) loop (! loop) loop 〉 
-              ap∘ loop loop ∘ ap∘ (! loop) (! loop) ≃〈 ! (ap2 (λ x y → x ∘ y) (A.same loop loop) (A.same (! loop) (! loop))) 〉 
-              (loop ∘ loop) ∘ ! loop ∘ ! loop ≃〈 ap (λ x → (loop ∘ loop) ∘ x) (! (!-∘ loop loop)) 〉 
-              (loop ∘ loop) ∘ ! (loop ∘ loop) ≃〈 !-inv-r (loop ∘ loop) 〉 
-              (id ∎)
+  module HigherCell where
 
-  module S³ = S³1
-  open S³ using (S³)
+    module A = HigherHomotopyAbelian S² S².base
 
-  hopf-map : S³ -> S²
-  hopf-map = S³.S³-rec S².base hopf-cell
+    module Four where
+      ichange : Path {Path {Path base base} id id}
+                  (ap∘ (loop ∘ loop) (loop ∘ loop))
+                  (ap∘ loop loop ∘ ap∘ loop loop)
+      ichange = ichange-type loop loop loop loop
+      
+      loop4 = ((loop ∘ loop) ∘ (loop ∘ loop))
+      
+      nontriv-loop4 : loop4 ≃ loop4
+      nontriv-loop4 = loop4 ≃〈 A.same (loop ∘ loop) (loop ∘ loop) 〉
+                      ap∘ (loop ∘ loop) (loop ∘ loop) ≃〈 ichange 〉 
+                      ap∘ loop loop ∘ ap∘ loop loop ≃〈 ap∘ (! (A.same loop loop)) (! (A.same loop loop))  〉
+                      loop4 ∎
+
+    hopf-cell : Path {Path {Path{S²} base base} id id} id id
+    hopf-cell = id ≃〈 ! (ap2 ap∘ (!-inv-r loop) (!-inv-r loop)) 〉
+                ap∘ (loop ∘ ! loop) (loop ∘ ! loop) ≃〈 ichange-type (! loop) loop (! loop) loop 〉 
+                ap∘ loop loop ∘ ap∘ (! loop) (! loop) ≃〈 ! (ap2 (λ x y → x ∘ y) (A.same loop loop) (A.same (! loop) (! loop))) 〉 
+                (loop ∘ loop) ∘ ! loop ∘ ! loop ≃〈 ap (λ x → (loop ∘ loop) ∘ x) (! (!-∘ loop loop)) 〉 
+                (loop ∘ loop) ∘ ! (loop ∘ loop) ≃〈 !-inv-r (loop ∘ loop) 〉 
+                (id ∎)
   
+    module S³ = S³1
+    open S³ using (S³)
+  
+    hopf-map : S³ -> S²
+    hopf-map = S³.S³-rec S².base hopf-cell
+  
+    -- we know that H = (τ₁ o Path S².base) from π_2(S^2); does that help at all?
+

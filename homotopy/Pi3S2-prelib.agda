@@ -4,55 +4,19 @@ open import lib.Prelude
 open import homotopy.Hopf
 open Paths
 open Truncation
-open Int
-open LoopSpace
 
 module homotopy.Pi3S2 where
 
-  module S = NSphere1
-  open S using (S^ ; S-rec; S-elim)
-
-  Two : Positive
-  Two = S One
-
-  TTwo : TLevel
-  TTwo = S (S (S (S -2)))
-
-  S² = S^ Two
-  S²-elim = S-elim {Two}
-  S²-rec  = \ {A} -> S-rec{Two}{A}
-  base = \{N} → S.base{N}
-  loop = S.loop Two
+  private 
+    module S² = S²1
+  open S² using (S² ; S²-rec ; S²-elim)
+  open S¹ using (S¹ ; S¹-rec ; S¹-elim)
 
   [_]2 : {A : _} → (x : A) -> Trunc (S (S (S (S -2)))) A
   [ x ]2 = [ x ]
 
-  hopf-cell : Path {Path {Path{S²} base base} id id} id id
-  hopf-cell = id ≃〈 ! (ap2 ap∘ (!-inv-r loop) (!-inv-r loop)) 〉
-              ap∘ (loop ∘ ! loop) (loop ∘ ! loop) ≃〈 ichange-type (! loop) loop (! loop) loop 〉 
-              ap∘ loop loop ∘ ap∘ (! loop) (! loop) ≃〈 ! (ap2 (λ x y → x ∘ y) (A.same loop loop) (A.same (! loop) (! loop))) 〉 
-              (loop ∘ loop) ∘ ! loop ∘ ! loop ≃〈 ap (λ x → (loop ∘ loop) ∘ x) (! (!-∘ loop loop)) 〉 
-              (loop ∘ loop) ∘ ! (loop ∘ loop) ≃〈 !-inv-r (loop ∘ loop) 〉 
-              (id ∎)
-
   B : S² → Type
-  B = S²-rec (τ₂ S²) loop' where
-      loop' : Loop Two Type (τ₂ S²)
-      loop' = λt One (λ a → 
-        Trunc-elim (λ x → x ≃ x) (λ x → path-preserves-IsTrunc Trunc-is)
-          (S²-elim (λ x → [ x ] ≃ [ x ]) 
-                   (ap [_] (id {_} {base}))
-                   (coe  (! (LoopOverS≃ One loop (λ x → [ x ]2 ≃ [ x ]2) (ap [_] (id {_} {base})))) 
-                     (apt One (ap^ (S One) (λ x → [ x ]2 ≃ [ x ]2) loop) (ap [_] id) ≃〈 apt-apS One (λ x → [ x ]2 ≃ [ x ]2) loop (ap [_] id) 〉 
-                     (ap (\ y -> transport (\ x -> [ x ]2 ≃ [ x ]2) y id) loop) ≃〈 ap-by-equals {f = λ y → transport (λ x → [ x ]2 ≃ [ x ]2) y id} {g = λ y → id} (λ y → !-inv-with-middle-r (ap [_]2 y) id ∘ transport-Path [_]2 [_]2 y id) loop 〉 
-                     (id ∘ ap (\ y -> id) loop) ≃〈 ∘-unit-l (ap (\ y -> id) loop) 〉 
-                     (ap (\ y -> id) loop)     ≃〈 ap-constant id loop 〉 
-                     id                        ≃〈 {!!} 〉 
-                     id ∎)))
-                   a)
-
-  {-
-  (τ₂ S²) 
+  B = S²-fibration (τ₂ S²) 
                    (Trunc-elim (λ x → x ≃ x) 
                               (λ x → IsTrunc-Path (Trunc (S (S (S (S -2)))) S²) Trunc-is x x)
                               (S²-elim (λ x → [ x ] ≃ [ x ]) 
@@ -65,8 +29,6 @@ module homotopy.Pi3S2 where
                        S².loop 
                        id) 
             id
-  -}
-
 {-
      βred = transport
              (λ y →
@@ -97,7 +59,6 @@ module homotopy.Pi3S2 where
            id ∎
 -}
 
-  {-
   P = τ₂ o Path S².base
 
   encode1 : {x : S²} -> Path{S²} S².base x -> B x
@@ -141,7 +102,7 @@ module homotopy.Pi3S2 where
                (λ≃ (λ x → id))
                (λ≃ (λ x → id))
            -> Path{Path {Path{Type} (τ₂ S²) (τ₂ S²)} id id} id id
-  -}    
+    
   {-
     step1 : Equiv (Path{Type} (τ₂ S²) (τ₂ S²)) (Equiv (τ₂ S²) (τ₂ S²))
     step1 = (_ , univalence)
@@ -163,7 +124,7 @@ module homotopy.Pi3S2 where
     step4 = {!!}
   -}
 
-{-
+
   transport-B-hopf : (ap (ap encode1') hopf-cell) ≃ (ap (ap [_]2) S².loop)
   transport-B-hopf = 
     (ap (ap encode1') hopf-cell) ≃〈 id 〉 
@@ -181,7 +142,7 @@ module homotopy.Pi3S2 where
                 loop2-as-equiv
       STS = (ap (ap (ap B)) hopf-cell) ≃〈 {!!} 〉 
             {!!} ∎
--}
+
 {-  
   encode-decode' : (x : τ₂ S²) -> encode' (decode' x) ≃ x
   encode-decode' = Trunc-elim (λ z → Path (encode' (decode' z)) z)

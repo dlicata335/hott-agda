@@ -8,6 +8,7 @@ open import lib.Functions
 open import lib.Nat
 open import lib.Int
 open import lib.Prods
+open import lib.Sums
 open Int
 open import lib.AdjointEquiv
 open import lib.Univalence
@@ -53,6 +54,20 @@ module lib.loopspace.Truncation where
 
   HProp-Loop-in-Trunc< : ∀ k n {A t} → k <tl (tlp n) → HProp (Loop n (Trunc k A) t)
   HProp-Loop-in-Trunc< -2 One lt = increment-IsTrunc (path-preserves-IsTrunc Trunc-is)
-  HProp-Loop-in-Trunc< -2 (S n) y = increment-IsTrunc (path-preserves-IsTrunc (IsKTrunc-Loop n -2 (Trunc-is { -2})))
-  HProp-Loop-in-Trunc< (S k) One (ltS (ltS (ltS ()))) 
-  HProp-Loop-in-Trunc< (S k) (S n) lt = path-preserves-IsTrunc (HProp-Loop-in-Trunc< (S k) n (un-ltS lt))
+  HProp-Loop-in-Trunc< -2 (S n) lt = increment-IsTrunc (path-preserves-IsTrunc (IsKTrunc-Loop n -2 (Trunc-is { -2})))
+  HProp-Loop-in-Trunc< (S .(S -2)) One ltS = use-trunc (Trunc-is {S (S -2)}) _ _
+  HProp-Loop-in-Trunc< (S .-2) One {A} {t} (ltSR ltS) = path-preserves-IsTrunc Trunc-is
+  HProp-Loop-in-Trunc< (S k) One (ltSR (ltSR (ltSR ())))
+  HProp-Loop-in-Trunc< (S k) (S n) {A}{t} lt with lt-unS-right lt
+  ... | Inl lt' = path-preserves-IsTrunc (HProp-Loop-in-Trunc< (S k) n lt')
+  ... | Inr eq = use-trunc
+                   (coe
+                    (ap (IsTrunc (S (S -2))) 
+                      (ap-Loop≃ n (ap (λ n' → Trunc n' A) eq)
+                        (ap≃ (transport-inv-2 (λ n' → Trunc n' A) eq) {t} 
+                         ∘ ! (ap≃ (transport-ap-assoc (λ n' → Trunc n' A) eq)
+                          {transport (λ x → Trunc x A) (! eq) t}))))
+                    (HSet-Loop n {_} {transport (λ x → Trunc x A) (! eq) t}
+                     (Trunc-is {tlp n} {A})))
+                   _ _ 
+  

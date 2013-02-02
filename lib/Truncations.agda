@@ -5,6 +5,7 @@ open import lib.First
 open import lib.Paths
 open Paths
 open import lib.Prods
+open import lib.Sums
 open import lib.Functions
 open import lib.Nat
 
@@ -22,11 +23,20 @@ module lib.Truncations where
   tl (S n) = (S (tl n))
 
   data _<tl_ : TLevel -> TLevel -> Type where
-    lt-2 : ∀ {m} → -2 <tl (S m)
-    ltS  : ∀ {n m} → n <tl m → n <tl (S m)
+    ltS   : ∀ {m} → m <tl (S m)
+    ltSR  : ∀ {n m} → n <tl m → n <tl (S m)
 
-  un-ltS : ∀ {n m} → (S n) <tl (S m) →  (S n) <tl m
-  un-ltS (ltS y) = y
+  subtract-left : ∀ {n m} -> (S n) <tl m → n <tl m
+  subtract-left ltS = ltSR ltS
+  subtract-left (ltSR lt) = ltSR (subtract-left lt)
+
+  lt-unS : ∀ {n m} → (S n) <tl (S m) → n <tl m
+  lt-unS ltS = ltS
+  lt-unS (ltSR lt) = subtract-left lt
+
+  lt-unS-right : ∀ {n m} → (S n) <tl (S m) → Either ((S n) <tl m) (m ≃ S n)
+  lt-unS-right ltS = Inr id
+  lt-unS-right (ltSR y) = Inl y
 
   {-
   record Contractible (A : Type) : Type where

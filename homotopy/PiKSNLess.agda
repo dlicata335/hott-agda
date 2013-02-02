@@ -78,18 +78,22 @@ module homotopy.PiKSNLess where
     contra : Contractible (Trunc k (Path{S^ (S n)} S.base S.base))
     contra = center S.base , paths {S.base}
 
-
-  -- works for k at least 2
-  -- separately should do π1(S^n) for 1 < n
-
   theorem : (k : Positive) (n : Positive) → (tlp k <tl tlp n) 
-          → π (S k) (S^ (S n)) S.base ≃ Unit
-  theorem k n lt = π (S k) (S^ (S n)) S.base                                          ≃〈 id 〉
-                   Trunc (tl 0) (Loop (S k) (S^ (S n)) S.base)                        ≃〈 ap (Trunc (tl 0)) (LoopPath.path k) 〉
-                   Trunc (tl 0) (Loop k (Loop One (S^ (S n)) S.base) id)              ≃〈 ! (Loop-Trunc0 k) 〉
-                   Loop k (Trunc (tlp k) (Loop One (S^ (S n)) S.base)) [ id ]         ≃〈 ap-Loop≃ k (Contractible≃Unit (Proof2.contra _ _ lt)) id 〉
-                   Loop k Unit <>                                                     ≃〈 ! (LoopUnit.path k) 〉 
-                   Unit ∎
+          → π k (S^ n) S.base ≃ Unit
+  theorem One (S n) lt = Contractible≃Unit (Proof2.contra _ _ (lt-unS lt))
+  theorem (S k) (S n) lt =
+    π (S k) (S^ (S n)) S.base                                          ≃〈 id 〉
+    Trunc (tl 0) (Loop (S k) (S^ (S n)) S.base)                        ≃〈 ap (Trunc (tl 0)) (LoopPath.path k) 〉
+    Trunc (tl 0) (Loop k (Loop One (S^ (S n)) S.base) id)              ≃〈 ! (Loop-Trunc0 k) 〉
+    Loop k (Trunc (tlp k) (Loop One (S^ (S n)) S.base)) [ id ]         ≃〈 ap-Loop≃ k (Contractible≃Unit (Proof2.contra _ _ (lt-unS lt))) id 〉
+    Loop k Unit <>                                                     ≃〈 ! (LoopUnit.path k) 〉 
+    Unit ∎
+  -- other cases are contradictory
+  theorem One One (ltSR (ltSR (ltSR ())))
+  theorem (S One) One (ltSR (ltSR (ltSR ())))
+  theorem (S (S One)) One (ltSR (ltSR (ltSR ())))
+  theorem (S (S (S n))) One lt with lt-unS (lt-unS (lt-unS lt))
+  ... | () 
 
   {- why the above argument doesn't work for arbitrary k
     (apt n (ap^ (S n) (λ y' → Trunc k (Path S.base y')) (S.loop (S n))) [ id ] ≃〈 {!!} 〉 

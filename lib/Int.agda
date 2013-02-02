@@ -6,6 +6,7 @@ open import lib.AdjointEquiv public
 open Paths
 open import lib.Truncations public
 open import lib.Nat
+open Truncation
 
 module lib.Int where
 
