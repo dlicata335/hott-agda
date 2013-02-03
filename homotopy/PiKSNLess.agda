@@ -39,7 +39,7 @@ module homotopy.PiKSNLess where
                               {- why it doesn't work for arbitrary k
                               (apt n (ap^ (S n) (λ y' → Trunc k (Path S.base y')) (S.loop (S n))) [ id ] ≃〈 {!!} 〉 
                               (apt n (λt n (Trunc-elim (λ tβ → Loop n (Trunc k (Path S.base _)) tβ) 
-                                           (λ _ → IsKTrunc-Loop n k Trunc-is) 
+                                           (λ _ → IsKTrunc-Loop n k Trunc-level) 
                                            (λ β → ap^ n [_]
                                                   (rebase n (∘-unit-l β) (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n))))))))
                                      [ id ]) ≃〈 LoopSType.β n _ _ 〉 
@@ -56,7 +56,7 @@ module homotopy.PiKSNLess where
 
     decode-encode : {y : S^ (S n)} (p : P y) → decode{y} (encode p) ≃ p
     decode-encode = Trunc-elim _ 
-                               (λ x → path-preserves-IsTrunc Trunc-is) 
+                               (λ x → path-preserves-level Trunc-level) 
                                (path-induction (λ y' α → decode {y'} (encode [ α ]) ≃ [ α ]) id)
 
   -- drop the units
@@ -72,7 +72,7 @@ module homotopy.PiKSNLess where
                          (HProp-unique (HProp-Loop-in-Trunc< k n lt) _ _)) -- need Id{Loop n (Trunc k _) _} _ _ 
 
     paths : {y : S^ (S n)} (p : P y) → center y ≃ p
-    paths = Trunc-elim _ (λ x → path-preserves-IsTrunc Trunc-is) 
+    paths = Trunc-elim _ (λ x → path-preserves-level Trunc-level) 
                          (path-induction (λ y' α → center y' ≃ [ α ]) id)
     
     contra : Contractible (Trunc k (Path{S^ (S n)} S.base S.base))
@@ -98,7 +98,7 @@ module homotopy.PiKSNLess where
   {- why the above argument doesn't work for arbitrary k
     (apt n (ap^ (S n) (λ y' → Trunc k (Path S.base y')) (S.loop (S n))) [ id ] ≃〈 {!!} 〉 
     (apt n (λt n (Trunc-elim (λ tβ → Loop n (Trunc k (Path S.base _)) tβ) 
-                 (λ _ → IsKTrunc-Loop n k Trunc-is) 
+                 (λ _ → IsKTrunc-Loop n k Trunc-level) 
                  (λ β → ap^ n [_]
                         (rebase n (∘-unit-l β) (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n))))))))
            [ id ]) ≃〈 LoopSType.β n _ _ 〉 

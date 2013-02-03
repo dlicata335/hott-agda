@@ -28,7 +28,7 @@ module homotopy.PiNSN where
 
   S-loops : ∀ n -> (x : Trunc (tlp n) (S^ n)) → Loop n (Trunc (tlp n) (S^ n)) x
   S-loops n = Trunc-elim (\ x ->  Loop n (Trunc (tlp n) (S^ n)) x)
-                         (λ x → IsKTrunc-Loop n (tlp n) Trunc-is)
+                         (λ x → IsKTrunc-Loop n (tlp n) Trunc-level)
                          (S-elim {n} (λ x → Loop n (Trunc (tlp n) (S^ n)) [ x ])
                                      (ap^ n [_] (S.loop n)) 
                                      (preserves n))
@@ -39,7 +39,7 @@ module homotopy.PiNSN where
                             (ap (λ x → x) (ap [_] (S.loop One)) ∘ (ap [_] (S.loop One)) ∘ ! (ap (λ x → x) (ap [_] (S.loop One)))) ≃〈 ap (λ z → z ∘ (ap [_] (S.loop One)) ∘ ! z) (ap-id (ap [_] (S.loop One))) 〉
                             ((ap [_] (S.loop One)) ∘ (ap [_] (S.loop One)) ∘ (! (ap [_] (S.loop One)))) ≃〈 ap (λ z → ap [_] (S.loop One) ∘ z) (!-inv-r (ap [_] (S.loop One))) 〉
                             (ap [_] (S.loop One))∎
-            preserves (S n) = HProp-unique (IsTrunc-LoopOver n (S -2) (id^ n) (λ x → HSet-Loop (S n) Trunc-is)) _ _
+            preserves (S n) = HProp-unique (NType-LoopOver n (S -2) (id^ n) (λ x → HSet-Loop (S n) Trunc-level)) _ _
                    
   endo : ∀ n -> Loop (S n) Type (Trunc (tlp n) (S^ n))
   endo n = λt n (S-loops n)
@@ -47,17 +47,17 @@ module homotopy.PiNSN where
   Codes : ∀ n -> (S^ (S n)) → Type
   Codes n = S-rec (Trunc (tlp n) (S^ n)) (endo n)
 
-  IsTrunc-Codes : ∀ n x → IsTrunc (tlp n) (Codes n x)
-  IsTrunc-Codes n = S-elim (\ x -> IsTrunc (tlp n) (Codes n x))
-                           Trunc-is
-                           (HProp-unique (IsTrunc-LoopOver n (S -2) (id^ n) (λ x → increment-IsTrunc (IsTrunc-is-HProp _)))
+  NType-Codes : ∀ n x → NType (tlp n) (Codes n x)
+  NType-Codes n = S-elim (\ x -> NType (tlp n) (Codes n x))
+                           Trunc-level
+                           (HProp-unique (NType-LoopOver n (S -2) (id^ n) (λ x → increment-level (NType-is-HProp _)))
                                          _ _)
 
   demote : {n : _} {x : S^ (S n)} → Path S.base x → Codes n x
   demote {n} = (\ α → coe (ap (Codes n) α) [ S.base ])
 
   encode : {n : _} {x : S^ (S n)} → P x → Codes n x
-  encode {n} {x} tα = Trunc-rec (IsTrunc-Codes n x) 
+  encode {n} {x} tα = Trunc-rec (NType-Codes n x) 
                                 demote
                                 tα
 
@@ -66,7 +66,7 @@ module homotopy.PiNSN where
                     → (c : Codes n S.base)
                     → encode (decode' c) ≃ c
     encode-decode'{n} = Trunc-elim (\ c -> encode (decode' c) ≃ c) 
-                                   (λ x → path-preserves-IsTrunc Trunc-is)
+                                   (λ x → path-preserves-level Trunc-level)
                                    (S-elim (λ c' → encode (decode' [ c' ]) ≃ [ c' ]) 
                                            id
                                            (resp n)) where
@@ -115,13 +115,13 @@ module homotopy.PiNSN where
           STS1 x' = 
                   (apt n (ap^ (S n) P (S.loop (S n))) (decode' x')) ≃〈 ap (λ x0 → apt n x0 (decode' x')) (ap^TruncPathPost n (tlp n) (S.loop (S n)) _) 〉 
                   (apt n (λt n (Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
-                                           (λ _ → IsKTrunc-Loop n (tlp n) Trunc-is)
+                                           (λ _ → IsKTrunc-Loop n (tlp n) Trunc-level)
                                            (λ β → ap^ n [_]
                                                     (rebase n (∘-unit-l β)
                                                     (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n))))))))
                               (decode' x')) ≃〈 LoopSType.β n _ _ 〉
                   ((Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
-                                               (λ _ → IsKTrunc-Loop n (tlp n) Trunc-is)
+                                               (λ _ → IsKTrunc-Loop n (tlp n) Trunc-level)
                                                (λ β → ap^ n [_]
                                                     (rebase n (∘-unit-l β)
                                                     (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n)))))))
@@ -135,13 +135,13 @@ module homotopy.PiNSN where
                   (!^ n (ap^ n decode' (apt n (!^ (S n) (ap^ (S n) (Codes n) (S.loop (S n)))) x')))
                   ∎ where
              STS2 : (x' : _) → ((Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
-                                                (λ _ → IsKTrunc-Loop n (tlp n) Trunc-is)
+                                                (λ _ → IsKTrunc-Loop n (tlp n) Trunc-level)
                                                 (λ β → ap^ n [_]
                                                      (rebase n (∘-unit-l β)
                                                      (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n)))))))
                                (decode' x'))
                              ≃ (ap^ n decode' (S-loops n x'))
-             STS2 = Trunc-elim _ (λ _ → path-preserves-IsTrunc (IsKTrunc-Loop n (tlp n) Trunc-is))
+             STS2 = Trunc-elim _ (λ _ → path-preserves-level (IsKTrunc-Loop n (tlp n) Trunc-level))
                                  (λ x0 → ! (STS3 x0)) where
               STS3 : (s : _) → (ap^ n decode' (S-loops n [ s ]))
                                ≃ (ap^ n [_]
@@ -158,7 +158,7 @@ module homotopy.PiNSN where
                       (rebase n (∘-unit-l (promote S.base))
                                 (ap^ n (λ x0 → x0 ∘ promote S.base)
                                 (loopSN1 n (S.loop (S n))))) ∎)
-                    (fst (use-trunc (IsTrunc-LoopOver n -2 (S.loop n) (λ x → use-trunc (HSet-Loop n Trunc-is) _ _)))) 
+                    (fst (use-level (NType-LoopOver n -2 (S.loop n) (λ x → use-level (HSet-Loop n Trunc-level) _ _)))) 
                  where
                   STS4 : (ap^ n promote (S.loop n)) ≃
                          (rebase n (∘-unit-l (promote S.base))
@@ -180,7 +180,7 @@ module homotopy.PiNSN where
 
   abstract
     decode-encode : {n : _} {x : S^ (S n)} (α : P x) → decode{n}{x} (encode{n}{x} α) ≃ α
-    decode-encode {n}{x} = Trunc-elim _ (λ _ → path-preserves-IsTrunc Trunc-is)
+    decode-encode {n}{x} = Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
                                         case-for-[] where
       case-for-[] : {x : S^ (S n)} (α : Path S.base x) → decode{n}{x} (encode{n}{x} [ α ]) ≃ [ α ]
       case-for-[] = path-induction (λ x α → decode{n}{x} (encode{n}{x} [ α ]) ≃ [ α ]) id

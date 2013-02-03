@@ -9,7 +9,7 @@ module lib.spaces.Interval where
   private 
     -- thing you would try first
     module NoDefinitionalBehavior where
-      postulate 
+      postulate {- HoTT Axiom -} 
         I : Set
         Zero : I
         One  : I
@@ -50,7 +50,7 @@ module lib.spaces.Interval where
     one : I
     one = One
 
-    postulate
+    postulate {- HoTT Axiom -}
       seg : zero ≃ one
 
     I-rec : {C : Set} 
@@ -66,7 +66,7 @@ module lib.spaces.Interval where
     I-elim a b _ Zero = a
     I-elim a b _ One = b
 
-    postulate 
+    postulate {- HoTT Axiom -} 
       compβseg/rec : {C : Set} 
            -> (a b : C)
            -> (p : a ≃ b)
@@ -96,7 +96,7 @@ module lib.spaces.Interval where
     one : I
     one = mkI'' (One , _)
 
-    postulate
+    postulate {- HoTT Axiom -}
       seg : zero ≃ one
 
     I-rec : {C : Set} 
@@ -170,7 +170,7 @@ module lib.spaces.Interval where
     right : I -> I+I/1=0
     right = Right
 
-    postulate
+    postulate {- HoTT Axiom -}
       1=0 : left one ≃ right zero
 
     I+I/1=0-rec : {C : Set} 
@@ -180,7 +180,7 @@ module lib.spaces.Interval where
     I+I/1=0-rec l r _ (Left x)  = l x
     I+I/1=0-rec l r _ (Right y) = r y
 
-    postulate 
+    postulate {- HoTT Axiom -} 
       compβ1=0 : {C : Set} 
            -> (l r : I -> C)
            -> (pres : _)

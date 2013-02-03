@@ -2,11 +2,13 @@
 
 open import lib.First public
 open import lib.Paths public
-open import lib.AdjointEquiv public
+open import lib.AdjointEquiv 
 open Paths
-open import lib.Truncations public
-open import lib.Nat
+open import lib.NTypes
+open import lib.Truncations
 open Truncation
+open import lib.Nat
+
 
 module lib.Int where
 

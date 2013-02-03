@@ -2,9 +2,12 @@
 
 module lib.BasicTypes where
 
+  -- more or less in dependency order; haven't checked lately
+
   open import lib.First public
   open import lib.Paths public
   open import lib.Prods public
+  open import lib.NTypes public
   open import lib.Functions public
   open import lib.AdjointEquiv public
   open import lib.Sums public
@@ -17,6 +20,7 @@ module lib.BasicTypes where
   open import lib.WEq public
   open import lib.Univalence public
   open import lib.Truncations public
+  open import lib.NTypes2 public
   open import lib.Paths2 public
   open import lib.Suspension public
   open import lib.LoopSpace public

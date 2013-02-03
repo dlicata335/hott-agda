@@ -13,14 +13,14 @@ module homotopy.Pi1S2 where
 
   Codes = S²-fibration Unit (λ _ → id)
 
-  Codes-Contractible : {x : S²} -> IsTrunc -2 (Codes x)
-  Codes-Contractible {x} = (S²-elim (\ x -> IsTrunc -2 (Codes x))
-                                    (istrunc (<> , (λ _ → id)))
-                                    (HSet-UIP (increment-IsTrunc (IsTrunc-is-HProp _)) _ _ _ _)
+  Codes-Contractible : {x : S²} -> NType -2 (Codes x)
+  Codes-Contractible {x} = (S²-elim (\ x -> NType -2 (Codes x))
+                                    (ntype (<> , (λ _ → id)))
+                                    (HSet-UIP (increment-level (NType-is-HProp _)) _ _ _ _)
                                     x)
   
   Codes-HSet : (x : S²) -> HSet (Codes x)
-  Codes-HSet x = increment-IsTrunc (increment-IsTrunc (Codes-Contractible{x}))
+  Codes-HSet x = increment-level (increment-level (Codes-Contractible{x}))
 
   P = τ₀ o Path{S²} S².base
 
@@ -38,12 +38,12 @@ module homotopy.Pi1S2 where
   decode : {x : S²} → Codes x → P x
   decode {x} = S²-elim (λ x' → Codes x' → P x') 
                        decode'
-                       (HSet-UIP (ΠIsTrunc (λ _ → Trunc-is)) _ _ _ _)
+                       (HSet-UIP (ΠNType (λ _ → Trunc-level)) _ _ _ _)
                        x
        
   decode-encode : {x : S²} (α : P x) → decode (encode α) ≃ α
   decode-encode{x} α = Trunc-elim (λ α' → decode {x} (encode {x} α') ≃ α')
-                                  (λ x' → path-preserves-IsTrunc Trunc-is)
+                                  (λ x' → path-preserves-level Trunc-level)
                                   case-for-[]
                                   α
     where 

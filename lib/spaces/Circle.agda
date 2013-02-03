@@ -17,7 +17,7 @@ module lib.spaces.Circle where
     base : S¹
     base = Base
   
-    postulate
+    postulate {- HoTT Axiom -}
       loop : Path base base
   
     S¹-rec : {C : Set} 
@@ -38,7 +38,7 @@ module lib.spaces.Circle where
             -> (x : S¹) -> C x
     S¹-induction = S¹-elim
   
-    postulate 
+    postulate {- HoTT Axiom -} 
       βloop/rec : {C : Set} 
            -> (c : C)
            -> (α : Path c c)

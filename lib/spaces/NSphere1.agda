@@ -22,7 +22,7 @@ module lib.spaces.NSphere1 where
     base : ∀ {n} → S^ n
     base = Base
   
-    postulate
+    postulate {- HoTT Axiom -}
       loop : (n : Positive) → Loop n (S^ n) base
   
     S-rec : {n : Positive} {C : Type} 
@@ -31,7 +31,7 @@ module lib.spaces.NSphere1 where
            -> S^ n -> C
     S-rec a _ Base = a
 
-    postulate 
+    postulate {- HoTT Axiom -} 
       βloop/rec : (n : _) {C : Type} 
            -> (c : C)
            -> (α : Loop n C c)

@@ -8,7 +8,7 @@ open import lib.Univalence
 open import lib.AdjointEquiv
 open import lib.WrappedPath
 open import lib.Functions
-open import lib.Truncations
+open import lib.NTypes
 
 module lib.TypeEquivalence where
 
@@ -66,13 +66,3 @@ module lib.TypeEquivalence where
   transport-by-equals≃ _ _ _ id  = id
 
 
-  -- FIXME: put these somewhere else 
-  
-  ContractibleEquivUnit : ∀ {A} → Contractible A → Equiv A Unit
-  ContractibleEquivUnit c = (improve (hequiv (λ _ → <>) (λ _ → fst c) (λ x → snd c x) (\ _ -> id)))
-
-  Contractible≃Unit : ∀ {A} → Contractible A → A ≃ Unit
-  Contractible≃Unit c = ua (ContractibleEquivUnit c)
-
-  Contractible-Unit : Contractible Unit
-  Contractible-Unit = (<> , \ _ -> id) 

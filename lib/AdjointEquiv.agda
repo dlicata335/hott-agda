@@ -3,7 +3,7 @@
 open import lib.First
 open import lib.Paths 
 open import lib.Prods
-open import lib.Truncations
+open import lib.NTypes
 open Paths
 
 module lib.AdjointEquiv where

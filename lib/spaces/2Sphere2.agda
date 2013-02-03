@@ -21,7 +21,7 @@ module lib.spaces.2Sphere2 where
     b : S²
     b = B
 
-    postulate
+    postulate {- HoTT Axiom -}
       n : a ≃ b
       s : a ≃ b
       fr : n ≃ s
@@ -45,7 +45,7 @@ module lib.spaces.2Sphere2 where
     S²-elim C _ b' _ _ _ _ B = b'
 
     module Rec where 
-     postulate
+     postulate {- HoTT Axiom -}
       βn :  {C : Set} 
              -> (a' : C)(b' : C)
              -> (n' : a' ≃ b') (s' : a' ≃ b')

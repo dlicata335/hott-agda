@@ -10,6 +10,8 @@ open Int
 open import lib.Prods
 open import lib.AdjointEquiv
 open import lib.Univalence
+open import lib.NTypes
+open import lib.NTypes2
 open import lib.Truncations
 open Truncation
 open import lib.WrappedPath
@@ -95,7 +97,7 @@ module lib.loopspace.Types where
                          ap (IsEquiv.g univalence) (pair≃ id β) ∘
                          ! (IsEquiv.α univalence p))
                         id)
-                     {id} (HSet-UIP (increment-IsTrunc (IsEquiv-HProp (coe p))) _ _ _ _) (!-inv-with-middle-r (IsEquiv.α univalence p) id)  
+                     {id} (HSet-UIP (increment-level (IsEquiv-HProp (coe p))) _ _ _ _) (!-inv-with-middle-r (IsEquiv.α univalence p) id)  
       ual-id (S n) = !-inv-with-middle-r (ual-id n) id 
 
     coel : ∀ n → Loop n (Path{Type} A A) p → Loop n (A → A) (coe p) 
@@ -138,7 +140,7 @@ module lib.loopspace.Types where
                                                    ap (IsEquiv.g univalence) (pair≃ id β0) ∘
                                                    ! (IsEquiv.α univalence id)
                                                    ≃ id) {id}{β'}
-                                                (fst (use-trunc (use-trunc (path-preserves-IsTrunc (IsEquiv-HProp (λ x → x))) _ _))) 
+                                                (fst (use-level (use-level (path-preserves-level (IsEquiv-HProp (λ x → x))) _ _))) 
                                                 (!-inv-with-middle-r (IsEquiv.α univalence id) id))
                                       l
     η (S n) l = ual (S n) (coel (S n) l) ≃〈 id 〉 
@@ -300,5 +302,5 @@ module lib.loopspace.Types where
   module LoopUnit where
 
     path : ∀ n → Unit ≃ Loop n Unit <> 
-    path n = ! (Contractible≃Unit (use-trunc (IsKTrunc-Loop n -2 (istrunc Contractible-Unit))))
+    path n = ! (Contractible≃Unit (use-level (IsKTrunc-Loop n -2 (ntype Contractible-Unit))))
 

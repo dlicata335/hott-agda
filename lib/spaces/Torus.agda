@@ -18,7 +18,7 @@ module lib.spaces.Torus where
     base : T
     base = Base
 
-    postulate
+    postulate {- HoTT Axiom -}
       loop₁ : base ≃ base
       loop₂ : base ≃ base
       f : (loop₁ ∘ loop₂) ≃ (loop₂ ∘ loop₁)
@@ -47,7 +47,7 @@ module lib.spaces.Torus where
           -> (x : T) -> C x
     T-elim a _ _ _ Base = a    
 
-    postulate
+    postulate {- HoTT Axiom -}
       βloop₁/rec : {C : Set}
         -> (a : C)
         -> (p q : a ≃ a)
@@ -88,14 +88,14 @@ module lib.spaces.Torus where
                    (ap2 (λ x x' → x ∘ x') (βloop₂/rec a p q f') (βloop₁/rec a p q f')) 〉
       (Id (p ∘ q) (q ∘ p)) ∎
     
-    postulate
+    postulate {- HoTT Axiom -}
       βf/rec : {C : Set}
         -> (a : C)
         -> (p q : a ≃ a)
         -> (f' : (p ∘ q) ≃ (q ∘ p))
         -> ap (ap (T-rec a p q f')) f ≃ transport (λ x → x) (! (f-aps a p q f')) f'
 
-    postulate 
+    postulate {- HoTT Axiom -} 
       -- FIXME: prove using dependent elim instead
       Tη : {X : Set} {g : T -> X} -> 
            g ≃ (T-rec (g base) (ap g loop₁) (ap g loop₂) (ap-∘ g loop₂ loop₁ ∘ ap (ap g) f ∘ ! (ap-∘ g loop₁ loop₂))) 

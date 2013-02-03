@@ -40,7 +40,7 @@ module lib.Functions where
   ap≃₁→ : {A B : Type} {f g : A → B} {x y : A} → f ≃ g → x ≃ y → f x ≃ g y
   ap≃₁→ α β = ap2 (\ f x -> f x) α β
 
-  postulate 
+  postulate {- HoTT Axiom -} 
     λ≃  : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> ((x : A) -> Path (f x) (g x)) -> Path f g
     Π≃η : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
          -> (α : Path f g)

@@ -12,6 +12,8 @@ open import lib.Sums
 open Int
 open import lib.AdjointEquiv
 open import lib.Univalence
+open import lib.NTypes
+open import lib.NTypes2
 open import lib.Truncations
 open Truncation
 open import lib.WrappedPath
@@ -21,20 +23,20 @@ open import lib.loopspace.Groupoid
 
 module lib.loopspace.Truncation where
 
-  Trunc-Loop : ∀ n k {A} {a} → IsTrunc (tlp (n +pn k)) A → IsTrunc (tl k) (Loop n A a)
-  Trunc-Loop One k {A = A} p = use-trunc (transport (λ x → IsTrunc x A) (tlp+1 k) p) _ _
-  Trunc-Loop (S n) k {A} p = use-trunc (Trunc-Loop n (S k) (transport (λ x → IsTrunc (tlp x) A) (! (+pn-rh-S n k)) p)) _ _
+  Trunc-Loop : ∀ n k {A} {a} → NType (tlp (n +pn k)) A → NType (tl k) (Loop n A a)
+  Trunc-Loop One k {A = A} p = use-level (transport (λ x → NType x A) (tlp+1 k) p) _ _
+  Trunc-Loop (S n) k {A} p = use-level (Trunc-Loop n (S k) (transport (λ x → NType (tlp x) A) (! (+pn-rh-S n k)) p)) _ _
 
-  IsTrunc-LoopOver : ∀ n k {A} {a} (α : Loop n A a) {B} {b} → ((x : A) → IsTrunc (S k) (B x)) → IsTrunc k (LoopOver n α B b)
-  IsTrunc-LoopOver One k α p = use-trunc (p _) _ _
-  IsTrunc-LoopOver (S n) k α{B}{b} p = use-trunc{S k} (IsTrunc-LoopOver n (S k) _ (λ x → increment-IsTrunc (p x))) _ _ 
+  NType-LoopOver : ∀ n k {A} {a} (α : Loop n A a) {B} {b} → ((x : A) → NType (S k) (B x)) → NType k (LoopOver n α B b)
+  NType-LoopOver One k α p = use-level (p _) _ _
+  NType-LoopOver (S n) k α{B}{b} p = use-level{S k} (NType-LoopOver n (S k) _ (λ x → increment-level (p x))) _ _ 
 
-  HSet-Loop : ∀ n {A} {a} → IsTrunc (tlp n) A → HSet (Loop n A a)
-  HSet-Loop n {A} i = Trunc-Loop n Z (transport (\ n -> IsTrunc (tlp n) A) (! (+pn-rh-Z n)) i)
+  HSet-Loop : ∀ n {A} {a} → NType (tlp n) A → HSet (Loop n A a)
+  HSet-Loop n {A} i = Trunc-Loop n Z (transport (\ n -> NType (tlp n) A) (! (+pn-rh-Z n)) i)
    
-  IsKTrunc-Loop : ∀ n k {A a} -> IsTrunc k A → IsTrunc k (Loop n A a)
-  IsKTrunc-Loop One k tA = path-preserves-IsTrunc tA
-  IsKTrunc-Loop (S n) k tA = path-preserves-IsTrunc (IsKTrunc-Loop n k tA)
+  IsKTrunc-Loop : ∀ n k {A a} -> NType k A → NType k (Loop n A a)
+  IsKTrunc-Loop One k tA = path-preserves-level tA
+  IsKTrunc-Loop (S n) k tA = path-preserves-level (IsKTrunc-Loop n k tA)
 
   -- FIXME Move somewhere else
   Path-Trunc : ∀ n {A} {x y : A} → Trunc n (Path x y) ≃ Path {(Trunc (S n) A)} [ x ] [ y ]
@@ -53,21 +55,21 @@ module lib.loopspace.Truncation where
   Loop-Trunc0 n = Loop-Trunc n 0 ∘ ap-Loop-Trunc-tlevel≃ n (! (ap tlp (+pn-rh-Z n)))
 
   HProp-Loop-in-Trunc< : ∀ k n {A t} → k <tl (tlp n) → HProp (Loop n (Trunc k A) t)
-  HProp-Loop-in-Trunc< -2 One lt = increment-IsTrunc (path-preserves-IsTrunc Trunc-is)
-  HProp-Loop-in-Trunc< -2 (S n) lt = increment-IsTrunc (path-preserves-IsTrunc (IsKTrunc-Loop n -2 (Trunc-is { -2})))
-  HProp-Loop-in-Trunc< (S .(S -2)) One ltS = use-trunc (Trunc-is {S (S -2)}) _ _
-  HProp-Loop-in-Trunc< (S .-2) One {A} {t} (ltSR ltS) = path-preserves-IsTrunc Trunc-is
+  HProp-Loop-in-Trunc< -2 One lt = increment-level (path-preserves-level Trunc-level)
+  HProp-Loop-in-Trunc< -2 (S n) lt = increment-level (path-preserves-level (IsKTrunc-Loop n -2 (Trunc-level { -2})))
+  HProp-Loop-in-Trunc< (S .(S -2)) One ltS = use-level (Trunc-level {S (S -2)}) _ _
+  HProp-Loop-in-Trunc< (S .-2) One {A} {t} (ltSR ltS) = path-preserves-level Trunc-level
   HProp-Loop-in-Trunc< (S k) One (ltSR (ltSR (ltSR ())))
   HProp-Loop-in-Trunc< (S k) (S n) {A}{t} lt with lt-unS-right lt
-  ... | Inl lt' = path-preserves-IsTrunc (HProp-Loop-in-Trunc< (S k) n lt')
-  ... | Inr eq = use-trunc
+  ... | Inl lt' = path-preserves-level (HProp-Loop-in-Trunc< (S k) n lt')
+  ... | Inr eq = use-level
                    (coe
-                    (ap (IsTrunc (S (S -2))) 
+                    (ap (NType (S (S -2))) 
                       (ap-Loop≃ n (ap (λ n' → Trunc n' A) eq)
                         (ap≃ (transport-inv-2 (λ n' → Trunc n' A) eq) {t} 
                          ∘ ! (ap≃ (transport-ap-assoc (λ n' → Trunc n' A) eq)
                           {transport (λ x → Trunc x A) (! eq) t}))))
                     (HSet-Loop n {_} {transport (λ x → Trunc x A) (! eq) t}
-                     (Trunc-is {tlp n} {A})))
+                     (Trunc-level {tlp n} {A})))
                    _ _ 
   

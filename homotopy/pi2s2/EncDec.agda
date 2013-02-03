@@ -80,7 +80,7 @@ module homotopy.Pi2S2.EncDec where
                              (! (ap [_] S².loop)
                               ∘ ap [_] S².loop) ≃〈 !-inv-l (ap [_] S².loop) 〉 
                              id ∎)
-                             (fst (use-trunc (use-trunc (use-trunc (use-trunc (Trunc-is {S (S (S -2))} {Path S².base S².base}) _ _) _ _) _ _)))
+                             (fst (use-level (use-level (use-level (use-level (Trunc-level {S (S (S -2))} {Path S².base S².base}) _ _) _ _) _ _)))
                where 
                 STS3 : (ap (λ β → transport H (! β) S¹.base) S².loop) ≃ ! S¹.loop
                 STS3 = (ap (λ β → transport H (! β) S¹.base) S².loop)    ≃〈 ap-o (λ z → transport H z S¹.base) ! S².loop 〉 

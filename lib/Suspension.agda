@@ -22,7 +22,7 @@ module lib.Suspension where
       So : ∀ {A} → Susp A
       So = So'
       
-      postulate 
+      postulate {- HoTT Axiom -} 
         mer : ∀ {A} → A -> Path{Susp A} No So
      
       Susp-rec : {A C : Type}
@@ -32,7 +32,7 @@ module lib.Suspension where
       Susp-rec N' S' _ No' = N'
       Susp-rec N' S' _ So' = S'
 
-      postulate 
+      postulate {- HoTT Axiom -} 
         Susp-rec/βmer : {A C : Type} {N' S' : C} {mer' : A → N' ≃ S'} {x : A} → ap (Susp-rec N' S' mer') (mer x) ≃ mer' x
 
       Susp-elim : {A : _} (C : Susp A → Type)
@@ -43,9 +43,7 @@ module lib.Suspension where
       Susp-elim _ N' S' _ No' = N'
       Susp-elim _ N' S' _ So' = S'
 
-      {- FIXME: 
-      postulate 
-        Susp-elim/βmer : {A C : Type} {N' S' : C} {mer' : A → N' ≃ S'} {x : S¹.S¹} → ap (Susp-rec N' S' mer') (mer x) ≃ mer' x
+      {- FIXME: elim 
       -}
 
     open S public

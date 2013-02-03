@@ -59,7 +59,7 @@ module homotopy.in-progress.Pi3S2-wrong where
 
   Bloop : Loop Two Type (τ₂ S²)
   Bloop = λt One (λ a → 
-        Trunc-elim (λ x → x ≃ x) (λ x → path-preserves-IsTrunc Trunc-is)
+        Trunc-elim (λ x → x ≃ x) (λ x → path-preserves-level Trunc-level)
           (S²-elim (λ x → [ x ] ≃ [ x ]) 
                    (ap [_] (id {_} {base}))
                    -- what follows is an hprop, so this doesn't matter...
@@ -88,9 +88,9 @@ module homotopy.in-progress.Pi3S2-wrong where
 
         l : foo ≃ bar
         l = fst
-              (use-trunc
-               (use-trunc
-                (use-trunc (use-trunc (use-trunc (Trunc-is {TTwo}) _ _) _ _) _ _) _
+              (use-level
+               (use-level
+                (use-level (use-level (use-level (Trunc-level {TTwo}) _ _) _ _) _ _) _
                 _))
   -}
 
@@ -105,8 +105,8 @@ module homotopy.in-progress.Pi3S2-wrong where
   encode1' : Path{S²} base base -> τ₂ S²
   encode1' = encode1{base}
 
-  B-is-2-truncated : (x : S²) -> IsTrunc (tl 2) (B x)
-  B-is-2-truncated = S²-elim (λ x → IsTrunc (tl 2) (B x)) Trunc-is (fst (use-trunc (use-trunc (use-trunc (increment-IsTrunc (IsTrunc-is-HProp _)) _ _) _ _))) 
+  B-is-2-truncated : (x : S²) -> NType (tl 2) (B x)
+  B-is-2-truncated = S²-elim (λ x → NType (tl 2) (B x)) Trunc-level (fst (use-level (use-level (use-level (increment-level (NType-is-HProp _)) _ _) _ _))) 
 
   encode : {x : S²} -> P x -> B x
   encode {x} = Trunc-rec (B-is-2-truncated x) encode1 
@@ -164,7 +164,7 @@ module homotopy.in-progress.Pi3S2-wrong where
   {-
   encode-decode' : (x : τ₂ S²) -> encode' (decode' x) ≃ x
   encode-decode' = 
-    Trunc-elim (λ z → Path (encode' (decode' z)) z) (λ x → path-preserves-IsTrunc Trunc-is) 
+    Trunc-elim (λ z → Path (encode' (decode' z)) z) (λ x → path-preserves-level Trunc-level) 
      (S²-elim (λ z → Path (encode' (decode' [ z ])) [ z ]) 
               id 
               (coe (! (LoopOverS≃ One loop (λ z → Path (encode' (decode' [ z ])) [ z ]) id))
@@ -243,10 +243,10 @@ module homotopy.in-progress.Pi3S2-wrong where
                           (λ≃ (λ x → id))
                           (λ≃ (λ x → id))
   loop2-as-fn-path = ap λ≃ (λ≃ (Trunc-elim (λ x → id ≃ id) 
-                               (λ x → IsTrunc-Path _ (IsTrunc-Path _ Trunc-is _ _) _ _)
+                               (λ x → NType-Path _ (NType-Path _ Trunc-level _ _) _ _)
                                (S²-elim (λ _ → id ≃ id) 
                                         (ap (ap [_]2) S².loop)
-                                        (fst (use-trunc (use-trunc (use-trunc (use-trunc (use-trunc (Trunc-is {tl 2} {S²}) _ _) _ _) _ _) _ _))))))
+                                        (fst (use-level (use-level (use-level (use-level (use-level (Trunc-level {tl 2} {S²}) _ _) _ _) _ _) _ _))))))
 
 
   loop2-as-equiv : Path{Path {Path{Type} (τ₂ S²) (τ₂ S²)} id id} id id

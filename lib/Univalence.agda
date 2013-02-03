@@ -5,9 +5,8 @@ open import lib.Paths
 open import lib.AdjointEquiv
 open import lib.Prods
 open import lib.Functions
-open import lib.Truncations
+open import lib.NTypes
 open Paths
-open import lib.Truncations
 
 module lib.Univalence where
 
@@ -34,7 +33,7 @@ module lib.Univalence where
   pathToEquiv-is-' : ∀ {A B} (α : Path A B) → pathToEquiv α ≃ pathToEquiv' α
   pathToEquiv-is-' id = id
 
-  postulate 
+  postulate {- HoTT Axiom -} 
     -- Dan version, using pathToEquiv'
     univalence : ∀ {A B} -> IsEquiv {Path A B} {Equiv A B} pathToEquiv'
   

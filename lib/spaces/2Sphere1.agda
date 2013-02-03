@@ -19,7 +19,7 @@ module lib.spaces.2Sphere1 where
     base : S²
     base = Base
 
-    postulate
+    postulate {- HoTT Axiom -}
       loop : id{_}{base} ≃ id{_}{base}
 
     S²-rec : {C : Set} 
@@ -37,7 +37,7 @@ module lib.spaces.2Sphere1 where
             -> (x : S²) -> C x
     S²-elim C base' _ Base = base'
 
-    postulate
+    postulate {- HoTT Axiom -}
       βloop/rec : {C : Set} 
                 -> (base' : C)
                 -> (loop' : id{_}{base'} ≃ id{_}{base'})
@@ -59,7 +59,7 @@ module lib.spaces.2Sphere1 where
 
 {-
     module Rec where 
-     postulate
+     postulate {- HoTT Axiom -}
       βn :  {C : Set} 
              -> (a' : C)(b' : C)
              -> (n' : a' ≃ b') (s' : a' ≃ b')

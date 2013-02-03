@@ -17,7 +17,7 @@ module lib.spaces.3Sphere1 where
     base : S³
     base = Base
 
-    postulate
+    postulate {- HoTT Axiom -}
       loop : Id{Id {Id base base} id id} id id
 
     S³-rec : {C : Set} 
@@ -38,7 +38,7 @@ module lib.spaces.3Sphere1 where
     S²-elim C _ b' _ _ _ _ B = b'
 
     module Rec where 
-     postulate
+     postulate {- HoTT Axiom -}
       βn :  {C : Set} 
              -> (a' : C)(b' : C)
              -> (n' : a' ≃ b') (s' : a' ≃ b')

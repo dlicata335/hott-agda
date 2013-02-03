@@ -1,0 +1,4 @@
+# exclude any directories named "scraps" or "in-progress"
+
+#!/bin/bash
+find . -name "*.agda" | grep -v "oldlib" | xargs grep postulate | grep -v "HoTT Axiom" | grep -v "scraps" | grep -v "in-progress"

@@ -9,7 +9,7 @@ open import lib.AdjointEquiv
 open import lib.Prods
 open import lib.Univalence
 open import lib.Functions
-open import lib.Truncations
+open import lib.NTypes
 open import lib.WrappedPath
 
 module lib.Paths2 where
@@ -32,7 +32,7 @@ module lib.Paths2 where
   loop-family->id-equiv-loop : {A : Type} 
                              → ((x : A) → Path x x)
                              → Path {Equiv A A} id-equiv id-equiv
-  loop-family->id-equiv-loop α = (pair≃ (λ≃ α) (fst (use-trunc (use-trunc (IsEquiv-HProp _) _ _))))
+  loop-family->id-equiv-loop α = (pair≃ (λ≃ α) (fst (use-level (use-level (IsEquiv-HProp _) _ _))))
  
   loop-family->id-loop : {A : Type} 
                        → ((x : A) → Path x x)

@@ -31,7 +31,7 @@ module homotopy.Pi2S2.Inverses where
       case-for-[] id = id
 
       OK : (α : τ₁(Path S².base x)) → HGpd (Path{τ₁ _} (decode{x} (encode{x} α)) α)
-      OK α = increment-IsTrunc {S (S -2)} {_} OK1 where
+      OK α = increment-level {S (S -2)} {_} OK1 where
         OK1 : HSet (Path{τ₁ _} (decode{x} (encode{x} α)) α)
-        OK1 = use-trunc (Trunc-is {S (S (S -2))}) (decode {x} (encode {x} α)) α
+        OK1 = use-level (Trunc-level {S (S (S -2))}) (decode {x} (encode {x} α)) α
 
