@@ -14,24 +14,22 @@ module homotopy.Pi2S2.Inverses where
 
   private 
     module S² = S²1
-  open S² using (S² ; S²-rec ; S²-elim)
-  open S¹ using (S¹ ; S¹-rec ; S¹-elim)
 
   abstract
-    encode-decode' : (x : S¹) -> encode (decode' x) ≃ x
+    encode-decode' : (x : S¹.S¹) -> encode (decode' x) ≃ x
     encode-decode' = R.encode-decode' --the truncations cancel by just β-reduction
    
-    decode-encode : {x : S²} (α : τ₁(Path S².base x)) → decode{x} (encode{x} α) ≃ α
+    decode-encode : {x : S².S²} (α : τ₁(Path S².base x)) → decode{x} (encode{x} α) ≃ α
     decode-encode{x} tα = Trunc-elim (\ α → decode{x} (encode{x} α) ≃ α)
-                                     OK 
+                                     (λ α → OK _ _)
                                      case-for-[]
                                      tα 
      where
-      case-for-[] : {x : S²} (α : (Path S².base x)) → decode{x} (encode{x} [ α ]) ≃ [ α ]
+      case-for-[] : {x : S².S²} (α : (Path S².base x)) → decode{x} (encode{x} [ α ]) ≃ [ α ]
       case-for-[] id = id
 
-      OK : (α : τ₁(Path S².base x)) → HGpd (Path{τ₁ _} (decode{x} (encode{x} α)) α)
-      OK α = increment-level {S (S -2)} {_} OK1 where
-        OK1 : HSet (Path{τ₁ _} (decode{x} (encode{x} α)) α)
-        OK1 = use-level (Trunc-level {S (S (S -2))}) (decode {x} (encode {x} α)) α
+      OK : (α β : τ₁(Path S².base x)) → HGpd (Path{τ₁ _} α β)
+      OK α β = increment-level {S (S -2)} {_} OK1 where
+        OK1 : HSet (Path{τ₁ _} α β)
+        OK1 = use-level (Trunc-level {S (S (S -2))}) α β
 

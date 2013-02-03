@@ -11,7 +11,8 @@ module homotopy.Hopf where
   private 
     module S² = S²1
 
-  open S²1
+  open S² 
+  open S¹ using (S¹ ; S¹-rec ; S¹-elim)
 
   S¹-loops : (x : S¹) → x ≃ x
   S¹-loops = 

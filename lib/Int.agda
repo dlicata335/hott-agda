@@ -16,7 +16,10 @@ module Int where
   data Positive : Type where
     One : Positive
     S   : (n : Positive) → Positive
- 
+
+  _+1 : Positive -> Positive
+  _+1 = S
+
   data Int : Type where
     Pos  : (n : Positive) → Int
     Zero : Int

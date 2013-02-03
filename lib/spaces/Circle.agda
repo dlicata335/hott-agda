@@ -48,8 +48,6 @@ module lib.spaces.Circle where
                  -> (c : C base) (α : Path (transport C loop c) c)
                  -> Path (apd (S¹-induction C c α) loop) α
 
-  open S¹ public using (S¹ ; S¹-rec; S¹-elim; S¹-induction)
-
   open S¹
 
   -- Equivalence between (S¹ -> X) and Σe X (\ x → Id x x)

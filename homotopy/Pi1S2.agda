@@ -38,7 +38,7 @@ module homotopy.Pi1S2 where
   decode : {x : S²} → Codes x → P x
   decode {x} = S²-elim (λ x' → Codes x' → P x') 
                        decode'
-                       (HSet-UIP (ΠNType (λ _ → Trunc-level)) _ _ _ _)
+                       (HSet-UIP (Πlevel (λ _ → Trunc-level)) _ _ _ _)
                        x
        
   decode-encode : {x : S²} (α : P x) → decode (encode α) ≃ α

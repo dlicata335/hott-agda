@@ -5,26 +5,21 @@ open Truncation
 open Int
 open Paths
 open LoopSpace
-open import homotopy.Pi1S1 using (Ω₁[S¹]-is-Int)
+open import homotopy.Pi1S1 using (Ω₁[S¹]≃Int)
 
 module homotopy.PiNSN where
 
   module S = NSphere1
   open S using (S^ ; S-rec; S-elim)
-       
-  -- πn(S^ n) = τ₀(Ω^n S^ n) = Ω^n-1(τ^n-1 (Ω(S^n)))
-  -- πn-1(S^ n-1) = Ω^n-1(τ^n-1 (S^ n -1))
-  -- so STS τ^n-1 (Ω(S^n)) = τ^n-1 (S^ n -1)
-  -- so STS τ^n (Ω(S^n+1)) = τ^n (S^ n)
 
-  promote : ∀ {n} → (S^ n) → (Path{S^ (S n)} S.base S.base)
+  promote : ∀ {n} → (S^ n) → (Path{S^ (n +1)} S.base S.base)
   promote{n} = S-rec id (loopSN1 n (S.loop (S n)))
 
-  decode' : ∀ {n} → Trunc (tlp n) (S^ n) → Trunc (tlp n) (Path{S^ (S n)} S.base S.base)
+  decode' : ∀ {n} → Trunc (tlp n) (S^ n) → Trunc (tlp n) (Path{S^ (n +1)} S.base S.base)
   decode'{n} = Trunc-func (promote{n})
 
-  P : {n : Positive} → S^ (S n) → Type
-  P {n} x = Trunc (tlp n) (Path{S^ (S n)} S.base x)
+  P : {n : Positive} → S^ (n +1) → Type
+  P {n} x = Trunc (tlp n) (Path{S^ (n +1)} S.base x)
 
   S-loops : ∀ n -> (x : Trunc (tlp n) (S^ n)) → Loop n (Trunc (tlp n) (S^ n)) x
   S-loops n = Trunc-elim (\ x ->  Loop n (Trunc (tlp n) (S^ n)) x)
@@ -44,7 +39,7 @@ module homotopy.PiNSN where
   endo : ∀ n -> Loop (S n) Type (Trunc (tlp n) (S^ n))
   endo n = λt n (S-loops n)
 
-  Codes : ∀ n -> (S^ (S n)) → Type
+  Codes : ∀ n -> (S^ (n +1)) → Type
   Codes n = S-rec (Trunc (tlp n) (S^ n)) (endo n)
 
   NType-Codes : ∀ n x → NType (tlp n) (Codes n x)
@@ -53,10 +48,10 @@ module homotopy.PiNSN where
                            (HProp-unique (NType-LoopOver n (S -2) (id^ n) (λ x → increment-level (NType-is-HProp _)))
                                          _ _)
 
-  demote : {n : _} {x : S^ (S n)} → Path S.base x → Codes n x
+  demote : {n : _} {x : S^ (n +1)} → Path S.base x → Codes n x
   demote {n} = (\ α → coe (ap (Codes n) α) [ S.base ])
 
-  encode : {n : _} {x : S^ (S n)} → P x → Codes n x
+  encode : {n : _} {x : S^ (n +1)} → P x → Codes n x
   encode {n} {x} tα = Trunc-rec (NType-Codes n x) 
                                 demote
                                 tα
@@ -93,7 +88,7 @@ module homotopy.PiNSN where
                     apt n (λt n (S-loops n)) [ S.base ]                             ≃〈 LoopSType.β n _ _ 〉
                     ap^ n [_] (S.loop n) ∎)
   
-  decode : {n : _} {x : S^ (S n)} → Codes n x → P x 
+  decode : {n : _} {x : S^ (n +1)} → Codes n x → P x 
   decode {n} {x} = S-elim (λ x' → Codes n x' → P x') 
                           decode'
                           (pl{n})
@@ -179,45 +174,34 @@ module homotopy.PiNSN where
                                     (loopSN1 n (S.loop (S n))))) ∎
 
   abstract
-    decode-encode : {n : _} {x : S^ (S n)} (α : P x) → decode{n}{x} (encode{n}{x} α) ≃ α
+    decode-encode : {n : _} {x : S^ (n +1)} (α : P x) → decode{n}{x} (encode{n}{x} α) ≃ α
     decode-encode {n}{x} = Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
                                         case-for-[] where
-      case-for-[] : {x : S^ (S n)} (α : Path S.base x) → decode{n}{x} (encode{n}{x} [ α ]) ≃ [ α ]
+      case-for-[] : {x : S^ (n +1)} (α : Path S.base x) → decode{n}{x} (encode{n}{x} [ α ]) ≃ [ α ]
       case-for-[] = path-induction (λ x α → decode{n}{x} (encode{n}{x} [ α ]) ≃ [ α ]) id
 
-  τn[Ω[S^n+1]]-Equiv-τn[S^n] : ∀ {n} → Equiv (Trunc (tlp n) (Path{S^ (S n)} S.base S.base))
+  τn[Ω[S^n+1]]-Equiv-τn[S^n] : ∀ {n} → Equiv (Trunc (tlp n) (Path{S^ (n +1)} S.base S.base))
                                              (Trunc (tlp n) (S^ n))
   τn[Ω[S^n+1]]-Equiv-τn[S^n] = (improve (hequiv encode decode decode-encode encode-decode'))
 
-  τn[Ω[S^n+1]]-is-τn[S^n] : ∀ {n} → Trunc (tlp n) (Path{S^ (S n)} S.base S.base)
+  τn[Ω[S^n+1]]-is-τn[S^n] : ∀ {n} → Trunc (tlp n) (Path{S^ (n +1)} S.base S.base)
                                   ≃ Trunc (tlp n) (S^ n)
   τn[Ω[S^n+1]]-is-τn[S^n] = (ua τn[Ω[S^n+1]]-Equiv-τn[S^n])
 
   preserves-point : ∀ {n} → coe (τn[Ω[S^n+1]]-is-τn[S^n] {n}) [ id ] ≃ [ S.base ]
   preserves-point {n} = ap≃ (type≃β τn[Ω[S^n+1]]-Equiv-τn[S^n]) {[ id ]}
 
-  πnSⁿ-diagonal : ∀ n → π (S n) (S^ (S n)) S.base ≃ π n (S^ n) S.base
-  πnSⁿ-diagonal n = π (S n) (S^ (S n)) S.base ≃〈 id 〉
-                    τ₀ (Loop (S n) (S^ (S n)) S.base) ≃〈 ap τ₀ (LoopPath.path n) 〉
-                    τ₀ (Loop n (Path {S^ (S n)} S.base S.base) id) ≃〈 ! (Loop-Trunc0 n) 〉
-                    Loop n (Trunc (tlp n) (Path {S^ (S n)} S.base S.base)) [ id ] ≃〈 ap-Loop≃ n τn[Ω[S^n+1]]-is-τn[S^n] preserves-point 〉
+  πnSⁿ-diagonal : ∀ n → π (S n) (S^ (n +1)) S.base ≃ π n (S^ n) S.base
+  πnSⁿ-diagonal n = π (S n) (S^ (n +1)) S.base ≃〈 id 〉
+                    τ₀ (Loop (S n) (S^ (n +1)) S.base) ≃〈 ap τ₀ (LoopPath.path n) 〉
+                    τ₀ (Loop n (Path {S^ (n +1)} S.base S.base) id) ≃〈 ! (Loop-Trunc0 n) 〉
+                    Loop n (Trunc (tlp n) (Path {S^ (n +1)} S.base S.base)) [ id ] ≃〈 ap-Loop≃ n τn[Ω[S^n+1]]-is-τn[S^n] preserves-point 〉
                     Loop n (Trunc (tlp n) (S^ n)) [ S.base ] ≃〈 Loop-Trunc0 n 〉
                     τ₀ (Loop n (S^ n) S.base) ≃〈 id 〉
                     π n (S^ n) S.base ∎
 
-  module S¹-is-S^One where
-    eqv : Equiv (S¹.S¹) (S^ One)
-    eqv = improve (hequiv (S¹.S¹-rec S.base (S.loop One))
-                          (S-rec S¹.base S¹.loop)
-                          (S¹.S¹-elim _ id ((!-inv-r S¹.loop ∘ ap∘ (ap-id S¹.loop) (ap ! ((S.βloop/rec One S¹.base S¹.loop ∘ ap (ap (S-rec S¹.base S¹.loop)) (S¹.βloop/rec S.base (S.loop One))) ∘ ap-o (S-rec S¹.base S¹.loop) (S¹.S¹-rec S.base (S.loop One)) S¹.loop) ∘ ∘-unit-l (! (ap (S-rec S¹.base S¹.loop o S¹.S¹-rec S.base (S.loop One)) S¹.loop)))) ∘ transport-Path ((S-rec S¹.base S¹.loop) o (S¹.S¹-rec S.base (S.loop One))) (\ x -> x) S¹.loop id ))
-                          (S.S-elim _ id ((!-inv-r (S.loop One) ∘ ap∘ (ap-id (S.loop One)) (ap ! ((S¹.βloop/rec S.base (S.loop One) ∘ ap (ap (S¹.S¹-rec S.base (S.loop One))) (S.βloop/rec One S¹.base (S¹.loop))) ∘ ap-o (S¹.S¹-rec S.base (S.loop One)) (S.S-rec S¹.base (S¹.loop)) (S.loop One)) ∘ ∘-unit-l (! (ap (S¹.S¹-rec S.base (S.loop One) o S.S-rec S¹.base (S¹.loop)) (S.loop One))))) ∘ transport-Path ((S¹.S¹-rec S.base (S.loop One)) o (S.S-rec S¹.base (S¹.loop))) (\ x -> x) (S.loop One) id )))
-
-
-    path : S¹.S¹ ≃ S^ One
-    path = ua eqv
-
   πnSⁿ-is-Z : ∀ n → π n (S^ n) S.base ≃ Int
-  πnSⁿ-is-Z One = (τ₀Int-is-Int ∘ ap τ₀ (ua (improve (Ω₁[S¹]-is-Int)))) ∘ ap τ₀ (ap-Loop≃ One (! S¹-is-S^One.path) (ap≃ (type≃β! S¹-is-S^One.eqv)))
+  πnSⁿ-is-Z One = (τ₀Int-is-Int ∘ ap τ₀ (Ω₁[S¹]≃Int)) ∘ ap τ₀ (ap-Loop≃ One (! S.S¹-is-S^One.path) (ap≃ (type≃β! S.S¹-is-S^One.eqv)))
   πnSⁿ-is-Z (S n) = πnSⁿ-is-Z n ∘ πnSⁿ-diagonal n
 
   -- πn(S^ n) = τ₀(Ω^n S^ n) = Ω^n-1(τ^n-1 (Ω(S^n)))
