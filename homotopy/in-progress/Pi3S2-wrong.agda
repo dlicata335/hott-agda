@@ -1,3 +1,5 @@
+-- τ2(S^ 2) is wrong: we need pi1 = Z not trivial
+
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude 
@@ -7,7 +9,7 @@ open Truncation
 open Int
 open LoopSpace
 
-module homotopy.Pi3S2 where
+module homotopy.in-progress.Pi3S2-wrong where
 
   module S = NSphere1
   open S using (S^ ; S-rec; S-elim)
@@ -67,7 +69,7 @@ module homotopy.Pi3S2 where
                      (id ∘ ap (\ y -> id) loop) ≃〈 ∘-unit-l (ap (\ y -> id) loop) 〉 
                      (ap (\ y -> id) loop)     ≃〈 ap-constant id loop 〉 
                      id ∎)))
-                   a)  where
+                   a)  
 
   {-
         cell1 = 
