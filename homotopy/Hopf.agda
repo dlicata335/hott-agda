@@ -12,7 +12,6 @@ module homotopy.Hopf where
     module S² = S²1
 
   open S²1
-  open S¹ using (S¹ ; S¹-elim)
 
   S¹-loops : (x : S¹) → x ≃ x
   S¹-loops = 
@@ -26,11 +25,6 @@ module homotopy.Hopf where
 
   H : S² → Type
   H = S²-fibration S¹ S¹-loops
-
-  S¹-is-Gpd : HGpd S¹
-  S¹-is-Gpd = ntype hset-path where
-    hset-path : (x y : _) → HSet (Path{S¹} x y)
-    hset-path x y = transport HSet (! (ua (improve Path-S¹-is-Int))) Int.HSet-Int
 
   H-is-1-truncated : (x : S²) → HGpd (H x)
   H-is-1-truncated = S²-elim (λ x → HGpd (H x)) S¹-is-Gpd

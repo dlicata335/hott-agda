@@ -60,65 +60,70 @@ module homotopy.Pi1S1 where
   loop^-preserves-pred Zero = id
   loop^-preserves-pred (Neg One) = id
   loop^-preserves-pred (Neg (S y)) = id
-  
+
   decode : {x : S¹} → Cover x → Path base x
   decode {x} = 
    S¹-induction 
     (λ x' → Cover x' → Path base x')
     loop^
-    (transport (λ x' →  Cover x' → Path base x') loop loop^  ≃〈 transport-→ Cover (Path base) loop loop^ 〉
-   
-       transport (λ x' → Path base x') loop 
-     o loop^ 
-     o transport Cover (! loop)                              ≃〈 λ≃ (λ y → transport-Path-right loop (loop^ (transport Cover (! loop) y))) 〉
-  
-       (λ p → loop ∘ p) 
-     o loop^ 
-     o transport Cover (! loop)                              ≃〈 λ≃ (λ y → ap (λ x' → loop ∘ loop^ x') (ap≃ transport-Cover-!loop)) 〉
-  
-       (λ p → loop ∘ p)
-     o loop^ 
-     o pred                                                  ≃〈 id 〉 
-  
-     (λ n → loop ∘ (loop^ (pred n)))                         ≃〈 λ≃ (λ y → move-left-! _ loop (loop^ y) (loop^-preserves-pred y)) 〉 
-  
-     (λ n → loop^ n)
-     ∎)
-    x
-  
-  encode-loop^ : (n : Int) → Path (encode (loop^ n)) n
-  encode-loop^ Zero = id
-  encode-loop^ (Pos One) = ap≃ transport-Cover-loop
-  encode-loop^ (Pos (S n)) = 
-    encode (loop^ (Pos (S n)))
-      ≃〈 id 〉 
-    transport Cover (loop ∘ loop^ (Pos n)) Zero
-      ≃〈 ap≃ (transport-∘ Cover loop (loop^ (Pos n))) 〉 
-    transport  Cover loop 
-               (transport Cover (loop^ (Pos n)) Zero)      
-      ≃〈 ap≃ transport-Cover-loop 〉
-    succ (transport Cover (loop^ (Pos n)) Zero)                      
-      ≃〈 id 〉 
-    succ (encode (loop^ (Pos n))) 
-      ≃〈 ap succ (encode-loop^ (Pos n)) 〉 
-    succ (Pos n) ∎
-  encode-loop^ (Neg One) = ap≃ transport-Cover-!loop
-  encode-loop^ (Neg (S n)) = 
-    transport Cover (! loop ∘ loop^ (Neg n)) Zero                    
-      ≃〈 ap≃ (transport-∘ Cover (! loop) (loop^ (Neg n))) 〉
-    transport Cover (! loop) (transport Cover (loop^ (Neg n)) Zero)  
-      ≃〈 ap≃ transport-Cover-!loop 〉
-    pred (transport Cover (loop^ (Neg n)) Zero) 
-      ≃〈 ap pred (encode-loop^ (Neg n)) 〉 
-    pred (Neg n) ∎
-  
+    loop^-respects-loop 
+    x where
+     abstract -- prevent Agda from normalizing
+      loop^-respects-loop : transport (λ x' →  Cover x' → Path base x') loop loop^ ≃ (λ n → loop^ n) 
+      loop^-respects-loop = 
+         (transport (λ x' →  Cover x' → Path base x') loop loop^  ≃〈 transport-→ Cover (Path base) loop loop^ 〉
+        
+            transport (λ x' → Path base x') loop 
+          o loop^ 
+          o transport Cover (! loop)                              ≃〈 λ≃ (λ y → transport-Path-right loop (loop^ (transport Cover (! loop) y))) 〉
+       
+            (λ p → loop ∘ p) 
+          o loop^ 
+          o transport Cover (! loop)                              ≃〈 λ≃ (λ y → ap (λ x' → loop ∘ loop^ x') (ap≃ transport-Cover-!loop)) 〉
+       
+            (λ p → loop ∘ p)
+          o loop^ 
+          o pred                                                  ≃〈 id 〉 
+       
+          (λ n → loop ∘ (loop^ (pred n)))                         ≃〈 λ≃ (λ y → move-left-! _ loop (loop^ y) (loop^-preserves-pred y)) 〉 
+       
+          (λ n → loop^ n)
+          ∎)
+
+  abstract -- prevent Agda from normalizing
+    encode-loop^ : (n : Int) → Path (encode (loop^ n)) n
+    encode-loop^ Zero = id
+    encode-loop^ (Pos One) = ap≃ transport-Cover-loop
+    encode-loop^ (Pos (S n)) = 
+      encode (loop^ (Pos (S n)))
+        ≃〈 id 〉 
+      transport Cover (loop ∘ loop^ (Pos n)) Zero
+        ≃〈 ap≃ (transport-∘ Cover loop (loop^ (Pos n))) 〉 
+      transport  Cover loop 
+                 (transport Cover (loop^ (Pos n)) Zero)      
+        ≃〈 ap≃ transport-Cover-loop 〉
+      succ (transport Cover (loop^ (Pos n)) Zero)                      
+        ≃〈 id 〉 
+      succ (encode (loop^ (Pos n))) 
+        ≃〈 ap succ (encode-loop^ (Pos n)) 〉 
+      succ (Pos n) ∎
+    encode-loop^ (Neg One) = ap≃ transport-Cover-!loop
+    encode-loop^ (Neg (S n)) = 
+      transport Cover (! loop ∘ loop^ (Neg n)) Zero                    
+        ≃〈 ap≃ (transport-∘ Cover (! loop) (loop^ (Neg n))) 〉
+      transport Cover (! loop) (transport Cover (loop^ (Neg n)) Zero)  
+        ≃〈 ap≃ transport-Cover-!loop 〉
+      pred (transport Cover (loop^ (Neg n)) Zero) 
+        ≃〈 ap pred (encode-loop^ (Neg n)) 〉 
+      pred (Neg n) ∎
+
   encode-decode  : {x : S¹} → (c : Cover x)
                  → Path (encode (decode{x} c)) c
   encode-decode {x} = S¹-induction
      (\ (x : S¹) →  (c : Cover x) 
                     → Path (encode{x} (decode{x} c)) c)
      encode-loop^ (λ≃ (λ x' → fst (use-level (use-level (use-level HSet-Int _ _) _ _)))) x 
-  
+
   decode-encode  : {x : S¹} (α : Path base x)
                  → Path (decode (encode α)) α
   decode-encode {x} α = 
@@ -126,17 +131,28 @@ module homotopy.Pi1S1 where
     (λ  (x' : S¹) (α' : Path base x') 
         → Path (decode (encode α')) α')
     id α
-  
+
   all-loops : (α : Path base base) → Path α (loop^ (encode α))
   all-loops α = ! (decode-encode α)
   
-  Ω₁[S¹]-is-Int : HEquiv (Path base base) Int
-  Ω₁[S¹]-is-Int = 
-     hequiv encode decode decode-encode encode-loop^
+  
+  -- equivalence for loop spaces
+  
+  Ω₁[S¹]-Equiv-Int : Equiv (Path base base) Int
+  Ω₁[S¹]-Equiv-Int = 
+     improve (hequiv encode decode decode-encode encode-loop^)
 
-  -- more generally:
-  postulate -- FIXME: TODO
-    Path-S¹-is-Int : ∀ {x y} → HEquiv (Path{S¹} x y) Int 
+  Ω₁[S¹]≃Int : (Path base base) ≃ Int
+  Ω₁[S¹]≃Int = ua Ω₁[S¹]-Equiv-Int
+
+  -- fiberwise equivalence
+
+  S¹-Path-Equiv-Cover : (y : S¹) → Equiv (Path base y) (Cover y)
+  S¹-Path-Equiv-Cover y = improve (hequiv encode decode decode-encode (encode-decode{y}))
+
+  S¹-Path≃Cover : (y : S¹) → (Path base y) ≃ (Cover y)
+  S¹-Path≃Cover y = ua (S¹-Path-Equiv-Cover y)
+
 
   -- preserves composition
   
@@ -163,3 +179,18 @@ module homotopy.Pi1S1 where
       ∘-assoc (! loop) (loop^ (Neg n)) (loop^ m) 
     ∘ ap (λ x → ! loop ∘ x) (preserves-composition (Neg n) m) 
     ∘ loop^-preserves-pred (Neg n + m) 
+
+
+
+  -- tlevel stuff
+
+  Cover-is-HSet : ∀ y → HSet (Cover y)
+  Cover-is-HSet = S¹-elim _ Int.HSet-Int (HProp-unique (NType-is-HProp _) _ _)
+
+  S¹-is-Gpd : HGpd S¹
+  S¹-is-Gpd = ntype hset-path where
+    hset-path : (x y : _) → HSet (Path{S¹} x y)
+    hset-path = S¹-elim _ 
+                (λ y → transport (λ P → HSet (P y)) (! (λ≃ S¹-Path≃Cover)) (Cover-is-HSet y)) 
+                (λ≃ (λ x → HProp-unique (NType-is-HProp _) _ _))
+
