@@ -32,6 +32,13 @@ module homotopy.Pi3S2 where
 
   module A = HigherHomotopyAbelian S² base
 
+  {-
+  ap∘-!-inv-l : {A : Type} {x : A} 
+              -> (α : Path (id{_}{x}) id)
+              → ap∘ (! α) α ≃ id
+  ap∘-!-inv-l α = !-inv-l α ∘ ! (HigherHomotopyAbelian.same _ _ (! α) α)
+  -}
+
   ap∘-! : {A : Type} {x y z : A} {p q : Path x y} {p' q' : Path y z} 
        -> (α : Path p' q') -> (β : Path p q)
        → ap∘ (! α) (! β) ≃ ! (ap∘ α β)
@@ -45,24 +52,48 @@ module homotopy.Pi3S2 where
 
   hopf-cell : ∀ {A} {a} -> Loop Two A a → Loop Three A a 
   hopf-cell α = hopf-cell-a2 α ∘ 
-                ichange-type (! α) α (! α) α ∘ 
+                ichange-type (! α) α (! α) α ∘ -- could also do ichange-type id α (! α) id ∘ 
                 hopf-cell-a1 α
 
-  B : S² → Type
-  B = S²-rec (τ₂ S²) loop' where
-      loop' : Loop Two Type (τ₂ S²)
-      loop' = λt One (λ a → 
+  Bloop : Loop Two Type (τ₂ S²)
+  Bloop = λt One (λ a → 
         Trunc-elim (λ x → x ≃ x) (λ x → path-preserves-IsTrunc Trunc-is)
           (S²-elim (λ x → [ x ] ≃ [ x ]) 
                    (ap [_] (id {_} {base}))
+                   -- what follows is an hprop, so this doesn't matter...
                    (coe  (! (LoopOverS≃ One loop (λ x → [ x ]2 ≃ [ x ]2) (ap [_] (id {_} {base})))) 
                      (apt One (ap^ (S One) (λ x → [ x ]2 ≃ [ x ]2) loop) (ap [_] id) ≃〈 apt-apS One (λ x → [ x ]2 ≃ [ x ]2) loop (ap [_] id) 〉 
                      (ap (\ y -> transport (\ x -> [ x ]2 ≃ [ x ]2) y id) loop) ≃〈 ap-by-equals {f = λ y → transport (λ x → [ x ]2 ≃ [ x ]2) y id} {g = λ y → id} (λ y → !-inv-with-middle-r (ap [_]2 y) id ∘ transport-Path [_]2 [_]2 y id) loop 〉 
                      (id ∘ ap (\ y -> id) loop) ≃〈 ∘-unit-l (ap (\ y -> id) loop) 〉 
                      (ap (\ y -> id) loop)     ≃〈 ap-constant id loop 〉 
-                     id                        ≃〈 ap (ap (ap [_]2)) (hopf-cell loop) 〉 -- should this show up here? not sure
                      id ∎)))
-                   a)
+                   a)  where
+
+  {-
+        cell1 = 
+
+        cell2 = apt One (ap^ (S One) (λ x → [ x ]2 ≃ [ x ]2) loop) (ap [_] id) ≃〈
+                apt-apS One (λ x → [ x ]2 ≃ [ x ]2) loop (ap [_] id) 〉
+                ap (λ y → transport (λ x → [ x ]2 ≃ [ x ]2) y id) loop ≃〈
+                ap-by-equals {f = λ y → transport (λ x → [ x ]2 ≃ [ x ]2) y id}
+                {g = λ y → id}
+                (λ y →
+                   !-inv-with-middle-r (ap [_]2 y) id ∘ transport-Path [_]2 [_]2 y id)
+                loop
+                〉
+                id ∘ ap (λ y → id) loop ≃〈 ∘-unit-l (ap (λ y → id) loop) 〉
+                ap (λ y → id) loop ≃〈 ap-constant id loop 〉 (id ∎)
+
+        l : foo ≃ bar
+        l = fst
+              (use-trunc
+               (use-trunc
+                (use-trunc (use-trunc (use-trunc (Trunc-is {TTwo}) _ _) _ _) _ _) _
+                _))
+  -}
+
+  B : S² → Type
+  B = S²-rec (τ₂ S²) Bloop
 
   P = τ₂ o Path{S²} base
 
@@ -89,16 +120,43 @@ module homotopy.Pi3S2 where
   red : (ap (ap encode1') (hopf-cell loop)) ≃ (ap (ap [_]) loop)
   red = ap (ap encode1') (hopf-cell loop) ≃〈 {!!} 〉 
         ap^ Two encode1' (hopf-cell loop) ≃〈 {!!} 〉 
-        apt Two (ap^ (S Two) B (hopf-cell loop)) [ base ] ≃〈 {!ap^ (S Two) B hopf-cell!} 〉 
+        apt Two (ap^ Three B (hopf-cell loop)) [ base ] ≃〈 {!apt Two !} 〉 
+        apt Two (hopf-cell (ap^ Two B loop)) [ base ] ≃〈 {!apt Two !} 〉 
+        apt Two (hopf-cell Bloop) [ base ] ≃〈 {!apt Two !} 〉 
         ap (ap [_]) loop ∎ where
-      lemma : ap (ap (ap B)) (ichange-type loop loop loop loop) ≃ {!!}
-      lemma = {!!}
+      lemma : ap (ap (ap B)) (hopf-cell loop) ≃ hopf-cell (ap (ap B) loop)
+      lemma = {!hopf-cell-a1 loop!}
 
       commute :  {A : Type} {x y z : A} {B : Type} {f : A → B}
                  {p q r : Path x y} {p' q' r' : Path y z}
                -> (a : Path p q) (b : Path q r) (c : Path p' q') (d : Path q' r') 
                -> ap (ap (ap f)) (ichange-type a b c d) ≃ {! ichange-type (ap (ap f) a) (ap (ap f) b) (ap (ap f) c) (ap (ap f) d)!}
       commute id id id id = {!!}
+
+      lemma' : {A : Type} {pa : A}
+                 {p q r : Path A A} {p' q' r' : Path A A}
+               -> (a : Path p q) (b : Path q r) 
+                  (c : Path p' q') (d : Path q' r') 
+               ->
+               ap (ap (\ x -> coe x pa)) 
+                  (ichange-type a b c d) 
+             ≃ {!!}
+      lemma' = {!!}
+      -- ap (\ x -> coe x pa) (ap∘ c a) is morally
+      -- ap2 (\ x y -> coe x (coe y pa)) c a
+
+      -- so
+      -- (ap (λ x → coe x pa) (ap∘ (d ∘ c) (b ∘ a)))
+
+      -- (ap2 (λ x y → coe x (coe y pa)) (d ∘ c) (b ∘ a)  [ should distribute over two compositions ]
+
+      -- (ap2 (λ x y → coe x (coe y pa)) d b ∘ 
+      --  ap2 (λ x y → coe x (coe y pa)) c a)
+
+      -- (ap (λ x → coe x pa) (ap∘ d b) ∘ 
+      --  ap (λ x → coe x pa) (ap∘ c a))
+
+      -- (ap (λ x → coe x pa) (ap∘ d b ∘ ap∘ c a))
 
 
   {-
@@ -118,6 +176,26 @@ module homotopy.Pi3S2 where
                (ap (ap [_]) loop) ∘ (! (ap (ap encode1') hopf-cell))                            ≃〈 {!!} 〉
                id ∎)))
   -}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {-
                                        (transport
                                           (λ y →

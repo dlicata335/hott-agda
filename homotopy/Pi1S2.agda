@@ -43,7 +43,7 @@ module homotopy.Pi1S2 where
        
   decode-encode : {x : S²} (α : P x) → decode (encode α) ≃ α
   decode-encode{x} α = Trunc-elim (λ α' → decode {x} (encode {x} α') ≃ α')
-                                  (λ x' → IsTrunc-Path _ Trunc-is _ _)
+                                  (λ x' → path-preserves-IsTrunc Trunc-is)
                                   case-for-[]
                                   α
     where 

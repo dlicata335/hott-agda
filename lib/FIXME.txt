@@ -1,7 +1,5 @@
 High risk:
 
-loopspace/OverTypes
-
 Low risk:
 
 (all about truncations; other people have proved them)
