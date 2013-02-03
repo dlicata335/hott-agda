@@ -32,13 +32,21 @@ module homotopy.Pi3S2 where
 
   module A = HigherHomotopyAbelian S² base
 
-  hopf-cell : Path {Path {Path{S²} base base} id id} id id
-  hopf-cell = id                                   ≃〈 ! (ap2 ap∘ (!-inv-r loop) (!-inv-r loop)) 〉
-              ap∘ (loop ∘ ! loop) (loop ∘ ! loop)   ≃〈 ichange-type (! loop) loop (! loop) loop 〉 
-              ap∘ loop loop ∘ ap∘ (! loop) (! loop) ≃〈 ! (ap2 (λ x y → x ∘ y) (A.same loop loop) (A.same (! loop) (! loop))) 〉 
-              (loop ∘ loop) ∘ ! loop ∘ ! loop       ≃〈 ap (λ x → (loop ∘ loop) ∘ x) (! (!-∘ loop loop)) 〉 
-              (loop ∘ loop) ∘ ! (loop ∘ loop)       ≃〈 !-inv-r (loop ∘ loop) 〉 
-              (id ∎)
+  ap∘-! : {A : Type} {x y z : A} {p q : Path x y} {p' q' : Path y z} 
+       -> (α : Path p' q') -> (β : Path p q)
+       → ap∘ (! α) (! β) ≃ ! (ap∘ α β)
+  ap∘-! id id = id
+
+  hopf-cell-a1 : ∀ {A} {a} -> (α : Loop Two A a) → id ≃ ap∘ (α ∘ ! α) (α ∘ ! α)
+  hopf-cell-a1 α = ! (ap2 ap∘ (!-inv-r α) (!-inv-r α))
+
+  hopf-cell-a2 : ∀ {A} {a} -> (α : Loop Two A a) → ap∘ α α ∘ ap∘ (! α) (! α) ≃ id
+  hopf-cell-a2 α = !-inv-r (ap∘ α α) ∘ ap (λ x → ap∘ α α ∘ x) (ap∘-! α α)
+
+  hopf-cell : ∀ {A} {a} -> Loop Two A a → Loop Three A a 
+  hopf-cell α = hopf-cell-a2 α ∘ 
+                ichange-type (! α) α (! α) α ∘ 
+                hopf-cell-a1 α
 
   B : S² → Type
   B = S²-rec (τ₂ S²) loop' where
@@ -52,7 +60,7 @@ module homotopy.Pi3S2 where
                      (ap (\ y -> transport (\ x -> [ x ]2 ≃ [ x ]2) y id) loop) ≃〈 ap-by-equals {f = λ y → transport (λ x → [ x ]2 ≃ [ x ]2) y id} {g = λ y → id} (λ y → !-inv-with-middle-r (ap [_]2 y) id ∘ transport-Path [_]2 [_]2 y id) loop 〉 
                      (id ∘ ap (\ y -> id) loop) ≃〈 ∘-unit-l (ap (\ y -> id) loop) 〉 
                      (ap (\ y -> id) loop)     ≃〈 ap-constant id loop 〉 
-                     id                        ≃〈 ap (ap (ap [_]2)) hopf-cell 〉 
+                     id                        ≃〈 ap (ap (ap [_]2)) (hopf-cell loop) 〉 -- should this show up here? not sure
                      id ∎)))
                    a)
 
@@ -73,18 +81,25 @@ module homotopy.Pi3S2 where
   encode' = encode{base}
 
   decode1' : S² → Path base base
-  decode1' = (S²-rec id hopf-cell)
+  decode1' = (S²-rec id (hopf-cell loop))
 
   decode' : τ₂ S² → P base
   decode' = Trunc-func decode1'
 
-  red : (ap (ap encode1') hopf-cell) ≃ (ap (ap [_]) loop)
-  red = ap (ap encode1') hopf-cell ≃〈 {!!} 〉 
-        ap^ Two encode1' hopf-cell ≃〈 {!!} 〉 
-        apt Two (ap^ (S Two) B hopf-cell) [ base ] ≃〈 {!ap^ (S Two) B hopf-cell!} 〉 
+  red : (ap (ap encode1') (hopf-cell loop)) ≃ (ap (ap [_]) loop)
+  red = ap (ap encode1') (hopf-cell loop) ≃〈 {!!} 〉 
+        ap^ Two encode1' (hopf-cell loop) ≃〈 {!!} 〉 
+        apt Two (ap^ (S Two) B (hopf-cell loop)) [ base ] ≃〈 {!ap^ (S Two) B hopf-cell!} 〉 
         ap (ap [_]) loop ∎ where
       lemma : ap (ap (ap B)) (ichange-type loop loop loop loop) ≃ {!!}
       lemma = {!!}
+
+      commute :  {A : Type} {x y z : A} {B : Type} {f : A → B}
+                 {p q r : Path x y} {p' q' r' : Path y z}
+               -> (a : Path p q) (b : Path q r) (c : Path p' q') (d : Path q' r') 
+               -> ap (ap (ap f)) (ichange-type a b c d) ≃ {! ichange-type (ap (ap f) a) (ap (ap f) b) (ap (ap f) c) (ap (ap f) d)!}
+      commute id id id id = {!!}
+
 
   {-
   encode-decode' : (x : τ₂ S²) -> encode' (decode' x) ≃ x
