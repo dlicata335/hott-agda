@@ -33,8 +33,7 @@ module lib.Universe where
   univalence≃-id : ∀ {A} → coe (univalence≃ {A} {A}) id ≃ id-equiv
   univalence≃-id {A} = ap≃ (type≃β (pathToEquiv' , univalence)) {id}
 
-  Path-equiv : ∀ {A B} (α : Path A B) 
-               {x y : A} 
+  Path-equiv : ∀ {A B} (α : Path A B) {x y : A} 
              -> Path (Path{A} x y) (Path{B} (coe α x) (coe α y))
   Path-equiv α = ap (λ (p : Σ (λ (A : Type) → A × A)) → Path (fst (snd p)) (snd (snd p)))
                     (pair≃ α (pair×≃ (ap fst (ap≃ (transport-× α (λ x → x) (λ x → x))))
@@ -65,15 +64,16 @@ module lib.Universe where
   NTypes : TLevel -> Type
   NTypes n = Σ \ (A : Type) → NType n A
 
-  Path-Type-level : ∀ n → {A B : Type}
-                        → NType (S n) B
-                        → NType (S n) (Path A B)
-  Path-Type-level n nB = transport (NType (S n)) (! univalence≃) (Σlevel (Πlevel (λ _ → nB)) (λ x → raise-HProp (IsEquiv-HProp _)))
-
-  NTypes-level : ∀ n → NType (S n) (NTypes n)
-  NTypes-level -2 = increment-level (ntype ((Unit , ntype Contractible-Unit) ,
-                                            (λ y → coe (ΣSubsetPath NType-is-HProp) (! (Contractible≃Unit (use-level (snd y)))))))
-  NTypes-level (S n) = ntype (λ An Bn → transport (NType (S n)) (ΣSubsetPath (λ _ → NType-is-HProp _))
-                                        (Path-Type-level n (snd Bn)))
+  abstract
+    Path-Type-level : ∀ n → {A B : Type}
+                          → NType (S n) B
+                          → NType (S n) (Path A B)
+    Path-Type-level n nB = transport (NType (S n)) (! univalence≃) (Σlevel (Πlevel (λ _ → nB)) (λ x → raise-HProp (IsEquiv-HProp _)))
+  
+    NTypes-level : ∀ n → NType (S n) (NTypes n)
+    NTypes-level -2 = increment-level (ntype ((Unit , ntype Contractible-Unit) ,
+                                              (λ y → coe (ΣSubsetPath NType-is-HProp) (! (Contractible≃Unit (use-level (snd y)))))))
+    NTypes-level (S n) = ntype (λ An Bn → transport (NType (S n)) (ΣSubsetPath (λ _ → NType-is-HProp _))
+                                          (Path-Type-level n (snd Bn)))
 
   

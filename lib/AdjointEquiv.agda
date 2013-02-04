@@ -67,8 +67,9 @@ module lib.AdjointEquiv where
                   (snd f' (f x) ∘ ! (ap f (α x))) ≃ id ≃〈 cancels-inverse-is≃ (snd f' (f x)) (ap f (α x)) 〉 
                   (snd f' (f x)) ≃ (ap f (α x)) ∎
 
- IsEquiv-HProp : {A B : Type} (f : A → B) → HProp (IsEquiv f)
- IsEquiv-HProp f = transport HProp (IsWeq≃IsEquiv f) (IsWEq-HProp f)
+ abstract
+   IsEquiv-HProp : {A B : Type} (f : A → B) → HProp (IsEquiv f)
+   IsEquiv-HProp f = transport HProp (IsWeq≃IsEquiv f) (IsWEq-HProp f)
 
 
 

@@ -350,28 +350,30 @@ module lib.First where
  HSet-UIP : ∀ {A} -> HSet A -> (x y : A) (p q : x ≃ y) -> p ≃ q
  HSet-UIP h x y p q = fst (use-level (use-level (use-level h x y) p q))
 
- unique-HProp : ∀ {A} -> ((x y : A) -> x ≃ y) -> HProp A
- unique-HProp f = ntype (λ x y → ntype (f x y , contra)) where
-   contra : ∀ {x y} → (α : Path x y) → Path (f x y) α
-   contra {x} id = square-id (f x x) (! lemma) where 
-      lemma = 
-              f x x ≃〈 ! (apd (f x) (f x x)) 〉 
-              transport (λ z → Id x z) (f x x) (f x x) ≃〈 transport-Path-right (f x x) (f x x) 〉 
-              (f x x ∘ (f x x)) ∎
+ abstract 
+   unique-HProp : ∀ {A} -> ((x y : A) -> x ≃ y) -> HProp A
+   unique-HProp f = ntype (λ x y → ntype (f x y , contra)) where
+     contra : ∀ {x y} → (α : Path x y) → Path (f x y) α
+     contra {x} id = square-id (f x x) (! lemma) where 
+        lemma : f x x ≃ (f x x ∘ (f x x))
+        lemma = 
+                f x x ≃〈 ! (apd (f x) (f x x)) 〉 
+                transport (λ z → Id x z) (f x x) (f x x) ≃〈 transport-Path-right (f x x) (f x x) 〉 
+                (f x x ∘ (f x x)) ∎
+  
+   UIP-HSet : ∀ {A} -> ((x y : A) (p q : x ≃ y) -> p ≃ q) → HSet A 
+   UIP-HSet u = ntype (λ x y → unique-HProp (u _ _))
 
- UIP-HSet : ∀ {A} -> ((x y : A) (p q : x ≃ y) -> p ≃ q) → HSet A 
- UIP-HSet u = ntype (λ x y → unique-HProp (u _ _))
-
- -- weakening
- -- in fact, it decrements, but often you want this lemma
- Contractible-Path : ∀ {A} -> Contractible A → (x y : A) -> Contractible (Path x y)
- Contractible-Path (acenter , apaths) x y = 
-   (apaths y ∘ ! (apaths x)) , (λ α → move-left-right (apaths y) α (apaths x) (! (apd apaths α ∘ ! (transport-Path-right α (apaths x)))))
-
- path-preserves-level : {n : TLevel} {A : Type} -> NType n A -> {x y : A} -> NType n (Path x y)
- path-preserves-level { -2 } {A} tA {x} {y} = ntype (Contractible-Path (use-level tA) x y)
- path-preserves-level { S n } {A} tA {x} {y} = ntype (λ p q → path-preserves-level (use-level tA x y))
-
- increment-level : {n : TLevel} {A : Type} -> (NType n A) → (NType (S n) A)
- increment-level {n}{A} tA = ntype (λ x y → path-preserves-level tA)
+   -- weakening
+   -- in fact, it decrements, but often you want this lemma
+   Contractible-Path : ∀ {A} -> Contractible A → (x y : A) -> Contractible (Path x y)
+   Contractible-Path (acenter , apaths) x y = 
+     (apaths y ∘ ! (apaths x)) , (λ α → move-left-right (apaths y) α (apaths x) (! (apd apaths α ∘ ! (transport-Path-right α (apaths x)))))
+  
+   path-preserves-level : {n : TLevel} {A : Type} -> NType n A -> {x y : A} -> NType n (Path x y)
+   path-preserves-level { -2 } {A} tA {x} {y} = ntype (Contractible-Path (use-level tA) x y)
+   path-preserves-level { S n } {A} tA {x} {y} = ntype (λ p q → path-preserves-level (use-level tA x y))
+  
+   increment-level : {n : TLevel} {A : Type} -> (NType n A) → (NType (S n) A)
+   increment-level {n}{A} tA = ntype (λ x y → path-preserves-level tA)
 

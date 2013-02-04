@@ -105,9 +105,10 @@ module lib.Prods where
   Contractible≃Unit : ∀ {A} → Contractible A → A ≃ Unit
   Contractible≃Unit c = ua (ContractibleEquivUnit c)
 
-  Contractible-Unit : Contractible Unit
-  Contractible-Unit = (<> , \ _ -> id) 
-
+  abstract
+    Contractible-Unit : Contractible Unit
+    Contractible-Unit = (<> , \ _ -> id) 
+  
 
   -- transport and ap
 

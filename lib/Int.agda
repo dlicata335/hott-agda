@@ -108,9 +108,10 @@ module Int where
   ... | Inl x = Inl (ap Neg x)
   ... | Inr x = Inr (x o ap outject)
 
-  HSet-Int : HSet Int
-  HSet-Int = UIP-HSet (λ x y p q → Hedberg.UIP decidePath-Int x {y} p q)
-  
+  abstract
+    HSet-Int : HSet Int
+    HSet-Int = UIP-HSet (λ x y p q → Hedberg.UIP decidePath-Int x {y} p q)
+    
   τ₀Int-is-Int : τ₀ Int ≃ Int
   τ₀Int-is-Int = Trunc-reflective (S (S -2)) HSet-Int
 
