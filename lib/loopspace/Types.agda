@@ -8,6 +8,7 @@ open import lib.Functions
 open import lib.Int
 open Int
 open import lib.Prods
+open import lib.Prods2
 open import lib.AdjointEquiv
 open import lib.Univalence
 open import lib.NTypes

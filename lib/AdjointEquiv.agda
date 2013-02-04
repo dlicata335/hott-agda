@@ -5,6 +5,7 @@ open import lib.Paths
 open import lib.Prods
 open import lib.NTypes
 open Paths
+open import lib.WEq
 
 module lib.AdjointEquiv where
 
@@ -106,3 +107,7 @@ module lib.AdjointEquiv where
  postulate 
    IsEquiv-HProp : {A B : Type} (f : A → B) → HProp (IsEquiv f)
    
+ module EquivsSame where
+   -- adjToWeq : {A B : Type} (f : A → B) → IsEquiv f → IsWEq A B f
+   -- adjToWeq f (isequiv g α β γ) = λ y → (g y , β y) , (λ y' → pair≃ (α (fst y') ∘ ! (ap g (snd y')))
+   --                                                           {!γ (fst y')!})

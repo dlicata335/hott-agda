@@ -7,29 +7,15 @@ open import lib.First
 open import lib.Paths
 open Paths
 open import lib.Prods
+open import lib.Prods2
+open import lib.Univalence
 open import lib.Sums
 open import lib.Functions
 open import lib.Nat
 open import lib.NTypes
 open import lib.AdjointEquiv
-open import lib.Univalence
 
 module lib.NTypes2 where
-
-  -- weakening
-
-  -- in fact, it decrements, but often you want this lemma
-  path-preserves-level : {n : TLevel} {A : Type} -> NType n A -> {x y : A} -> NType n (Path x y)
-  path-preserves-level { -2 } {A} tA {x} {y} = ntype (Contractible-Path (use-level tA) x y)
-  path-preserves-level { S n } {A} tA {x} {y} = ntype (λ p q → path-preserves-level (use-level tA x y))
-
-  increment-level : {n : TLevel} {A : Type} -> (NType n A) → (NType (S n) A)
-  increment-level {n}{A} tA = ntype (λ x y → path-preserves-level tA)
-
-  raise-HProp : ∀ {n} {A : Type} → HProp A → NType (S n) A
-  raise-HProp { -2 } hA = hA
-  raise-HProp {S n} hA = increment-level (raise-HProp hA)
-
 
   -- less than for tlevels
 
@@ -50,20 +36,11 @@ module lib.NTypes2 where
   lt-unS-right (ltSR y) = Inl y
 
 
-  -- would go elsewhere but need to be later on 
+  -- would go earlier but need to be later than where they would go
 
   Πlevel : ∀{A n}{B : A → Type} → ((x : A) -> NType n (B x)) → NType n ((x : A) → B x)
   Πlevel {A} { -2} a = ntype ((λ x → fst (use-level (a x))) , (λ f → λ≃ (λ x → snd (use-level (a x)) (f x))))
   Πlevel {A} {S n} a = ntype (λ f g → transport (NType n) (ua ΠPath.eqv) (Πlevel {A} {n} (λ x → use-level (a x) _ _)))
-
-  ContractibleEquivUnit : ∀ {A} → Contractible A → Equiv A Unit
-  ContractibleEquivUnit c = (improve (hequiv (λ _ → <>) (λ _ → fst c) (λ x → snd c x) (\ _ -> id)))
-
-  Contractible≃Unit : ∀ {A} → Contractible A → A ≃ Unit
-  Contractible≃Unit c = ua (ContractibleEquivUnit c)
-
-  Contractible-Unit : Contractible Unit
-  Contractible-Unit = (<> , \ _ -> id) 
 
   use-level≃ : ∀ {n A} -> NType n A ≃ NType' n A
   use-level≃ = ua (improve (hequiv use-level ntype (\ {(ntype _)  -> id}) (\ x -> id)))
@@ -92,52 +69,6 @@ module lib.NTypes2 where
 
 
   -- level of the collection of all ntypes
-
-  -- FIXME move elsewhere
-
-  module ΣPath where
-
-    eqv : {A : Type} {B : A → Type} {p q : Σ B}
-        → Equiv (Σ \ (α : Path (fst p) (fst q)) → Path (transport B α (snd p)) (snd q))
-                (Path p q)
-    eqv {B = B} {p = p} {q = q} = 
-      improve (hequiv 
-        (λ p → pair≃ (fst p) (snd p))
-        (λ p → fst≃ p , snd≃ p)
-        (λ p' → pair≃ (Σ≃β1 (fst p') (snd p')) 
-                      (move-left-right (snd≃ (pair≃{B = B} (fst p') (snd p'))) (snd p')
-                         (ap (λ v → transport B v (snd p)) (Σ≃β1 (fst p') (snd p')))
-                         (Σ≃β2 {B = B} (fst p') (snd p')) ∘
-                       transport-Path-pre' (λ v → transport B v (snd p))
-                                           (Σ≃β1 (fst p') (snd p'))
-                                           (snd≃ (pair≃{B = B} (fst p') (snd p'))))) 
-        (λ p → Σ≃η p))
-
-    path : {A : Type} {B : A → Type} {p q : Σ B}
-        →   (Σ \ (α : Path (fst p) (fst q)) → Path (transport B α (snd p)) (snd q))
-          ≃ (Path p q)
-    path = ua eqv 
-
-  Σ-with-Contractible : {A : Type} {B : A → Type}
-                        → ( (x : A) → Contractible (B x))
-                        -> A ≃ Σ B
-  Σ-with-Contractible c = 
-     ua (improve (hequiv (λ a → a , fst (c a))
-                         fst
-                         (λ _ → id)
-                         (λ p → pair≃ id (HProp-unique (increment-level (ntype (c (fst p)))) _ _)))) 
-
-  ΣSubsetPath : {A : Type} {B : A → Type} {p q : Σ B} 
-                → ( (x : A) → HProp (B x))
-                →   (Path (fst p) (fst q))
-                  ≃ (Path p q)
-  ΣSubsetPath {p = p}{q = q} hp = ΣPath.path ∘ Σ-with-Contractible (λ p' → use-level{n = -2} (use-level{n = S -2} (hp (fst q)) _ _))
-
-  postulate
-    Σlevel : ∀ {n} {A : Type} {B : A → Type}
-           → NType n A
-           → ((x : A) → NType n (B x))
-           → NType n (Σ B)
 
   Path-Type-level : ∀ n → {A B : Type}
                         → NType (S n) B

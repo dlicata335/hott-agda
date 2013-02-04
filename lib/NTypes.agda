@@ -83,3 +83,19 @@ module lib.NTypes where
   NTypes n = Σ \ (A : Type) → NType n A
 
 
+  -- weakening
+
+  -- in fact, it decrements, but often you want this lemma
+  path-preserves-level : {n : TLevel} {A : Type} -> NType n A -> {x y : A} -> NType n (Path x y)
+  path-preserves-level { -2 } {A} tA {x} {y} = ntype (Contractible-Path (use-level tA) x y)
+  path-preserves-level { S n } {A} tA {x} {y} = ntype (λ p q → path-preserves-level (use-level tA x y))
+
+  increment-level : {n : TLevel} {A : Type} -> (NType n A) → (NType (S n) A)
+  increment-level {n}{A} tA = ntype (λ x y → path-preserves-level tA)
+
+  raise-HProp : ∀ {n} {A : Type} → HProp A → NType (S n) A
+  raise-HProp { -2 } hA = hA
+  raise-HProp {S n} hA = increment-level (raise-HProp hA)
+
+
+
