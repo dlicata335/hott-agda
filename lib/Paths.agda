@@ -60,6 +60,23 @@ module lib.Paths where
    
    _∎ : ∀ {A : Type} (x : A) → Path x x
    _∎ _ = id
+
+   -- transport and ap
+   
+   transport :  {B : Type} (E : B → Type) 
+                {b1 b2 : B} → Path b1 b2 → (E b1 → E b2)
+   transport C id = λ x → x
+   
+   ap :  {A B : Type} {M N : A}
+         (f : A → B) → Path{A} M N → Path{B} (f M) (f N)
+   ap f id = id
+   
+   apd  :  {B : Type} {E : B → Type} {b₁ b₂ : B} 
+           (f : (x : B) → E x) (β : Path b₁ b₂) 
+        → Path (transport E β (f b₁)) (f b₂) 
+   apd f id = id 
+
+   -- laws
    
    ∘-unit-l  : {A : Type} {M N : A} (α : Path M N)
              → Path (id ∘ α) α
@@ -167,25 +184,9 @@ module lib.Paths where
                       -> Path q (! p)
    cancels-is-inverse {_}{_}{_}{p}{q} α = ∘-unit-l (! p) ∘ move-right-right q p id α
 
-   -- transport and ap
-   
-   transport :  {B : Type} (E : B → Type) 
-                {b1 b2 : B} → Path b1 b2 → (E b1 → E b2)
-   transport C id = λ x → x
-   
-   transport-Path-right :  {A : Type} {M N P : A} 
-     (α' : Path N P) (α : Path M N)
-     → Path (transport (\ x → Path M x) α' α) (α' ∘ α)
-   transport-Path-right id id = id 
+   square-id : {A : Type} {x : A} (p : x ≃ x) -> (p ∘ p) ≃ p → p ≃ id
+   square-id p α = !-inv-r p ∘ ap (λ x' → x' ∘ ! p) α ∘ ∘-assoc p p (! p) ∘ ap (λ x' → p ∘ x') (! (!-inv-r p))
 
-   ap :  {A B : Type} {M N : A}
-         (f : A → B) → Path{A} M N → Path{B} (f M) (f N)
-   ap f id = id
-   
-   apd  :  {B : Type} {E : B → Type} {b₁ b₂ : B} 
-           (f : (x : B) → E x) (β : Path b₁ b₂) 
-        → Path (transport E β (f b₁)) (f b₂) 
-   apd f id = id 
    
    transport-∘ : {A : Type} (C : A → Type) {M N P : A} (β : Path N P) (α : Path M N)
              → Path (transport C (β ∘ α)) (\ x → transport C β (transport C α x))
@@ -201,6 +202,11 @@ module lib.Paths where
    transport-ap-assoc' : {A B : Type} (C : B → Type) (f : A → B) {M N : A} (α : Path M N) 
                        → Path (transport (\ x -> C (f x)) α) (transport C (ap f α))
    transport-ap-assoc' C f id = id 
+
+   transport-Path-right :  {A : Type} {M N P : A} 
+     (α' : Path N P) (α : Path M N)
+     → Path (transport (\ x → Path M x) α' α) (α' ∘ α)
+   transport-Path-right id id = id 
 
    coe : {A B : Type} -> Path A B -> A -> B
    coe = transport (\ x -> x)
@@ -285,6 +291,11 @@ module lib.Paths where
    transport-Path-pre : {A : Type} {M N P : A} (p' : Path N M) (p : Path N P)
                  -> Path (transport (\ x -> Path x P) p' p) (p ∘ ! p')
    transport-Path-pre id id = id -- FIXME J
+
+   transport-Path-pre' : {Γ A : Type} {g : A} (f : Γ → A) {M N : Γ} (p : Path M N)
+                  → (p' : _) → Path (transport (\ x → Path (f x) g) p p')
+                                      (p' ∘ (! (ap f p)))
+   transport-Path-pre' _ id p' = id
 
    transport-com-for-ap-of-transport : 
        {Γ : Type} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)

@@ -77,13 +77,16 @@ module lib.Truncations where
    Trunc-func : {n : TLevel} {A B : Type} -> (A -> B) -> (Trunc n A -> Trunc n B)
    Trunc-func f = Trunc-rec Trunc-level ([_] o f)
 
-   module TruncPath {n : _} {A : _} {x : A} where
+   Trunc-reflective : ∀ k {A} -> NType k A → Trunc k A ≃ A
+   Trunc-reflective k tA = ua (improve (hequiv (Trunc-rec tA (λ x → x)) [_] (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (λ _ → id)) (λ _ → id)))
+
+   module TruncPath (n : _) {A : _} {x : A} where
 
      decode' : {y : _} → (Trunc n (Path x y)) → Path {(Trunc (S n) A)} [ x ] [ y ]
      decode' {y} = Trunc-rec (use-level (Trunc-level {S n} {A}) [ x ] [ y ]) (ap [_]) 
 
      Codes : Trunc (S n) A → NTypes n
-     Codes = Trunc-rec (NTypes-NType n) 
+     Codes = Trunc-rec (NTypes-level n) 
                        (λ y → Trunc n (Path x y) , Trunc-level) 
      
      encode : {y : Trunc (S n) A}
@@ -99,7 +102,7 @@ module lib.Truncations where
      encode-decode' : {y : A} (c : fst (Codes [ y ]))
                     → encode'{y} (decode'{y} c) ≃ c
      encode-decode' = Trunc-elim _ (λ x' → path-preserves-level Trunc-level) 
-       (λ α → transport (λ x' → fst (Trunc-rec (NTypes-NType n) (λ y → Trunc n (Id x y) , Trunc-level) x')) (ap [_] α) [ id ] ≃〈 ! (ap≃ (transport-ap-assoc' (λ x' → fst (Trunc-rec (NTypes-NType n) (λ y → Trunc n (Id x y) , Trunc-level) x')) [_] α)) 〉 
+       (λ α → transport (λ x' → fst (Trunc-rec (NTypes-level n) (λ y → Trunc n (Id x y) , Trunc-level) x')) (ap [_] α) [ id ] ≃〈 ! (ap≃ (transport-ap-assoc' (λ x' → fst (Trunc-rec (NTypes-level n) (λ y → Trunc n (Id x y) , Trunc-level) x')) [_] α)) 〉 
               transport (λ y → Trunc n (Id x y)) α [ id ] ≃〈 ap≃ (transport-Trunc (λ y → Id x y) α) 〉
               [ transport (\ y -> (Id x y)) α id ] ≃〈 ap [_] (transport-Path-right α id) 〉
               [ α ] ∎)
@@ -120,3 +123,4 @@ module lib.Truncations where
 
      path : {y : A} -> (Trunc n (Path x y)) ≃ (Path {(Trunc (S n) A)} [ x ] [ y ])
      path {y} = ua eqv
+

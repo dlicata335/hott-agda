@@ -94,6 +94,10 @@ module lib.Bool where
       {-# BUILTIN TRUE  True  #-}
       {-# BUILTIN FALSE False #-}
 
+      forget : ∀ {A B} → Either A B -> Bool
+      forget (Inl _) = True
+      forget (Inr _) = False
+
 {-
   respif : {Γ : Type} {θ1 θ2 : Γ} {P : Path θ1 θ2} {C : Γ -> Bool -> Type} {M : Γ -> Bool} {M1 : (x : Γ) -> C x True} {M2 : (x : Γ) -> C x False} 
          -> Path (respd (\ x -> if C x / (M x) then (M1 x) else (M2 x)) P) 

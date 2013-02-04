@@ -3,6 +3,8 @@
 open import lib.First
 open import lib.Paths 
 open import lib.Prods
+open import lib.AdjointEquiv
+open import lib.NTypes
 open Paths
 
 module lib.Functions where 
@@ -47,8 +49,14 @@ module lib.Functions where
          -> α ≃ λ≃ (\ x -> ap≃ α {x})
     Π≃β : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : (x : A) -> Path (f x) (g x)) {N : A}
          -> ap≃ (λ≃ α) {N} ≃ (α N)
-
+    -- FIXME should assume a coherence cell too
+  
     λ≃i : ∀ {A} {B : A -> Set} {f g : {x : A} -> B x} -> ((x : A) -> Path (f {x}) (g {x})) -> Path{ {x : A} -> B x } f g
+
+  module ΠPath where
+    eqv : {A : Type} {B : A → Type} {f g : (x : A) → B x} 
+        → Equiv ((x : A) → Path (f x) (g x)) (Path f g)
+    eqv = improve (hequiv λ≃ (λ α → λ x → ap≃ α {x}) (λ α → λ≃ (λ x → Π≃β α)) (λ y → ! (Π≃η y)))
 
   transport-→ :  {Γ : Type} (A B : Γ → Type) {θ1 θ2 : Γ} 
                   (δ : θ1 ≃ θ2) (f : A θ1 → B θ1) 
@@ -59,6 +67,12 @@ module lib.Functions where
   transport-→-pre : ∀ {C A B : Set} (δ : A ≃ B) (f : A -> C) 
          -> transport (\ X -> X -> C) δ f ≃ (f o (transport (\ X -> X) (! δ)))
   transport-→-pre id f = id 
+
+  transport-Π-post' :  {Γ A : Type} (B : Γ → A -> Type) {θ1 θ2 : Γ} 
+                  (δ : θ1 ≃ θ2) (f : (x : A) → B θ1 x) 
+     → Path  (transport (\ γ → (x : A) → B γ x) δ f) 
+             (\ x -> transport (\ γ -> B γ x) δ (f x))
+  transport-Π-post' _ id f = id 
 
   -- transportitution extension for Γ,x:A⁻ in DTT
   pair≃⁻ : {A : Set} {B : A -> Set} {p q : Σ B} 

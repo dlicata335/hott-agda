@@ -38,18 +38,14 @@ module lib.loopspace.Truncation where
   IsKTrunc-Loop One k tA = path-preserves-level tA
   IsKTrunc-Loop (S n) k tA = path-preserves-level (IsKTrunc-Loop n k tA)
 
-  -- FIXME Move somewhere else
-  Path-Trunc : ∀ n {A} {x y : A} → Trunc n (Path x y) ≃ Path {(Trunc (S n) A)} [ x ] [ y ]
-  Path-Trunc n = ua (improve (hequiv TruncPath.decode TruncPath.encode TruncPath.encode-decode' TruncPath.decode-encode))
-
   mutual
     Loop-Trunc : ∀ (n : Positive) (k : Nat) {A} {a} → Loop n (Trunc (tlp (n +pn k)) A) [ a ] ≃ Trunc (tl k) (Loop n A a)
-    Loop-Trunc One k {A} {a} = ! (Path-Trunc (tl k)) ∘ ap-Loop-Trunc-tlevel≃ One (tlp+1 k)
-    Loop-Trunc (S n) k {A} {a} = ! (Path-Trunc (tl k)) ∘ ap-Loop≃ One (Loop-Trunc n (S k)) (Loop-Trunc-id n (S k)) ∘ ap-Loop-Trunc-tlevel≃ (S n) (! (ap tlp (+pn-rh-S n k)))
+    Loop-Trunc One k {A} {a} = ! (TruncPath.path (tl k)) ∘ ap-Loop-Trunc-tlevel≃ One (tlp+1 k)
+    Loop-Trunc (S n) k {A} {a} = ! (TruncPath.path (tl k)) ∘ ap-Loop≃ One (Loop-Trunc n (S k)) (Loop-Trunc-id n (S k)) ∘ ap-Loop-Trunc-tlevel≃ (S n) (! (ap tlp (+pn-rh-S n k)))
 
     Loop-Trunc-id : ∀ n k {A a} → coe (Loop-Trunc n k {A} {a}) (id^ n) ≃ [ id^ n ]
-    Loop-Trunc-id One k = (ap≃ (type≃β! (improve (hequiv TruncPath.decode TruncPath.encode TruncPath.encode-decode' TruncPath.decode-encode))) {id} ∘ ap (transport (λ X → X) (! (Path-Trunc (tl k)))) (ap-Loop-Trunc-tlevel≃-id One (tlp+1 k))) ∘ ap≃ (transport-∘ (λ X → X) (! (Path-Trunc (tl k))) (ap-Loop-Trunc-tlevel≃ One (tlp+1 k)))
-    Loop-Trunc-id (S n) k = (ap≃ (type≃β! (improve (hequiv TruncPath.decode TruncPath.encode TruncPath.encode-decode' TruncPath.decode-encode))) {id} ∘ ap (transport (λ X → X) (! (Path-Trunc (tl k)))) (ap-Loop≃-id One (Loop-Trunc n (S k)) (Loop-Trunc-id n (S k))) ∘ ap (transport (λ X → X) (! (Path-Trunc (tl k))) o transport (λ X → X) (ap-Loop≃ One (Loop-Trunc n (S k)) (Loop-Trunc-id n (S k)))) (ap-Loop-Trunc-tlevel≃-id (S n) (! (ap tlp (+pn-rh-S n k))))) ∘ ap≃ (transport-∘3 (λ X → X) (! (Path-Trunc (tl k))) (ap-Loop≃ One (Loop-Trunc n (S k)) (Loop-Trunc-id n (S k))) (ap-Loop-Trunc-tlevel≃ (S n) (! (ap tlp (+pn-rh-S n k)))))
+    Loop-Trunc-id One k = (ap≃ (type≃β! (TruncPath.eqv _)) {id} ∘ ap (transport (λ X → X) (! (TruncPath.path (tl k)))) (ap-Loop-Trunc-tlevel≃-id One (tlp+1 k))) ∘ ap≃ (transport-∘ (λ X → X) (! (TruncPath.path (tl k))) (ap-Loop-Trunc-tlevel≃ One (tlp+1 k)))
+    Loop-Trunc-id (S n) k = (ap≃ (type≃β! (TruncPath.eqv _)) {id} ∘ ap (transport (λ X → X) (! (TruncPath.path (tl k)))) (ap-Loop≃-id One (Loop-Trunc n (S k)) (Loop-Trunc-id n (S k))) ∘ ap (transport (λ X → X) (! (TruncPath.path (tl k))) o transport (λ X → X) (ap-Loop≃ One (Loop-Trunc n (S k)) (Loop-Trunc-id n (S k)))) (ap-Loop-Trunc-tlevel≃-id (S n) (! (ap tlp (+pn-rh-S n k))))) ∘ ap≃ (transport-∘3 (λ X → X) (! (TruncPath.path (tl k))) (ap-Loop≃ One (Loop-Trunc n (S k)) (Loop-Trunc-id n (S k))) (ap-Loop-Trunc-tlevel≃ (S n) (! (ap tlp (+pn-rh-S n k)))))
 
   Loop-Trunc0 : ∀ n {A} {a} → Loop n (Trunc (tlp n) A) [ a ] ≃ τ₀ (Loop n A a)
   Loop-Trunc0 n = Loop-Trunc n 0 ∘ ap-Loop-Trunc-tlevel≃ n (! (ap tlp (+pn-rh-Z n)))

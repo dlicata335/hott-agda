@@ -2,12 +2,16 @@
 
 open import lib.First public
 open import lib.Paths public
+open import lib.Prods public
+open import lib.Sums public
 open import lib.AdjointEquiv 
 open Paths
 open import lib.NTypes
 open import lib.Truncations
+open import lib.Univalence
 open Truncation
 open import lib.Nat
+open import lib.DecidablePath
 
 
 module lib.Int where
@@ -70,11 +74,48 @@ module Int where
  
   succEquiv : Equiv Int Int
   succEquiv = improve (hequiv succ pred pred-succ succ-pred)
-  
-  postulate
-    HSet-Int : HSet Int
 
-    τ₀Int-is-Int : τ₀ Int ≃ Int
+
+  -- decidable equality and sets
+
+  tpred : Positive -> Positive
+  tpred One = One
+  tpred (S n) = n
+
+  decidePath-Positive : DecPath Positive
+  decidePath-Positive One One = Inl id
+  decidePath-Positive One (S n) = Inr (λ ())
+  decidePath-Positive (S n) One = Inr (λ ())
+  decidePath-Positive (S n) (S n') with decidePath-Positive n n'
+  ... | Inl x = Inl (ap S x)
+  ... | Inr x = Inr (x o ap tpred)
+
+  outject : Int -> Positive
+  outject (Pos n) = n
+  outject (Neg n) = n
+  outject (Zero) = One
+
+  decidePath-Int : DecPath Int
+  decidePath-Int (Pos n) (Pos n') with decidePath-Positive n n' 
+  ... | Inl x = Inl (ap Pos x)
+  ... | Inr x = Inr (x o ap outject)
+  decidePath-Int (Pos n) Zero = Inr (λ ())
+  decidePath-Int (Pos n) (Neg n') = Inr (λ ())
+  decidePath-Int Zero (Pos n) = Inr (λ ())
+  decidePath-Int Zero Zero = Inl id
+  decidePath-Int Zero (Neg n) = Inr (λ ())
+  decidePath-Int (Neg n) (Pos n') = Inr (λ ())
+  decidePath-Int (Neg n) Zero = Inr (λ ())
+  decidePath-Int (Neg n) (Neg n') with decidePath-Positive n n' 
+  ... | Inl x = Inl (ap Neg x)
+  ... | Inr x = Inr (x o ap outject)
+
+  HSet-Int : HSet Int
+  HSet-Int = UIP-HSet (λ x y p q → Hedberg.UIP decidePath-Int x {y} p q)
+  
+  τ₀Int-is-Int : τ₀ Int ≃ Int
+  τ₀Int-is-Int = Trunc-reflective (S (S -2)) HSet-Int
+
 
   -- relating Int to other kinds of numbers
   

@@ -36,8 +36,8 @@ module lib.NTypes where
 
   -- want some control over unfolding
   mutual
-    data NType : TLevel -> Type -> Type where
-      ntype  : ∀ {n} {A} → NType' n A -> NType n A
+    data NType (n : TLevel) (A : Type) : Type where
+      ntype  : NType' n A -> NType n A
   
     NType' : TLevel -> Type -> Type 
     NType' -2 A = Contractible A
@@ -58,6 +58,18 @@ module lib.NTypes where
   HProp-unique : ∀ {A} -> HProp A -> (x y : A) -> x ≃ y
   HProp-unique h x y = fst (use-level (use-level h x y))
 
+  unique-HProp : ∀ {A} -> ((x y : A) -> x ≃ y) -> HProp A
+  unique-HProp f = ntype (λ x y → ntype (f x y , contra)) where
+    contra : ∀ {x y} → (α : Path x y) → Path (f x y) α
+    contra {x} id = square-id (f x x) (! lemma) where 
+       lemma = 
+               f x x ≃〈 ! (apd (f x) (f x x)) 〉 
+               transport (λ z → Id x z) (f x x) (f x x) ≃〈 transport-Path-right (f x x) (f x x) 〉 
+               (f x x ∘ (f x x)) ∎
+
+  UIP-HSet : ∀ {A} -> ((x y : A) (p q : x ≃ y) -> p ≃ q) → HSet A 
+  UIP-HSet u = ntype (λ x y → unique-HProp (u _ _))
+  
   HGpd : Type -> Type
   HGpd A = NType (tl 1) A
 

@@ -103,7 +103,6 @@ module lib.AdjointEquiv where
 
  infixr 10 _∘equiv_
  
- -- FIXME prove
  postulate 
    IsEquiv-HProp : {A B : Type} (f : A → B) → HProp (IsEquiv f)
    
