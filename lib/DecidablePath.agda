@@ -1,12 +1,8 @@
 {-# OPTIONS --without-K --type-in-type #-}
 
-open import lib.Paths
-open Paths
 open import lib.First
+open import lib.Paths
 open import lib.Sums
-open import lib.Prods
-open import lib.Bool
-open import lib.AdjointEquiv
 
 module lib.DecidablePath where
 

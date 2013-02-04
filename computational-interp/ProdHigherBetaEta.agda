@@ -2,7 +2,7 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude hiding (_×_ ; fst ; snd; _,_; fst≃; snd≃; pair≃ ; transport-×; ×≃η; ×≃β1; ×≃β2; ∘-×)
-open Paths 
+ 
 
 module computational-interp.ProdHigherBetaEta where
 

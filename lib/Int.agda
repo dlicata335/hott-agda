@@ -5,10 +5,8 @@ open import lib.Paths public
 open import lib.Prods public
 open import lib.Sums public
 open import lib.AdjointEquiv 
-open Paths
-open import lib.NTypes
+open import lib.NType
 open import lib.Truncations
-open import lib.Univalence
 open Truncation
 open import lib.Nat
 open import lib.DecidablePath

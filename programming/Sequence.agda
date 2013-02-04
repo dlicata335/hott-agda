@@ -2,7 +2,6 @@
 {-# OPTIONS --type-in-type #-}
 
 open import lib.Prelude
-open Paths
 
 module programming.Sequence where
 

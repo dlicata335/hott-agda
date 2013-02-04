@@ -4,7 +4,7 @@
 
 open import lib.Prelude 
 open import homotopy.Hopf
-open Paths
+
 open Truncation
 open Int
 open LoopSpace

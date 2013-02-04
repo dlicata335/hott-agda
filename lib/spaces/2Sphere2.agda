@@ -4,7 +4,7 @@ open import lib.BasicTypes
 
 module lib.spaces.2Sphere2 where
 
-  open Paths
+  
 
   module S²2 where
     private

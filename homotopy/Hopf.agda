@@ -2,7 +2,7 @@
 
 open import lib.Prelude 
 open import homotopy.Pi1S1 
-open Paths
+
 
 module homotopy.Hopf where
 

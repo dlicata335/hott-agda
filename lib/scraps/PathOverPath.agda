@@ -6,7 +6,7 @@
 -- we also use M ≃ N and Paths M N as notation for Id M N
 
 open import lib.Paths
-open Paths
+
 open import lib.Prods using (Σ ; fst ; snd ; _,_ ; _×_)
 open import lib.Functions using (λ≃)
 open lib.Prods.NDPair using (nondep-pair≃)

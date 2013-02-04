@@ -3,82 +3,11 @@
 open import lib.First
 open import lib.Paths 
 open import lib.Prods
-open import lib.NTypes
-open Paths
+open import lib.NType
+open import lib.WEq
+open import lib.Functions
 
 module lib.AdjointEquiv where
-
- record IsEquiv {A B : Type} (f : A → B) : Type where
-  constructor isequiv
-  field
-     g : B → A
-     α : (x : A) → Path (g (f x)) x
-     β : (y : B) → Path (f (g y)) y
-     γ : (x : A) →  Path (β (f x)) (ap f (α x)) -- coherence condition necessary for higher spaces
-     -- also satifies:
-     -- (y : B) →  Path (α (g y)) (ap g (β y));
-     -- this is just γ with f<→g and α<→β, so we'll prove this in
-     -- the process of defining !-equiv below
-
- Equiv : Type -> Type -> Type
- Equiv A B = Σ (IsEquiv{A}{B})
-
- equiv : {A B : Type}
-     (f : A → B)
-     (g : B → A)
-     (α : (x : A) → Path (g (f x)) x)
-     (β : (y : B) → Path (f (g y)) y)
-     (γ : (x : A) →  Path (β (f x)) (ap f (α x)))
-   → Equiv A B
- equiv f g α β γ = f , isequiv g α β γ
-
- record IsHEquiv {A B : Type} (f : A → B) : Type where
-   constructor ishequiv
-   field
-     g : B → A
-     α : (x : A) → Path (g (f x)) x
-     β : (y : B) → Path (f (g y)) y
-
- HEquiv : Type → Type → Type
- HEquiv A B = Σ (IsHEquiv{A}{B})
-
- hequiv : {A B : Type}
-     (f : A → B)
-     (g : B → A)
-     (α : (x : A) → Path (g (f x)) x)
-     (β : (y : B) → Path (f (g y)) y)
-     → HEquiv A B
- hequiv f g α β = f , ishequiv g α β
-
- inverses-natural : ∀ {A B} (f : A → B) (g : B → A) (η : (x : A) → Path (g (f x)) x)
-                      {x : A} 
-                   → Path (η (g (f x))) (ap (g o f) (η x))
- inverses-natural f g η {x} = 
-   (∘-unit-l _ ∘ ap (λ y → y ∘ ap (λ x' → g (f x')) (η x)) (!-inv-l (η x))) ∘ 
-   ap (λ a → (! a ∘ η x) ∘ ap (g o f) (η x)) (ap-id (η x)) ∘
-   move-right-right-! (η (g (f x))) (ap (λ x' → g (f x')) (η x)) _
-     (move-right (ap (λ x' → x') (η x)) (η (g (f x)) ∘ ! (ap (λ x' → g (f x')) (η x))) _
-       (apd η (η x) ∘ ! (transport-Path (g o f) (λ x' → x') (η x) (η (g (f x)))))) 
-
- improve : {A B : Type} → HEquiv A B → Equiv A B
- improve (f , ishequiv g η ξ) = 
-   equiv f g 
-         η 
-         (λ x → ξ x ∘ ap f (η (g x)) ∘ ap (f o g) (! (ξ x)))
-         coh where
-   abstract -- we might someday need to know this, but for now it's slowing things down too much
-            -- at call sites to normalize it
-     coh : (x : _) -> ξ (f x) ∘ ap f (η (g (f x))) ∘ ap (f o g) (! (ξ (f x))) ≃ ap f (η x)
-     coh =
-         (λ x → ξ (f x) ∘ ap f (η (g (f x))) ∘ ap (f o g) (! (ξ (f x)))                            ≃〈 ap (λ a → ξ (f x) ∘ ap f a ∘ ap (f o g) (! (ξ (f x)))) (inverses-natural f g η) 〉 
-                ξ (f x) ∘ ap f (ap (g o f) (η x)) ∘ ap (f o g) (! (ξ (f x)))                      ≃〈 ap (λ a → ξ (f x) ∘ a ∘ ap (f o g) (! (ξ (f x)))) (ap-o (f o g) f (η x) ∘ ! (ap-o f (g o f) (η x))) 〉 
-                ξ (f x) ∘ ap (f o g) (ap f (η x)) ∘ ap (f o g) (! (ξ (f x)))                      ≃〈 ap (λ a → ξ (f x) ∘ a ∘ ap (f o g) (! (ξ (f x)))) (ap (λ a → ! (ξ (f x)) ∘ ap f (η x) ∘ a) (!-invol (ξ (f (g (f x))))) ∘ ap-by-id (λ x' → ! (ξ x')) (ap f (η x))) 〉 
-                ξ (f x) ∘ (! (ξ (f x)) ∘ (ap f (η x)) ∘ ξ (f (g (f x)))) ∘ ap (f o g) (! (ξ (f x))) ≃〈 rassoc-1-3-1 (ξ (f x)) (! (ξ (f x))) (ap f (η x)) (ξ (f (g (f x)))) (ap (f o g) (! (ξ (f x)))) 〉 
-                ξ (f x) ∘ ! (ξ (f x)) ∘ (ap f (η x)) ∘ ξ (f (g (f x))) ∘ ap (f o g) (! (ξ (f x)))   ≃〈 !-inv-r-front (ξ (f x)) (ap f (η x) ∘ ξ (f (g (f x))) ∘ ap (f o g) (! (ξ (f x)))) 〉 
-                (ap f (η x)) ∘ ξ (f (g (f x))) ∘ ap (f o g) (! (ξ (f x)))                          ≃〈 ap (λ a → ap f (η x) ∘ a ∘ ap (f o g) (! (ξ (f x)))) (inverses-natural g f ξ) 〉 
-                (ap f (η x)) ∘ ap (f o g) (ξ ((f x))) ∘ ap (f o g) (! (ξ (f x)))                  ≃〈 ap (λ a → ap f (η x) ∘ ap (f o g) (ξ (f x)) ∘ a) (ap-! (f o g) (ξ (f x))) 〉 
-                (ap f (η x)) ∘ ap (f o g) (ξ ((f x))) ∘ ! (ap (f o g) (ξ (f x)))                  ≃〈 ap (λ a → ap f (η x) ∘ a) (!-inv-r (ap (f o g) (ξ (f x)))) 〉 
-                (ap f (η x) ∎)) 
 
  id-equiv : ∀ {A} -> Equiv A A
  id-equiv = ( (\ x -> x) , isequiv (λ x → x) (\ _ -> id) (\ _ -> id) (\ _ -> id))
@@ -103,38 +32,6 @@ module lib.AdjointEquiv where
 
  infixr 10 _∘equiv_
  
-{- 
- -- FIXME move somewhere else
-
- -- might want to know what coercing by this does... 
- apΣ : {A A' : Type} {B : A → Type} {B' : A' → Type}
-       (a : A ≃ A')
-       (b : (\ (x : A) → B x) ≃ (\ (x : A) → B' (coe a x)))
-     → Σ B ≃ Σ B'
- apΣ id id = id
-
- -- build in some β reduction
- apΣ' : {A A' : Type} {B : A → Type} {B' : A' → Type}
-        (a : Equiv A A')
-        (b : (x' : A') → B (IsEquiv.g (snd a) x') ≃ B' x')
-      → Σ B ≃ Σ B'
- apΣ' {A = A} {B = B} {B' = B'}  a b = apΣ (ua a) (λ≃ (λ x' → ap B' (! (ap≃ (type≃β a))) ∘ b (fst a x') ∘ ap B (! (IsEquiv.α (snd a) _)))) -- (λ≃ (λ x → ap B' (! (ap≃ (type≃β a))) ∘ b x))
-
- uncurry≃ : (A : Type) (B : A -> Type) (C : Σ B -> Type)
-          -> ((p : Σ B) → C p)
-          ≃  ((x : A) (y : B x) -> C (x , y))
- uncurry≃ _ _ _ = ua (equiv (λ f x y → f (x , y)) (λ f p → f (fst p) (snd p)) (λ _ → id) (λ _ → id) (λ _ → id))
-
- exchange≃ : {A : Type} {B : Type} {C : A → B → Type}
-           -> ((x : A) (y : B) → C x y)
-            ≃ ((y : B) (x : A) → C x y)
- exchange≃ = ua (equiv (λ f x y → f y x) (λ f x y → f y x) (λ _ → id) (λ _ → id) (λ _ → id))
-
- path-induction≃ : {B : Type} {b : B} {C : (y : B) -> Path b y → Type}
-                   → ((y : B) (p : Path b y) → C y p)
-                   ≃ C b id
- path-induction≃ {b = b} {C = C} = ua (improve (hequiv (λ f → f b id) (λ b' y p → path-induction C b' p) (λ f → λ≃ (λ x → λ≃ (λ p → path-induction (λ x' x0 → Id (path-induction C (f b id) x0) (f x' x0)) id p))) (λ _ → id)))
-
  IsEquiv-as-tuple≃ : ∀ {A B} (f : A → B)
                   -> IsEquiv f ≃ 
                      (Σe (Σe (B → A) (λ g → (x : B) → Id (f (g x)) x))
@@ -169,10 +66,9 @@ module lib.AdjointEquiv where
        STS' α x = transport (λ v → Path (f v) (f x)) (α x) (snd f' (f x)) ≃ id ≃〈 ap (BackPath _) (transport-Path-pre' f (α x) (snd f' (f x))) 〉
                   (snd f' (f x) ∘ ! (ap f (α x))) ≃ id ≃〈 cancels-inverse-is≃ (snd f' (f x)) (ap f (α x)) 〉 
                   (snd f' (f x)) ≃ (ap f (α x)) ∎
--}
 
- postulate
-   IsEquiv-HProp : {A B : Type} (f : A → B) → HProp (IsEquiv f)
+ IsEquiv-HProp : {A B : Type} (f : A → B) → HProp (IsEquiv f)
+ IsEquiv-HProp f = transport HProp (IsWeq≃IsEquiv f) (IsWEq-HProp f)
 
 
 

@@ -3,7 +3,6 @@
 
 open import lib.First
 open import lib.Paths
-open Paths
 open import lib.Functions
 open import lib.Nat
 open import lib.Int
@@ -11,9 +10,7 @@ open import lib.Prods
 open import lib.Sums
 open Int
 open import lib.AdjointEquiv
-open import lib.Univalence
-open import lib.NTypes
-open import lib.NTypes2
+open import lib.NType
 open import lib.Truncations
 open Truncation
 open import lib.WrappedPath

@@ -3,9 +3,6 @@
 open import lib.First
 open import lib.Paths
 open import lib.Functions
-open Paths
-open import lib.AdjointEquiv
-open import lib.Univalence
 
 module lib.HigherHomotopyAbelian where
  

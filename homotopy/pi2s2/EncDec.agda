@@ -4,7 +4,7 @@ open import lib.Prelude
 open import homotopy.Hopf
 import homotopy.Pi1S1
 import homotopy.Pi2S2.Retract
-open Paths
+
 open Int
 
 module homotopy.Pi2S2.EncDec where

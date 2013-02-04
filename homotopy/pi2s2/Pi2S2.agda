@@ -8,7 +8,7 @@ import homotopy.Pi1S1
 import homotopy.Pi2S2.Retract
 open import homotopy.Pi2S2.EncDec
 open import homotopy.Pi2S2.Inverses
-open Paths
+
 open Int
 open Truncation
 

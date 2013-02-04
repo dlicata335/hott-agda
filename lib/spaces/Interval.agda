@@ -4,7 +4,7 @@ open import lib.BasicTypes
 
 module lib.spaces.Interval where
 
-  open Paths
+  
 
   private 
     -- thing you would try first

@@ -3,12 +3,10 @@
 
 open import lib.First
 open import lib.Paths
-open Paths
 open import lib.Functions
 open import lib.Int
 open Int
 open import lib.AdjointEquiv
-open import lib.Univalence
 open import lib.Truncations
 open Truncation
 open import lib.WrappedPath

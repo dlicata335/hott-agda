@@ -3,7 +3,7 @@
 open import lib.Prelude
 open Truncation
 open Int
-open Paths
+
 
 module homotopy.PiNSN where
 

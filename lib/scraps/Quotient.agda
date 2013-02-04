@@ -3,7 +3,7 @@
 {-# OPTIONS --without-K --type-in-type #-}
 
 open import lib.Paths
-open Paths
+
 open import lib.Prods
 open import lib.Nat 
 open NatM using (_+_)

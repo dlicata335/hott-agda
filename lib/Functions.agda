@@ -3,9 +3,6 @@
 open import lib.First
 open import lib.Paths 
 open import lib.Prods
-open import lib.AdjointEquiv
-open import lib.NTypes
-open Paths
 
 module lib.Functions where 
 
@@ -21,10 +18,6 @@ module lib.Functions where
                  -> ap2 _o_ (δ2' ∘ δ1') (δ2 ∘ δ1) ≃ ap2 _o_ δ2' δ2 ∘ ap2 _o_ δ1' δ1 
   ichange-theory id id id id = id
   
-  ap≃ : ∀ {A} {B : A → Type} {f g : (x : A) → B x} 
-         → Path f g → {x : A} → Path (f x) (g x)
-  ap≃ α {x} = ap (\ f → f x) α
-
   ap≃i : ∀ {A} {B : A -> Set} {f g : {x : A} -> B x} 
        -> Path (\ {x} -> f {x}) (\ {x} -> g {x}) -> ({x : A} -> Path (f {x}) (g {x}))
   ap≃i α {x} = ap (\ f -> f {x}) α
@@ -42,21 +35,14 @@ module lib.Functions where
   ap≃₁→ : {A B : Type} {f g : A → B} {x y : A} → f ≃ g → x ≃ y → f x ≃ g y
   ap≃₁→ α β = ap2 (\ f x -> f x) α β
 
-  postulate {- HoTT Axiom -} 
-    λ≃  : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> ((x : A) -> Path (f x) (g x)) -> Path f g
-    Π≃η : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} 
-         -> (α : Path f g)
-         -> α ≃ λ≃ (\ x -> ap≃ α {x})
-    Π≃β : ∀ {A} {B : A -> Set} {f g : (x : A) -> B x} -> (α : (x : A) -> Path (f x) (g x)) {N : A}
-         -> ap≃ (λ≃ α) {N} ≃ (α N)
-    -- FIXME should assume a coherence cell too
-  
-    λ≃i : ∀ {A} {B : A -> Set} {f g : {x : A} -> B x} -> ((x : A) -> Path (f {x}) (g {x})) -> Path{ {x : A} -> B x } f g
-
   module ΠPath where
     eqv : {A : Type} {B : A → Type} {f g : (x : A) → B x} 
         → Equiv ((x : A) → Path (f x) (g x)) (Path f g)
     eqv = improve (hequiv λ≃ (λ α → λ x → ap≃ α {x}) (λ α → λ≃ (λ x → Π≃β α)) (λ y → ! (Π≃η y)))
+
+    path : {A : Type} {B : A → Type} {f g : (x : A) → B x} 
+        → ((x : A) → Path (f x) (g x)) ≃ (Path f g)
+    path = ua eqv
 
   transport-→ :  {Γ : Type} (A B : Γ → Type) {θ1 θ2 : Γ} 
                   (δ : θ1 ≃ θ2) (f : A θ1 → B θ1) 
@@ -183,10 +169,27 @@ module lib.Functions where
                     ≃ ap2 f α β
   ap-uncurry f id id = id
 
-{-                 
-  λ≃-refl : ∀ {A B} {f : A -> B} -> 
-          Path{Path {A -> B} f f} 
-            (λ≃ (\ x -> id{_}{f x})) 
-            (id{_}{f})
-  λ≃-refl = {!!}
--}  
+  Πlevel : ∀{A n}{B : A → Type} → ((x : A) -> NType n (B x)) → NType n ((x : A) → B x)
+  Πlevel {A} { -2} a = ntype ((λ x → fst (use-level (a x))) , (λ f → λ≃ (λ x → snd (use-level (a x)) (f x))))
+  Πlevel {A} {S n} a = ntype (λ f g → transport (NType n) (ua ΠPath.eqv) (Πlevel {A} {n} (λ x → use-level (a x) _ _)))
+
+  uncurry≃ : (A : Type) (B : A -> Type) (C : Σ B -> Type)
+           -> ((p : Σ B) → C p)
+           ≃  ((x : A) (y : B x) -> C (x , y))
+  uncurry≃ _ _ _ = ua (equiv (λ f x y → f (x , y)) (λ f p → f (fst p) (snd p)) (λ _ → id) (λ _ → id) (λ _ → id))
+ 
+  exchange≃ : {A : Type} {B : Type} {C : A → B → Type}
+            -> ((x : A) (y : B) → C x y)
+             ≃ ((y : B) (x : A) → C x y)
+  exchange≃ = ua (equiv (λ f x y → f y x) (λ f x y → f y x) (λ _ → id) (λ _ → id) (λ _ → id))
+
+  ΠΣcommuteEquiv : (A : Type) (B : A -> Type) (C : (x : A) → B x → Type)
+            → Equiv ((x : A) → (Σ \ (y : B x) -> C x y))
+                    (Σ \ (f : (x : A) →  B x) → ((x : A) → C x (f x)))
+  ΠΣcommuteEquiv A B C = (improve (hequiv ((λ f → (λ x → fst (f x)) , (λ x → snd (f x))))
+                                           (λ p → λ x → fst p x , snd p x) (λ _ → id) (λ _ → id)))
+
+  ΠΣcommute : (A : Type) (B : A -> Type) (C : (x : A) → B x → Type)
+            → ((x : A) → (Σ \ (y : B x) -> C x y))
+            ≃ Σ \ (f : (x : A) →  B x) → ((x : A) → C x (f x))
+  ΠΣcommute A B C = ua (ΠΣcommuteEquiv A B C) 

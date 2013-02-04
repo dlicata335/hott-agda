@@ -1,7 +1,7 @@
 {-# OPTIONS --type-in-type #-}
 
+open import lib.First
 open import lib.Paths
-open Paths
 open import lib.Prods
 open import lib.Functions
 

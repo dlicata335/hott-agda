@@ -4,7 +4,7 @@ open import lib.BasicTypes
 
 module lib.spaces.3Sphere1 where
 
-  open Paths
+  
 
   module S³1 where
     private

@@ -1,7 +1,7 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude 
-open Paths
+
 
 module computational-interp.JFromSubst where
 

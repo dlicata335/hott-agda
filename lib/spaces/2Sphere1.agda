@@ -4,8 +4,6 @@ open import lib.BasicTypes
 
 module lib.spaces.2Sphere1 where
 
-  open Paths
-
   module S²1 where
 
    module S where

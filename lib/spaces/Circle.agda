@@ -4,7 +4,7 @@ open import lib.BasicTypes
 
 module lib.spaces.Circle where
 
-  open Paths
+  
 
   module S¹ where
     private

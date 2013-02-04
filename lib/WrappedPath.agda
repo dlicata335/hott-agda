@@ -2,7 +2,6 @@
 
 open import lib.First
 open import lib.Paths
-open Paths
 open import lib.HigherHomotopyAbelian
 open HigherHomotopyAbelian
 open import lib.Functions
@@ -102,17 +101,13 @@ module lib.WrappedPath where
             → adj w α ≃ adj (w ∘ w') m
   adj-bind β = adj-∘ _ _ _ ∘ ap (adj _) β 
 
-  {- don't need these--just use adj-bind at the call site! it's easy!
- 
-  adj-ap-adj : ∀ {A B}{a a1 b} → (f : A → B) (α : Path a a) (p : Id _ b) (q : Path _ a1)
-             -> adj p (ap f (adj q α)) ≃ adj (p ∘ ap f q) (ap f α)
-  adj-ap-adj f α p q = adj-bind (ap-adj f α q) 
+  adj-middle-id : ∀ {A} {m1 m2 : A} (w : m1 ≃ m2) (m : m1 ≃ m1)
+                ->  (m ≃ id) ≃ (adj w m ≃ id)
+  adj-middle-id id m = ap (λ x → Id x id) (adj-id m)
 
-  adj-ap-loop-by-equals : {A B : Type} {f g : A → B}
-                          (α : (x : _) → g x ≃ f x) 
-                          → {M : A} (β : M ≃ M) {b : B}
-                          → (p : Path (f M) b)
-                          → adj p (ap f β) ≃ adj (p ∘ α M) (ap g β)
-  adj-ap-loop-by-equals α β p = adj-∘ _ (α _) _ ∘ ap (adj p) (ap-loop-by-equals α β)
-  -}
- 
+  move-adj≃ : ∀ {A} {a1 a2 a3 : A} 
+             {w : a1 ≃ a2} (m : a1 ≃ a1)
+             {w' : a3 ≃ a2} (m' : a3 ≃ a3)
+           -> (adj w m ≃ adj w' m') ≃ (m ≃ adj (! w ∘ w') m')
+  move-adj≃ {w = id} m1 {w' = id} m1' = ap (λ x → Path x (adj id m1')) (∘-unit-l m1 ∘ (adj-def _ _))
+

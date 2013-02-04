@@ -4,7 +4,7 @@ open import lib.First
 open import lib.Paths
 open import lib.Prods
 open import lib.Int
-open Paths
+
 open Int
 open import lib.AdjointEquiv
 open import lib.Functions

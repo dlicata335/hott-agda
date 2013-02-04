@@ -2,16 +2,7 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.First
-open import lib.Paths 
-open import lib.Prods
-open import lib.Prods2
-open import lib.NTypes
-open import lib.NTypes2
-open import lib.Functions
-open import lib.AdjointEquiv
-open import lib.TypeEquivalence
-open import lib.Univalence
-open Paths
+open import lib.NType
 
 module lib.WEq where
 
@@ -28,6 +19,8 @@ module lib.WEq where
   IsWEq-HProp f = unique-HProp (λ w w' → λ≃ (λ y → HProp-unique (Contractible-is-HProp _) _ _))
 
 {-
+  -- same as adjoint equiv: 
+
   -- can write out the maps explicitly but don't want to do the beta reduction
   -- don't want to do the beta reduction
 

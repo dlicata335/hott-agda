@@ -5,8 +5,6 @@ open import lib.WEq
 
 module lib.spaces.Torus where
 
-  open Paths
-
   module Torus where
     private
       data T' : Set where

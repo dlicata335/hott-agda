@@ -4,7 +4,7 @@
 {-# OPTIONS --type-in-type #-}
 
 open import lib.Prelude
-open Paths
+
 
 module polymorphism.SubsetModel where
 

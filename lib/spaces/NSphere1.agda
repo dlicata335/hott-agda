@@ -5,8 +5,6 @@ open import lib.First
 open import lib.Int
 open import lib.Paths
 open import lib.AdjointEquiv
-open import lib.Univalence
-open Paths
 open Int
 open import lib.spaces.Circle
 

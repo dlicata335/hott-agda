@@ -5,7 +5,6 @@ open import lib.Paths
 open import lib.Prods
 open import lib.Functions
 open import lib.Sums
-open Paths
 
 module lib.Bool where
 

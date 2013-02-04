@@ -2,7 +2,7 @@
 
 open import lib.Prelude 
 open import homotopy.Hopf
-open Paths
+
 
 module homotopy.Pi2S2.Retract where
 

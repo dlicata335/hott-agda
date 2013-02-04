@@ -3,7 +3,7 @@
 open import lib.Prelude
 open Truncation
 open Int
-open Paths
+
 open LoopSpace
 open import homotopy.Pi1S1 using (Ω₁[S¹]≃Int)
 

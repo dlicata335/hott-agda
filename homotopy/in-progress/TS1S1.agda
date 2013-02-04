@@ -1,7 +1,7 @@
 
 {-# OPTIONS --type-in-type --without-K #-}
 open import lib.Prelude
-open Paths
+
 open S¹
 open Torus using (T; T-rec ; T-elim)
 module homotopy.TS1S1 where

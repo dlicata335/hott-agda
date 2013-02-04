@@ -2,7 +2,6 @@
 
 open import lib.First
 open import lib.Paths
-open Paths
 
 module lib.Suspension where
 
