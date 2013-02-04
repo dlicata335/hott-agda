@@ -31,6 +31,9 @@ module lib.NType where
   lt-unS-right ltS = Inr id
   lt-unS-right (ltSR y) = Inl y
 
+  nothing<-2 : ∀ {n} -> n <tl -2 -> Void
+  nothing<-2 ()
+
 
   -- alternate characterizations
 

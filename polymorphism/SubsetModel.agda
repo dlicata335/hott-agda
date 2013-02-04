@@ -1,7 +1,7 @@
 
 -- FIXME: something went wrong in the library update---runs out of memory now
 
-{-# OPTIONS --type-in-type #-}
+{-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude
 
@@ -114,10 +114,10 @@ module polymorphism.SubsetModel where
                         (pair≃ (pair≃ id (α0 g0)) {!!})
                         (s1 g0 g1))
 
-  contract : {Γ : Ctx} {A : Ty Γ} (M N : Tm A) (P : Tm (ID A M N)) 
+  contract' : {Γ : Ctx} {A : Ty Γ} (M N : Tm A) (P : Tm (ID A M N)) 
            -> Tm (ID (Σt A (ID (tysubst A (p A)) (tmsubst M (p A)) (v A))) (pair A (ID (tysubst A (p A)) (tmsubst M (p A)) (v A)) M (refl M)) (pair A (ID (tysubst A (p A)) (tmsubst M (p A)) (v A)) N P))
-  contract (tm M0 M1) (tm N0 N1) (tm P0 P1) = tm (λ g0 → pair≃ (P0 g0) (transport-Path-right (P0 g0) id)) 
-                                                 (λ g0 g1 → {!!})
+  contract' (tm M0 M1) (tm N0 N1) (tm P0 P1) = tm (λ g0 → pair≃ (P0 g0) (transport-Path-right (P0 g0) id)) 
+                                                  (λ g0 g1 → {!!})
 
   -- FIXME: finish and check computation rules
   
@@ -142,6 +142,7 @@ module polymorphism.SubsetModel where
             Tm {∫ (El B)} (ID (El (tmsubst B (p (El B)))) (tmsubst l (_,,_ {∫ (El B)} {Γ} {El A} (p (El B)) r)) (v (El B)))
           × Tm {∫ (El A)} (ID (El (tmsubst A (p (El A)))) (tmsubst r (_,,_ {∫ (El A)} {Γ} {El B} (p (El A)) l)) (v (El A)))
 
+{- FIXME used to typecheck
   univalencet : ∀ {Γ} {A B : Tm (U{Γ})} -> Equivt A B -> Tm (ID U A B)
   univalencet {Γ}{tm A0 A1}{tm B0 B1} (tm l0 l1 , tm r0 r1 , tm α0 α1 , tm β0 β1) =
               tm (\ g0 -> (ua (equiv1 g0)))
@@ -168,21 +169,18 @@ module polymorphism.SubsetModel where
                                                   (λ b0 → r0 (g0 , b0))
                                                   (λ a0 → β0 (g0 , a0))
                                                   (λ b0 → α0 (g0 , b0))))
-
+-}
 
   -- universe of with h-prop valued relations
 
   -- FIXME: what do you get if you say this internally?  
   -- this is probably wrong
 
-  UIP = \ (A : Set) -> (x y : A) (p q : Id x y) -> Id p q
-  Irrel = \ (A : Set) -> (x y : A) -> Id x y
-
-  HSet = Σ UIP
-  HProp = Σ Irrel
+  HSets  = NTypes (tl 0)
+  HProps = NTypes (S -2)
 
   hset : ∀ {Γ} -> Ty Γ
-  hset = ty (λ _ → HSet) (λ _ _ A → fst A → HProp)
+  hset = ty (λ _ → HSets) (λ _ _ A → fst A → HProps)
 
   El-hset : ∀ {Γ} -> Tm hset -> Ty Γ
   El-hset (tm A0 A1) = ty (\ g0 -> fst (A0 g0)) (\ g0 g1 a0 -> fst (A1 g0 g1 a0))
@@ -243,7 +241,9 @@ module polymorphism.SubsetModel where
                      (v (El-hset (v {Γ} hset))))
 
 
+    {- FIXME used to typecheck
     eta : ∀ {Γ} 
         -> Tm{Γ} (Π (idty{Γ}) (# (ID idty (v (idty{Γ})) idfun)))
     eta {Γ} = tm _ (λ g0 g1 f0 f1 → (λ≃ (λ A → λ≃ (λ x → f1 A (λ y → Id y x , (snd A _ _)) x id))) , 
-                                     λ≃ (λ a0 → λ≃ (λ a1 → λ≃ (λ a2 → λ≃ (λ a23 → snd (a1 a2) _ _)))))
+                                        λ≃ (λ a0 → λ≃ (λ a1 → λ≃ (λ a2 → λ≃ (λ a23 → snd (a1 a2) _ _)))))
+    -} 

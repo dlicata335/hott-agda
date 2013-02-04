@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type #-}
+{-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude
 open Truncation
@@ -92,7 +92,7 @@ module homotopy.PiKSNLess where
   theorem One One (ltSR (ltSR (ltSR ())))
   theorem (S One) One (ltSR (ltSR (ltSR ())))
   theorem (S (S One)) One (ltSR (ltSR (ltSR ())))
-  theorem (S (S (S n))) One lt with lt-unS (lt-unS (lt-unS lt))
+  theorem (S (S (S n))) One lt with (nothing<-2 (lt-unS (lt-unS (lt-unS lt))))
   ... | () 
 
   {- why the above argument doesn't work for arbitrary k

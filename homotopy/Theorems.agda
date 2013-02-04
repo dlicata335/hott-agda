@@ -1,4 +1,5 @@
-import homotopy.Pi1Either
+-- wrapper to type check everything that's doneimport homotopy.Pi1Either
+
 import homotopy.Pi1S1
 
 import homotopy.Hopf
@@ -12,4 +13,3 @@ import homotopy.Pi2S2.Pi2S2
 
 module homotopy.Theorems where
 
-  -- wrapper to type check everything that's done
