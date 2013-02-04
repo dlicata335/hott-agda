@@ -5,7 +5,6 @@ open import lib.Paths
 open import lib.Prods
 open import lib.NTypes
 open Paths
-open import lib.WEq
 
 module lib.AdjointEquiv where
 
@@ -104,10 +103,79 @@ module lib.AdjointEquiv where
 
  infixr 10 _∘equiv_
  
- postulate 
+{- 
+ -- FIXME move somewhere else
+
+ -- might want to know what coercing by this does... 
+ apΣ : {A A' : Type} {B : A → Type} {B' : A' → Type}
+       (a : A ≃ A')
+       (b : (\ (x : A) → B x) ≃ (\ (x : A) → B' (coe a x)))
+     → Σ B ≃ Σ B'
+ apΣ id id = id
+
+ -- build in some β reduction
+ apΣ' : {A A' : Type} {B : A → Type} {B' : A' → Type}
+        (a : Equiv A A')
+        (b : (x' : A') → B (IsEquiv.g (snd a) x') ≃ B' x')
+      → Σ B ≃ Σ B'
+ apΣ' {A = A} {B = B} {B' = B'}  a b = apΣ (ua a) (λ≃ (λ x' → ap B' (! (ap≃ (type≃β a))) ∘ b (fst a x') ∘ ap B (! (IsEquiv.α (snd a) _)))) -- (λ≃ (λ x → ap B' (! (ap≃ (type≃β a))) ∘ b x))
+
+ uncurry≃ : (A : Type) (B : A -> Type) (C : Σ B -> Type)
+          -> ((p : Σ B) → C p)
+          ≃  ((x : A) (y : B x) -> C (x , y))
+ uncurry≃ _ _ _ = ua (equiv (λ f x y → f (x , y)) (λ f p → f (fst p) (snd p)) (λ _ → id) (λ _ → id) (λ _ → id))
+
+ exchange≃ : {A : Type} {B : Type} {C : A → B → Type}
+           -> ((x : A) (y : B) → C x y)
+            ≃ ((y : B) (x : A) → C x y)
+ exchange≃ = ua (equiv (λ f x y → f y x) (λ f x y → f y x) (λ _ → id) (λ _ → id) (λ _ → id))
+
+ path-induction≃ : {B : Type} {b : B} {C : (y : B) -> Path b y → Type}
+                   → ((y : B) (p : Path b y) → C y p)
+                   ≃ C b id
+ path-induction≃ {b = b} {C = C} = ua (improve (hequiv (λ f → f b id) (λ b' y p → path-induction C b' p) (λ f → λ≃ (λ x → λ≃ (λ p → path-induction (λ x' x0 → Id (path-induction C (f b id) x0) (f x' x0)) id p))) (λ _ → id)))
+
+ IsEquiv-as-tuple≃ : ∀ {A B} (f : A → B)
+                  -> IsEquiv f ≃ 
+                     (Σe (Σe (B → A) (λ g → (x : B) → Id (f (g x)) x))
+                          (λ gβ → Σe ((x : A) → Id (fst gβ (f x)) x)
+                                     (λ α → (x : A) → Id (snd gβ (f x)) (ap f (α x)))))
+ IsEquiv-as-tuple≃ f = ua (improve (hequiv (λ {(isequiv g α β γ) → (g , β) , α , γ}) (\ {((g , β) , αγ) → isequiv g (fst αγ) β (snd αγ)}) (λ _ → id) (λ _ → id)))
+
+ IsWeq≃IsEquiv : {A B : Type} (f : A → B)
+              -> IsWEq f ≃ IsEquiv f
+ IsWeq≃IsEquiv{A}{B} f = IsWEq f ≃〈 id 〉 
+                  ((y : B) → Contractible (Σ \x -> Path (f x) y)) ≃〈 id 〉 
+                  ((y : B) → Σ (\ (p : (Σ \x -> Path (f x) y)) → ((q : (Σ \x -> Path (f x) y)) → Path p q))) ≃〈 ΠΣcommute _ _ _ 〉 
+                  Σ (λ (f' : (x : B) → Σ (λ x' → Path (f x') x)) → (x : B) (q : Σ (λ x' → Path (f x') x)) → Path (f' x) q) ≃〈 apΣ' (ΠΣcommuteEquiv _ _ _) (λ x' → id) 〉 
+                  Σ (λ (f' : Σ (λ (g : B → A) → (x : B) → Path (f (g x)) x)) 
+                     → (y : B) (q : Σ (λ (x : A) → Path (f x) y)) → Path (fst f' y , snd f' y) q) ≃〈 ap (λ t → Σ {A = Σ (λ (g : B → A) → (x : B) → Path (f (g x)) x)} t) (λ≃ STS) 〉 
+                  Σ (λ x → Σ (λ α → (x' : A) → snd x (f x') ≃ ap f (α x'))) ≃〈 ! (IsEquiv-as-tuple≃ f) 〉 
+                  IsEquiv f ∎ where
+   STS : (f' : Σ (λ (g : B → A) → (x : B) → Path (f (g x)) x)) → 
+        ((y : B) (q : Σ (λ (x : A) → Path (f x) y)) → Path (fst f' y , snd f' y) q) 
+       ≃ Σ (λ α → (x : A) → snd f' (f x) ≃ ap f (α x)) 
+   STS f' = ((y : B) (q : Σ (λ (x : A) → Path (f x) y)) → Path (fst f' y , snd f' y) q) ≃〈 ap (λ C → (y : B) → C y) (λ≃ (λ y → uncurry≃ A (λ x → Path (f x) y) _)) 〉
+            ((y : B) (x : A) (y' : Path (f x) y) → Path{Σ (λ v → Path (f v) y)} (fst f' y , snd f' y) (x , y')) ≃〈 exchange≃ 〉
+            ((x : A) (y : B) (y' : Path (f x) y) → Path{Σ (λ v → Path (f v) y)} (fst f' y , snd f' y) (x , y')) ≃〈 ap (λ B' → (x : A) → B' x) (λ≃ (λ x → path-induction≃)) 〉
+            ((x : A) → Path{Σ (λ v → Path (f v) (f x))} (fst f' (f x) , snd f' (f x)) (x , id)) ≃〈 ap (λ C → (x : A) → C x) (λ≃ (λ x → ! ΣPath.path)) 〉
+            ((x : A) → Σ (λ α → Path (transport (λ v → Path (f v) (f x)) α (snd f' (f x))) id)) ≃〈 ΠΣcommute _ _ _ 〉 
+            Σ (λ (α : (x : A) → Id (fst f' (f x)) x) → (x : A) → Path (transport (λ v → Path (f v) (f x)) (α x) (snd f' (f x))) id) ≃〈 ap (λ C → Σ (λ (α : (x : A) → Id (fst f' (f x)) x) → C α)) (λ≃ (λ α → ap (λ C → (x : A) → C x) (λ≃ (λ x → STS' α x)))) 〉 
+            Σ (λ α → (x : A) → snd f' (f x) ≃ ap f (α x)) ∎ where
+       STS' : (α : (x : A) → Id (fst f' (f x)) x) → 
+              (x : A) 
+            → Path (transport (λ v → Path (f v) (f x)) (α x) (snd f' (f x))) id
+            ≃ (snd f' (f x) ≃ ap f (α x)) 
+       STS' α x = transport (λ v → Path (f v) (f x)) (α x) (snd f' (f x)) ≃ id ≃〈 ap (BackPath _) (transport-Path-pre' f (α x) (snd f' (f x))) 〉
+                  (snd f' (f x) ∘ ! (ap f (α x))) ≃ id ≃〈 cancels-inverse-is≃ (snd f' (f x)) (ap f (α x)) 〉 
+                  (snd f' (f x)) ≃ (ap f (α x)) ∎
+-}
+
+ postulate
    IsEquiv-HProp : {A B : Type} (f : A → B) → HProp (IsEquiv f)
+
+
+
    
- module EquivsSame where
-   -- adjToWeq : {A B : Type} (f : A → B) → IsEquiv f → IsWEq A B f
-   -- adjToWeq f (isequiv g α β γ) = λ y → (g y , β y) , (λ y' → pair≃ (α (fst y') ∘ ! (ap g (snd y')))
-   --                                                           {!γ (fst y')!})
+               
+ 

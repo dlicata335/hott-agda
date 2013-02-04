@@ -184,6 +184,16 @@ module lib.Paths where
                       -> Path q (! p)
    cancels-is-inverse {_}{_}{_}{p}{q} α = ∘-unit-l (! p) ∘ move-right-right q p id α
 
+   cancels-is-inverse≃ : ∀ {A} {M N : A} {p : Path M N} {q : Path N M}
+                      -> Path (q ∘ p) id
+                      ≃ Path q (! p)
+   cancels-is-inverse≃ {p = id}{q} = id
+
+   cancels-inverse-is≃ : ∀ {A} {M N : A} (q : Path N M) (p : Path N M)
+                      -> Path (q ∘ ! p) id
+                       ≃ Path q p
+   cancels-inverse-is≃ q id = id
+
    square-id : {A : Type} {x : A} (p : x ≃ x) -> (p ∘ p) ≃ p → p ≃ id
    square-id p α = !-inv-r p ∘ ap (λ x' → x' ∘ ! p) α ∘ ∘-assoc p p (! p) ∘ ap (λ x' → p ∘ x') (! (!-inv-r p))
 

@@ -13,7 +13,6 @@ module lib.Univalence where
   pathToEquiv : ∀ {A B} → Path A B → Equiv A B
   pathToEquiv {A} α = transport(\ x -> Equiv A x) α id-equiv
 
-
   -- eta-expanded version; makes the later definitions easier
   -- and is maybe better for the computational interp,
   -- at least if it's based on groupoids.

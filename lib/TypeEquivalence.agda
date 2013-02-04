@@ -10,6 +10,8 @@ open import lib.WrappedPath
 open import lib.Functions
 open import lib.NTypes
 
+-- FIXME move elsewhere
+
 module lib.TypeEquivalence where
 
   move-transport-right-!≃ : ∀ {A : Type} {M M' : A} (B : A → Type)
@@ -65,4 +67,13 @@ module lib.TypeEquivalence where
                          -> (transport B α b1 ≃ b2) ≃ (transport B' α (coe (ap≃ β) b1) ≃ coe (ap≃ β) b2)
   transport-by-equals≃ _ _ _ id  = id
 
+  ΠΣcommuteEquiv : (A : Type) (B : A -> Type) (C : (x : A) → B x → Type)
+            → Equiv ((x : A) → (Σ \ (y : B x) -> C x y))
+                    (Σ \ (f : (x : A) →  B x) → ((x : A) → C x (f x)))
+  ΠΣcommuteEquiv A B C = (improve (hequiv ((λ f → (λ x → fst (f x)) , (λ x → snd (f x))))
+                                        (λ p → λ x → fst p x , snd p x) (λ _ → id) (λ _ → id)))
 
+  ΠΣcommute : (A : Type) (B : A -> Type) (C : (x : A) → B x → Type)
+            → ((x : A) → (Σ \ (y : B x) -> C x y))
+            ≃ Σ \ (f : (x : A) →  B x) → ((x : A) → C x (f x))
+  ΠΣcommute A B C = ua (ΠΣcommuteEquiv A B C) 

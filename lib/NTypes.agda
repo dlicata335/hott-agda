@@ -46,11 +46,20 @@ module lib.NTypes where
   use-level : ∀ {n A} → NType n A -> NType' n A
   use-level (ntype p) = p
 
+  NTypes : TLevel -> Type
+  NTypes n = Σ \ (A : Type) → NType n A
+
   HProp : Type -> Type
   HProp A = NType -1 A
 
   HSet : Type -> Type
   HSet A = NType (tl 0) A
+
+  HGpd : Type -> Type
+  HGpd A = NType (tl 1) A
+
+
+  -- there's more stuff like this in NType2.agda but we need this early
 
   HSet-UIP : ∀ {A} -> HSet A -> (x y : A) (p q : x ≃ y) -> p ≃ q
   HSet-UIP h x y p q = fst (use-level (use-level (use-level h x y) p q))
@@ -70,17 +79,11 @@ module lib.NTypes where
   UIP-HSet : ∀ {A} -> ((x y : A) (p q : x ≃ y) -> p ≃ q) → HSet A 
   UIP-HSet u = ntype (λ x y → unique-HProp (u _ _))
   
-  HGpd : Type -> Type
-  HGpd A = NType (tl 1) A
-
   Contractible-Path : ∀ {A} -> Contractible A → (x y : A) -> Contractible (Path x y)
   Contractible-Path (acenter , apaths) x y = 
     contract (apaths y ∘ ! (apaths x)) 
              (λ α → move-left-right (apaths y) α (apaths x)
                       (! (apd apaths α ∘ ! (transport-Path-right α (apaths x)))))
-
-  NTypes : TLevel -> Type
-  NTypes n = Σ \ (A : Type) → NType n A
 
 
   -- weakening

@@ -38,16 +38,6 @@ module lib.NTypes2 where
 
   -- would go earlier but need to be later than where they would go
 
-  Πlevel : ∀{A n}{B : A → Type} → ((x : A) -> NType n (B x)) → NType n ((x : A) → B x)
-  Πlevel {A} { -2} a = ntype ((λ x → fst (use-level (a x))) , (λ f → λ≃ (λ x → snd (use-level (a x)) (f x))))
-  Πlevel {A} {S n} a = ntype (λ f g → transport (NType n) (ua ΠPath.eqv) (Πlevel {A} {n} (λ x → use-level (a x) _ _)))
-
-  use-level≃ : ∀ {n A} -> NType n A ≃ NType' n A
-  use-level≃ = ua (improve (hequiv use-level ntype (\ {(ntype _)  -> id}) (\ x -> id)))
-
-
-  -- level of NType predicate
-
   Contractible-is-HProp : (A : Type) -> HProp (Contractible A)
   Contractible-is-HProp A = unique-HProp 
     (λ p q → pair≃ (snd p (fst q)) 
@@ -62,6 +52,16 @@ module lib.NTypes2 where
       (snd p x) ∎
     rearrange : {a b c : A} (α : a ≃ b) (β : a ≃ c) (γ : c ≃ b) → (γ ∘ β ≃ α) → (α ∘ ! β ≃ γ) 
     rearrange id id g = !
+
+  Πlevel : ∀{A n}{B : A → Type} → ((x : A) -> NType n (B x)) → NType n ((x : A) → B x)
+  Πlevel {A} { -2} a = ntype ((λ x → fst (use-level (a x))) , (λ f → λ≃ (λ x → snd (use-level (a x)) (f x))))
+  Πlevel {A} {S n} a = ntype (λ f g → transport (NType n) (ua ΠPath.eqv) (Πlevel {A} {n} (λ x → use-level (a x) _ _)))
+
+  use-level≃ : ∀ {n A} -> NType n A ≃ NType' n A
+  use-level≃ = ua (improve (hequiv use-level ntype (\ {(ntype _)  -> id}) (\ x -> id)))
+
+
+  -- level of NType predicate
 
   NType-is-HProp   : {n : TLevel} (A : Type) -> HProp (NType n A)
   NType-is-HProp { -2 } A = transport (HProp) (! use-level≃) (Contractible-is-HProp A)
