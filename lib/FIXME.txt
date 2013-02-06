@@ -2,12 +2,3 @@ High risk:
 
 Low risk:
 
-(all about truncations; other people have proved them)
-Truncation
-AdjointEquiv
-Int
-
-Just sketchy; not exported:
-
-PathOverPaths
-Quotients
