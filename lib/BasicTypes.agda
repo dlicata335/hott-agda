@@ -31,3 +31,4 @@ module lib.BasicTypes where
   open import lib.Suspension public
   open import lib.LoopSpace public
 
+  open import lib.NConnected public

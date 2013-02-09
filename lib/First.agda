@@ -282,12 +282,9 @@ module lib.First where
  coe-equiv : ∀ {A B} (p : Path A B) → Equiv A B
  coe-equiv p = (coe p , coe-is-equiv p)
 
- pathToEquiv' : ∀ {A B} → Path A B → Equiv A B
- pathToEquiv' α = (coe α , coe-is-equiv α)
-
  postulate {- HoTT Axiom -} 
    -- using pathToEquiv' instead of pathToEquiv (see Universe.agda)
-   univalence : ∀ {A B} -> IsEquiv {Path A B} {Equiv A B} pathToEquiv'
+   univalence : ∀ {A B} -> IsEquiv {Path A B} {Equiv A B} coe-equiv
  
  -- ua is the intro form; coe is the elim
 
@@ -295,7 +292,7 @@ module lib.First where
  ua = IsEquiv.g univalence
 
  univalence≃ : ∀ {A B} → Path A B ≃ Equiv A B
- univalence≃ = ua (pathToEquiv' , univalence)
+ univalence≃ = ua (coe-equiv , univalence)
 
  type≃β : {A B : Type} (e : Equiv A B) -> Path (coe (ua e)) (fst e)
  type≃β e = ap fst (IsEquiv.β univalence e)
@@ -307,7 +304,7 @@ module lib.First where
  type≃η p = IsEquiv.α univalence p
 
  type≃-coh : ∀ {A B} (p : Path A B) -> ap coe (type≃η p) ≃ type≃β (coe-equiv p)
- type≃-coh p = ap (ap fst) (! (IsEquiv.γ univalence p)) ∘ ap-o fst pathToEquiv' (IsEquiv.α univalence p) 
+ type≃-coh p = ap (ap fst) (! (IsEquiv.γ univalence p)) ∘ ap-o fst coe-equiv (IsEquiv.α univalence p) 
 
 
  -- ----------------------------------------------------------------------

@@ -116,7 +116,7 @@ module lib.loopspace.Groupoid where
      eqv : ∀ n → Equiv (Loop (S n) A a) (Loop n (Path a a) id) 
      eqv n = improve (hequiv (loopSN1 n) (loopN1S n) (β n) (η n)) 
 
-     path : ∀ n → (Loop (S n) A a) ≃ (Loop n (Path a a) id) -- what about for non-id?
+     path : ∀ n → (Loop (S n) A a) ≃ (Loop n (Path a a) id)    -- what about for non-id?
      path n = ua (eqv n)
 
   open LoopPath public using (loopN1S ; loopSN1)
@@ -200,6 +200,12 @@ module lib.loopspace.Groupoid where
                        ! (ap (loopSN1 n) (ap^-S' n f (loopN1S n α))) 
                      ∘ ap (λ x → loopSN1 n (loopN1S n (ap^ n (ap f) x))) (! (LoopPath.η n _))
                      ∘ ! (LoopPath.η n _)
+
+    ap^-ap-assoc' : ∀ {A B} → (n : _) → (f : A → B) → {a : A} 
+                    (α : Loop (S n) A a)
+                  → (ap^ n (ap f) (loopSN1 n α)) ≃ loopSN1 n (ap^ (S n) f α)
+    ap^-ap-assoc' n f α = ap (λ t → loopSN1 n (ap^-id n f ∘ ap (ap^ n f) t ∘ ! (ap^-id n f)))
+                            (LoopPath.β n _) ∘ ap^-ap-assoc n f (loopSN1 n α)
     
     ap^-by-equals : ∀ n {A} {B} {f g : A → B} (α : f ≃ g) {a : A} (β : Loop n A a) 
                   → ap^ n f β ≃ rebase n (ap≃ (! α)) (ap^ n g β)

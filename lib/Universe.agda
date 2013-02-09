@@ -14,6 +14,9 @@ module lib.Universe where
   pathToEquiv : ∀ {A B} → Path A B → Equiv A B
   pathToEquiv {A} α = transport(\ x -> Equiv A x) α id-equiv
 
+  pathToEquiv' : ∀ {A B} → Path A B → Equiv A B
+  pathToEquiv' = coe-equiv
+
   -- really the same thing
   pathToEquiv-is-' : ∀ {A B} (α : Path A B) → pathToEquiv α ≃ pathToEquiv' α
   pathToEquiv-is-' id = id
@@ -65,6 +68,12 @@ module lib.Universe where
   NTypes n = Σ \ (A : Type) → NType n A
 
   abstract
+    Path-Type-level-loop : ∀ n → {B : Type}
+                          → NType n B
+                          → NType n (Path B B)
+    Path-Type-level-loop -2 nB = ntype (transport Contractible (! univalence≃) (id-equiv , (λ y → coe (ΣSubsetPath (λ y' → IsEquiv-HProp _)) (λ≃ (λ x → HProp-unique (increment-level nB) _ _)))))
+    Path-Type-level-loop (S n) nB = transport (NType (S n)) (! univalence≃) (Σlevel (Πlevel (λ _ → nB)) (λ x → raise-HProp (IsEquiv-HProp _)))
+
     Path-Type-level : ∀ n → {A B : Type}
                           → NType (S n) B
                           → NType (S n) (Path A B)

@@ -44,7 +44,7 @@ module lib.loopspace.Basics where
     idOver : (n : Positive) {A : Type} {a : A} (B : A → Type) (b : B a) 
            → LoopOver n (id^ n) B b
     idOver One B b = id
-    idOver (S n) B b = id
+    idOver (S n) B b = id{_}{idOver n B b}
 
   {-
   n = (S (S (S (S One))))
