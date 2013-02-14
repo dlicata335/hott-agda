@@ -141,7 +141,10 @@ module lib.Paths where
  rotate3≃-2 : ∀ {A} {w z : A} (a : z ≃ z) (b : w ≃ z) (c : w ≃ w)
             -> (a ∘ b ∘ ! c ≃ b) ≃ (a ≃ b ∘ c ∘ ! b)
  rotate3≃-2 a b c = flip≃ ∘ rotate3≃ a b c b 
-  
+
+ flip-triangle≃ : ∀ {A} {x y z : A} (p : Path x y) (q : Path z y) (r : Path x z)
+                -> (p ∘ ! r ≃ q) ≃ (! q ∘ p ≃ r)
+ flip-triangle≃ p id id = ap (λ x → Path x id) (! (∘-unit-l p))
 
  -- transport stuff
 

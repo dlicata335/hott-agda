@@ -34,6 +34,9 @@ module lib.NType where
   nothing<-2 : ∀ {n} -> n <tl -2 -> Void
   nothing<-2 ()
 
+  -- less than or equal to for tlevel
+  _<=tl_ : TLevel -> TLevel -> Type 
+  x <=tl y = Either (x <tl y) (x ≃ y)
 
   -- alternate characterizations
 
@@ -51,6 +54,10 @@ module lib.NType where
     raise-HProp { -2 } hA = hA
     raise-HProp {S n} hA = increment-level (raise-HProp hA)
 
+    raise-level : ∀ {n m} {A} -> n <=tl m -> NType n A -> NType m A
+    raise-level (Inl ltS) nA = increment-level nA
+    raise-level (Inl (ltSR y)) nA = increment-level (raise-level (Inl y) nA)
+    raise-level (Inr id) nA = nA
 
   -- level of NType predicate
 
