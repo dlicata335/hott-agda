@@ -76,7 +76,7 @@ module homotopy.PiNSNWedge2 where
                                          coe (ap Codes (! (mer base))) 
                                              (coe (ap Codes (mer x)) [ base ]) ≃〈 {!!} 〉 
                                          coe (! (ap Codes (mer base)))
-                                             (Codes-mer x [ base ]) ≃〈 ap (λ x' → coe (! (ap Codes (mer base))) x') {!Codes-mer-βb !} 〉 
+                                             (Codes-mer x [ base ]) ≃〈 ap (λ x' → coe (! (ap Codes (mer base))) x') (ap≃ Codes-mer-βb) 〉 
                                          coe (! (ap Codes (mer base)))
                                              [ x ] ≃〈 {!!} 〉 
                                          Codes-mer base [ x ] ≃〈 id 〉 
