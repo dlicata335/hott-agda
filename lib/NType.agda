@@ -34,9 +34,35 @@ module lib.NType where
   nothing<-2 : ∀ {n} -> n <tl -2 -> Void
   nothing<-2 ()
 
+  -2< : ∀ n -> -2 <tl (S n)
+  -2< -2 = ltS 
+  -2< (S n) = ltSR (-2< n) 
+
+  ltSCong : ∀ {n} {m} -> n <tl m -> (S n) <tl (S m)
+  ltSCong {n} { -2 } () 
+  ltSCong { -2 } {(S -2)} lt = ltS
+  ltSCong { -2 } { (S (S y)) } (ltSR lt') = ltSR (ltSCong lt')
+  ltSCong { (S y) } { (S y') } lt with lt-unS-right lt
+  ... | Inl a = ltSR (ltSCong a) 
+  ... | Inr b = transport (λ x → S (S y) <tl x) (ap (S o S) (! b)) ltS 
+
   -- less than or equal to for tlevel
   _<=tl_ : TLevel -> TLevel -> Type 
   x <=tl y = Either (x <tl y) (x ≃ y)
+
+  -1<= : ∀ {n} -> -2 <tl n → -1 <=tl n
+  -1<= { -2 } () 
+  -1<= {(S -2)} lt = Inr id
+  -1<= {(S (S n))} (ltSR lt') = Inl (ltSCong lt')
+
+
+  -- funny addition for tlevels
+  -- n + m + 2
+  -- (not total otherwise)
+  plus2 : TLevel -> TLevel -> TLevel
+  plus2 -2 n = n
+  plus2 (S n) m = S (plus2 n m)
+
 
   -- alternate characterizations
 

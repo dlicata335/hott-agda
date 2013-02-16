@@ -72,6 +72,11 @@ module lib.AdjointEquiv where
    IsEquiv-HProp f = transport HProp (IsWeq≃IsEquiv f) (IsWEq-HProp f)
 
 
+ transport-IsEquiv-g : ∀ {A B} {f g : A → B} (α : f ≃ g) (e : IsEquiv f)
+                        → IsEquiv.g (transport IsEquiv α e) ≃ IsEquiv.g e
+ transport-IsEquiv-g id e = id
+
+
 
    
                

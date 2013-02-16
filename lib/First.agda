@@ -87,6 +87,9 @@ module lib.First where
  !-inv-r-front : {A : Type} {M N P : A} (p : Path P N) (q : Path M N) → Path (p ∘ (! p) ∘ q) q
  !-inv-r-front id id = id
  
+ !-inv-l-back : {A : Type} {M N P : A} (q : Path N M) (p : Path N P) → Path (q ∘ ! p ∘ p) q
+ !-inv-l-back id id = id
+
  !-inv-r-back : {A : Type} {M N P : A} (q : Path N M) (p : Path P N) → Path (q ∘ (p ∘ ! p)) q
  !-inv-r-back id id = id
 
