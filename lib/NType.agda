@@ -107,3 +107,14 @@ module lib.NType where
     NType-is-HProp { -2 } A = transport (HProp) (! use-level≃) (Contractible-is-HProp A)
     NType-is-HProp {S n} A = transport HProp (! use-level≃) (Πlevel (λ _ → Πlevel (λ _ → NType-is-HProp {n} _)))
 
+
+  -- lemmas about contractibility
+
+  out-of-contractible : ∀ {A C} (f : A -> C) (cA : NType -2 A) (a b : A)
+                      → f a ≃ f b
+  out-of-contractible f cA _ _ = ap f (HProp-unique (increment-level cA) _ _ )
+
+  out-of-contractible-id : ∀ {A C} (f : A -> C) (cA : NType -2 A) (a : A)
+                         → out-of-contractible f cA a a ≃ id
+  out-of-contractible-id f cA a = ap (ap f) (HSet-UIP (increment-level (increment-level cA)) _ _ _ id)
+

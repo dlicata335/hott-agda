@@ -16,9 +16,8 @@ module lib.NConnected where
   Connected : TLevel -> Type -> Type
   Connected n A = NType -2 (Trunc n A)
 
-  out-of-contractible : ∀ {A C} (f : A -> C) (cA : NType -2 A) (a b : A)
-                      → f a ≃ f b
-  out-of-contractible f cA _ _ = ap f (HProp-unique (increment-level cA) _ _ )
+  connected-Trunc : ∀ n k A -> Connected n A -> Connected n (Trunc k A)
+  connected-Trunc n k A cA = {!!}
 
   module ConnectedFib where 
    somewhere : (n : TLevel) {A : Type} {a : A}
@@ -31,7 +30,7 @@ module lib.NConnected where
              -> Connected (S n) A 
              -> (P : A → NTypes n)
              -> (fst (P a0)) → ((x : A) → fst (P x))
-   everywhere n {A}{a0} c P p = λ x → coe (! (ap fst (ap≃ lemma))) p 
+   everywhere n {A}{a0} c P p0 = λ x → coe (! (ap fst (ap≃ lemma {x}))) p0
      where lemma1 : (Trunc-rec (NTypes-level n) (λ x' → P x')) ≃ (\ _ -> P a0)
            lemma1 = λ≃ (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) c x [ a0 ])
    
@@ -43,9 +42,19 @@ module lib.NConnected where
      -> (P : A → NTypes n)
      -> (p0 : fst (P a0)) 
      -> everywhere n cA P p0 a0 ≃ p0
-   β n cA P p0 = {!!}
-        
+   β n {A}{a0} cA P p0 = ap (λ x → coe (! (ap fst x)) p0) cancel where
+      cancel : (ap≃ (ap (λ f → f o ([_]{S n})) (λ≃ (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) cA x [ a0 ]))) {a0})
+               ≃ id
+      cancel = ap≃ (ap (λ f → f o [_] {S n}) (λ≃ (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) cA x [ a0 ]))) {a0} ≃〈 id 〉
+               ap (\ f' -> f' a0) (ap (λ f → f o [_] {S n}) (λ≃ (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) cA x [ a0 ]))) ≃〈 ! (ap-o (λ f' → f' a0) (λ f → f o [_] {S n}) (λ≃ (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) cA x [ a0 ]))) 〉
+               ap ((\ f' -> f' a0) o (λ f → f o [_] {S n})) (λ≃ (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) cA x [ a0 ])) ≃〈 id 〉
+               ap (λ f → f [ a0 ]) (λ≃ (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) cA x [ a0 ])) ≃〈 Π≃β (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) cA x ([ a0 ])) {[ a0 ]} 〉
+               (out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) cA [ a0 ] [ a0 ]) ≃〈 out-of-contractible-id (Trunc-rec (NTypes-level n) (λ x' → P x')) cA [ a0 ] 〉
+               id ∎ 
 {-
+  -- didn't end up needing these.  
+
+  postulate
      η : (n : TLevel) {A : Type} {a0 : A}
                -> (cA : Connected (S n) A)
                -> (P : A → NTypes n)
@@ -269,65 +278,4 @@ module lib.NConnected where
        wedge-rec-coh cA cB nC = wedge-elim-coh cA cB (\ _ _ -> _ , nC)
 
 
-
-{-
-  module LeftBiased where
-    wedge-rec : ∀ {A B C : Type} {a : A} {b : B}
-              -> (fa : B -> C)
-              -> (fb : A -> C)
-              -> fa b ≃ fb a 
-              -> A -> B -> C
-    wedge-rec fa fb agree = λ _ b → fa b
-  
-    wedge-rec-βa : ∀ {A B C : Type} {a : A} {b : B}
-              -> (fa : B -> C)
-              -> (fb : A -> C)
-              -> (agree : fa b ≃ fb a)
-              -> (wedge-rec fa fb agree a ≃ fa)
-    wedge-rec-βa fa fb agree = id
-  
-    wedge-rec-βb : ∀ n {A B C : Type} {a : A} {b : B}
-                   (cA : Connected (S n) A)
-                   (nC : NType (S n) C)
-              -> (fa : B -> C)
-              -> (fb : A -> C)
-              -> (agree : fa b ≃ fb a)
-              -> (\ a -> wedge-rec fa fb agree a b) ≃ fb
-    wedge-rec-βb n {C = C}{a}{b} cA nC fa fb agree = 
-      λ≃ (\ x -> ConnectedFib.everywhere n 
-                 cA
-                 (λ x → Path (fa b) (fb x) , use-level nC _ _)
-                 agree
-                 x)
-
-    wedge-elim : ∀ n {A B : Type} (cA : Connected (S n) A) (C : A → B → NTypes n) {a : A} {b : B}
-              -> (fa : (b' : B) -> fst (C a b'))
-              -> (fb : (a' : A) -> fst (C a' b))
-              -> fa b ≃ fb a 
-              -> (a' : A) -> (b' : B) -> fst (C a' b')
-    wedge-elim n cA C fa fb agree = λ a' b' → ConnectedFib.everywhere n cA (λ a'' → (C a'' b')) (fa b') a'
-
-    wedge-elim-βa : ∀ n {A B : Type} (cA : Connected (S n) A) (C : A → B → NTypes n) {a : A} {b : B}
-              -> (fa : (b' : B) -> fst (C a b'))
-              -> (fb : (a' : A) -> fst (C a' b))
-              -> (agree : fa b ≃ fb a)
-              -> (wedge-elim n cA C fa fb agree a ≃ fa)
-    wedge-elim-βa n cA C fa fb agree = λ≃ (\ b' -> ConnectedFib.everywhereβ n cA (λ a' → C a' b') (fa b'))
-
-    wedge-elim-βb : ∀ n {A B : Type} (cA : Connected (S n) A) (C : A → B → NTypes n) {a : A} {b : B}
-              -> (fa : (b' : B) -> fst (C a b'))
-              -> (fb : (a' : A) -> fst (C a' b))
-              -> (agree : fa b ≃ fb a)
-              -> (\ a' -> wedge-elim n cA C fa fb agree a' b) ≃ fb
-    wedge-elim-βb n cA C{a}{b} fa fb agree = 
-      λ≃ (\ x -> ConnectedFib.everywhere n 
-                 cA
-                 (λ a' → Path (wedge-elim n cA C fa fb agree a' b) (fb a') , use-level (increment-level (snd (C a' b))) _ _)
-                 (agree ∘ ConnectedFib.everywhereβ n cA (λ a' → C a' b) (fa b))
-                 x)
-  
--}
-
-  postulate
-    connected-Trunc : ∀ n k A -> Connected n A -> Connected n (Trunc k A)
 
