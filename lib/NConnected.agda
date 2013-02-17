@@ -13,6 +13,9 @@ open Truncation
 
 module lib.NConnected where
 
+  postulate
+    plus2-comm : ∀ m n -> plus2 m n ≃ plus2 n m
+
   Connected : TLevel -> Type -> Type
   Connected n A = NType -2 (Trunc n A)
 
@@ -27,25 +30,42 @@ module lib.NConnected where
              -> ((x : A) → fst (P x)) → (fst (P a))
    somewhere n {A}{a} c P f = f a
 
-   everywhere : (n : TLevel) {A : Type} {a : A}
+   everywhere : (n : TLevel) {A : Type} {a0 : A}
              -> Connected (S n) A 
              -> (P : A → NTypes n)
-             -> (fst (P a)) → ((x : A) → fst (P x))
-   everywhere n {A}{a} c P p = λ x → coe (! (ap fst (ap≃ lemma))) p 
-     where lemma1 : (Trunc-rec (NTypes-level n) (λ x' → P x')) ≃ (\ _ -> P a)
-           lemma1 = λ≃ (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) c x [ a ])
+             -> (fst (P a0)) → ((x : A) → fst (P x))
+   everywhere n {A}{a0} c P p = λ x → coe (! (ap fst (ap≃ lemma))) p 
+     where lemma1 : (Trunc-rec (NTypes-level n) (λ x' → P x')) ≃ (\ _ -> P a0)
+           lemma1 = λ≃ (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) c x [ a0 ])
    
-           lemma : P ≃ (\ _ -> P a) 
+           lemma : P ≃ (\ _ -> P a0) 
            lemma = P ≃〈 id 〉
                    Trunc-rec (NTypes-level n) (λ x' → P x') o [_] ≃〈 ap (λ f → f o ([_]{S n})) lemma1 〉
-                   (\ _ -> P a) o ([_]{S n}) ≃〈 id 〉
-                   ((λ _ → P a) ∎)
+                   (\ _ -> P a0) o ([_]{S n}) ≃〈 id 〉
+                   ((λ _ → P a0) ∎)
    postulate
-     everywhereβ : (n : TLevel) {A : Type} {a : A}
+     β : (n : TLevel) {A : Type} {a0 : A}
                -> (cA : Connected (S n) A)
                -> (P : A → NTypes n)
-               -> (at-base : fst (P a)) 
-               -> everywhere n cA P at-base a ≃ at-base
+               -> (p0 : fst (P a0)) 
+               -> everywhere n cA P p0 a0 ≃ p0
+
+     η : (n : TLevel) {A : Type} {a0 : A}
+               -> (cA : Connected (S n) A)
+               -> (P : A → NTypes n)
+               -> (p0 : fst (P a0))
+               -> (f : ((x : A) → fst (P x)))
+               -> f a0 ≃ p0
+               -> f ≃ everywhere n cA P p0
+
+   ext : (n : TLevel) {A : Type} {a0 : A}
+      -> (cA : Connected (S n) A)
+      -> (P : A → NTypes n)
+      -> (f g : ((x : A) → fst (P x)))
+      -> f a0 ≃ g a0 
+      -> f ≃ g
+   ext n {a0 = a0} cA P f g on-a0 = ! (η n cA P (f a0) g (! on-a0)) ∘ η n cA P (f a0) f id
+        
 {-
    eqv : (n : TLevel) {A : Type} {a : A}
         -> Connected (S n) A 
@@ -84,12 +104,12 @@ module lib.NConnected where
                          (a0 : A) (C : A -> NTypes (plus2 n m)) (c0 : fst (C a0))
                      -> NType n (Extensions A a0 (fst o C) c0)
     Extensions-level {m}{ -2} cA a0 C c0 = 
-     ntype ((ConnectedFib.everywhere m cA C c0 , ConnectedFib.everywhereβ m cA C c0) ,
+     ntype ((ConnectedFib.everywhere m cA C c0 , ConnectedFib.β m cA C c0) ,
            (λ {(f , α) → pair≃ (λ≃ 
              (ConnectedFib.everywhere 
                 m {_} {a0} cA 
                 (λ a → Path (ConnectedFib.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a)))
-                (! α ∘ ConnectedFib.everywhereβ m cA C c0)))
+                (! α ∘ ConnectedFib.β m cA C c0)))
              FIXME})) where
      postulate FIXME : ∀ {A} -> A
     Extensions-level {m}{S n} cA a0 C c0 =
@@ -97,88 +117,167 @@ module lib.NConnected where
              (! (Extensions-Path (fst o C) c0 e1 e2))
              (Extensions-level {_} {n} cA a0 (\ a -> (Path (fst e1 a) (fst e2 a), use-level (snd (C a)) _ _)) 
                                              (! (snd e2) ∘ snd e1)))
-    
-    wedge-elim' : ∀ {m n} {A B : Type} 
-                   (cA : Connected (S m) A) 
-                   (cB : Connected (S n) B)
-                   (C : A → B → NTypes (plus2 m n)) 
-                   {a0 : A} {b0 : B}
-                -> (fa0 : (b' : B) -> fst (C a0 b'))
-                -> (fb0 : (a' : A) -> fst (C a' b0))
-                -> fa0 b0 ≃ fb0 a0 
-                -> (a' : A) -> (b' : B) -> fst (C a' b')
-    wedge-elim'{m}{n}{A}{B} cA cB C {a0}{b0} fa0 fb0 agree a = 
-      fst
-        (ConnectedFib.everywhere m {_} {a0} cA
-         (λ a' → Extensions _ _ (fst o (C a')) (fb0 a') , 
-                 Extensions-level {n} {m} cB b0 (C a') (fb0 a')) 
-         (fa0 , agree)
-         a)
-    
-    wedge-elim : ∀ {m n p} {A B : Type} 
-                   (cA : Connected (S m) A) 
-                   (cB : Connected (S n) B)
-                   (C : A → B → NTypes p) 
-                   (app : p <=tl plus2 m n)
-                   {a0 : A} {b0 : B}
-                -> (fa0 : (b' : B) -> fst (C a0 b'))
-                -> (fb0 : (a' : A) -> fst (C a' b0))
-                -> fa0 b0 ≃ fb0 a0 
-                -> (a' : A) -> (b' : B) -> fst (C a' b')
-    wedge-elim{m}{n}{p}{A}{B} cA cB C ap  = 
-      wedge-elim' cA cB (λ a b → fst (C a b) , raise-level ap (snd (C a b))) 
-    
-    {-
-    postulate
-      wedge-elim-βa : ∀{m}{n}{p} {A B : Type}
-                     (cA : Connected m A) (cB : Connected n B) (C : A → B → NTypes p) {a : A} {b : B}
-                  -> (fa : (b' : B) -> fst (C a b'))
-                  -> (fb : (a' : A) -> fst (C a' b))
-                  -> (agree : fa b ≃ fb a)
-                  -> (wedge-elim cA cB C app fa fb agree a ≃ fa)
-      
-      wedge-elim-βb : ∀{m}{n}{p} {A B : Type}
-                     (cA : Connected m A) (cB : Connected n B) (C : A → B → NTypes p) {a : A} {b : B}
-                  -> (fa : (b' : B) -> fst (C a b'))
-                  -> (fb : (a' : A) -> fst (C a' b))
-                  -> (agree : fa b ≃ fb a)
-                  -> (\ a' -> wedge-elim cA cB C app fa fb agree a' b) ≃ fb
-    -}
 
-    wedge-rec : ∀ {m n p} {A B C : Type} 
-              -> Connected (S m) A 
-              -> Connected (S n) B
-              -> NType p C 
-              -> p <=tl (plus2 m n)
-              -> {a : A} {b : B}
-              -> (fa : B -> C)
-              -> (fb : A -> C)
-              -> fa b ≃ fb a 
-              -> A -> B -> C
-    wedge-rec cA cB nC = wedge-elim cA cB (\ _ _ -> _ , nC) 
-    
-    postulate
-      wedge-rec-βa : ∀ {m}{n}{p} {A B C : Type} 
-                -> (cA : Connected (S m) A)
-                -> (cB : Connected (S n) B)
-                -> (nC : NType p C)
-                -> (ap : p <=tl (plus2 m n))
-                   {a : A} {b : B}
-                -> (fa : B -> C)
-                -> (fb : A -> C)
-                -> (agree : fa b ≃ fb a)
-                -> (wedge-rec cA cB nC ap fa fb agree a ≃ fa)
-    
-      wedge-rec-βb : ∀ {m}{n}{p} {A B C : Type}
-                -> (cA : Connected (S m) A)
-                -> (cB : Connected (S n) B)
-                -> (nC : NType p C)
-                -> (ap : p <=tl (plus2 m n))
-                   {a : A} {b : B}
-                -> (fa : B -> C)
-                -> (fb : A -> C)
-                -> (agree : fa b ≃ fb a)
-                -> (\ a' -> wedge-rec cA cB nC ap fa fb agree a' b) ≃ fb
+    abstract
+       wedge-elim1' : ∀ {m n} {A B : Type} 
+                      (cA : Connected (S m) A) 
+                      (cB : Connected (S n) B)
+                      (C : A → B → NTypes (plus2 m n)) 
+                      {a0 : A} {b0 : B}
+                   -> (fa0 : (b' : B) -> fst (C a0 b'))
+                   -> (fb0 : (a' : A) -> fst (C a' b0))
+                   -> fa0 b0 ≃ fb0 a0 
+                   -> (a' : A) -> Extensions _ b0 (fst o (C a')) (fb0 a')
+       wedge-elim1'{m}{n}{A}{B} cA cB C {a0}{b0} fa0 fb0 agree a = 
+           (ConnectedFib.everywhere m {_} {a0} cA
+            (λ a' → Extensions _ _ (fst o (C a')) (fb0 a') , 
+                    Extensions-level {n} {m} cB b0 (C a') (fb0 a')) 
+            (fa0 , agree)
+            a)
+
+{-
+       wedge-elim2' : ∀ {m n} {A B : Type} 
+                      (cA : Connected (S m) A) 
+                      (cB : Connected (S n) B)
+                      (C : A → B → NTypes (plus2 m n)) 
+                      {a0 : A} {b0 : B}
+                   -> (fa0 : (b' : B) -> fst (C a0 b'))
+                   -> (fb0 : (a' : A) -> fst (C a' b0))
+                   -> fa0 b0 ≃ fb0 a0 
+                   -> (b' : B) -> Extensions _ a0 (\a' -> fst (C a' b')) (fa0 b')
+       wedge-elim2'{m}{n}{A}{B} cA cB C {a0}{b0} fa0 fb0 agree b = 
+           (ConnectedFib.everywhere n {_} {b0} cB
+            (λ b' → Extensions _ _ (\a' -> fst (C a' b')) (fa0 b') , 
+                    Extensions-level {m} {n} cA a0 (\ a' -> fst (C a' b') , transport (λ x → NType x (fst (C a' b'))) (plus2-comm m n) (snd (C a' b'))) (fa0 b')) 
+            (fb0 , ! agree)
+            b)
+-}
+       
+       wedge-elim : ∀ {m n p} {A B : Type} 
+                      (cA : Connected (S m) A) 
+                      (cB : Connected (S n) B)
+                      (C : A → B → NTypes p) 
+                      (app : p <=tl plus2 m n)
+                      {a0 : A} {b0 : B}
+                   -> (fa0 : (b' : B) -> fst (C a0 b'))
+                   -> (fb0 : (a' : A) -> fst (C a' b0))
+                   -> fa0 b0 ≃ fb0 a0 
+                   -> (a' : A) -> (b' : B) -> fst (C a' b')
+       wedge-elim{m}{n}{p}{A}{B} cA cB C app fa0 fb0 agree a' = 
+         fst (wedge-elim1' cA cB (λ a b → fst (C a b) , raise-level app (snd (C a b))) fa0 fb0 agree a')
+
+{-
+       wedge-elim2 : ∀ {m n p} {A B : Type} 
+                      (cA : Connected (S m) A) 
+                      (cB : Connected (S n) B)
+                      (C : A → B → NTypes p) 
+                      (app : p <=tl plus2 m n)
+                      {a0 : A} {b0 : B}
+                   -> (fa0 : (b' : B) -> fst (C a0 b'))
+                   -> (fb0 : (a' : A) -> fst (C a' b0))
+                   -> fa0 b0 ≃ fb0 a0 
+                   -> (a' : A) -> (b' : B) -> fst (C a' b')
+       wedge-elim2{m}{n}{p}{A}{B} cA cB C app fa0 fb0 agree a' b' = 
+         fst (wedge-elim2' cA cB (λ a b → fst (C a b) , raise-level app (snd (C a b))) fa0 fb0 agree b') a'
+
+       
+       same : ∀ {m n p} {A B : Type} 
+                      (cA : Connected (S m) A) 
+                      (cB : Connected (S n) B)
+                      (C : A → B → NTypes p) 
+                      (app : p <=tl plus2 m n)
+                      {a0 : A} {b0 : B}
+                   -> (fa0 : (b' : B) -> fst (C a0 b'))
+                   -> (fb0 : (a' : A) -> fst (C a' b0))
+                   -> (agree : fa0 b0 ≃ fb0 a0)
+                   -> (a' : A) -> (b' : B) -> (wedge-elim cA cB C app fa0 fb0 agree a' b')
+                                            ≃ (wedge-elim2 cA cB C app fa0 fb0 agree a' b')
+       same {m}{n}{p} cA cB C app {a0}{b0} fa0 fb0 agree a' b' =
+         wedge-elim {m} {n} {p} cA cB
+           (λ a b →
+              wedge-elim cA cB C app fa0 fb0 agree a b ≃
+              wedge-elim2 cA cB C app fa0 fb0 agree a b
+              , {!!})
+           app{a0}{b0} {!!} {!!} {!!} a' b'
+-}       
+      
+       wedge-elim-βa : ∀{m}{n}{p} {A B : Type}
+                        (cA : Connected (S m) A) (cB : Connected (S n) B) (C : A → B → NTypes p) 
+                        (app : p <=tl (plus2 m n)){a0 : A} {b0 : B}
+                     -> (fa0 : (b : B) -> fst (C a0 b))
+                     -> (fb0 : (a : A) -> fst (C a b0))
+                     -> (agree : fa0 b0 ≃ fb0 a0)
+                     -> (wedge-elim cA cB C app fa0 fb0 agree a0 ≃ fa0)
+       wedge-elim-βa{m}{n}{p} cA cB C app{a0}{b0} fa0 fb0 agree = 
+        let C = (λ a b → fst (C a b) , raise-level app (snd (C a b))) 
+        in 
+          ap fst
+          (ConnectedFib.β m cA
+           (λ a' →
+              Extensions _ _ (fst o C a') (fb0 a') ,
+              Extensions-level {n} {m} cB b0 (C a') (fb0 a'))
+           (fa0 , agree))
+         
+       wedge-elim-βb : ∀{m}{n}{p} {A B : Type}
+                        (cA : Connected (S m) A) (cB : Connected (S n) B) (C : A → B → NTypes p) 
+                        (app : p <=tl (plus2 m n)){a0 : A} {b0 : B}
+                     -> (fa0 : (b : B) -> fst (C a0 b))
+                     -> (fb0 : (a : A) -> fst (C a b0))
+                     -> (agree : fa0 b0 ≃ fb0 a0)
+                     -> (\ a -> wedge-elim cA cB C app fa0 fb0 agree a b0) ≃ fb0
+       wedge-elim-βb {m}{n}{p} cA cB C app{a0}{b0} fa0 fb0 agree = 
+        let C = (λ a b → fst (C a b) , raise-level app (snd (C a b))) 
+        in 
+         λ≃ (\ a -> 
+                ap≃
+                (fst≃
+                 (ConnectedFib.everywhere m {a0 = a0} cA
+                  (λ a' →
+                     ConnectedFib.everywhere m {_} {a0} cA
+                     (λ a1 →
+                        Extensions _ _ (fst o C a1) (fb0 a1) ,
+                        Extensions-level {n} {m} cB b0 (C a1) (fb0 a1))
+                     (fa0 , agree) a'
+                     ≃ {!fb0!}
+                     , {!!})
+                  {!!} a)))
+--                                       (agree ∘ ap≃ (wedge-elim-βa cA cB C app fa0 fb0 agree)))
+
+       wedge-rec : ∀ {m n p} {A B C : Type} 
+                 -> Connected (S m) A 
+                 -> Connected (S n) B
+                 -> NType p C 
+                 -> p <=tl (plus2 m n)
+                 -> {a : A} {b : B}
+                 -> (fa : B -> C)
+                 -> (fb : A -> C)
+                 -> fa b ≃ fb a 
+                 -> A -> B -> C
+       wedge-rec cA cB nC = wedge-elim cA cB (\ _ _ -> _ , nC) 
+       
+       wedge-rec-βa : ∀ {m}{n}{p} {A B C : Type} 
+                   -> (cA : Connected (S m) A)
+                   -> (cB : Connected (S n) B)
+                   -> (nC : NType p C)
+                   -> (ap : p <=tl (plus2 m n))
+                      {a : A} {b : B}
+                   -> (fa : B -> C)
+                   -> (fb : A -> C)
+                   -> (agree : fa b ≃ fb a)
+                   -> (wedge-rec cA cB nC ap fa fb agree a ≃ fa)
+       wedge-rec-βa cA cB nC = wedge-elim-βa cA cB (\ _ _ -> _ , nC)
+      
+       wedge-rec-βb : ∀ {m}{n}{p} {A B C : Type}
+                   -> (cA : Connected (S m) A)
+                   -> (cB : Connected (S n) B)
+                   -> (nC : NType p C)
+                   -> (ap : p <=tl (plus2 m n))
+                      {a : A} {b : B}
+                   -> (fa : B -> C)
+                   -> (fb : A -> C)
+                   -> (agree : fa b ≃ fb a)
+                   -> (\ a' -> wedge-rec cA cB nC ap fa fb agree a' b) ≃ fb
+       wedge-rec-βb cA cB nC = wedge-elim-βb cA cB (\ _ _ -> _ , nC)
 
 
 
