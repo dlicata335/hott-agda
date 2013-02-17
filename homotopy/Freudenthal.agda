@@ -1,5 +1,7 @@
 -- Peter Lumsdaine and Dan Licata
 
+-- about 450 lines of new library code + this file
+
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude
@@ -13,8 +15,6 @@ module homotopy.Freudenthal where
   -- index constraints:
   -- n is successor: needed first for the wedge-rec in Codes mer
   -- n is double-successor (n' is successor): needed first in Codes-mer-equiv (raise-HProp)
-  -- k is not -2: helpful for decode, though maybe could do without it
-  --              but the theorem is trivial for k=-2 anyway
   module Freudenthal
     (n' : TLevel)
     (k : TLevel)

@@ -9,6 +9,7 @@ open import lib.Prods
 open import lib.NType
 open import lib.Universe
 open import lib.Truncations
+open import lib.Sums
 open Truncation
 
 module lib.NConnected where
@@ -16,8 +17,9 @@ module lib.NConnected where
   Connected : TLevel -> Type -> Type
   Connected n A = NType -2 (Trunc n A)
 
-  connected-Trunc : ∀ n k A -> Connected n A -> Connected n (Trunc k A)
-  connected-Trunc n k A cA = {!!}
+  abstract
+    connected-Trunc : ∀ n k A -> Connected n A -> Connected n (Trunc k A)
+    connected-Trunc n k A cA = transport (NType -2) (! (FuseTrunc.path _ _ _)) (lower-Trunc-preserves-level n (mintl n k) { -2} (mintl<=1 n k) cA)
 
   module ConnectedFib where 
    somewhere : (n : TLevel) {A : Type} {a : A}
@@ -53,15 +55,15 @@ module lib.NConnected where
                id ∎ 
 {-
   -- didn't end up needing these.  
-
-  postulate
-     η : (n : TLevel) {A : Type} {a0 : A}
+  
+   η : (n : TLevel) {A : Type} {a0 : A}
                -> (cA : Connected (S n) A)
                -> (P : A → NTypes n)
                -> (p0 : fst (P a0))
                -> (f : ((x : A) → fst (P x)))
                -> f a0 ≃ p0
                -> f ≃ everywhere n cA P p0
+   η = ?
 
    ext : (n : TLevel) {A : Type} {a0 : A}
       -> (cA : Connected (S n) A)

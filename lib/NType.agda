@@ -55,6 +55,31 @@ module lib.NType where
   -1<= {(S -2)} lt = Inr id
   -1<= {(S (S n))} (ltSR lt') = Inl (ltSCong lt')
 
+  -2<= : ∀ n -> -2 <=tl n
+  -2<= -2 = Inr id
+  -2<= (S n) = Inl (-2< n)
+
+
+  -- min for tlevels
+  mintl : TLevel -> TLevel -> TLevel 
+  mintl -2 n = -2
+  mintl m -2 = -2
+  mintl (S m) (S n) = S (mintl m n)
+
+  mintl<=1 : (m n : TLevel) -> mintl m n <=tl m 
+  mintl<=1 -2 n = Inr id
+  mintl<=1 (S m) -2 = Inl (-2< m)
+  mintl<=1 (S m) (S n) with mintl<=1 m n
+  ... | Inl lt = Inl (ltSCong lt)
+  ... | Inr eq = Inr (ap S eq)
+
+  mintl<=2 : (m n : TLevel) -> mintl m n <=tl n
+  mintl<=2 -2 n = -2<= n
+  mintl<=2 (S m) -2 = Inr id
+  mintl<=2 (S m) (S n) with mintl<=2 m n
+  ... | Inl lt = Inl (ltSCong lt)
+  ... | Inr eq = Inr (ap S eq)
+
 
   -- funny addition for tlevels
   -- n + m + 2

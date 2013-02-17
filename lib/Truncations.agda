@@ -122,3 +122,70 @@ module lib.Truncations where
      path : {y : A} -> (Trunc n (Path x y)) ≃ (Path {(Trunc (S n) A)} [ x ] [ y ])
      path {y} = ua eqv
 
+   abstract
+     decrement-Trunc-preserves-level : ∀ {n} {k} {A} 
+                                     -> NType k (Trunc (S n) A) → NType k (Trunc n A)
+     decrement-Trunc-preserves-level {n} { -2} nTA = ntype (lemma (use-level nTA)) where
+         lower-path : ∀ {n} {A} {x y} → Path {Trunc (S n) A} [ x ] [ y ] → Path {Trunc n A} [ x ] [ y ]
+         lower-path = ap (Trunc-rec (increment-level Trunc-level) (λ x → [ x ]))
+   
+         lemma : ∀ {n A} → Contractible (Trunc (S n) A) → Contractible (Trunc n A)
+         lemma {n}{A} c = Trunc-elim (λ x → ((y : _) → Path x y) → Contractible (Trunc n A))
+                            (λ _ → Πlevel (λ _ → raise-HProp (Contractible-is-HProp _)))
+                            (λ x f → [ x ] , 
+                                     (Trunc-elim (λ y → Path [ x ] y) 
+                                                 (λ _ → path-preserves-level Trunc-level)
+                                                 (λ y → lower-path (f [ y ]))))
+                            (fst c) (snd c)
+     decrement-Trunc-preserves-level { -2 } {k} nTA = raise-level (-2<= _) Trunc-level
+     decrement-Trunc-preserves-level {S n} {(S k)} nTA = 
+       ntype (Trunc-elim (\ x -> ( y : _) -> NType k (Path x y))
+                         (λ _ → Πlevel (λ _ → raise-HProp (NType-is-HProp _)))
+                         (λ x → Trunc-elim (λ y → NType k (Path [ x ] y)) 
+                                (λ _ → raise-HProp (NType-is-HProp _))
+                                (λ y →  transport (NType k) (TruncPath.path _)
+                                          (decrement-Trunc-preserves-level
+                                           (transport (NType k) (! (TruncPath.path _))
+                                            (use-level nTA [ x ] [ y ]))))))
+    
+     lower-Trunc-preserves-level : ∀ n1 n2 {k} {A} → n2 <=tl n1 
+                                  -> NType k (Trunc n1 A) → NType k (Trunc n2 A)
+     lower-Trunc-preserves-level .(S n2) n2 (Inl ltS) nTA = decrement-Trunc-preserves-level nTA
+     lower-Trunc-preserves-level (S m) n2 (Inl (ltSR lt)) nTA = lower-Trunc-preserves-level _ _ (Inl lt) (decrement-Trunc-preserves-level nTA)
+     lower-Trunc-preserves-level n1 .n1 (Inr id) nTA = nTA
+
+     Trunc-preserves-contractibility : ∀ {n}{A} -> Contractible A -> Contractible (Trunc n A)
+     Trunc-preserves-contractibility (center , eq) = 
+       [ center ] , Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (λ x → ap [_] (eq x))
+  
+     Trunc-level-better : ∀ {n} {k} {A} -> NType n A -> NType (mintl k n) (Trunc k A)
+     Trunc-level-better {n} { -2} nA = Trunc-level
+     Trunc-level-better { -2 } {S k} nA = ntype (Trunc-preserves-contractibility (use-level nA))
+     Trunc-level-better { S n } {S k} nA = 
+       ntype (Trunc-elim _ (λ _ → Πlevel (λ _ → raise-HProp (NType-is-HProp _)))
+                           (\ x -> Trunc-elim (λ y → NType (mintl k n) (Path [ x ] y)) 
+                                              (λ _ → raise-HProp (NType-is-HProp _))
+                                              (λ y → transport (NType (mintl k n)) (TruncPath.path _)
+                                                       (Trunc-level-better (use-level nA _ _)))))
+
+   module FuseTrunc (n k : TLevel) (A : Type) where 
+ 
+     left : (Trunc n (Trunc k A)) → (Trunc (mintl n k) A)
+     left = (Trunc-rec (raise-level (mintl<=1 n k) Trunc-level) 
+                                      (Trunc-rec (raise-level (mintl<=2 n k) Trunc-level) 
+                                                 [_]))
+
+     right : (Trunc (mintl n k) A) → (Trunc n (Trunc k A))
+     right = (Trunc-rec (Trunc-level-better Trunc-level) (λ x → [ [ x ] ]))
+
+     eqv : Equiv (Trunc n (Trunc k A)) (Trunc (mintl n k) A)
+     eqv = improve (hequiv left
+                           right
+                           (Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
+                              (Trunc-elim _ 
+                                (λ _ → path-preserves-level (raise-level (mintl<=2 n k) (Trunc-level-better Trunc-level)))
+                                (λ _ → id)))
+                           (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (λ _ → id)))
+
+     path : Trunc n (Trunc k A) ≃ Trunc (mintl n k) A
+     path = ua eqv
