@@ -51,6 +51,16 @@ module lib.Prods where
   Σ≃β2' {p = x , y} {q = .x , .y} id id = id
   -}
 
+  -- subst extension for Γ,x:A⁻ in DTT
+  pair≃⁻ : {A : Set} {B : A -> Set} {p q : Σ B} 
+        -> (α : (fst p) ≃ (fst q)) -> (snd p) ≃ transport B (! α) (snd q) 
+        -> p ≃ q
+  pair≃⁻ {A}{B}{p}{q} α β = 
+         pair≃ α (ap≃ (ap (λ x → transport B x) (!-inv-r α) ∘ ! (transport-∘ B α (! α))) ∘ ap (transport B α) β)
+
+  snd≃⁻ : {A : Type} {B : A -> Type} {p q : Σ B} -> (c : p ≃ q) -> (snd p) ≃ transport B (! (fst≃ c)) (snd q)
+  snd≃⁻ {p = p} {q = .p} id = id
+
   module ΣPath where
 
     eqv : {A : Type} {B : A → Type} {p q : Σ B}

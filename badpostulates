@@ -2,5 +2,5 @@
 
 #!/bin/bash
 
-find . -name "*.agda" | grep -v "oldlib" | xargs grep postulate | grep -v "HoTT Axiom" | grep -v "scraps" | grep -v "in-progress" 
+find . -name "*.agda" | grep -v "oldlib" | xargs grep postulate | grep -v "HoTT Axiom" | grep -v "Agda Primitive"  | grep -v "scraps" | grep -v "in-progress" 
 

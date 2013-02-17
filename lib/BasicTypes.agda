@@ -22,6 +22,8 @@ module lib.BasicTypes where
   open import lib.Maybe public
   open import lib.List public
   open import lib.Monoid public
+  open import lib.Char public
+  open import lib.String public
 
   open import lib.Universe public
   open import lib.Truncations public

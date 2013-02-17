@@ -13,9 +13,6 @@ open Truncation
 
 module lib.NConnected where
 
-  postulate
-    plus2-comm : ∀ m n -> plus2 m n ≃ plus2 n m
-
   Connected : TLevel -> Type -> Type
   Connected n A = NType -2 (Trunc n A)
 
@@ -39,17 +36,16 @@ module lib.NConnected where
            lemma1 = λ≃ (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) c x [ a0 ])
    
            lemma : P ≃ (\ _ -> P a0) 
-           lemma = P ≃〈 id 〉
-                   Trunc-rec (NTypes-level n) (λ x' → P x') o [_] ≃〈 ap (λ f → f o ([_]{S n})) lemma1 〉
-                   (\ _ -> P a0) o ([_]{S n}) ≃〈 id 〉
-                   ((λ _ → P a0) ∎)
-   postulate
-     β : (n : TLevel) {A : Type} {a0 : A}
-               -> (cA : Connected (S n) A)
-               -> (P : A → NTypes n)
-               -> (p0 : fst (P a0)) 
-               -> everywhere n cA P p0 a0 ≃ p0
+           lemma = ap (λ f → f o ([_]{S n})) lemma1
 
+   β : (n : TLevel) {A : Type} {a0 : A}
+     -> (cA : Connected (S n) A)
+     -> (P : A → NTypes n)
+     -> (p0 : fst (P a0)) 
+     -> everywhere n cA P p0 a0 ≃ p0
+   β n cA P p0 = {!!}
+        
+{-
      η : (n : TLevel) {A : Type} {a0 : A}
                -> (cA : Connected (S n) A)
                -> (P : A → NTypes n)
@@ -65,8 +61,7 @@ module lib.NConnected where
       -> f a0 ≃ g a0 
       -> f ≃ g
    ext n {a0 = a0} cA P f g on-a0 = ! (η n cA P (f a0) g (! on-a0)) ∘ η n cA P (f a0) f id
-        
-{-
+
    eqv : (n : TLevel) {A : Type} {a : A}
         -> Connected (S n) A 
         -> (P : A → NTypes n)
@@ -99,27 +94,50 @@ module lib.NConnected where
            Path (α1 ∘ ! (h a0)) α2) ≃〈 ap (λ B → Σ B) (λ≃ (λ h → flip≃ ∘ flip-triangle≃ α1 α2 (h a0))) 〉 
       Σ (\ h -> h a0 ≃ ! α2 ∘ α1) ≃〈 id 〉 
       Extensions A a0 (λ a → Path (f1 a) (f2 a)) (! α2 ∘ α1) ∎
-      
-    Extensions-level : ∀ {m n} {A : Type} (cA : Connected (S m) A)
-                         (a0 : A) (C : A -> NTypes (plus2 n m)) (c0 : fst (C a0))
-                     -> NType n (Extensions A a0 (fst o C) c0)
-    Extensions-level {m}{ -2} cA a0 C c0 = 
-     ntype ((ConnectedFib.everywhere m cA C c0 , ConnectedFib.β m cA C c0) ,
-           (λ {(f , α) → pair≃ (λ≃ 
-             (ConnectedFib.everywhere 
-                m {_} {a0} cA 
-                (λ a → Path (ConnectedFib.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a)))
-                (! α ∘ ConnectedFib.β m cA C c0)))
-             FIXME})) where
-     postulate FIXME : ∀ {A} -> A
-    Extensions-level {m}{S n} cA a0 C c0 =
-      ntype (λ e1 e2 → transport (NType n) 
-             (! (Extensions-Path (fst o C) c0 e1 e2))
-             (Extensions-level {_} {n} cA a0 (\ a -> (Path (fst e1 a) (fst e2 a), use-level (snd (C a)) _ _)) 
-                                             (! (snd e2) ∘ snd e1)))
 
     abstract
-       wedge-elim1' : ∀ {m n} {A B : Type} 
+      Extensions-level : ∀ {m n} {A : Type} (cA : Connected (S m) A)
+                           (a0 : A) (C : A -> NTypes (plus2 n m)) (c0 : fst (C a0))
+                       -> NType n (Extensions A a0 (fst o C) c0)
+      Extensions-level {m}{ -2} cA a0 C c0 = 
+       ntype ((ConnectedFib.everywhere m cA C c0 , ConnectedFib.β m cA C c0) ,
+              (λ {(f , α) → pair≃ (λ≃ (ConnectedFib.everywhere m {_} {a0} cA 
+                                       (λ a → Path (ConnectedFib.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a)))
+                                       (! α ∘ ConnectedFib.β m cA C c0)))
+                            (transport (λ f' → f' a0 ≃ c0)
+                               (λ≃
+                                (ConnectedFib.everywhere m cA
+                                 (λ a →
+                                    Path (ConnectedFib.everywhere m cA C c0 a) (f a) ,
+                                    path-preserves-level (snd (C a)))
+                                 (! α ∘ ConnectedFib.β m cA C c0)))
+                               (ConnectedFib.β m cA C c0) ≃〈 transport-Path-pre' (λ f' → f' a0) (λ≃ (ConnectedFib.everywhere m cA (λ a → Path (ConnectedFib.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a))) (! α ∘ ConnectedFib.β m cA C c0))) (ConnectedFib.β m cA C c0) 〉
+                             (ConnectedFib.β m cA C c0) ∘ 
+                             ! (ap≃ (λ≃
+                                (ConnectedFib.everywhere m cA
+                                 (λ a →
+                                    Path (ConnectedFib.everywhere m cA C c0 a) (f a) ,
+                                    path-preserves-level (snd (C a)))
+                                 (! α ∘ ConnectedFib.β m cA C c0))) {a0}) ≃〈 ap (λ x → ConnectedFib.β m cA C c0 ∘ ! x) (Π≃β (ConnectedFib.everywhere m cA (λ a → Path (ConnectedFib.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a))) (! α ∘ ConnectedFib.β m cA C c0))) 〉 
+                             (ConnectedFib.β m cA C c0) ∘ 
+                             ! ((ConnectedFib.everywhere m cA
+                                 (λ a →
+                                    Path (ConnectedFib.everywhere m cA C c0 a) (f a) ,
+                                    path-preserves-level (snd (C a)))
+                                 (! α ∘ ConnectedFib.β m cA C c0)) a0) ≃〈 ap (λ x → ConnectedFib.β m cA C c0 ∘ ! x) (ConnectedFib.β m cA (λ a → Path (ConnectedFib.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a))) (! α ∘ ConnectedFib.β m cA C c0)) 〉 
+                             (ConnectedFib.β m cA C c0) ∘ 
+                             ! (! α ∘ ConnectedFib.β m cA C c0) ≃〈 ap (_∘_ (ConnectedFib.β m cA C c0)) (!-∘ (! α) (ConnectedFib.β m cA C c0)) 〉 
+                             (ConnectedFib.β m cA C c0) ∘ ! (ConnectedFib.β m cA C c0) ∘ ! (! α) ≃〈 !-inv-r-front (ConnectedFib.β m cA C c0) (! (! α)) 〉 
+                             ! (! α) ≃〈 !-invol α 〉 
+                             α ∎)}))
+      Extensions-level {m}{S n} cA a0 C c0 =
+        ntype (λ e1 e2 → transport (NType n) 
+               (! (Extensions-Path (fst o C) c0 e1 e2))
+               (Extensions-level {_} {n} cA a0 (\ a -> (Path (fst e1 a) (fst e2 a), use-level (snd (C a)) _ _)) 
+                                               (! (snd e2) ∘ snd e1)))
+
+    abstract
+       wedge-elim' : ∀ {m n} {A B : Type} 
                       (cA : Connected (S m) A) 
                       (cB : Connected (S n) B)
                       (C : A → B → NTypes (plus2 m n)) 
@@ -127,80 +145,27 @@ module lib.NConnected where
                    -> (fa0 : (b' : B) -> fst (C a0 b'))
                    -> (fb0 : (a' : A) -> fst (C a' b0))
                    -> fa0 b0 ≃ fb0 a0 
-                   -> (a' : A) -> Extensions _ b0 (fst o (C a')) (fb0 a')
-       wedge-elim1'{m}{n}{A}{B} cA cB C {a0}{b0} fa0 fb0 agree a = 
+                   -> (a : A) -> Extensions B b0 (\ b -> fst (C a b)) (fb0 a)
+       wedge-elim'{m}{n}{A}{B} cA cB C {a0}{b0} fa0 fb0 agree a = 
            (ConnectedFib.everywhere m {_} {a0} cA
-            (λ a' → Extensions _ b0 (fst o (C a')) (fb0 a') , 
+            (λ a' → Extensions _ b0 (\ b -> fst (C a' b)) (fb0 a') , 
                     Extensions-level {n} {m} cB b0 (C a') (fb0 a')) 
             (fa0 , agree)
             a)
 
-{-
-       wedge-elim2' : ∀ {m n} {A B : Type} 
-                      (cA : Connected (S m) A) 
-                      (cB : Connected (S n) B)
-                      (C : A → B → NTypes (plus2 m n)) 
-                      {a0 : A} {b0 : B}
-                   -> (fa0 : (b' : B) -> fst (C a0 b'))
-                   -> (fb0 : (a' : A) -> fst (C a' b0))
-                   -> fa0 b0 ≃ fb0 a0 
-                   -> (b' : B) -> Extensions _ a0 (\a' -> fst (C a' b')) (fa0 b')
-       wedge-elim2'{m}{n}{A}{B} cA cB C {a0}{b0} fa0 fb0 agree b = 
-           (ConnectedFib.everywhere n {_} {b0} cB
-            (λ b' → Extensions _ _ (\a' -> fst (C a' b')) (fa0 b') , 
-                    Extensions-level {m} {n} cA a0 (\ a' -> fst (C a' b') , transport (λ x → NType x (fst (C a' b'))) (plus2-comm m n) (snd (C a' b'))) (fa0 b')) 
-            (fb0 , ! agree)
-            b)
--}
-       
        wedge-elim : ∀ {m n p} {A B : Type} 
                       (cA : Connected (S m) A) 
                       (cB : Connected (S n) B)
                       (C : A → B → NTypes p) 
                       (app : p <=tl plus2 m n)
                       {a0 : A} {b0 : B}
-                   -> (fa0 : (b' : B) -> fst (C a0 b'))
-                   -> (fb0 : (a' : A) -> fst (C a' b0))
+                   -> (fa0 : (b : B) -> fst (C a0 b))
+                   -> (fb0 : (a : A) -> fst (C a b0))
                    -> fa0 b0 ≃ fb0 a0 
-                   -> (a' : A) -> (b' : B) -> fst (C a' b')
-       wedge-elim{m}{n}{p}{A}{B} cA cB C app fa0 fb0 agree a' = 
-         fst (wedge-elim1' cA cB (λ a b → fst (C a b) , raise-level app (snd (C a b))) fa0 fb0 agree a')
+                   -> (a : A) -> (b : B) -> fst (C a b)
+       wedge-elim{m}{n}{p}{A}{B} cA cB C app fa0 fb0 agree a = 
+         fst (wedge-elim' cA cB (λ a' b' → fst (C a' b') , raise-level app (snd (C a' b'))) fa0 fb0 agree a)
 
-{-
-       wedge-elim2 : ∀ {m n p} {A B : Type} 
-                      (cA : Connected (S m) A) 
-                      (cB : Connected (S n) B)
-                      (C : A → B → NTypes p) 
-                      (app : p <=tl plus2 m n)
-                      {a0 : A} {b0 : B}
-                   -> (fa0 : (b' : B) -> fst (C a0 b'))
-                   -> (fb0 : (a' : A) -> fst (C a' b0))
-                   -> fa0 b0 ≃ fb0 a0 
-                   -> (a' : A) -> (b' : B) -> fst (C a' b')
-       wedge-elim2{m}{n}{p}{A}{B} cA cB C app fa0 fb0 agree a' b' = 
-         fst (wedge-elim2' cA cB (λ a b → fst (C a b) , raise-level app (snd (C a b))) fa0 fb0 agree b') a'
-
-       
-       same : ∀ {m n p} {A B : Type} 
-                      (cA : Connected (S m) A) 
-                      (cB : Connected (S n) B)
-                      (C : A → B → NTypes p) 
-                      (app : p <=tl plus2 m n)
-                      {a0 : A} {b0 : B}
-                   -> (fa0 : (b' : B) -> fst (C a0 b'))
-                   -> (fb0 : (a' : A) -> fst (C a' b0))
-                   -> (agree : fa0 b0 ≃ fb0 a0)
-                   -> (a' : A) -> (b' : B) -> (wedge-elim cA cB C app fa0 fb0 agree a' b')
-                                            ≃ (wedge-elim2 cA cB C app fa0 fb0 agree a' b')
-       same {m}{n}{p} cA cB C app {a0}{b0} fa0 fb0 agree a' b' =
-         wedge-elim {m} {n} {p} cA cB
-           (λ a b →
-              wedge-elim cA cB C app fa0 fb0 agree a b ≃
-              wedge-elim2 cA cB C app fa0 fb0 agree a b
-              , {!!})
-           app{a0}{b0} {!!} {!!} {!!} a' b'
--}       
-      
        wedge-elim-βa : ∀{m}{n}{p} {A B : Type}
                         (cA : Connected (S m) A) (cB : Connected (S n) B) (C : A → B → NTypes p) 
                         (app : p <=tl (plus2 m n)){a0 : A} {b0 : B}
@@ -211,7 +176,7 @@ module lib.NConnected where
        wedge-elim-βa{m}{n}{p} cA cB C app{a0}{b0} fa0 fb0 agree = 
         let C = (λ a b → fst (C a b) , raise-level app (snd (C a b))) 
         in 
-          ap fst
+          fst≃
           (ConnectedFib.β m cA
            (λ a' →
               Extensions _ _ (fst o C a') (fb0 a') ,
@@ -226,41 +191,36 @@ module lib.NConnected where
                      -> (agree : fa0 b0 ≃ fb0 a0)
                      -> (\ a -> wedge-elim cA cB C app fa0 fb0 agree a b0) ≃ fb0
        wedge-elim-βb {m}{n}{p}{A}{B} cA cB C app{a0}{b0} fa0 fb0 agree =
-        let C = (λ a b → fst (C a b) , raise-level app (snd (C a b))) 
+        λ≃ (\ a -> snd (wedge-elim' cA cB (λ a b → fst (C a b) , raise-level app (snd (C a b))) fa0 fb0 agree a))
+
+       wedge-elim-coh : ∀{m}{n}{p} {A B : Type}
+                        (cA : Connected (S m) A) (cB : Connected (S n) B) (C : A → B → NTypes p) 
+                        (app : p <=tl (plus2 m n)){a0 : A} {b0 : B}
+                     -> (fa0 : (b : B) -> fst (C a0 b))
+                     -> (fb0 : (a : A) -> fst (C a b0))
+                     -> (agree : fa0 b0 ≃ fb0 a0)
+                     ->   ap≃ (wedge-elim-βb cA cB C app fa0 fb0 agree) {a0}
+                        ≃ agree ∘ ap≃ (wedge-elim-βa cA cB C app fa0 fb0 agree) {b0}
+       wedge-elim-coh cA cB C app {a0}{b0} fa0 fb0 agree =
+        let C' = (λ a b → fst (C a b) , raise-level app (snd (C a b))) 
         in 
-         λ≃ (\ a -> 
-                ap≃
-                (fst≃
-                 (ConnectedFib.everywhere m {a0 = a0} cA
-                  (λ a' →
-                     ConnectedFib.everywhere m {_} {a0} cA
-                     (λ a1 →
-                        Extensions _ _ (fst o C a1) (fb0 a1) ,
-                        Extensions-level {n} {m} cB b0 (C a1) (fb0 a1))
-                     (fa0 , agree) a'
-                     ≃ {!fb0!}
-                     , path-preserves-level (Extensions-level {n} {m} cB b0 (C _) (fb0 _)))
-                  {!!} a)))
-        {-
-         λ≃ (\ a -> 
-            ConnectedFib.everywhere m {a0 = a0} cA (λ a' → wedge-elim cA cB C app fa0 fb0 agree a' b0 ≃ fb0 a' , 
-                                      {!not an m-type!})
-                                      (agree ∘ ap≃ (wedge-elim-βa cA cB C app fa0 fb0 agree)) a)
-         -}
-         {-
-         ext : Extensions _ a0 (λ a → wedge-elim cA cB C app{a0}{b0} fa0 fb0 agree a b0 ≃ fb0 a)
-                               (agree ∘ ap≃ (wedge-elim-βa cA cB C app fa0 fb0 agree))
-         ext = ConnectedFib.everywhere m {a0 = a0} cA
-                 (λ a →
-                    Extensions _ a0
-                    (λ a' →
-                       wedge-elim cA cB C app {a0} {b0} fa0 fb0 agree a' b0 ≃ fb0 a')
-                    (agree ∘ ap≃ (wedge-elim-βa cA cB C app fa0 fb0 agree))
-                    , {!!})
-                 {!!} {!a!}
-        -} 
-        
---                                       
+         ap≃ (wedge-elim-βb cA cB C app fa0 fb0 agree) {a0} ≃〈 Π≃β (\ a -> snd (wedge-elim' cA cB (λ a b → fst (C a b) , raise-level app (snd (C a b))) fa0 fb0 agree a)) 〉
+         snd (wedge-elim' cA cB (λ a b → fst (C a b) , raise-level app (snd (C a b))) fa0 fb0 agree a0) ≃〈 id 〉
+         snd (ConnectedFib.everywhere _ {_} {a0} cA
+               (λ a' → Extensions _ b0 (λ b → fst (C' a' b)) (fb0 a') ,
+                       Extensions-level cB b0 (C' a') (fb0 a'))
+               (fa0 , agree) a0) ≃〈 snd≃⁻
+                                       (ConnectedFib.β _ cA
+                                        (λ a' →
+                                           Extensions _ _ (fst o C' a') (fb0 a') ,
+                                           Extensions-level cB b0 (C' a') (fb0 a'))
+                                        (fa0 , agree)) 〉 
+         transport (λ f → f b0 ≃ fb0 a0)
+           (! (wedge-elim-βa cA cB C app fa0 fb0 agree))
+           agree ≃〈 transport-Path-pre' (λ f → f b0) (! (wedge-elim-βa cA cB C app fa0 fb0 agree)) agree 〉 
+         agree ∘ ! (ap≃ (! (wedge-elim-βa cA cB C app fa0 fb0 agree)) {b0}) ≃〈 ap (_∘_ agree) (! (ap-! (λ f → f b0) (! (wedge-elim-βa cA cB C app fa0 fb0 agree)))) 〉 
+         agree ∘ (ap≃ (! (! (wedge-elim-βa cA cB C app fa0 fb0 agree))) {b0}) ≃〈 ap (\ x -> agree ∘ ap≃ x {b0}) (!-invol (wedge-elim-βa cA cB C app fa0 fb0 agree)) 〉 
+         (agree ∘ ap≃ (wedge-elim-βa cA cB C app fa0 fb0 agree) {b0} ∎)
 
        wedge-rec : ∀ {m n p} {A B C : Type} 
                  -> Connected (S m) A 
@@ -297,6 +257,16 @@ module lib.NConnected where
                    -> (agree : fa b ≃ fb a)
                    -> (\ a' -> wedge-rec cA cB nC ap fa fb agree a' b) ≃ fb
        wedge-rec-βb cA cB nC = wedge-elim-βb cA cB (\ _ _ -> _ , nC)
+
+       wedge-rec-coh : ∀{m}{n}{p} {A B C : Type}
+                        (cA : Connected (S m) A) (cB : Connected (S n) B) (nC : NType p C) 
+                        (app : p <=tl (plus2 m n)){a0 : A} {b0 : B}
+                     -> (fa0 : B → C)
+                     -> (fb0 : A → C)
+                     -> (agree : fa0 b0 ≃ fb0 a0)
+                     ->   ap≃ (wedge-rec-βb cA cB nC app fa0 fb0 agree) {a0}
+                        ≃ agree ∘ ap≃ (wedge-rec-βa cA cB nC app fa0 fb0 agree) {b0}
+       wedge-rec-coh cA cB nC = wedge-elim-coh cA cB (\ _ _ -> _ , nC)
 
 
 

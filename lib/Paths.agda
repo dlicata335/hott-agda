@@ -110,6 +110,13 @@ module lib.Paths where
                         ≃ (b ≃ transport B α b')
  move-transport-right-!≃ B id = id
 
+ move-posto-with-transport-left : ∀ {A D : Type} (C : A → Type) {M M' : A}
+                          (α : M ≃ M') 
+                          (f : C M → D) (g : C M' → D)
+                       -> f ≃ (g o transport C α)
+                       -> (f o transport C (! α)) ≃ g
+ move-posto-with-transport-left C id f g = λ x → x
+
  cancel-left≃ : ∀ {A} {m1 m2 : A}
               (q : m1 ≃ m2) 
               (p : m1 ≃ m1)

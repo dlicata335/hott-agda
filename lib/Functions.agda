@@ -60,13 +60,6 @@ module lib.Functions where
              (\ x -> transport (\ γ -> B γ x) δ (f x))
   transport-Π-post' _ id f = id 
 
-  -- transportitution extension for Γ,x:A⁻ in DTT
-  pair≃⁻ : {A : Set} {B : A -> Set} {p q : Σ B} 
-        -> (α : (fst p) ≃ (fst q)) -> (snd p) ≃ transport B (! α) (snd q) 
-        -> p ≃ q
-  pair≃⁻ {A}{B}{p}{q} α β = 
-         pair≃ α (ap≃ (ap (λ x → transport B x) (!-inv-r α) ∘ ! (transport-∘ B α (! α))) ∘ ap (transport B α) β)
-
   transport-Π : ∀ {Γ} (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
             {θ1 θ2 : Γ} (δ : θ1 ≃ θ2) (f : (x : A θ1) -> B θ1 x) 
          -> transport (\ γ -> (x : A γ) -> B γ x) δ f ≃ 
