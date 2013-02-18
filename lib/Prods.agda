@@ -200,6 +200,16 @@ module lib.Prods where
          ≃ (\ p -> (transport A δ (fst p) , transport B δ (snd p)))
   transport-× id A B = id
 
+  transport-×2 : ∀ {A B} {M N : A} (C : A -> Type) (α : M ≃  N)
+                 → transport (\ a -> B × (C a)) α
+                 ≃ λ {(b , c) -> (b , (transport C α c))}
+  transport-×2 C id = id
+
+  transport-×1 : ∀ {A C} {M N : A} (B : A -> Type) (α : M ≃  N)
+                 → transport (\ a -> (B a) × C) α
+                 ≃ λ {(b , c) -> (transport B α b , c)}
+  transport-×1 C id = id
+
   snd×≃ : {A B : Type} {p q : A × B} -> p ≃ q -> (snd p) ≃ (snd q)
   snd×≃ {p = p} {q = .p} id = id    
 

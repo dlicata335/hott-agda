@@ -47,56 +47,97 @@ module programming.Database where
     convert : DB -> DB
     convert = ListM.map convert-record
   
-    test : convert euro ≃ american
-    test = id
+    map-fusion : ∀ {A B C} (g : B → C) (f : A → B) (l : List A) 
+               → ListM.map (g o f) l ≃ ListM.map g (ListM.map f l)
+    map-fusion g f [] = id
+    map-fusion g f (x :: xs) = ap (_::_ (g (f x))) (map-fusion g f xs)
+
+    map-idfunc : ∀ {A} (l : List A)
+               → ListM.map (\ x -> x) l ≃ l
+    map-idfunc [] = id
+    map-idfunc (x :: xs) = ap (_::_ x) (map-idfunc xs)
   
     convert-inv : convert o convert ≃ (\ x -> x)
-    convert-inv = convert o convert ≃〈 id 〉 
-                  ListM.map convert-record o ListM.map convert-record ≃〈 {!!} 〉 
-                  ListM.map convert-record o ListM.map convert-record ≃〈 {!!} 〉 
+    convert-inv = 
+
+                  convert o convert 
+                    ≃〈 id 〉 
+
+                  ListM.map convert-record o ListM.map convert-record
+                    ≃〈 ! (λ≃ (map-fusion convert-record convert-record)) 〉 
+
+                  ListM.map (convert-record o convert-record) 
+                    ≃〈 id 〉 
+
+                  ListM.map (\ x -> x) 
+                    ≃〈 λ≃ ListM.map-idfunc 〉 
+
                   (λ x → x) ∎
+
+    test : convert euro ≃ american
+    test = id
+
   
   module HoTT where
+    swapfn : ∀ {A B} → (A × B) → (B × A)
+    swapfn (x , y) = (y , x)
+    
     swap : ∀ {A B} → Equiv (A × B) (B × A)
-    swap = equiv (λ {(x , y) → y , x})
-                 (λ {(x , y) → y , x})
-                 (λ _ → id)
-                 (λ _ → id)
-                 (λ _ → id)
+    swap = equiv swapfn swapfn (λ _ → id) (λ _ → id) (λ _ → id)
 
     swap≃ : ∀ {A B} → (A × B) ≃ (B × A)
     swap≃ = ua swap
 
-    !swap≃ : ∀ {A B} → swap≃ ≃ ! (swap≃{A}{B})
-    !swap≃ = ! (!-ua swap)
-
     convert : DB → DB
-    convert = transport (\ A -> List (Nat × String × (A × Nat)))  swap≃
+    convert = transport (\ A -> List (Nat × String × (A × Nat))) swap≃
+
 
     convert-inv : convert o convert ≃ (\ x -> x)
     convert-inv = let C = (\ A -> List (Nat × String × (A × Nat))) in 
                   
-                  convert o convert
+                  convert o convert 
                     ≃〈 id 〉 
 
-                  transport C swap≃
-                  o transport C swap≃
-                    ≃〈 ap (λ x → transport C swap≃ o transport C x) !swap≃ 〉 
+                  transport C swap≃ o transport C swap≃  
+                    ≃〈 ! (transport-∘ C swap≃ swap≃) 〉 
 
-                  transport C swap≃
-                  o transport C (! swap≃) 
-                    ≃〈 transport-inv-2 C swap≃ 〉 
+                  transport C (swap≃ ∘ swap≃)
+                    ≃〈 ap (transport C) (type≃-ext (swap≃ ∘ swap≃) id (λ p → (ap≃ (type≃β swap) ∘ ap (λ f → coe swap≃ (f p)) (type≃β swap)) ∘ ap≃ (transport-∘ (λ x → x) swap≃ swap≃))) 〉 
+
+                  transport C id
+                    ≃〈 id 〉 
 
                   (λ x → x) ∎
+
 
     test : convert euro ≃ american
     test = ap≃ converts-same where
       converts-same : convert ≃ ByHand.convert
       converts-same =
-        convert
-          ≃〈 {!!} 〉 
-        transport (\ A -> List (Nat × String × (A × Nat))) swap≃ 
-          ≃〈 {!!} 〉 
-        ListM.map (transport (\ A -> Nat × String × (A × Nat)) swap≃)
-          ≃〈 {!!} 〉 
+        convert                                                          ≃〈 id 〉 
+
+        transport (\ A -> List (Nat × String × (A × Nat))) swap≃         ≃〈 transport-List (λ A → Nat × String × A × Nat) swap≃ 〉 
+
+        ListM.map (transport (\ A -> Nat × String × (A × Nat)) swap≃)    ≃〈 ap ListM.map (transport-×2 (λ A → String × A × Nat) swap≃) 〉 
+
+        ListM.map (λ {(key , name , (month , day) , year)
+                     → (key , transport (λ A → String × A × Nat) swap≃
+                                        (name , (month , day) , year))})  ≃〈 ap ListM.map (λ≃ λ {(key , name , (month , day) , year) → ap (_,_ key) (ap≃ (transport-×2 (λ A → A × Nat) swap≃))}) 〉 
+
+        ListM.map (λ {(key , name , (month , day) , year) → 
+                      (key , name , 
+                       (transport (λ A → A × Nat) swap≃ 
+                                  ((month , day) , year)))})              ≃〈 ap ListM.map (λ≃ λ {(key , name , (month , day) , year) → ap (λ x → key , name , x) (ap≃ (transport-×1 (λ A → A) swap≃))}) 〉 
+
+        ListM.map (λ {(key , name , (month , day) , year) → 
+                      (key , name , 
+                       (transport (λ A → A) swap≃ (month , day)) ,
+                       year)})                                            ≃〈 ap ListM.map (λ≃ λ {(key , name , (month , day) , year) → ap (λ x → key , name , x , year) (ap≃ (type≃β swap))}) 〉 
+
+        ListM.map (λ {(key , name , (month , day) , year) → 
+                     (key , name , (swapfn (month , day) , year))})       ≃〈 id 〉 
+
+        ListM.map (λ {(key , name , ((month , day) , year)) → 
+                      (key , name , (day , month) , year)})               ≃〈 id 〉 
+
         ByHand.convert ∎

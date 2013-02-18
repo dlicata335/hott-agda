@@ -72,3 +72,14 @@ module lib.List where
               ≃ map (\ x -> g (f x)) l
     fuse-map [] = id
     fuse-map {f = f} {g = g} (x :: xs) = ap (\ xs -> (g (f x)) :: xs) (fuse-map xs)
+
+    map-idfunc : ∀ {A} (l : List A)
+               → map (\ x -> x) l ≃ l
+    map-idfunc [] = id
+    map-idfunc (x :: xs) = ap (_::_ x) (map-idfunc xs)
+
+  transport-List : ∀ {A} {M N : A} (C : A -> Type) (α : M ≃  N)
+                   → transport (\ x -> List (C x)) α
+                   ≃ ListM.map (transport C α) 
+  transport-List C id = ! (λ≃ ListM.map-idfunc)
+

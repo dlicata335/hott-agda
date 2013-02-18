@@ -33,6 +33,9 @@ module lib.Universe where
   !-ua : {A B : Type} (e : Equiv A B) → (! (ua e)) ≃ (ua (!equiv e))
   !-ua e = type≃-ext (! (ua e)) (ua (!equiv e)) (λ x → ap≃ (! (type≃β (!equiv e)) ∘ type≃β! e))
 
+  ∘-ua : {A B C : Type} (e : Equiv B C)(e' : Equiv A B) → (ua e) ∘ (ua e') ≃ ua (e ∘equiv e')
+  ∘-ua e e' = type≃-ext _ _ (λ x → ((! (ap≃ (type≃β (e ∘equiv e'))) ∘ ap (fst e) (ap≃ (type≃β e'))) ∘ ap≃ (type≃β e)) ∘ ap≃ (transport-∘ (λ x' → x') (ua e) (ua e')))
+
   univalence≃-id : ∀ {A} → coe (univalence≃ {A} {A}) id ≃ id-equiv
   univalence≃-id {A} = ap≃ (type≃β (pathToEquiv' , univalence)) {id}
 
