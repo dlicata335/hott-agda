@@ -4,17 +4,6 @@ open import lib.Prelude
 
 module programming.Database where
 
-  -- Bijection : Type -> Type -> Type
-  -- Bijection = Equiv 
-
-  -- bij : {A B : Type}
-  --       (f : A → B)
-  --       (g : B → A)
-  --       (α : (x : A) → Path (g (f x)) x)
-  --       (β : (y : B) → Path (f (g y)) y)
-  --       → Equiv A B
-  -- bij f g α β = improve (hequiv f g α β)
-
   DB : Type
   DB = List (Nat × String × ((Nat × Nat) × Nat))
 
