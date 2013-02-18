@@ -36,6 +36,9 @@ module programming.Database where
     convert : DB -> DB
     convert = ListM.map convert-record
   
+    test : convert euro ≃ american
+    test = id
+
     map-fusion : ∀ {A B C} (g : B → C) (f : A → B) (l : List A) 
                → ListM.map (g o f) l ≃ ListM.map g (ListM.map f l)
     map-fusion g f [] = id
@@ -63,8 +66,6 @@ module programming.Database where
 
                   (λ x → x) ∎
 
-    test : convert euro ≃ american
-    test = id
 
   
   module HoTT where
