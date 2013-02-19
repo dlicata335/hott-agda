@@ -29,6 +29,46 @@ module programming.Database-starter where
 
   module ByHand where
 
+    convert-record : Nat × String × (Nat × Nat) × Nat 
+                   → Nat × String × (Nat × Nat) × Nat 
+    convert-record (key , name , (day , month) , year) = 
+                   (key , name , (month , day) , year)
+
     convert : DB -> DB
-    convert = {!!}
+    convert d = ListM.map convert-record d
   
+    -- id : {A : Type} {M : A} -> M ≃ M
+
+    test : convert euro ≃ american
+    test = id
+
+    map-fusion : ∀ {A B C} (g : B -> C) (f : A -> B)
+               -> ListM.map (g o f) ≃ ListM.map g o ListM.map f
+    map-fusion {A} g f = λ≃ pointwise where
+      pointwise : (l : List A) → 
+                  ListM.map (g o f) l 
+                ≃ ListM.map g (ListM.map f l)
+      pointwise [] = id
+      pointwise (x :: xs) =
+        ap2 _::_ id (pointwise xs)
+
+    map-idfunc : ∀ {A} -> ListM.map (\ (x : A) -> x) 
+                        ≃ (\ x -> x)
+    map-idfunc {A} = λ≃ pointwise where
+      pointwise : (l : List A) → ListM.map (\ x -> x) l
+                               ≃ l
+      pointwise [] = id
+      pointwise (y :: y') = ap2 _::_ id (pointwise y')
+    
+    inverse : convert o convert ≃ (λ x -> x)
+    inverse = convert o convert           ≃〈 id 〉 
+
+              ListM.map convert-record o
+              ListM.map convert-record    ≃〈 ! (map-fusion convert-record convert-record) 〉 
+
+              ListM.map (convert-record o 
+                         convert-record)  ≃〈 id 〉
+
+              ListM.map (λ x → x)  ≃〈 map-idfunc 〉
+              
+              (λ x → x) ∎
