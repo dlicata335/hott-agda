@@ -142,3 +142,21 @@ module Int where
   tlp+1 Z = id
   tlp+1 (S k) = ap S (tlp+1 k)
 
+  pos2nat : Positive -> Nat
+  pos2nat One = S Z
+  pos2nat (S n) = S (pos2nat n)
+
+  -2ptl : Positive -> TLevel
+  -2ptl One = (S -2)
+  -2ptl (S One) = (S (S -2))
+  -2ptl (S (S n)) = tl (pos2nat n)
+
+  pos2nat-+1np : ∀ n' -> (pos2nat n' +1np) ≃ S n'
+  pos2nat-+1np One = id
+  pos2nat-+1np (S n') = ap S (pos2nat-+1np n')
+
+  -2<pos-2 : ∀ n → -2 <tl -2ptl n
+  -2<pos-2 One = ltS
+  -2<pos-2 (S One) = ltSR ltS
+  -2<pos-2 (S (S n')) = -2<nat (pos2nat n')
+

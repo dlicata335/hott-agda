@@ -38,6 +38,10 @@ module lib.NType where
   -2< -2 = ltS 
   -2< (S n) = ltSR (-2< n) 
 
+  -2<nat : ∀ n → -2 <tl (tl n)
+  -2<nat Z = ltSR ltS
+  -2<nat (S y) = ltSR (-2<nat y)
+
   ltSCong : ∀ {n} {m} -> n <tl m -> (S n) <tl (S m)
   ltSCong {n} { -2 } () 
   ltSCong { -2 } {(S -2)} lt = ltS

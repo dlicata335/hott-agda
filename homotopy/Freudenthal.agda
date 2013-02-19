@@ -7,15 +7,16 @@
 open import lib.Prelude
 open Suspension
 open Truncation
-
+open Int
 open ConnectedProduct
 
 module homotopy.Freudenthal where
 
+
   -- index constraints:
   -- n is successor: needed first for the wedge-rec in Codes mer
   -- n is double-successor (n' is successor): needed first in Codes-mer-equiv (raise-HProp)
-  module Freudenthal
+  module FreudenthalEquiv
     (n' : TLevel)
     (k : TLevel)
     (-2<n' : -2 <tl n')
@@ -166,6 +167,56 @@ module homotopy.Freudenthal where
                                   (path-induction (λ _ p → decode (encode [ p ]) ≃ [ p ]) (ap [_] (!-inv-l (mer base))))
                                   tα
 
-    theorem : Trunc k X ≃ Trunc k (Path {(Susp X)} No No)
-    theorem = ua (improve (hequiv decode' encode encode-decode' decode-encode))
+    eqv : Equiv (Trunc k X) (Trunc k (Path {(Susp X)} No No))
+    eqv = (improve (hequiv decode' encode encode-decode' decode-encode))
 
+    path : Trunc k X ≃ Trunc k (Path {(Susp X)} No No)
+    path = ua eqv -- ua (improve (hequiv decode' encode encode-decode' decode-encode))
+
+  module StableSphere (n : Positive) (k : Positive) 
+                      (c : (tlp k <=tl plus2 (-2ptl n) (-2ptl n)))
+                      -- i.e. k <= 2n - 2 
+         where
+
+    open NSphereSusp
+
+    nS^ : ∀ n → Connected (S (-2ptl n)) (S^ n)
+    nS^ One = S^-Connected 0
+    nS^ (S One) = S^-Connected 1
+    nS^ (S (S n')) = transport (λ x → Connected (S (tl (pos2nat n'))) (Susp (S^ x))) 
+                              (pos2nat-+1np n')
+                              (S^-Connected (pos2nat (S n')))
+
+    module F = FreudenthalEquiv (-2ptl n) (tlp k) (-2<pos-2 n) c (S^ n) (base^ n) (nS^ n) 
+
+    stable : π k (S^ n) (base^ n) ≃ π (k +1) (S^ (n +1)) (base^ (n +1))
+    stable = ! (π (S k) (S^ (S n)) (base^ (S n)) ≃〈 id 〉
+                τ₀ (Loop (S k) (S^ (S n)) (base^ (S n))) ≃〈 ap τ₀ (LoopSpace.LoopPath.path k) 〉
+                τ₀ (Loop k (Path {(S^ (S n))} (base^ (S n)) (base^ (S n))) id) ≃〈 ! (LoopSpace.Loop-Trunc0 k) 〉
+                Loop k (Trunc (tlp k) (Path {(S^ (S n))} (base^ (S n)) (base^ (S n)))) [ id ] ≃〈 id 〉
+                Loop k (Trunc (tlp k) (Path {Susp (S^ n)} No No)) [ id ] ≃〈 ap-Loop≃ k (! F.path) (ap≃ (type≃β! F.eqv)) 〉
+                Loop k (Trunc (tlp k) (S^ n)) [ base^ n ] ≃〈 LoopSpace.Loop-Trunc0 k 〉 
+                τ₀ (Loop k (S^ n) (base^ n)) ≃〈 id 〉 
+                π k (S^ n) (base^ n) ∎)
+    
+    -- consequences of stablity for k <= 2n - 2 
+    -- n = 1: k <= 0
+    -- n = 2: k <= 2 : pi_1(S^2) = pi_2(S^3) and pi_2(S^2) = pi_3(S^3) 
+    -- n = 3: k <= 4 : pi_1(S^3) = pi_2(S^4) and pi_2(S^3) = pi_3(S^4) and pi_3(S^3) = pi_4(s^4) and pi_4(S^3) = pi_5(S^4)
+    -- n = 4: k <= 6 : pi_1(S^4) = pi_2(S^5) and pi_2(S^4) = pi_3(S^5) and pi_3(S^4) = pi_4(s^5) and pi_4(S^4) = pi_5(s^5) and pi_5(S^4) = pi_6(s^5) and pi_6(S^4) = pi_7(S^5)
+    
+    -- so: 
+    -- k<n : pi_1(S^2) = pi_2(S^3) = pi_3(S^4) = pi_4(s^5) = ...
+    --       pi_1(S^3) = pi_2(S^4) = pi_3(S^5) = ...
+    --       pi_1(S^4) = pi_2(S^5) 
+    -- k=n : pi_2(S^2) = pi_3(S^3) = pi_4(s^4) = pi_5(s^5) = ...
+    -- k>n : pi_4(S^3) = pi_5(S^4) = pi_6(s^5) = ... 
+    --       pi_6(S^4) = pi_7(S^5)
+
+    -- to start the diagonals, can prove:
+    -- pi_1(S^2)
+    -- pi_1(S^3)
+    -- pi_1(S^4)
+    -- pi_2(S^2)
+    -- pi_4(S^3)
+    -- pi_6(S^4)

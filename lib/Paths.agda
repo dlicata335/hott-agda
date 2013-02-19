@@ -232,6 +232,11 @@ module lib.Paths where
                                     (p' ∘ (! (ap f p)))
  transport-Path-pre' _ id p' = id
 
+ transport-Path-post' : {Γ A : Type} {f : A} (g : Γ → A) {M N : Γ} (p : Path M N)
+                → (p' : _) → Path (transport (\ x → Path f (g x)) p p')
+                                   (ap g p ∘ p')
+ transport-Path-post' _ id p' = ! (∘-unit-l p')
+
  transport-com-for-ap-of-transport : 
      {Γ : Type} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
      (A : Γ -> Type) (C : (γ : Γ) -> A γ -> Type)
