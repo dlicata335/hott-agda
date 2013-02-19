@@ -2,7 +2,7 @@
 
 open import lib.Prelude
 
-module programming.Database-starter where
+module programming.Database-Monday where
 
   DB : Type
   DB = List (Nat × String × ((Nat × Nat) × Nat))
