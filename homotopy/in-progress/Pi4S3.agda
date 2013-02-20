@@ -51,8 +51,16 @@ module homotopy.in-progress.Pi4S3 where
 
   S³ = S^ (S (S One))
 
+  ichange3 : {A : Type} {a a' : A} {x y z : Path a a'} 
+            {p q r : Path x y} {p' q' r' : Path y z}
+          -> (a : Path p q) (b : Path q r) (c : Path p' q') (d : Path q' r') 
+          -> Path (ap∘ (d ∘ c) (b ∘ a)) (ap∘ d b ∘ ap∘ c a)
+  ichange3 id id id id = id
+
+  generator' = ichange3 (S.loop (S (S One))) (! (S.loop (S (S One)))) (S.loop (S (S One))) (! (S.loop (S (S One))))
+
   generator : Loop (S (S (S One))) S³ S.base
-  generator = {!!}
+  generator = {!!} ∘ generator' ∘ {!!}
 
   order2 : generator ∘ generator ≃ id
   order2 = {!!}
