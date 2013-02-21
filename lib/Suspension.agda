@@ -4,7 +4,12 @@ open import lib.First
 open import lib.Paths
 open import lib.NConnected
 open import lib.Truncations
+open import lib.Int
+open import lib.Nat
+open import lib.NType
 open Truncation
+open Int
+open Nat
 
 module lib.Suspension where
 
@@ -73,3 +78,26 @@ module lib.Suspension where
                                       (λ x0 → ap [_] (mer x) ≃ ap [_] (mer x0) , use-level (use-level (Trunc-level {S (S n)}) _ _) _ _) id x'
 
 
+    Susp^ : (n : Nat) → Type → Type
+    Susp^ Z A = A
+    Susp^ (S n) A = Susp (Susp^ n A)
+
+    point^ : (n : Nat) → {A : Type} (a : A) → Susp^ n A
+    point^ Z a = a
+    point^ (S _) _ = No
+
+    -- FIXME : generalize
+    abstract
+      Susp^-Connected-1 : (n : Nat) {A : Type} (a : A)
+                      → Connected (tl n) (Susp^ (S n) A)
+      Susp^-Connected-1 Z a =
+        ntype ([ No ] , Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
+                                   (Susp-elim _ id (ap [_] (mer a)) 
+                                   (λ x → HProp-unique (use-level (Trunc-level {S (S -2)}) _ _) _ _)))
+      Susp^-Connected-1 (S n) a = Susp-Connected _ (Susp^-Connected-1 n a)
+
+      Susp^-Connected0 : (n : Nat) {A : Type} 
+                      → Connected (S (S -2)) A 
+                      → Connected (tl n) (Susp^ n A)
+      Susp^-Connected0 Z nA = nA
+      Susp^-Connected0 (S n) a = Susp-Connected _ (Susp^-Connected0 n a)

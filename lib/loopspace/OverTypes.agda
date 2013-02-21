@@ -90,7 +90,6 @@ module lib.loopspace.OverTypes where
        LoopOver (S n) α (λ x → f x ≃ g x) β ∎
 
 
-
   -- relate LoopOver (S n) α B b to an equation about (ap^ n B α),
   -- and provide rules for ap^ n B for each B
 

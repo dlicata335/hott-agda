@@ -25,18 +25,18 @@ module lib.spaces.NSphere where
     -}
       
     -- might compute too far, but we'll see
-    S^ : (n : Int.Positive) → Type
-    S^ Int.One = S¹.S¹
-    S^ (Int.S n) = Susp (S^ n)
-  
-
-    S^-Connected : (n : Nat) → Connected (tl n) (S^ (n +1np))
-    S^-Connected Z = 
-      ntype ([ S¹.base ] ,
-             Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
-                       (S¹.S¹-elim _ id (HSet-UIP (Trunc-level {tl 0}) _ _ _ _)))
-    S^-Connected (S n) = Susp-Connected _ (S^-Connected n)
+    S^ : (n : Positive) → Type
+    S^ n = Susp^ (n -1pn) S¹.S¹
 
     base^ : (n : Positive) → S^ n
-    base^ One = S¹.base
-    base^ (S n) = No
+    base^ n = point^ (n -1pn) S¹.base
+
+    abstract
+      S^-Connected : (n : Nat) → Connected (tl n) (S^ (n +1np))
+      S^-Connected n = transport (λ x → NType -2 (Trunc (tl n) x)) (ap (λ x → Susp^ x S¹.S¹) (! (+1-1-cancel n)))
+                         (Susp^-Connected0 n (ntype
+                                                ([ S¹.base ] ,
+                                                 Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
+                                                 (S¹.S¹-elim _ id (HSet-UIP (Trunc-level {tl 0}) _ _ _ _))))) 
+
+

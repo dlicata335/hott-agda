@@ -122,9 +122,20 @@ module Int where
   tlp One = tl 1
   tlp (S n) = S (tlp n)
 
+  pos2nat : Positive -> Nat
+  pos2nat One = S Z
+  pos2nat (S n) = S (pos2nat n)
+
   _+1np : Nat → Positive
   Z +1np = One
   (S n) +1np = S (n +1np)
+
+  _-1pn : Positive → Nat
+  One -1pn = Z
+  (S n) -1pn = pos2nat n
+
+  postulate
+    +1-1-cancel : ∀ n → (n +1np) -1pn ≃ n
 
   _+pn_ : Positive → Nat → Positive
   One +pn k = k +1np
@@ -142,10 +153,8 @@ module Int where
   tlp+1 Z = id
   tlp+1 (S k) = ap S (tlp+1 k)
 
-  pos2nat : Positive -> Nat
-  pos2nat One = S Z
-  pos2nat (S n) = S (pos2nat n)
-
+  -- the following are maybe not used any more:
+  -- (were used for wrong definition of the spheres)
   -2ptl : Positive -> TLevel
   -2ptl One = (S -2)
   -2ptl (S One) = (S (S -2))
@@ -159,4 +168,4 @@ module Int where
   -2<pos-2 One = ltS
   -2<pos-2 (S One) = ltSR ltS
   -2<pos-2 (S (S n')) = -2<nat (pos2nat n')
-
+  -- end
