@@ -176,3 +176,9 @@ module Int where
   ... | Inl lt = Inl (ltSR lt)
   ... | Inr eq = transport (λ x → tl 1 <=tl S x) eq (Inl ltS)
 
+  postulate
+    pos-not-<0 : (p : Positive) → tlp p <=tl (S (S -2)) -> Void
+  -- pos-not-<0 One (Inl (ltSR (ltSR ())))
+  -- pos-not-<0 One (Inr ())
+  -- pos-not-<0 (S n) (Inl y) = {!y!}
+  -- pos-not-<0 (S n) (Inr y) = {!y!}

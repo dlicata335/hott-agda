@@ -89,6 +89,16 @@ module homotopy.KGn where
 
       -- TODO: prove everything else below the diagonal using Freudenthal
 
+      πk : ∀ k n → (tlp k <tl tlp n) → π k (B n) (base^ n) ≃ Unit
+      πk One One (ltSR (ltSR (ltSR ())))
+      πk One (S n) lt = π1 n
+      -- πk (S One) One (ltSR (ltSR (ltSR ())))
+      -- πk (S (S One)) One (ltSR (ltSR (ltSR ())))
+      -- πk (S (S (S One))) One (ltSR (ltSR (ltSR ())))
+      πk (S k) One lt with pos-not-<0 k (Inl (lt-unS lt))
+      ... | () 
+      πk (S k) (S n) lt = {!Stable.stable n k ? !}
+
     module OnDiagonal where
     
       π1 : π One (B One) (base^ One)  ≃  π One A a0
