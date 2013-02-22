@@ -7,6 +7,7 @@ open Int
 open LoopSpace
 open Suspension
 open import homotopy.Freudenthal
+open import homotopy.PiLessOfConnected
 
 module homotopy.KGn where
 
@@ -17,7 +18,7 @@ module homotopy.KGn where
   IsK1 : Type -> Type
   IsK1 A = A × 
            Connected (S (S -2)) A × 
-           HGpd A ×
+           NType (tl 1) A ×
            Abelian A
 
   module B (A : Type) (isK1 : IsK1 A) where
@@ -37,6 +38,19 @@ module homotopy.KGn where
                       (λ x → NType -2 (Trunc (tl n) (Trunc (tlp (n +1np)) (Susp^ x A))))
                       (! (+1-1-cancel n)) (connected-Trunc _ _ _ (Susp^-Connected0 n A-Connected))
 
+    B-Connected' : (n : Positive) → Connected (S (-2ptl n)) (B n)
+    B-Connected' One = B-Connected 0
+    B-Connected' (S One) = B-Connected 1
+    B-Connected' (S (S n')) = {!B-Connected (pos2nat (S n'))!} where -- {!S^-Connected (pos2nat (S n'))!} -- right where
+                             postulate FIXME : _
+        -- transport (λ x → Connected (S (tl (pos2nat n'))) (Susp (S^ x))) 
+        --                         (pos2nat-+1np n')
+        --                         {!(S^-Connected (pos2nat (S n')))!}
+
+    B-Connected'' : (n : Positive) → Connected (tlp n) (B (n +1))
+    B-Connected'' n = {!B-Connected' (n +1)!}
+  
+
     base^ : ∀ n → B n
     base^ n = [ point^ (n -1pn) a0 ]
 
@@ -46,16 +60,7 @@ module homotopy.KGn where
                   -- i.e. k <= 2n - 2 
            where
   
-      nB : ∀ n → Connected (S (-2ptl n)) (B n)
-      nB One = B-Connected 0
-      nB (S One) = B-Connected 1
-      nB (S (S n')) = {!B-Connected (pos2nat (S n'))!} where -- {!S^-Connected (pos2nat (S n'))!} -- right where
-                             postulate FIXME : _
-        -- transport (λ x → Connected (S (tl (pos2nat n'))) (Susp (S^ x))) 
-        --                         (pos2nat-+1np n')
-        --                         {!(S^-Connected (pos2nat (S n')))!}
-  
-      module F = FreudenthalEquiv (-2ptl n) (tlp k) (-2<pos-2 n) c (B n) (base^ n) (nB n) 
+      module F = FreudenthalEquiv (-2ptl n) (tlp k) (-2<pos-2 n) c (B n) (base^ n) (B-Connected' n) 
   
       stable : π k (B n) (base^ n) ≃ π (k +1) (B (n +1)) (base^ (n +1))
       stable = ! (π (k +1) (B (n +1)) (base^ (n +1)) ≃〈 id 〉
@@ -76,11 +81,28 @@ module homotopy.KGn where
     --   Path (B n+1) No No ≃ B n
     -- set k = n, and cancel redundant truncations
 
-    -- need pi_1(B n) = 1, for n > 2
-    --   get below diagonal by above
-    -- need pi_1(B 1) = pi_1(A) check (definitional)
-    -- need pi_2(B 2) = pi_1(A) tricky?
-    --   get diagonal by above
-    -- need pi_k(B_n) for k > n easy: above truncation
 
+    module BelowDiagonal where
+
+      π1 : (n : Positive) → (π One (B (n +1)) (base^ (n +1))) ≃ Unit
+      π1 n = π1Connected≃Unit (tlp n) _ (base^ (n +1)) (B-Connected'' n) (1<=pos n)
+
+      -- TODO: prove everything else below the diagonal using Freudenthal
+
+    module OnDiagonal where
     
+      π1 : π One (B One) (base^ One)  ≃  π One A a0
+      π1 = τ₀ (Path {Trunc (tl 1) A} [ a0 ] [ a0 ]) ≃〈 ap τ₀ (ap-Loop≃ One (UnTrunc.path _ _ (fst (snd (snd isK1)))) (ap≃ (type≃β (UnTrunc.eqv _ _ (fst (snd (snd isK1))))))) 〉
+           τ₀ (Path {A} a0 a0) ∎
+    
+      -- tricky?  pi_2(B 2) = pi_1(A) 
+
+      -- get rest of diagonal by Freud
+
+    module AboveDiagonal where
+
+      -- need pi_k(B_n) for k > n easy: above truncation
+   
+        
+      
+      

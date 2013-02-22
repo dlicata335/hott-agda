@@ -63,6 +63,13 @@ module lib.NType where
   -2<= -2 = Inr id
   -2<= (S n) = Inl (-2< n)
 
+  <=-unS : ∀ {n m} → (S n) <=tl (S m) → n <=tl m
+  <=-unS (Inl lt) = Inl (lt-unS lt)
+  <=-unS (Inr e) = Inr (ap tpred e) where
+    tpred : TLevel -> TLevel
+    tpred (S n) = n
+    tpred -2 = -2
+
 
   -- min for tlevels
   mintl : TLevel -> TLevel -> TLevel 

@@ -169,3 +169,10 @@ module Int where
   -2<pos-2 (S One) = ltSR ltS
   -2<pos-2 (S (S n')) = -2<nat (pos2nat n')
   -- end
+
+  1<=pos : (p : Positive) → tl 1 <=tl (tlp p)
+  1<=pos One = Inr id
+  1<=pos (S n) with 1<=pos n
+  ... | Inl lt = Inl (ltSR lt)
+  ... | Inr eq = transport (λ x → tl 1 <=tl S x) eq (Inl ltS)
+

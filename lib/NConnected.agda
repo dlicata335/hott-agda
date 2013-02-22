@@ -18,8 +18,14 @@ module lib.NConnected where
   Connected n A = NType -2 (Trunc n A)
 
   abstract
+    lower-Connected : ∀ {k1 k2} {A} → k1 <=tl k2 → Connected k2 A -> Connected k1 A
+    lower-Connected {k1}{k2} lt = lower-Trunc-preserves-level k2 k1 { -2} lt
+
     connected-Trunc : ∀ n k A -> Connected n A -> Connected n (Trunc k A)
-    connected-Trunc n k A cA = transport (NType -2) (! (FuseTrunc.path _ _ _)) (lower-Trunc-preserves-level n (mintl n k) { -2} (mintl<=1 n k) cA)
+    connected-Trunc n k A cA = transport (NType -2) (! (FuseTrunc.path _ _ _)) (lower-Connected (mintl<=1 n k) cA)
+
+    Connected-Path : ∀ {k} {A} → Connected (S k) A → { x y : A} → Connected k (Path x y)
+    Connected-Path {k = k} cA = transport (NType -2) (! (TruncPath.path k)) (path-preserves-level cA)
 
   module ConnectedFib where 
    somewhere : (n : TLevel) {A : Type} {a : A}

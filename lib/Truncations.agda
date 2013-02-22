@@ -189,3 +189,11 @@ module lib.Truncations where
 
      path : Trunc n (Trunc k A) ≃ Trunc (mintl n k) A
      path = ua eqv
+
+   module UnTrunc (n : TLevel) (A : Type) (nA : NType n A) where
+
+    eqv : Equiv (Trunc n A) A
+    eqv = improve (hequiv (Trunc-rec nA (λ x → x)) [_] (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (λ _ → id)) (λ _ → id))
+    
+    path : Trunc n A ≃ A
+    path = ua eqv
