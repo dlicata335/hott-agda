@@ -25,7 +25,7 @@ module homotopy.PiNSN where
 
   S-loops : ∀ n -> (x : Trunc (tlp n) (S^ n)) → Loop n (Trunc (tlp n) (S^ n)) x
   S-loops n = Trunc-elim (\ x ->  Loop n (Trunc (tlp n) (S^ n)) x)
-                         (λ x → IsKTrunc-Loop n (tlp n) Trunc-level)
+                         (λ x → Loop-preserves-level n (tlp n) Trunc-level)
                          (S-elim {n} (λ x → Loop n (Trunc (tlp n) (S^ n)) [ x ])
                                      (ap^ n [_] (S.loop n)) 
                                      (preserves n)) where
@@ -118,13 +118,13 @@ module homotopy.PiNSN where
           STS1 x' = 
                   (apt n (ap^ (S n) P (S.loop (S n))) (decode' x')) ≃〈 ap (λ x0 → apt n x0 (decode' x')) (ap^TruncPathPost n (tlp n) (S.loop (S n)) _) 〉 
                   (apt n (λt n (Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
-                                           (λ _ → IsKTrunc-Loop n (tlp n) Trunc-level)
+                                           (λ _ → Loop-preserves-level n (tlp n) Trunc-level)
                                            (λ β → ap^ n [_]
                                                     (rebase n (∘-unit-l β)
                                                     (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n))))))))
                               (decode' x')) ≃〈 LoopSType.β n _ _ 〉
                   ((Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
-                                               (λ _ → IsKTrunc-Loop n (tlp n) Trunc-level)
+                                               (λ _ → Loop-preserves-level n (tlp n) Trunc-level)
                                                (λ β → ap^ n [_]
                                                     (rebase n (∘-unit-l β)
                                                     (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n)))))))
@@ -138,13 +138,13 @@ module homotopy.PiNSN where
                   (!^ n (ap^ n decode' (apt n (!^ (S n) (ap^ (S n) (Codes n) (S.loop (S n)))) x')))
                   ∎ where
              STS2 : (x' : _) → ((Trunc-elim (λ tβ → Loop n (Trunc (tlp n) (Path _ _)) tβ) 
-                                                (λ _ → IsKTrunc-Loop n (tlp n) Trunc-level)
+                                                (λ _ → Loop-preserves-level n (tlp n) Trunc-level)
                                                 (λ β → ap^ n [_]
                                                      (rebase n (∘-unit-l β)
                                                      (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n)))))))
                                (decode' x'))
                              ≃ (ap^ n decode' (S-loops n x'))
-             STS2 = Trunc-elim _ (λ _ → path-preserves-level (IsKTrunc-Loop n (tlp n) Trunc-level))
+             STS2 = Trunc-elim _ (λ _ → path-preserves-level (Loop-preserves-level n (tlp n) Trunc-level))
                                  (λ x0 → ! (STS3 x0)) where
               STS3 : (s : _) → (ap^ n decode' (S-loops n [ s ]))
                                ≃ (ap^ n [_]

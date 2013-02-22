@@ -298,5 +298,5 @@ module lib.loopspace.Types where
   module LoopUnit where
 
     path : ∀ n → Unit ≃ Loop n Unit <> 
-    path n = ! (Contractible≃Unit (use-level (IsKTrunc-Loop n -2 (ntype Contractible-Unit))))
+    path n = ! (Contractible≃Unit (use-level (Loop-preserves-level n -2 (ntype Contractible-Unit))))
 

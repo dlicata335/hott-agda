@@ -39,7 +39,7 @@ module homotopy.PiKSNLess where
                               {- why it doesn't work for arbitrary k
                               (apt n (ap^ (S n) (λ y' → Trunc k (Path S.base y')) (S.loop (S n))) [ id ] ≃〈 {!!} 〉 
                               (apt n (λt n (Trunc-elim (λ tβ → Loop n (Trunc k (Path S.base _)) tβ) 
-                                           (λ _ → IsKTrunc-Loop n k Trunc-level) 
+                                           (λ _ → Loop-preserves-level n k Trunc-level) 
                                            (λ β → ap^ n [_]
                                                   (rebase n (∘-unit-l β) (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n))))))))
                                      [ id ]) ≃〈 LoopSType.β n _ _ 〉 
@@ -98,7 +98,7 @@ module homotopy.PiKSNLess where
   {- why the above argument doesn't work for arbitrary k
     (apt n (ap^ (S n) (λ y' → Trunc k (Path S.base y')) (S.loop (S n))) [ id ] ≃〈 {!!} 〉 
     (apt n (λt n (Trunc-elim (λ tβ → Loop n (Trunc k (Path S.base _)) tβ) 
-                 (λ _ → IsKTrunc-Loop n k Trunc-level) 
+                 (λ _ → Loop-preserves-level n k Trunc-level) 
                  (λ β → ap^ n [_]
                         (rebase n (∘-unit-l β) (ap^ n (λ x → x ∘ β) (loopSN1 n (S.loop (S n))))))))
            [ id ]) ≃〈 LoopSType.β n _ _ 〉 

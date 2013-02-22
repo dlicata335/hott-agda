@@ -97,11 +97,14 @@ module homotopy.KGn where
     
       -- tricky?  pi_2(B 2) = pi_1(A) 
 
-      -- get rest of diagonal by Freud
+      -- TODO: prove everything else on the diagonal by Freudenthal
 
     module AboveDiagonal where
 
       -- need pi_k(B_n) for k > n easy: above truncation
+
+      πabove : ∀ k n → tlp n <tl tlp k → π k (B n) (base^ n)  ≃  Unit
+      πabove k n lt = Contractible≃Unit (use-level { -2} (Trunc-level-better (Loop-level-> (tlp n) k Trunc-level lt)))
    
         
       

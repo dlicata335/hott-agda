@@ -291,23 +291,23 @@ module lib.loopspace.OverTypes where
   abstract -- possible we could want the definition but seems unlikely!
     ap^-Trunc : ∀ n k {A} (α : Loop (S n) Type A) → 
                 ap^ (S n) (\ A -> Trunc k A) α ≃ λt n (Trunc-elim (λ tβ → Loop n (Trunc k A) tβ)
-                                                      (λ _ → IsKTrunc-Loop n k Trunc-level) 
+                                                      (λ _ → Loop-preserves-level n k Trunc-level) 
                                                       (λ x → ap^ n [_] (apt n α x))) 
     ap^-Trunc n k α = LoopSType.ext n (λ x → apt n (ap^ (S n) (Trunc k) α) x ≃〈 STS x 〉
-                                             (Trunc-elim (Loop n (Trunc k _)) (λ z → IsKTrunc-Loop n k Trunc-level)
+                                             (Trunc-elim (Loop n (Trunc k _)) (λ z → Loop-preserves-level n k Trunc-level)
                                                   (λ x' → ap^ n [_] (apt n α x'))
                                                 x) ≃〈 ! (LoopSType.β n _ _)〉 
                                              (apt n
                                                 (λt n
-                                                 (Trunc-elim (Loop n (Trunc k _)) (λ z → IsKTrunc-Loop n k Trunc-level)
+                                                 (Trunc-elim (Loop n (Trunc k _)) (λ z → Loop-preserves-level n k Trunc-level)
                                                   (λ x' → ap^ n [_] (apt n α x'))))
                                                 x
                                                 ∎)) where 
               STS : ∀ x -> apt n (ap^ (S n) (Trunc k) α) x ≃
-                             (Trunc-elim (Loop n (Trunc k _)) (λ z → IsKTrunc-Loop n k Trunc-level)
+                             (Trunc-elim (Loop n (Trunc k _)) (λ z → Loop-preserves-level n k Trunc-level)
                                          (λ x' → ap^ n [_] (apt n α x'))
                                          x) 
-              STS = Trunc-elim _ (λ x → path-preserves-level (IsKTrunc-Loop n k Trunc-level)) 
+              STS = Trunc-elim _ (λ x → path-preserves-level (Loop-preserves-level n k Trunc-level)) 
                                  (STS1) where
                  STS1 : ∀ x' -> apt n (ap^ (S n) (Trunc k) α) [ x' ] ≃
                                 ap^ n [_] (apt n α x')
@@ -359,7 +359,7 @@ module lib.loopspace.OverTypes where
   LoopTypeTruncPathPost : ∀ n k {A} {a : A} (α : Loop (S n) A a) (a0 : A) 
                    → Loop (S n) Type (Trunc k (Path{A} a0 a))
   LoopTypeTruncPathPost n k α a0 = λt n (Trunc-elim (λ tβ → Loop n (Trunc k (Path a0 _)) tβ) 
-                                                    (λ _ → IsKTrunc-Loop n k Trunc-level) 
+                                                    (λ _ → Loop-preserves-level n k Trunc-level) 
                                                     (λ β → ap^ n [_]
                                                     (rebase n (∘-unit-l β) (ap^ n (λ x → x ∘ β) (loopSN1 n α)))))
 
@@ -374,10 +374,10 @@ module lib.loopspace.OverTypes where
                                                                 (ap^ n (λ x → x ∘ p)
                                                                        (loopSN1 n α)))) ≃〈 ap^-Trunc n k _ 〉
                                 λt n (Trunc-elim (λ tβ → Loop n (Trunc k _) tβ)
-                                                      (λ _ → IsKTrunc-Loop n k Trunc-level) 
+                                                      (λ _ → Loop-preserves-level n k Trunc-level) 
                                                       (λ x → ap^ n [_] (apt n (λt n (λ p → rebase n (∘-unit-l p)
                                                                 (ap^ n (λ x → x ∘ p)
-                                                                       (loopSN1 n α)))) x))) ≃〈 ap (λt n o (Trunc-elim (λ tβ → Loop n (Trunc k _) tβ) (λ _ → IsKTrunc-Loop n k Trunc-level))) (λ≃ (λ x → ap (ap^ n [_]) (LoopSType.β n _ _))) 〉
+                                                                       (loopSN1 n α)))) x))) ≃〈 ap (λt n o (Trunc-elim (λ tβ → Loop n (Trunc k _) tβ) (λ _ → Loop-preserves-level n k Trunc-level))) (λ≃ (λ x → ap (ap^ n [_]) (LoopSType.β n _ _))) 〉
                                 LoopTypeTruncPathPost n k α a0 ∎
 
 

@@ -21,20 +21,36 @@ open import lib.loopspace.Groupoid
 module lib.loopspace.Truncation where
 
   abstract 
-    Trunc-Loop : ∀ n k {A} {a} → NType (tlp (n +pn k)) A → NType (tl k) (Loop n A a)
-    Trunc-Loop One k {A = A} p = use-level (transport (λ x → NType x A) (tlp+1 k) p) _ _
-    Trunc-Loop (S n) k {A} p = use-level (Trunc-Loop n (S k) (transport (λ x → NType (tlp x) A) (! (+pn-rh-S n k)) p)) _ _
+    -- if you have enough gas
+    -- FIXME rename to Loop-level
+    Loop-level : ∀ n k {A} {a} → NType (tlp (n +pn k)) A → NType (tl k) (Loop n A a)
+    Loop-level One k {A = A} p = use-level (transport (λ x → NType x A) (tlp+1 k) p) _ _
+    Loop-level (S n) k {A} p = use-level (Loop-level n (S k) (transport (λ x → NType (tlp x) A) (! (+pn-rh-S n k)) p)) _ _
+
+    -- if you run out of gas
+    Loop-level-S : ∀ k {A} {a} → NType (tlp k) A → NType -2 (Loop (S k) A a)
+    Loop-level-S One nA' = ntype (id , (λ _ → HSet-UIP (use-level nA' _ _) _ _ _ _))
+    Loop-level-S (S n') nA' = transport (NType -2) (! (LoopPath.path (S n'))) (Loop-level-S n' (use-level nA' _ _))
+
+    Loop-level-> : ∀ n k {A} {a} → NType n A → n <tl (tlp k) → NType -2 (Loop k A a)
+    Loop-level-> .(S (S -2)) One {A} {a} nA (ltS {.(S (S -2))}) = ntype (id , (λ y → HSet-UIP nA _ _ _ _))
+    Loop-level-> .(S -2) One nA (ltSR ltS) = use-level nA _ _
+    Loop-level-> .-2 One nA (ltSR (ltSR ltS)) = path-preserves-level nA
+    Loop-level-> n One nA (ltSR (ltSR (ltSR ())))
+    Loop-level-> n (S k) {A} {a} nA lt with lt-unS-right lt
+    ... | Inl lt' = path-preserves-level (Loop-level-> n k nA lt')
+    ... | Inr eq = Loop-level-S k (transport (λ x → NType x A) (! eq) nA) 
   
     NType-LoopOver : ∀ n k {A} {a} (α : Loop n A a) {B} {b} → ((x : A) → NType (S k) (B x)) → NType k (LoopOver n α B b)
     NType-LoopOver One k α p = use-level (p _) _ _
     NType-LoopOver (S n) k α{B}{b} p = use-level{S k} (NType-LoopOver n (S k) _ (λ x → increment-level (p x))) _ _ 
   
     HSet-Loop : ∀ n {A} {a} → NType (tlp n) A → HSet (Loop n A a)
-    HSet-Loop n {A} i = Trunc-Loop n Z (transport (\ n -> NType (tlp n) A) (! (+pn-rh-Z n)) i)
+    HSet-Loop n {A} i = Loop-level n Z (transport (\ n -> NType (tlp n) A) (! (+pn-rh-Z n)) i)
      
-    IsKTrunc-Loop : ∀ n k {A a} -> NType k A → NType k (Loop n A a)
-    IsKTrunc-Loop One k tA = path-preserves-level tA
-    IsKTrunc-Loop (S n) k tA = path-preserves-level (IsKTrunc-Loop n k tA)
+    Loop-preserves-level : ∀ n k {A a} -> NType k A → NType k (Loop n A a)
+    Loop-preserves-level One k tA = path-preserves-level tA
+    Loop-preserves-level (S n) k tA = path-preserves-level (Loop-preserves-level n k tA)
 
   mutual
     Loop-Trunc : ∀ (n : Positive) (k : Nat) {A} {a} → Loop n (Trunc (tlp (n +pn k)) A) [ a ] ≃ Trunc (tl k) (Loop n A a)
@@ -51,7 +67,7 @@ module lib.loopspace.Truncation where
   abstract
     HProp-Loop-in-Trunc< : ∀ k n {A t} → k <tl (tlp n) → HProp (Loop n (Trunc k A) t)
     HProp-Loop-in-Trunc< -2 One lt = increment-level (path-preserves-level Trunc-level)
-    HProp-Loop-in-Trunc< -2 (S n) lt = increment-level (path-preserves-level (IsKTrunc-Loop n -2 (Trunc-level { -2})))
+    HProp-Loop-in-Trunc< -2 (S n) lt = increment-level (path-preserves-level (Loop-preserves-level n -2 (Trunc-level { -2})))
     HProp-Loop-in-Trunc< (S .(S -2)) One ltS = use-level (Trunc-level {S (S -2)}) _ _
     HProp-Loop-in-Trunc< (S .-2) One {A} {t} (ltSR ltS) = path-preserves-level Trunc-level
     HProp-Loop-in-Trunc< (S k) One (ltSR (ltSR (ltSR ())))

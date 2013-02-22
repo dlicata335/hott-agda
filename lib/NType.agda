@@ -27,7 +27,7 @@ module lib.NType where
   lt-unS ltS = ltS
   lt-unS (ltSR lt) = subtract-left lt
 
-  lt-unS-right : ∀ {n m} → (S n) <tl (S m) → Either ((S n) <tl m) (m ≃ S n)
+  lt-unS-right : ∀ {n m} → n <tl (S m) → Either (n <tl m) (m ≃ n)
   lt-unS-right ltS = Inr id
   lt-unS-right (ltSR y) = Inl y
 
