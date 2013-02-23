@@ -10,6 +10,7 @@ open import lib.NType
 open import lib.Universe
 open import lib.Truncations
 open import lib.Sums
+open import lib.WEq
 open Truncation
 
 module lib.NConnected where
@@ -92,7 +93,12 @@ module lib.NConnected where
    path n c P = ua (eqv n c P)
 -}
 
-  module ConnectedProduct where
+  module ConnectedMap where
+    
+    -- FIXME: what is the right indexing?  (n or n-1 ... n-1 agrees with wikipedia N-connected article?)
+    -- does it help to redo in terms of connected maps?
+    ConnectedMap : (n : TLevel) → ∀ {A B} → (f : A → B) → Type
+    ConnectedMap n {A}{B} f = (y : B) → Connected n (HFiber f y)
 
     Extensions : (A : Type) (a0 : A) (C : A -> Type) (c0 : C a0) -> Type
     Extensions A a0 C c0 = Σ (λ (f : (a : A) → (C a)) → f a0 ≃ c0)
@@ -152,6 +158,12 @@ module lib.NConnected where
                (! (Extensions-Path (fst o C) c0 e1 e2))
                (Extensions-level {_} {n} cA a0 (\ a -> (Path (fst e1 a) (fst e2 a), use-level (snd (C a)) _ _)) 
                                                (! (snd e2) ∘ snd e1)))
+
+  open ConnectedMap
+
+
+  module ConnectedProduct where
+
 
     abstract
        wedge-elim' : ∀ {m n} {A B : Type} 

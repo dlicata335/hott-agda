@@ -19,13 +19,13 @@ module lib.NType where
     ltS   : ∀ {m} → m <tl (S m)
     ltSR  : ∀ {n m} → n <tl m → n <tl (S m)
 
-  subtract-left : ∀ {n m} -> (S n) <tl m → n <tl m
-  subtract-left ltS = ltSR ltS
-  subtract-left (ltSR lt) = ltSR (subtract-left lt)
+  lt-subtract-left : ∀ {n m} -> (S n) <tl m → n <tl m
+  lt-subtract-left ltS = ltSR ltS
+  lt-subtract-left (ltSR lt) = ltSR (lt-subtract-left lt)
 
   lt-unS : ∀ {n m} → (S n) <tl (S m) → n <tl m
   lt-unS ltS = ltS
-  lt-unS (ltSR lt) = subtract-left lt
+  lt-unS (ltSR lt) = lt-subtract-left lt
 
   lt-unS-right : ∀ {n m} → n <tl (S m) → Either (n <tl m) (m ≃ n)
   lt-unS-right ltS = Inr id
@@ -69,6 +69,10 @@ module lib.NType where
     tpred : TLevel -> TLevel
     tpred (S n) = n
     tpred -2 = -2
+
+  <=SCong : ∀ {n} {m} -> n <=tl m -> (S n) <=tl (S m)
+  <=SCong (Inl lt) = Inl (ltSCong lt)
+  <=SCong (Inr eq) = Inr (ap S eq)
 
 
   -- min for tlevels
