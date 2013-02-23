@@ -193,9 +193,9 @@ module homotopy.KGn where
                            a ∎
         -}
 
-        -- need 
+        -- need mer a0 ≃ id
         --      mer (a ⊙ a') ≃ mer a ⊙ mer a'
-        -- follows: mer a0 ≃ id
+        --  
 
         decode : ∀ {x} → fst (Codes x) → P x 
         decode {x} = Trunc-elim (λ x' → fst (Codes x') → P x') (λ _ → Πlevel (λ _ → increment-level Trunc-level)) 

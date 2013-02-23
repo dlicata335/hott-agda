@@ -20,7 +20,7 @@ module lib.Pushout where
       inr : ∀ {A B P} → B → Pushout A B P
       inr = inr'
 
-      postulate {- HIT -}
+      postulate {- HoTT Axiom -}
         H : ∀ {A B P} → (a : A) → (b : B) → (p : P a b) → 
                         Path{Pushout A B P} (inl a) (inr b)
 
@@ -32,6 +32,8 @@ module lib.Pushout where
                     Pushout A B P → C
       Pushout-rec f _ _ (inl' a) = f a
       Pushout-rec _ g _ (inr' b) = g b
+
+      -- FIXME path β
 
       Pushout-elim : {A B : Type}
                      {P : A → B → Type}

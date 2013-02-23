@@ -154,7 +154,8 @@ module lib.spaces.Interval where
     thm : {p : Id x y} -> Id p left
     thm = {!!}
 -}
- 
+
+{- 
   module Pushout where
     private
       data Pushout : Set where
@@ -218,6 +219,7 @@ module lib.spaces.Interval where
       meet : I x I -> I
       acts like algebraic meet operation
     -}
+-}
   
 {-
   -- holds without functional extensionality 

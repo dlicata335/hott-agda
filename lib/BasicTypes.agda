@@ -34,3 +34,4 @@ module lib.BasicTypes where
   open import lib.LoopSpace public
 
   open import lib.NConnected public
+  open import lib.Pushout public
