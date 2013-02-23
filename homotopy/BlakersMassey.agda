@@ -13,6 +13,6 @@ module homotopy.BlakersMassey where
     (P : A → B → Type)
     (a₀ : A) (b₀ : B) (p₀ : P a₀ b₀)
     (i j : TLevel)
-    (iA : (a : A) → Connected i (Σ[ b ∶ A ] P a b₀))
-    (jB : (b : B) → Connected j (Σ[ b ∶ B ] P a₀ b))
+    (iA : (a : A) → Connected i (Σ[ b ∶ B ] P a b))
+    (jB : (b : B) → Connected j (Σ[ a ∶ A ] P a b))
     where
