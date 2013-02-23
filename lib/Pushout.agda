@@ -21,14 +21,14 @@ module lib.Pushout where
       inr = inr'
 
       postulate {- HoTT Axiom -}
-        H : ∀ {A B P} → (a : A) → (b : B) → (p : P a b) → 
+        cross : ∀ {A B P} → {a : A} → {b : B} → (p : P a b) → 
                         Path{Pushout A B P} (inl a) (inr b)
 
       Pushout-rec : {A B C : Type}
                     {P : A → B → Type}
                     (f : (a : A) → C)
                     (g : (b : B) → C)
-                    (H' : (a : A) → (b : B) → (p : P a b) → Path (f a) (g b)) →
+                    (cross' : (a : A) → (b : B) → (p : P a b) → Path (f a) (g b)) →
                     Pushout A B P → C
       Pushout-rec f _ _ (inl' a) = f a
       Pushout-rec _ g _ (inr' b) = g b
@@ -40,8 +40,10 @@ module lib.Pushout where
                      {C : Pushout A B P → Type}
                      (f : (a : A) → C (inl a))
                      (g : (b : B) → C (inr b))
-                     (H' : (a : A) → (b : B) → (p : P a b) → 
-                           Path (transport C (H a b p) (f a)) (g b)) →
+                     (cross' : (a : A) → (b : B) → (p : P a b) → 
+                           Path (transport C (cross p) (f a)) (g b)) →
                      (x : Pushout A B P) → C x
       Pushout-elim f g H' (inl' a) = f a
       Pushout-elim f g H' (inr' b) = g b
+
+    open P public
