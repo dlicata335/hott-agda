@@ -38,13 +38,13 @@ module homotopy.BlakersMassey where
     decode' = Trunc-func P.cross
 
 
+    a0 : (Σ \ (x : X) -> (P x y0))
+    a0 = x0 , p0
+
+    b0 : (a : (Σ \ (x : X) -> (P x y0))) → Σ \ (y : Y) → P (fst a) y
+    b0 (x , px) = y0 , px
+
     abstract
-      a0 : (Σ \ (x : X) -> (P x y0))
-      a0 = x0 , p0
-
-      b0 : (a : (Σ \ (x : X) -> (P x y0))) → Σ \ (y : Y) → P (fst a) y
-      b0 (x , px) = y0 , px
-
       Codes-cross' : (a : (Σ \ (x : X) -> (P x y0)))
                    → (b : Σ \ (y : Y) → P (fst a) y) 
                    → Trunc k (P x0 (fst b))
@@ -98,7 +98,8 @@ module homotopy.BlakersMassey where
  
       Codes-cross-isequiv : (x : X) (y : Y) → (p : P x y) 
                            -> IsEquiv (Codes-cross x y p)
-      Codes-cross-isequiv = {!!}
+      Codes-cross-isequiv x y p = ConnectedFib.everywhere j' {a0 = x0 , {!!}} (cY _)
+                                    (λ xpx → IsEquiv (Codes-cross (fst xpx) y (snd xpx)) , {!!}) {!!} (x , p)
 {-  
       Codes-mer-isequiv = ConnectedFib.everywhere n' {a0 = base} 
                                                    nX
@@ -146,65 +147,50 @@ module homotopy.BlakersMassey where
     decode : ∀ {x} -> Codes x → Pa x
     decode {x} = Pushout-elim (\ x -> Codes x → Pa x)
                               (λ x → Trunc-func (λ px → ! (P.cross px) ∘ P.cross p0))
-                              (λ _ → decode') -- (Trunc-func (λ x' → mer x')) 
-                              -- (λ x' →
-                              --   transport (λ x0 → Codes x0 → P x0) (mer x') decode' ≃〈 transport-→ Codes P (mer x') decode' 〉
-                              --   transport P (mer x') o decode' o transport Codes (! (mer x')) ≃〈 move-posto-with-transport-left Codes (mer x') (transport P (mer x') o decode') (Trunc-func (λ x0 → mer x0)) (λ≃ (STS x'))〉
-                              --   (Trunc-func (λ x0 → mer x0) ∎))
-                              {!!}
-                              x 
-    {-
-        where
+                              (λ _ → decode') 
+                              (λ x y p →
+                                  transport (λ x0 → Codes x0 → Pa x0) (P.cross p) (Trunc-func (λ px → ! (P.cross px) ∘ P.cross p0)) ≃〈 {!!} 〉
+                                  transport Pa (P.cross p) o (Trunc-func (λ px → ! (P.cross px) ∘ P.cross p0)) o transport Codes (! (P.cross p)) ≃〈 {! move-posto-with-transport-left Codes (mer x') (transport P (mer x') o decode') (Trunc-func (λ x0 → mer x0)) (λ≃ (STS x')) !}〉
+                                  decode' ∎)
+                              x where
      abstract
-       STS : ∀ x' c -> transport P (mer x') (decode' c) ≃ 
-                       Trunc-func mer (transport Codes (mer x') c)
-       STS x' = Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
-         (λ x0 → wedge-elim nX nX 
-                   (λ x1 x2 →
-                      (transport P (mer x1) (decode' [ x2 ]) ≃
-                        Trunc-func mer (transport Codes (mer x1) [ x2 ]))
-                      , path-preserves-level (Trunc-level {k})) -- a little slack here, but would tightening it help?
-                   k<
-         {base}{base}
-         (λ b' → transport P (mer base) (decode' [ b' ]) ≃〈 id 〉
-                 transport P (mer base) [ (up b') ] ≃〈 ap≃ (transport-Trunc (Path No) (mer base)) 〉
-                 [ transport (Path No) (mer base) (up b') ] ≃〈 ap [_] (transport-Path-right (mer base) (up b')) 〉
-                 [ (mer base) ∘ ! (mer base) ∘ mer b' ] ≃〈 ap [_] (!-inv-r-front (mer base) (mer b')) 〉
-                 [ mer b' ] ≃〈 id 〉
-                 Trunc-func mer [ b' ] ≃〈 ap (Trunc-func mer) (! (ap≃ Codes-mer-βa)) 〉
-                 (Trunc-func mer (Codes-mer base [ b' ])) ≃〈 ap (Trunc-func mer) (! (ap≃ (type≃β (Codes-mer-equiv base)))) 〉 
-                 (Trunc-func mer (coe (ua (Codes-mer-equiv base)) [ b' ])) ≃〈 ap (Trunc-func mer) (ap (λ x1 → coe x1 [ b' ]) (! Susp-rec/βmer)) 〉  
-                 (Trunc-func mer (coe (ap Codes (mer base)) [ b' ])) ≃〈 ap (Trunc-func mer) (! (ap≃ (transport-ap-assoc Codes (mer base)))) 〉 
-                 (Trunc-func mer (transport Codes (mer base) [ b' ]) ∎))
-         (λ a' → transport P (mer a') (decode' [ base ]) ≃〈 id 〉
-                 transport P (mer a') [ up base ] ≃〈 ap≃ (transport-Trunc (Path No) (mer a')) 〉
-                 [ transport (Path No) (mer a') (up base) ] ≃〈 ap [_] (transport-Path-right (mer a') (up base)) 〉
-                 [ (mer a') ∘ ! (mer base) ∘ mer base ] ≃〈 ap [_] (!-inv-l-back (mer a') (mer base)) 〉 -- difference 1
-                 [ (mer a') ] ≃〈 id 〉
-                 Trunc-func mer [ a' ] ≃〈 ap (Trunc-func mer) (! (ap≃ Codes-mer-βb)) 〉 -- difference 2
-                 (Trunc-func mer (Codes-mer a' [ base ])) ≃〈 ap (Trunc-func mer) (! (ap≃ (type≃β (Codes-mer-equiv a')))) 〉 
-                 (Trunc-func mer (coe (ua (Codes-mer-equiv a')) [ base ])) ≃〈 ap (Trunc-func mer) (ap (λ x1 → coe x1 [ base ]) (! Susp-rec/βmer)) 〉  
-                 (Trunc-func mer (coe (ap Codes (mer a')) [ base ])) ≃〈 ap (Trunc-func mer) (! (ap≃ (transport-ap-assoc Codes (mer a')))) 〉 
-                 (Trunc-func mer (transport Codes (mer a') [ base ]) ∎))
-         (ap2
-            (λ x1 y →
-               transport P (mer base) (decode' [ base ]) ≃〈 id 〉
-               transport P (mer base) [ up base ] ≃〈 ap≃ (transport-Trunc (Path No) (mer base)) 〉
-               [ transport (Path No) (mer base) (up base) ] ≃〈 ap [_] (transport-Path-right (mer base) (up base)) 〉
-               [ mer base ∘ ! (mer base) ∘ mer base ] ≃〈 x1 〉
-               [ mer base ] ≃〈 id 〉
-               Trunc-func mer [ base ] ≃〈 y 〉
-               Trunc-func mer (Codes-mer base [ base ]) ≃〈 ap (Trunc-func mer) (! (ap≃ (type≃β (Codes-mer-equiv base)))) 〉
-               Trunc-func mer (coe (ua (Codes-mer-equiv base)) [ base ]) ≃〈 ap (Trunc-func mer) (ap (λ x2 → coe x2 [ base ]) (! Susp-rec/βmer))〉
-               Trunc-func mer (coe (ap Codes (mer base)) [ base ]) ≃〈 ap (Trunc-func mer) (! (ap≃ (transport-ap-assoc Codes (mer base)))) 〉 (Trunc-func mer (transport Codes (mer base) [ base ]) ∎))
-            (coh1 (mer base)) coh2) 
-         x' x0) 
-        where coh1 : ∀ {k A} {a a' : A} (p : a ≃ a') -> ap ([_]{k}) (!-inv-r-front p p) ≃ ap ([_]{k}) (!-inv-l-back p p)
-              coh1 id = id
-  
-              coh2 : ap (Trunc-func mer) (! (ap≃ Codes-mer-βa {[ base ]})) ≃ ap (Trunc-func mer) (! (ap≃ Codes-mer-βb {base}))
-              coh2 = ap (λ x0 → ap (Trunc-func mer) (! x0)) (! Codes-mer-coh)
--}
+       STS : ∀ x y (p : P x y) p' 
+             -> transport Pa (P.cross p) ((Trunc-func (λ px → ! (P.cross px) ∘ P.cross p0)) p')
+              ≃ decode' (transport Codes (P.cross p) p')
+       STS x y p = Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
+        (\ pxy0 -> wedge-elim {A = Σ (λ (x' : X) → P x' y0)}
+          {B = λ a → Σ (λ (y' : Y) → P (fst a) y')} (cY _) (λ xpx → cX (fst xpx))
+          (λ a b →
+             transport Pa (P.cross (snd b))
+             (Trunc-func (λ px → ! (P.cross px) ∘ P.cross p0) [ snd a ])
+             ≃ decode' (transport Codes (P.cross (snd b)) [ snd a ])
+             , path-preserves-level Trunc-level)
+          k<
+          {a0} {b0}
+          (λ {(y , px0y) → 
+               (transport Pa (P.cross px0y) (Trunc-func (λ px → ! (P.cross px) ∘ P.cross p0) [ p0 ]) ≃〈 id 〉
+                transport Pa (P.cross px0y) [ ! (P.cross p0) ∘ P.cross p0 ] ≃〈 {!!} 〉
+                [ (P.cross px0y) ∘ ! (P.cross p0) ∘ P.cross p0 ] ≃〈 {!!} 〉
+                [ (P.cross px0y) ] ≃〈 id 〉
+                decode' [ px0y ] ≃〈 {!!} 〉 
+                decode' (Codes-cross x0 y px0y [ p0 ]) ≃〈 {!!} 〉 
+                decode' (coe (ua (Codes-cross-equiv _ _ px0y)) [ p0 ]) ≃〈 {!!} 〉 
+                decode' (coe (ap Codes (P.cross px0y)) [ p0 ]) ≃〈 {!!} 〉 
+                decode' (transport Codes (P.cross px0y) [ p0 ]) ∎) })
+          (λ {(x , pxy0) → 
+                transport Pa (P.cross pxy0) (Trunc-func (λ px → ! (P.cross px) ∘ P.cross p0) [ pxy0 ]) ≃〈 {!!} 〉
+                transport Pa (P.cross pxy0) [ ! (P.cross pxy0) ∘ P.cross p0 ] ≃〈 {!!} 〉
+                [ (P.cross pxy0) ∘ ! (P.cross pxy0) ∘ P.cross p0 ] ≃〈 {!!} 〉
+                [ P.cross p0 ] ≃〈 id 〉
+                decode' [ p0 ] ≃〈 {!!} 〉 
+                decode' (Codes-cross x y0 pxy0 [ pxy0 ]) ≃〈 {!!} 〉 
+                decode' (coe (ua (Codes-cross-equiv _ _ pxy0)) [ pxy0 ]) ≃〈 {!!} 〉 
+                decode' (coe (ap Codes (P.cross pxy0)) [ pxy0 ]) ≃〈 {!!} 〉 
+                decode' (transport Codes (P.cross pxy0) [ pxy0 ]) ∎
+             })
+          {!!}
+          (x , pxy0) (y , p))
+
     decode-encode : ∀ {x : _} (α : Pa x) -> decode (encode α) ≃ α
     decode-encode tα = Trunc-elim (\ α -> decode (encode α) ≃ α) (λ x → path-preserves-level Trunc-level) 
                                   (path-induction (λ _ p → decode (encode [ p ]) ≃ [ p ])

@@ -49,13 +49,13 @@ module lib.Pushout where
       postulate
         Pushout-elim/βcross : {A B C : Type}
                               {P : A → B → Type}
-                              {C : Pushout A B P → Type}
+                              (C : Pushout A B P → Type)
                               (f : (a : A) → C (inl a))
                               (g : (b : B) → C (inr b))
                               (cross' : (a : A) → (b : B) → (p : P a b) →
                                       Path (transport C (cross p) (f a)) (g b)) →
                             (a : A) → (b : B) → (p : P a b) → 
-                            Path (apd (Pushout-elim f g cross') (cross p))
+                            Path (apd (Pushout-elim C f g cross') (cross p))
                                  (cross' a b p)
 
     open P public
