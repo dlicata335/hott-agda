@@ -11,22 +11,22 @@ open import homotopy.PiLessOfConnected
 
 module homotopy.KGn where
 
-  Abelian : Type -> Type
-  Abelian A = (x : A) (p q : Path x x) → p ∘ q ≃ q ∘ p
+  -- Abelian : Type -> Type
+  -- Abelian A = (x : A) (p q : Path x x) → p ∘ q ≃ q ∘ p
 
   record H-Structure (A : Type) (a0 : A) : Type where
    field 
      _⊙_     : A → A → A
-    unitl    : ((a : A) → a ⊙ a0 ≃ a)
-    unitr    : ((a : A) → a ⊙ a0 ≃ a)
-    isequivl : ((a : A) → IsEquiv (_⊙_ a))
+     unitl    : ((a : A) → a0 ⊙ a ≃ a)
+     unitr    : ((a : A) → a ⊙ a0 ≃ a)
+     unitcoh  : unitl a0 ≃ unitr a0
+     isequivl : ((a : A) → IsEquiv (_⊙_ a))
 
   -- like K_G,1 for abelian G
   IsK1 : Type -> Type
   IsK1 A = Σ \ (a0 : A) →  
            Connected (S (S -2)) A × 
            NType (tl 1) A ×
---           Abelian A ×
            H-Structure A a0
 
   module B (A : Type) (isK1 : IsK1 A) where
@@ -193,6 +193,24 @@ module homotopy.KGn where
                            a ∎
         -}
 
+        homomorphism? : ∀ a a' → 
+                  Path{(Path {Trunc (tl 2) (Susp A)} [ No ] [ So ]) }
+                       (ap [_] (mer (a ⊙ a'))) (ap [_] (mer a ∘ ! (mer a0) ∘ mer a'))
+        homomorphism? = ConnectedProduct.wedge-elim {A = A} {B = A} A-Connected A-Connected
+                          (λ a a' →
+                             Path {Path {Trunc (tl 2) (Susp A)} [ No ] [ So ]}
+                             (ap [_] (mer (a ⊙ a'))) (ap [_] (mer a ∘ ! (mer a0) ∘ mer a'))
+                             , use-level (use-level (Trunc-level {tl 2}) _ _) _ _)
+                          (Inr id) {a0} {a0}
+                          (λ a → ap [_] (mer (a0 ⊙ a)) ≃〈 ap (ap [_]) (ap mer (unitl a)) 〉
+                                 ap [_] (mer a) ≃〈 ap (ap [_]) (! (!-inv-r-front (mer a0) (mer a))) 〉
+                                 ap [_] (mer a0 ∘ ! (mer a0) ∘ mer a) ∎)
+                          (λ a →
+                               ap [_] (mer (a ⊙ a0)) ≃〈 ap (ap [_]) (ap mer (unitr a)) 〉
+                               ap [_] (mer a) ≃〈 ap (ap [_]) (! (!-inv-l-back (mer a) (mer a0))) 〉
+                               (ap [_] (mer a ∘ ! (mer a0) ∘ mer a0) ∎))
+                          {!!}
+
         -- need mer a0 ≃ id
         --      mer (a ⊙ a') ≃ mer a ⊙ mer a'
         --  
@@ -201,7 +219,7 @@ module homotopy.KGn where
         decode {x} = Trunc-elim (λ x' → fst (Codes x') → P x') (λ _ → Πlevel (λ _ → increment-level Trunc-level)) 
                                 (Susp-elim _ 
                                            decode'
-                                           (λ a → [ ap [_] (mer a) ])
+                                           (λ a → {! [ ap [_] (mer a) ] !})
                                            (λ a → {!!}))
                                 x where
                STS : (a a' : A) → 
