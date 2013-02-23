@@ -37,13 +37,13 @@ module lib.Pushout where
 
       Pushout-elim : {A B : Type}
                      {P : A → B → Type}
-                     {C : Pushout A B P → Type}
+                     (C : Pushout A B P → Type)
                      (f : (a : A) → C (inl a))
                      (g : (b : B) → C (inr b))
                      (cross' : (a : A) → (b : B) → (p : P a b) → 
                            Path (transport C (cross p) (f a)) (g b)) →
                      (x : Pushout A B P) → C x
-      Pushout-elim f g H' (inl' a) = f a
-      Pushout-elim f g H' (inr' b) = g b
+      Pushout-elim _ f g H' (inl' a) = f a
+      Pushout-elim _ f g H' (inr' b) = g b
 
     open P public

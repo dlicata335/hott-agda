@@ -5,7 +5,7 @@
 open import lib.Prelude
 open Truncation
 open Int
-open ConnectedProduct
+open ConnectedSigma
 
 module homotopy.BlakersMassey where
 
@@ -22,7 +22,7 @@ module homotopy.BlakersMassey where
     (-2<i' : -2 <tl i')
     (-2<j' : -2 <tl j')
     (k : TLevel)
-    (k< : k <=tl (plus2 i' j'))
+    (k< : k <=tl (plus2 j' i'))
     where
 
     i : TLevel
@@ -39,30 +39,73 @@ module homotopy.BlakersMassey where
 
 
     abstract
-      -- Codes-cross' : (a : (Σ \ (x : X) -> P x y)) → (Σ \ (y : Y) → (Trunc k (P (fst a) y0))) → (Trunc k (P x0 y))
-      -- Codes-cross' = ?
+      a0 : (Σ \ (x : X) -> (P x y0))
+      a0 = x0 , p0
+
+      b0 : (a : (Σ \ (x : X) -> (P x y0))) → Σ \ (y : Y) → P (fst a) y
+      b0 (x , px) = y0 , px
+
+      Codes-cross' : (a : (Σ \ (x : X) -> (P x y0)))
+                   → (b : Σ \ (y : Y) → P (fst a) y) 
+                   → Trunc k (P x0 (fst b))
+      Codes-cross' = wedge-elim
+                       {A = Σ (λ (x : X) → P x y0)}
+                       {B = λ a → Σ (λ (y : Y) → P (fst a) y)}
+                       (cY _) (λ xpx → cX (fst xpx))
+                       (λ a b → Trunc k (P x0 (fst b)) , Trunc-level)
+                       k< {a0} {b0} 
+                       (λ ypy → [ snd ypy ])
+                       (λ xpx → [ p0 ])
+                       id
 
       Codes-cross : (x : X) (y : Y) → P x y → (Trunc k (P x y0)) → (Trunc k (P x0 y))
-      Codes-cross x y px py = {!!}
+      Codes-cross x y py px = Trunc-rec Trunc-level (λ px' → Codes-cross' (x , px') (y , py)) px 
   
-{-
-      Codes-mer-βa : (\ b -> Codes-mer base b) ≃ (\ x -> x)
-      Codes-mer-βa = wedge-rec-βa nX (connected-Trunc _ _ _ nX) Trunc-level k< (λ x → x) (λ x → [ x ]) id
-  
-      Codes-mer-βb : (\ a -> Codes-mer a [ base ]) ≃ (\ x -> [ x ])
-      Codes-mer-βb = wedge-rec-βb nX (connected-Trunc _ _ _ nX) Trunc-level k< (λ x → x) (λ x → [ x ]) id
+      Codes-cross-βa : (\ y py -> Codes-cross x0 y py [ p0 ]) ≃ (\ y py -> [ py ])
+      Codes-cross-βa = λ≃ (\ y -> λ≃ \ py -> 
+                       ap≃ (wedge-elim-βa
+                       {A = Σ (λ (x : X) → P x y0)}
+                       {B = λ a → Σ (λ (y : Y) → P (fst a) y)}
+                       (cY _) (λ xpx → cX (fst xpx))
+                       (λ a b → Trunc k (P x0 (fst b)) , Trunc-level)
+                       k< {a0} {b0} 
+                       (λ ypy → [ snd ypy ])
+                       (λ xpx → [ p0 ])
+                       id) {(y , py)})
 
+      Codes-cross-βb : (\ x px -> Codes-cross x y0 px [ px ]) ≃ (λ _ _ → [ p0 ])
+      Codes-cross-βb = λ≃ (\ y -> λ≃ \ py -> 
+                       ap≃ (wedge-elim-βb
+                       {A = Σ (λ (x : X) → P x y0)}
+                       {B = λ a → Σ (λ (y : Y) → P (fst a) y)}
+                       (cY _) (λ xpx → cX (fst xpx))
+                       (λ a b → Trunc k (P x0 (fst b)) , Trunc-level)
+                       k< {a0} {b0} 
+                       (λ ypy → [ snd ypy ])
+                       (λ xpx → [ p0 ])
+                       id) {(y , py)})
 
-      Codes-mer-coh : ap≃ Codes-mer-βb {base} ≃ ap≃ Codes-mer-βa {[ base ]} 
-      Codes-mer-coh = ∘-unit-l (ap≃ Codes-mer-βa) ∘ wedge-rec-coh nX (connected-Trunc _ _ _ nX) Trunc-level k< (λ x → x) (λ x → [ x ]) id
-
-      Codes-mer-isequiv : (x : X) -> IsEquiv (Codes-mer x)
+      Codes-cross-coh : ap≃ (ap≃ Codes-cross-βb {x0}) {p0}
+                      ≃ ap≃ (ap≃ Codes-cross-βa {y0}) {p0}
+      Codes-cross-coh = 
+                       {!!} ∘
+                         wedge-elim-coh {A = Σ (λ (x : X) → P x y0)}
+                         {B = λ a → Σ (λ (y : Y) → P (fst a) y)} (cY _)
+                         (λ xpx → cX (fst xpx))
+                         (λ a b → Trunc k (P x0 (fst b)) , Trunc-level) k< {a0} {b0}
+                         (λ ypy → [ snd ypy ]) (λ xpx → [ p0 ]) id
+                         ∘ {!!}
+ 
+      Codes-cross-isequiv : (x : X) (y : Y) → (p : P x y) 
+                           -> IsEquiv (Codes-cross x y p)
+      Codes-cross-isequiv = {!!}
+{-  
       Codes-mer-isequiv = ConnectedFib.everywhere n' {a0 = base} 
                                                    nX
                                                    (λ x' → IsEquiv (Codes-mer x') ,
                                                     raise-level (-1<= -2<n') (IsEquiv-HProp (Codes-mer x'))) -- need n' is S - for this
                                                    (transport IsEquiv (! Codes-mer-βa) (snd id-equiv))
-  
+
       Codes-mer-inv-base : IsEquiv.g (Codes-mer-isequiv base) ≃ (\ x -> x)
       Codes-mer-inv-base = transport-IsEquiv-g (! Codes-mer-βa) (snd id-equiv) ∘ ap IsEquiv.g
                              (ConnectedFib.β n' nX
@@ -70,58 +113,48 @@ module homotopy.BlakersMassey where
                                  IsEquiv (Codes-mer x') ,
                                  raise-level (-1<= -2<n') (IsEquiv-HProp (Codes-mer x')))
                               (transport IsEquiv (! Codes-mer-βa) (snd id-equiv)))
-
-    Codes-mer-equiv : (x : X) -> Equiv (Trunc k X) (Trunc k X)
-    Codes-mer-equiv x = (Codes-mer x) , Codes-mer-isequiv x 
 -}
+
+    Codes-cross-equiv : (x : X) (y : Y) (p : P x y) -> Equiv (Trunc k (P x y0)) (Trunc k (P x0 y))
+    Codes-cross-equiv x y p = ((Codes-cross x y p) , Codes-cross-isequiv x y p)
 
     Codes : Pushout X Y P -> Type 
     Codes = Pushout-rec (λ x → Trunc k (P x y0))
                         (λ y → Trunc k (P x0 y))
-                        {!!}
+                        (λ x y p → ua (Codes-cross-equiv x y p))
 
-{-
-    NType-Codes : (x : Susp X) -> NType k (Codes x)
-    NType-Codes = Susp-elim _ Trunc-level Trunc-level (λ _ → HProp-unique (NType-is-HProp _) _ _)
+    NType-Codes : (x : Pushout X Y P) -> NType k (Codes x)
+    NType-Codes = Pushout-elim _ (\ _ -> Trunc-level) (\ _ -> Trunc-level) (λ _ _ _ → HProp-unique (NType-is-HProp _) _ _)
 
-    encode0 : ∀ {x : Susp X} → Path No x → Codes x
-    encode0 α = transport Codes α [ base ]
+    encode0 : ∀ {y : _} → Path (P.inl x0) y → Codes y
+    encode0 α = transport Codes α [ p0 ]
 
-    encode : ∀ {x : Susp X} → P x → Codes x
+    encode : ∀ {x : _} → Pa x → Codes x
     encode{x} tα = Trunc-rec (NType-Codes x) encode0 tα
 
     abstract
-      encode-decode' : (c : Codes No) → encode (decode' c) ≃ c
-      encode-decode' = Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
-                                    (λ x → encode (decode' [ x ]) ≃〈 id 〉 
-                                           transport Codes (! (mer base) ∘ mer x) [ base ] ≃〈 ap≃ (transport-ap-assoc Codes (! (mer base) ∘ mer x)) 〉 
-                                           coe (ap Codes (! (mer base) ∘ mer x)) [ base ] ≃〈 ap (λ x' → coe x' [ base ]) (ap-∘ Codes (! (mer base)) (mer x)) 〉 
-                                           coe (ap Codes (! (mer base)) ∘ ap Codes (mer x)) [ base ] ≃〈 ap≃ (transport-∘ (λ x' → x') (ap Codes (! (mer base))) (ap Codes (mer x))) 〉 
-                                           coe (ap Codes (! (mer base))) 
-                                               (coe (ap Codes (mer x)) [ base ]) ≃〈 ap (\ x -> (coe (ap Codes (! (mer base))) (coe x [ base ]))) Susp-rec/βmer 〉 
-                                           coe (ap Codes (! (mer base))) 
-                                               (coe (ua (Codes-mer-equiv x)) [ base ]) ≃〈 ap (coe (ap Codes (! (mer base)))) (ap≃ (type≃β (Codes-mer-equiv x))) 〉 
-                                           coe (ap Codes (! (mer base)))
-                                               (Codes-mer x [ base ]) ≃〈 ap (λ x' → coe (ap Codes (! (mer base))) x') (ap≃ Codes-mer-βb) 〉 
-                                           coe (ap Codes (! (mer base)))
-                                               [ x ] ≃〈 ap (λ y → coe y [ x ]) (ap-! Codes (mer base)) 〉 
-                                           coe (! (ap Codes (mer base)))
-                                               [ x ] ≃〈 ap (λ y → coe (! y) [ x ]) Susp-rec/βmer 〉 
-                                           coe (! (ua (Codes-mer-equiv base)))
-                                               [ x ] ≃〈 ap≃ (type≃β! (Codes-mer-equiv base)) 〉 
-                                           IsEquiv.g (snd (Codes-mer-equiv base))
-                                               [ x ] ≃〈 ap≃ Codes-mer-inv-base {[ x ]} 〉 
-                                           [ x ] ∎)
+      encode-decode' : (y : _) (p : Trunc k (P x0 y)) → encode (decode' p) ≃ p
+      encode-decode' y = Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
+        (λ py → encode (decode' [ py ]) ≃〈 id 〉 
+               encode [ P.cross py ] ≃〈 id 〉 
+               transport Codes (P.cross py) [ p0 ] ≃〈 ap≃ (transport-ap-assoc Codes (P.cross py)) 〉 
+               coe (ap Codes (P.cross py)) [ p0 ] ≃〈 {!!} 〉 
+               coe (ua (Codes-cross-equiv x0 y py)) [ p0 ] ≃〈 ap≃ (type≃β (Codes-cross-equiv _ _ py)) 〉 
+               Codes-cross x0 y py [ p0 ] ≃〈 ap≃ (ap≃ Codes-cross-βa) 〉 
+               [ py ] ∎)
 
-    decode : ∀ {x} -> Codes x → P x
-    decode {x} = Susp-elim (\ x -> Codes x → P x)
-                           decode'
-                           (Trunc-func (λ x' → mer x')) 
-                           (λ x' →
-                                transport (λ x0 → Codes x0 → P x0) (mer x') decode' ≃〈 transport-→ Codes P (mer x') decode' 〉
-                                transport P (mer x') o decode' o transport Codes (! (mer x')) ≃〈 move-posto-with-transport-left Codes (mer x') (transport P (mer x') o decode') (Trunc-func (λ x0 → mer x0)) (λ≃ (STS x'))〉
-                                (Trunc-func (λ x0 → mer x0) ∎))
-                           x where
+    decode : ∀ {x} -> Codes x → Pa x
+    decode {x} = Pushout-elim (\ x -> Codes x → Pa x)
+                              (λ x → Trunc-func (λ px → ! (P.cross px) ∘ P.cross p0))
+                              (λ _ → decode') -- (Trunc-func (λ x' → mer x')) 
+                              -- (λ x' →
+                              --   transport (λ x0 → Codes x0 → P x0) (mer x') decode' ≃〈 transport-→ Codes P (mer x') decode' 〉
+                              --   transport P (mer x') o decode' o transport Codes (! (mer x')) ≃〈 move-posto-with-transport-left Codes (mer x') (transport P (mer x') o decode') (Trunc-func (λ x0 → mer x0)) (λ≃ (STS x'))〉
+                              --   (Trunc-func (λ x0 → mer x0) ∎))
+                              {!!}
+                              x 
+    {-
+        where
      abstract
        STS : ∀ x' c -> transport P (mer x') (decode' c) ≃ 
                        Trunc-func mer (transport Codes (mer x') c)
@@ -171,15 +204,15 @@ module homotopy.BlakersMassey where
   
               coh2 : ap (Trunc-func mer) (! (ap≃ Codes-mer-βa {[ base ]})) ≃ ap (Trunc-func mer) (! (ap≃ Codes-mer-βb {base}))
               coh2 = ap (λ x0 → ap (Trunc-func mer) (! x0)) (! Codes-mer-coh)
-
-    decode-encode : ∀ {x : Susp X} (α : P x) -> decode (encode α) ≃ α
-    decode-encode tα = Trunc-elim (\ α -> decode (encode α) ≃ α) (λ x → path-preserves-level Trunc-level) 
-                                  (path-induction (λ _ p → decode (encode [ p ]) ≃ [ p ]) (ap [_] (!-inv-l (mer base))))
-                                  tα
 -}
+    decode-encode : ∀ {x : _} (α : Pa x) -> decode (encode α) ≃ α
+    decode-encode tα = Trunc-elim (\ α -> decode (encode α) ≃ α) (λ x → path-preserves-level Trunc-level) 
+                                  (path-induction (λ _ p → decode (encode [ p ]) ≃ [ p ])
+                                                  (ap [_] (!-inv-l (P.cross p0))))
+                                  tα
 
     eqv : (y : Y) → Equiv (Trunc k (P x0 y)) (Trunc k (Path {Pushout X Y P} (P.inl x0) (P.inr y)))
-    eqv = {!!} -- (improve (hequiv decode' encode encode-decode' decode-encode))
+    eqv y = (improve (hequiv decode' encode (encode-decode' y) decode-encode))
 
 {-
     path : Trunc k X ≃ Trunc k (Path {(Susp X)} No No)
