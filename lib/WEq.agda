@@ -10,7 +10,7 @@ module lib.WEq where
   HFiber f y = Σ \x -> Path (f x) y
   
   IsWEq : {A B : Type} -> (f : A -> B) -> Type
-  IsWEq f = (y : _) -> Contractible (HFiber f y)
+  IsWEq {A}{B} f = (y : B) -> Contractible (HFiber f y)
   
   WEq : (A B : Type) -> Type
   WEq A B = Σ \f -> IsWEq{A}{B} f

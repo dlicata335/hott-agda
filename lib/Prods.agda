@@ -96,11 +96,24 @@ module lib.Prods where
                          (λ _ → id)
                          (λ p → pair≃ id (HProp-unique (increment-level (ntype (c (fst p)))) _ _)))) 
 
+  Σ-with-Contractibleβ1 : {A : Type} {B : A → Type}
+                        → (c : (x : A) → Contractible (B x))
+                        → (coe (Σ-with-Contractible c)) ≃ (\a -> a , fst (c a))
+  Σ-with-Contractibleβ1 c = type≃β _
+
   ΣSubsetPath : {A : Type} {B : A → Type} {p q : Σ B} 
                 → ( (x : A) → HProp (B x))
                 →   (Path (fst p) (fst q))
                   ≃ (Path p q)
   ΣSubsetPath {p = p}{q = q} hp = ΣPath.path ∘ Σ-with-Contractible (λ p' → use-level{n = -2} (use-level{n = S -2} (hp (fst q)) _ _))
+
+  ΣSubsetPathβ : {A : Type} {B : A → Type} {p q : Σ B} 
+               → (hp : (x : A) → HProp (B x)) (p1 : Path (fst p) (fst q))
+               → fst≃ (coe (ΣSubsetPath {p = p} {q = q} hp) p1) ≃ p1
+  ΣSubsetPathβ {p = (x , _)}  {q = (.x , _)} hp id = 
+    ((Σ≃β1 _ _ ∘ ap fst≃ (ap≃ (type≃β ΣPath.eqv))) ∘ 
+     ap (fst≃ o coe ΣPath.path) (ap≃ (Σ-with-Contractibleβ1 (λ p' → use-level {n = -2} (use-level {n = S -2} (hp x) _ _))))) ∘
+     ap fst≃ (ap≃ (transport-∘ (λ x' → x') ΣPath.path (Σ-with-Contractible (λ p' → use-level {n = -2} (use-level {n = S -2} (hp x) _ _)))))
 
   Σlevel : ∀ {n} {A : Type} {B : A → Type}
            → NType n A
