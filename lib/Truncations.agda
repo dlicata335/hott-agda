@@ -190,6 +190,10 @@ module lib.Truncations where
      path : Trunc n (Trunc k A) ≃ Trunc (mintl n k) A
      path = ua eqv
 
+   module SwapTrunc (n k : TLevel) (A : Type) where 
+     path : Trunc n (Trunc k A) ≃ Trunc k (Trunc n A)
+     path = ! (FuseTrunc.path k n A) ∘ ap (λ x → Trunc x A) (mintl-comm n k) ∘ FuseTrunc.path n k A
+
    module UnTrunc (n : TLevel) (A : Type) (nA : NType n A) where
 
     eqv : Equiv (Trunc n A) A

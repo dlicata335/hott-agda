@@ -55,11 +55,12 @@ module homotopy.KGn where
                   τ₀ (Loop (k +1) (B (n +1)) (base^ (n +1))) ≃〈 ap τ₀ (LoopSpace.LoopPath.path k) 〉
                   τ₀ (Loop k (Path {(B (n +1))} (base^ (n +1)) (base^ (n +1))) id) ≃〈 ! (LoopSpace.Loop-Trunc0 k) 〉
                   Loop k (Trunc (tlp k) (Path {(B (n +1))} (base^ (n +1)) (base^ (n +1)))) [ id ] ≃〈 id 〉
-                  Loop k (Trunc (tlp k) (Path {Trunc (tlp (n +1)) (Susp^ (pos2nat n) A)} (base^ (n +1)) (base^ (n +1)))) [ id ] ≃〈 {!!} 〉
-                  Loop k (Trunc (tlp k) (Trunc (tlp n) (Path {(Susp^ (pos2nat n) A)} (point^ (pos2nat n) a0) (point^ (pos2nat n) a0)))) [ [ id ] ] ≃〈 {!unfold susp!} 〉
-                  Loop k (Trunc (tlp k) (Trunc (tlp n) (Path {Susp (B n)} No No))) [ [ id ] ] ≃〈 {!swap !} 〉
-                  Loop k (Trunc (tlp n) (Trunc (tlp k) (Path {Susp (B n)} No No))) [ [ id ] ] ≃〈 ap-Loop≃ k (ap (Trunc (tlp n)) (! F.path)) {!(! F.path)!} 〉
-                  Loop k (Trunc (tlp n) (Trunc (tlp k) (B n))) [ [ base^ n ] ]  ≃〈 {! swap inside and cancel double Trunc n!} 〉
+                  Loop k (Trunc (tlp k) (Path {Trunc (tlp (n +1)) (Susp^ (pos2nat n) A)} (base^ (n +1)) (base^ (n +1)))) [ id ] ≃〈 ap-Loop≃ k (ap (Trunc (tlp k)) (! (TruncPath.path (tlp n)))) {!compute!} 〉
+                  Loop k (Trunc (tlp k) (Trunc (tlp n) (Path {(Susp^ (pos2nat n) A)} (point^ (pos2nat n) a0) (point^ (pos2nat n) a0)))) [ [ id ] ] ≃〈 {! index math to unfold susp!} 〉
+                  Loop k (Trunc (tlp k) (Trunc (tlp n) (Path {Susp (B n)} No No))) [ [ id ] ] ≃〈 ap-Loop≃ k (SwapTrunc.path (tlp k) (tlp n) (Path {Susp (B n)} No No)) {!compute!} 〉
+                  Loop k (Trunc (tlp n) (Trunc (tlp k) (Path {Susp (B n)} No No))) [ [ id ] ] ≃〈 ap-Loop≃ k (ap (Trunc (tlp n)) (! F.path)) {! compute!} 〉
+                  Loop k (Trunc (tlp n) (Trunc (tlp k) (B n))) [ [ base^ n ] ]  ≃〈 ap-Loop≃ k (SwapTrunc.path (tlp n) (tlp k) _) {!compute!} 〉
+                  Loop k (Trunc (tlp k) (Trunc (tlp n) (B n))) [ [ base^ n ] ]  ≃〈 ap-Loop≃ k (ap (Trunc (tlp k)) (UnTrunc.path _ _ Trunc-level)) {!compute!} 〉
                   Loop k (Trunc (tlp k) (B n)) [ base^ n ] ≃〈 LoopSpace.Loop-Trunc0 k 〉 
                   τ₀ (Loop k (B n) (base^ n)) ≃〈 id 〉 
                   π k (B n) (base^ n) ∎) 

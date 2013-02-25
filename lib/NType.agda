@@ -95,6 +95,11 @@ module lib.NType where
   ... | Inl lt = Inl (ltSCong lt)
   ... | Inr eq = Inr (ap S eq)
 
+  mintl-comm : (m n : TLevel) → mintl m n ≃ mintl n m
+  mintl-comm -2 -2 = id
+  mintl-comm -2 (S n) = id
+  mintl-comm (S m) -2 = id
+  mintl-comm (S m) (S n) = ap S (mintl-comm m n)
 
   -- funny addition for tlevels
   -- n + m + 2
