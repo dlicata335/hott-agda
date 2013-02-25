@@ -7,36 +7,22 @@ open Int
 open LoopSpace
 open Suspension
 open import homotopy.Freudenthal
+open import homotopy.HStructure
 open import homotopy.PiLessOfConnected
+open import homotopy.Pi2HSusp
 
 module homotopy.KGn where
 
-  -- like K_G,1 for abelian G
-  IsK1 : Type -> Type
-  IsK1 A = Σ \ (a0 : A) →  
-           Connected (S (S -2)) A × 
-           NType (tl 1) A ×
-           H-Structure A a0
-
-  module B (A : Type) (isK1 : IsK1 A) where
-
-    a0 : A
-    a0 = fst isK1
-
-    A-level : NType (tl 1) A
-    A-level = fst (snd (snd isK1))
-
-    A-Connected : Connected (S (S -2)) A
-    A-Connected = fst (snd isK1)
-
-    A-H : H-Structure A a0
-    A-H = snd (snd (snd isK1))
+  module B (A : Type) 
+           (a0 : A)
+           (A-Connected : Connected (S (S -2)) A)
+           (A-level : NType (tl 1) A)
+           (H-A : H-Structure A a0) where
 
     -- Bn = KGn 
     B : Positive → Type
     B n = Trunc (tlp n) (Susp^ (n -1pn) A)
 
-{-
     B-Connected : ∀ (i : Nat) → Connected (tl i) (B (i +1np))
     B-Connected n = transport
                       (λ x → NType -2 (Trunc (tl n) (Trunc (tlp (n +1np)) (Susp^ x A))))
@@ -45,20 +31,17 @@ module homotopy.KGn where
     B-Connected' : (n : Positive) → Connected (S (-2ptl n)) (B n)
     B-Connected' One = B-Connected 0
     B-Connected' (S One) = B-Connected 1
-    B-Connected' (S (S n')) = {!B-Connected (pos2nat (S n'))!} where -- {!S^-Connected (pos2nat (S n'))!} -- right where
-                             postulate FIXME : _
+    B-Connected' (S (S n')) = {!B-Connected (pos2nat (S n'))!} -- {!S^-Connected (pos2nat (S n'))!} -- right where
         -- transport (λ x → Connected (S (tl (pos2nat n'))) (Susp (S^ x))) 
         --                         (pos2nat-+1np n')
         --                         {!(S^-Connected (pos2nat (S n')))!}
 
     B-Connected'' : (n : Positive) → Connected (tlp n) (B (n +1))
     B-Connected'' n = {!B-Connected' (n +1)!}
--}  
 
     base^ : ∀ n → B n
     base^ n = [ point^ (n -1pn) a0 ]
 
-{-
     module Stable (k : Positive)
                   (n : Positive) 
                   (c : (tlp k <=tl plus2 (-2ptl n) (-2ptl n)))
@@ -79,13 +62,12 @@ module homotopy.KGn where
                   Loop k (Trunc (tlp n) (Trunc (tlp k) (B n))) [ [ base^ n ] ]  ≃〈 {! swap inside and cancel double Trunc n!} 〉
                   Loop k (Trunc (tlp k) (B n)) [ base^ n ] ≃〈 LoopSpace.Loop-Trunc0 k 〉 
                   τ₀ (Loop k (B n) (base^ n)) ≃〈 id 〉 
-                  π k (B n) (base^ n) ∎) where
-          postulate FIXME : _
+                  π k (B n) (base^ n) ∎) 
+
 
     -- spectrum:
     --   Path (B n+1) No No ≃ B n
     -- set k = n, and cancel redundant truncations
-
 
     module BelowDiagonal where
 
@@ -120,15 +102,30 @@ module homotopy.KGn where
          --
          -- (plus2 (tl (pos2nat n')) (tl (pos2nat n')))
          -- = 2n' + 2
--}
+
     module OnDiagonal where
     
       π1 : π One (B One) (base^ One)  ≃  π One A a0
-      π1 = τ₀ (Path {Trunc (tl 1) A} [ a0 ] [ a0 ]) ≃〈 ap τ₀ (ap-Loop≃ One (UnTrunc.path _ _ A-level) (ap≃ (type≃β (UnTrunc.eqv _ _ (fst (snd (snd isK1))))))) 〉
+      π1 = τ₀ (Path {Trunc (tl 1) A} [ a0 ] [ a0 ]) ≃〈 ap τ₀ (ap-Loop≃ One (UnTrunc.path _ _ A-level) (ap≃ (type≃β (UnTrunc.eqv _ _ A-level)))) 〉
            τ₀ (Path {A} a0 a0) ∎
-    
 
-      -- TODO: prove everything else on the diagonal by Freudenthal
+      Two : Positive 
+      Two = S One
+
+      π2 : π Two (B Two) (base^ Two) ≃ π One A a0
+      π2 = path A a0 A-level A-Connected H-A
+
+      πn : ∀ n → π n (B n) (base^ n) ≃ π One A a0
+      πn One = π1
+      πn (S One) = π2
+      πn (S (S n)) = πn (S n) ∘ ! (Stable.stable (S n) (S n) (arith n)) where
+      -- n+1 <= 2 + (n-1) + (n-1)
+      --      = 2 n
+        arith : ∀ n → tlp (n +1) <=tl plus2 (-2ptl (S n)) (-2ptl (S n))
+        arith One = Inr id
+        arith (S One) = Inl ltS
+        arith (S (S n)) = {!arith (S n)!}
+
 
     module AboveDiagonal where
 

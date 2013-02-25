@@ -27,14 +27,6 @@ module programming.Semigroup where
                                 (λ≃ (λ y1 → λ≃ (λ y2 → λ≃ (λ y3 → 
                                  ap-id (assoc y1 y2 y3) ∘ ∘-unit-l (ap (λ x → x) (assoc y1 y2 y3))))))}
 
-  transport-isequiv : ∀ {A : Type} {M N : A} (B : A → Type) (α : M ≃ N) 
-                  -> IsEquiv (transport B α)
-  transport-isequiv {A}{M} B α = isequiv (transport B (! α)) (λ x → ap≃ (transport-inv-1 B α)) (λ x → ap≃ (transport-inv-2 B α)) 
-                                  (coh α) where
-                    coh : {N : _} (α : Path M N) 
-                        → (x : B M) → Path (ap≃ (transport-inv-2 B α)) (ap (transport B α) (ap≃ (transport-inv-1 B α) {x}))
-                    coh id = λ _ → id
-
   transport-Semigroup : ∀ {A : Type} {M N : A} (B : A → Type) (α : M ≃ N) 
                       → transport (\ x → Semigroup (B x)) α 
                       ≃ transport-Semigroup-eqv (transport B α , transport-isequiv B α)

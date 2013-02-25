@@ -14,7 +14,8 @@ module homotopy.Pi2HSusp (A : Type)
                          (A-Connected : Connected (tl 0) A)
                          (A-H : H-Structure A a0) where
 
-  Two = One +1
+  private
+    Two = One +1
 
   B2 = Trunc (tlp Two) (Susp A)
 

@@ -33,6 +33,17 @@ module lib.Pushout where
       Pushout-rec f _ _ (inl' a) = f a
       Pushout-rec _ g _ (inr' b) = g b
 
+      postulate {- HoTT Axiom -}
+        Pushout-rec/βcross : {A B C : Type}
+                             {P : A → B → Type}
+                             {C : Type}
+                             (f : (a : A) → C)
+                             (g : (b : B) → C)
+                             (cross' : (a : A) → (b : B) → (p : P a b) →
+                                      Path (f a) (g b)) →
+                            (a : A) → (b : B) → (p : P a b) → 
+                            Path (ap (Pushout-rec f g cross') (cross p))
+                                 (cross' a b p)
       -- FIXME path β
 
       Pushout-elim : {A B : Type}
@@ -46,7 +57,7 @@ module lib.Pushout where
       Pushout-elim _ f g H' (inl' a) = f a
       Pushout-elim _ f g H' (inr' b) = g b
 
-      postulate
+      postulate {- HoTT Axiom -}
         Pushout-elim/βcross : {A B C : Type}
                               {P : A → B → Type}
                               (C : Pushout A B P → Type)
