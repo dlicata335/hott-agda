@@ -134,9 +134,6 @@ module Int where
   One -1pn = Z
   (S n) -1pn = pos2nat n
 
-  postulate
-    +1-1-cancel : ∀ n → (n +1np) -1pn ≃ n
-
   _+pn_ : Positive → Nat → Positive
   One +pn k = k +1np
   S n +pn k = S (n +pn k)
@@ -153,8 +150,6 @@ module Int where
   tlp+1 Z = id
   tlp+1 (S k) = ap S (tlp+1 k)
 
-  -- the following are maybe not used any more:
-  -- (were used for wrong definition of the spheres)
   -2ptl : Positive -> TLevel
   -2ptl One = (S -2)
   -2ptl (S One) = (S (S -2))
@@ -163,6 +158,14 @@ module Int where
   pos2nat-+1np : ∀ n' -> (pos2nat n' +1np) ≃ S n'
   pos2nat-+1np One = id
   pos2nat-+1np (S n') = ap S (pos2nat-+1np n')
+
+  pos2nat-of-+1np : ∀ n' -> (pos2nat (n' +1np)) ≃ S n'
+  pos2nat-of-+1np Z = id
+  pos2nat-of-+1np (S y) = ap S (pos2nat-of-+1np y)
+
+  +1-1-cancel : ∀ n → (n +1np) -1pn ≃ n
+  +1-1-cancel Z = id
+  +1-1-cancel (S y) = pos2nat-of-+1np y
 
   -2<pos-2 : ∀ n → -2 <tl -2ptl n
   -2<pos-2 One = ltS
@@ -176,9 +179,19 @@ module Int where
   ... | Inl lt = Inl (ltSR lt)
   ... | Inr eq = transport (λ x → tl 1 <=tl S x) eq (Inl ltS)
 
-  postulate
-    pos-not-<0 : (p : Positive) → tlp p <=tl (S (S -2)) -> Void
-  -- pos-not-<0 One (Inl (ltSR (ltSR ())))
-  -- pos-not-<0 One (Inr ())
-  -- pos-not-<0 (S n) (Inl y) = {!y!}
-  -- pos-not-<0 (S n) (Inr y) = {!y!}
+  pos-not-<=-2 : (p : Positive) → tlp p <=tl -2 -> Void
+  pos-not-<=-2 One (Inl ())
+  pos-not-<=-2 One (Inr ())
+  pos-not-<=-2 (S n) (Inl y) = pos-not-<=-2 n (Inl (lt-subtract-left y))
+  pos-not-<=-2 (S n) (Inr ())
+
+  pos-not-<=-1 : (p : Positive) → tlp p <=tl (S -2) -> Void
+  pos-not-<=-1 One (Inl (ltSR ()))
+  pos-not-<=-1 One (Inr ())
+  pos-not-<=-1 (S p) lte = pos-not-<=-2 p (<=-unS lte)
+
+  pos-not-<=0 : (p : Positive) → tlp p <=tl (S (S -2)) -> Void
+  pos-not-<=0 One (Inl (ltSR (ltSR ())))
+  pos-not-<=0 One (Inr ())
+  pos-not-<=0 (S n) lt = pos-not-<=-1 n (<=-unS lt)
+
