@@ -13,117 +13,6 @@ open import homotopy.Pi2HSusp
 
 module homotopy.KGn where
 
-  -- FIXME move to libraty
-
-  2*_-2 : Positive -> TLevel
-  2* n -2 = plus2 (-2ptl n) (-2ptl n)
-
-  <trans : ∀ {n m p} → n <tl m → m <tl p → n <tl p
-  <trans ltS q = lt-subtract-left q
-  <trans (ltSR y) q = <trans y (lt-subtract-left q)
-
-  <=trans : ∀ {n m p} → n <=tl m → m <=tl p → n <=tl p
-  <=trans (Inl x) (Inl y) = Inl (<trans x y)
-  <=trans (Inl x) (Inr y) = Inl (transport (λ x' → _ <tl x') y x)
-  <=trans (Inr x) (Inl y) = Inl (transport (λ x' → x' <tl _) (! x) y)
-  <=trans (Inr x) (Inr y) = Inr (y ∘ x)
-
-  pos2nat-is-S : ∀ n → (pos2nat n) ≃ S (n -1pn)
-  pos2nat-is-S One = id
-  pos2nat-is-S (S n) = id
-
-  n-1<n : ∀ n → tl (n -1pn) <tl tl (pos2nat n)
-  n-1<n n = transport (λ x → tl (n -1pn) <tl tl x) (! (pos2nat-is-S n)) ltS
-
-  -2ptl-S-1pn : ∀ n → (-2ptl (S n)) ≃ (tl (n -1pn))
-  -2ptl-S-1pn One = id
-  -2ptl-S-1pn (S n) = id
-
-  -2ptl-S : ∀ n' →  -2ptl (S n') ≃ (S (-2ptl n'))
-  -2ptl-S One = id
-  -2ptl-S (S n) = ap S (! (-2ptl-S-1pn n)) ∘ ap tl (pos2nat-is-S n)
-
-  plus2-monotone-2 : ∀ n m m' -> m <tl m' -> plus2 n m <tl plus2 n m'
-  plus2-monotone-2 -2 m m' lt = lt
-  plus2-monotone-2 (S y) m m' lt = ltSCong (plus2-monotone-2 y m m' lt)
-  
-  pos-1< : ∀ n → tl (n -1pn) <tl tl (pos2nat n)
-  pos-1< One = ltS
-  pos-1< (S n) = ltS
-
-  n-1<=2n-2 : ∀ n → (tl (n -1pn)) <=tl 2* n -2
-  n-1<=2n-2 One = Inr id
-  n-1<=2n-2 (S One) = Inl ltS
-  n-1<=2n-2 (S (S n')) = <=trans (<=SCong (n-1<=2n-2 (S n'))) 
-                                 (<=trans (Inr (ap (λ x → plus2 x (-2ptl (S n'))) (! (-2ptl-S (S n')))))
-                                           (Inl (plus2-monotone-2 (tl (pos2nat n')) _ _ (transport (λ x → x <tl tl (pos2nat n')) (! (-2ptl-S-1pn n')) (pos-1< n')))))
-
-  tl-pos2nat-tlp : ∀ n → tl (pos2nat n) ≃ (tlp n)
-  tl-pos2nat-tlp One = id
-  tl-pos2nat-tlp (S n) = ap S (tl-pos2nat-tlp n)
-
-  lt-unS-right' : ∀ {n m} → n <tl (S m) → Either (n <tl m) (n ≃ m)
-  lt-unS-right' ltS = Inr id
-  lt-unS-right' (ltSR y) = Inl y
-
-  lt-1pn-right : ∀ k n → k <tl tlp n → k <=tl (tl (n -1pn))
-  lt-1pn-right k One lt = lt-unS-right' lt
-  lt-1pn-right k (S n) lt = transport (λ x → k <=tl x) (! (tl-pos2nat-tlp n)) (lt-unS-right' lt)
-
-  2*S-2 : ∀ n → S (2* n -2) <tl 2* (S n) -2
-  2*S-2 One = ltS
-  2*S-2 (S n) = transport (λ x → x <tl plus2 (tl (pos2nat n)) (tl (pos2nat n))) 
-                          (ap (λ x → plus2 x (-2ptl (S n))) (-2ptl-S (S n)))
-                          (plus2-monotone-2 (tl (pos2nat n)) (-2ptl (S n)) (tl (pos2nat n)) (transport (λ x → x <tl tl (pos2nat n)) (! (-2ptl-S-1pn n)) (n-1<n n)))
-
-  <=-to-+ : ∀ {n m} -> tlp n <=tl tlp m -> Σ \ k -> tlp (n +pn k) ≃ tlp m
-  <=-to-+ {n}{m} (Inr p) = 0 , p ∘ ap tlp (+pn-rh-Z n)
-  <=-to-+ {One} {One} (Inl (ltSR (ltSR (ltSR ()))))
-  <=-to-+ {S n} {One} (Inl lt) with pos-not-<=0 n (Inl (lt-unS lt))
-  ... | () 
-  <=-to-+ {n} {S n'} (Inl lt) with lt-unS-right lt
-  ... | Inr eq = S Z , (ap S (! eq) ∘ ap (S o tlp) (+pn-rh-Z n)) ∘ ap tlp (+pn-rh-S n Z)
-  ... | Inl lt' with <=-to-+ {n}{n'} (Inl lt') 
-  ...              | (n'' , eq''') = S n'' , ap S eq''' ∘ ap tlp (+pn-rh-S n n'')
-
-  >pos->1 : ∀ k n -> tlp k <tl tlp n -> tl 1 <tl tlp n 
-  >pos->1 k' One lt' with pos-not-<=0 k' (lt-unS-right' lt')
-  ... | ()
-  >pos->1 One (S n') lt' = lt'
-  >pos->1 (S n') (S n0) lt'' = ltSR (>pos->1 n' n0 (lt-unS lt''))
-
-  n<=2*n-2 : ∀ n → tl 1 <tl tlp n → tlp n <=tl 2* n -2
-  n<=2*n-2 One (ltSR (ltSR y)) = Inl (ltSR y)
-  n<=2*n-2 (S n) lt with (lt-unS-right lt) 
-  ... | Inl lt' = <=trans (<=SCong (n<=2*n-2 n lt')) (Inl (2*S-2 n))
-  ... | Inr eq  = transport (λ x → S x <=tl plus2 (-2ptl (S n)) (-2ptl (S n))) (! eq)
-                    (arith n eq) where
-    arith : ∀ n -> tlp n ≃ (tl 1) → (tl 2) <=tl 2* (S n) -2
-    arith One eq' = Inr id
-    arith (S n) eq' with pos-not-<=0 n (<=-unS (Inr eq'))
-    ... | ()
-
-  min-1nat : (m : Nat) → mintl (S -2) (tl m) ≃ (S -2)
-  min-1nat Z = id
-  min-1nat (S y) = id
-
-  min0nat : (m : Nat) → mintl (tl 0) (tl m) ≃ (tl 0)
-  min0nat Z = id
-  min0nat (S y) = ap S (min-1nat y)
-
-  π<=Trunc : ∀ k n (lt : tlp k <=tl tlp n) {A} (a0 : A) 
-             -> π k (Trunc (tlp n) A) [ a0 ] ≃ π k A a0
-  π<=Trunc k n lt {A} a0 with <=-to-+{k}{n} lt 
-  ... | (m , eq) =  π k (Trunc (tlp n) A) [ a0 ] ≃〈 id 〉 
-                    τ₀ (Loop k (Trunc (tlp n) A) [ a0 ]) ≃〈 ap τ₀ (ap-Loop-Trunc-tlevel≃ k (! eq)) 〉 
-                    τ₀ (Loop k (Trunc (tlp (k +pn m)) A) [ a0 ]) ≃〈 ap τ₀ (Loop-Trunc k m) 〉 
-                    τ₀ (Trunc (tl m) (Loop k A  a0))             ≃〈 FuseTrunc.path (tl 0) (tl m) (Loop k A a0) 〉 
-                    (Trunc (mintl (tl 0) (tl m)) (Loop k A  a0)) ≃〈 ap (λ x → Trunc x (Loop k A a0)) (min0nat m) 〉 
-                    (π k A a0) ∎
-
-  
-
-
   module B (A : Type) 
            (a0 : A)
            (A-Connected : Connected (S (S -2)) A)
@@ -167,27 +56,12 @@ module homotopy.KGn where
        
        stable : π k (Σ^ n) (Σbase^ n) ≃ π (k +1) (Σ^ (n +1)) (Σbase^ (n +1))
        stable = ! (π (k +1) (Σ^ (n +1)) (Σbase^ (n +1)) ≃〈 id 〉
-                   τ₀ (Loop (k +1) (Σ^ (n +1)) (Σbase^ (n +1))) ≃〈 ap τ₀ (LoopSpace.LoopPath.path k) 〉
-                   τ₀ (Loop k (Path {(Σ^ (n +1))} (Σbase^ (n +1)) (Σbase^ (n +1))) id) ≃〈 ! (LoopSpace.Loop-Trunc0 k) 〉
-                   Loop k (Trunc (tlp k) (Loop One (Σ^ (n +1)) (Σbase^ (n +1)))) [ id ] ≃〈 id 〉
-                   Loop k (Trunc (tlp k) (Loop One (Susp^ (pos2nat n) A) (Σbase^ (n +1)))) [ id ] 
-                     ≃〈 ap-Loop≃ k (ap (Trunc (tlp k)) (ap-Loop≃ One (ap (λ x → Susp^ x A) (pos2nat-is-S n)) (transport-Susp^-number (pos2nat-is-S n) a0 ∘ ! (ap≃ (transport-ap-assoc (λ x → Susp^ x A) (pos2nat-is-S n)))))) 
-                                       (({!!} ∘
-                                           ap≃
-                                           (transport-Trunc {tlp k} (λ A' → A')
-                                            (ap-Loop≃ One (ap (λ x → Susp^ x A) (pos2nat-is-S n))
-                                             (transport-Susp^-number (pos2nat-is-S n) a0 ∘
-                                              ! (ap≃ (transport-ap-assoc (λ x → Susp^ x A) (pos2nat-is-S n))))))
-                                           {[ id ]}) ∘
-                                          ap≃
-                                          (!
-                                           (transport-ap-assoc (Trunc (tlp k))
-                                            (ap-Loop≃ One (ap (λ x → Susp^ x A) (pos2nat-is-S n))
-                                             (transport-Susp^-number (pos2nat-is-S n) a0 ∘
-                                              !
-                                              (ap≃ (transport-ap-assoc (λ x → Susp^ x A) (pos2nat-is-S n))))))){[ id ]}) 〉
-                   Loop k (Trunc (tlp k) (Loop One (Susp (Σ^ n)) No)) [ id ] ≃〈 ap-Loop≃ k (! F.path) (ap≃ (type≃β! F.eqv)) 〉 
-                   Loop k (Trunc (tlp k) (Σ^ n)) [ Σbase^ n ]  ≃〈 Loop-Trunc0 k 〉
+                   τ₀ (Loop (k +1) (Σ^ (n +1)) (Σbase^ (n +1)))                                    ≃〈 ap τ₀ (LoopSpace.LoopPath.path k) 〉
+                   τ₀ (Loop k (Path {(Σ^ (n +1))} (Σbase^ (n +1)) (Σbase^ (n +1))) id)             ≃〈 ! (LoopSpace.Loop-Trunc0 k) 〉
+                   Loop k (Trunc (tlp k) (Loop One (Σ^ (n +1)) (Σbase^ (n +1)))) [ id ]           ≃〈 id 〉
+                   Loop k (Trunc (tlp k) (Loop One (Susp^ (pos2nat n) A) (Σbase^ (n +1)))) [ id ] ≃〈 ap-Loop≃ k (ap (Trunc (tlp k)) (ap-Loop≃ One (ap (λ x → Susp^ x A) (pos2nat-is-S n)) (transport-Susp^-number (pos2nat-is-S n) a0 ∘ ! (ap≃ (transport-ap-assoc (λ x → Susp^ x A) (pos2nat-is-S n)))))) ((ap [_] (ap-Loop≃-id One (ap (λ x → Susp^ x A) (pos2nat-is-S n)) (transport-Susp^-number (pos2nat-is-S n) a0 ∘ ! (ap≃ (transport-ap-assoc (λ x → Susp^ x A) (pos2nat-is-S n))))) ∘ ap≃ (transport-Trunc {tlp k} (λ A' → A') (ap-Loop≃ One (ap (λ x → Susp^ x A) (pos2nat-is-S n)) (transport-Susp^-number (pos2nat-is-S n) a0 ∘ ! (ap≃ (transport-ap-assoc (λ x → Susp^ x A) (pos2nat-is-S n)))))) {[ id ]}) ∘ ap≃ (! (transport-ap-assoc (Trunc (tlp k)) (ap-Loop≃ One (ap (λ x → Susp^ x A) (pos2nat-is-S n)) (transport-Susp^-number (pos2nat-is-S n) a0 ∘ ! (ap≃ (transport-ap-assoc (λ x → Susp^ x A) (pos2nat-is-S n))))))){[ id ]}) 〉
+                   Loop k (Trunc (tlp k) (Loop One (Susp (Σ^ n)) No)) [ id ]                      ≃〈 ap-Loop≃ k (! F.path) (ap≃ (type≃β! F.eqv)) 〉 
+                   Loop k (Trunc (tlp k) (Σ^ n)) [ Σbase^ n ]                                     ≃〈 Loop-Trunc0 k 〉
                    τ₀ (Loop k (Σ^ n) (Σbase^ n)) ≃〈 id 〉 
                    π k (Σ^ n) (Σbase^ n) ∎)
 
@@ -270,8 +144,4 @@ module homotopy.KGn where
     module AboveDiagonal where
 
       πabove : (k n : Positive) → tlp n <tl tlp k → π k (B n) (base^ n)  ≃  Unit
-      πabove k n lt = Contractible≃Unit (use-level { -2} (Trunc-level-better (Loop-level-> (tlp n) k Trunc-level lt)))
-   
-        
-      
-      
+      πabove k n lt = Contractible≃Unit (use-level { -2} (Trunc-level-better (Loop-level-> (tlp n) k Trunc-level lt))) 

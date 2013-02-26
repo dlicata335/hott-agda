@@ -10,6 +10,8 @@ open import lib.Functions
 
 module lib.NType where
 
+  -- lemmas about tlevel numbers
+
   tl : Nat -> TLevel
   tl Z = (S (S -2))
   tl (S n) = (S (tl n))
@@ -19,15 +21,15 @@ module lib.NType where
     ltS   : ∀ {m} → m <tl (S m)
     ltSR  : ∀ {n m} → n <tl m → n <tl (S m)
 
-  lt-subtract-left : ∀ {n m} -> (S n) <tl m → n <tl m
-  lt-subtract-left ltS = ltSR ltS
-  lt-subtract-left (ltSR lt) = ltSR (lt-subtract-left lt)
+  lt-unS-left : ∀ {n m} -> (S n) <tl m → n <tl m
+  lt-unS-left ltS = ltSR ltS
+  lt-unS-left (ltSR lt) = ltSR (lt-unS-left lt)
 
   lt-unS : ∀ {n m} → (S n) <tl (S m) → n <tl m
   lt-unS ltS = ltS
-  lt-unS (ltSR lt) = lt-subtract-left lt
+  lt-unS (ltSR lt) = lt-unS-left lt
 
-  lt-unS-right : ∀ {n m} → n <tl (S m) → Either (n <tl m) (m ≃ n)
+  lt-unS-right : ∀ {n m} → n <tl (S m) → Either (n <tl m) (n ≃ m)
   lt-unS-right ltS = Inr id
   lt-unS-right (ltSR y) = Inl y
 
@@ -48,7 +50,12 @@ module lib.NType where
   ltSCong { -2 } { (S (S y)) } (ltSR lt') = ltSR (ltSCong lt')
   ltSCong { (S y) } { (S y') } lt with lt-unS-right lt
   ... | Inl a = ltSR (ltSCong a) 
-  ... | Inr b = transport (λ x → S (S y) <tl x) (ap (S o S) (! b)) ltS 
+  ... | Inr b = transport (λ x → S (S y) <tl x) (ap (S o S) b) ltS 
+
+  <trans : ∀ {n m p} → n <tl m → m <tl p → n <tl p
+  <trans ltS q = lt-unS-left q
+  <trans (ltSR y) q = <trans y (lt-unS-left q)
+
 
   -- less than or equal to for tlevel
   _<=tl_ : TLevel -> TLevel -> Type 
@@ -73,6 +80,12 @@ module lib.NType where
   <=SCong : ∀ {n} {m} -> n <=tl m -> (S n) <=tl (S m)
   <=SCong (Inl lt) = Inl (ltSCong lt)
   <=SCong (Inr eq) = Inr (ap S eq)
+
+  <=trans : ∀ {n m p} → n <=tl m → m <=tl p → n <=tl p
+  <=trans (Inl x) (Inl y) = Inl (<trans x y)
+  <=trans (Inl x) (Inr y) = Inl (transport (λ x' → _ <tl x') y x)
+  <=trans (Inr x) (Inl y) = Inl (transport (λ x' → x' <tl _) (! x) y)
+  <=trans (Inr x) (Inr y) = Inr (y ∘ x)
 
 
   -- min for tlevels
@@ -101,6 +114,7 @@ module lib.NType where
   mintl-comm (S m) -2 = id
   mintl-comm (S m) (S n) = ap S (mintl-comm m n)
 
+
   -- funny addition for tlevels
   -- n + m + 2
   -- (not total otherwise)
@@ -108,6 +122,14 @@ module lib.NType where
   plus2 -2 n = n
   plus2 (S n) m = S (plus2 n m)
 
+  plus2-monotone-2 : ∀ n m m' -> m <tl m' -> plus2 n m <tl plus2 n m'
+  plus2-monotone-2 -2 m m' lt = lt
+  plus2-monotone-2 (S y) m m' lt = ltSCong (plus2-monotone-2 y m m' lt)
+
+
+
+
+  -- other stuff about ntypes
 
   -- alternate characterizations
 

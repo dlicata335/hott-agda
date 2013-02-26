@@ -39,7 +39,7 @@ module lib.loopspace.Truncation where
     Loop-level-> n One nA (ltSR (ltSR (ltSR ())))
     Loop-level-> n (S k) {A} {a} nA lt with lt-unS-right lt
     ... | Inl lt' = path-preserves-level (Loop-level-> n k nA lt')
-    ... | Inr eq = Loop-level-S k (transport (λ x → NType x A) (! eq) nA) 
+    ... | Inr eq = Loop-level-S k (transport (λ x → NType x A) eq nA) 
   
     NType-LoopOver : ∀ n k {A} {a} (α : Loop n A a) {B} {b} → ((x : A) → NType (S k) (B x)) → NType k (LoopOver n α B b)
     NType-LoopOver One k α p = use-level (p _) _ _
@@ -61,8 +61,22 @@ module lib.loopspace.Truncation where
     Loop-Trunc-id One k = (ap≃ (type≃β! (TruncPath.eqv _)) {id} ∘ ap (transport (λ X → X) (! (TruncPath.path (tl k)))) (ap-Loop-Trunc-tlevel≃-id One (tlp+1 k))) ∘ ap≃ (transport-∘ (λ X → X) (! (TruncPath.path (tl k))) (ap-Loop-Trunc-tlevel≃ One (tlp+1 k)))
     Loop-Trunc-id (S n) k = (ap≃ (type≃β! (TruncPath.eqv _)) {id} ∘ ap (transport (λ X → X) (! (TruncPath.path (tl k)))) (ap-Loop≃-id One (Loop-Trunc n (S k)) (Loop-Trunc-id n (S k))) ∘ ap (transport (λ X → X) (! (TruncPath.path (tl k))) o transport (λ X → X) (ap-Loop≃ One (Loop-Trunc n (S k)) (Loop-Trunc-id n (S k)))) (ap-Loop-Trunc-tlevel≃-id (S n) (! (ap tlp (+pn-rh-S n k))))) ∘ ap≃ (transport-∘3 (λ X → X) (! (TruncPath.path (tl k))) (ap-Loop≃ One (Loop-Trunc n (S k)) (Loop-Trunc-id n (S k))) (ap-Loop-Trunc-tlevel≃ (S n) (! (ap tlp (+pn-rh-S n k)))))
 
-  Loop-Trunc0 : ∀ n {A} {a} → Loop n (Trunc (tlp n) A) [ a ] ≃ τ₀ (Loop n A a)
+  Loop-Trunc0 : ∀ n {A} {a} → Loop n (Trunc (tlp n) A) [ a ] ≃ π n A a
   Loop-Trunc0 n = Loop-Trunc n 0 ∘ ap-Loop-Trunc-tlevel≃ n (! (ap tlp (+pn-rh-Z n)))
+
+  π<=Trunc : ∀ k n (lt : tlp k <=tl tlp n) {A} (a0 : A) 
+             -> π k (Trunc (tlp n) A) [ a0 ] ≃ π k A a0
+  π<=Trunc k n lt {A} a0 with <=-to-+{k}{n} lt 
+  ... | (m , eq) =  π k (Trunc (tlp n) A) [ a0 ] ≃〈 id 〉 
+                    τ₀ (Loop k (Trunc (tlp n) A) [ a0 ]) ≃〈 ap τ₀ (ap-Loop-Trunc-tlevel≃ k (! eq)) 〉 
+                    τ₀ (Loop k (Trunc (tlp (k +pn m)) A) [ a0 ]) ≃〈 ap τ₀ (Loop-Trunc k m) 〉 
+                    τ₀ (Trunc (tl m) (Loop k A  a0))             ≃〈 FuseTrunc.path (tl 0) (tl m) (Loop k A a0) 〉 
+                    (Trunc (mintl (tl 0) (tl m)) (Loop k A  a0)) ≃〈 ap (λ x → Trunc x (Loop k A a0)) (min0nat m) 〉 
+                    (π k A a0) ∎
+
+  
+
+
 
   abstract
     HProp-Loop-in-Trunc< : ∀ k n {A t} → k <tl (tlp n) → HProp (Loop n (Trunc k A) t)
@@ -73,7 +87,8 @@ module lib.loopspace.Truncation where
     HProp-Loop-in-Trunc< (S k) One (ltSR (ltSR (ltSR ())))
     HProp-Loop-in-Trunc< (S k) (S n) {A}{t} lt with lt-unS-right lt
     ... | Inl lt' = path-preserves-level (HProp-Loop-in-Trunc< (S k) n lt')
-    ... | Inr eq = use-level
+    ... | Inr eq = let eq = ! eq in 
+                   use-level
                      (coe
                       (ap (NType (S (S -2))) 
                         (ap-Loop≃ n (ap (λ n' → Trunc n' A) eq)

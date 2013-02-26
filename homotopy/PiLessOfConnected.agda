@@ -30,7 +30,7 @@ module homotopy.PiLessOfConnected where
        doloop : ∀ k {n} {A} (a : A) → tlp k <tl n 
                → Connected n A → Connected (S (S -2)) (Loop k A a)
        doloop One a lt cA = {!!}
-       doloop (S k) a lt cA = {!doloop k _ (lt-subtract-left lt) cA!}
+       doloop (S k) a lt cA = {!doloop k _ (lt-unS-left lt) cA!}
 
        πk-Unit : π k A a ≃ Unit
        πk-Unit = Contractible≃Unit (use-level { -2} (doloop k a lt cA))
