@@ -89,7 +89,7 @@ module homotopy.Freudenthal where
                                            coe (ap Codes (! (mer base) ∘ mer x)) [ base ] ≃〈 ap (λ x' → coe x' [ base ]) (ap-∘ Codes (! (mer base)) (mer x)) 〉 
                                            coe (ap Codes (! (mer base)) ∘ ap Codes (mer x)) [ base ] ≃〈 ap≃ (transport-∘ (λ x' → x') (ap Codes (! (mer base))) (ap Codes (mer x))) 〉 
                                            coe (ap Codes (! (mer base))) 
-                                               (coe (ap Codes (mer x)) [ base ]) ≃〈 ap (\ x -> (coe (ap Codes (! (mer base))) (coe x [ base ]))) Susp-rec/βmer 〉 
+                                               (coe (ap Codes (mer x)) [ base ]) ≃〈 ap (\ x -> (coe (ap Codes (! (mer base))) (coe x [ base ]))) (Susp-rec/βmer {mer' = λ x₁ → ua (Codes-mer-equiv x₁)}) 〉 
                                            coe (ap Codes (! (mer base))) 
                                                (coe (ua (Codes-mer-equiv x)) [ base ]) ≃〈 ap (coe (ap Codes (! (mer base)))) (ap≃ (type≃β (Codes-mer-equiv x))) 〉 
                                            coe (ap Codes (! (mer base)))
@@ -97,7 +97,7 @@ module homotopy.Freudenthal where
                                            coe (ap Codes (! (mer base)))
                                                [ x ] ≃〈 ap (λ y → coe y [ x ]) (ap-! Codes (mer base)) 〉 
                                            coe (! (ap Codes (mer base)))
-                                               [ x ] ≃〈 ap (λ y → coe (! y) [ x ]) Susp-rec/βmer 〉 
+                                               [ x ] ≃〈 ap (λ y → coe (! y) [ x ]) (Susp-rec/βmer {mer' = (λ x → ua (Codes-mer-equiv x))} ) 〉 
                                            coe (! (ua (Codes-mer-equiv base)))
                                                [ x ] ≃〈 ap≃ (type≃β! (Codes-mer-equiv base)) 〉 
                                            IsEquiv.g (snd (Codes-mer-equiv base))
@@ -131,7 +131,7 @@ module homotopy.Freudenthal where
                  [ mer b' ] ≃〈 id 〉
                  Trunc-func mer [ b' ] ≃〈 ap (Trunc-func mer) (! (ap≃ Codes-mer-βa)) 〉
                  (Trunc-func mer (Codes-mer base [ b' ])) ≃〈 ap (Trunc-func mer) (! (ap≃ (type≃β (Codes-mer-equiv base)))) 〉 
-                 (Trunc-func mer (coe (ua (Codes-mer-equiv base)) [ b' ])) ≃〈 ap (Trunc-func mer) (ap (λ x1 → coe x1 [ b' ]) (! Susp-rec/βmer)) 〉  
+                 (Trunc-func mer (coe (ua (Codes-mer-equiv base)) [ b' ])) ≃〈 ap (Trunc-func mer) (ap (λ x1 → coe x1 [ b' ]) (! (Susp-rec/βmer {mer' = (λ x → ua (Codes-mer-equiv x))}))) 〉  
                  (Trunc-func mer (coe (ap Codes (mer base)) [ b' ])) ≃〈 ap (Trunc-func mer) (! (ap≃ (transport-ap-assoc Codes (mer base)))) 〉 
                  (Trunc-func mer (transport Codes (mer base) [ b' ]) ∎))
          (λ a' → transport P (mer a') (decode' [ base ]) ≃〈 id 〉
@@ -141,7 +141,7 @@ module homotopy.Freudenthal where
                  [ (mer a') ] ≃〈 id 〉
                  Trunc-func mer [ a' ] ≃〈 ap (Trunc-func mer) (! (ap≃ Codes-mer-βb)) 〉 -- difference 2
                  (Trunc-func mer (Codes-mer a' [ base ])) ≃〈 ap (Trunc-func mer) (! (ap≃ (type≃β (Codes-mer-equiv a')))) 〉 
-                 (Trunc-func mer (coe (ua (Codes-mer-equiv a')) [ base ])) ≃〈 ap (Trunc-func mer) (ap (λ x1 → coe x1 [ base ]) (! Susp-rec/βmer)) 〉  
+                 (Trunc-func mer (coe (ua (Codes-mer-equiv a')) [ base ])) ≃〈 ap (Trunc-func mer) (ap (λ x1 → coe x1 [ base ]) (! (Susp-rec/βmer {mer' = (λ x → ua (Codes-mer-equiv x))}))) 〉  
                  (Trunc-func mer (coe (ap Codes (mer a')) [ base ])) ≃〈 ap (Trunc-func mer) (! (ap≃ (transport-ap-assoc Codes (mer a')))) 〉 
                  (Trunc-func mer (transport Codes (mer a') [ base ]) ∎))
          (ap2
@@ -153,7 +153,7 @@ module homotopy.Freudenthal where
                [ mer base ] ≃〈 id 〉
                Trunc-func mer [ base ] ≃〈 y 〉
                Trunc-func mer (Codes-mer base [ base ]) ≃〈 ap (Trunc-func mer) (! (ap≃ (type≃β (Codes-mer-equiv base)))) 〉
-               Trunc-func mer (coe (ua (Codes-mer-equiv base)) [ base ]) ≃〈 ap (Trunc-func mer) (ap (λ x2 → coe x2 [ base ]) (! Susp-rec/βmer))〉
+               Trunc-func mer (coe (ua (Codes-mer-equiv base)) [ base ]) ≃〈 ap (Trunc-func mer) (ap (λ x2 → coe x2 [ base ]) (! (Susp-rec/βmer {mer' = (λ x → ua (Codes-mer-equiv x))})))〉
                Trunc-func mer (coe (ap Codes (mer base)) [ base ]) ≃〈 ap (Trunc-func mer) (! (ap≃ (transport-ap-assoc Codes (mer base)))) 〉 (Trunc-func mer (transport Codes (mer base) [ base ]) ∎))
             (coh1 (mer base)) coh2) 
          x' x0) 
