@@ -116,7 +116,9 @@ module Int where
   τ₀Int-is-Int = Trunc-reflective (S (S -2)) HSet-Int
 
 
-  -- relating Int to other kinds of numbers
+  -- relating Int/Pos to other kinds of numbers
+
+  -- coercions
   
   tlp : Positive -> TLevel
   tlp One = tl 1
@@ -134,51 +136,145 @@ module Int where
   One -1pn = Z
   (S n) -1pn = pos2nat n
 
-  postulate
-    +1-1-cancel : ∀ n → (n +1np) -1pn ≃ n
-
   _+pn_ : Positive → Nat → Positive
   One +pn k = k +1np
   S n +pn k = S (n +pn k)
 
-  +pn-rh-Z : ∀ n -> n +pn Z ≃ n
-  +pn-rh-Z One = id
-  +pn-rh-Z (S n) = ap S (+pn-rh-Z n)
-
-  +pn-rh-S : ∀ n k -> n +pn (S k) ≃ S (n +pn k)
-  +pn-rh-S One k = id
-  +pn-rh-S (S n) k = ap S (+pn-rh-S n k)
-
-  tlp+1 : (k : Nat) → tlp (k +1np) ≃ S (tl k)
-  tlp+1 Z = id
-  tlp+1 (S k) = ap S (tlp+1 k)
-
-  -- the following are maybe not used any more:
-  -- (were used for wrong definition of the spheres)
   -2ptl : Positive -> TLevel
   -2ptl One = (S -2)
   -2ptl (S One) = (S (S -2))
   -2ptl (S (S n)) = tl (pos2nat n)
 
-  pos2nat-+1np : ∀ n' -> (pos2nat n' +1np) ≃ S n'
-  pos2nat-+1np One = id
-  pos2nat-+1np (S n') = ap S (pos2nat-+1np n')
+  2*_-2 : Positive -> TLevel
+  2* n -2 = plus2 (-2ptl n) (-2ptl n)
 
-  -2<pos-2 : ∀ n → -2 <tl -2ptl n
-  -2<pos-2 One = ltS
-  -2<pos-2 (S One) = ltSR ltS
-  -2<pos-2 (S (S n')) = -2<nat (pos2nat n')
-  -- end
+  -- properties
+  -- ENH: organize/systemetize
 
-  1<=pos : (p : Positive) → tl 1 <=tl (tlp p)
-  1<=pos One = Inr id
-  1<=pos (S n) with 1<=pos n
-  ... | Inl lt = Inl (ltSR lt)
-  ... | Inr eq = transport (λ x → tl 1 <=tl S x) eq (Inl ltS)
+  abstract
+    +pn-rh-Z : ∀ n -> n +pn Z ≃ n
+    +pn-rh-Z One = id
+    +pn-rh-Z (S n) = ap S (+pn-rh-Z n)
+  
+    +pn-rh-S : ∀ n k -> n +pn (S k) ≃ S (n +pn k)
+    +pn-rh-S One k = id
+    +pn-rh-S (S n) k = ap S (+pn-rh-S n k)
+  
+    tlp+1 : (k : Nat) → tlp (k +1np) ≃ S (tl k)
+    tlp+1 Z = id
+    tlp+1 (S k) = ap S (tlp+1 k)
+  
+    pos2nat-is-S : ∀ n → (pos2nat n) ≃ S (n -1pn)
+    pos2nat-is-S One = id
+    pos2nat-is-S (S n) = id
+  
+    n-1<n : ∀ n → tl (n -1pn) <tl tl (pos2nat n)
+    n-1<n n = transport (λ x → tl (n -1pn) <tl tl x) (! (pos2nat-is-S n)) ltS
+  
+    pos2nat-+1np : ∀ n' -> (pos2nat n' +1np) ≃ S n'
+    pos2nat-+1np One = id
+    pos2nat-+1np (S n') = ap S (pos2nat-+1np n')
+  
+    pos2nat-of-+1np : ∀ n' -> (pos2nat (n' +1np)) ≃ S n'
+    pos2nat-of-+1np Z = id
+    pos2nat-of-+1np (S y) = ap S (pos2nat-of-+1np y)
+  
+    +1-1-cancel : ∀ n → (n +1np) -1pn ≃ n
+    +1-1-cancel Z = id
+    +1-1-cancel (S y) = pos2nat-of-+1np y
+  
+    -2<pos-2 : ∀ n → -2 <tl -2ptl n
+    -2<pos-2 One = ltS
+    -2<pos-2 (S One) = ltSR ltS
+    -2<pos-2 (S (S n')) = -2<nat (pos2nat n')
+  
+    pos-not-<=-2 : (p : Positive) → tlp p <=tl -2 -> Void
+    pos-not-<=-2 One (Inl ())
+    pos-not-<=-2 One (Inr ())
+    pos-not-<=-2 (S n) (Inl y) = pos-not-<=-2 n (Inl (lt-unS-left y))
+    pos-not-<=-2 (S n) (Inr ())
+  
+    pos-not-<=-1 : (p : Positive) → tlp p <=tl (S -2) -> Void
+    pos-not-<=-1 One (Inl (ltSR ()))
+    pos-not-<=-1 One (Inr ())
+    pos-not-<=-1 (S p) lte = pos-not-<=-2 p (<=-unS lte)
+  
+    pos-not-<=0 : (p : Positive) → tlp p <=tl (S (S -2)) -> Void
+    pos-not-<=0 One (Inl (ltSR (ltSR ())))
+    pos-not-<=0 One (Inr ())
+    pos-not-<=0 (S n) lt = pos-not-<=-1 n (<=-unS lt)
+  
+    1<=pos : (p : Positive) → tl 1 <=tl (tlp p)
+    1<=pos One = Inr id
+    1<=pos (S n) with 1<=pos n
+    ... | Inl lt = Inl (ltSR lt)
+    ... | Inr eq = transport (λ x → tl 1 <=tl S x) eq (Inl ltS)
+  
+    >pos->1 : ∀ k n -> tlp k <tl tlp n -> tl 1 <tl tlp n 
+    >pos->1 k' One lt' with pos-not-<=0 k' (lt-unS-right lt')
+    ... | ()
+    >pos->1 One (S n') lt' = lt'
+    >pos->1 (S n') (S n0) lt'' = ltSR (>pos->1 n' n0 (lt-unS lt''))
+  
+    -2ptl-S-1pn : ∀ n → (-2ptl (S n)) ≃ (tl (n -1pn))
+    -2ptl-S-1pn One = id
+    -2ptl-S-1pn (S n) = id
+  
+    -2ptl-S : ∀ n' →  -2ptl (S n') ≃ (S (-2ptl n'))
+    -2ptl-S One = id
+    -2ptl-S (S n) = ap S (! (-2ptl-S-1pn n)) ∘ ap tl (pos2nat-is-S n)
+  
+    pos-1< : ∀ n → tl (n -1pn) <tl tl (pos2nat n)
+    pos-1< One = ltS
+    pos-1< (S n) = ltS
+  
+    n-1<=2n-2 : ∀ n → (tl (n -1pn)) <=tl 2* n -2
+    n-1<=2n-2 One = Inr id
+    n-1<=2n-2 (S One) = Inl ltS
+    n-1<=2n-2 (S (S n')) = <=trans (<=SCong (n-1<=2n-2 (S n'))) 
+                                   (<=trans (Inr (ap (λ x → plus2 x (-2ptl (S n'))) (! (-2ptl-S (S n')))))
+                                             (Inl (plus2-monotone-2 (tl (pos2nat n')) _ _ (transport (λ x → x <tl tl (pos2nat n')) (! (-2ptl-S-1pn n')) (pos-1< n')))))
+  
+    tl-pos2nat-tlp : ∀ n → tl (pos2nat n) ≃ (tlp n)
+    tl-pos2nat-tlp One = id
+    tl-pos2nat-tlp (S n) = ap S (tl-pos2nat-tlp n)
+  
+    lt-1pn-right : ∀ k n → k <tl tlp n → k <=tl (tl (n -1pn))
+    lt-1pn-right k One lt = lt-unS-right lt
+    lt-1pn-right k (S n) lt = transport (λ x → k <=tl x) (! (tl-pos2nat-tlp n)) (lt-unS-right lt)
+  
+    2*S-2 : ∀ n → S (2* n -2) <tl 2* (S n) -2
+    2*S-2 One = ltS
+    2*S-2 (S n) = transport (λ x → x <tl plus2 (tl (pos2nat n)) (tl (pos2nat n))) 
+                            (ap (λ x → plus2 x (-2ptl (S n))) (-2ptl-S (S n)))
+                            (plus2-monotone-2 (tl (pos2nat n)) (-2ptl (S n)) (tl (pos2nat n)) (transport (λ x → x <tl tl (pos2nat n)) (! (-2ptl-S-1pn n)) (n-1<n n)))
+  
+    n<=2*n-2 : ∀ n → tl 1 <tl tlp n → tlp n <=tl 2* n -2
+    n<=2*n-2 One (ltSR (ltSR y)) = Inl (ltSR y)
+    n<=2*n-2 (S n) lt with (lt-unS-right lt) 
+    ... | Inl lt' = <=trans (<=SCong (n<=2*n-2 n lt')) (Inl (2*S-2 n))
+    ... | Inr eq  = transport (λ x → S x <=tl plus2 (-2ptl (S n)) (-2ptl (S n))) eq
+                      (arith n (! eq)) where
+      arith : ∀ n -> tlp n ≃ (tl 1) → (tl 2) <=tl 2* (S n) -2
+      arith One eq' = Inr id
+      arith (S n) eq' with pos-not-<=0 n (<=-unS (Inr eq'))
+      ... | ()
+  
+    min-1nat : (m : Nat) → mintl (S -2) (tl m) ≃ (S -2)
+    min-1nat Z = id
+    min-1nat (S y) = id
+  
+    min0nat : (m : Nat) → mintl (tl 0) (tl m) ≃ (tl 0)
+    min0nat Z = id
+    min0nat (S y) = ap S (min-1nat y)
 
-  postulate
-    pos-not-<0 : (p : Positive) → tlp p <=tl (S (S -2)) -> Void
-  -- pos-not-<0 One (Inl (ltSR (ltSR ())))
-  -- pos-not-<0 One (Inr ())
-  -- pos-not-<0 (S n) (Inl y) = {!y!}
-  -- pos-not-<0 (S n) (Inr y) = {!y!}
+  <=-to-+ : ∀ {n m} -> tlp n <=tl tlp m -> Σ \ k -> tlp (n +pn k) ≃ tlp m
+  <=-to-+ {n}{m} (Inr p) = 0 , p ∘ ap tlp (+pn-rh-Z n)
+  <=-to-+ {One} {One} (Inl (ltSR (ltSR (ltSR ()))))
+  <=-to-+ {S n} {One} (Inl lt) with pos-not-<=0 n (Inl (lt-unS lt))
+  ... | () 
+  <=-to-+ {n} {S n'} (Inl lt) with lt-unS-right lt
+  ... | Inr eq = S Z , (ap S eq) ∘ ap (S o tlp) (+pn-rh-Z n) ∘ ap tlp (+pn-rh-S n Z)
+  ... | Inl lt' with <=-to-+ {n}{n'} (Inl lt') 
+  ...              | (n'' , eq''') = S n'' , ap S eq''' ∘ ap tlp (+pn-rh-S n n'')
+

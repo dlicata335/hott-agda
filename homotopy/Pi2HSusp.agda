@@ -43,38 +43,39 @@ module homotopy.Pi2HSusp (A : Type)
   decode' : A → (τ₁ (Path{B2} base2 base2))
   decode' a = [ ap [_] (! (mer a0) ∘ mer a) ]
 
-  transport-Codes-mer : ∀ a a' → 
-    (transport (\ z -> fst (Codes [ z ]))) (mer a) a' ≃ a ⊙ a'
-  transport-Codes-mer a a' = 
-    (transport (\ z -> fst (Codes [ z ])) (mer a) a') ≃〈 ap≃ (transport-ap-assoc (λ z → fst (Codes [ z ])) (mer a)) 〉 
-    (coe (ap (λ z → fst (Codes [ z ])) (mer a)) a') 
-      ≃〈 (ap (\ x -> coe x a') (ap-o fst (Codes o [_]) (mer a))) 〉 
-    (coe (fst≃ (ap (Codes o [_]) (mer a))) a') 
-      ≃〈 ap (λ p → coe (fst≃ p) a') Susp-rec/βmer 〉 
-    coe
-      (fst≃ (coe (ΣSubsetPath NType-is-HProp) (ua (_⊙_ a , isequivl a))))
-      a' ≃〈 ap (λ x → coe x a') (ΣSubsetPathβ NType-is-HProp (ua (_⊙_ a , isequivl a))) 〉
-    coe ((ua (_⊙_ a , isequivl a))) a' ≃〈 ap≃ (type≃β (_⊙_ a , isequivl a)) 〉
-    (a ⊙ a') ∎
-
-  transport-Codes-mer-a0-! : ∀ a → 
-    transport (fst o Codes o [_]) (! (mer a0)) a ≃ a
-  transport-Codes-mer-a0-! a = 
-    transport (\ z -> fst (Codes [ z ])) (! (mer a0)) a ≃〈 ap≃ (transport-ap-assoc (λ z → fst (Codes [ z ])) (! (mer a0))) 〉 
-    (coe (ap (λ z → fst (Codes [ z ])) (! (mer a0))) a) 
-      ≃〈 (ap (\ x -> coe x a) (ap-o fst (Codes o [_]) (! (mer a0)))) 〉 
-    (coe (fst≃ (ap (Codes o [_]) (! (mer a0)))) a) 
-      ≃〈 ap (λ x → coe (fst≃ x) a) (ap-! (Codes o [_]) (mer a0)) 〉 
-    (coe (fst≃ (! (ap (Codes o [_]) (mer a0)))) a) 
-      ≃〈 ap (λ x → coe x a) (ap-! fst (ap (Codes o [_]) (mer a0))) 〉 
-    (coe (! (fst≃ (ap (Codes o [_]) (mer a0)))) a) 
-      ≃〈 ap (λ p → coe (! (fst≃ p)) a) Susp-rec/βmer 〉
-    coe
-      (! (fst≃ (coe (ΣSubsetPath NType-is-HProp) (ua (_⊙_ a0 , isequivl a0)))))
-      a ≃〈 ap (λ x → coe (! x) a) (ΣSubsetPathβ NType-is-HProp (ua (_⊙_ a0 , isequivl a0))) 〉
-    coe (! ((ua (_⊙_ a0 , isequivl a0)))) a ≃〈 ap (λ x → coe (! x) a) (type≃-ext (ua (_⊙_ a0 , isequivl a0)) id (λ x → unitl x ∘ ap≃ (type≃β (_⊙_ a0 , isequivl a0)))) 〉
-    coe (! id) a ≃〈 id 〉
-    a ∎
+  abstract
+    transport-Codes-mer : ∀ a a' → 
+      (transport (\ z -> fst (Codes [ z ]))) (mer a) a' ≃ a ⊙ a'
+    transport-Codes-mer a a' = 
+      (transport (\ z -> fst (Codes [ z ])) (mer a) a') ≃〈 ap≃ (transport-ap-assoc (λ z → fst (Codes [ z ])) (mer a)) 〉 
+      (coe (ap (λ z → fst (Codes [ z ])) (mer a)) a') 
+        ≃〈 (ap (\ x -> coe x a') (ap-o fst (Codes o [_]) (mer a))) 〉 
+      (coe (fst≃ (ap (Codes o [_]) (mer a))) a') 
+        ≃〈 ap (λ p → coe (fst≃ p) a') Susp-rec/βmer 〉 
+      coe
+        (fst≃ (coe (ΣSubsetPath NType-is-HProp) (ua (_⊙_ a , isequivl a))))
+        a' ≃〈 ap (λ x → coe x a') (ΣSubsetPathβ NType-is-HProp (ua (_⊙_ a , isequivl a))) 〉
+      coe ((ua (_⊙_ a , isequivl a))) a' ≃〈 ap≃ (type≃β (_⊙_ a , isequivl a)) 〉
+      (a ⊙ a') ∎
+  
+    transport-Codes-mer-a0-! : ∀ a → 
+      transport (fst o Codes o [_]) (! (mer a0)) a ≃ a
+    transport-Codes-mer-a0-! a = 
+      transport (\ z -> fst (Codes [ z ])) (! (mer a0)) a ≃〈 ap≃ (transport-ap-assoc (λ z → fst (Codes [ z ])) (! (mer a0))) 〉 
+      (coe (ap (λ z → fst (Codes [ z ])) (! (mer a0))) a) 
+        ≃〈 (ap (\ x -> coe x a) (ap-o fst (Codes o [_]) (! (mer a0)))) 〉 
+      (coe (fst≃ (ap (Codes o [_]) (! (mer a0)))) a) 
+        ≃〈 ap (λ x → coe (fst≃ x) a) (ap-! (Codes o [_]) (mer a0)) 〉 
+      (coe (fst≃ (! (ap (Codes o [_]) (mer a0)))) a) 
+        ≃〈 ap (λ x → coe x a) (ap-! fst (ap (Codes o [_]) (mer a0))) 〉 
+      (coe (! (fst≃ (ap (Codes o [_]) (mer a0)))) a) 
+        ≃〈 ap (λ p → coe (! (fst≃ p)) a) Susp-rec/βmer 〉
+      coe
+        (! (fst≃ (coe (ΣSubsetPath NType-is-HProp) (ua (_⊙_ a0 , isequivl a0)))))
+        a ≃〈 ap (λ x → coe (! x) a) (ΣSubsetPathβ NType-is-HProp (ua (_⊙_ a0 , isequivl a0))) 〉
+      coe (! ((ua (_⊙_ a0 , isequivl a0)))) a ≃〈 ap (λ x → coe (! x) a) (type≃-ext (ua (_⊙_ a0 , isequivl a0)) id (λ x → unitl x ∘ ap≃ (type≃β (_⊙_ a0 , isequivl a0)))) 〉
+      coe (! id) a ≃〈 id 〉
+      a ∎
 
   abstract 
     encode-decode' : (a : A) → encode{base2}(decode' a) ≃ a
@@ -88,31 +89,32 @@ module homotopy.Pi2HSusp (A : Type)
                        transport (fst o Codes o [_]) (! (mer a0)) a ≃〈 transport-Codes-mer-a0-! a 〉 
                        a ∎
 
-  homomorphism : ∀ a a' → 
-            Path{(Path {Trunc (tl 2) (Susp A)} [ No ] [ So ]) }
-                 (ap [_] (mer (a ⊙ a'))) (ap [_] (mer a ∘ ! (mer a0) ∘ mer a'))
-  homomorphism = ConnectedProduct.wedge-elim {A = A} {B = A} A-Connected A-Connected
-                    (λ a a' →
-                       Path {Path {Trunc (tl 2) (Susp A)} [ No ] [ So ]}
-                       (ap [_] (mer (a ⊙ a'))) (ap [_] (mer a ∘ ! (mer a0) ∘ mer a'))
-                       , use-level (use-level (Trunc-level {tl 2}) _ _) _ _)
-                    (Inr id) {a0} {a0}
-                    (λ a → ap [_] (mer (a0 ⊙ a)) ≃〈 ap (ap [_]) (ap mer (unitl a)) 〉
-                           ap [_] (mer a) ≃〈 ap (ap [_]) (! (!-inv-r-front (mer a0) (mer a))) 〉
-                           ap [_] (mer a0 ∘ ! (mer a0) ∘ mer a) ∎)
-                    (λ a →
-                         ap [_] (mer (a ⊙ a0)) ≃〈 ap (ap [_]) (ap mer (unitr a)) 〉
-                         ap [_] (mer a) ≃〈 ap (ap [_]) (! (!-inv-l-back (mer a) (mer a0))) 〉
-                         (ap [_] (mer a ∘ ! (mer a0) ∘ mer a0) ∎))
-                    (ap2 (λ x y → 
-                           ap [_] (mer (a0 ⊙ a0)) ≃〈 x 〉
-                           ap [_] (mer a0) ≃〈 y 〉
-                           ap [_] (mer a0 ∘ ! (mer a0) ∘ mer a0) ∎)
-                       (ap (λ x → ap (ap [_]) (ap mer x)) unitcoh)
-                       (coh1 (mer (a0)))) where
-    coh1 : ∀ {k A} {a a' : A} (p : a ≃ a')
-         -> ap (ap ([_]{k})) (! (!-inv-r-front p p)) ≃ ap (ap ([_]{k})) (! (!-inv-l-back p p))
-    coh1 id = id
+  abstract
+    homomorphism : ∀ a a' → 
+              Path{(Path {Trunc (tl 2) (Susp A)} [ No ] [ So ]) }
+                   (ap [_] (mer (a ⊙ a'))) (ap [_] (mer a ∘ ! (mer a0) ∘ mer a'))
+    homomorphism = ConnectedProduct.wedge-elim {A = A} {B = A} A-Connected A-Connected
+                      (λ a a' →
+                         Path {Path {Trunc (tl 2) (Susp A)} [ No ] [ So ]}
+                         (ap [_] (mer (a ⊙ a'))) (ap [_] (mer a ∘ ! (mer a0) ∘ mer a'))
+                         , use-level (use-level (Trunc-level {tl 2}) _ _) _ _)
+                      (Inr id) {a0} {a0}
+                      (λ a → ap [_] (mer (a0 ⊙ a)) ≃〈 ap (ap [_]) (ap mer (unitl a)) 〉
+                             ap [_] (mer a) ≃〈 ap (ap [_]) (! (!-inv-r-front (mer a0) (mer a))) 〉
+                             ap [_] (mer a0 ∘ ! (mer a0) ∘ mer a) ∎)
+                      (λ a →
+                           ap [_] (mer (a ⊙ a0)) ≃〈 ap (ap [_]) (ap mer (unitr a)) 〉
+                           ap [_] (mer a) ≃〈 ap (ap [_]) (! (!-inv-l-back (mer a) (mer a0))) 〉
+                           (ap [_] (mer a ∘ ! (mer a0) ∘ mer a0) ∎))
+                      (ap2 (λ x y → 
+                             ap [_] (mer (a0 ⊙ a0)) ≃〈 x 〉
+                             ap [_] (mer a0) ≃〈 y 〉
+                             ap [_] (mer a0 ∘ ! (mer a0) ∘ mer a0) ∎)
+                         (ap (λ x → ap (ap [_]) (ap mer x)) unitcoh)
+                         (coh1 (mer (a0)))) where
+      coh1 : ∀ {k A} {a a' : A} (p : a ≃ a')
+           -> ap (ap ([_]{k})) (! (!-inv-r-front p p)) ≃ ap (ap ([_]{k})) (! (!-inv-l-back p p))
+      coh1 id = id
 
   decode : ∀ {x} → fst (Codes x) → P x 
   decode {x} = Trunc-elim (λ x' → fst (Codes x') → P x') (λ _ → Πlevel (λ _ → increment-level Trunc-level)) 
