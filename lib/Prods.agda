@@ -115,6 +115,10 @@ module lib.Prods where
      ap (fst≃ o coe ΣPath.path) (ap≃ (Σ-with-Contractibleβ1 (λ p' → use-level {n = -2} (use-level {n = S -2} (hp x) _ _))))) ∘
      ap fst≃ (ap≃ (transport-∘ (λ x' → x') ΣPath.path (Σ-with-Contractible (λ p' → use-level {n = -2} (use-level {n = S -2} (hp x) _ _)))))
 
+  --   ΣSubsetPathβ! : {A : Type} {B : A → Type} {p q : Σ B} 
+  --                → (hp : (x : A) → HProp (B x)) (p' : Path p q)
+  --                → (coe (! (ΣSubsetPath {p = p} {q = q} hp)) p') ≃ fst≃ p'
+
   Σlevel : ∀ {n} {A : Type} {B : A → Type}
            → NType n A
            → ((x : A) → NType n (B x))
