@@ -168,6 +168,16 @@ module lib.Functions where
                     ≃ ap2 f α β
   ap-uncurry f id id = id
 
+
+  ∘Π : ∀ {A} {B : A → Type} {f g h : (x : A) → B x} (β : g ≃ h) (α : f ≃ g) 
+      → β ∘ α ≃ λ≃ (\x -> ap≃ β {x} ∘ ap≃ α {x})
+  ∘Π id id = Π≃η id
+
+  ∘λ≃ : ∀ {A} {B : A → Type} {f g h : (x : A) → B x} (β : (x : A) → g x ≃ h x) (α : (x : A) → f x ≃ g x) 
+      → λ≃ β ∘ λ≃ α ≃ λ≃ (\x -> β x ∘ α x)
+  ∘λ≃ β α = ap λ≃ (λ≃ (λ x → ap∘ (Π≃β β) (Π≃β α))) ∘ ∘Π (λ≃ β) (λ≃ α)
+
+
   abstract 
     Πlevel : ∀{A n}{B : A → Type} → ((x : A) -> NType n (B x)) → NType n ((x : A) → B x)
     Πlevel {A} { -2} a = ntype ((λ x → fst (use-level (a x))) , (λ f → λ≃ (λ x → snd (use-level (a x)) (f x))))

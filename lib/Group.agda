@@ -35,6 +35,9 @@ module lib.Group where
     f : El G -> El H
     pres-ident : f (ident G) ≃ ident H
     pres-comp  : ∀ g1 g2 → f (comp G g1 g2) ≃ comp H (f g1) (f g2)
+
+  AbelianGroup : Type
+  AbelianGroup = Σ \ (G : Group) -> (x y : El G) → comp G x y ≃ comp G y x
   
   PathGroup : (A : NTypes (tl 1)) (a0 : fst A) -> Group
   PathGroup (A , A-level) a0 = record { El = Path a0 a0; El-level = use-level A-level _ _; ident = id; inv = !; comp = \ x y -> y ∘ x; 
