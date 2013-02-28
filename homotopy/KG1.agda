@@ -66,24 +66,22 @@ module homotopy.KG1 where
    loop-inv : ∀ g -> loop (inv g) ≃ ! (loop g)
    loop-inv g = cancels-is-inverse ((loop-ident ∘ ap loop (invr g)) ∘ ! (loop-comp g (inv g)))
     
-
+  abstract
+      1TypeUnique : ∀ {A} (nA : NType (tl 1) A)
+               -> { x y : A} {p q : x ≃ y} {r s : p ≃ q} -> r ≃ s
+      1TypeUnique nA = HSet-UIP (use-level {tl 1} nA _ _) _ _ _ _
 
   module H-on-KG1 (A : AbelianGroup) where
     open Group (fst A)
     module KG1 = K1 (fst A)
     open KG1 using (KG1 ; KG1-rec ; KG1-elim)
 
-    abstract
-      trivial1 : ∀ {A} (nA : NType (tl 1) A)
-               -> { x y : A} {p q : x ≃ y} {r s : p ≃ q} -> r ≃ s
-      trivial1 nA = HSet-UIP (use-level {tl 1} nA _ _) _ _ _ _
-
     mult-loop : (g : El) (x : KG1) → x ≃ x
     mult-loop g = (KG1-elim (λ x → x ≃ x , path-preserves-level KG1.level)
                             (KG1.loop g)
                             loop'
-                            (λ _ → trivial1 KG1.level)
-                            (λ _ _ → trivial1 KG1.level)) where
+                            (λ _ → 1TypeUnique KG1.level)
+                            (λ _ _ → 1TypeUnique KG1.level)) where
       abstract
               loop' : (g' : El) → transport (λ x' → x' ≃ x') (KG1.loop g') (KG1.loop g) ≃ KG1.loop g
               loop' g' = transport (λ x → Id x x) (KG1.loop g') (KG1.loop g) ≃〈 transport-Path (λ x → x) (λ x → x) (KG1.loop g') (KG1.loop g) 〉
@@ -107,15 +105,15 @@ module homotopy.KG1 where
       mult-hom = (record { f = λ g → λ≃ (mult-loop g);
                            pres-ident = ! (Π≃η id) ∘ ap λ≃ (λ≃ (KG1-elim (λ x → _ , path-preserves-level (path-preserves-level KG1.level))
                                                                          KG1.loop-ident
-                                                                         (λ _ → trivial1 KG1.level)
-                                                                         (λ _ → trivial1 (path-preserves-level KG1.level))
-                                                                         (λ _ _ → trivial1 (path-preserves-level KG1.level))));
+                                                                         (λ _ → 1TypeUnique KG1.level)
+                                                                         (λ _ → 1TypeUnique (path-preserves-level KG1.level))
+                                                                         (λ _ _ → 1TypeUnique (path-preserves-level KG1.level))));
                            pres-comp = λ g1 g2 → ! (∘λ≃ _ _) ∘ ap λ≃ (λ≃ (KG1-elim
                                                                             (λ x → _ , path-preserves-level (path-preserves-level KG1.level)) 
                                                                             (KG1.loop-comp g1 g2)
-                                                                            (λ _ → trivial1 KG1.level)
-                                                                            (λ _ → trivial1 (path-preserves-level KG1.level))
-                                                                            (λ _ _ → trivial1 (path-preserves-level KG1.level)))) })
+                                                                            (λ _ → 1TypeUnique KG1.level)
+                                                                            (λ _ → 1TypeUnique (path-preserves-level KG1.level))
+                                                                            (λ _ _ → 1TypeUnique (path-preserves-level KG1.level)))) })
 
     mult-isequiv : (x : KG1) → IsEquiv (mult x)
     mult-isequiv = KG1-elim (\ x -> _ , raise-HProp (IsEquiv-HProp _))
@@ -131,8 +129,8 @@ module homotopy.KG1 where
                                       (λ g → (!-inv-r (ap (λ x → x) (KG1.loop g)) ∘ 
                                               ∘-assoc (ap (λ x → x) (KG1.loop g)) id (! (ap (λ x → x) (KG1.loop g)))) ∘
                                               transport-Path (λ x → x) (λ x → x) (KG1.loop g) id) 
-                                      (\ _ -> trivial1 KG1.level) 
-                                      (\ _ _ -> trivial1 KG1.level);
+                                      (\ _ -> 1TypeUnique KG1.level) 
+                                      (\ _ _ -> 1TypeUnique KG1.level);
                      unitr = KG1-elim
                                (λ x → mult x KG1.base ≃ x , path-preserves-level KG1.level)
                                id
@@ -144,7 +142,7 @@ module homotopy.KG1 where
                                       ((KG1.loop x) ∘ ! (ap≃ (λ≃ (mult-loop x)) {KG1.base})) ≃〈 ap (λ y → KG1.loop x ∘ ! y) (Π≃β (mult-loop x)) 〉 
                                       ((KG1.loop x) ∘ ! (KG1.loop x)) ≃〈 !-inv-r (KG1.loop x)  〉
                                       id ∎)
-                               (λ _ → trivial1 KG1.level) (λ _ _ → trivial1 KG1.level); 
+                               (λ _ → 1TypeUnique KG1.level) (λ _ _ → 1TypeUnique KG1.level); 
                      unitcoh = id;
                      isequivl = mult-isequiv }
 
@@ -167,42 +165,66 @@ module homotopy.KG1 where
     Codes : KG1 → NTypes (tl 0)
     Codes = KG1-rec (NTypes-level (tl 0))
                     (El , El-level)
-                    (record { f = λ g → coe (Path-NTypes (tl 0)) (ua (comp-equiv g));
-                              pres-ident = coe (! (Path2-NTypes (tl 0) _ _))
-                                               (type≃-ext (ua (comp-equiv ident)) id 
-                                                          (λ x → {!unitr x!} ∘ ap≃ (type≃β (comp-equiv ident)) {x}) 
-                                                ∘ Path-NTypesβ (tl 0) (ua (comp-equiv ident)));
-                              pres-comp = {!!} })
+                    (record { f = f;
+                              pres-ident = pri ;
+                              pres-comp = prc }) where
+        f : ∀ g → (El , El-level) ≃ (El , El-level)
+        f =  λ g → coe (Path-NTypes (tl 0)) (ua (comp-equiv g))
 
-    transport-Codes-loop : ∀ g g' -> (transport (fst o Codes) (KG1.loop g) g') ≃ comp g' g
-    transport-Codes-loop g g' = transport (fst o Codes) (KG1.loop g) g' ≃〈 ap≃ (transport-ap-assoc' fst Codes (KG1.loop g)) 〉 
-                                transport fst (ap  Codes (KG1.loop g)) g' ≃〈 ap (λ x → transport fst x g') (KG1.KG1-rec/βloop _) 〉 -- might need to fill the _ in new agda
-                                transport fst (coe (Path-NTypes (tl 0)) (ua (comp-equiv g))) g' ≃〈 ap≃ (transport-ap-assoc fst (coe (Path-NTypes (tl 0)) (ua (comp-equiv g)))) 〉 
-                                coe (fst≃ (coe (Path-NTypes (tl 0)) (ua (comp-equiv g)))) g' ≃〈 ap (λ x → coe x g') (Path-NTypesβ (tl 0) (ua (comp-equiv g))) 〉 
-                                coe (ua (comp-equiv g)) g' ≃〈 ap≃ (type≃β (comp-equiv g)) 〉 
-                                comp g' g ∎
+        abstract
+          pri : f ident ≃ id
+          pri = coe (! (Path2-NTypes (tl 0) _ _))
+                    (type≃-ext (ua (comp-equiv ident)) id 
+                               (λ x → unitr x ∘ ap≃ (type≃β (comp-equiv ident)) {x}) 
+                     ∘ Path-NTypesβ (tl 0) (ua (comp-equiv ident)))
+
+          prc : ∀ g1 g2 -> f (comp g1 g2) ≃ f g2 ∘ f g1
+          prc g1 g2 = coe (! (Path2-NTypes (tl 0) _ _)) 
+                          (! (ap-∘ fst (f g2) (f g1)) ∘ 
+                           ! (ap (λ x → x ∘ ap fst (f g1)) (Path-NTypesβ (tl 0) (ua (comp-equiv g2)))) ∘ 
+                           ! (ap (λ x → ua (comp-equiv g2) ∘ x) (Path-NTypesβ (tl 0) (ua (comp-equiv g1)))) ∘ 
+                           type≃-ext (ua (comp-equiv (comp g1 g2))) (ua (comp-equiv g2) ∘ ua (comp-equiv g1)) 
+                                     (λ g → ! (ap≃ (transport-∘ (λ x → x) (ua (comp-equiv g2)) (ua (comp-equiv g1)))) ∘ 
+                                            (! (ap≃ (type≃β (comp-equiv g2))) ∘ ! (ap (λ x → fst (comp-equiv g2) x) (ap≃ (type≃β (comp-equiv g1)))) ∘
+                                            ! (assoc g g1 g2)) ∘
+                                            ap≃ (type≃β (comp-equiv (comp g1 g2)))) 
+                           ∘ Path-NTypesβ (tl 0) (ua (comp-equiv (comp g1 g2))))
+          
+
+    abstract
+      transport-Codes-loop : ∀ g g' -> (transport (fst o Codes) (KG1.loop g) g') ≃ comp g' g
+      transport-Codes-loop g g' = transport (fst o Codes) (KG1.loop g) g' ≃〈 ap≃ (transport-ap-assoc' fst Codes (KG1.loop g)) 〉 
+                                  transport fst (ap  Codes (KG1.loop g)) g' ≃〈 ap (λ x → transport fst x g') (KG1.KG1-rec/βloop _) 〉 -- might need to fill the _ in new agda
+                                  transport fst (coe (Path-NTypes (tl 0)) (ua (comp-equiv g))) g' ≃〈 ap≃ (transport-ap-assoc fst (coe (Path-NTypes (tl 0)) (ua (comp-equiv g)))) 〉 
+                                  coe (fst≃ (coe (Path-NTypes (tl 0)) (ua (comp-equiv g)))) g' ≃〈 ap (λ x → coe x g') (Path-NTypesβ (tl 0) (ua (comp-equiv g))) 〉 
+                                  coe (ua (comp-equiv g)) g' ≃〈 ap≃ (type≃β (comp-equiv g)) 〉 
+                                  comp g' g ∎
 
     encode : {x : KG1} -> Path KG1.base x -> fst (Codes x)
     encode α = transport (fst o Codes) α ident
 
-    encode-decode' : ∀ x -> encode (decode' x) ≃ x
-    encode-decode' x = encode (decode' x) ≃〈 id 〉 
-                       encode (KG1.loop x) ≃〈 id 〉 
-                       transport (fst o Codes) (KG1.loop x) ident ≃〈 transport-Codes-loop x ident 〉 
-                       comp ident x ≃〈 unitl x 〉 
-                       x ∎
+    abstract
+      encode-decode' : ∀ x -> encode (decode' x) ≃ x
+      encode-decode' x = encode (decode' x) ≃〈 id 〉 
+                         encode (KG1.loop x) ≃〈 id 〉 
+                         transport (fst o Codes) (KG1.loop x) ident ≃〈 transport-Codes-loop x ident 〉 
+                         comp ident x ≃〈 unitl x 〉 
+                         x ∎
     
     decode : {x : _} -> fst (Codes x) -> Path KG1.base x
     decode {x} = KG1-elim (λ x' → (fst (Codes x') → Path KG1.base x') , Πlevel (λ _ → path-preserves-level KG1.level))
                           decode'
-                          (λ g → transport-→-from-square (fst o Codes) (Path KG1.base) (KG1.loop g) decode' decode'
-                                 (λ≃ (\ g' -> 
-                                   (transport (Path KG1.base) (KG1.loop g) (decode' g') ≃〈 id 〉
-                                    transport (Path KG1.base) (KG1.loop g) (KG1.loop g') ≃〈 transport-Path-right (KG1.loop g) (KG1.loop g') 〉
-                                    (KG1.loop g) ∘ (KG1.loop g') ≃〈 ! (KG1.loop-comp g' g) 〉
-                                    KG1.loop (comp g' g) ≃〈 ap KG1.loop (! (transport-Codes-loop g g')) 〉 
-                                    KG1.loop (transport (fst o Codes) (KG1.loop g) g') ≃〈 id 〉 
-                                    decode' (transport (fst o Codes) (KG1.loop g) g') ∎))))
+                          loop'
                           (λ _ → HSet-UIP (Πlevel (λ _ → use-level KG1.level _ _)) _ _ _ _)
                           (λ _ _ → HSet-UIP (Πlevel (λ _ → use-level KG1.level _ _)) _ _ _ _)
-                          x
+                          x where
+      abstract
+         loop' : ∀ g -> transport (\x -> fst (Codes x) -> Path KG1.base x) (KG1.loop g) decode' ≃ decode'
+         loop' = (λ g → transport-→-from-square (fst o Codes) (Path KG1.base) (KG1.loop g) decode' decode'
+                                      (λ≃ (\ g' -> 
+                                        (transport (Path KG1.base) (KG1.loop g) (decode' g') ≃〈 id 〉
+                                         transport (Path KG1.base) (KG1.loop g) (KG1.loop g') ≃〈 transport-Path-right (KG1.loop g) (KG1.loop g') 〉
+                                         (KG1.loop g) ∘ (KG1.loop g') ≃〈 ! (KG1.loop-comp g' g) 〉
+                                         KG1.loop (comp g' g) ≃〈 ap KG1.loop (! (transport-Codes-loop g g')) 〉 
+                                         KG1.loop (transport (fst o Codes) (KG1.loop g) g') ≃〈 id 〉 
+                                         decode' (transport (fst o Codes) (KG1.loop g) g') ∎))))
