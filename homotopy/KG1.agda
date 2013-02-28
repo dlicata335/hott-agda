@@ -228,3 +228,16 @@ module homotopy.KG1 where
                                          KG1.loop (comp g' g) ≃〈 ap KG1.loop (! (transport-Codes-loop g g')) 〉 
                                          KG1.loop (transport (fst o Codes) (KG1.loop g) g') ≃〈 id 〉 
                                          decode' (transport (fst o Codes) (KG1.loop g) g') ∎))))
+
+
+    decode-encode : ∀ {x} (α : Path KG1.base x) -> decode (encode α) ≃ α
+    decode-encode id = KG1.loop-ident
+
+    Ω1[KG1]-Equiv-G : Equiv (Path{KG1} KG1.base KG1.base) El
+    Ω1[KG1]-Equiv-G = improve (hequiv encode decode decode-encode encode-decode')
+
+    Ω1[KG1]-is-G : (Path{KG1} KG1.base KG1.base) ≃ El
+    Ω1[KG1]-is-G = ua Ω1[KG1]-Equiv-G
+
+    
+    
