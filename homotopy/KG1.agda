@@ -51,12 +51,13 @@ module homotopy.KG1 where
      KG1-elim : (C : KG1 → NTypes (tl 1))
              -> (b' : fst (C base))
              -> (loop' : (x : El) → transport (fst o C) (loop x) b' ≃ b')
+                -- these would be nicer with path over a path
              -> (preserves-ident : (x : El) → Path{Path{fst (C base)} _ _}
                                                (transport (λ p → transport (fst o C) p b' ≃ b') loop-ident
                                                          (loop' ident))
                                                (id {_} {b'}))
              -> (preserves-comp  : (g1 g2 : El) → transport (λ p → transport (fst o C) p b' ≃ b') (loop-comp g1 g2) (loop' (comp g1 g2))
-                                                   ≃ {! (loop' g1) !})
+                                                ≃ loop' g2 ∘ ap (transport (fst o C) (loop g2)) (loop' g1) ∘ ap≃ (transport-∘ (fst o C) (loop g2) (loop g1)) {b'})
              -> (x : KG1) → fst (C x)
      KG1-elim _ b' _ _ _ base' = b'
    open K' public
