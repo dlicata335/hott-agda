@@ -51,7 +51,7 @@ module homotopy.Pi2HSusp (A : Type)
       (coe (ap (λ z → fst (Codes [ z ])) (mer a)) a') 
         ≃〈 (ap (\ x -> coe x a') (ap-o fst (Codes o [_]) (mer a))) 〉 
       (coe (fst≃ (ap (Codes o [_]) (mer a))) a') 
-        ≃〈 ap (λ p → coe (fst≃ p) a') Susp-rec/βmer 〉 
+        ≃〈 ap (λ p → coe (fst≃ p) a') (Susp-rec/βmer {mer' = (λ a → coe (ΣSubsetPath (λ _ → (NType-is-HProp _)))(ua (_⊙_ a , isequivl a)))})〉 
       coe
         (fst≃ (coe (ΣSubsetPath NType-is-HProp) (ua (_⊙_ a , isequivl a))))
         a' ≃〈 ap (λ x → coe x a') (ΣSubsetPathβ NType-is-HProp (ua (_⊙_ a , isequivl a))) 〉
@@ -69,7 +69,7 @@ module homotopy.Pi2HSusp (A : Type)
       (coe (fst≃ (! (ap (Codes o [_]) (mer a0)))) a) 
         ≃〈 ap (λ x → coe x a) (ap-! fst (ap (Codes o [_]) (mer a0))) 〉 
       (coe (! (fst≃ (ap (Codes o [_]) (mer a0)))) a) 
-        ≃〈 ap (λ p → coe (! (fst≃ p)) a) Susp-rec/βmer 〉
+        ≃〈 ap (λ p → coe (! (fst≃ p)) a) (Susp-rec/βmer {mer' = (λ a → coe (ΣSubsetPath (λ _ → (NType-is-HProp _)))(ua (_⊙_ a , isequivl a)))})〉
       coe
         (! (fst≃ (coe (ΣSubsetPath NType-is-HProp) (ua (_⊙_ a0 , isequivl a0)))))
         a ≃〈 ap (λ x → coe (! x) a) (ΣSubsetPathβ NType-is-HProp (ua (_⊙_ a0 , isequivl a0))) 〉
