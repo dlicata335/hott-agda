@@ -37,3 +37,5 @@ module lib.BasicTypes where
   open import lib.Pushout public
 
   open import lib.Group public
+
+  open import lib.Groupoid public

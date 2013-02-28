@@ -88,10 +88,11 @@ module lib.Universe where
     NTypes-level (S n) = ntype (λ An Bn → transport (NType (S n)) (ΣSubsetPath (λ _ → NType-is-HProp _))
                                           (Path-Type-level n (snd Bn)))
 
-    Path-NTypes : ∀ n {A1 A2} → Path{NTypes n} A1 A2 ≃ Path (fst A1) (fst A2)
-    Path-NTypes n = ! (ΣSubsetPath (λ a → NType-is-HProp _))
+    Path-NTypes : ∀ n {A1 A2} → Path (fst A1) (fst A2) ≃ Path{NTypes n} A1 A2
+    Path-NTypes n = (ΣSubsetPath (λ a → NType-is-HProp _))
 
-    {-
+    Path-NTypesβ : ∀ n {A1 A2 : NTypes n} (α : Path (fst A1) (fst A2)) → (fst≃ (coe (Path-NTypes n {A1}{A2}) α)) ≃ α
+    Path-NTypesβ n = (ΣSubsetPathβ (λ a → NType-is-HProp _))
+
     Path2-NTypes : ∀ n {A1 A2} (p q : Path{NTypes n} A1 A2) -> Path p q ≃ (Path (fst≃ p) (fst≃ q))
-    Path2-NTypes n p q = apPath≃ (Path-NTypes n) (ΣSubsetPathβ! (λ _ → NType-is-HProp _) p) (ΣSubsetPathβ! (λ _ → NType-is-HProp _) q)
-    -}
+    Path2-NTypes n p q = apPath≃ (! (Path-NTypes n)) (ΣSubsetPathβ! (λ _ → NType-is-HProp _) p) (ΣSubsetPathβ! (λ _ → NType-is-HProp _) q)

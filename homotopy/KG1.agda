@@ -10,7 +10,7 @@ open LoopSpace
 module homotopy.KG1 where
 
   -- reflection of G
-  module K (G : Group) where
+  module K1 (G : Group) where
    private
     module K' where
      open Group G
@@ -25,7 +25,7 @@ module homotopy.KG1 where
      base : KG1 
      base = base'
      
-     postulate 
+     postulate {- HoTT Axiom -}
        level  : NType (tl 1) KG1
        loop       : El -> Path base base
        loop-ident : loop ident  ≃ id
@@ -38,7 +38,7 @@ module homotopy.KG1 where
              -> KG1 → C
      KG1-rec _ b' _ base' = b'
 
-     postulate
+     postulate {- HoTT Axiom -}
        KG1-rec/βloop : ∀ {C} 
                        -> {nC : NType (tl 1) C}
                        -> {b' : C}
@@ -70,7 +70,7 @@ module homotopy.KG1 where
 
   module H-on-KG1 (A : AbelianGroup) where
     open Group (fst A)
-    module KG1 = K (fst A)
+    module KG1 = K1 (fst A)
     open KG1 using (KG1 ; KG1-rec ; KG1-elim)
 
     abstract
@@ -152,7 +152,7 @@ module homotopy.KG1 where
 
     open Group G
 
-    module KG1 = K G
+    module KG1 = K1 G
     open KG1 using (KG1 ; KG1-rec ; KG1-elim)
 
     comp-equiv : ∀ g -> Equiv El El
@@ -167,7 +167,7 @@ module homotopy.KG1 where
     Codes : KG1 → NTypes (tl 0)
     Codes = KG1-rec (NTypes-level (tl 0))
                     (El , El-level)
-                    (record { f = λ g → coe (! (Path-NTypes (tl 0))) (ua (comp-equiv g));
+                    (record { f = λ g → coe (Path-NTypes (tl 0)) (ua (comp-equiv g));
                               pres-ident = {!!};
                               pres-comp = {!!} })
 
