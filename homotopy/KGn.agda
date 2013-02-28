@@ -163,12 +163,9 @@ module homotopy.KGn where
     KGbase One = KG1.base
     KGbase (S n) = KGnT.base^ (S n)
 
-    π1[KGn]-is-G : π One KG1.KG1 KG1.base ≃ Group.El (fst G)
-    π1[KGn]-is-G = UnTrunc.path _ _ (Group.El-level (fst G)) ∘ ap (Trunc (tl 0)) KG1.Pi1.Ω1[KG1]-is-G
-
     πn-KGn-is-G : ∀ n → π n (KG n) (KGbase n) ≃ (Group.El (fst G))
-    πn-KGn-is-G One = π1[KGn]-is-G
-    πn-KGn-is-G (S n) = π1[KGn]-is-G ∘ KGn.OnDiagonal.πn (S n)
+    πn-KGn-is-G One = KG1.Pi1.π1[KGn]-is-G
+    πn-KGn-is-G (S n) = KG1.Pi1.π1[KGn]-is-G ∘ KGn.OnDiagonal.πn (S n)
 
     πk-KGn-trivial : ∀ k n → Either (tlp k <tl tlp n) (tlp n <tl tlp k) 
                    → π k (KG n) (KGbase n) ≃ Unit

@@ -350,6 +350,11 @@ module lib.First where
  HSet-UIP : ∀ {A} -> HSet A -> (x y : A) (p q : x ≃ y) -> p ≃ q
  HSet-UIP h x y p q = fst (use-level (use-level (use-level h x y) p q))
 
+ 1Type-unique : ∀ {A} (nA : NType (S (S (S -2))) A)
+               -> { x y : A} {p q : x ≃ y} {r s : p ≃ q} -> r ≃ s
+ 1Type-unique nA = HSet-UIP (use-level {(S (S (S -2)))} nA _ _) _ _ _ _
+
+
  abstract 
    unique-HProp : ∀ {A} -> ((x y : A) -> x ≃ y) -> HProp A
    unique-HProp f = ntype (λ x y → ntype (f x y , contra)) where

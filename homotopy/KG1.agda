@@ -9,11 +9,6 @@ open LoopSpace
 
 module homotopy.KG1 where
 
-  abstract
-      1TypeUnique : ∀ {A} (nA : NType (tl 1) A)
-               -> { x y : A} {p q : x ≃ y} {r s : p ≃ q} -> r ≃ s
-      1TypeUnique nA = HSet-UIP (use-level {tl 1} nA _ _) _ _ _ _
-
   -- reflection of G
   module K1 (G : Group) where
    private
@@ -163,14 +158,17 @@ module homotopy.KG1 where
     Ω1[KG1]-is-G : (Path{KG1} KG1.base KG1.base) ≃ El
     Ω1[KG1]-is-G = ua Ω1[KG1]-Equiv-G
 
+    π1[KGn]-is-G : π One KG1.KG1 KG1.base ≃ El
+    π1[KGn]-is-G = UnTrunc.path _ _ El-level ∘ ap (Trunc (tl 0)) Ω1[KG1]-is-G
+
    module Pi0 where
      KG1-Connected : Connected (tl 0) KG1 
      KG1-Connected = ntype ([ KG1.base ] , (Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
                                                          (KG1-elim (λ _ → _ , path-preserves-level (increment-level Trunc-level)) 
                                                          id
                                                          (λ _ → HSet-UIP Trunc-level _ _ _ _)
-                                                         (λ _ → 1TypeUnique (increment-level Trunc-level))
-                                                         (λ _ _ → 1TypeUnique (increment-level Trunc-level)))))
+                                                         (λ _ → 1Type-unique (increment-level Trunc-level))
+                                                         (λ _ _ → 1Type-unique (increment-level Trunc-level)))))
 
 
   module H-on-KG1 (A : AbelianGroup) where
@@ -182,8 +180,8 @@ module homotopy.KG1 where
     mult-loop g = (KG1-elim (λ x → x ≃ x , path-preserves-level KG1.level)
                             (KG1.loop g)
                             loop'
-                            (λ _ → 1TypeUnique KG1.level)
-                            (λ _ _ → 1TypeUnique KG1.level)) where
+                            (λ _ → 1Type-unique KG1.level)
+                            (λ _ _ → 1Type-unique KG1.level)) where
       abstract
               loop' : (g' : El) → transport (λ x' → x' ≃ x') (KG1.loop g') (KG1.loop g) ≃ KG1.loop g
               loop' g' = transport (λ x → Id x x) (KG1.loop g') (KG1.loop g) ≃〈 transport-Path (λ x → x) (λ x → x) (KG1.loop g') (KG1.loop g) 〉
@@ -207,15 +205,15 @@ module homotopy.KG1 where
       mult-hom = (record { f = λ g → λ≃ (mult-loop g);
                            pres-ident = ! (Π≃η id) ∘ ap λ≃ (λ≃ (KG1-elim (λ x → _ , path-preserves-level (path-preserves-level KG1.level))
                                                                          KG1.loop-ident
-                                                                         (λ _ → 1TypeUnique KG1.level)
-                                                                         (λ _ → 1TypeUnique (path-preserves-level KG1.level))
-                                                                         (λ _ _ → 1TypeUnique (path-preserves-level KG1.level))));
+                                                                         (λ _ → 1Type-unique KG1.level)
+                                                                         (λ _ → 1Type-unique (path-preserves-level KG1.level))
+                                                                         (λ _ _ → 1Type-unique (path-preserves-level KG1.level))));
                            pres-comp = λ g1 g2 → ! (∘λ≃ _ _) ∘ ap λ≃ (λ≃ (KG1-elim
                                                                             (λ x → _ , path-preserves-level (path-preserves-level KG1.level)) 
                                                                             (KG1.loop-comp g1 g2)
-                                                                            (λ _ → 1TypeUnique KG1.level)
-                                                                            (λ _ → 1TypeUnique (path-preserves-level KG1.level))
-                                                                            (λ _ _ → 1TypeUnique (path-preserves-level KG1.level)))) })
+                                                                            (λ _ → 1Type-unique KG1.level)
+                                                                            (λ _ → 1Type-unique (path-preserves-level KG1.level))
+                                                                            (λ _ _ → 1Type-unique (path-preserves-level KG1.level)))) })
 
     mult-isequiv : (x : KG1) → IsEquiv (mult x)
     mult-isequiv = KG1-elim (\ x -> _ , raise-HProp (IsEquiv-HProp _))
@@ -231,8 +229,8 @@ module homotopy.KG1 where
                                       (λ g → (!-inv-r (ap (λ x → x) (KG1.loop g)) ∘ 
                                               ∘-assoc (ap (λ x → x) (KG1.loop g)) id (! (ap (λ x → x) (KG1.loop g)))) ∘
                                               transport-Path (λ x → x) (λ x → x) (KG1.loop g) id) 
-                                      (\ _ -> 1TypeUnique KG1.level) 
-                                      (\ _ _ -> 1TypeUnique KG1.level);
+                                      (\ _ -> 1Type-unique KG1.level) 
+                                      (\ _ _ -> 1Type-unique KG1.level);
                      unitr = KG1-elim
                                (λ x → mult x KG1.base ≃ x , path-preserves-level KG1.level)
                                id
@@ -244,11 +242,10 @@ module homotopy.KG1 where
                                       ((KG1.loop x) ∘ ! (ap≃ (λ≃ (mult-loop x)) {KG1.base})) ≃〈 ap (λ y → KG1.loop x ∘ ! y) (Π≃β (mult-loop x)) 〉 
                                       ((KG1.loop x) ∘ ! (KG1.loop x)) ≃〈 !-inv-r (KG1.loop x)  〉
                                       id ∎)
-                               (λ _ → 1TypeUnique KG1.level) (λ _ _ → 1TypeUnique KG1.level); 
+                               (λ _ → 1Type-unique KG1.level) (λ _ _ → 1Type-unique KG1.level); 
                      unitcoh = id;
                      isequivl = mult-isequiv }
 
     
-  module Pi0 (G : Group) where
 
     
