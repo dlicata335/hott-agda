@@ -10,6 +10,7 @@ open import homotopy.Freudenthal
 open import homotopy.HStructure
 open import homotopy.PiLessOfConnected
 open import homotopy.Pi2HSusp
+open import homotopy.KG1
 
 module homotopy.KGn where
 
@@ -145,3 +146,34 @@ module homotopy.KGn where
 
       πabove : (k n : Positive) → tlp n <tl tlp k → π k (B n) (base^ n)  ≃  Unit
       πabove k n lt = Contractible≃Unit (use-level { -2} (Trunc-level-better (Loop-level-> (tlp n) k Trunc-level lt))) 
+
+
+  module Explicit (G : AbelianGroup) where
+
+    module KG1 = K1 (fst G)
+
+    module KGn = B (KG1.KG1) KG1.base KG1.Pi0.KG1-Connected KG1.level (H-on-KG1.H-KG1 G)
+    module KGnT = KGn.Truncated
+
+    KG : Positive -> Type
+    KG One = KG1.KG1
+    KG (S n) = KGnT.B (S n)
+
+    KGbase : ∀ n → KG n
+    KGbase One = KG1.base
+    KGbase (S n) = KGnT.base^ (S n)
+
+    π1[KGn]-is-G : π One KG1.KG1 KG1.base ≃ Group.El (fst G)
+    π1[KGn]-is-G = UnTrunc.path _ _ (Group.El-level (fst G)) ∘ ap (Trunc (tl 0)) KG1.Pi1.Ω1[KG1]-is-G
+
+    πn-KGn-is-G : ∀ n → π n (KG n) (KGbase n) ≃ (Group.El (fst G))
+    πn-KGn-is-G One = π1[KGn]-is-G
+    πn-KGn-is-G (S n) = π1[KGn]-is-G ∘ KGn.OnDiagonal.πn (S n)
+
+    πk-KGn-trivial : ∀ k n → Either (tlp k <tl tlp n) (tlp n <tl tlp k) 
+                   → π k (KG n) (KGbase n) ≃ Unit
+    πk-KGn-trivial k One (Inl k<n) with pos-not-<=0 k (lt-unS-right k<n)
+    ... | ()
+    πk-KGn-trivial k (S n) (Inl k<n) = KGn.BelowDiagonal.πk k (S n) k<n
+    πk-KGn-trivial k One (Inr n<k) = Contractible≃Unit (use-level { -2} (Trunc-level-better (Loop-level-> (tlp One) k KG1.level n<k)))
+    πk-KGn-trivial k (S n) (Inr n<k) = KGn.AboveDiagonal.πabove k (S n) n<k
