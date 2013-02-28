@@ -168,14 +168,19 @@ module homotopy.KG1 where
     Codes = KG1-rec (NTypes-level (tl 0))
                     (El , El-level)
                     (record { f = λ g → coe (Path-NTypes (tl 0)) (ua (comp-equiv g));
-                              pres-ident = {!!};
+                              pres-ident = coe (! (Path2-NTypes (tl 0) _ _))
+                                               (type≃-ext (ua (comp-equiv ident)) id 
+                                                          (λ x → {!unitr x!} ∘ ap≃ (type≃β (comp-equiv ident)) {x}) 
+                                                ∘ Path-NTypesβ (tl 0) (ua (comp-equiv ident)));
                               pres-comp = {!!} })
 
     transport-Codes-loop : ∀ g g' -> (transport (fst o Codes) (KG1.loop g) g') ≃ comp g' g
-    transport-Codes-loop = {!!}
-                       -- coe (ap (fst o Codes) (KG1.loop x)) ident ≃〈 {!!} 〉 
-                       -- coe (fst≃ (coe (! (Path-NTypes (tl 0))) (ua (comp-equiv x)))) ident ≃〈 {!!} 〉 
-                       -- coe (ua (comp-equiv x)) ident ≃〈 {!!} 〉 
+    transport-Codes-loop g g' = transport (fst o Codes) (KG1.loop g) g' ≃〈 ap≃ (transport-ap-assoc' fst Codes (KG1.loop g)) 〉 
+                                transport fst (ap  Codes (KG1.loop g)) g' ≃〈 ap (λ x → transport fst x g') (KG1.KG1-rec/βloop _) 〉 -- might need to fill the _ in new agda
+                                transport fst (coe (Path-NTypes (tl 0)) (ua (comp-equiv g))) g' ≃〈 ap≃ (transport-ap-assoc fst (coe (Path-NTypes (tl 0)) (ua (comp-equiv g)))) 〉 
+                                coe (fst≃ (coe (Path-NTypes (tl 0)) (ua (comp-equiv g)))) g' ≃〈 ap (λ x → coe x g') (Path-NTypesβ (tl 0) (ua (comp-equiv g))) 〉 
+                                coe (ua (comp-equiv g)) g' ≃〈 ap≃ (type≃β (comp-equiv g)) 〉 
+                                comp g' g ∎
 
     encode : {x : KG1} -> Path KG1.base x -> fst (Codes x)
     encode α = transport (fst o Codes) α ident
