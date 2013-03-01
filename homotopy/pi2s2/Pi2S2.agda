@@ -28,5 +28,5 @@ module homotopy.pi2s2.Pi2S2 where
   π₂S²-is-Z = (τ₀ (Path{Path{S²} S².base S².base} id id))                     ≃〈 TruncPath.path (tl 0) 〉 
               Path{τ₁ (Path{S²} S².base S².base)} [ id ] [ id ]               ≃〈 Path-equiv τ₁Ω[S²]-is-S¹ {[ id ]} {[ id ]} 〉
               Path{S¹} (coe τ₁Ω[S²]-is-S¹ [ id ]) (coe τ₁Ω[S²]-is-S¹  [ id ]) ≃〈 ap (λ x → Path {S¹} x x) (ap≃ (type≃β _)) 〉 
-              Path{S¹} S¹.base S¹.base                                       ≃〈 homotopy.Pi1S1.Ω₁[S¹]≃Int 〉 
+              Path{S¹} S¹.base S¹.base                                       ≃〈 homotopy.Pi1S1.Ω₁[S¹]-is-Int 〉 
               Int ∎

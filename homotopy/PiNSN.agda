@@ -5,7 +5,7 @@ open Truncation
 open Int
 
 open LoopSpace
-open import homotopy.Pi1S1 using (Ω₁[S¹]≃Int)
+open import homotopy.Pi1S1 using (π₁[S¹]-is-Int)
 
 module homotopy.PiNSN where
 
@@ -209,7 +209,7 @@ module homotopy.PiNSN where
                     π n (S^ n) S.base ∎
 
   πnSⁿ-is-Z : ∀ n → π n (S^ n) S.base ≃ Int
-  πnSⁿ-is-Z One = (τ₀Int-is-Int ∘ ap τ₀ (Ω₁[S¹]≃Int)) ∘ ap τ₀ (ap-Loop≃ One (! S.S¹-is-S^One.path) (ap≃ (type≃β! S.S¹-is-S^One.eqv)))
+  πnSⁿ-is-Z One = π₁[S¹]-is-Int ∘ ap τ₀ (ap-Loop≃ One (! S.S¹-is-S^One.path) (ap≃ (type≃β! S.S¹-is-S^One.eqv)))
   πnSⁿ-is-Z (S n) = πnSⁿ-is-Z n ∘ πnSⁿ-diagonal n
 
   -- πn(S^ n) = τ₀(Ω^n S^ n) = Ω^n-1(τ^n-1 (Ω(S^n)))
