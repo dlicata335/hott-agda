@@ -66,6 +66,7 @@ module homotopy.KGn where
                    τ₀ (Loop k (Σ^ n) (Σbase^ n)) ≃〈 id 〉 
                    π k (Σ^ n) (Σbase^ n) ∎)
 
+
     module Truncated where
   
       open Untruncated hiding (module Stable)

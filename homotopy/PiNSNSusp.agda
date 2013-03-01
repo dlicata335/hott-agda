@@ -1,7 +1,11 @@
 {-# OPTIONS --type-in-type #-}
 
 open import lib.Prelude
-open import homotopy.Freudenthal
+open import homotopy.KGn
+open import homotopy.Pi1S1
+open import homotopy.HStructure
+open import homotopy.Pi2HSusp
+open import homotopy.PiLessOfConnected
 open Int
 open Truncation
 open LoopSpace
@@ -9,35 +13,21 @@ open Suspension
 
 module homotopy.PiNSNSusp where
 
-  module StableSphere (n : Positive) (k : Positive) 
-                      (c : (tlp k <=tl plus2 (-2ptl n) (-2ptl n)))
-                      -- i.e. k <= 2n - 2 
-         where
+  open NSphereSusp
 
-    open NSphereSusp
+  module BS = B (S¹.S¹) S¹.base (S^-Connected 0) S¹-is-Gpd H-S¹
 
-    nS^ : ∀ n → Connected (S (-2ptl n)) (S^ n)
-    nS^ One = S^-Connected 0
-    nS^ (S One) = S^-Connected 1
-    nS^ (S (S n')) = FIXME where -- {!S^-Connected (pos2nat (S n'))!} -- right where
-                           postulate FIXME : _
-      -- transport (λ x → Connected (S (tl (pos2nat n'))) (Susp (S^ x))) 
-      --                         (pos2nat-+1np n')
-      --                         {!(S^-Connected (pos2nat (S n')))!}
+  π1[Sn] : ∀ n -> tl 1 <tl tlp n -> π One (S^ n) (base^ n) ≃ Unit
+  π1[Sn] One (ltSR (ltSR (ltSR ()))) 
+  π1[Sn] (S n) lt = π1Connected≃Unit (tlp (S n)) (S^ (S n)) (base^ (S n)) {!S^-Connected (pos2nat (S n))!} (Inl (>pos->1 n (S n) ltS))
 
-    module F = FreudenthalEquiv (-2ptl n) (tlp k) (-2<pos-2 n) c (S^ n) (base^ n) (nS^ n) 
+  πk[Sn]-less : ∀ k n → tlp k <tl tlp n → π k (S^ n) (base^ n) ≃ Unit
+  πk[Sn]-less = {!!}
 
-    stable : π k (S^ n) (base^ n) ≃ π (k +1) (S^ (n +1)) (base^ (n +1))
-    stable = ! (π (k +1) (S^ (n +1)) (base^ (n +1)) ≃〈 id 〉
-                τ₀ (Loop (k +1) (S^ (n +1)) (base^ (n +1))) ≃〈 ap τ₀ (LoopSpace.LoopPath.path k) 〉
-                τ₀ (Loop k (Path {(S^ (n +1))} (base^ (n +1)) (base^ (n +1))) id) ≃〈 ! (LoopSpace.Loop-Trunc0 k) 〉
-                Loop k (Trunc (tlp k) (Path {(S^ (n +1))} (base^ (n +1)) (base^ (n +1)))) [ id ] ≃〈 id 〉
-                Loop k (Trunc (tlp k) (Path {Susp^ (pos2nat n) S¹.S¹} (base^ (n +1)) (base^ (n +1)))) [ id ] ≃〈 FIXME 〉
-                Loop k (Trunc (tlp k) (Path {Susp^ (S (n -1pn)) S¹.S¹} No No)) [ id ] ≃〈 ap-Loop≃ k (! F.path) (ap≃ (type≃β! F.eqv)) 〉
-                Loop k (Trunc (tlp k) (S^ n)) [ base^ n ] ≃〈 LoopSpace.Loop-Trunc0 k 〉 
-                τ₀ (Loop k (S^ n) (base^ n)) ≃〈 id 〉 
-                π k (S^ n) (base^ n) ∎) where
-        postulate FIXME : _
+  πn[Sn]-is-Int : ∀ n → π n (S^ n) (base^ n) ≃ Int
+  πn[Sn]-is-Int One = π₁[S¹]-is-Int
+  πn[Sn]-is-Int (S One) = {!homotopy.Pi2HSusp.path S¹.S¹ S¹.base S¹-is-Gpd (S^-Connected 0) H-S¹ !} -- need to fix pi2: unnecessary truncation?
+  πn[Sn]-is-Int (S (S n)) = πn[Sn]-is-Int (S n) ∘ ! (BS.Untruncated.Stable.stable (S n) (S n) (n<=2*n-2 (S n) (>pos->1 n (S n) ltS)))
 
     -- consequences of stablity for k <= 2n - 2 
     -- n = 1: k <= 0

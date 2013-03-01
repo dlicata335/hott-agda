@@ -5,6 +5,8 @@ open import lib.Prelude
 
 open S¹
 open Int
+open LoopSpace
+open Truncation
 
 module homotopy.Pi1S1 where
 
@@ -142,8 +144,12 @@ module homotopy.Pi1S1 where
   Ω₁[S¹]-Equiv-Int = 
      improve (hequiv encode decode decode-encode encode-loop^)
 
-  Ω₁[S¹]≃Int : (Path base base) ≃ Int
-  Ω₁[S¹]≃Int = ua Ω₁[S¹]-Equiv-Int
+  Ω₁[S¹]-is-Int : (Path base base) ≃ Int
+  Ω₁[S¹]-is-Int = ua Ω₁[S¹]-Equiv-Int
+
+  π₁[S¹]-is-Int : π One S¹ base ≃ Int
+  π₁[S¹]-is-Int = UnTrunc.path _ _ HSet-Int ∘ ap (Trunc (tl 0)) Ω₁[S¹]-is-Int
+
 
   -- fiberwise equivalence
 
@@ -187,7 +193,7 @@ module homotopy.Pi1S1 where
   Cover-is-HSet : ∀ y → HSet (Cover y)
   Cover-is-HSet = S¹-elim _ Int.HSet-Int (HProp-unique (NType-is-HProp _) _ _)
 
-  S¹-is-Gpd : HGpd S¹
+  S¹-is-Gpd : NType (tl 1) S¹
   S¹-is-Gpd = ntype hset-path where
     hset-path : (x y : _) → HSet (Path{S¹} x y)
     hset-path = S¹-elim _ 
