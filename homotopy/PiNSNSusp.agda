@@ -19,7 +19,7 @@ module homotopy.PiNSNSusp where
 
   π1[Sn] : ∀ n -> tl 1 <tl tlp n -> π One (S^ n) (base^ n) ≃ Unit
   π1[Sn] One (ltSR (ltSR (ltSR ()))) 
-  π1[Sn] (S n) lt = π1Connected≃Unit (tlp (S n)) (S^ (S n)) (base^ (S n)) {!S^-Connected (pos2nat (S n))!} (Inl (>pos->1 n (S n) ltS))
+  π1[Sn] (S n) lt = π1Connected≃Unit (tlp (S n)) (S^ (S n)) (base^ (S n)) {!S^-Connected (pos2nat n)!} (Inl (>pos->1 n (S n) ltS))
 
   πk[Sn]-less : ∀ k n → tlp k <tl tlp n → π k (S^ n) (base^ n) ≃ Unit
   πk[Sn]-less = {!!}
