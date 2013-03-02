@@ -134,6 +134,15 @@ module lib.loopspace.Groupoid where
                        ! (adj _ (ap (loopSN1 n) a')) ≃〈 ap ! (adj-def (LoopPath.loopSN1-id n) _) 〉
                        (! (loopSN1 (S n) a') ∎)
 
+  -- because it's at least an Ω2, the basepoint for loops in a path type
+  -- doesn't matter
+  rebase-Loop-Path : ∀ k {A} {x x' : A} (α : Path x x') 
+                → Loop k (Path {A} x x') α
+                ≃ Loop k (Path {A} x x) id
+  rebase-Loop-Path k id = id
+  -- not sure what coe'ing by this does in general,
+  -- but we can get the reduction we need with a J in Whitehead.agda
+
    
   -- action of transporting at Loop n A -
 

@@ -33,6 +33,19 @@ module lib.loopspace.Basics where
     ap^-id One f = id
     ap^-id (S n) f = !-inv-with-middle-r (ap^-id n f) id
 
+
+  -- alternative unfolding; could try redoing things with this instead
+  Loop' : Positive -> (A : Type) -> A -> Type
+  Loop' One A a = Path a a
+  Loop' (S k) A a = Loop' k (Path a a) id
+
+  ap^' : ∀ n {A B} {a : A} (f : A -> B) 
+       -> Loop' n A a
+       -> Loop' n B (f a)
+  ap^' One f α = ap f α
+  ap^' (S n) f α = ap^' n (ap f) α
+
+
   mutual 
     LoopOver : (n : Positive) {A : Type} {a : A} (α : Loop n A a) 
              → (B : A -> Type) (b : B a) → Type
@@ -71,4 +84,5 @@ module lib.loopspace.Basics where
 
   π : ∀ n A (a : A) → Type
   π n A a = τ₀ (Loop n A a)
+
 
