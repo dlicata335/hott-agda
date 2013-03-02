@@ -7,6 +7,25 @@ open Int
 
 module homotopy.Whitehead where
 
+  module LoopEquivToPathEquiv {A B : Type}
+                              (f : A → B)
+                              (zero : IsEquiv {Trunc (tl 0) A} {Trunc (tl 0) B} (Trunc-func f))
+                              (loops : (x : A) → IsEquiv{(Path{A} x x)} {(Path{B} (f x) (f x))} (ap f)) where
+
+    eqv : (x : A) (x' : A) (α : x ≃ x') → IsEquiv{(Path{A} x x')}{(Path{B} (f x) (f x'))} (ap f)
+    eqv x .x id  = loops x
+
+    paths : (x : A) (x' : A) → IsWEq{(Path{A} x x')}{(Path{B} (f x) (f x'))} (ap f)
+    paths x x' β = Trunc-rec (Contractible-is-HProp _)
+                             (λ α → coe (! (IsWeq≃IsEquiv (ap f))) (eqv x x' α) β)
+                             fact2 where 
+      fact1 : Path{Trunc (tl 0) A} ([ x ]) ([ x' ])
+      fact1 = IsEquiv.α zero [ x' ] ∘ ap (IsEquiv.g zero) (ap [_] β) ∘ ! (IsEquiv.α zero [ x ])
+
+      fact2 : Trunc -1 (Path x x') 
+      fact2 = coe (! (TruncPath.path -1)) fact1
+  
+
   module Split {A B : Type} 
                (f : A → B)
                (zero : IsEquiv {Trunc (tl 0) A} {Trunc (tl 0) B} (Trunc-func f))
