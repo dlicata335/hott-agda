@@ -31,7 +31,7 @@ module homotopy.PiNSNSusp where
 
   πn[Sn]-is-Int : ∀ n → π n (S^ n) (base^ n) ≃ Int
   πn[Sn]-is-Int One = π₁[S¹]-is-Int
-  πn[Sn]-is-Int (S One) = {!homotopy.Pi2HSusp.path S¹.S¹ S¹.base S¹-is-Gpd (S^-Connected 0) H-S¹ !} -- need to fix pi2: unnecessary truncation?
+  πn[Sn]-is-Int (S One) = π₁[S¹]-is-Int ∘ π2Susp S¹.S¹ S¹.base S¹-is-Gpd (S^-Connected 0) H-S¹ 
   πn[Sn]-is-Int (S (S n)) = πn[Sn]-is-Int (S n) ∘ ! (SS.Stable.stable (S n) (S n) (k<=n->k<=2n-2 (S n) (S n) (Inr (id , >pos->1 n (S n) ltS))))
 
   -- consequences of stablity for k <= 2n - 2 

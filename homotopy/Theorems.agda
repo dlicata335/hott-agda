@@ -12,13 +12,16 @@ import homotopy.PiNSN
 import homotopy.Pi1S2
 import homotopy.pi2s2.Pi2S2
 
--- freudenthal and the π's necessary to start the
--- diagonals for spheres
+-- freudenthal 
 
 import homotopy.Freudenthal
+
+-- homotopy groups of n-spheres with susp definiton
+
 import homotopy.Pi2HSusp
 import homotopy.PiLessOfConnected
--- import homotopy.PiNSNSusp  in progress
+import homotopy.FreudenthalIteratedSuspension1
+import homotopy.PiNSNSusp 
 
 -- Eilenberg/Maclane space
 

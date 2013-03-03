@@ -74,7 +74,12 @@ module homotopy.KGn where
         Two = S One
   
         π2 : π Two (KG Two) (base^ Two) ≃ π One A a0
-        π2 = homotopy.Pi2HSusp.path A a0 A-level A-Connected H-A
+        π2 = π Two (KG Two) (base^ Two) ≃〈 id 〉 
+             Trunc (tl 0) (Loop Two (Trunc (tl 2) (Susp A)) [ No ]) ≃〈 ap (Trunc (tl 0)) (Loop-Trunc0 Two) 〉 
+             Trunc (tl 0) (Trunc (tl 0) (Loop Two (Susp A) No)) ≃〈 FuseTrunc.path (tl 0) (tl 0) _ 〉 
+             Trunc (tl 0) (Loop Two (Susp A) No) ≃〈 π2Susp A a0 A-level A-Connected H-A 〉 
+             Trunc (tl 0) (Loop One A a0) ≃〈 id 〉 
+             π One A a0 ∎ 
   
         πn : (n : Positive) → π n (KG n) (base^ n) ≃ π One A a0
         πn One = π1
