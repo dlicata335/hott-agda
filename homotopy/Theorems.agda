@@ -1,4 +1,4 @@
--- wrapper to type check everything that's doneimport homotopy.Pi1Either
+-- wrapper to type check everything that's done
 
 import homotopy.Pi1Either
 
@@ -24,6 +24,10 @@ import homotopy.PiLessOfConnected
 
 import homotopy.KG1
 import homotopy.KGn
+
+-- Whitehead's principle
+
+import homotopy.Whitehead
 
 
 module homotopy.Theorems where

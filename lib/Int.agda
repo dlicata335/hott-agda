@@ -268,6 +268,11 @@ module Int where
     min0nat Z = id
     min0nat (S y) = ap S (min-1nat y)
 
+    -- need that n>1 when they're equal
+    k<=n->k<=2n-2 : ∀ k n → Either (tlp k <tl tlp n) ((tlp k ≃ tlp n) × (tl 1 <tl tlp n)) → tlp k <=tl 2* n -2
+    k<=n->k<=2n-2 k n (Inl lt)        = <=trans (Inl lt) (n<=2*n-2 n (>pos->1 k n lt))  
+    k<=n->k<=2n-2 k n (Inr (eq , lt)) = <=trans (Inr eq) (n<=2*n-2 n lt)
+
   <=-to-+ : ∀ {n m} -> tlp n <=tl tlp m -> Σ \ k -> tlp (n +pn k) ≃ tlp m
   <=-to-+ {n}{m} (Inr p) = 0 , p ∘ ap tlp (+pn-rh-Z n)
   <=-to-+ {One} {One} (Inl (ltSR (ltSR (ltSR ()))))

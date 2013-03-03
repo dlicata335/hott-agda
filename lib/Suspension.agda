@@ -101,3 +101,8 @@ module lib.Suspension where
                       → Connected (tl n) (Susp^ n A)
       Susp^-Connected0 Z nA = nA
       Susp^-Connected0 (S n) a = Susp-Connected _ (Susp^-Connected0 n a)
+
+    transport-Susp^-number : ∀ {m n} (α : m ≃ n) {A}(a : A)
+                              -> (transport (\x -> Susp^ x A) α (point^ m a)) ≃ (point^ n a)
+    transport-Susp^-number id _ = id
+
