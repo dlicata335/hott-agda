@@ -11,7 +11,7 @@ open Truncation
 open LoopSpace
 open Suspension
 
-module homotopy.PiNSNSusp where
+module homotopy.PiSNSusp where
 
   open NSphereSusp
 

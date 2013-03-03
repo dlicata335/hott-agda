@@ -21,7 +21,7 @@ import homotopy.Freudenthal
 import homotopy.Pi2HSusp
 import homotopy.PiLessOfConnected
 import homotopy.FreudenthalIteratedSuspension1
-import homotopy.PiNSNSusp 
+import homotopy.PiSNSusp 
 
 -- Eilenberg/Maclane space
 
