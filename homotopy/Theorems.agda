@@ -12,9 +12,11 @@ import homotopy.PiNSN
 import homotopy.Pi1S2
 import homotopy.pi2s2.Pi2S2
 
+
 -- freudenthal 
 
 import homotopy.Freudenthal
+
 
 -- homotopy groups of n-spheres with susp definiton
 
@@ -23,10 +25,12 @@ import homotopy.PiLessOfConnected
 import homotopy.FreudenthalIteratedSuspension1
 import homotopy.PiSNSusp 
 
+
 -- Eilenberg/Maclane space
 
 import homotopy.KG1
 import homotopy.KGn
+
 
 -- Whitehead's principle
 
