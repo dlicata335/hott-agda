@@ -5,107 +5,111 @@ open import lib.WEq
 
 module lib.spaces.Torus where
 
-  module Torus where
-    private
-      data T' : Set where
-        Base : T'
-    
-    T : Set
-    T = T'
-
-    base : T
-    base = Base
-
-    postulate {- HoTT Axiom -}
-      loop₁ : base ≃ base
-      loop₂ : base ≃ base
-      f : (loop₁ ∘ loop₂) ≃ (loop₂ ∘ loop₁)
-
-    T-rec :  {C : Set}
-          -> (a : C)
-          -> (p q : a ≃ a)
-          -> (f' : (p ∘ q) ≃ (q ∘ p))
-          -> T -> C
-    T-rec a _ _ _ Base = a
-
-    CommutatorDep : {C : T -> Set}
-             (a' : C base) 
-             (p' : transport C loop₁ a' ≃ a') 
-             (q' : transport C loop₂ a' ≃ a') -> Set
-    CommutatorDep {C} a' p' q' = 
-                      transport (λ x → transport C x a' ≃ a') f 
-                            (p' ∘ (ap (transport C loop₁) q') ∘ ap≃ (transport-∘ C loop₁ loop₂)) 
-                    ≃ q' ∘ (ap (transport C loop₂) p') ∘ ap≃ (transport-∘ C loop₂ loop₁)
-
-    T-elim : {C : T -> Set}
-             (a' : C base) 
-             (p' : transport C loop₁ a' ≃ a') 
-             (q' : transport C loop₂ a' ≃ a')
-             (f' : CommutatorDep {C} a' p' q') 
-          -> (x : T) -> C x
-    T-elim a _ _ _ Base = a    
-
-    postulate {- HoTT Axiom -}
-      βloop₁/rec : {C : Set}
-        -> (a : C)
-        -> (p q : a ≃ a)
-        -> (f : (p ∘ q) ≃ (q ∘ p))
-        -> ap (T-rec a p q f) loop₁ ≃ p
-      
-      βloop₂/rec : {C : Set}
-        -> (a : C)
-        -> (p q : a ≃ a)
-        -> (f : (p ∘ q) ≃ (q ∘ p))
-        -> ap (T-rec a p q f) loop₂ ≃ q
-
-    ap-f : {X : Set}
-          -> (p : T -> X)
-          -> Id (ap p (loop₁ ∘ loop₂)) (ap p (loop₂ ∘ loop₁)) ≃
-             Id (ap p loop₁ ∘ ap p loop₂) (ap p loop₂ ∘ ap p loop₁)
-    ap-f p = 
-      Id (ap p (loop₁ ∘ loop₂)) (ap p (loop₂ ∘ loop₁)) 
-               ≃〈 ap2 (λ x x' → Id x x') 
-                        (ap-∘ p loop₁ loop₂) 
-                        (ap-∘ p loop₂ loop₁) 〉
-      Id (ap p loop₁ ∘ ap p loop₂) (ap p loop₂ ∘ ap p loop₁) ∎
-
-    f-aps : {C : Set}
+module Torus where
+  private
+    module T where
+     private
+       data T' : Set where
+         Base : T'
+     
+     T : Set
+     T = T'
+  
+     base : T
+     base = Base
+  
+     postulate {- HoTT Axiom -}
+       loop₁ : base ≃ base
+       loop₂ : base ≃ base
+       f : (loop₁ ∘ loop₂) ≃ (loop₂ ∘ loop₁)
+  
+     T-rec :  {C : Set}
            -> (a : C)
            -> (p q : a ≃ a)
            -> (f' : (p ∘ q) ≃ (q ∘ p))
-           -> Id (ap (T-rec a p q f') (loop₁ ∘ loop₂)) (ap (T-rec a p q f') (loop₂ ∘ loop₁))
-            ≃ Id (p ∘ q) (q ∘ p)
-    f-aps a p q f' = 
-      (Id (ap (T-rec a p q f') (loop₁ ∘ loop₂))
-          (ap (T-rec a p q f') (loop₂ ∘ loop₁)))
-          ≃〈 ap-f (T-rec a p q f') 〉
-      (Id (ap (T-rec a p q f') loop₁ ∘ ap (T-rec a p q f') loop₂)
-          (ap (T-rec a p q f') loop₂ ∘ ap (T-rec a p q f') loop₁))
-          ≃〈 ap2 (λ x y → Id x y) 
-                   (ap2 (λ x x' → x ∘ x') (βloop₁/rec a p q f') (βloop₂/rec a p q f')) 
-                   (ap2 (λ x x' → x ∘ x') (βloop₂/rec a p q f') (βloop₁/rec a p q f')) 〉
-      (Id (p ∘ q) (q ∘ p)) ∎
+           -> T -> C
+     T-rec a _ _ _ Base = a
+  
+     CommutatorDep : {C : T -> Set}
+              (a' : C base) 
+              (p' : transport C loop₁ a' ≃ a') 
+              (q' : transport C loop₂ a' ≃ a') -> Set
+     CommutatorDep {C} a' p' q' = 
+                       transport (λ x → transport C x a' ≃ a') f 
+                             (p' ∘ (ap (transport C loop₁) q') ∘ ap≃ (transport-∘ C loop₁ loop₂)) 
+                     ≃ q' ∘ (ap (transport C loop₂) p') ∘ ap≃ (transport-∘ C loop₂ loop₁)
+  
+     T-elim : {C : T -> Set}
+              (a' : C base) 
+              (p' : transport C loop₁ a' ≃ a') 
+              (q' : transport C loop₂ a' ≃ a')
+              (f' : CommutatorDep {C} a' p' q') 
+           -> (x : T) -> C x
+     T-elim a _ _ _ Base = a    
+  
+     postulate {- HoTT Axiom -}
+       βloop₁/rec : {C : Set}
+         -> (a : C)
+         -> (p q : a ≃ a)
+         -> (f : (p ∘ q) ≃ (q ∘ p))
+         -> ap (T-rec a p q f) loop₁ ≃ p
+       
+       βloop₂/rec : {C : Set}
+         -> (a : C)
+         -> (p q : a ≃ a)
+         -> (f : (p ∘ q) ≃ (q ∘ p))
+         -> ap (T-rec a p q f) loop₂ ≃ q
+  
+     ap-f : {X : Set}
+           -> (p : T -> X)
+           -> Id (ap p (loop₁ ∘ loop₂)) (ap p (loop₂ ∘ loop₁)) ≃
+              Id (ap p loop₁ ∘ ap p loop₂) (ap p loop₂ ∘ ap p loop₁)
+     ap-f p = 
+       Id (ap p (loop₁ ∘ loop₂)) (ap p (loop₂ ∘ loop₁)) 
+                ≃〈 ap2 (λ x x' → Id x x') 
+                         (ap-∘ p loop₁ loop₂) 
+                         (ap-∘ p loop₂ loop₁) 〉
+       Id (ap p loop₁ ∘ ap p loop₂) (ap p loop₂ ∘ ap p loop₁) ∎
+  
+     f-aps : {C : Set}
+            -> (a : C)
+            -> (p q : a ≃ a)
+            -> (f' : (p ∘ q) ≃ (q ∘ p))
+            -> Id (ap (T-rec a p q f') (loop₁ ∘ loop₂)) (ap (T-rec a p q f') (loop₂ ∘ loop₁))
+             ≃ Id (p ∘ q) (q ∘ p)
+     f-aps a p q f' = 
+       (Id (ap (T-rec a p q f') (loop₁ ∘ loop₂))
+           (ap (T-rec a p q f') (loop₂ ∘ loop₁)))
+           ≃〈 ap-f (T-rec a p q f') 〉
+       (Id (ap (T-rec a p q f') loop₁ ∘ ap (T-rec a p q f') loop₂)
+           (ap (T-rec a p q f') loop₂ ∘ ap (T-rec a p q f') loop₁))
+           ≃〈 ap2 (λ x y → Id x y) 
+                    (ap2 (λ x x' → x ∘ x') (βloop₁/rec a p q f') (βloop₂/rec a p q f')) 
+                    (ap2 (λ x x' → x ∘ x') (βloop₂/rec a p q f') (βloop₁/rec a p q f')) 〉
+       (Id (p ∘ q) (q ∘ p)) ∎
+     
+     postulate {- HoTT Axiom -}
+       βf/rec : {C : Set}
+         -> (a : C)
+         -> (p q : a ≃ a)
+         -> (f' : (p ∘ q) ≃ (q ∘ p))
+         -> ap (ap (T-rec a p q f')) f ≃ transport (λ x → x) (! (f-aps a p q f')) f'
+  
+     postulate {- HoTT Axiom -} 
+       -- FIXME: prove using dependent elim instead
+       Tη : {X : Set} {g : T -> X} -> 
+            g ≃ (T-rec (g base) (ap g loop₁) (ap g loop₂) (ap-∘ g loop₂ loop₁ ∘ ap (ap g) f ∘ ! (ap-∘ g loop₁ loop₂))) 
+
+  open T public
+
+  T-rec' : {X : Set}
+          -> (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l1 ∘ l2) (l2 ∘ l1))))
+          -> (T -> X)
+  T-rec' (x , l1 , l2 , comm) = T-rec x l1 l2 comm
+
+  postulate 
+    ump : ∀ {X} → IsEquiv (T-rec'{X})
     
-    postulate {- HoTT Axiom -}
-      βf/rec : {C : Set}
-        -> (a : C)
-        -> (p q : a ≃ a)
-        -> (f' : (p ∘ q) ≃ (q ∘ p))
-        -> ap (ap (T-rec a p q f')) f ≃ transport (λ x → x) (! (f-aps a p q f')) f'
-
-    postulate {- HoTT Axiom -} 
-      -- FIXME: prove using dependent elim instead
-      Tη : {X : Set} {g : T -> X} -> 
-           g ≃ (T-rec (g base) (ap g loop₁) (ap g loop₂) (ap-∘ g loop₂ loop₁ ∘ ap (ap g) f ∘ ! (ap-∘ g loop₁ loop₂))) 
-
-
-  module T-Lemmas where
-    open Torus
-
-    rec-to-torus-X : {X : Set}
-                   -> (Σ[ x ∶ X ] (Σ[ l1 ∶ Id x x ] (Σ[ l2 ∶ Id x x ] Id (l1 ∘ l2) (l2 ∘ l1))))
-                   -> (T -> X)
-    rec-to-torus-X (x , l1 , l2 , comm) = T-rec x l1 l2 comm
 
 {-
     rec-to-torus-X-isWEq : ∀ {X} -> WEqBy _ _ (rec-to-torus-X{X})

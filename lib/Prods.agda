@@ -120,6 +120,39 @@ module lib.Prods where
                   → (hp : (x : A) → HProp (B x)) (p' : Path{Σ B} p q)
                   → (coe (! (ΣSubsetPath {p = p} {q = q} hp)) p') ≃ fst≃ p'
 
+
+
+  module Σassoc where
+
+    rassoc : {X : Type} 
+             -> {A : X -> Type}
+             -> {B : (Σ[ x ∶ X ] (A x)) -> Type}
+             -> (Σ[ p ∶ (Σ[ x ∶ X ] (A x)) ] (B p))
+             -> Σ[ x  ∶ X ] (Σ[ l1 ∶ A x ] (B (x , l1)))
+    rassoc ((fst , snd) , snd') = fst , (snd , snd')
+  
+    lassoc : {X : Type}
+             -> {A : X -> Type}
+             -> {B : (Σ[ x ∶ X ] (A x)) -> Type}
+             -> Σ[ x ∶ X ] (Σ[ l1 ∶ A x ] (B (x , l1)))
+             -> (Σ[ p ∶ (Σ[ x ∶ X ] (A x)) ] (B p))
+    lassoc (fst , fst' , snd) = (fst , fst') , snd
+  
+    eqv : {X : Type}
+         -> {A : X -> Type}
+         -> {B : (Σ[ x ∶ X ] (A x)) -> Type}
+         -> Equiv (Σ[ p ∶ (Σ[ x ∶ X ] (A x)) ] (B p))
+                  (Σ[ x  ∶ X ] (Σ[ l1 ∶ A x ] (B (x , l1))))
+    eqv = improve (hequiv  rassoc lassoc (λ y → id) (λ x → id))
+
+    path : {X : Type}
+         -> {A : X -> Type}
+         -> {B : (Σ[ x ∶ X ] (A x)) -> Type}
+         ->   (Σ[ p ∶ (Σ[ x ∶ X ] (A x)) ] (B p))
+            ≃ (Σ[ x  ∶ X ] (Σ[ l1 ∶ A x ] (B (x , l1))))
+    path = ua eqv
+
+
   Σlevel : ∀ {n} {A : Type} {B : A → Type}
            → NType n A
            → ((x : A) → NType n (B x))

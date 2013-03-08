@@ -1,6 +1,8 @@
 -- wrapper to type check everything that's done
 
+
 import homotopy.Pi1Either
+
 
 -- homotopy groups of spheres
 

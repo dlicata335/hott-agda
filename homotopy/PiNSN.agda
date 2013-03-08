@@ -13,7 +13,7 @@ module homotopy.PiNSN where
   open S using (S^ ; S-rec; S-elim)
 
   promote : ∀ {n} → (S^ n) → (Path{S^ (n +1)} S.base S.base)
-  promote{n} = S-rec id (loopSN1 n (S.loop (S n)))
+  promote{n} = S-rec id (loopSN1 n (S.loop (n +1)))
 
   decode' : ∀ {n} 
           → Trunc (tlp n) (S^ n) 
@@ -24,7 +24,7 @@ module homotopy.PiNSN where
   P {n} x = Trunc (tlp n) (Path{S^ (n +1)} S.base x)
 
   S-loops : ∀ n -> (x : Trunc (tlp n) (S^ n)) → Loop n (Trunc (tlp n) (S^ n)) x
-  S-loops n = Trunc-elim (\ x ->  Loop n (Trunc (tlp n) (S^ n)) x)
+  S-loops n = Trunc-elim _
                          (λ x → Loop-preserves-level n (tlp n) Trunc-level)
                          (S-elim {n} (λ x → Loop n (Trunc (tlp n) (S^ n)) [ x ])
                                      (ap^ n [_] (S.loop n)) 

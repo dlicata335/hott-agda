@@ -71,7 +71,7 @@ module homotopy.Whitehead where
                 (nA : NType (tlp n) A) (nB : NType (tlp n) B)
                 (f : A → B)
                 (zero : IsEquiv {Trunc (tl 0) A} {Trunc (tl 0) B} (Trunc-func f))
-                (pis  : ∀ k x → IsEquiv{Trunc (tl 0) (Loop k A x)}{Trunc (tl 0) (Loop k B (f x))} (Trunc-func (ap^ k f)))
+                (pis  : ∀ k x → IsEquiv{π k A x}{π k B (f x)} (Trunc-func (ap^ k f)))
               -> IsEquiv f
     whitehead One nA nB f zero pis = 
       SplitEquiv.iseqv f zero 

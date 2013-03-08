@@ -54,6 +54,10 @@ module lib.Functions where
          -> transport (\ X -> X -> C) δ f ≃ (f o (transport (\ X -> X) (! δ)))
   transport-→-pre id f = id 
 
+  transport-→-post : ∀ {C A B : Set} (δ : B ≃ C) (f : A -> B) 
+         -> transport (\ X -> A -> X) δ f ≃ (transport (\ X -> X) δ o f)
+  transport-→-post id f = id 
+
   transport-→-from-square :  ∀ {A} (B C : A → Type) {a a' : A} (α : a ≃ a') 
                              (f : B a -> C a) (g : B a' -> C a')
                           -> transport C α o f ≃ g o (transport B α)
