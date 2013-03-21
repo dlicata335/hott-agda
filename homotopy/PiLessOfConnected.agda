@@ -15,8 +15,8 @@ module homotopy.PiLessOfConnected where
    π1Connected≃Unit -2 A a cA (Inl ())
    π1Connected≃Unit -2 A a cA (Inr ())
    π1Connected≃Unit (S n) A a cA lt = 
-     Contractible≃Unit 
-               (use-level { -2} (lower-Connected (<=-unS lt) (Connected-Path cA)))
+     Contractible≃Unit
+       (use-level { -2} (lower-Connected (<=-unS lt) (Connected-Path cA)))
 
 {-
   module PiKLessConnected

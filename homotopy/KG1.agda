@@ -165,10 +165,10 @@ module homotopy.KG1 where
      KG1-Connected : Connected (tl 0) KG1 
      KG1-Connected = ntype ([ KG1.base ] , (Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
                                                          (KG1-elim (λ _ → _ , path-preserves-level (increment-level Trunc-level)) 
-                                                         id
-                                                         (λ _ → HSet-UIP Trunc-level _ _ _ _)
-                                                         (λ _ → 1Type-unique (increment-level Trunc-level))
-                                                         (λ _ _ → 1Type-unique (increment-level Trunc-level)))))
+                                                                   id
+                                                                   (λ _ → HSet-UIP Trunc-level _ _ _ _)
+                                                                   (λ _ → 1Type-unique (increment-level Trunc-level))
+                                                                   (λ _ _ → 1Type-unique (increment-level Trunc-level)))))
 
 
   module H-on-KG1 (A : AbelianGroup) where

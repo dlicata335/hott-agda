@@ -73,22 +73,22 @@ module homotopy.Pi1S1 where
      abstract -- prevent Agda from normalizing
       loop^-respects-loop : transport (λ x' →  Cover x' → Path base x') loop loop^ ≃ (λ n → loop^ n) 
       loop^-respects-loop = 
-         (transport (λ x' →  Cover x' → Path base x') loop loop^  ≃〈 transport-→ Cover (Path base) loop loop^ 〉
-        
+         (transport (λ x' →  Cover x' → Path base x') loop loop^ 
+          ≃〈 transport-→ Cover (Path base) loop loop^ 〉
             transport (λ x' → Path base x') loop 
           o loop^ 
-          o transport Cover (! loop)                              ≃〈 λ≃ (λ y → transport-Path-right loop (loop^ (transport Cover (! loop) y))) 〉
-       
+          o transport Cover (! loop)
+          ≃〈 λ≃ (λ y → transport-Path-right loop (loop^ (transport Cover (! loop) y))) 〉
             (λ p → loop ∘ p) 
           o loop^ 
-          o transport Cover (! loop)                              ≃〈 λ≃ (λ y → ap (λ x' → loop ∘ loop^ x') (ap≃ transport-Cover-!loop)) 〉
-       
+          o transport Cover (! loop)
+          ≃〈 λ≃ (λ y → ap (λ x' → loop ∘ loop^ x') (ap≃ transport-Cover-!loop)) 〉
             (λ p → loop ∘ p)
           o loop^ 
-          o pred                                                  ≃〈 id 〉 
-       
-          (λ n → loop ∘ (loop^ (pred n)))                         ≃〈 λ≃ (λ y → move-left-! _ loop (loop^ y) (loop^-preserves-pred y)) 〉 
-       
+          o pred
+          ≃〈 id 〉 
+          (λ n → loop ∘ (loop^ (pred n)))
+          ≃〈 λ≃ (λ y → move-left-! _ loop (loop^ y) (loop^-preserves-pred y)) 〉 
           (λ n → loop^ n)
           ∎)
 
@@ -133,12 +133,6 @@ module homotopy.Pi1S1 where
     (λ  (x' : S¹) (α' : Path base x') 
         → Path (decode (encode α')) α')
     id α
-
-  all-loops : (α : Path base base) → Path α (loop^ (encode α))
-  all-loops α = ! (decode-encode α)
-  
-  
-  -- equivalence for loop spaces
   
   Ω₁[S¹]-Equiv-Int : Equiv (Path base base) Int
   Ω₁[S¹]-Equiv-Int = 
