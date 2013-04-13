@@ -21,6 +21,21 @@ module programming.Semigroup where
                       f (g (f (g y1 ⊙ g y2)) ⊙ g y3) ≃〈 id 〉 
                       (y1 ⊙' y2) ⊙' y3 ∎
 
+  -- proof that it's an equivalence (hsets only; couldn't stand to do the calculation otherwise)
+  transport-Semigroup-eqv-eqv : ∀ {A B} -> NType (tl 0) A → NType (tl 0) B 
+                              → Equiv A B → Equiv (Semigroup A) (Semigroup B)
+  transport-Semigroup-eqv-eqv nA nB (f , isequiv g α β γ) = 
+    improve (hequiv (transport-Semigroup-eqv (equiv f g α β γ))
+                    (transport-Semigroup-eqv (!equiv (equiv f g α β γ)))
+                    (λ {(_⊙_ , assoc) → pair≃ (λ≃ (λ y1 → λ≃ (λ y2 → 
+                                                   ap2 _⊙_ (α y1) (α y2) ∘ α (g (f y1) ⊙ g (f y2))))) 
+                                               (λ≃ (λ x → λ≃ (λ y → λ≃ (λ z → HSet-UIP nA _ _ _ _))))})
+                    (λ {(_⊙_ , assoc) → pair≃ (λ≃ (λ y1 → λ≃ (λ y2 → 
+                                                   ap2 _⊙_ (β y1) (β y2) ∘ β (f (g y1) ⊙ f (g y2))))) 
+                                               (λ≃ (λ x → λ≃ (λ y → λ≃ (λ z → HSet-UIP nB _ _ _ _))))}))
+
+  -- proof that that's what transport does
+
   transport-Semigroup-eqv-id : ∀ {A} -> transport-Semigroup-eqv{A}{A} id-equiv ≃ (\ x -> x)
   transport-Semigroup-eqv-id = 
     λ≃ λ {(_⊙_ , assoc) → pair≃ id 

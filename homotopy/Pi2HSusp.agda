@@ -28,7 +28,7 @@ module homotopy.Pi2HSusp (A : Type)
   Codes-level = Susp-elim _ A-level A-level (λ _ → HProp-unique (NType-is-HProp _) _ _)
 
   encode0 : ∀ {x} → (Path No x) -> (Codes x)
-  encode0 α = transport (Codes) α a0
+  encode0 α = transport Codes α a0
 
   encode : ∀ {x} → P x -> (Codes x)
   encode {x} = Trunc-rec (Codes-level x) encode0 

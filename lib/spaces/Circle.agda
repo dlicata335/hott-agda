@@ -103,7 +103,31 @@ module S¹ where
   ump {X} = ua ump-eqv
 
 
+{-
+  module Reverse where
 
+    reverse : S¹ → S¹
+    reverse = S¹-rec base (! loop)
+
+    P : (x : S¹) -> Path base x -> Type
+    P = S¹-induction
+        _
+        (λ α → ap reverse α ≃ ! α) 
+        (λ≃ (λ α → 
+         (ap reverse (! loop ∘ α) ≃ ! (! loop ∘ α) ≃〈 {!!} 〉
+          ap reverse (! loop ∘ α) ≃ ! α ∘ (! (! loop)) ≃〈 {!!} 〉
+          ap reverse (! loop ∘ α) ≃ ! α ∘ loop ≃〈 {!!} 〉
+          ap reverse (! loop ∘ α) ∘ ! loop ≃ α ≃〈 {!!} 〉
+          ap reverse (! loop) ∘ ap reverse α ∘ ! loop ≃ α ≃〈 {!!} 〉
+          loop ∘ ap reverse α ∘ ! loop ≃ α ≃〈 {!!} 〉
+          ap reverse α ≃ ! α ∎) ∘
+         ap (λ α' → ap reverse α' ≃ ! α') (transport-Path-right (! loop) α) ∘
+         ap≃ (transport-constant loop) ∘
+         ap≃ (transport-→ (Path base) (λ _ → Type) loop (λ α' → ap reverse α' ≃ ! α'))))
+
+    reverse-is-inverse : (α : base ≃ base) → ap reverse α ≃ ! α 
+    reverse-is-inverse α = path-induction P id α
+-}
 
   
 

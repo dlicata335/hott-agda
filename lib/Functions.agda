@@ -64,6 +64,12 @@ module lib.Functions where
                           -> transport (\ x -> B x -> C x) α f ≃ g
   transport-→-from-square _ _ id _ _ p = p
 
+  transport-→-pre' : {Γ B : Type} (A : Γ -> Type) {θ1 θ2 : Γ} 
+                  (δ : θ1 ≃ θ2) (f : (x : A θ1) → B) 
+     → Path  (transport (\ γ → (A γ) → B) δ f) 
+             (\ x -> f (transport (\ γ -> A γ) (! δ) x))
+  transport-→-pre' _ id f = id 
+
   transport-Π-post' :  {Γ A : Type} (B : Γ → A -> Type) {θ1 θ2 : Γ} 
                   (δ : θ1 ≃ θ2) (f : (x : A) → B θ1 x) 
      → Path  (transport (\ γ → (x : A) → B γ x) δ f) 
