@@ -1,7 +1,5 @@
 -- Peter Lumsdaine and Dan Licata
 
--- about 450 lines of new library code + this file
-
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude
