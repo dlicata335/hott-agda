@@ -110,6 +110,18 @@ module lib.Paths where
                         ≃ (b ≃ transport B α b')
  move-transport-right-!≃ B id = id
 
+ move-transport-right≃ : ∀ {A : Type} {M M' : A} (B : A → Type)
+                          (α : M ≃ M') {b : B M} {b' : B M'}
+                       -> (transport B α b ≃ b')
+                        ≃ (b ≃ transport B (! α) b')
+ move-transport-right≃ B id = id
+
+ move-transport-left-!≃ : ∀ {A : Type} {M M' : A} (B : A → Type)
+                          (α : M ≃ M') {b : B M} {b' : B M'}
+                       -> (b ≃ transport B (! α) b')
+                        ≃ (transport B α b ≃ b')
+ move-transport-left-!≃ B id = id
+
  move-posto-with-transport-left : ∀ {A D : Type} (C : A → Type) {M M' : A}
                           (α : M ≃ M') 
                           (f : C M → D) (g : C M' → D)
@@ -244,6 +256,13 @@ module lib.Paths where
                 → (p' : _) → Path (transport (\ x → Path f (g x)) p p')
                                    (ap g p ∘ p')
  transport-Path-post' _ id p' = ! (∘-unit-l p')
+
+ transport-Path-right-∘ : ∀ {A} {a b c : A} (β : b ≃ c) (α : a ≃ b)
+                           → transport-Path-right (β ∘ α) id ≃ 
+                             ap (λ x → β ∘ x) (transport-Path-right α id) ∘
+                             (transport-Path-right β (transport (Path a) α id) ∘
+                              ap≃ (transport-∘ (Path a) β α))
+ transport-Path-right-∘ id id = id
 
  apPath≃ : ∀ {A B} {x1 x2 : A} {y1 y2 : B} 
             -> (α : Path A B) -> Path (coe α x1) y1 -> Path (coe α x2) y2

@@ -87,11 +87,14 @@ module lib.First where
  !-inv-r-front : {A : Type} {M N P : A} (p : Path P N) (q : Path M N) → Path (p ∘ (! p) ∘ q) q
  !-inv-r-front id id = id
  
- !-inv-l-back : {A : Type} {M N P : A} (q : Path N M) (p : Path N P) → Path (q ∘ ! p ∘ p) q
- !-inv-l-back id id = id
-
  !-inv-r-back : {A : Type} {M N P : A} (q : Path N M) (p : Path P N) → Path (q ∘ (p ∘ ! p)) q
  !-inv-r-back id id = id
+
+ !-inv-l-front : {A : Type} {M N P : A} (p : Path N P) (q : Path M N) → Path (! p ∘ p ∘ q) q
+ !-inv-l-front id id = id
+
+ !-inv-l-back : {A : Type} {M N P : A} (q : Path N M) (p : Path N P) → Path (q ∘ ! p ∘ p) q
+ !-inv-l-back id id = id
 
  square-id : {A : Type} {x : A} (p : x ≃ x) -> (p ∘ p) ≃ p → p ≃ id
  square-id p α = !-inv-r p ∘ ap (λ x' → x' ∘ ! p) α ∘ ∘-assoc p p (! p) ∘ ap (λ x' → p ∘ x') (! (!-inv-r p))

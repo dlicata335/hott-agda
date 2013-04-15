@@ -1,4 +1,4 @@
--- Peter Lumsdaine and Dan Licata
+-- Proof by Peter Lumsdaine and Dan 
 
 {-# OPTIONS --type-in-type --without-K #-}
 
@@ -10,48 +10,11 @@ open ConnectedProduct
 
 module homotopy.FreudenthalConnected where
 
-  -- FIXME move
-  transport-HFiber-arg : {A B : Type} -> (f : A -> B) -> {b1 b2 : B}
-                             (β : b1 ≃ b2)
-                           -> transport (HFiber f) β ≃ \ p → (fst p , β ∘ snd p)
-  transport-HFiber-arg f id = λ≃ \ p -> pair≃ id (! (∘-unit-l (snd p)))
-
   transport-Trunc-HFiber-arg : {A B : Type} {k : _} -> (f : A -> B) -> {b1 b2 : B}
                              (β : b1 ≃ b2)
                            -> transport (Trunc k o HFiber f) β ≃ Trunc-func (\ p → (fst p , β ∘ snd p))
   transport-Trunc-HFiber-arg f id = λ≃ (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (λ p → ap [_] (pair≃ id (! (∘-unit-l (snd p))))))
  
-  !-inv-l-front : {A : Type} {M N P : A} (p : Path N P) (q : Path M N) → Path (! p ∘ p ∘ q) q
-  !-inv-l-front id id = id
-  
-  move-transport-right≃ : ∀ {A : Type} {M M' : A} (B : A → Type)
-                          (α : M ≃ M') {b : B M} {b' : B M'}
-                       -> (transport B α b ≃ b')
-                        ≃ (b ≃ transport B (! α) b')
-  move-transport-right≃ B id = id
-
-  move-transport-left-!≃ : ∀ {A : Type} {M M' : A} (B : A → Type)
-                          (α : M ≃ M') {b : B M} {b' : B M'}
-                       -> (b ≃ transport B (! α) b')
-                        ≃ (transport B α b ≃ b')
-  move-transport-left-!≃ B id = id
-
-    {-
-    transport-Path-right-∘ : ∀ {A} {a b c : A} (β : b ≃ c) (α : a ≃ b)
-                           → transport-Path-right (β ∘ α) id ≃ 
-                             ap (λ x → β ∘ x) (transport-Path-right α id) ∘
-                             (transport-Path-right β (transport (Path a) α id) ∘
-                              ap≃ (transport-∘ (Path a) β α))
-    transport-Path-right-∘ id id = id
-
-    ∘-Σ : ∀ {A} {B : A → Type} {p q r : Σ B}
-        → (α1 : fst p ≃ fst q) (α2 : fst q ≃ fst r)
-        → (β1 : transport B α1 (snd p) ≃ (snd q)) (β2 : transport B α2 (snd q) ≃ (snd r))
-        → (pair≃{B = B} α2 β2) ∘ (pair≃ α1 β1) ≃ pair≃ (α2 ∘ α1) (β2 ∘ ap (transport B α2) β1 ∘ ap≃ (transport-∘ B α2 α1))
-    ∘-Σ {p = (p1 , p2)} {q = (.p1 , .p2)} {r = (.p1 , .p2)} id id id id = id
-    -}
-
-
   module Freudenthal
     (n' : TLevel)
     (-2<n' : -2 <tl n')
@@ -176,15 +139,26 @@ module homotopy.FreudenthalConnected where
                        (pair≃ {B = Path No} α (transport-Path-right α id)))
                    [ x0 , !-inv-l (mer x0) ] -- includes bit from decode-encode
 
-    -- FIXME
+    -- ENH: could do this in more generality
     Susp-elim-β-mer-fst : ∀ {C} {x : X} (B : Susp X → Type) {b1 : B No} {b2 : B So} (β : transport B (mer x) b1 ≃ b2)
                       {n' : B No → C} {s' : B So → C} (mer' : (x : X) → transport (\ x -> B x → C) (mer x) n' ≃ s') →
                         ap (\ (p : Σ B) → Susp-elim (\ x -> B x → C) n' s' mer' (fst p) (snd p)) (pair≃ (mer x) β)
                       ≃ ap≃ (mer' x) {b2}
                       ∘ ! (ap≃ (transport-→-pre' B (mer x) n'))
                       ∘ ap n' (coe (move-transport-right≃ B (mer x)) β)
-    Susp-elim-β-mer-fst = {!!} where 
-
+    Susp-elim-β-mer-fst {C} {x} B β {n'}{s'} mer' = 
+     ap (λ z → ap≃ z ∘ ! (ap≃ (transport-→-pre' B (mer x) n')) ∘ ap n' (coe (move-transport-right≃ B (mer x)) β))
+        (Susp-elim/βmer (λ x' → B x' → C) n' s' mer')
+     ∘ step1 B (mer x) β (Susp-elim (\ x -> B x → C) n' s' mer') where 
+      step1 : ∀ {A C} (B : A → Type) {a1 a2 : A} {b1 : B a1} {b2 : B a2} 
+              (α : a1 ≃ a2)
+              (β : transport B α b1 ≃ b2)
+              (f : (a : A) -> B a -> C) → 
+                ap (\ (p : Σ B) → f (fst p) (snd p)) (pair≃ α β)
+              ≃ ap≃ (apd f α)
+                ∘ ! (ap≃ (transport-→-pre' B α (f a1)))
+                ∘ ap (f a1) (coe (move-transport-right≃ B α) β)
+      step1 B id id f = id
 
     -- if α = decode c then encode α = c
     encode-decode : {x : Susp X} → (α : Path No x) → (c : CodesFor x α) -> (encode α) ≃ c
@@ -325,5 +299,4 @@ module homotopy.FreudenthalConnected where
     thm : ConnectedMap.ConnectedMap 2n {X}{(Path {(Susp X)} No No)} loop
     thm α = ntype (encode α , encode-decode α)
 
-  
-
+ 

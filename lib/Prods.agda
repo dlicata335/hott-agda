@@ -61,6 +61,12 @@ module lib.Prods where
   snd≃⁻ : {A : Type} {B : A -> Type} {p q : Σ B} -> (c : p ≃ q) -> (snd p) ≃ transport B (! (fst≃ c)) (snd q)
   snd≃⁻ {p = p} {q = .p} id = id
 
+  ∘-Σ : ∀ {A} {B : A → Type} {p q r : Σ B}
+       → (α1 : fst p ≃ fst q) (α2 : fst q ≃ fst r)
+       → (β1 : transport B α1 (snd p) ≃ (snd q)) (β2 : transport B α2 (snd q) ≃ (snd r))
+       → (pair≃{B = B} α2 β2) ∘ (pair≃ α1 β1) ≃ pair≃ (α2 ∘ α1) (β2 ∘ ap (transport B α2) β1 ∘ ap≃ (transport-∘ B α2 α1))
+  ∘-Σ {p = (p1 , p2)} {q = (.p1 , .p2)} {r = (.p1 , .p2)} id id id id = id
+
   module ΣPath where
 
     eqv : {A : Type} {B : A → Type} {p q : Σ B}

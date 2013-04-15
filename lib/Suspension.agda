@@ -50,8 +50,12 @@ module lib.Suspension where
       Susp-elim _ N' S' _ No' = N'
       Susp-elim _ N' S' _ So' = S'
 
-      {- FIXME: elim 
-      -}
+      postulate {- HoTT Axiom -} 
+        Susp-elim/βmer : {A : _} (C : Susp A → Type)
+                  (N' : C No) 
+                  (S' : C So) 
+                  (mer' : (x : A) -> Path (transport C (mer x) N') S') {x : A}
+                -> apd (Susp-elim C N' S' mer') (mer x) ≃ mer' x
 
     open S public
 

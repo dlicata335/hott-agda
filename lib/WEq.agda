@@ -3,6 +3,7 @@
 
 open import lib.First
 open import lib.NType
+open import lib.Prods
 
 module lib.WEq where
 
@@ -17,6 +18,12 @@ module lib.WEq where
 
   IsWEq-HProp : {A B : Type} (f : A → B) → HProp (IsWEq f)
   IsWEq-HProp f = unique-HProp (λ w w' → λ≃ (λ y → HProp-unique (Contractible-is-HProp _) _ _))
+
+  transport-HFiber-arg : {A B : Type} -> (f : A -> B) -> {b1 b2 : B}
+                             (β : b1 ≃ b2)
+                           -> transport (HFiber f) β ≃ \ p → (fst p , β ∘ snd p)
+  transport-HFiber-arg f id = λ≃ \ p -> pair≃ id (! (∘-unit-l (snd p)))
+
 
 {-
   -- same as adjoint equiv: 
