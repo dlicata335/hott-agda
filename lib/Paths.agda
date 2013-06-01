@@ -43,7 +43,8 @@ module lib.Paths where
  !-∘ : {A : Type} {M N P : A} → (q : Path N P) → (p : Path M N)
      → (! (q ∘ p)) ≃ ! p ∘ ! q
  !-∘ id id = id
- 
+
+ -- ENH: make α β γ implicit
  move-left :  {A : Type} {M N P : A}
                (α : Path M P) (β : Path N P) (γ : Path M N)
             → Path α (β ∘ γ)
@@ -164,6 +165,9 @@ module lib.Paths where
  flip-triangle≃ : ∀ {A} {x y z : A} (p : Path x y) (q : Path z y) (r : Path x z)
                 -> (p ∘ ! r ≃ q) ≃ (! q ∘ p ≃ r)
  flip-triangle≃ p id id = ap (λ x → Path x id) (! (∘-unit-l p))
+
+ pre∘-equiv : ∀ {A} {a b c : A} → (a ≃ b) -> Equiv (b ≃ c) (a ≃ c)
+ pre∘-equiv α = (improve (hequiv (λ β → β ∘ α) (λ β' → β' ∘ ! α) (λ β → !-inv-r-back β α ∘ ! (∘-assoc β α (! α))) (λ β → !-inv-l-back β α ∘ ! (∘-assoc β (! α) α))))
 
  -- transport stuff
 

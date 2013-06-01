@@ -213,3 +213,15 @@ module lib.Functions where
             → ((x : A) → (Σ \ (y : B x) -> C x y))
             ≃ Σ \ (f : (x : A) →  B x) → ((x : A) → C x (f x))
   ΠΣcommute A B C = ua (ΠΣcommuteEquiv A B C) 
+
+  apΠ : {A A' : Type} {B : A → Type} {B' : A' → Type}
+      (a : A ≃ A')
+      (b : (\ (x : A) → B x) ≃ (\ (x : A) → B' (coe a x)))
+    → ((x : A) → B x) ≃ ((x' : A') → B' x')
+  apΠ id id = id
+
+  apΠ' : {A A' : Type} {B : A → Type} {B' : A' → Type}
+       (a : Equiv A A')
+       (b : (x' : A') → B (IsEquiv.g (snd a) x') ≃ B' x')
+     → ((x : A) → B x) ≃ ((x' : A') → B' x')
+  apΠ' {A = A} {B = B} {B' = B'}  a b = apΠ (ua a) (λ≃ (λ x' → ap B' (! (ap≃ (type≃β a))) ∘ b (fst a x') ∘ ap B (! (IsEquiv.α (snd a) _)))) 

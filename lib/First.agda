@@ -28,9 +28,10 @@ module lib.First where
  ! : {A : Type} {M N : A} → Path M N → Path N M 
  ! id = id
  
- _∘_  : {A : Type} {M N P : A} → Path N P → Path M N → Path M P
+ _∘_  : {A : Type} {M N P : A} 
+      → Path N P → Path M N → Path M P
  β ∘ id = β
- 
+
  infixr 10 _∘_ 
 
  infix  2 _∎
@@ -72,6 +73,11 @@ module lib.First where
  !-invol : {A : Type} {M N : A} (p : Path M N) → Path (! (! p)) p
  !-invol id = id
 
+ -- ∘-assoc  : {A : Type} {a b c d : A} 
+ --     (p : Path a b) (q : Path b c) (r : Path c d) 
+ --   → Path (r ∘ (q ∘ p)) ((r ∘ q) ∘ p)
+ -- ∘-assoc id id id = id
+
  ∘-assoc  : {A : Type} {M N P Q : A} 
           (γ : Path P Q) (β : Path N P) (α : Path M N) 
           → Path (γ ∘ (β ∘ α)) ((γ ∘ β) ∘ α)
@@ -111,6 +117,7 @@ module lib.First where
             → Path (α ∘ ! γ) β 
  move-left-right id β id x = x
 
+ -- ENH: make β and γ implicit
  move-right-right-! :  {A : Type} {M N P : A}
                        (β : Path N P) (α : Path N M) (γ : Path M P)
                     → Path (β ∘ ! α) γ

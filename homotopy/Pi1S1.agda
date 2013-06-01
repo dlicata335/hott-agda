@@ -92,7 +92,7 @@ module homotopy.Pi1S1 where
           (λ n → loop^ n)
           ∎)
 
-  abstract -- prevent Agda from normalizing
+  abstract
     encode-loop^ : (n : Int) → Path (encode (loop^ n)) n
     encode-loop^ Zero = id
     encode-loop^ (Pos One) = ap≃ transport-Cover-loop
@@ -199,3 +199,4 @@ module homotopy.Pi1S1 where
     hset-path = S¹-elim _ 
                 (λ y → transport (λ P → HSet (P y)) (! (λ≃ S¹-Path≃Cover)) (Cover-is-HSet y)) 
                 (λ≃ (λ x → HProp-unique (NType-is-HProp _) _ _))
+

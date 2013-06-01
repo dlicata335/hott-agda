@@ -93,12 +93,7 @@ module lib.NConnected where
    path n c P = ua (eqv n c P)
 -}
 
-  module ConnectedMap where
-    
-    -- FIXME: what is the right indexing?  (n or n-1 ... n-1 agrees with wikipedia N-connected article?)
-    -- does it help to redo in terms of connected maps?
-    ConnectedMap : (n : TLevel) → ∀ {A B} → (f : A → B) → Type
-    ConnectedMap n {A}{B} f = (y : B) → Connected n (HFiber f y)
+  module Extensions where
 
     Extensions : (A : Type) (a0 : A) (C : A -> Type) (c0 : C a0) -> Type
     Extensions A a0 C c0 = Σ (λ (f : (a : A) → (C a)) → f a0 ≃ c0)
@@ -159,8 +154,79 @@ module lib.NConnected where
                (Extensions-level {_} {n} cA a0 (\ a -> (Path (fst e1 a) (fst e2 a), use-level (snd (C a)) _ _)) 
                                                (! (snd e2) ∘ snd e1)))
 
-  open ConnectedMap
+    Extensions-ntype : ∀ {m n} {A : Type} (cA : Connected (S m) A)
+                       (a0 : A) (C : A -> NTypes (plus2 n m)) (c0 : fst (C a0))
+                     → NTypes n 
+    Extensions-ntype {_}{_} {A} cA a0 C c0 = ((Extensions A a0 (fst o C) c0) , Extensions-level cA a0 C c0)
 
+  open Extensions
+
+
+  module ConnectedMap where
+    ConnectedMapUMP : (n : TLevel) → ∀ {A B} → (f : A → B) → Type
+    ConnectedMapUMP n {A}{B} f =  (P : B → NTypes n)
+                               -> (b : (x : A) → fst (P (f x)))
+                               → Σ \(extend : ((y : B) → fst (P y))) -> 
+                                    (x : A) → extend (f x) ≃ b x 
+
+    -- FIXME: what is the right indexing?  (n or n-1 ... n-1 agrees with wikipedia N-connected article?)
+    ConnectedMap : (n : TLevel) → ∀ {A B} → (f : A → B) → Type
+    ConnectedMap n {A}{B} f = (y : B) → Connected n (HFiber f y)
+
+    extend : (n : TLevel) {A : Type} {B : Type} (f : A → B)
+             -> ConnectedMap n f 
+             -> (P : B → NTypes n)
+             -> ((x : A) → fst (P (f x)))
+             → ((y : B) → fst (P y))
+    extend n f cf P forA y = Trunc-rec (snd (P y))
+                                       (λ hfy → transport (fst o P) (snd hfy) (forA (fst hfy)))
+                                       (fst (use-level (cf y)))
+
+    postulate
+      extendβ : (n : TLevel) → ∀ {A B} (f : A → B) →
+                (cf : ConnectedMap n f) →
+                (P : B → NTypes n)
+             -> (b : (x : A) → fst (P (f x)))
+             →  (x : A) → extend n f cf P b (f x) ≃ b x 
+--    extendβ n f cF P b x = {!!}
+
+    ConnectedMap-has-UMP : (n : TLevel) {A B : Type} (f : A → B) →
+               ConnectedMap n f → ConnectedMapUMP n f 
+    ConnectedMap-has-UMP n f cf P b = (extend n f cf P b , extendβ n f cf P b)
+
+    ConnectedMap-from-UMP : (n : TLevel) {A B : Type} (f : A → B) →
+                            ConnectedMapUMP n f → ConnectedMap n f 
+    ConnectedMap-from-UMP n f ext b = 
+      let elm = (ext (λ b' → Trunc n (HFiber f b') , Trunc-level) (λ a → [ a , id ]))
+       in ntype ((fst elm b) , 
+                  Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
+                               (fst (ext (λ b' → ((x : HFiber f b') → fst elm b' ≃ [ x ]) , Πlevel (λ _ → path-preserves-level Trunc-level)) 
+                                         (λ a → (λ {(a' , p) → 
+                                                ((ap [_] (ap≃ (transport-HFiber-arg f p)) 
+                                                  ∘ transport-Trunc' (HFiber f) p [ a' , id ])
+                                                  ∘ ap (transport (λ z → Trunc n (HFiber f z)) p) (snd elm a')
+                                                  ∘ ! (apd (fst elm) p))})))
+                                    b))
+
+    ConnectedMap-Equiv : (n : TLevel) → ∀ {A B} → (f : A → B) → ConnectedMap n f 
+                     → Equiv (Trunc n A) (Trunc n B)
+    ConnectedMap-Equiv n f cf = 
+      improve (hequiv (Trunc-func f) 
+                      (Trunc-rec Trunc-level (λ y → Trunc-func fst (fst (use-level (cf y)))))
+                      (Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
+                        (λ x → ap (Trunc-func fst) (snd (use-level (cf (f x))) [ x , id ])))
+                      (Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
+                        (λ y → split-Trunc-dep1 n (λ tx → Trunc-func f tx ≃ [ y ]) (λ _ → path-preserves-level Trunc-level)
+                                   (λ _ → λ p → ap [_] p)
+                                   (fst (use-level (cf y)))))) where
+           split-Trunc-dep1 : ∀ n {A} {B : A → Type} (P : Trunc n A → Type) (nP : (x : _) → NType n (P x))
+                     → ((x : A) (y : B x) → P [ x ])
+                     → (p : Trunc n (Σ B)) → P (Trunc-func fst p)
+           split-Trunc-dep1 n P nP branch = Trunc-elim _ (λ _ → nP _) (λ {(a , b) → branch a b})
+
+
+
+  open ConnectedMap
 
   module ConnectedProduct where
 
