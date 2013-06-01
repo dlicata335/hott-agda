@@ -49,8 +49,9 @@ module homotopy.BlakersMasseyInfTopos (Z X Y : Type)
                            (λ x p → Trunc i+j (HFiber glue-map (x , g z , (gluer z ∘ ! p))))
                            (λ z' p → Trunc i+j (HFiber glue-map (f z , g z' , gluer z' ∘ p ∘ gluel z))) -- FIXME choice of which side z/z' go on
                            (λ y p → Trunc i+j (HFiber glue-map (f z , y , p ∘ gluel z)))
-                           {!!}
-                           {!!}
+                           {!!} -- Trunc i+j (HFiber glue-map (f z' , g z , gluer z ∘ ! p ∘ ! (gluel z'))) 
+                                -- = Trunc i+j (HFiber glue-map (f z , g z' , gluer z' ∘ p ∘ gluel z))
+                           {!easy!}
 
     center : (z : Z) (w : W) (p : Path (inm z) w) → (Codes z w p)
     center z ._ id = [ z , ap (λ p → f z , g z , p) (! (∘-assoc (gluer z) id (gluel z))) ]
@@ -99,6 +100,8 @@ module homotopy.BlakersMasseyInfTopos (Z X Y : Type)
   Z×XZ = Pullback{X} f f 
   Z×YZ = Pullback{Y} g g 
 
+  -- FIXME: could rewrite these as maps of fibrations, since they leave fst unchanged
+
   glue-map-r : Z×XZ → Z×WY
   glue-map-r (z1 , z2 , p) = z1 , g z2 , (gluelr z2 ∘ ap inl p ∘ ! (gluel z1))
 
@@ -112,7 +115,7 @@ module homotopy.BlakersMasseyInfTopos (Z X Y : Type)
                            (λ z → z , z , id)
                            (λ {(z1 , z2 , p) → z1 , z2 , ! (gluer z2) ∘ ap inr p ∘ gluer z1})
                            (λ z → ap (λ p → z , z , p) (!-inv-r (gluel z) ∘ ∘-assoc (gluel z) id (! (gluel z))))
-                           (λ z → ap (λ p → z , z , p) (! ({!!-inv-l (gluer z)!} ∘ ∘-assoc (! (gluer z)) id (gluer z))))
+                           (λ z → ap (λ p → z , z , p) (! (!-inv-l (gluer z) ∘ ∘-assoc (! (gluer z)) id (gluer z))))
 
   module Codes∞Topos where
     -- difference with CodesTT: args are always the same; change the glue-map
@@ -158,6 +161,19 @@ module homotopy.BlakersMasseyInfTopos (Z X Y : Type)
                  ((y' : _) (p' : _) → Contractible (Trunc i+j (HFiber glue-map (x' , y' , p')))) ,
                   raise-HProp (Πlevel (λ _ → Πlevel (λ _ → Contractible-is-HProp _))))
               step2'
+
+{-
+  module Test where
+  
+    -- does it help more than having one less thing to contract...?
+
+    glue-map-r' : (z : Z) → (Σ \ z' → f z ≃ f z') -> (Σ \ y -> Path{W} (inm z) (inr y))
+    glue-map-r' z1 (z2 , p) = (g z2 , (gluelr z2 ∘ ap inl p ∘ ! (gluel z1)))
+
+    eq : (z1 : Z) (z2 : Z) (p : _) → HFiber (glue-map-r' z1) (g z2 , p ∘ ! (gluel z1))
+                                   ≃ HFiber glue-map (f z1 , g z2 , p)
+    eq = {!HFiber glue-map (f z1!}
+-}
     
 
   module Step1Comparison where
