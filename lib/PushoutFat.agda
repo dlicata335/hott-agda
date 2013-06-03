@@ -112,13 +112,15 @@ module lib.PushoutFat where
 -}
     open P public
 
+    Wedge : {A B : Type} (a0 : A) (b0 : B) → Type
+    Wedge {A}{B} a0 b0 = Pushout {Unit}{A}{B} (\ _ -> a0) (\ _ -> b0)
+
+    wedge-to-prod : ∀ {A B} {a0 : A} {b0 : B} → (Wedge a0 b0) → A × B
+    wedge-to-prod {a0 = a0} {b0 = b0} = Pushout-rec (λ a → a , b0) (λ _ → a0 , b0) (λ b → a0 , b) (\ _ -> id) (\ _ -> id)
+
     module WedgeToProd {A B : Type} {m n : _} (a0 : A) (b0 : B) (cA : Connected (S m) A) (cB : Connected (S n) B) where
 
-      Wedge : {A B : Type} (a0 : A) (b0 : B) → Type
-      Wedge {A}{B} a0 b0 = Pushout {Unit}{A}{B} (\ _ -> a0) (\ _ -> b0)
-
-      i : (Wedge a0 b0) → A × B
-      i = Pushout-rec (λ a → a , b0) (λ _ → a0 , b0) (λ b → a0 , b) (\ _ -> id) (\ _ -> id)
+      i = wedge-to-prod {A}{B}{a0} {b0}
 
       i-ump : ConnectedMap.ConnectedMapUMP (plus2 m n) i
       i-ump P br = (λ ab → fst (ext (fst ab)) (snd ab)) ,

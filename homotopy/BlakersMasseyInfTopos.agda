@@ -41,6 +41,9 @@ module homotopy.BlakersMasseyInfTopos (Z X Y : Type)
   Z×WX = Pullback{W} inm inl
   Z×WZ = Pullback{W} inm inm
 
+  ZxWZ→ZxWY : Z×WZ → Z×WY
+  ZxWZ→ZxWY (z1 , z2 , p) = z1 , g z2 , gluer z2 ∘ p
+
   module CodesTT where
     -- difference with Codes∞Topos: keep glue-map the same; change the args
 
@@ -110,7 +113,7 @@ module homotopy.BlakersMasseyInfTopos (Z X Y : Type)
 
   CM = Pushout{Z}{Z×XZ}{Z×YZ} (λ z → z , z , id) (λ z → z , z , id)
 
-  glue-map-m : CM -> Z×WZ  
+  glue-map-m : CM -> Z×WZ
   glue-map-m = Pushout-rec (λ {(z1 , z2 , p) → z1 , z2 , gluel z2 ∘ ap inl p ∘ ! (gluel z1)})
                            (λ z → z , z , id)
                            (λ {(z1 , z2 , p) → z1 , z2 , ! (gluer z2) ∘ ap inr p ∘ gluer z1})
@@ -120,6 +123,144 @@ module homotopy.BlakersMasseyInfTopos (Z X Y : Type)
   module Codes∞Topos where
     -- difference with CodesTT: args are always the same; change the glue-map
 
+    module MoveToConnectedMap where
+      fiberwise-to-total : ∀ {A} {B1 B2 : A → Type} (f : ∀ a → B1 a → B2 a) → Σ B1 → Σ B2
+      fiberwise-to-total f (a , b) = (a , f a b)
+
+      fiberwise-to-total-connected : ∀ n {A} {B1 B2 : A → Type} (f : ∀ a → B1 a → B2 a)
+           → (∀ a → ConnectedMap n (f a))
+           → ConnectedMap n (fiberwise-to-total f)
+      fiberwise-to-total-connected n f cf (a , b2) = transport (λ A → NType -2 (Trunc n A))
+                                       (! (({!commute and path induction!} ∘ apΣ' id-equiv (λ a' → apΣ' id-equiv (λ b1 → ! ΣPath.path))) ∘ Σassoc.path))
+                                       (cf a b2)
+
+      module Lemma (n : _) {A B C : _} (h : C → B) 
+                (f : B → A) (g : C → A) 
+                (α : f o h ≃ g)
+                (ch : ConnectedMap n h)
+                (a : A) where
+
+         h' : HFiber g a → HFiber f a
+         h' (c , p) = h c , p ∘ ap≃ α
+
+         h'-connected-ump : ConnectedMapUMP n h'
+         h'-connected-ump P br = (λ {(b , p) → ext b p}) ,
+                                 ext-β where
+           ext : (b : B) → (p : Path (f b) a) → fst (P (b , p))
+           ext = ConnectedMap.extend n h ch
+                    (\ b -> ((p : _) → fst (P (b , p))) , Πlevel (\ p -> snd (P (b , p))))
+                    (λ c (p : f (h c) ≃ a) → transport (\ p -> fst (P (h c , p)))
+                                                       (!-inv-l-back p (ap≃ α) ∘ ! (∘-assoc p (! (ap≃ α)) (ap≃ α)))
+                                                       (br (c , p ∘ ! (ap≃ α))))
+
+           ext-β : (x : HFiber g a) → ext (fst (h' x)) (snd (h' x)) ≃ br x
+           ext-β (c , p) =   adjustment ∘ 
+                             ap≃
+                             (extendβ n h ch
+                              (λ b →
+                                 ((p' : _) → fst (P (b , p'))) , Πlevel (λ p' → snd (P (b , p'))))
+                              (λ c' (p' : f (h c') ≃ a) →
+                                 transport (λ p0 → fst (P (h c' , p0)))
+                                 (!-inv-l-back p' (ap≃ α) ∘ ! (∘-assoc p' (! (ap≃ α)) (ap≃ α)))
+                                 (br (c' , p' ∘ ! (ap≃ α))))
+                              c)
+                             {p ∘ ap≃ α} where
+            adjustment : (transport (λ p0 → fst (P (h c , p0)))
+                               (!-inv-l-back (p ∘ ap≃ α) (ap≃ α) ∘
+                                ! (∘-assoc (p ∘ ap≃ α) (! (ap≃ α)) (ap≃ α)))
+                               (br (c , (p ∘ ap≃ α) ∘ ! (ap≃ α))))
+                    ≃ (br (c , p))
+            adjustment = apd (λ p' → br (c , p'))
+                             (!-inv-r-back p (ap≃ α) ∘ !(∘-assoc p (ap≃ α) (! (ap≃ α))))
+                         ∘ {!!}
+
+
+
+           
+             
+
+
+
+    module Codes-gluel where
+
+      CM' : Z → Type
+      CM' z1 = Wedge {Σ (λ z2 → f z1 ≃ f z2)} {Σ (λ z2 → g z1 ≃ g z2)} (z1 , id) (z1 , id)
+
+      CM-to-CM' : CM → Σ CM'
+      CM-to-CM' = Pushout-rec (λ {(z1 , z2 , p) → z1 , inl (z2 , p)})
+                              (λ z → z , inl (z , id))
+                              (λ {(z1 , z2 , p) → z1 , inr (z2 , p)})
+                              (λ _ → id)
+                              (λ z → pair≃ id (gluer _ ∘ gluel _))
+
+      CM'-to-CM : Σ CM' → CM
+      CM'-to-CM (z , w) = Pushout-rec (λ {(z2 , p) → inl (z , z2 , p)})
+                                      (λ _ → inm z) 
+                                      (λ {(z2 , p) → inr (z , z2 , p)})
+                                      (λ _ → gluel z)
+                                      (λ _ → gluer z)
+                                      w
+
+      CM-eqv : Equiv CM (Σ CM')
+      CM-eqv = {!!}
+
+      cΣ1 : ∀ z → Connected i (Σ (λ z2 → f z ≃ f z2))
+      cΣ1 z = transport (Connected i) (apΣ' id-equiv (λ z' → flip≃)) (cf (f z))
+
+      cΣ2 : ∀ z → Connected j (Σ (λ z2 → g z ≃ g z2))
+      cΣ2 z = transport (Connected j) (apΣ' id-equiv (λ z' → flip≃)) (cg (g z))
+  
+      CM'-to-prod : ∀ z -> CM' z -> (Σ (λ z2 → f z ≃ f z2)) × (Σ (λ z2 → g z ≃ g z2))
+      CM'-to-prod z = wedge-to-prod
+
+      CM'-to-prod-connected : ∀ z → ConnectedMap i+j (CM'-to-prod z)
+      CM'-to-prod-connected z = WedgeToProd.ci _ _ (cΣ1 z) (cΣ2 z)
+
+
+{-   
+    -- trying to do Codes-glue directly gets ugly fast
+
+    P : X → Y → Type
+    P x y = Σ \ z -> (f z ≃ x) × (g z ≃ y)
+
+    -- gluep : ∀ {x y} → P x y → Path{W}(inl x)(inr y)
+    -- gluep (z , p1 , p2) = {!!}
+    
+    cΣ1 : (x : X) → Connected i (Σ \ y -> P x y)
+    cΣ1 = ConnectedMap.extend i f cf (\ x -> Connected i (Σ (P x)) , raise-HProp (NType-is-HProp _))
+                                     (λ z → ntype ([ (g z) , (z , id , id) ] , 
+                                                   (Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
+                                                                 (λ {(y , z' , p1 , p2) → {!!}}))))
+
+    module Codes-gluer where
+      map1 : ∀ z z' p → 
+             (Trunc i+j (HFiber glue-map-m (z , z' , (! (gluer z')) ∘ p)))
+           → (Trunc i+j (HFiber glue-map-r (z , g z' , p)))
+      map1 z z' p = Trunc-func (λ {(cm , b) → {!Pushout-rec !}})
+
+      map2' : ∀ z z' (p : inm z ≃ inr (g z'))
+                z1 z2 (p12 : f z1 ≃ f z2)
+              → (q : z1 ≃ z)
+              → (r : g z2 ≃ g z')
+              → ap inr r ∘ gluelr z2 ∘ ap inl p12 ∘ ! (gluel z1) ≃ p ∘ ap inm q
+              → (HFiber glue-map-m (z , z' , (! (gluer z')) ∘ p))
+      map2' z z' p .z z2 p12 id r α = {!p!}
+
+      map2 : ∀ z z' p → 
+             (Trunc i+j (HFiber glue-map-r (z , g z' , p)))
+           → (Trunc i+j (HFiber glue-map-m (z , z' , (! (gluer z')) ∘ p)))
+      map2 z z' p = Trunc-func (λ {((z1 , z2 , p12) , b) → {!snd (snd (coe (Path-Pullback _ _) b))!}})
+
+    eqv : (z z' : Z) (p : Path (inm z) (inr (g z')))
+        → Equiv (Trunc i+j (HFiber glue-map-m (z , z' , (! (gluer z')) ∘ p)))
+                        (Trunc i+j (HFiber glue-map-r (z , g z' , p)))
+    eqv z z' p = {!!}
+-}
+    eqv : (z z' : Z) (p : _)
+        → Equiv (Trunc i+j (HFiber glue-map-m (z , z' , p)))
+                (Trunc i+j (HFiber glue-map-r (ZxWZ→ZxWY (z , z' , p))))
+    eqv z z' p = {!!}
+
     Codes : (z : Z) (w : W) → Path (inm z) w → Type
     Codes z = Pushout-elim _ 
                            (λ x p → Trunc i+j (HFiber glue-map-l (z , x , p))) 
@@ -127,6 +268,11 @@ module homotopy.BlakersMasseyInfTopos (Z X Y : Type)
                            (λ y p → Trunc i+j (HFiber glue-map-r (z , y , p)))
                            {!!}
                            {!!}
+    {-
+                           (λ z' → λ≃ (λ p → ua (Codes-gluer.eqv z z' p) ∘
+                                             ap (λ p' → Trunc i+j (HFiber glue-map-m (z , z' , p'))) (transport-Path-right (! (gluer z')) p))
+                                             ∘ transport-→-pre' (λ z0 → Path (inm z) z0) (gluer z') _)
+    -}
 
     -- ENH probably easier to do the calculations if written out as a coe with pathsfrom contractible
     center : (z : Z) (w : W) (p : Path (inm z) w) → Codes z w p
