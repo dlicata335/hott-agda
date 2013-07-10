@@ -2,6 +2,7 @@
 
 open import lib.First
 open import lib.Paths
+open import lib.Prods
 open import lib.NConnected
 open import lib.Truncations
 open import lib.Int
@@ -21,13 +22,16 @@ module lib.Suspension where
           No'  : Susp' A
           So'  : Susp' A
 
-      Susp = Susp'
+        data Susp'' (A : Type) : Type where
+          mkSusp'' : Susp' A → (Unit -> Unit) -> Susp'' A
+
+      Susp = Susp''
 
       No : ∀ {A} → Susp A
-      No = No'
+      No = mkSusp'' No' _
 
       So : ∀ {A} → Susp A
-      So = So'
+      So = mkSusp'' So' _
       
       postulate {- HoTT Axiom -} 
         mer : ∀ {A} → A -> Path{Susp A} No So
@@ -36,8 +40,8 @@ module lib.Suspension where
                  (N' S' : C) 
                  (mer' : A -> Path N' S')
                -> Susp A -> C
-      Susp-rec N' S' _ No' = N'
-      Susp-rec N' S' _ So' = S'
+      Susp-rec N' S' _ (mkSusp'' No' _) = N'
+      Susp-rec N' S' _ (mkSusp'' So' _) = S'
 
       postulate {- HoTT Axiom -} 
         Susp-rec/βmer : {A C : Type} {N' S' : C} {mer' : A → N' ≃ S'} {x : A} → ap (Susp-rec N' S' mer') (mer x) ≃ mer' x
@@ -47,8 +51,8 @@ module lib.Suspension where
                   (S' : C So) 
                   (mer' : (x : A) -> Path (transport C (mer x) N') S')
                 -> (x : Susp A) -> C x
-      Susp-elim _ N' S' _ No' = N'
-      Susp-elim _ N' S' _ So' = S'
+      Susp-elim _ N' S' _ (mkSusp'' No' _) = N'
+      Susp-elim _ N' S' _ (mkSusp'' So' _) = S'
 
       postulate {- HoTT Axiom -} 
         Susp-elim/βmer : {A : _} (C : Susp A → Type)

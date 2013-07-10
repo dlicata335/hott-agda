@@ -11,11 +11,14 @@ module lib.spaces.2Sphere1 where
       data S2 : Set where
         Base : S2
 
+      data S2' : Set where
+        mkS2' : S2 -> (Unit -> Unit) -> S2' 
+
     S² : Set
-    S² = S2
+    S² = S2'
 
     base : S²
-    base = Base
+    base = mkS2' Base _
 
     postulate {- HoTT Axiom -}
       loop : id{_}{base} ≃ id{_}{base}
@@ -24,7 +27,7 @@ module lib.spaces.2Sphere1 where
            -> (base' : C)
            -> (loop' : id{_}{base'} ≃ id{_}{base'})
            -> S² -> C
-    S²-rec base' _ Base = base'
+    S²-rec base' _ (mkS2' Base _) = base'
 
     S²-elim :  (C : S² -> Set)
             -> (base' : C base)
@@ -33,7 +36,7 @@ module lib.spaces.2Sphere1 where
                                   (id{_}{base'})
                         ≃ id {_} {base'})
             -> (x : S²) -> C x
-    S²-elim C base' _ Base = base'
+    S²-elim C base' _ (mkS2' Base _) = base'
 
     postulate {- HoTT Axiom -}
       βloop/rec : {C : Set} 

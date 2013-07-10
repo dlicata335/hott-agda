@@ -18,12 +18,15 @@ module homotopy.KG1 where
      private
        data KG1' : Type where
          base' : KG1'
+
+       data KG1'' : Type where
+         mkKG1'' : KG1' -> (Unit -> Unit) -> KG1''
        
      KG1 : Type
-     KG1 = KG1'
+     KG1 = KG1''
      
      base : KG1 
-     base = base'
+     base = mkKG1'' base' _
      
      postulate {- HoTT Axiom -}
        level  : NType (tl 1) KG1
@@ -36,7 +39,7 @@ module homotopy.KG1 where
              -> (b' : C)
              -> (l' : GroupHom G (PathGroup (C , nC) b'))
              -> KG1 → C
-     KG1-rec _ b' _ base' = b'
+     KG1-rec _ b' _ (mkKG1'' base' _) = b'
 
      postulate {- HoTT Axiom -}
        KG1-rec/βloop : ∀ {C} 
@@ -59,7 +62,7 @@ module homotopy.KG1 where
              -> (preserves-comp  : (g1 g2 : El) → transport (λ p → transport (fst o C) p b' ≃ b') (loop-comp g1 g2) (loop' (comp g1 g2))
                                                 ≃ loop' g2 ∘ ap (transport (fst o C) (loop g2)) (loop' g1) ∘ ap≃ (transport-∘ (fst o C) (loop g2) (loop g1)) {b'})
              -> (x : KG1) → fst (C x)
-     KG1-elim _ b' _ _ _ base' = b'
+     KG1-elim _ b' _ _ _ (mkKG1'' base' _) = b'
 
    module KG1 = K'
    open K' public
@@ -81,16 +84,11 @@ module homotopy.KG1 where
     decode' : El → Path{KG1} KG1.base KG1.base
     decode' = KG1.loop
 
-    Codes : KG1 → NTypes (tl 0)
-    Codes = KG1-rec (NTypes-level (tl 0))
-                    (El , El-level)
-                    (record { f = f;
-                              pres-ident = pri ;
-                              pres-comp = prc }) where
-        f : ∀ g → (El , El-level) ≃ (El , El-level)
-        f =  λ g → coe (Path-NTypes (tl 0)) (ua (comp-equiv g))
+    module Codes where
+      f : ∀ g → (El , El-level) ≃ (El , El-level)
+      f =  λ g → coe (Path-NTypes (tl 0)) (ua (comp-equiv g))
 
-        abstract
+      abstract
           pri : f ident ≃ id
           pri = coe (! (Path2-NTypes (tl 0) _ _))
                     (type≃-ext (ua (comp-equiv ident)) id 
@@ -108,12 +106,20 @@ module homotopy.KG1 where
                                             ! (assoc g g1 g2)) ∘
                                             ap≃ (type≃β (comp-equiv (comp g1 g2)))) 
                            ∘ Path-NTypesβ (tl 0) (ua (comp-equiv (comp g1 g2))))
+
+    Codes : KG1 → NTypes (tl 0)
+    Codes = KG1-rec (NTypes-level (tl 0))
+                    (El , El-level)
+                    (record { f = Codes.f;
+                              pres-ident = Codes.pri ;
+                              pres-comp = Codes.prc }) 
+
           
 
     abstract
       transport-Codes-loop : ∀ g g' -> (transport (fst o Codes) (KG1.loop g) g') ≃ comp g' g
       transport-Codes-loop g g' = transport (fst o Codes) (KG1.loop g) g' ≃〈 ap≃ (transport-ap-assoc' fst Codes (KG1.loop g)) 〉 
-                                  transport fst (ap  Codes (KG1.loop g)) g' ≃〈 ap (λ x → transport fst x g') (KG1.KG1-rec/βloop _) 〉 -- might need to fill the _ in new agda
+                                  transport fst (ap Codes (KG1.loop g)) g' ≃〈 ap (λ x → transport fst x g') (KG1.KG1-rec/βloop{_}{NTypes-level (tl 0)} (record {f = Codes.f; pres-ident = Codes.pri; pres-comp = Codes.prc })) 〉 
                                   transport fst (coe (Path-NTypes (tl 0)) (ua (comp-equiv g))) g' ≃〈 ap≃ (transport-ap-assoc fst (coe (Path-NTypes (tl 0)) (ua (comp-equiv g)))) 〉 
                                   coe (fst≃ (coe (Path-NTypes (tl 0)) (ua (comp-equiv g)))) g' ≃〈 ap (λ x → coe x g') (Path-NTypesβ (tl 0) (ua (comp-equiv g))) 〉 
                                   coe (ua (comp-equiv g)) g' ≃〈 ap≃ (type≃β (comp-equiv g)) 〉 

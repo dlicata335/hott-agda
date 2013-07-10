@@ -20,11 +20,14 @@ module lib.Truncations where
       data Trunc' (n : TLevel) (A : Type) : Type where
         trunc' : A -> Trunc' n A
 
+      data Trunc'' (n : TLevel) (A : Type) : Type where
+        mkTrunc'' : Trunc' n A → (Unit -> Unit) → Trunc'' n A
+
     Trunc : (n : TLevel) (A : Type) → Type
-    Trunc = Trunc' 
+    Trunc = Trunc'' 
 
     [_] : {n : TLevel} {A : Type} → A -> Trunc n A
-    [ x ] = trunc' x
+    [ x ] = mkTrunc'' (trunc' x) _
 
     postulate {- HoTT Axiom -}
       Trunc-level : {n : TLevel} {A : Type} → NType n (Trunc n A)
@@ -32,13 +35,13 @@ module lib.Truncations where
     Trunc-rec : {A C : Type} {n : TLevel} (tC : NType n C)
           -> (A → C)
           → (Trunc n A) → C
-    Trunc-rec _ f (trunc' x) = f x
+    Trunc-rec _ f (mkTrunc'' (trunc' x) _) = f x
 
     Trunc-elim : {A : Type} {n : TLevel} (C : Trunc n A → Type)
                 (tC : (x : Trunc n A) → NType n (C x))
           -> ((x : A) → C [ x ])
           → (x : (Trunc n A)) → C x
-    Trunc-elim _ _ f (trunc' x) = f x
+    Trunc-elim _ _ f (mkTrunc'' (trunc' x) _) = f x
    open T public
 
    τ₋₁ = Trunc -1

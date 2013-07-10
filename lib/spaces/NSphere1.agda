@@ -3,6 +3,7 @@
 
 open import lib.First
 open import lib.Int
+open import lib.Prods
 open import lib.Paths
 open import lib.AdjointEquiv
 open Int
@@ -17,12 +18,15 @@ module lib.spaces.NSphere1 where
     private
       data S' (n : Positive) : Type where
         Base : S' n
+
+      data S'' (n : Positive) : Type where
+        mkS'' : S' n -> (Unit -> Unit) → S'' n
   
     S^ : Positive -> Type
-    S^ n = S' n
+    S^ n = S'' n
   
     base : ∀ {n} → S^ n
-    base = Base
+    base = mkS'' Base _
   
     postulate {- HoTT Axiom -}
       loop : (n : Positive) → Loop n (S^ n) base
@@ -31,7 +35,7 @@ module lib.spaces.NSphere1 where
            -> (c : C)
            -> (α : Loop n C c)
            -> S^ n -> C
-    S-rec a _ Base = a
+    S-rec a _ (mkS'' Base _) = a
 
     postulate {- HoTT Axiom -} 
       βloop/rec : (n : _) {C : Type} 
@@ -43,7 +47,13 @@ module lib.spaces.NSphere1 where
             -> (c : C base) 
                (α : LoopOver n (loop n) C c)
             -> (x : S^ n) -> C x
-    S-elim _ x _ Base = x
+    S-elim _ x _ (mkS'' Base _) = x
+
+
+   {-
+   bad : (p : S.base ≃ S.base) -> p ≃ id
+   bad id = ?
+   -}
 
     -- FIXME: need to define apd^, but fortunately this
     -- doesn't come up very often (e.g. pi2(s2) doesn't use it)

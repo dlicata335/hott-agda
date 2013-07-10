@@ -10,12 +10,15 @@ module S¹ where
       private
         data S¹' : Type where
           Base : S¹'
+
+        data S¹'' : Type where
+          mkS¹'' : S¹' → (Unit -> Unit) → S¹''
     
       S¹ : Type
-      S¹ = S¹'
+      S¹ = S¹''
     
       base : S¹
-      base = Base
+      base = mkS¹'' Base _
     
       postulate {- HoTT Axiom -}
         loop : Path base base
@@ -24,13 +27,13 @@ module S¹ where
              -> (c : C)
              -> (α : c ≃ c)
              -> S¹ -> C
-      S¹-rec a _ Base = a
+      S¹-rec a _ (mkS¹'' Base _) = a
     
       S¹-elim :  (C : S¹ -> Type)
               -> (c : C base) 
                  (α : Path (transport C loop c) c)
               -> (x : S¹) -> C x
-      S¹-elim _ x _ Base = x
+      S¹-elim _ x _ (mkS¹'' Base _) = x
   
       S¹-induction :  (C : S¹ -> Type)
               -> (c : C base) 
@@ -50,8 +53,17 @@ module S¹ where
 
   open S public
 
+  {-
   bad : (p : Path base base) -> Path p id
   bad id = id
+   /Users/drl/work/cmu/rsh/progind/code/hott-me/lib/spaces/Circle.agda:57,7-9
+   The indices
+     .lib.spaces.Circle.S¹.S.S¹''.mkS¹''
+     .lib.spaces.Circle.S¹.S.S¹'.Base (λ _ → <>)
+   are not constructors (or literals) applied to variables (note that
+   parameters count as constructor arguments)
+   when checking that the pattern id has type Path base base
+  -}
 
   -- Equivalence between (S¹ -> X) and Σe X (\ x → Id x x)
   η-rec : {C : Type} 
