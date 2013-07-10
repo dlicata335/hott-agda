@@ -186,7 +186,7 @@ module lib.NConnected where
       extendβ : (n : TLevel) → ∀ {A B} (f : A → B) →
                 (cf : ConnectedMap n f) →
                 (P : B → NTypes n)
-             -> (b : (x : A) → fst (P (f x)))
+            -> (b : (x : A) → fst (P (f x)))
              →  (x : A) → extend n f cf P b (f x) ≃ b x 
 --    extendβ n f cF P b x = {!!}
 

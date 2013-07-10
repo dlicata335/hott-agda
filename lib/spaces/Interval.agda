@@ -32,9 +32,6 @@ module lib.spaces.Interval where
                -> ap (I-rec a b p) seg ≃ (! (compβ1 _ _ _)) ∘  p ∘ (compβ0 _ _ _)
                   -- wouldn't need the trans if comp0 and comp1 were definitional
 
-
-  {- Nisse found a bug:
-     https://lists.chalmers.se/pipermail/agda/2012/004052.html -}
   module Interval where
     private
       data I' : Set where
@@ -76,6 +73,17 @@ module lib.spaces.Interval where
       --      -> ap (I-elim a b p) seg ≃ p
     -- FIXME : η?
 
+  {- Nisse found a bug:
+     https://lists.chalmers.se/pipermail/agda/2012/004052.html -}
+
+  bad1 : (p : Path Interval.zero Interval.one) -> Void
+  bad1 ()
+
+  {- jcreed found another one,
+     July 2013 -}
+  bad2 : (p : Path Interval.one Interval.one) -> Id p id
+  bad2 id = id
+
   {- conjectured fix: 
      https://lists.chalmers.se/pipermail/agda/2012/004061.html -}
   module IntervalFn where
@@ -85,16 +93,16 @@ module lib.spaces.Interval where
         One  : I'
 
       data I'' : Set where
-        mkI'' : (I' × (Unit -> Unit)) -> I''
+        mkI'' : I' → (Unit -> Unit) -> I''
 
     I : Set
     I = I''
 
     zero : I
-    zero = mkI'' (Zero , _)
+    zero = mkI'' Zero _
     
     one : I
-    one = mkI'' (One , _)
+    one = mkI'' One _
 
     postulate {- HoTT Axiom -}
       seg : zero ≃ one
@@ -103,16 +111,34 @@ module lib.spaces.Interval where
            -> (a b : C)
            -> (p : a ≃ b)
            -> I -> C
-    I-rec a b _ (mkI'' (Zero , _)) = a
-    I-rec a b _ (mkI'' (One , _)) = b
+    I-rec a b p (mkI'' Zero _) = a 
+    I-rec a b p (mkI'' One _) = b
 
     I-elim : {C : I -> Set} 
            -> (a : C zero) (b : C one) (p : transport C seg a ≃ b)
            -> (x : I) -> C x
-    I-elim a b _ (mkI'' (Zero , _)) = a
-    I-elim a b _ (mkI'' (One , _)) = b
+    I-elim a b _ (mkI'' Zero _) = a
+    I-elim a b _ (mkI'' One _) = b
 
   open IntervalFn public
+
+  {- now these no longer pass
+
+  bad1 : (p : Path IntervalFn.zero IntervalFn.one) -> Void
+  bad1 ()
+
+  bad2 : (p : Path IntervalFn.one IntervalFn.one) -> Id p id
+  bad2 id = {!p!}
+
+  -- works in 2.3.2.1 but Guillaume says it doesn't in darcs version
+  -- test : {y : IntervalFn.I} (p : Path IntervalFn.one y) → {!!}
+  -- test id = {!!}
+  -}
+
+  -- now that I've upgraded to 2.3.2.1, unused argument stuff breaks things:
+  bad-unused : {C : Set} -> (a b : C) -> (p : a ≃ b) (q : a ≃ b) -> I-rec a b p ≃ I-rec a b q
+  bad-unused a b p q = id
+
   {-
     Interval provides:
     I : Set

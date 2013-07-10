@@ -50,6 +50,9 @@ module S¹ where
 
   open S public
 
+  bad : (p : Path base base) -> Path p id
+  bad id = id
+
   -- Equivalence between (S¹ -> X) and Σe X (\ x → Id x x)
   η-rec : {C : Type} 
             (M : S¹ -> C)
