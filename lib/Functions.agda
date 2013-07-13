@@ -44,6 +44,10 @@ module lib.Functions where
         → ((x : A) → Path (f x) (g x)) ≃ (Path f g)
     path = ua eqv
 
+  Π≃ext : {A : Type} {B : A → Type} {f g : (x : A) → B x} {α β : f ≃ g}
+          → ((x : A) → ap≃ α {x} ≃ ap≃ β {x}) → α ≃ β
+  Π≃ext h = (! (Π≃η _) ∘ ap λ≃ (λ≃ h)) ∘ Π≃η _ 
+
   transport-→ :  {Γ : Type} (A B : Γ → Type) {θ1 θ2 : Γ} 
                   (δ : θ1 ≃ θ2) (f : A θ1 → B θ1) 
      → Path  (transport (\ γ → (A γ) → B γ) δ f) 

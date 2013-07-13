@@ -7,6 +7,17 @@ module lib.Prods where
 
   record Unit : Type where
     constructor <> 
+
+  -- sometimes handy not to have definitional η
+  data Unit⁺ : Type where
+    <>⁺ : Unit⁺
+
+  -- gadget for defeating unused argument check in Agda 2.3.2.1 and later
+  -- a version of Unit⁺ that's indexed by an arbitrary thing.  
+  record Phantom {A : Type}(a : A) : Type where
+    constructor phantom
+    field 
+      match : Unit⁺
   
   _×_ : Type -> Type -> Type
   a × b = Σ (\ (_ : a) -> b)
@@ -302,6 +313,5 @@ module lib.Prods where
                ap (λ x → y , f (x)) α ≃
                pair×≃ (ap (λ _ → y) α) (ap (λ x → f (x)) α)
   ap-×-snd _ _ id = id
-
 
       

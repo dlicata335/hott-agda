@@ -30,3 +30,11 @@ module lib.Nat where
     max  Z    m      = m
     max (S n)  Z     = S n
     max (S n) (S m)  = S (max n m)
+
+{-
+    disjoint : {m : Nat} → Path{Nat} (S m) Z → {!!}
+    disjoint ()
+
+    injective : {m n : Nat} → Path{Nat} (S m) (S n) -> m ≃ n
+    injective id = id
+-}

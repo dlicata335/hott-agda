@@ -23,17 +23,29 @@ module S¹ where
       postulate {- HoTT Axiom -}
         loop : Path base base
     
+      S¹-rec' : {C : Type} 
+             -> (c : C)
+             -> (α : c ≃ c) (_ : Phantom α)
+             -> S¹ -> C
+      S¹-rec' a _ (Phantom.phantom <>⁺) (mkS¹'' Base _) = a
+
       S¹-rec : {C : Type} 
              -> (c : C)
              -> (α : c ≃ c)
              -> S¹ -> C
-      S¹-rec a _ (mkS¹'' Base _) = a
+      S¹-rec a α = S¹-rec' a α (Phantom.phantom <>⁺)
     
+      S¹-elim' :  (C : S¹ -> Type)
+              -> (c : C base) 
+                 (α : Path (transport C loop c) c) (_ : Phantom α)
+              -> (x : S¹) -> C x
+      S¹-elim' _ x _ (Phantom.phantom <>⁺) (mkS¹'' Base _) = x
+
       S¹-elim :  (C : S¹ -> Type)
               -> (c : C base) 
                  (α : Path (transport C loop c) c)
               -> (x : S¹) -> C x
-      S¹-elim _ x _ (mkS¹'' Base _) = x
+      S¹-elim C c α = S¹-elim' C c α (Phantom.phantom <>⁺)
   
       S¹-induction :  (C : S¹ -> Type)
               -> (c : C base) 
@@ -54,8 +66,12 @@ module S¹ where
   open S public
 
   {-
-  bad : (p : Path base base) -> Path p id
-  bad id = id
+  without the Unit->Unit trick, you can prove
+
+  uip-base : (p : Path base base) -> Path p id
+  uip-base id = id
+
+  but now you get
    /Users/drl/work/cmu/rsh/progind/code/hott-me/lib/spaces/Circle.agda:57,7-9
    The indices
      .lib.spaces.Circle.S¹.S.S¹''.mkS¹''
@@ -63,6 +79,19 @@ module S¹ where
    are not constructors (or literals) applied to variables (note that
    parameters count as constructor arguments)
    when checking that the pattern id has type Path base base
+  -}
+  
+  {- 
+  without the Phantom trick, you can prove
+
+  path-irrel : {C : Type} {c : C} {p q : c ≃ c} → S¹-rec c p ≃ S¹-rec c q
+  path-irrel = id
+  
+  but now we get
+  /Users/drl/work/cmu/rsh/progind/code/hott-me/lib/spaces/Circle.agda:88,16-18
+  .p != .q of type Id .c .c
+  when checking that the expression id has type
+  Id (S¹-rec .c .p) (S¹-rec .c .q)
   -}
 
   -- Equivalence between (S¹ -> X) and Σe X (\ x → Id x x)
