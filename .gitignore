@@ -1,2 +1,4 @@
 *.agdai
 TAGS
+
+.DS_Store
