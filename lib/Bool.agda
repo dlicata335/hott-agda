@@ -101,18 +101,20 @@ module lib.Bool where
       Bool-η {C} f = λ≃ (λ b → if (λ x → f x ≃ if C / x then f True else (f False)) / b then id else id)
   
       Bool-coh1 : ∀ {C : Bool → Type} (f : (b : Bool) → C b) → ap≃ (Bool-η f) {True} ≃ id
-      Bool-coh1 {C} f = Π≃β
-                          (λ b →
-                             if (λ x → f x ≃ if C / x then f True else (f False)) / b then id
-                             else
-                             id)
+      Bool-coh1 {C} f = Π≃β (λ b → if (λ x → f x ≃ if C / x then f True else (f False)) / b 
+                                   then id
+                                   else id)
   
       Bool-coh2 : ∀ {C : Bool → Type} (f : (b : Bool) → C b) → ap≃ (Bool-η f) {False} ≃ id
-      Bool-coh2 {C} f = Π≃β
-                          (λ b →
-                             if (λ x → f x ≃ if C / x then f True else (f False)) / b then id
-                             else
-                             id)
+      Bool-coh2 {C} f = Π≃β (λ b → if (λ x → f x ≃ if C / x then f True else (f False)) / b 
+                                   then id
+                                   else id)
+
+      Bool-coh : ∀ {C : Bool → Type} {e1 : C True} {e2 : C False} 
+               → Bool-η (\ b -> if C / b then e1 else e2) ≃ id
+      Bool-coh {C}{e1}{e2} = Π≃ext (λ b → if (λ b₁ → ap≃ (Bool-η (λ b₂ → if C / b₂ then e1 else e2)){b₁} ≃ id) / b
+                                          then Bool-coh1 (λ b₂ → if C / b₂ then e1 else e2) 
+                                          else (Bool-coh2 (λ b₂ → if C / b₂ then e1 else e2)))
 
   module ProductsFromPi where
 
@@ -134,44 +136,8 @@ module lib.Bool where
             (C : A * B → Type) 
             (f : (x : A) (y : B) → C (pair x y))
             (x : A) (y : B) → *-ind C f (pair x y) ≃ f x y
-    *-ind-β {A}{B}C f x y = *-ind C f (pair x y) ≃〈 id 〉 
-                      transport C
-                        (!
-                         (λ≃
-                          (λ b →
-                             if
-                             (λ x₁ → Path (if (λ b₁ → if (λ _ → Set) / b₁ then A else B) / x₁ then x else y) (if (λ z → if (λ _ → Set) / z then A else B) / x₁ then x else y))
-                                   / b then id else id)))
-                        (f x y) ≃〈 ap (λ a → transport C (! a) (f x y)) STS 〉 
-                      transport C id (f x y) ≃〈 id 〉 
-                      (f x y ∎)  where
-            STS : (λ≃ (λ b →
-                             if
-                             (λ x₁ →
-                                Id
-                                (if (λ b₁ → if (λ _ → Set) / b₁ then A else B) / x₁ then x else y)
-                                (if (λ z → if (λ _ → Set) / z then A else B) / x₁ then x else y))
-                             / b then id else
-                             id))
-                  ≃ id
-            STS = Π≃ext (λ b →
-                             if
-                             (λ (x₁ : Bool) →
-                                Path
-                                (ap (λ f₁ → f₁ x₁)
-                                 (λ≃
-                                  (λ b₁ →
-                                     if
-                                     (λ x₂ →
-                                        Path (if (λ b₂ → if (λ _ → Set) / b₂ then A else B) / x₂ then x else y)
-                                             (if (λ z → if (λ _ → Set) / z then A else B) / x₂ then x else y))
-                                     / b₁ then id else
-                                     id)))
-                                id)
-                             / b then Bool-coh1 {λ b₂ → if (λ _ → Set) / b₂ then A else B} 
-                                                (λ x₂ → if (λ b₂ → if (λ _ → Set) / b₂ then A else B) / x₂ then x else y)
-                                 else (Bool-coh2 {λ b₂ → if (λ _ → Set) / b₂ then A else B}
-                                                 (λ x₂ → if (λ b₂ → if (λ _ → Set) / b₂ then A else B) / x₂ then x else y)))
+    *-ind-β {A}{B}C f x y = ap (λ a → transport C (! a) (f x y)) Bool-coh 
+
 {-
   respif : {Γ : Type} {θ1 θ2 : Γ} {P : Path θ1 θ2} {C : Γ -> Bool -> Type} {M : Γ -> Bool} {M1 : (x : Γ) -> C x True} {M2 : (x : Γ) -> C x False} 
          -> Path (respd (\ x -> if C x / (M x) then (M1 x) else (M2 x)) P) 
