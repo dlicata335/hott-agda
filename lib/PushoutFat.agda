@@ -112,6 +112,17 @@ module lib.PushoutFat where
 -}
     open P public
 
+{-
+    module JoinOfHProps {A B : Type} {hA : HProp A} {hB : HProp B} where
+      A*B = Pushout {A × B}{A}{B} fst snd
+
+      hA*B : HProp A*B
+      hA*B = unique-HProp {!Pushout-elim !}
+
+      test : (a : A) (b : B) → Path {A*B} (inl a) (inr b)
+      test a b = gluer (a , b) ∘ gluel (a , b)
+-}      
+
     Wedge : {A B : Type} (a0 : A) (b0 : B) → Type
     Wedge {A}{B} a0 b0 = Pushout {Unit}{A}{B} (\ _ -> a0) (\ _ -> b0)
 

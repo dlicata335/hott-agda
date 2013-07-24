@@ -23,7 +23,11 @@ module lib.First where
  _≃_ : {A : Type} → A → A → Type
  _≃_ = Path
 
+ _==_ : {A : Type} → A → A → Type
+ _==_ = Path
+
  infix 9 _≃_
+ infix 9 _==_
 
  ! : {A : Type} {M N : A} → Path M N → Path N M 
  ! id = id
@@ -36,9 +40,13 @@ module lib.First where
 
  infix  2 _∎
  infixr 2 _≃〈_〉_ 
+ infixr 2 _=〈_〉_ 
  
  _≃〈_〉_ : {A : Type} (x : A) {y z : A} → Path x y → Path y z → Path x z
  _ ≃〈 p1 〉 p2 = (p2 ∘ p1)
+
+ _=〈_〉_ : {A : Type} (x : A) {y z : A} → Path x y → Path y z → Path x z
+ _ =〈 p1 〉 p2 = (p2 ∘ p1)
  
  _∎ : ∀ {A : Type} (x : A) → Path x x
  _∎ _ = id

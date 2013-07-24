@@ -114,11 +114,11 @@ module lib.spaces.Interval where
     I-rec a b p (mkI'' Zero _) = a 
     I-rec a b p (mkI'' One _) = b
 
-    I-elim : {C : I -> Set} 
+    I-elim : (C : I -> Set)
            -> (a : C zero) (b : C one) (p : transport C seg a ≃ b)
            -> (x : I) -> C x
-    I-elim a b _ (mkI'' Zero _) = a
-    I-elim a b _ (mkI'' One _) = b
+    I-elim _ a b _ (mkI'' Zero _) = a
+    I-elim _ a b _ (mkI'' One _) = b
 
   open IntervalFn public
 
@@ -138,6 +138,9 @@ module lib.spaces.Interval where
   -- now that I've upgraded to 2.3.2.1, unused argument stuff breaks things:
   bad-unused : {C : Set} -> (a b : C) -> (p : a ≃ b) (q : a ≃ b) -> I-rec a b p ≃ I-rec a b q
   bad-unused a b p q = id
+
+  I-level : NType -2 I
+  I-level = ntype (zero , I-elim _ id seg (transport-Path-right seg id))
 
   {-
     Interval provides:

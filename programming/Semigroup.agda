@@ -8,8 +8,8 @@ module programming.Semigroup where
   Semigroup A = Σ \ (_⊙_ : A → A → A) → 
                   (x y z : A) → x ⊙ (y ⊙ z) ≃ (x ⊙ y) ⊙ z
 
-  transport-Semigroup-eqv : ∀ {A B} -> Equiv A B → Semigroup A → Semigroup B
-  transport-Semigroup-eqv {A}{B}(f , isequiv g α β γ) (_⊙_ , assoc) = (_⊙'_ , assoc') where
+  transport-Semigroup-eqv  : ∀ {A B} -> Equiv A B → Semigroup A → Semigroup B
+  transport-Semigroup-eqv {A}{B}(f , isequiv g α β γ) (_⊙_ , assoc) = (_⊙'_ , assoc') where  
     _⊙'_ : B → B → B
     y1 ⊙' y2 = f (g y1 ⊙ g y2) 
 
@@ -37,10 +37,10 @@ module programming.Semigroup where
   -- proof that that's what transport does
 
   transport-Semigroup-eqv-id : ∀ {A} -> transport-Semigroup-eqv{A}{A} id-equiv ≃ (\ x -> x)
-  transport-Semigroup-eqv-id = 
-    λ≃ λ {(_⊙_ , assoc) → pair≃ id 
-                                (λ≃ (λ y1 → λ≃ (λ y2 → λ≃ (λ y3 → 
-                                 ap-id (assoc y1 y2 y3) ∘ ∘-unit-l (ap (λ x → x) (assoc y1 y2 y3))))))}
+  transport-Semigroup-eqv-id {A} = 
+    λ≃ λ {(_⊙_ , assoc) → pair≃ {_}{_}{(transport-Semigroup-eqv id-equiv (_⊙_ , assoc))}{_⊙_ , assoc} 
+                                id
+                                (λ≃ (λ y1 → λ≃ (λ y2 → λ≃ (λ y3 → ap-id (assoc y1 y2 y3) ∘ ∘-unit-l (ap (λ x → x) (assoc y1 y2 y3))))))}
 
   transport-Semigroup : ∀ {A : Type} {M N : A} (B : A → Type) (α : M ≃ N) 
                       → transport (\ x → Semigroup (B x)) α 
