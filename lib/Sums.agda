@@ -18,3 +18,6 @@ module lib.Sums where
     case C l r (Inl x) = l x
     case C l r (Inr y) = r y
 
+    abort : {A : Type} → Void → A
+    abort ()
+    

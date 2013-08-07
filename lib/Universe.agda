@@ -31,7 +31,7 @@ module lib.Universe where
   -- transport-Equiv-post : ∀ {A B C} {b : Equiv B C} {a : Equiv A B} -> Path (transport (\ X -> Equiv A X) (ua b) a) (b ∘equiv a)
   
   !-ua : {A B : Type} (e : Equiv A B) → (! (ua e)) ≃ (ua (!equiv e))
-  !-ua e = type≃-ext (! (ua e)) (ua (!equiv e)) (λ x → ap≃ (! (type≃β (!equiv e)) ∘ type≃β! e))
+  !-ua e = type≃-ext (! (ua e)) (ua (!equiv e)) (λ x → ap≃ (! (type≃β (!equiv e)) ∘ type≃β! e)) 
 
   ∘-ua : {A B C : Type} (e : Equiv B C)(e' : Equiv A B) → (ua e) ∘ (ua e') ≃ ua (e ∘equiv e')
   ∘-ua e e' = type≃-ext _ _ (λ x → ((! (ap≃ (type≃β (e ∘equiv e'))) ∘ ap (fst e) (ap≃ (type≃β e'))) ∘ ap≃ (type≃β e)) ∘ ap≃ (transport-∘ (λ x' → x') (ua e) (ua e')))

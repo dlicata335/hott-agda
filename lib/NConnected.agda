@@ -182,7 +182,7 @@ module lib.NConnected where
                                        (λ hfy → transport (fst o P) (snd hfy) (forA (fst hfy)))
                                        (fst (use-level (cf y)))
 
-    postulate
+    postulate -- working on Blakers-Massey
       extendβ : (n : TLevel) → ∀ {A B} (f : A → B) →
                 (cf : ConnectedMap n f) →
                 (P : B → NTypes n)
