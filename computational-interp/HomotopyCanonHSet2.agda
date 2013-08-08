@@ -9,36 +9,36 @@ module HomotopyCanonHSet2 where
 
   -- universe of propositions
   mutual
-    data CanonicalProp : Set where
+    data CanonicalProp : Type where
       unit : CanonicalProp
       void : CanonicalProp
       `∀   : (A : CanonicalProp) (B : ElP A → CanonicalProp) → CanonicalProp
   
-    ElP : CanonicalProp → Set
+    ElP : CanonicalProp → Type
     ElP unit = Unit
     ElP void = Void
     ElP (`∀ A B) = (x : ElP A) → ElP (B x)
 
   -- universe of sets
   mutual
-    data CanonicalSet : Set where
+    data CanonicalSet : Type where
       prop  : CanonicalSet
       proof : CanonicalProp → CanonicalSet
       bool  : CanonicalSet
       Π : (A : CanonicalSet) (B : El A → CanonicalSet) → CanonicalSet
   
-    El : CanonicalSet → Set
+    El : CanonicalSet → Type
     El bool = Bool
     El prop = CanonicalProp
     El (proof P) = ElP P
     El (Π A B) = (x : El A) → El (B x)
 
   mutual
-    data CanonicalCtx : Set where
+    data CanonicalCtx : Type where
       ·   : CanonicalCtx
       _,_ : (Γ : CanonicalCtx) (A : ElC Γ → CanonicalSet) → CanonicalCtx
 
-    ElC : CanonicalCtx → Set
+    ElC : CanonicalCtx → Type
     ElC · = Unit
     ElC (Γ , A) = Σ \ (θ : ElC Γ) → El (A θ)
 
@@ -46,10 +46,10 @@ module HomotopyCanonHSet2 where
   -- syntax and its interpretation
 
   -- due to all the mutality, Agda is happier if this is indexed by the denotation, rather than
-  -- using a decoding function interpA.  See HomotopyCanonHSet1.agda for what goes wrong.  
-  data Ty : (Γ : CanonicalCtx) → (ElC Γ → CanonicalSet) → Set 
+  -- using a decoding function interpA.  See HomotopyCanonHType1.agda for what goes wrong.  
+  data Ty : (Γ : CanonicalCtx) → (ElC Γ → CanonicalSet) → Type 
 
-  data Tm : (Γ : _) {A : _} → Ty Γ A → Set 
+  data Tm : (Γ : _) {A : _} → Ty Γ A → Type 
 
   interp : ∀ {Γ A} {A* : Ty Γ A} → Tm Γ A* → (θ : ElC Γ) → El (A θ)
 
@@ -119,3 +119,28 @@ module HomotopyCanonHSet2 where
   abortcase _ M θ = Sums.abort (interp M θ)
   plamcase M θ = λ x → interp M (θ , x)
   pappcase M N θ = interp M θ (interp N θ)
+
+
+  -- syntactic contexts
+  data Ctx : CanonicalCtx → Type where
+      ·   : Ctx ·
+      _,_ : ∀ {Γ A} → (Γ* : Ctx Γ) → Ty Γ A → Ctx (Γ , A)
+
+  mutual
+    RC : ∀ {Γ} → (Γ* : Ctx Γ) (θ : ElC Γ) → Type
+    RC · θ = Unit
+    RC (Γ* , A*) (θ , M) = Σ (λ (sθ : RC Γ* θ) → R Γ* A* sθ M)
+
+    R : ∀ {Γ A} (Γ* : Ctx Γ) (A* : Ty Γ A) → {θ : ElC Γ} → RC Γ* θ → El (A θ) → Type
+    R _ bool rθ M = Either (M == True) (M == False)
+    R Γ* prop rθ M = {!!}
+    R Γ* (proof M) rθ M₁ = {!!}
+    R Γ* (Π{Γ}{A}{B} A* B*) {θ} rθ M = (N : El (A θ)) (rN : R Γ* A* rθ N) → R (Γ* , A*) B* (rθ , rN) (M N)
+    R (Γ* , _) (w A* B*) {θ , _} (rθ , _) M = 
+      R Γ* B* rθ M
+    R Γ* (subst1{Γ}{A0}{B}{A0*} B* M0) {θ} rθ M = 
+      R (Γ* , A0*) B* (rθ , fund A0* rθ M0) M
+
+    fund : ∀ {Γ A θ} {Γ* : Ctx Γ} (A* : Ty Γ A) (rθ : RC Γ* θ) → (M : Tm Γ A*) → R Γ* A* rθ (interp M θ)
+    fund = {!!}
+  
