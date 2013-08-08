@@ -5,6 +5,7 @@ open BoolM
 
 module HomotopyCanonHSet4 where
 
+  -- RULE: no transport at MetaTypes!
   MetaType = Type
 
   -- make some syntax to induct over, a la Outrageous but Meaningful Coindcidences
@@ -64,21 +65,11 @@ module HomotopyCanonHSet4 where
     refl : ∀ {Γ A} {A* : Ty Γ A} (M : Tm Γ A*) → Tm Γ (id A* M M) 
     tr   : ∀ {Γ A C} {A* : Ty Γ A} (C* : Ty (Γ , A) C) {M1 M2 : Tm Γ A*} (α : Tm Γ (id A* M1 M2)) →  Tm Γ (subst1 C* M1) →  Tm Γ (subst1 C* M2)
 
-  ifcase : 
-    {Γ   : Ctx}
-    {C   : Σe (ElC Γ) (λ θ₁ → Bool) → Type}
-    (C*  : Ty (Γ , (λ _ → Bool)) C)
-    (M   : Tm Γ bool)
-    (M1  : Tm Γ (subst1 C* true))
-    (M2  : Tm Γ (subst1 C* false))
-    (θ   : ElC Γ)
-    → C (θ , interp M θ)
-
-  <>case : {Γ : Ctx} {θ : ElC Γ} → (interp unit θ)
-  abortcase : ∀ {Γ A} (A* : Ty Γ A) → Tm Γ (proof void) → (θ : ElC Γ) → (A θ)
-  plamcase : ∀ {Γ A B} → (M : Tm (Γ , _) (proof B)) (θ : ElC Γ) → (interp (`∀ A B) θ)
-  pappcase  : ∀ {Γ A B} → (M : Tm Γ (proof (`∀ A B))) → (N : Tm Γ (proof A)) (θ : ElC Γ)
-              → (interp B (θ , interp N θ))
+  interp-if : {Γ   : Ctx} {C   : Σe (ElC Γ) (λ θ₁ → Bool) → Type} (C*  : Ty (Γ , (λ _ → Bool)) C) (M   : Tm Γ bool) (M1  : Tm Γ (subst1 C* true)) (M2  : Tm Γ (subst1 C* false)) (θ   : ElC Γ) → C (θ , interp M θ)
+  interp-<> : {Γ : Ctx} {θ : ElC Γ} → (interp unit θ)
+  interp-abort : ∀ {Γ A} (A* : Ty Γ A) → Tm Γ (proof void) → (θ : ElC Γ) → (A θ)
+  interp-plam : ∀ {Γ A B} → (M : Tm (Γ , _) (proof B)) (θ : ElC Γ) → (interp (`∀ A B) θ)
+  interp-papp  : ∀ {Γ A B} → (M : Tm Γ (proof (`∀ A B))) → (N : Tm Γ (proof A)) (θ : ElC Γ) → (interp B (θ , interp N θ))
 
   interp v θ = snd θ
   interp (w M) θ = interp M (fst θ)
@@ -87,22 +78,22 @@ module HomotopyCanonHSet4 where
   interp unit _ = Unit
   interp void _ = Void
   interp (`∀ A B) θ = (x : interp A θ) -> interp B (θ , x)
-  interp <> θ = <>case
-  interp (abort{_}{_}{A*} M) θ = abortcase A* M θ
-  interp (plam M) θ = plamcase M θ
-  interp (papp M N) θ = pappcase M N θ
-  interp (if{Γ}{C}{C*} M1 M2 M) θ = ifcase C* M M1 M2 θ
+  interp <> θ = interp-<>
+  interp (abort{_}{_}{A*} M) θ = interp-abort A* M θ
+  interp (plam M) θ = interp-plam M θ
+  interp (papp M N) θ = interp-papp M N θ
+  interp (if{Γ}{C}{C*} M1 M2 M) θ = interp-if C* M M1 M2 θ
   interp (lam M) θ = λ x → interp M (θ , x)
   interp (app M N) θ = (interp M θ) (interp N θ)
   interp (refl M) θ = id
   interp (tr{Γ}{A}{C} C* α N) θ = transport (λ x → C (θ , x)) (interp α θ) (interp N θ)
 
   -- can't inline these because we need the prior cases of interp to be available
-  ifcase {_}{C} C* M M1 M2 θ = if (λ x → (C (θ , x))) / interp M θ then interp M1 θ else (interp M2 θ)
-  <>case = <>
-  abortcase _ M θ = Sums.abort (interp M θ)
-  plamcase M θ = λ x → interp M (θ , x)
-  pappcase M N θ = interp M θ (interp N θ)
+  interp-if {_}{C} C* M M1 M2 θ = if (λ x → (C (θ , x))) / interp M θ then interp M1 θ else (interp M2 θ)
+  interp-<> = <>
+  interp-abort _ M θ = Sums.abort (interp M θ)
+  interp-plam M θ = λ x → interp M (θ , x)
+  interp-papp M N θ = interp M θ (interp N θ)
 
 
   -- syntactic contexts
@@ -151,8 +142,7 @@ module HomotopyCanonHSet4 where
 
 
   -- proof that R is well-defined on Γ₀(A θ), without using transport.  
-  -- FIXME: should be able to do this without using transport at any MetaTypes?
-  -- and it should be a bijection?
+  -- FIXME do we need to know that it is a bijection?
 
   transportQ : ∀ {Γ A} (Γ* : Ctx* Γ) (A* : Ty Γ A) → {θ : ElC Γ} → (rθ : RC Γ* θ) 
              → {M N : A θ} → (rM : R Γ* A* rθ M) → (rN : R Γ* A* rθ N) → {α α' : M == N} (p : α == α')
@@ -176,6 +166,10 @@ module HomotopyCanonHSet4 where
   transportR Γ* (subst1{Γ}{A0}{B}{A0*} B* M0) rθ p rM = transportR (Γ* , A0*) B* (rθ , _) p rM
   transportR Γ* (id A* M* N*) rθ p rα = transportQ Γ* A* rθ (fund Γ* A* rθ M*) (fund Γ* A* rθ N*) p rα
 
+  fund-<> : ∀ {Γ θ} → (Γ* : Ctx* Γ) (rθ : RC Γ* θ) → R Γ* (proof unit) rθ <>
+
+  fund-abort : ∀ {Γ θ C} → (Γ* : Ctx* Γ) (rθ : RC Γ* θ) → Tm Γ (proof void) → C
+
   fund-refl : ∀ {Γ A} (Γ* : Ctx* Γ) (A* : Ty Γ A) → {θ : ElC Γ} → (rθ : RC Γ* θ) 
        → {M : A θ} → (rM : R Γ* A* rθ M) 
        → Q Γ* A* rθ rM rM id
@@ -185,26 +179,44 @@ module HomotopyCanonHSet4 where
           (rα : Q Γ* A* rθ rM1 rM2 α) (rN : R (Γ* , A*) C* (rθ , rM1) N)
           → R (Γ* , A*) C* (rθ , rM2) (transport (\ x → C (θ , x)) α N)
 
-  fund (Γ* , A0*) .(w A* A*) (rθ , rM) (v {Γ} {A} {A*}) = coe {!!} rM -- need coherence for two typing derivations for Ty Γ A
+  fund (Γ* , A0*) .(w A* A*) (rθ , rM) (v {Γ} {A} {A*}) = coe FIXME rM where
+    -- need coherence for two typing derivations for Ty Γ A
+    -- primitive primTrustMe : {l : Level} {A : Set} {x y : A} -> x == y
+    FIXME = {!!}
   fund (Γ* , A0*) .(w A* B*) (rθ , rM) (w {Γ} {A} {B} {A*} {B*} M) = fund Γ* B* rθ M
   fund Γ* .bool rθ true = Inl id
   fund Γ* .bool rθ false = Inr id
   fund Γ* .prop rθ unit = (λ _ _ _ → Unit) , (λ φ' α p1 p2 x x₁ → <>)
   fund Γ* .prop rθ void = (λ _ _ _ → Void) , (λ φ' α p1 p2 x x₁ → x₁)
-  fund Γ* .prop rθ (`∀ φ ψ) = (λ φ' p x → {!!}) , {!!}
-  fund Γ* .(proof unit) rθ <> = {! <>!}
-  fund Γ* A* rθ (abort M) = {! Sums.abort (fund Γ* (proof void) rθ M) !}
+  fund {θ = θ} Γ* .prop rθ (`∀ φ ψ) = 
+    (λ φ' p x → (y : interp φ θ) → (ry : fst (fund Γ* prop rθ φ) _ id y) → fst (fund (Γ* , proof φ) prop (rθ , ry) ψ) _ id (coe (! p) x y)) , 
+    (λ φ' α p1 p2 q w y ry → snd (fund (Γ* , proof φ) prop (rθ , ry) ψ) (interp ψ (θ , y)) id (coe (! α) p1 y) (coe (! α) p2 y) (ap (λ z → coe (! α) z y) q) (w y ry))
+  fund Γ* .(proof unit) rθ <> = fund-<> Γ* rθ
+  fund Γ* A* rθ (abort M) = fund-abort Γ* rθ M
   fund Γ* .(proof (`∀ M M₁)) rθ (plam {Γ} {M} {M₁} M₂) = {!!}
   fund Γ* .(subst1 (proof M₁) M₃) rθ (papp {Γ} {M} {M₁} M₂ M₃) = {!!}
-  fund {θ = θ} Γ* .(subst1 C* M) rθ (if {Γ} {C} {C*} M1 M2 M) = 
-    (if (λ z → (rz : _) → R (Γ* , bool) C* (rθ , rz) (if (λ x → C (θ , x)) / z then interp M1 θ else (interp M2 θ))) / 
-        interp M θ 
-        then (λ rz → {!fund Γ* (subst1 C* true) rθ M1!}) -- need bool is an hset/consistency
-        else {!!}) (fund Γ* bool rθ M)
+  fund {θ = θ} Γ* .(subst1 C* M) rθ (if {Γ} {C} {C*} M1 M2 M) with interp M θ | (fund Γ* bool rθ M)
+  ... | i | Inl x = transportR (Γ* , bool) C* (rθ , Inl x) (path-induction
+                                                              (λ i₁ x₁ →
+                                                                 transport (λ x₂ → C (θ , x₂)) x₁ (interp M1 θ) ==
+                                                                 if (λ x₂ → C (θ , x₂)) / i₁ then interp M1 θ else (interp M2 θ))
+                                                              id (! x)) 
+                               (fund-tr{_}{_}{_}{_}{_}{_}{ ! x }{_} Γ* C* rθ (fund Γ* bool rθ true) (Inl x) <>  (fund Γ* _ rθ M1)) 
+                -- Note: is this path-induction kosher?
+                --       it seems like it's in a spot where we just need a path in the language!
+  ... | i | Inr x = transportR (Γ* , bool) C* (rθ , Inr x) (path-induction
+                                                              (λ i₁ x₁ →
+                                                                 transport (λ x₂ → C (θ , x₂)) x₁ (interp M2 θ) ==
+                                                                 if (λ x₂ → C (θ , x₂)) / i₁ then interp M1 θ else (interp M2 θ))
+                                                              id (! x)) 
+                               (fund-tr{_}{_}{_}{_}{_}{_}{ ! x }{_} Γ* C* rθ (fund Γ* bool rθ false) (Inr x) <>  (fund Γ* _ rθ M2)) 
   fund Γ* .(Π A* B*) rθ (lam {Γ} {A} {B} {A*} {B*} M) = λ N rN → fund (Γ* , A*) B* (rθ , rN) M
   fund Γ* .(subst1 B* N) rθ (app {Γ} {A} {B} {A*} {B*} M N) = fund Γ* (Π A* B*) rθ M _ (fund Γ* A* rθ N)
   fund Γ* .(id A* M* M*) rθ (refl{_}{_}{A*} M*) = fund-refl Γ* A* rθ (fund Γ* A* rθ M*)
   fund Γ* ._ rθ (tr{Γ}{A}{C}{A*} C* {M1}{M2} α N) = fund-tr Γ* C* rθ (fund Γ* _ rθ M1) (fund Γ* _ rθ M2) (fund Γ* _ rθ α) (fund Γ* _ rθ N)
+
+  fund-<> Γ* rθ = <>
+  fund-abort Γ* rθ M = Sums.abort (fund Γ* (proof void) rθ M)
 
   fund-refl Γ* bool rθ rM = <>
   fund-refl Γ* prop rθ rM = λ x rx → rx
