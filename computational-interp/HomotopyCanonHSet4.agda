@@ -3,7 +3,7 @@
 open import lib.Prelude 
 open BoolM 
 
-module HomotopyCanonHSet3 where
+module HomotopyCanonHSet4 where
 
   MetaType = Type
 
@@ -128,7 +128,8 @@ module HomotopyCanonHSet3 where
   RC {Γ , A} (Γ* , A*) (θ , M) = Σ (λ (sθ : RC Γ* θ) → R Γ* A* sθ M)
 
   R _ bool rθ M = Either (M == True) (M == False)
-  R Γ* prop rθ φ = (φ'x : U~) → fst φ'x == φ → MetaType
+  R Γ* prop rθ φ = Σ \ (Rφ : (φ' : Type) → φ == φ' → φ' → MetaType) → 
+                    (φ' : Type) (α : φ == φ') → (p1 p2 : φ') → p1 == p2 → Rφ φ' α p1 → Rφ φ' α p2 -- respects transport
   R Γ* (proof M) rθ pf = R-proof Γ* M rθ pf
   R Γ* (Π{Γ}{A}{B} A* B*) {θ} rθ M = (N : (A θ)) (rN : R Γ* A* rθ N) → R (Γ* , A*) B* (rθ , rN) (M N)
   R (Γ* , _) (w A* B*) {θ , _} (rθ , _) M = 
@@ -137,11 +138,11 @@ module HomotopyCanonHSet3 where
     R (Γ* , A0*) B* (rθ , fund _ A0* rθ M0) M
   R Γ* (id A* M N) rθ α = Q Γ* A* rθ (fund Γ* A* rθ M) (fund Γ* A* rθ N) α
 
-  R-proof Γ* φ rθ pf = fund Γ* prop rθ φ (_ , pf) id 
+  R-proof Γ* φ rθ pf = fst (fund Γ* prop rθ φ) _ id pf
 
   -- is this an hprop in the metalanguage?
   Q Γ* bool rθ rM rN α = Unit  -- FIXME: should we insist that it's refl?
-  Q Γ* prop rθ rM rN α = (x : _) → rM (_ , x) id → rN (_ , coe α x) id -- FIXME and symmetrically?
+  Q Γ* prop rθ rM rN α = (x : _) → fst rM _ id x → fst rN _ id (coe α x) -- FIXME and symmetrically?
   Q Γ* (proof M) rθ rM rN α = Unit
   Q Γ* (Π A* B*) rθ rM rN α = (x : _) (rx : R Γ* A* rθ x) → Q (Γ* , A*) B* (rθ , rx) (rM _ rx) (rN _ rx) (ap≃ α)
   Q Γ* (id A* M N) rθ rM rN α = Unit
@@ -157,7 +158,7 @@ module HomotopyCanonHSet3 where
              → {M N : A θ} → (rM : R Γ* A* rθ M) → (rN : R Γ* A* rθ N) → {α α' : M == N} (p : α == α')
              → Q Γ* A* rθ rM rN α → Q Γ* A* rθ rM rN α'
   transportQ Γ* bool rθ rM rN p q = <>
-  transportQ Γ* prop rθ rM rN p q = {!!} -- equal in Γ₀ U~
+  transportQ Γ* prop rθ rM rN p q = (λ x rx → snd rN _ id _ _ (ap (λ z → transport (λ x₁ → x₁) z x) p) (q _ rx))
   transportQ Γ* (proof M) rθ rM rN p q = <>
   transportQ Γ* (Π A* B*) rθ rM rN p q = (λ x rx → transportQ (Γ* , A*) B* (rθ , rx) (rM _ rx) (rN _ rx) (ap (λ z → ap≃ z {x}) p) (q x rx))
   transportQ Γ* (id A* M N) rθ rM rN p q = <>
@@ -168,9 +169,9 @@ module HomotopyCanonHSet3 where
                R Γ* A* rθ M → R Γ* A* rθ M'
   transportR Γ* bool rθ p (Inl x) = Inl (x ∘ ! p)
   transportR Γ* bool rθ p (Inr x) = Inr (x ∘ ! p)
-  transportR Γ* prop rθ p rφ = λ φ'x q → rφ φ'x (! p ∘ q)  {- R Γ* prop rθ φ = φ → MetaType fails this case -} 
-  transportR Γ* (proof M) rθ p rM = {!!} -- these are equal in Γ₀(U~)... 
-  transportR Γ* (Π A* B*) rθ p rM = λ N rn → transportR (Γ* , A*) B* (rθ , rn) (ap≃ p) (rM N rn)  -- FIXME: no contravariance?
+  transportR Γ* prop rθ p rφ = (λ φ' q x → fst rφ φ' (q ∘ p) x) , (λ φ' φ=φ' pf1 pf2 α rpf1 → snd rφ _ (φ=φ' ∘ p) pf1 pf2 α rpf1)  
+  transportR Γ* (proof M) rθ p rM = snd (fund Γ* prop rθ M) _ id _ _ p rM 
+  transportR Γ* (Π A* B*) rθ p rM = λ N rn → transportR (Γ* , A*) B* (rθ , rn) (ap≃ p) (rM N rn) 
   transportR (Γ* , A*) (w A1* A2*) rθ p rM = transportR Γ* A2* (fst rθ) p rM
   transportR Γ* (subst1{Γ}{A0}{B}{A0*} B* M0) rθ p rM = transportR (Γ* , A0*) B* (rθ , _) p rM
   transportR Γ* (id A* M* N*) rθ p rα = transportQ Γ* A* rθ (fund Γ* A* rθ M*) (fund Γ* A* rθ N*) p rα
@@ -188,9 +189,9 @@ module HomotopyCanonHSet3 where
   fund (Γ* , A0*) .(w A* B*) (rθ , rM) (w {Γ} {A} {B} {A*} {B*} M) = fund Γ* B* rθ M
   fund Γ* .bool rθ true = Inl id
   fund Γ* .bool rθ false = Inr id
-  fund Γ* .prop rθ unit = λ _ _ → Unit
-  fund Γ* .prop rθ void = λ _ _ → Void
-  fund Γ* .prop rθ (`∀ φ ψ) = λ {(φ' , x) p → {!coe p x!}}
+  fund Γ* .prop rθ unit = (λ _ _ _ → Unit) , (λ φ' α p1 p2 x x₁ → <>)
+  fund Γ* .prop rθ void = (λ _ _ _ → Void) , (λ φ' α p1 p2 x x₁ → x₁)
+  fund Γ* .prop rθ (`∀ φ ψ) = (λ φ' p x → {!!}) , {!!}
   fund Γ* .(proof unit) rθ <> = {! <>!}
   fund Γ* A* rθ (abort M) = {! Sums.abort (fund Γ* (proof void) rθ M) !}
   fund Γ* .(proof (`∀ M M₁)) rθ (plam {Γ} {M} {M₁} M₂) = {!!}
@@ -215,13 +216,16 @@ module HomotopyCanonHSet3 where
 
   fund-tr {α = α} Γ* bool rθ rM1 rM2 rα (Inl x) = Inl (x ∘ ap≃ (transport-constant α))
   fund-tr {α = α} Γ* bool rθ rM1 rM2 rα (Inr x) = Inr (x ∘ ap≃ (transport-constant α))
-  fund-tr Γ* prop rθ rM1 rM2 rα rN = {!!}
-  fund-tr Γ* (proof M) rθ rM1 rM2 rα rN = {!!}
+  fund-tr {α = α} Γ* prop rθ rM1 rM2 rα rN = (λ φ' p x' → fst rN φ' (p ∘ ! (ap≃ (transport-constant α))) x') , (λ φ' p x1' x2' eq rx1 → snd rN φ' _ x1' x2' eq rx1)
+  fund-tr {α = α} Γ* (proof M) rθ rM1 rM2 rα rN = snd (fund (Γ* , _) prop (rθ , rM2) M) _ id _ _ (! (ap≃ (transport-ap-assoc (λ x → interp M (_ , x)) α))) 
+                                                      (ap-is-reducible _ rN) where
+          ap-is-reducible : Q Γ* prop rθ (fund (Γ* , _) prop (rθ , rM1) M) (fund (Γ* , _) prop (rθ , rM2) M) (ap (\ x -> interp M (_ , x)) α)
+          ap-is-reducible = {!!}
   fund-tr {Γ}{A0}{._}{θ}{M1}{M2}{α}{f} Γ* {A0*} (Π{.(Γ , A0)}{A}{B} A* B*) rθ rM1 rM2 rα rf = 
-          λ x rx → {!fund-tr Γ* B* ? (rf _ (fund-tr Γ* A* rθ rM2 rM1 ? rx)) !}
-  fund-tr Γ* (id C* M N) rθ rM1 rM2 rα rN = {!!}
+          λ x rx → {!fund-tr Γ* B* ? (rf _ (fund-tr Γ* A* rθ rM2 rM1 ? rx)) !} -- need Sigmas
+  fund-tr Γ* (id C* M N) rθ rM1 rM2 rα rN = {!!} -- need composition and ap and !
   fund-tr {α = α} Γ* (w A* B*) rθ rM1 rM2 rα rN = transportR Γ* B* rθ (! (ap≃ (transport-constant α))) rN
-  fund-tr Γ* (subst1 B* M) rθ rM1 rM2 rα rN = {!!}
+  fund-tr Γ* (subst1 B* M) rθ rM1 rM2 rα rN = {!!} -- FIXME
 
   canonicity : (M : Tm · bool) → Either (interp M <> == True) (interp M <> == False)
   canonicity M = fund <> bool <> M
