@@ -8,18 +8,28 @@ module HomotopyCanonHSet4 where
   -- RULE: no transport at MetaTypes!
   MetaType = Type
 
-  -- make some syntax to induct over, a la Outrageous but Meaningful Coindcidences
-  -- this version uses large indexing (datatypes indexed by Types); 
-  -- see version 2 for a (partial) version that uses a universe instead.
+  {-
+    Make some syntax to induct over, a la Outrageous but Meaningful Coindcidences.  
+
+    This version uses large indexing (datatypes indexed by Types); 
+    see version 2 for a (partial) version that uses a universe instead.
+
+    Unlike in the paper, terms are indexed by *syntactic* types,
+    but there is a definitional equality rule that uses the semantics.
+    The reason is that I couldn't figure out how to prove the fundamental
+    theorem if terms are indexed by semantic types:
+    splitting the term doesn't determine the syntactic type,
+    and after splitting the syntactic type you can't split the term.  
+  -}
 
   -- Agda has trouble with non-constructor indices if we
   -- represent contexts as Types instead of lists of Types
   mutual
-    data Ctx : MetaType where
-      ·   : Ctx
-      _,_ : (Γ : Ctx) (A : ElC Γ → Type) → Ctx
+    data Context : MetaType where
+      ·   : Context
+      _,_ : (Γ : Context) (A : ElC Γ → Type) → Context
 
-    ElC : Ctx → Type
+    ElC : Context → Type
     ElC · = Unit
     ElC (Γ , A) = Σ \ (θ : ElC Γ) → (A θ)
 
@@ -28,11 +38,15 @@ module HomotopyCanonHSet4 where
 
   -- due to all the mutality, Agda is happier if Ty is indexed by the denotation of the type,
   -- rather than using a decoding function interpA.  See HomotopyCanonHType1.agda for what goes wrong.  
-  data Ty : (Γ : Ctx) → (ElC Γ → Type) → MetaType 
-
+  Ctx : Context → MetaType 
+  data Ty : (Γ : Context) → (ElC Γ → Type) → MetaType 
   data Tm : (Γ : _) {A : _} → Ty Γ A → MetaType 
+  Subst : (Γ : Context) {Γ' : _} → Ctx Γ' → MetaType
+  interp  : ∀ {Γ A} {A* : Ty Γ A} → Tm Γ A* → (θ : ElC Γ) → (A θ)
+  interps : ∀ {Γ Γ'} {Γ'* : Ctx Γ'} → Subst Γ Γ'* → (ElC Γ) → ElC Γ'
 
-  interp : ∀ {Γ A} {A* : Ty Γ A} → Tm Γ A* → (θ : ElC Γ) → (A θ)
+  Ctx · = Unit
+  Ctx (Γ , A) = Ctx Γ × Ty Γ A 
 
   data Ty where
     bool : ∀ {Γ} → Ty Γ (\ _ -> Bool)
@@ -40,9 +54,20 @@ module HomotopyCanonHSet4 where
     proof : ∀ {Γ} → (M : Tm Γ prop) → Ty Γ (\ θ → (interp M θ))
     Π : ∀ {Γ A B} → (A* : Ty Γ A) (B* : Ty (Γ , A) B) → Ty Γ (\ θ → (x : A θ) → (B (θ , x)))
     id : ∀ {Γ A} (A* : Ty Γ A) (M N : Tm Γ A*) → Ty Γ (\ θ → interp M θ == interp N θ)
+    subst : ∀ {Γ Γ' A} (Γ'* : Ctx Γ') (θ'* : Subst Γ Γ'*) (A* : Ty Γ' A) → Ty Γ (λ θ → A (interps θ'* θ))
     w : ∀ {Γ A B} → (A* : Ty Γ A) (B* : Ty Γ B) → Ty (Γ , A) (\ θ → B (fst θ))
     subst1 : ∀ {Γ A B} → {A* : Ty Γ A} (B* : Ty (Γ , A) B)
                (M : Tm Γ A*) → Ty Γ (\ θ → B (θ , interp M θ))
+
+  Subst Γ {·} Γ'* = Unit
+  Subst Γ {Γ' , A} (Γ'* , A*) = Σ (λ (θ* : Subst Γ Γ'*) → Tm Γ (subst Γ'* θ* A*))
+  
+  interps {Γ} {·} θ'* θ = <>
+  interps {Γ} {Γ' , A} (θ'* , M*) θ = interps θ'* θ , interp M* θ
+  
+  unlam : ∀ {Γ A B} {A* : Ty Γ A} {B* : Ty (Γ , A) B} → Tm Γ (Π A* B*) → Tm (Γ , A) B*
+
+  -- FIXME: missing some structural properties?
 
   data Tm where
     v    : ∀ {Γ A} {A* : Ty Γ A} → Tm (Γ , A) (w A* A*)
@@ -64,12 +89,29 @@ module HomotopyCanonHSet4 where
     app  : ∀ {Γ A B} {A* : Ty Γ A} {B* : Ty (Γ , A) B} → Tm Γ (Π A* B*) → (M : Tm Γ A*) → Tm Γ (subst1 B* M)
     refl : ∀ {Γ A} {A* : Ty Γ A} (M : Tm Γ A*) → Tm Γ (id A* M M) 
     tr   : ∀ {Γ A C} {A* : Ty Γ A} (C* : Ty (Γ , A) C) {M1 M2 : Tm Γ A*} (α : Tm Γ (id A* M1 M2)) →  Tm Γ (subst1 C* M1) →  Tm Γ (subst1 C* M2)
+    uap  : ∀ {Γ} {P : Tm Γ prop} {Q : Tm Γ prop} 
+           (f : Tm (Γ , \ θ -> interp P θ) (w (proof P) (proof Q)))
+           (g : Tm (Γ , \ θ -> interp Q θ) (w (proof Q) (proof P)))
+           → Tm Γ (id prop P Q)
+    deq : ∀ {Γ A} {A* A'* : Ty Γ A} → Tm Γ A* → Tm Γ A'* -- any two ways of saying the same thing are equal
+    lam=  : ∀ {Γ A B} {A* : Ty Γ A} {B* : Ty (Γ , A) B} 
+           (f g : Tm Γ (Π A* B*))
+           (α : Tm (Γ , A) (id B* (unlam f) (unlam g)))
+           → Tm Γ (id _ f g)
 
-  interp-if : {Γ   : Ctx} {C   : Σe (ElC Γ) (λ θ₁ → Bool) → Type} (C*  : Ty (Γ , (λ _ → Bool)) C) (M   : Tm Γ bool) (M1  : Tm Γ (subst1 C* true)) (M2  : Tm Γ (subst1 C* false)) (θ   : ElC Γ) → C (θ , interp M θ)
-  interp-<> : {Γ : Ctx} {θ : ElC Γ} → (interp unit θ)
+  interp-if : ∀ {Γ C} (C*  : Ty (Γ , (λ _ → Bool)) C) (M   : Tm Γ bool) (M1  : Tm Γ (subst1 C* true)) (M2  : Tm Γ (subst1 C* false)) (θ   : ElC Γ) → C (θ , interp M θ)
+  interp-<> : ∀ {Γ} {θ : ElC Γ} → (interp unit θ)
   interp-abort : ∀ {Γ A} (A* : Ty Γ A) → Tm Γ (proof void) → (θ : ElC Γ) → (A θ)
   interp-plam : ∀ {Γ A B} → (M : Tm (Γ , _) (proof B)) (θ : ElC Γ) → (interp (`∀ A B) θ)
   interp-papp  : ∀ {Γ A B} → (M : Tm Γ (proof (`∀ A B))) → (N : Tm Γ (proof A)) (θ : ElC Γ) → (interp B (θ , interp N θ))
+  interp-uap-eqv : ∀ {Γ} {P : Tm Γ prop} {Q : Tm Γ prop} 
+           (f : Tm (Γ , \ θ -> interp P θ) (w (proof P) (proof Q)))
+           (g : Tm (Γ , \ θ -> interp Q θ) (w (proof Q) (proof P)))
+           (θ : _) → Equiv (interp P θ) (interp Q θ)
+  interp-lam= : ∀ {Γ A B} {A* : Ty Γ A} {B* : Ty (Γ , A) B} 
+           (f g : Tm Γ (Π A* B*))
+           (α : Tm (Γ , A) (id B* (unlam f) (unlam g))) (θ : ElC Γ)
+           → interp f θ == interp g θ
 
   interp v θ = snd θ
   interp (w M) θ = interp M (fst θ)
@@ -87,6 +129,19 @@ module HomotopyCanonHSet4 where
   interp (app M N) θ = (interp M θ) (interp N θ)
   interp (refl M) θ = id
   interp (tr{Γ}{A}{C} C* α N) θ = transport (λ x → C (θ , x)) (interp α θ) (interp N θ)
+  interp (uap f g) θ = ua (interp-uap-eqv f g θ) 
+  interp (deq M) θ = interp M θ
+  interp (lam= f g α) θ = interp-lam= f g α θ
+
+  -- f : G |- Π A B
+  -- w f : G , A |- Π A B
+  -- v   : G , A |- A
+  unlam{Γ}{A}{B}{A*}{B*} f = deq (app wf' v) -- deq (app {A* = w A* A*}{B* = {!w (w A* A*) B*!}} (deq (w{A* = A*} f)) v)
+    where wf : Tm (Γ , A) (w A* (Π A* B*))
+          wf = w f
+
+          wf' : Tm (Γ , A) (Π (w A* A*) {!subst (Γ* , A*) ? B*!}) 
+          wf' = deq wf
 
   -- can't inline these because we need the prior cases of interp to be available
   interp-if {_}{C} C* M M1 M2 θ = if (λ x → (C (θ , x))) / interp M θ then interp M1 θ else (interp M2 θ)
@@ -94,33 +149,29 @@ module HomotopyCanonHSet4 where
   interp-abort _ M θ = Sums.abort (interp M θ)
   interp-plam M θ = λ x → interp M (θ , x)
   interp-papp M N θ = interp M θ (interp N θ)
+  interp-uap-eqv f g θ = (improve (hequiv (λ x → interp f (θ , x)) (λ y → interp g (θ , y)) FIXME1 FIXME2))  where
+    postulate FIXME1 : _
+              FIXME2 : _
+    -- one option would be to observe that all props are hprops, but what goes wrong if we don't?
+  interp-lam= f g α θ = λ≃ (λ x → interp α (θ , x))
 
-
-  -- syntactic contexts
-  Ctx* : Ctx → MetaType 
-  Ctx* · = Unit
-  Ctx* (Γ , A) = Ctx* Γ × Ty Γ A 
-
-  U~ : Type
-  U~ = Σ \ (X : Type) → X
-
-
+{-
   -- definition and proof of reducibility
 
-  RC : ∀ {Γ} → (Γ* : Ctx* Γ) (θ : ElC Γ) → MetaType
-  R : ∀ {Γ A} (Γ* : Ctx* Γ) (A* : Ty Γ A) → {θ : ElC Γ} → RC Γ* θ → (A θ) → MetaType
-  Q : ∀ {Γ A} (Γ* : Ctx* Γ) (A* : Ty Γ A) → {θ : ElC Γ} → (rθ : RC Γ* θ) 
+  RC : ∀ {Γ} → (Γ* : Ctx Γ) (θ : ElC Γ) → MetaType
+  R : ∀ {Γ A} (Γ* : Ctx Γ) (A* : Ty Γ A) → {θ : ElC Γ} → RC Γ* θ → (A θ) → MetaType
+  Q : ∀ {Γ A} (Γ* : Ctx Γ) (A* : Ty Γ A) → {θ : ElC Γ} → (rθ : RC Γ* θ) 
     → {M N : A θ} → R Γ* A* rθ M → R Γ* A* rθ N → (α : M == N) → MetaType
-  fund : ∀ {Γ A θ} (Γ* : Ctx* Γ) (A* : Ty Γ A) (rθ : RC Γ* θ) → (M : Tm Γ A*) → R Γ* A* rθ (interp M θ)
+  fund : ∀ {Γ A θ} (Γ* : Ctx Γ) (A* : Ty Γ A) (rθ : RC Γ* θ) → (M : Tm Γ A*) → R Γ* A* rθ (interp M θ)
   -- workaround scoping rules
-  R-proof : ∀ {Γ} (Γ* : Ctx* Γ) (φ : Tm Γ prop) {θ : ElC Γ} (rθ : RC Γ* θ) (pf : interp φ θ) → MetaType
+  R-proof : ∀ {Γ} (Γ* : Ctx Γ) (φ : Tm Γ prop) {θ : ElC Γ} (rθ : RC Γ* θ) (pf : interp φ θ) → MetaType
 
   RC {·} <> θ = Unit
   RC {Γ , A} (Γ* , A*) (θ , M) = Σ (λ (sθ : RC Γ* θ) → R Γ* A* sθ M)
 
   R _ bool rθ M = Either (M == True) (M == False)
   R Γ* prop rθ φ = Σ \ (Rφ : (φ' : Type) → φ == φ' → φ' → MetaType) → 
-                    (φ' : Type) (α : φ == φ') → (p1 p2 : φ') → p1 == p2 → Rφ φ' α p1 → Rφ φ' α p2 -- respects transport
+                       (φ' : Type) (α : φ == φ') → (p1 p2 : φ') → p1 == p2 → Rφ φ' α p1 → Rφ φ' α p2 -- has a transport function
   R Γ* (proof M) rθ pf = R-proof Γ* M rθ pf
   R Γ* (Π{Γ}{A}{B} A* B*) {θ} rθ M = (N : (A θ)) (rN : R Γ* A* rθ N) → R (Γ* , A*) B* (rθ , rN) (M N)
   R (Γ* , _) (w A* B*) {θ , _} (rθ , _) M = 
@@ -133,7 +184,7 @@ module HomotopyCanonHSet4 where
 
   -- is this an hprop in the metalanguage?
   Q Γ* bool rθ rM rN α = Unit  -- FIXME: should we insist that it's refl?
-  Q Γ* prop rθ rM rN α = (x : _) → fst rM _ id x → fst rN _ id (coe α x) -- FIXME and symmetrically?
+  Q Γ* prop rθ rM rN α = ((x : _) → fst rM _ id x → fst rN _ id (coe α x)) × ((y : _) → fst rN _ id y → fst rM _ id (coe (! α) y))
   Q Γ* (proof M) rθ rM rN α = Unit
   Q Γ* (Π A* B*) rθ rM rN α = (x : _) (rx : R Γ* A* rθ x) → Q (Γ* , A*) B* (rθ , rx) (rM _ rx) (rN _ rx) (ap≃ α)
   Q Γ* (id A* M N) rθ rM rN α = Unit
@@ -144,18 +195,19 @@ module HomotopyCanonHSet4 where
   -- proof that R is well-defined on Γ₀(A θ), without using transport.  
   -- FIXME do we need to know that it is a bijection?
 
-  transportQ : ∀ {Γ A} (Γ* : Ctx* Γ) (A* : Ty Γ A) → {θ : ElC Γ} → (rθ : RC Γ* θ) 
+  transportQ : ∀ {Γ A} (Γ* : Ctx Γ) (A* : Ty Γ A) → {θ : ElC Γ} → (rθ : RC Γ* θ) 
              → {M N : A θ} → (rM : R Γ* A* rθ M) → (rN : R Γ* A* rθ N) → {α α' : M == N} (p : α == α')
              → Q Γ* A* rθ rM rN α → Q Γ* A* rθ rM rN α'
   transportQ Γ* bool rθ rM rN p q = <>
-  transportQ Γ* prop rθ rM rN p q = (λ x rx → snd rN _ id _ _ (ap (λ z → transport (λ x₁ → x₁) z x) p) (q _ rx))
+  transportQ Γ* prop rθ rM rN p q = (λ x rx → snd rN _ id _ _ (ap (λ z → transport (λ x₁ → x₁) z x) p) (fst q _ rx)) , 
+                                   (λ y ry → snd rM _ id _ _ (ap (λ z → transport (λ x₁ → x₁) (! z) y) p) (snd q _ ry))
   transportQ Γ* (proof M) rθ rM rN p q = <>
   transportQ Γ* (Π A* B*) rθ rM rN p q = (λ x rx → transportQ (Γ* , A*) B* (rθ , rx) (rM _ rx) (rN _ rx) (ap (λ z → ap≃ z {x}) p) (q x rx))
   transportQ Γ* (id A* M N) rθ rM rN p q = <>
   transportQ Γ* (w A* B*) rθ rM rN p q = transportQ (fst Γ*) B* (fst rθ) rM rN p q
   transportQ Γ* (subst1{_}{_}{_}{A0*} B* M) rθ rM rN p q = transportQ (Γ* , A0*) B* (rθ , fund Γ* A0* rθ M) rM rN p q
 
-  transportR : ∀ {Γ A θ M M'} (Γ* : Ctx* Γ) (A* : Ty Γ A) (rθ : RC Γ* θ) → M == M' → 
+  transportR : ∀ {Γ A θ M M'} (Γ* : Ctx Γ) (A* : Ty Γ A) (rθ : RC Γ* θ) → M == M' → 
                R Γ* A* rθ M → R Γ* A* rθ M'
   transportR Γ* bool rθ p (Inl x) = Inl (x ∘ ! p)
   transportR Γ* bool rθ p (Inr x) = Inr (x ∘ ! p)
@@ -166,15 +218,15 @@ module HomotopyCanonHSet4 where
   transportR Γ* (subst1{Γ}{A0}{B}{A0*} B* M0) rθ p rM = transportR (Γ* , A0*) B* (rθ , _) p rM
   transportR Γ* (id A* M* N*) rθ p rα = transportQ Γ* A* rθ (fund Γ* A* rθ M*) (fund Γ* A* rθ N*) p rα
 
-  fund-<> : ∀ {Γ θ} → (Γ* : Ctx* Γ) (rθ : RC Γ* θ) → R Γ* (proof unit) rθ <>
+  fund-<> : ∀ {Γ θ} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → R Γ* (proof unit) rθ <>
 
-  fund-abort : ∀ {Γ θ C} → (Γ* : Ctx* Γ) (rθ : RC Γ* θ) → Tm Γ (proof void) → C
+  fund-abort : ∀ {Γ θ C} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → Tm Γ (proof void) → C
 
-  fund-refl : ∀ {Γ A} (Γ* : Ctx* Γ) (A* : Ty Γ A) → {θ : ElC Γ} → (rθ : RC Γ* θ) 
+  fund-refl : ∀ {Γ A} (Γ* : Ctx Γ) (A* : Ty Γ A) → {θ : ElC Γ} → (rθ : RC Γ* θ) 
        → {M : A θ} → (rM : R Γ* A* rθ M) 
        → Q Γ* A* rθ rM rM id
 
-  fund-tr : ∀ {Γ A C θ M1 M2 α N} (Γ* : Ctx* Γ) {A* : Ty Γ A} (C* : Ty (Γ , A) C) (rθ : RC Γ* θ)
+  fund-tr : ∀ {Γ A C θ M1 M2 α N} (Γ* : Ctx Γ) {A* : Ty Γ A} (C* : Ty (Γ , A) C) (rθ : RC Γ* θ)
           (rM1 : R Γ* A* rθ M1) (rM2 : R Γ* A* rθ M2) 
           (rα : Q Γ* A* rθ rM1 rM2 α) (rN : R (Γ* , A*) C* (rθ , rM1) N)
           → R (Γ* , A*) C* (rθ , rM2) (transport (\ x → C (θ , x)) α N)
@@ -193,8 +245,8 @@ module HomotopyCanonHSet4 where
     (λ φ' α p1 p2 q w y ry → snd (fund (Γ* , proof φ) prop (rθ , ry) ψ) (interp ψ (θ , y)) id (coe (! α) p1 y) (coe (! α) p2 y) (ap (λ z → coe (! α) z y) q) (w y ry))
   fund Γ* .(proof unit) rθ <> = fund-<> Γ* rθ
   fund Γ* A* rθ (abort M) = fund-abort Γ* rθ M
-  fund Γ* .(proof (`∀ M M₁)) rθ (plam {Γ} {M} {M₁} M₂) = {!!}
-  fund Γ* .(subst1 (proof M₁) M₃) rθ (papp {Γ} {M} {M₁} M₂ M₃) = {!!}
+  fund Γ* .(proof (`∀ M M₁)) rθ (plam {Γ} {M} {M₁} M₂) = {!!} -- should be like lam 
+  fund Γ* .(subst1 (proof M₁) M₃) rθ (papp {Γ} {M} {M₁} M₂ M₃) = {!!} -- should be like app
   fund {θ = θ} Γ* .(subst1 C* M) rθ (if {Γ} {C} {C*} M1 M2 M) with interp M θ | (fund Γ* bool rθ M)
   ... | i | Inl x = transportR (Γ* , bool) C* (rθ , Inl x) (path-induction
                                                               (λ i₁ x₁ →
@@ -214,31 +266,71 @@ module HomotopyCanonHSet4 where
   fund Γ* .(subst1 B* N) rθ (app {Γ} {A} {B} {A*} {B*} M N) = fund Γ* (Π A* B*) rθ M _ (fund Γ* A* rθ N)
   fund Γ* .(id A* M* M*) rθ (refl{_}{_}{A*} M*) = fund-refl Γ* A* rθ (fund Γ* A* rθ M*)
   fund Γ* ._ rθ (tr{Γ}{A}{C}{A*} C* {M1}{M2} α N) = fund-tr Γ* C* rθ (fund Γ* _ rθ M1) (fund Γ* _ rθ M2) (fund Γ* _ rθ α) (fund Γ* _ rθ N)
+  fund {θ = θ} Γ* ._ rθ (uap{Γ}{P}{Q} f* g*) = 
+       (λ x rx → snd (fund Γ* prop rθ Q) _ id (interp f* (θ , x)) (coe (interp (uap{P = P}{Q = Q} f* g*) θ) x) 
+                     (! (ap≃ (type≃β (interp-uap-eqv{P = P}{Q = Q} f* g* θ))))
+                     (fund (Γ* , proof P) (w (proof P) (proof Q)) (rθ , rx) f*)) , 
+       (λ x rx → snd (fund Γ* prop rθ P) _ id (interp g* (θ , x)) (coe (! (interp (uap{P = P}{Q = Q} f* g*) θ)) x) 
+                     (! (ap≃ (type≃β! (interp-uap-eqv{P = P}{Q = Q} f* g* θ))))
+                     (fund (Γ* , proof Q) (w (proof Q) (proof P)) (rθ , rx) g*)) 
+  fund Γ* ._ rθ (lam={A* = A*}{B* = B*} f* g* α*) = λ x rx → {! (fund (Γ* , A*) _ (rθ , rx) α*) !}
+  fund Γ* .A* rθ (deq{Γ}{A}{A1*}{A*} M) = coe {!!} (fund Γ* A1* rθ M) -- same as var case
 
   fund-<> Γ* rθ = <>
   fund-abort Γ* rθ M = Sums.abort (fund Γ* (proof void) rθ M)
 
   fund-refl Γ* bool rθ rM = <>
-  fund-refl Γ* prop rθ rM = λ x rx → rx
+  fund-refl Γ* prop rθ rM = (λ x rx → rx) , (λ x rx → rx)
   fund-refl Γ* (proof M) rθ rM = <>
   fund-refl Γ* (Π A* B*) rθ rM = λ x rx → fund-refl (Γ* , A*) B* (rθ , rx) (rM _ rx)
   fund-refl Γ* (id A* M N) rθ rM = <>
   fund-refl Γ* (w A* B*) rθ rM = fund-refl (fst Γ*) B* (fst rθ) rM
   fund-refl Γ* (subst1{_}{_}{_}{A0*} B* M) rθ rM = fund-refl (Γ* , A0*) B* (rθ , fund Γ* A0* rθ M) rM
 
+  fund-sym : ∀ {Γ A θ M N α} (Γ* : Ctx Γ) (A* : Ty Γ A) (rθ : RC Γ* θ)
+               (rM : R Γ* A* rθ M) (rN : R Γ* A* rθ N)
+           → Q Γ* A* rθ rM rN α
+           → Q Γ* A* rθ rN rM (! α)
+  fund-sym Γ* bool rθ rM rN rα = <>
+  fund-sym {α = α} Γ* prop rθ rM rN rα = snd rα , (λ x rx → snd rN _ id _ _ (ap (λ z → coe z x) (! (!-invol α))) (fst rα x rx))
+  fund-sym Γ* (proof M) rθ rM rN rα = <>
+  fund-sym {α = α} Γ* (Π A* B*) rθ rM rN rα = λ x rx → transportQ (Γ* , A*) B* (rθ , rx) _ _ (! (ap-! (λ f → f x) α))
+                                               (fund-sym (Γ* , A*) B* (rθ , rx) (rM x rx) (rN x rx) (rα x rx))
+  fund-sym Γ* (id A* M N) rθ rM rN rα = <>
+  fund-sym Γ* (w A* B*) rθ rM rN rα = fund-sym (fst Γ*) B* (fst rθ) rM rN rα
+  fund-sym Γ* (subst1{_}{_}{_}{A*} B* M) rθ rM rN rα = fund-sym (Γ* , A*) B* (rθ , _) rM rN rα
+
+  fund-trans : ∀ {Γ A θ M N O α β} (Γ* : Ctx Γ) (A* : Ty Γ A) (rθ : RC Γ* θ)
+               (rM : R Γ* A* rθ M) (rN : R Γ* A* rθ N) (rO : R Γ* A* rθ O) 
+             → Q Γ* A* rθ rM rN α
+             → Q Γ* A* rθ rN rO β
+             → Q Γ* A* rθ rM rO (β ∘ α)
+  fund-trans Γ* bool rθ rM rN rO qMN qNO = <>
+  fund-trans {α = α} {β = β} Γ* prop rθ rM rN rO qMN qNO = 
+    (λ x rx → snd rO _ id _ _ (! (ap≃ (transport-∘ (λ x₁ → x₁) β α))) (fst qNO _ (fst qMN x rx))) , 
+    (λ y ry → snd rM _ id _ _ (ap (λ z → coe z y) (! (!-∘ β α)) ∘ ! (ap≃ (transport-∘ (λ x₁ → x₁) (! α) (! β)))) (snd qMN _ (snd qNO y ry)))
+  fund-trans Γ* (proof M) rθ rM rN rO qMN qNO = <>
+  fund-trans {α = α} {β = β} Γ* (Π A* B*) rθ rM rN rO qMN qNO = λ x rx → transportQ (Γ* , A*) B* (rθ , rx) _ _ (! (ap-∘ (λ f → f x) β α))
+                                                           (fund-trans (Γ* , A*) B* (rθ , rx) (rM x rx) (rN x rx) (rO x rx)
+                                                            (qMN x rx) (qNO x rx))
+  fund-trans Γ* (id A* M N) rθ rM rN rO qMN qNO = <>
+  fund-trans Γ* (w A* B*) rθ rM rN rO qMN qNO = fund-trans (fst Γ*) B* (fst rθ) rM rN rO qMN qNO
+  fund-trans Γ* (subst1{_}{_}{_}{A*} B* M) rθ rM rN rO qMN qNO = fund-trans (Γ* , A*) B* (rθ , _) rM rN rO qMN qNO
+
   fund-tr {α = α} Γ* bool rθ rM1 rM2 rα (Inl x) = Inl (x ∘ ap≃ (transport-constant α))
   fund-tr {α = α} Γ* bool rθ rM1 rM2 rα (Inr x) = Inr (x ∘ ap≃ (transport-constant α))
   fund-tr {α = α} Γ* prop rθ rM1 rM2 rα rN = (λ φ' p x' → fst rN φ' (p ∘ ! (ap≃ (transport-constant α))) x') , (λ φ' p x1' x2' eq rx1 → snd rN φ' _ x1' x2' eq rx1)
   fund-tr {α = α} Γ* (proof M) rθ rM1 rM2 rα rN = snd (fund (Γ* , _) prop (rθ , rM2) M) _ id _ _ (! (ap≃ (transport-ap-assoc (λ x → interp M (_ , x)) α))) 
-                                                      (ap-is-reducible _ rN) where
+                                                      (fst ap-is-reducible _ rN) where
           ap-is-reducible : Q Γ* prop rθ (fund (Γ* , _) prop (rθ , rM1) M) (fund (Γ* , _) prop (rθ , rM2) M) (ap (\ x -> interp M (_ , x)) α)
           ap-is-reducible = {!!}
   fund-tr {Γ}{A0}{._}{θ}{M1}{M2}{α}{f} Γ* {A0*} (Π{.(Γ , A0)}{A}{B} A* B*) rθ rM1 rM2 rα rf = 
-          λ x rx → {!fund-tr Γ* B* ? (rf _ (fund-tr Γ* A* rθ rM2 rM1 ? rx)) !} -- need Sigmas
-  fund-tr Γ* (id C* M N) rθ rM1 rM2 rα rN = {!!} -- need composition and ap and !
+          λ x rx → {!fund-tr Γ* B* ? (rf _ (fund-tr Γ* A* rθ rM2 rM1 ? rx)) !} -- need Sigmas / generalization to contexts
+  fund-tr {θ = θ} Γ* (id C* M N) rθ rM1 rM2 rα rN = {!!} -- need composition and ap and !
   fund-tr {α = α} Γ* (w A* B*) rθ rM1 rM2 rα rN = transportR Γ* B* rθ (! (ap≃ (transport-constant α))) rN
-  fund-tr Γ* (subst1 B* M) rθ rM1 rM2 rα rN = {!!} -- FIXME
+  fund-tr Γ* (subst1 B* M) rθ rM1 rM2 rα rN = {!!} 
 
   canonicity : (M : Tm · bool) → Either (interp M <> == True) (interp M <> == False)
   canonicity M = fund <> bool <> M
 
+-}
