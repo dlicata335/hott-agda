@@ -4,7 +4,7 @@ open import lib.Prelude
 open BoolM 
 import lib.PrimTrustMe
 
-module HomotopyCanonHSet9 where
+module computational-interp.HomotopyCanonHSet9 where
 
   -- RULE: no transport at MetaTypes!
   MetaType = Type
@@ -67,9 +67,14 @@ module HomotopyCanonHSet9 where
     true : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* bool
     false : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* bool
     unit  : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* prop
+    unit⁺  : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* prop
     void  : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* prop
     `∀    : ∀ {Γ} {Γ* : Ctx Γ} (A* : Tm Γ* prop) (B* : Tm (Γ* , proof A*) prop) → Tm Γ* prop
     <>    : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* (proof unit)
+    <>⁺     : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* (proof unit⁺)
+    split1 : ∀ {Γ} {Γ* : Ctx Γ} {C : _} (C* : Ty (Γ* , proof unit⁺) C)
+          → Tm Γ* (subst1 C* <>⁺) 
+          → (x : Tm Γ* (proof unit⁺)) → Tm Γ* (subst1 C* x)
     abort : ∀ {Γ C} {Γ* : Ctx Γ} {C* : Ty Γ* C} → Tm Γ* (proof void) → Tm Γ* C*
     plam  : ∀ {Γ} {Γ* : Ctx Γ} {A* : Tm Γ* prop} {B* : Tm (Γ* , proof A*) prop}
           → Tm (Γ* , proof A*) (proof B*) → Tm Γ* (proof (`∀ A* B*))
@@ -95,6 +100,8 @@ module HomotopyCanonHSet9 where
 
   interp-if : ∀ {Γ C} {Γ* : Ctx Γ} (C*  : Ty (Γ* , bool) C) (M : Tm Γ* bool) (M1  : Tm Γ* (subst1 C* true)) (M2  : Tm Γ* (subst1 C* false)) (θ : Γ) → C (θ , interp M θ)
   interp-<> : ∀ {Γ} {Γ* : Ctx Γ} {θ : Γ} → (interp {Γ* = Γ*} unit θ)
+  interp-<>⁺ : ∀ {Γ} {Γ* : Ctx Γ} {θ : Γ} → (interp {Γ* = Γ*} unit⁺ θ)
+  interp-split1 : ∀ {Γ} {Γ* : Ctx Γ} {C : _} (C*  : Ty (Γ* , proof unit⁺) C) (M1  : Tm Γ* (subst1 C* <>⁺))  (M : Tm Γ* (proof unit⁺)) (θ : Γ) → C (θ , interp M θ)
   interp-abort : ∀ {Γ A} {Γ* : Ctx Γ} (A* : Ty Γ* A) → Tm Γ* (proof void) → (θ : Γ) → (A θ)
   interp-plam : ∀ {Γ} {Γ* : Ctx Γ} {A : _} {B : _}→ (M : Tm (Γ* , _) (proof B)) (θ : Γ) → (interp (`∀ A B) θ)
   interp-papp  : ∀ {Γ} {Γ* : Ctx Γ} {A : _} {B : _} → (M : Tm Γ* (proof (`∀ A B))) → (N : Tm Γ* (proof A)) (θ : Γ) → (interp B (θ , interp N θ))
@@ -112,9 +119,12 @@ module HomotopyCanonHSet9 where
   interp true _ = True
   interp false _ = False
   interp unit _ = Unit
+  interp unit⁺ _ = Unit⁺
   interp void _ = Void
   interp (`∀ A B) θ = (x : interp A θ) -> interp B (θ , x)
   interp <> θ = interp-<>
+  interp <>⁺ θ = interp-<>⁺
+  interp (split1 C* M1 M) θ = interp-split1 C* M1 M θ
   interp (abort{_}{_}{_}{A*} M) θ = interp-abort A* M θ
   interp (plam M) θ = interp-plam M θ
   interp (papp M N) θ = interp-papp M N θ
@@ -126,7 +136,7 @@ module HomotopyCanonHSet9 where
   interp (uap f g) θ = ua (interp-uap-eqv f g θ) 
   interp (deq M) θ = interp M θ
   interp (lam= f g α) θ = interp-lam= f g α θ
-  
+
   unlam{Γ}{A}{B}{Γ*}{A*}{B*} f = deq (app wf' v) -- deq (app {A* = w A* A*}{B* = {!w (w A* A*) B*!}} (deq (w{A* = A*} f)) v)
     where wf : Tm (Γ* , A*) (w A* (Π A* B*))
           wf = w f
@@ -140,6 +150,8 @@ module HomotopyCanonHSet9 where
   -- can't inline these because we need the prior cases of interp to be available
   interp-if {_}{C} C* M M1 M2 θ = if (λ x → (C (θ , x))) / interp M θ then interp M1 θ else (interp M2 θ)
   interp-<> = <>
+  interp-<>⁺ = <>⁺
+  interp-split1 {_}{_}{C} C* M1 M θ = split1⁺ (λ x → C (θ , x)) (interp M1 θ) (interp M θ)
   interp-abort _ M θ = Sums.abort (interp M θ)
   interp-plam M θ = λ x → interp M (θ , x)
   interp-papp M N θ = interp M θ (interp N θ)
@@ -230,12 +242,18 @@ module HomotopyCanonHSet9 where
   R-deq Γ* A* A1* rθ = lib.PrimTrustMe.unsafe-cast
 
   fund-<> : ∀ {Γ θ} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → R Γ* (proof unit) rθ <>
+  fund-<>⁺ : ∀ {Γ θ} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → R Γ* (proof unit⁺) rθ <>⁺
   fund-abort : ∀ {Γ θ C} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → Tm Γ* (proof void) → C
   fund-lam= : ∀ {Γ A B} (Γ* : Ctx Γ) (A* : Ty Γ* A) (B* : Ty (Γ* , A*) B)
               (f g : Tm Γ* (Π A* B*))
               (α : Tm (Γ* , A*) (id B* (unlam f) (unlam g)))
               {θ : Γ} (rθ : RC Γ* θ)
             → (x : _) (rx : _) → _
+  fund-split1 : ∀ {Γ θ} (Γ* : Ctx Γ) {C : _} (C* : Ty (Γ* , proof unit⁺) C)
+          → (M1 : Tm Γ* (subst1 C* <>⁺) )
+          → (M : Tm Γ* (proof unit⁺))
+          → (rθ : RC Γ* θ)
+          → R Γ* (subst1 C* M) rθ (interp (split1 C* M1 M) θ)
 
   fund-refl : ∀ {Γ A} (Γ* : Ctx Γ) (A* : Ty Γ* A) → {θ : Γ} → (rθ : RC Γ* θ) 
        → {M : A θ} → (rM : R Γ* A* rθ M) 
@@ -251,6 +269,7 @@ module HomotopyCanonHSet9 where
   fund Γ* .bool rθ true = Inl id
   fund Γ* .bool rθ false = Inr id
   fund Γ* .prop rθ unit = (λ _ _ _ → Unit) , (λ φ' α p1 p2 x x₁ → <>)
+  fund Γ* .prop rθ unit⁺ = (λ ψ p x → coe (! p) x == <>⁺) , (λ φ' α p1 p2 α₁ r1 → r1 ∘ ap (λ z → coe (! α) z) (! α₁))
   fund Γ* .prop rθ void = (λ _ _ _ → Void) , (λ φ' α p1 p2 x x₁ → x₁)
   fund {θ = θ} Γ* .prop rθ (`∀ φ ψ) = 
     (λ φ' p x → (y : interp φ θ) → (ry : fst (fund Γ* prop rθ φ) _ id y) → fst (fund (Γ* , proof φ) prop (rθ , ry) ψ) _ id (coe (! p) x y)) , 
@@ -266,8 +285,7 @@ module HomotopyCanonHSet9 where
                                                                  if (λ x₂ → C (θ , x₂)) / i₁ then interp M1 θ else (interp M2 θ))
                                                               id (! x)) 
                                (fund-tr{_}{_}{_}{_}{_}{_}{ ! x }{_}  Γ* C* rθ (fund Γ* bool rθ true) (Inl x) <>  (fund Γ* _ rθ M1)) 
-                -- Note: is this path-induction kosher?
-                --       it seems like it's in a spot where we just need a path in the language!
+                -- see split1 for a cleaner version
   ... | i | Inr x = transportR (Γ* , bool) C* (rθ , Inr x) (path-induction
                                                               (λ i₁ x₁ →
                                                                  transport (λ x₂ → C (θ , x₂)) x₁ (interp M2 θ) ==
@@ -287,11 +305,20 @@ module HomotopyCanonHSet9 where
                      (fund (Γ* , proof Q) (w (proof Q) (proof P)) (rθ , rx) g*)) 
   fund .Γ* .A* rθ (deq{Γ}{A}{Γ*}{A1*}{A*} M) = R-deq Γ* A1* A* rθ (fund Γ* A1* rθ M) 
   fund Γ* ._ rθ (lam={A* = A*}{B* = B*} f* g* α*) = λ x rx → fund-lam= Γ*  A* B* f* g* α* rθ x rx
+  fund Γ* ._ rθ <>⁺ = fund-<>⁺ Γ* rθ
+  fund Γ* ._ rθ (split1 C* M1 M) = fund-split1 Γ* C* M1 M rθ 
 
   fund-<> Γ* rθ = <>
+  fund-<>⁺ Γ* rθ = id
   fund-abort Γ* rθ M = Sums.abort (fund Γ* (proof void) rθ M)
   fund-lam= Γ* A* B* f* g* α* rθ x rx = transportQ (Γ* , A*) B* (rθ , rx) (fund Γ* (Π A* B*) rθ f* x rx)
                                          (fund Γ* (Π A* B*) rθ g* x rx) (! (Π≃β (λ x₁ → interp α* (_ , x₁)))) (fund (Γ* , A*) _ (rθ , rx) α*)
+
+  fund-split1 {θ = θ} Γ* {C} C* M1 M rθ = transportR (Γ* , proof unit⁺) C* (rθ , (fund Γ* (proof unit⁺) rθ M)) (apd (split1⁺ (λ x → C (θ , x)) (interp M1 θ)) (! (fund Γ* (proof unit⁺) rθ M))) 
+                                          (fund-tr {α = ! (fund Γ* (proof unit⁺) rθ M)}
+                                                  Γ* C* rθ id (fund Γ* (proof unit⁺) rθ M) <>  -- uses the fact that all paths are reducible in Prooff(-)
+                                                  (fund Γ* (subst1 C* <>⁺) rθ M1))
+  -- (fund Γ* (subst1 C* <>⁺) rθ M1) -- 
 
   fund-refl Γ* bool rθ rM = <>
   fund-refl Γ* prop rθ rM = (λ x rx → rx) , (λ x rx → rx)
@@ -334,6 +361,50 @@ module HomotopyCanonHSet9 where
   fund-trans Γ* (subst1{_}{_}{_}{._}{A*} B* M) rθ rM rN rO qMN qNO = fund-trans (Γ* , A*) B* (rθ , _) rM rN rO qMN qNO
   fund-trans Γ* _ rθ rM rN rO qMN qNO = {!!}
 
+  fund-ap : ∀ {Γ A B θ M1 M2 α} 
+           (Γ* : Ctx Γ) {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} (f : Tm (Γ* , A*) B*) (rθ : RC Γ* θ)
+           (rM1 : R Γ* A* rθ M1) (rM2 : R Γ* A* rθ M2) 
+           (rα : Q Γ* A* rθ rM1 rM2 α)
+          → Q (Γ* , A*) B* (rθ , rM2) 
+              (fund-tr Γ* B* rθ rM1 rM2 rα (fund (Γ* , A*) B* (rθ , rM1) f)) 
+              (fund (Γ* , A*) B* (rθ , rM2) f) 
+              (apd (\ x -> interp f (θ , x)) α)
+  fund-ap {α = α} Γ* {A* = A*} v rθ rM1 rM2 rα = transportQ Γ* A* rθ _ rM2 (coh α) (fund-trans {α = ap≃ (transport-constant α)} {β = α} Γ* A* rθ _ _ _ {!!} rα) where
+    coh : ∀ {A} {M1 M2 : A} (α : M1 == M2)→ (α ∘ ap (λ f → f M1) (transport-constant α)) == (apd (λ x → x) α)
+    coh id = id
+  fund-ap Γ* (w f) rθ rM1 rM2 rα = {!!}
+  fund-ap Γ* true rθ rM1 rM2 rα = <>
+  fund-ap Γ* false rθ rM1 rM2 rα = <>
+  fund-ap Γ* unit rθ rM1 rM2 rα = {!!}
+  fund-ap Γ* unit⁺ rθ rM1 rM2 rα = {!!}
+  fund-ap Γ* void rθ rM1 rM2 rα = {!!}
+  fund-ap Γ* (`∀ f f₁) rθ rM1 rM2 rα = {!!}
+  fund-ap Γ* <> rθ rM1 rM2 rα = <>
+  fund-ap Γ* <>⁺ rθ rM1 rM2 rα = <>
+  fund-ap Γ* (split1 _ f f₁) rθ rM1 rM2 rα = {!!}
+  fund-ap Γ* (abort f) rθ rM1 rM2 rα = {!!}
+  fund-ap Γ* (plam f₂) rθ rM1 rM2 rα = <>
+  fund-ap Γ* (papp f₂ f₃) rθ rM1 rM2 rα = <>
+  fund-ap Γ* (if f f₁ f₂) rθ rM1 rM2 rα = {!!}
+  fund-ap Γ* (lam f) rθ rM1 rM2 rα = {!!}
+  fund-ap Γ* (app f f₁) rθ rM1 rM2 rα = {!!}
+  fund-ap Γ* (refl f) rθ rM1 rM2 rα = <>
+  fund-ap Γ* (tr C* f₂ f₃) rθ rM1 rM2 rα = {!!}
+  fund-ap Γ* (uap f₂ f₃) rθ rM1 rM2 rα = <>
+  fund-ap Γ* (deq f) rθ rM1 rM2 rα = lib.PrimTrustMe.unsafe-cast (fund-ap Γ* f rθ rM1 rM2 rα)
+  fund-ap Γ* (lam= f f₁ f₂) rθ rM1 rM2 rα = <>
+
+  fund-ap1 : ∀ {Γ A B θ M1 M2 α} (Γ* : Ctx Γ) {A* : Ty Γ* A} {B* : Ty Γ* B} (f : Tm (Γ* , A*) (w _ B*)) (rθ : RC Γ* θ)
+           (rM1 : R Γ* A* rθ M1) (rM2 : R Γ* A* rθ M2) 
+          → Q Γ* A* rθ rM1 rM2 α
+          → Q Γ* B* rθ (fund (Γ* , A*) (w _ B*) (rθ , rM1) f) (fund (Γ* , A*) (w _ B*) (rθ , rM2) f) (ap (\ x -> interp f (θ , x)) α)
+  fund-ap1 {θ = θ} {α = α} Γ* {B* = B*} f rθ rM1 rM2 rα =
+    transportQ Γ* B* rθ _ _ (coh {f = \ x -> interp f (θ , x)} α) (fund-trans {α = ! (ap≃ (transport-constant α))} Γ* B* rθ _ _ _ {!!} (fund-ap Γ* f rθ rM1 rM2 rα)) where
+           coh : ∀ {A B} {f : A → B} {M1 M2 : _} (α : M1 == M2) → 
+             (apd f α ∘ ! (ap≃ (transport-constant α))) == (ap f α)
+           coh id = id
+
+
   -- FIXME: why doesn't this work in --without-K? 
   fund-tr {α = α} Γ* bool rθ rM1 rM2 rα (Inl x) = Inl (x ∘ ap≃ (transport-constant α))
   fund-tr {α = α} Γ* bool rθ rM1 rM2 rα (Inr x) = Inr (x ∘ ap≃ (transport-constant α))
@@ -341,7 +412,7 @@ module HomotopyCanonHSet9 where
   fund-tr {α = α} Γ* (proof M) rθ rM1 rM2 rα rN = snd (fund (Γ* , _) prop (rθ , rM2) M) _ id _ _ (! (ap≃ (transport-ap-assoc (λ x → interp M (_ , x)) α))) 
                                                       (fst ap-is-reducible _ rN) where
           ap-is-reducible : Q Γ* prop rθ (fund (Γ* , _) prop (rθ , rM1) M) (fund (Γ* , _) prop (rθ , rM2) M) (ap (\ x -> interp M (_ , x)) α)
-          ap-is-reducible = {!!}
+          ap-is-reducible = fund-ap1 Γ* (deq {A* = prop} {A'* = w _ prop} M) rθ rM1 rM2 rα -- FIXME need to set things up so that we do the equality test after!
   fund-tr {Γ}{A0}{._}{θ}{M1}{M2}{α}{f} Γ* {A0*} (Π{._}{A}{B} A* B*) rθ rM1 rM2 rα rf = 
           λ x rx → {!fund-tr Γ* B* ? (rf _ (fund-tr Γ* A* rθ rM2 rM1 ? rx)) !} -- need Sigmas / generalization to contexts
   fund-tr {θ = θ} Γ* (id C* M N) rθ rM1 rM2 rα rN = {!!} -- need composition and ap and !
@@ -349,7 +420,26 @@ module HomotopyCanonHSet9 where
   fund-tr {α = α} Γ* {A*} (w .A* B*) rθ rM1 rM2 rα rN = transportR Γ* B* rθ (! (ap≃ (transport-constant α))) rN
   fund-tr Γ* (subst1 A₃ M) rθ rM1 rM2 rα M₁ = {!!}
   fund-tr ._ (ex _ _ _) rθ rM1 rM2 rα M₁ = {!!}
-  
-  canonicity : (M : Tm · bool) → Either (interp M <> == True) (interp M <> == False)
-  canonicity M = fund · bool <> M
 
+  example : Tm · (proof unit⁺)
+  example = deq (tr {A* = prop} (proof (deq v)) {M1 = unit} {M2 = unit⁺} unit=unit (deq <>)) where
+    unit=unit : Tm · (id prop unit unit⁺)
+    unit=unit = uap {P = unit} {Q = unit⁺} (deq <>⁺) (deq <>)
+
+  example2 : Tm · bool
+  example2 = deq (split1 bool (deq true) example)
+
+  example2a : Tm · bool
+  example2a = true
+
+  example2b : Tm · bool
+  example2b = (deq (split1 bool (deq true) <>⁺))
+
+  canonicity1 : (M : Tm · (proof unit⁺)) → interp M <> == <>⁺
+  canonicity1 M = fund · (proof unit⁺) <> M
+
+  canonicity2 : (M : Tm · bool) → Either (interp M <> == True) (interp M <> == False)
+  canonicity2 M = fund · bool <> M
+
+  test : canonicity2 example2 == Inl {!!}
+  test = id

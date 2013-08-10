@@ -12,6 +12,9 @@ module lib.Prods where
   data Unit⁺ : Type where
     <>⁺ : Unit⁺
 
+  split1⁺ : (C : Unit⁺ → Type) → C <>⁺ → (x : Unit⁺) → C x
+  split1⁺ C b <>⁺ = b
+
   -- gadget for defeating unused argument check in Agda 2.3.2.1 and later
   -- a version of Unit⁺ that's indexed by an arbitrary thing.  
   record Phantom {A : Type}(a : A) : Type where
