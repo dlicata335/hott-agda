@@ -32,9 +32,9 @@ module computational-interp.hcanon.HSetLang where
   data Ctx : Context → MetaType 
   data Ty : ∀ {Γ} (Γ* : Ctx Γ) → (Γ → Type) → MetaType 
   data Tm : ∀ {Γ} (Γ* : Ctx Γ) {A : _} → Ty Γ* A → MetaType 
-  Subst : ∀ {Γ Γ'} (Γ* : Ctx Γ) (Γ'* : Ctx Γ') → MetaType
+--  Subst : ∀ {Γ Γ'} (Γ* : Ctx Γ) (Γ'* : Ctx Γ') → MetaType
   interp  : ∀ {Γ A} {Γ* : Ctx Γ} {A* : Ty Γ* A} → Tm Γ* A* → (θ : Γ) → (A θ)
-  interps : ∀ {Γ Γ'} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} → Subst Γ* Γ'* → Γ → Γ'
+--  interps : ∀ {Γ Γ'} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} → Subst Γ* Γ'* → Γ → Γ'
 
   data Ctx where
     ·   : Ctx Unit
@@ -46,18 +46,18 @@ module computational-interp.hcanon.HSetLang where
     proof : ∀ {Γ} {Γ* : Ctx Γ} (M : Tm Γ* prop) → Ty Γ* (\ θ → (interp M θ))
     Π : ∀ {Γ A B} {Γ* : Ctx Γ} (A* : Ty Γ* A) (B* : Ty (Γ* , A*) B) → Ty Γ* (\ θ → (x : A θ) → (B (θ , x)))
     id : ∀ {Γ A} {Γ* : Ctx Γ} (A* : Ty Γ* A) (M N : Tm Γ* A*) → Ty Γ* (\ θ → interp M θ == interp N θ)
-    subst : ∀ {Γ Γ' A} {Γ* : Ctx Γ} (Γ'* : Ctx Γ') (θ'* : Subst Γ* Γ'*) (A* : Ty Γ'* A) → Ty Γ* (λ θ → A (interps θ'* θ))
+--    subst : ∀ {Γ Γ' A} {Γ* : Ctx Γ} (Γ'* : Ctx Γ') (θ'* : Subst Γ* Γ'*) (A* : Ty Γ'* A) → Ty Γ* (λ θ → A (interps θ'* θ))
     w : ∀ {Γ A B} {Γ* : Ctx Γ} → (A* : Ty Γ* A) (B* : Ty Γ* B) → Ty (Γ* , A*) (\ θ → B (fst θ))
     subst1 : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} (B* : Ty (Γ* , A*) B)
                (M : Tm Γ* A*) → Ty Γ* (\ θ → B (θ , interp M θ))
     ex : ∀ {Γ A B C} {Γ* : Ctx Γ} (A* : Ty Γ* A) (B* : Ty Γ* B) → Ty ((Γ* , A*) , w A* B*) C → Ty ((Γ* , B*) , w B* A*) (\ θ → C ((fst (fst θ) , snd θ) , snd (fst θ)))
     -- FIXME: missing some structural properties?
 
-  Subst Γ* · = Unit
-  Subst Γ* (Γ'* , A*) = Σ (λ (θ* : Subst Γ* Γ'*) → Tm Γ* (subst Γ'* θ* A*))
+  -- Subst Γ* · = Unit
+  -- Subst Γ* (Γ'* , A*) = Σ (λ (θ* : Subst Γ* Γ'*) → Tm Γ* (subst Γ'* θ* A*))
 
-  interps {Γ'* = ·} θ'* θ = <>
-  interps {Γ'* = Γ' , A} (θ'* , M*) θ = interps θ'* θ , interp M* θ
+  -- interps {Γ'* = ·} θ'* θ = <>
+  -- interps {Γ'* = Γ' , A} (θ'* , M*) θ = interps θ'* θ , interp M* θ
 
   unlam : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → Tm (Γ* , A*) B*
 
