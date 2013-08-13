@@ -7,6 +7,22 @@ open import computational-interp.hcanon.HSetLang
 
 module computational-interp.hcanon.HSetProof where
 
+  Propo = Type -- really small hprops?
+
+  record Candidate (P : Propo) : MetaType where
+   constructor cand
+   field 
+    redP            : (Q : Propo) → P == Q → Q → MetaType
+    -- redP respects paths in all positions
+    -- (this is what you would get if it were (Σ \ Q -> P == Q × Q) → Type)
+    transportPfull : {Q1 Q2 : Propo} {α1 : P == Q1} {α2 : P == Q2} {p1 : Q1} {p2 : Q2}
+                     (propo : Q1 == Q2) (path : propo ∘ α1 == α2) (elt : coe propo p1 == p2)
+                   → redP Q1 α1 p1 → redP Q2 α2 p2
+   -- special case: redP respects homotopy of elements
+   transportP      : (Q : Propo) (α : P == Q) → (p1 p2 : Q) → p1 == p2 → redP Q α p1 → redP Q α p2
+   transportP _ α _ _ β r = transportPfull id (∘-unit-l α) β r
+  open Candidate
+
   -- definition and proof of reducibility
 
   RC : ∀ {Γ} → (Γ* : Ctx Γ) (θ : Γ) → MetaType
@@ -26,8 +42,7 @@ module computational-interp.hcanon.HSetProof where
             → MetaType
 
   R _ bool rθ M = Either (M == True) (M == False)
-  R Γ* prop rθ φ = Σ \ (Rφ : (φ' : Type) → φ == φ' → φ' → MetaType) → 
-                       (φ' : Type) (α : φ == φ') → (p1 p2 : φ') → p1 == p2 → Rφ φ' α p1 → Rφ φ' α p2 -- has a transport function
+  R Γ* prop rθ P = Candidate P
   R Γ* (proof M) rθ pf = R-proof Γ* M rθ pf
   R Γ* (Π{Γ}{A}{B} A* B*) {θ} rθ M = (N : (A θ)) (rN : R Γ* A* rθ N) → R (Γ* , A*) B* (rθ , rN) (M N)
   R ._ (w{Γ* = Γ*} A* B*) {θ , _} (rθ , _) M = 
@@ -39,11 +54,11 @@ module computational-interp.hcanon.HSetProof where
 --  R Γ* _ rθ p = {!!}
 
   R-ex Γ* A* B* C* rθ rb ra M = R ((Γ* , A*) , w A* B*) C* ((rθ , ra) , rb) M
-  R-proof Γ* φ rθ pf = fst (fund Γ* prop rθ φ) _ id pf
+  R-proof Γ* φ rθ pf = redP (fund Γ* prop rθ φ) _ id pf
 
   -- is this an hprop in the metalanguage?
   Q Γ* bool rθ rM rN α = Unit  -- FIXME: should we insist that it's refl?
-  Q Γ* prop rθ rM rN α = ((x : _) → fst rM _ id x → fst rN _ id (coe α x)) × ((y : _) → fst rN _ id y → fst rM _ id (coe (! α) y))
+  Q Γ* prop rθ rM rN α = ((x : _) → redP rM _ id x → redP rN _ id (coe α x)) × ((y : _) → redP rN _ id y → redP rM _ id (coe (! α) y))
   Q Γ* (proof M) rθ rM rN α = Unit
   Q Γ* (Π A* B*) rθ rM rN α = (x : _) (rx : R Γ* A* rθ x) → Q (Γ* , A*) B* (rθ , rx) (rM _ rx) (rN _ rx) (ap≃ α)
   Q Γ* (id A* M N) rθ rM rN α = Unit
@@ -59,8 +74,8 @@ module computational-interp.hcanon.HSetProof where
              → {M N : A θ} → (rM : R Γ* A* rθ M) → (rN : R Γ* A* rθ N) → {α α' : M == N} (p : α == α')
              → Q Γ* A* rθ rM rN α → Q Γ* A* rθ rM rN α'
   transportQ Γ* bool rθ rM rN p q = <>
-  transportQ Γ* prop rθ rM rN p q = (λ x rx → snd rN _ id _ _ (ap (λ z → transport (λ x₁ → x₁) z x) p) (fst q _ rx)) , 
-                                   (λ y ry → snd rM _ id _ _ (ap (λ z → transport (λ x₁ → x₁) (! z) y) p) (snd q _ ry))
+  transportQ Γ* prop rθ rM rN p q = (λ x rx → transportP rN _ id _ _ (ap (λ z → transport (λ x₁ → x₁) z x) p) (fst q _ rx)) , 
+                                   (λ y ry → transportP rM _ id _ _ (ap (λ z → transport (λ x₁ → x₁) (! z) y) p) (snd q _ ry))
   transportQ Γ* (proof M) rθ rM rN p q = <>
   transportQ Γ* (Π A* B*) rθ rM rN p q = (λ x rx → transportQ (Γ* , A*) B* (rθ , rx) (rM _ rx) (rN _ rx) (ap (λ z → ap≃ z {x}) p) (q x rx))
   transportQ Γ* (id A* M N) rθ rM rN p q = <>
@@ -73,8 +88,11 @@ module computational-interp.hcanon.HSetProof where
                R Γ* A* rθ M → R Γ* A* rθ M'
   transportR Γ* bool rθ p (Inl x) = Inl (x ∘ ! p)
   transportR Γ* bool rθ p (Inr x) = Inr (x ∘ ! p)
-  transportR Γ* prop rθ p rφ = (λ φ' q x → fst rφ φ' (q ∘ p) x) , (λ φ' φ=φ' pf1 pf2 α rpf1 → snd rφ _ (φ=φ' ∘ p) pf1 pf2 α rpf1)  
-  transportR Γ* (proof M) rθ p rM = snd (fund Γ* prop rθ M) _ id _ _ p rM 
+  transportR Γ* prop rθ p rφ = cand (λ φ' q x → redP rφ φ' (q ∘ p) x) 
+                                    (λ {Q1}{Q2}{α1}{α2}{p2}{p2} propo path elt rp1 → 
+                                       transportPfull rφ propo (propo ∘ α1 ∘ p ≃〈 ap (λ x → x ∘ p) path ∘ ∘-assoc propo α1 p 〉 (α2 ∘ p ∎)) 
+                                                      elt rp1)
+  transportR Γ* (proof M) rθ p rM = transportP (fund Γ* prop rθ M) _ id _ _ p rM 
   transportR Γ* (Π A* B*) rθ p rM = λ N rn → transportR (Γ* , A*) B* (rθ , rn) (ap≃ p) (rM N rn) 
   transportR ._ (w {Γ* = Γ*} A1* A2*) rθ p rM = transportR Γ* A2* (fst rθ) p rM
   transportR Γ* (subst1{Γ}{A0}{B}{._}{A0*} B* M0) rθ p rM = transportR (Γ* , A0*) B* (rθ , _) p rM
@@ -115,12 +133,13 @@ module computational-interp.hcanon.HSetProof where
   fund .(Γ* , A*) .(w A* B*) (rθ , rM) (w {Γ} {A} {B} {Γ*} {A*} {B*} M) = fund Γ* B* rθ M
   fund Γ* .bool rθ true = Inl id
   fund Γ* .bool rθ false = Inr id
-  fund Γ* .prop rθ unit = (λ _ _ _ → Unit) , (λ φ' α p1 p2 x x₁ → <>)
-  fund Γ* .prop rθ unit⁺ = (λ ψ p x → coe (! p) x == <>⁺) , (λ φ' α p1 p2 α₁ r1 → r1 ∘ ap (λ z → coe (! α) z) (! α₁))
-  fund Γ* .prop rθ void = (λ _ _ _ → Void) , (λ φ' α p1 p2 x x₁ → x₁)
+  fund Γ* .prop rθ unit = cand (λ _ _ _ → Unit) (λ propo path elt x → <>) 
+  fund Γ* .prop rθ unit⁺ = cand (λ ψ p x → coe (! p) x == <>⁺) {!!} -- (λ {_}{_}{α1} propo path elt x → ({!!} ∘ ap (coe (! (propo ∘ α1))) elt) ∘ ! (ap (λ x₁ → coe (! x₁) _) path)) -- (λ φ' α p1 p2 α₁ r1 → r1 ∘ ap (λ z → coe (! α) z) (! α₁)) 
+  fund Γ* .prop rθ void = cand (λ _ _ _ → Void) (λ propo path elt x → x) -- (λ φ' α p1 p2 x x₁ → x₁) 
   fund {θ = θ} Γ* .prop rθ (`∀ φ ψ) = 
-    (λ φ' p x → (y : interp φ θ) → (ry : fst (fund Γ* prop rθ φ) _ id y) → fst (fund (Γ* , proof φ) prop (rθ , ry) ψ) _ id (coe (! p) x y)) , 
-    (λ φ' α p1 p2 q w y ry → snd (fund (Γ* , proof φ) prop (rθ , ry) ψ) (interp ψ (θ , y)) id (coe (! α) p1 y) (coe (! α) p2 y) (ap (λ z → coe (! α) z y) q) (w y ry))
+    cand (λ φ' p x → (y : interp φ θ) → (ry : redP (fund Γ* prop rθ φ) _ id y) → redP (fund (Γ* , proof φ) prop (rθ , ry) ψ) _ id (coe (! p) x y)) 
+         {!!} 
+--         (λ φ' α p1 p2 q w y ry → transportP (fund (Γ* , proof φ) prop (rθ , ry) ψ) (interp ψ (θ , y)) id (coe (! α) p1 y) (coe (! α) p2 y) (ap (λ z → coe (! α) z y) q) (w y ry))
   fund Γ* .(proof unit) rθ <> = fund-<> Γ* rθ
   fund Γ* A* rθ (abort M) = fund-abort Γ* rθ M
   fund .Γ* .(proof (`∀ M M₁)) rθ (plam {Γ}{Γ*} {M} {M₁} M₂) = {!!} -- should be like lam 
@@ -144,10 +163,10 @@ module computational-interp.hcanon.HSetProof where
   fund .Γ* .(id A* M* M*) rθ (refl{_}{_}{Γ*}{A*} M*) = fund-refl Γ* A* rθ (fund Γ* A* rθ M*)
   fund .Γ* ._ rθ (tr{Γ}{A}{C}{Γ*}{A*} C* {M1}{M2} α N) = fund-tr Γ* C* rθ (fund Γ* _ rθ M1) (fund Γ* _ rθ M2) (fund Γ* _ rθ α) (fund Γ* _ rθ N)
   fund {θ = θ} .Γ* ._ rθ (uap{Γ}{Γ*}{P}{Q} f* g*) = 
-       (λ x rx → snd (fund Γ* prop rθ Q) _ id (interp f* (θ , x)) (coe (interp (uap{P = P}{Q = Q} f* g*) θ) x) 
+       (λ x rx → transportP (fund Γ* prop rθ Q) _ id (interp f* (θ , x)) (coe (interp (uap{P = P}{Q = Q} f* g*) θ) x) 
                      (! (ap≃ (type≃β (interp-uap-eqv{P = P}{Q = Q} f* g* θ))))
                      (fund (Γ* , proof P) (w (proof P) (proof Q)) (rθ , rx) f*)) , 
-       (λ x rx → snd (fund Γ* prop rθ P) _ id (interp g* (θ , x)) (coe (! (interp (uap{P = P}{Q = Q} f* g*) θ)) x) 
+       (λ x rx → transportP (fund Γ* prop rθ P) _ id (interp g* (θ , x)) (coe (! (interp (uap{P = P}{Q = Q} f* g*) θ)) x) 
                      (! (ap≃ (type≃β! (interp-uap-eqv{P = P}{Q = Q} f* g* θ))))
                      (fund (Γ* , proof Q) (w (proof Q) (proof P)) (rθ , rx) g*)) 
   fund .Γ* .A* rθ (deq{Γ}{A}{Γ*}{A1*}{A*} M) = R-deq Γ* A1* A* rθ (fund Γ* A1* rθ M) 
@@ -181,7 +200,7 @@ module computational-interp.hcanon.HSetProof where
            → Q Γ* A* rθ rM rN α
            → Q Γ* A* rθ rN rM (! α)
   fund-sym Γ* bool rθ rM rN rα = <>
-  fund-sym {α = α} Γ* prop rθ rM rN rα = snd rα , (λ x rx → snd rN _ id _ _ (ap (λ z → coe z x) (! (!-invol α))) (fst rα x rx))
+  fund-sym {α = α} Γ* prop rθ rM rN rα = snd rα , (λ x rx → transportP rN _ id _ _ (ap (λ z → coe z x) (! (!-invol α))) (fst rα x rx))
   fund-sym Γ* (proof M) rθ rM rN rα = <>
   fund-sym {α = α} Γ* (Π A* B*) rθ rM rN rα = λ x rx → transportQ (Γ* , A*) B* (rθ , rx) _ _ (! (ap-! (λ f → f x) α))
                                                (fund-sym (Γ* , A*) B* (rθ , rx) (rM x rx) (rN x rx) (rα x rx))
@@ -197,8 +216,8 @@ module computational-interp.hcanon.HSetProof where
              → Q Γ* A* rθ rM rO (β ∘ α)
   fund-trans Γ* bool rθ rM rN rO qMN qNO = <>
   fund-trans {α = α} {β = β} Γ* prop rθ rM rN rO qMN qNO = 
-    (λ x rx → snd rO _ id _ _ (! (ap≃ (transport-∘ (λ x₁ → x₁) β α))) (fst qNO _ (fst qMN x rx))) , 
-    (λ y ry → snd rM _ id _ _ (ap (λ z → coe z y) (! (!-∘ β α)) ∘ ! (ap≃ (transport-∘ (λ x₁ → x₁) (! α) (! β)))) (snd qMN _ (snd qNO y ry)))
+    (λ x rx → transportP rO _ id _ _ (! (ap≃ (transport-∘ (λ x₁ → x₁) β α))) (fst qNO _ (fst qMN x rx))) , 
+    (λ y ry → transportP rM _ id _ _ (ap (λ z → coe z y) (! (!-∘ β α)) ∘ ! (ap≃ (transport-∘ (λ x₁ → x₁) (! α) (! β)))) (snd qMN _ (snd qNO y ry)))
   fund-trans Γ* (proof M) rθ rM rN rO qMN qNO = <>
   fund-trans {α = α} {β = β} Γ* (Π A* B*) rθ rM rN rO qMN qNO = λ x rx → transportQ (Γ* , A*) B* (rθ , rx) _ _ (! (ap-∘ (λ f → f x) β α))
                                                            (fund-trans (Γ* , A*) B* (rθ , rx) (rM x rx) (rN x rx) (rO x rx)
@@ -220,75 +239,30 @@ module computational-interp.hcanon.HSetProof where
   transportRQ : ∀ {Γ A θ M1 M2} {α : M1 == M2} (Γ* : Ctx Γ) (A* : Ty Γ* A) (rθ : RC Γ* θ) (rM1 : R Γ* A* rθ M1) 
               → Q Γ* A* rθ (transportR Γ* A* rθ α rM1) rM1 (! α)
   transportRQ Γ* bool rθ rM1 = <>
-  transportRQ {M1 = P} {M2 = Q} Γ* prop rθ rP = (λ q rq → {!!}) , {!!}
+  transportRQ {M1 = P} {M2 = Q} {α = α} Γ* prop rθ rP = (λ q rq → transportPfull rP (! α) (!-inv-l α ∘ ∘-assoc (! α) id α) id rq) , (λ p rp → transportPfull rP α (! (∘-unit-l α)) (ap (λ x → coe x p) (! (!-invol α))) rp)
   transportRQ Γ* (proof M) rθ rM1 = <>
   transportRQ {α = α} Γ* (Π A* A*₁) rθ rM1 = λ x rx → transportQ (Γ* , A*) A*₁ (rθ , rx) _ _ (! (ap-! (λ f → f x) α))
                                                         (transportRQ {α = ap (λ f → f x) α} (Γ* , A*) A*₁ (rθ , rx)
                                                          (rM1 x rx))
   transportRQ Γ* (id A* M N) rθ rM1 = <>
   transportRQ .(Γ* , A*) (w {Γ} {A} {B} {Γ*} A* A*₁) rθ rM1 = transportRQ Γ* A*₁ (fst rθ) rM1
-  transportRQ Γ* (subst1 A*₁ M) rθ rM1 = {!!}
-  transportRQ .((Γ* , A*₁) , w A*₁ A*) (ex {Γ} {A} {B} {C} {Γ*} A* A*₁ A*₂) rθ rM1 = {!!}
-
-{-
-  fund-transport-constant : ∀ {Γ A θ M1 M2} (Γ* : Ctx Γ) (A* : Ty Γ* A) (rθ : RC Γ* θ) (rM1 : R Γ* A* rθ M1) (rM2 : R Γ* A* rθ M2) (α : M1 == M2)
-                          → Q Γ* A* rθ (transportR Γ* A* rθ (! (ap≃ (transport-constant α))) rM1) rM1 (ap≃ (transport-constant α))
-  fund-transport-constant Γ* bool rθ rM1 rM2 α = <>
-  fund-transport-constant Γ* prop rθ rM1 rM2 α = (λ x x₁ → {!snd rM1!}) , {!transport-constant α!}
-  fund-transport-constant Γ* (proof M) rθ rM1 rM2 α = <>
-  fund-transport-constant Γ* (Π A* A*₁) rθ rM1 rM2 α = λ x rx → {!!} -- need some generalization
-  fund-transport-constant Γ* (id A* M N) rθ rM1 rM2 α = <>
-  fund-transport-constant .(Γ* , A*) (w {Γ} {A} {B} {Γ*} A* A*₁) rθ rM1 rM2 α = {!!}
-  fund-transport-constant Γ* (subst1 A*₁ M) rθ rM1 rM2 α = {!!}
-  fund-transport-constant .((Γ* , A*₁) , w A*₁ A*) (ex {Γ} {A} {B} {C} {Γ*} A* A*₁ A*₂) rθ rM1 rM2 α = {!!}
--}
-
-  fund-ap1 : ∀ {Γ A B θ M1 M2 α} (Γ* : Ctx Γ) {A* : Ty Γ* A} {B* : Ty Γ* B} (f : Tm (Γ* , A*) (w _ B*)) (rθ : RC Γ* θ)
-           (rM1 : R Γ* A* rθ M1) (rM2 : R Γ* A* rθ M2) 
-          → Q Γ* A* rθ rM1 rM2 α
-          → Q Γ* B* rθ (fund (Γ* , A*) (w _ B*) (rθ , rM1) f) (fund (Γ* , A*) (w _ B*) (rθ , rM2) f) (ap (\ x -> interp f (θ , x)) α)
-
-  {-
-  fund-apd-to-ap : ∀ {Γ A θ M1 M2} {B : Γ → Type} {α f} (Γ* : Ctx Γ) (A* : Ty Γ* A)
-                   (rθ : RC Γ* θ) (rM1 : R Γ* A* rθ M1) (rM2 : R Γ* A* rθ M2) 
-                   (rα : Q Γ* A* rθ rM1 rM2 α) 
-                 → (B* : Ty (Γ* , A*) (B o fst)) 
-                 → (f : Tm (Γ* , A*) B*)
-                 → Q (Γ* , A*) B* (rθ , rM2)
-                   (fund-tr Γ* B* rθ rM1 rM2 rα (fund (Γ* , A*) B* (rθ , rM1) f))
-                   (fund (Γ* , A*) B* (rθ , rM2) f)
-                   (apd (λ x → interp f (θ , x)) α)
-                 → Q (Γ* , A*) B* (rθ , rM2)
-                   (fund (Γ* , A*) B* (rθ , rM1) f)
-                   (fund (Γ* , A*) B* (rθ , rM2) f)
-                   (ap (λ x → interp f (θ , x)) α)
-  -}
-  {-
-  Goal: Q Γ* A* rθ
-      (transportR Γ* A* rθ (! (ap (λ f → f .M1) (transport-constant α)))
-       rM1)
-      rM2 (apd (λ x → x) α)
-  Have: Q Γ* A* rθ rM1 rM2 α
-
-  Goal : Q Γ* prop rθ (fund (Γ* , _) prop (rθ , rM1) M) (fund (Γ* , _) prop (rθ , rM2) M) (ap (\ x -> interp M (_ , x)) α)
-  Have: Q (Γ* , .A*) prop (rθ , rM2)
-      (fund-tr Γ* prop rθ rM1 rM2 rα (fund (Γ* , .A*) prop (rθ , rM1) M))
-      (fund (Γ* , .A*) prop (rθ , rM2) M)
-      (apd (λ x → interp M (.θ , x)) α)
-
-  -}
+  transportRQ Γ* (subst1 {A* = A*} B* M) rθ rM1 = transportRQ (Γ* , A*) B* (rθ , fund Γ* A* rθ M) rM1
+  transportRQ ._ (ex {Γ} {A} {B} {C} {Γ*} A* B* C*) ((rθ , rb) , ra) rM1 = transportRQ ((Γ* , A*) , w A* B*) C* ((rθ , ra) , rb) rM1
 
   -- FIXME: why doesn't this work in --without-K? 
   fund-tr {α = α} Γ* bool rθ rM1 rM2 rα (Inl x) = Inl (x ∘ ap≃ (transport-constant α))
   fund-tr {α = α} Γ* bool rθ rM1 rM2 rα (Inr x) = Inr (x ∘ ap≃ (transport-constant α))
-  fund-tr {α = α} Γ* prop rθ rM1 rM2 rα rN = (λ φ' p x' → fst rN φ' (p ∘ ! (ap≃ (transport-constant α))) x') , (λ φ' p x1' x2' eq rx1 → snd rN φ' _ x1' x2' eq rx1)
-  fund-tr {α = α} Γ* (proof M) rθ rM1 rM2 rα rN = snd (fund (Γ* , _) prop (rθ , rM2) M) _ id _ _ (! (ap≃ (transport-ap-assoc (λ x → interp M (_ , x)) α))) 
-                                                      (fst ap-is-reducible _ rN) where
+  fund-tr {α = α} Γ* prop rθ rM1 rM2 rα rN = cand (λ φ' p x' → redP rN φ' (p ∘ ! (ap≃ (transport-constant α))) x') 
+                                                  {!!} --  (λ φ' p x1' x2' eq rx1 → transportP rN φ' _ x1' x2' eq rx1) 
+  fund-tr {α = α} Γ* (proof M) rθ rM1 rM2 rα rN = transportP (fund (Γ* , _) prop (rθ , rM2) M) _ id _ _ (! (ap≃ (transport-ap-assoc (λ x → interp M (_ , x)) α))) 
+                                                            (fst ap-is-reducible _ rN) where
+          -- FIXME: abstract out what happens at function type!
           ap-is-reducible : Q Γ* prop rθ (fund (Γ* , _) prop (rθ , rM1) M) (fund (Γ* , _) prop (rθ , rM2) M) (ap (\ x -> interp M (_ , x)) α)
-          ap-is-reducible = fund-ap1 Γ* (deq {A* = prop} {A'* = w _ prop} M) rθ rM1 rM2 rα -- FIXME need to set things up so that we do the equality test after!
-
-          ap-is-reducible' : Q Γ* prop rθ (fund (Γ* , _) prop (rθ , rM1) M) (fund (Γ* , _) prop (rθ , rM2) M) (ap (\ x -> interp M (_ , x)) α)
-          ap-is-reducible' = {! fund-ap Γ* M rθ rM1 rM2 rα !} -- FIXME need to set things up so that we do the equality test after!
+          ap-is-reducible with fund-ap Γ* M rθ rM1 rM2 rα
+          ... | (left , right) = (λ x rx → transportPfull (fund (Γ* , _) prop (rθ , rM2) M) id id {!!} 
+                                           (left (coe (! (ap≃ (transport-constant α))) x) 
+                                                 (transportPfull (fund (Γ* , _) prop (rθ , rM1) M) (! (ap≃ (transport-constant α))) (! (∘-unit-l (! (ap≃ (transport-constant α))))) id rx))) 
+                                , {!!} 
   fund-tr {Γ}{A0}{._}{θ}{M1}{M2}{α}{f} Γ* {A0*} (Π{._}{A}{B} A* B*) rθ rM1 rM2 rα rf = 
           λ x rx → {!fund-tr Γ* B* ? (rf _ (fund-tr Γ* A* rθ rM2 rM1 ? rx)) !} -- need Sigmas / generalization to contexts
   fund-tr {θ = θ} {α = α} {N = β} Γ* {A*} (id {A = C} C* M N) rθ rM1 rM2 rα rβ = 
@@ -320,13 +294,11 @@ module computational-interp.hcanon.HSetProof where
   fund-tr Γ* (subst1 A₃ M) rθ rM1 rM2 rα M₁ = {!!}
   fund-tr ._ (ex _ _ _) rθ rM1 rM2 rα M₁ = {!!}
 
-
   fund-ap {α = α} Γ* {A* = A*} v rθ rM1 rM2 rα = transportQ Γ* A* rθ _ _ (coh α)
                                                    (fund-trans Γ* A* rθ _ _ _
                                                     (transportRQ {α = ! (ap≃ (transport-constant α))} Γ* A* rθ rM1) rα) where
     coh : ∀ {A} {M1 M2 : A} (α : M1 == M2)→ (α ∘ !( ! (ap (λ f → f M1) (transport-constant α)))) == (apd (λ x → x) α)
     coh id = id
-
   fund-ap Γ* (w f) rθ rM1 rM2 rα = {!fund-ap Γ* f !}
   fund-ap Γ* true rθ rM1 rM2 rα = <>
   fund-ap Γ* false rθ rM1 rM2 rα = <>
@@ -349,22 +321,6 @@ module computational-interp.hcanon.HSetProof where
   fund-ap Γ* (deq f) rθ rM1 rM2 rα = lib.PrimTrustMe.unsafe-cast (fund-ap Γ* f rθ rM1 rM2 rα) -- FIXME: need some lemma about R-deq
   fund-ap Γ* (lam= f f₁ f₂) rθ rM1 rM2 rα = <>
 
-  fund-ap1 {θ = θ} {α = α} Γ* {B* = B*} f rθ rM1 rM2 rα =
-   {! 
-   transportQ Γ* B* rθ _ _ {!!}
-     (fund-trans Γ* B* rθ _ _ _ (fund-sym Γ* B* rθ _ _ {!coe ? (transportRQ {α = ?} Γ* B* rθ (fund (Γ* , _) (w _ B*) (rθ , rM1) f) (fund (Γ* , _) (w _ B*) (rθ , rM1) f) !}))
-      (fund-ap Γ* f rθ rM1 rM2 rα))
-    !}
-{-
-    transportQ Γ* B* rθ _ _ (coh {f = λ x → interp f (θ , x)} α)
-       (fund-trans {α = ! (ap≃ (transport-constant α))} Γ* B* rθ _ _ _ 
-         (fund-sym Γ* B* rθ _ _ 
-           {! !}) 
-         (fund-ap Γ* f rθ rM1 rM2 rα)) where
-           coh : ∀ {A B} {f : A → B} {M1 M2 : _} (α : M1 == M2) → 
-             (apd f α ∘ ! (ap≃ (transport-constant α))) == (ap f α)
-           coh id = id
--}
 {-
   example : Tm · (proof unit⁺)
   example = deq (tr {A* = prop} (proof (deq v)) {M1 = unit} {M2 = unit⁺} unit=unit (deq <>)) where
