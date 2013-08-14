@@ -249,6 +249,25 @@ module computational-interp.hcanon.HSetProof where
   transportRQ Γ* (subst1 {A* = A*} B* M) rθ rM1 = transportRQ (Γ* , A*) B* (rθ , fund Γ* A* rθ M) rM1
   transportRQ ._ (ex {Γ} {A} {B} {C} {Γ*} A* B* C*) ((rθ , rb) , ra) rM1 = transportRQ ((Γ* , A*) , w A* B*) C* ((rθ , ra) , rb) rM1
 
+  fund-aptransport : ∀ {Γ A C θ M1 M2 α N1 N2 β} (Γ* : Ctx Γ) {A* : Ty Γ* A} (C* : Ty (Γ* , A*) C) (rθ : RC Γ* θ)
+          (rM1 : R Γ* A* rθ M1) (rM2 : R Γ* A* rθ M2) 
+          (rα : Q Γ* A* rθ rM1 rM2 α) 
+          (rN1 : R (Γ* , A*) C* (rθ , rM1) N1) (rN2 : R (Γ* , A*) C* (rθ , rM1) N2)
+          (rβ : Q (Γ* , A*) C* (rθ , rM1) rN1 rN2 β)
+        → Q (Γ* , A*) C* (rθ , rM2) (fund-tr Γ* C* rθ rM1 rM2 rα rN1) (fund-tr Γ* C* rθ rM1 rM2 rα rN2) (ap (transport (λ x → C (θ , x)) α) β)
+  fund-aptransport Γ* bool rθ rM1 rM2 rα rN1 rN2 rβ = <>
+  fund-aptransport {Γ}{A}{._}{θ}{M1}{M2}{α}{N1}{N2}{β} Γ* prop rθ rM1 rM2 rα rN1 rN2 rβ = 
+                   (λ x rx → transportPfull rN2 (! (ap≃ (transport-constant α))) (! (∘-unit-l (! (ap (λ f → f N2) (transport-constant α))))) {!OK!}
+                               (fst rβ (coe (ap≃ (transport-constant α)) x) (transportPfull rN1 (ap≃ (transport-constant α)) {!OK!} id rx))) , 
+                   {!!}
+  fund-aptransport Γ* (proof M) rθ rM1 rM2 rα rN1 rN2 rβ = <>
+  fund-aptransport Γ* (Π C* C*₁) rθ rM1 rM2 rα rN1 rN2 rβ = {!!}
+  fund-aptransport Γ* (id C* M N) rθ rM1 rM2 rα rN1 rN2 rβ = <>
+  fund-aptransport Γ* {A*} (w .A* C*) rθ rM1 rM2 rα rN1 rN2 rβ = {!!}
+  fund-aptransport Γ* (subst1 C*₁ M) rθ rM1 rM2 rα rN1 rN2 rβ = {!!}
+  fund-aptransport .(Γ* , C*₁) (ex {Γ} {A} {B} {C} {Γ*} C* C*₁ C*₂) rθ rM1 rM2 rα rN1 rN2 rβ = {!!}
+
+
   -- FIXME: why doesn't this work in --without-K? 
   fund-tr {α = α} Γ* bool rθ rM1 rM2 rα (Inl x) = Inl (x ∘ ap≃ (transport-constant α))
   fund-tr {α = α} Γ* bool rθ rM1 rM2 rα (Inr x) = Inr (x ∘ ap≃ (transport-constant α))
@@ -261,7 +280,7 @@ module computational-interp.hcanon.HSetProof where
           ap-is-reducible with fund-ap Γ* M rθ rM1 rM2 rα
           ... | (left , right) = (λ x rx → transportPfull (fund (Γ* , _) prop (rθ , rM2) M) id id {!!} 
                                            (left (coe (! (ap≃ (transport-constant α))) x) 
-                                                 (transportPfull (fund (Γ* , _) prop (rθ , rM1) M) (! (ap≃ (transport-constant α))) (! (∘-unit-l (! (ap≃ (transport-constant α))))) id rx))) 
+                                                 {!!})) -- (transportPfull (fund (Γ* , _) prop (rθ , rM1) M) (! (ap≃ (transport-constant α))) (! (∘-unit-l (! (ap≃ (transport-constant α))))) id rx))) 
                                 , {!!} 
   fund-tr {Γ}{A0}{._}{θ}{M1}{M2}{α}{f} Γ* {A0*} (Π{._}{A}{B} A* B*) rθ rM1 rM2 rα rf = 
           λ x rx → {!fund-tr Γ* B* ? (rf _ (fund-tr Γ* A* rθ rM2 rM1 ? rx)) !} -- need Sigmas / generalization to contexts
@@ -288,7 +307,7 @@ module computational-interp.hcanon.HSetProof where
                  (fund-tr Γ* C* rθ rM1 rM2 rα (fund (Γ* , A*) C* (rθ , rM1) M))
                  (fund-tr Γ* C* rθ rM1 rM2 rα (fund (Γ* , A*) C* (rθ , rM1) N))
                  (ap (transport (λ z → C (θ , z)) α) β)
-          aprβ = {!(transport (λ z → C (θ , z)) α)!}
+          aprβ = fund-aptransport Γ* C* rθ rM1 rM2 rα (fund (Γ* , A*) C* (rθ , rM1) M) (fund (Γ* , A*) C* (rθ , rM1) N) rβ
 --  fund-tr Γ* (subst Γ'* θ'* A₂) rθ rM1 rM2 rα M = {!!}
   fund-tr {α = α} Γ* {A*} (w .A* B*) rθ rM1 rM2 rα rN = transportR Γ* B* rθ (! (ap≃ (transport-constant α))) rN
   fund-tr Γ* (subst1 A₃ M) rθ rM1 rM2 rα M₁ = {!!}
@@ -299,11 +318,15 @@ module computational-interp.hcanon.HSetProof where
                                                     (transportRQ {α = ! (ap≃ (transport-constant α))} Γ* A* rθ rM1) rα) where
     coh : ∀ {A} {M1 M2 : A} (α : M1 == M2)→ (α ∘ !( ! (ap (λ f → f M1) (transport-constant α)))) == (apd (λ x → x) α)
     coh id = id
-  fund-ap Γ* (w f) rθ rM1 rM2 rα = {!fund-ap Γ* f !}
+  fund-ap Γ* (w f) rθ rM1 rM2 rα = {!fund-ap _ f !}
   fund-ap Γ* true rθ rM1 rM2 rα = <>
   fund-ap Γ* false rθ rM1 rM2 rα = <>
   fund-ap Γ* unit rθ rM1 rM2 rα = (λ x x₁ → <>) , (λ y x → <>)
-  fund-ap Γ* unit⁺ rθ rM1 rM2 rα = (λ x x₁ → {!!}) , {!!}
+  fund-ap {α = α} Γ* unit⁺ rθ rM1 rM2 rα = (λ x x₁ → coh α x₁) , {!!} where
+    coh : {M1 M2 : _} (α : M1 == M2)  {x : transport (λ x₂ → Set) α Unit⁺} 
+          (x₁ : Path (transport (λ x₂ → x₂) (! (id ∘ ! (ap (λ f → f Unit⁺) (transport-constant α)))) x) <>⁺)
+        → Path (transport (λ x₂ → x₂) (apd (λ x₂ → Unit⁺) α) x) <>⁺
+    coh id x₁ = x₁
   fund-ap Γ* void rθ rM1 rM2 rα = (λ x x₁ → x₁) , (λ y x → x)
   fund-ap Γ* (`∀ f f₁) rθ rM1 rM2 rα = {!!}
   fund-ap Γ* <> rθ rM1 rM2 rα = <>
