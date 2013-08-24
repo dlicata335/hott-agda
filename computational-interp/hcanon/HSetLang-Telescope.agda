@@ -4,7 +4,7 @@ open import lib.Prelude
 open BoolM 
 import lib.PrimTrustMe
 
-module computational-interp.hcanon.HSetLang-Telescope where
+module computational-interp.hcanon.HSetLang-Telescope2 where
 
   -- RULE: no transport at MetaTypes!
   MetaType = Type
@@ -32,33 +32,23 @@ module computational-interp.hcanon.HSetLang-Telescope where
   data Ctx : Context → MetaType 
   data Ty : ∀ {Γ} (Γ* : Ctx Γ) → (Γ → Type) → MetaType 
   data Tm : ∀ {Γ} (Γ* : Ctx Γ) {A : _} → Ty Γ* A → MetaType 
-  data TelescopeTy : ∀ {Γ} (Γ* : Ctx Γ) → MetaType 
---  data PathSubst : ∀ {Γ Γ'} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} (θ1 θ2 : Subst Γ* Γ'*) → MetaType
+  data TelescopeTy : ∀ {Γ Γ'} (Γ* : Ctx Γ) (Γ'* : Ctx Γ') → MetaType 
   interp   : ∀ {Γ A} {Γ* : Ctx Γ} {A* : Ty Γ* A} → Tm Γ* A* → (θ : Γ) → (A θ)
-  -- interps  : ∀ {Γ Γ'} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} → Subst Γ* Γ'* → Γ → Γ'
-  -- interpps : ∀ {Γ Γ'} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} {θ1* θ2* : Subst Γ* Γ'*} → PathSubst θ1* θ2* 
-  --          → (θ : _) → interps θ1* θ == interps θ2* θ
 
   data Ctx where
     ·   : Ctx Unit
     _,_ : ∀ {Γ A} → (Γ* : Ctx Γ) → Ty Γ* A → Ctx (Σ A)
 
-  unwind : ∀ {Γ} {Γ* : Ctx Γ} → TelescopeTy Γ* → Σ \ Δ → Ctx Δ
-
   data TelescopeTy where
-    ·   : ∀ {Γ} {Γ* : Ctx Γ} → TelescopeTy Γ* 
-    _,_ : ∀ {Γ} {Γ* : Ctx Γ} → (Δ* : TelescopeTy Γ*) → {A : _} (A* : Ty (snd (unwind Δ*)) A) → TelescopeTy Γ* 
+    ·   : ∀ {Γ} {Γ* : Ctx Γ} → TelescopeTy Γ* Γ*
+    _,_ : ∀ {Γ Γ'} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} → (Δ* : TelescopeTy Γ* Γ'*) → {A : _} (A* : Ty Γ'* A) → TelescopeTy Γ* (Γ'* , A*) 
 
-  unwind {Γ* = Γ*} · = _ , Γ*
-  unwind (Δ* , A*) = _ , (snd (unwind Δ*) , A*)
+  data SubstTele {Γ : _} {Γ* : Ctx Γ} {A : _} {A* : Ty Γ* A} (M : Tm Γ* A*) : ∀ {Γ' Γ''} {Γ'* : Ctx Γ'} (Δ* : TelescopeTy (Γ* , A*) Γ'*) (Γ''* : Ctx Γ'') → Set 
 
-  _++_ : ∀ {Γ} (Γ* : Ctx Γ) → (Δ* : TelescopeTy Γ*) → Ctx (fst (unwind Δ*))
-  _ ++ Δ* = snd (unwind Δ*)
-
-  substt : ∀ {Γ A} {Γ* : Ctx Γ} {A* : Ty Γ* A} → TelescopeTy (Γ* , A*) → Tm Γ* A* → TelescopeTy Γ*
-
-  semsubstmiddle : ∀ {Γ A} {Γ* : Ctx Γ} {A* : Ty Γ* A} (Δ* : TelescopeTy (Γ* , A*)) (M : Tm Γ* A*) 
-          → fst (unwind (substt Δ* M)) → fst (unwind Δ*)
+  semsubstmiddle : {Γ : _} {Γ* : Ctx Γ} {A : _} {A* : Ty Γ* A} (M : Tm Γ* A*) 
+                 → ∀ {Γ' Γ''} {Γ'* : Ctx Γ'} (Δ* : TelescopeTy (Γ* , A*) Γ'*) (Γ''* : Ctx Γ'') 
+                 → SubstTele M Δ* Γ''*
+                 → (Γ'' → Γ')
 
   data Ty where
     bool : ∀ {Γ} {Γ* : Ctx Γ} → Ty Γ* (\ _ -> Bool)
@@ -67,20 +57,25 @@ module computational-interp.hcanon.HSetLang-Telescope where
     Π : ∀ {Γ A B} {Γ* : Ctx Γ} (A* : Ty Γ* A) (B* : Ty (Γ* , A*) B) → Ty Γ* (\ θ → (x : A θ) → (B (θ , x)))
     id : ∀ {Γ A} {Γ* : Ctx Γ} (A* : Ty Γ* A) (M N : Tm Γ* A*) → Ty Γ* (\ θ → interp M θ == interp N θ)
     w : ∀ {Γ A B} {Γ* : Ctx Γ} → (A* : Ty Γ* A) (B* : Ty Γ* B) → Ty (Γ* , A*) (\ θ → B (fst θ))
-    subst : ∀ {Γ A} {Γ* : Ctx Γ} {A* : Ty Γ* A} (Δ* : TelescopeTy (Γ* , A*)) {B : _}
-               (B* : Ty ((Γ* , A*) ++ Δ*) B)
-               (M : Tm Γ* A*) 
-               → Ty (Γ* ++ (substt Δ* M)) (B o semsubstmiddle Δ* M)
+    subst : ∀ {Γ Γ' Γ'' A} {Γ* : Ctx Γ} {A* : Ty Γ* A} {Γ'* : Ctx Γ'} {Γ''* : Ctx Γ''}  
+                 (M : Tm Γ* A*) 
+                 (Δ* : TelescopeTy (Γ* , A*) Γ'*) {B : _}
+                 (B* : Ty Γ'* B)
+               → (st : SubstTele M Δ* Γ''*)
+               → Ty Γ''* (B o semsubstmiddle _ _ _ st)
     subst1 : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} (B* : Ty (Γ* , A*) B)
                (M : Tm Γ* A*) → Ty Γ* (\ θ → B (θ , interp M θ))
     ex : ∀ {Γ A B C} {Γ* : Ctx Γ} (A* : Ty Γ* A) (B* : Ty Γ* B) → Ty ((Γ* , A*) , w A* B*) C → Ty ((Γ* , B*) , w B* A*) (\ θ → C ((fst (fst θ) , snd θ) , snd (fst θ)))
     -- FIXME: missing some structural properties?
 
-  substt · M = ·
-  substt (Δ , B*) M = substt Δ M , subst Δ B* M
+  data SubstTele  {Γ : _} {Γ* : Ctx Γ} {A : _} {A* : Ty Γ* A} (M : Tm Γ* A*) where
+    ST-· : SubstTele M · Γ*
+    ST-, : ∀ {Γ' Γ''} {Γ'* : Ctx Γ'} (Δ* : TelescopeTy (Γ* , A*) Γ'*) (Γ''* : Ctx Γ'') {B : _} (B* : Ty _ B) 
+         → (st : SubstTele M Δ* Γ''*)
+         → SubstTele M (Δ* , B*) (Γ''* , subst M Δ* B* st)
 
-  semsubstmiddle · M θ = θ , interp M θ
-  semsubstmiddle (Δ* , B*) M θ = semsubstmiddle Δ* M (fst θ) , snd θ
+  semsubstmiddle M* .· Γ''* ST-· θ = θ , interp M* θ
+  semsubstmiddle M* .(Δ* , B*) .(Γ''* , subst M* Δ* B* st) (ST-, Δ* Γ''* B* st) θ = semsubstmiddle _ _ _ st (fst θ) , snd θ
 
   unlam : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → Tm (Γ* , A*) B*
 
@@ -112,7 +107,7 @@ module computational-interp.hcanon.HSetLang-Telescope where
     refl : ∀ {Γ A} {Γ* : Ctx Γ} {A* : Ty Γ* A} (M : Tm Γ* A*) → Tm Γ* (id A* M M) 
     tr   : ∀ {Γ A C} {Γ* : Ctx Γ} {A* : Ty Γ* A} 
            (C* : Ty (Γ* , A*) C) {M* : Tm Γ* A*} {N* : Tm Γ* A*} (α : Tm Γ* (id A* M* N*) )
-         → Tm Γ* (subst · C* M*) → Tm Γ* (subst · C* N*)
+         → Tm Γ* (subst M* · C* ST-·) → Tm Γ* (subst N* · C* ST-·)
     uap  : ∀ {Γ} {Γ* : Ctx Γ} {P : Tm Γ* prop} {Q : Tm Γ* prop} 
            (f : Tm (Γ* , proof P) (w (proof P) (proof Q)))
            (g : Tm (Γ* , proof Q) (w (proof Q) (proof P)))

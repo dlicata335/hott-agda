@@ -3,9 +3,9 @@
 open import lib.Prelude 
 open BoolM 
 import lib.PrimTrustMe
-open import computational-interp.hcanon.HSetLang-Telescope2
+open import computational-interp.hcanon.HSetLang-Telescope
 
-module computational-interp.hcanon.HSetProof-Telescope2 where
+module computational-interp.hcanon.HSetProof-Telescope where
 
   Propo = Type -- really small hprops?
 
@@ -41,10 +41,9 @@ module computational-interp.hcanon.HSetProof-Telescope2 where
             → {θ : Γ} {a : A θ} {b : B θ} → (rθ : RC Γ* θ) -> (rb :  R Γ* B* rθ b) (ra : R (Γ* , B*) (w B* A*) (rθ , rb) a) → C ((θ , a) , b) 
             → MetaType
 
-  RC-middle : {Γ : _} {Γ* : Ctx Γ} {A : _} {A* : Ty Γ* A} {M : Tm Γ* A*} → ∀ {Γ' Γ''} {Γ'* : Ctx Γ'} {Δ* : TelescopeTy (Γ* , A*) Γ'*} {Γ''* : Ctx Γ''}
-            → (st : SubstTele M Δ* Γ''*) 
-            → {θ : _} → RC Γ''* θ
-            → RC Γ'* (semsubstmiddle M Δ* Γ''* st θ)
+  RC-middle : ∀ {Γ A} {Γ* : Ctx Γ} {A* : Ty Γ* A} (Δ* : TelescopeTy (Γ* , A*)) (M* : Tm Γ* A*) {θ : _} 
+            → RC (Γ* ++ (substt Δ* M*)) θ
+            → RC ((Γ* , A*) ++ Δ*) (semsubstmiddle Δ* M* θ)
 
   R _ bool rθ M = Either (M == True) (M == False)
   R Γ* prop rθ P = Candidate P
@@ -56,10 +55,10 @@ module computational-interp.hcanon.HSetProof-Telescope2 where
   R .Γ* (subst1{Γ}{A0}{B}{Γ*}{A0*} B* M0) {θ} rθ M = 
     R (Γ* , A0*) B* (rθ , fund _ A0* rθ M0) M
   R ._ (ex {Γ* = Γ*} A* B* C*) ((rθ , rb) , ra) M = R-ex Γ* A* B* C* rθ rb ra M
-  R Γ''* (subst {Γ* = Γ*} {A* = A*} M Δ* B* st) rθ p = R _ B* (RC-middle st rθ) p
+  R ._ (subst {Γ* = Γ*} {A* = A*} Δ* B* M) rθ p = R ((Γ* , A*) ++ Δ*) B* (RC-middle Δ* M rθ) p
 
-  RC-middle {M = M} ST-· rθ = rθ , fund _ _ rθ M
-  RC-middle (ST-, Δ* Γ''* B* st) rθ = RC-middle st (fst rθ) , snd rθ
+  RC-middle {Γ* = Γ*} {A* = A*} · M* rθ = rθ , fund Γ* A* rθ M*
+  RC-middle (Δ* , A*₁) M* rθ = RC-middle Δ* M* (fst rθ) , snd rθ
 
   R-ex Γ* A* B* C* rθ rb ra M = R ((Γ* , A*) , w A* B*) C* ((rθ , ra) , rb) M
   R-proof Γ* φ rθ pf = redP (fund Γ* prop rθ φ) _ id pf
@@ -137,93 +136,40 @@ module computational-interp.hcanon.HSetProof-Telescope2 where
           (rN : R (Γ* , A*) C* (rθ , rM1) N)
         → R (Γ* , A*) C* (rθ , rM2) (transport (\ x → C (θ , x)) α N)
 
-  RC-++-fst : {Γ : _} {Γ* : Ctx Γ} {A : _} {A* : Ty Γ* A} {M : Tm Γ* A*} → ∀ {Γ' Γ''} {Γ'* : Ctx Γ'} {Δ* : TelescopeTy (Γ* , A*) Γ'*} {Γ''* : Ctx Γ''}
-            → (st : SubstTele M Δ* Γ''*) → {θ'' : _} → RC Γ''* θ'' → Σ \ θ → RC Γ* θ
-  RC-++-fst ST-· rθ'' = _ , rθ''
-  RC-++-fst (ST-, Δ* Γ''* B* st) rθ'' = _ , snd (RC-++-fst st (fst rθ''))
+{-
+  RC-tail : ∀ {Γ A θ M} {Γ* : Ctx Γ} {A* : Ty Γ* A} (Δ* : TelescopeTy (Γ* , A*))
+             (rθ  : RC Γ* θ) (rM : R Γ* A* rθ M)
+          →  RC ((Γ* , A*) ++ Δ*) {!!}
+  RC-tail · rθ rM = rθ , rM
+  RC-tail (Δ* , B*) rθ rM = {!RC-tail Δ* (fst rθ) rM , ? !}
+-}
 
-  RC-tr : ∀ {Γ A Γ' Γ1 Γ2} (Γ* : Ctx Γ) {Γ'* : Ctx Γ'} {Γ1* : Ctx Γ1} {Γ2* : Ctx Γ2} {A* : Ty Γ* A} {M1 M2 : Tm Γ* A*} 
-          (Δ* : TelescopeTy (Γ* , A*) Γ'*) 
-          (s1 : SubstTele M1 Δ* Γ1*) (s2 : SubstTele M2 Δ* Γ2*)
-          {θ1 : _} (rθ1 : RC Γ1* θ1) 
-          {α : _} (rα : Q Γ* A* (snd (RC-++-fst s1 rθ1)) (fund Γ* A* _ M1) (fund Γ* A* _ M2) α) 
-        → Σ \ θ2 → RC Γ2* θ2 
+  RC-++-fst : ∀ {Γ} {Γ* : Ctx Γ} (Δ* : TelescopeTy Γ*) {θ : _} (rθ : RC (Γ* ++ Δ*) θ) → Σ \ θ1 → RC Γ* θ1
+  RC-++-fst · rθ = _ , rθ
+  RC-++-fst (Δ* , A*) rθ = _ , snd (RC-++-fst Δ* (fst rθ))
 
-  RC-tr-back : ∀ {Γ A Γ' Γ1 Γ2} (Γ* : Ctx Γ) {Γ'* : Ctx Γ'} {Γ1* : Ctx Γ1} {Γ2* : Ctx Γ2} {A* : Ty Γ* A} {M1 M2 : Tm Γ* A*} 
-          (Δ* : TelescopeTy (Γ* , A*) Γ'*) 
-          (s1 : SubstTele M1 Δ* Γ1*) (s2 : SubstTele M2 Δ* Γ2*)
-          {θ2 : _} (rθ2 : RC Γ2* θ2) 
-          {α : _} (rα : Q Γ* A* (snd (RC-++-fst s2 rθ2)) (fund Γ* A* _ M1) (fund Γ* A* _ M2) α) 
-        → Σ \ θ1 → RC Γ1* θ1
+{-
+  sempathmiddle : ∀ {Γ A} (Γ* : Ctx Γ) {A* : Ty Γ* A} {M1 M2 : Tm Γ* A*} (Δ* : TelescopeTy (Γ* , A*)) 
+                  {θ : _} (rθ : RC (Γ* ++ (substt Δ* M1)) θ) 
+                → Id (semsubstmiddle Δ* M1 θ) (semsubstmiddle Δ* M2 ?)
+  sempath-middle = ?
+-}
 
-  sempathmiddle : ∀ {Γ A Γ' Γ1 Γ2} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} {Γ1* : Ctx Γ1} {Γ2* : Ctx Γ2} {A* : Ty Γ* A} {M1 M2 : Tm Γ* A*} 
-          {Δ* : TelescopeTy (Γ* , A*) Γ'*}
-          (s1 : SubstTele M1 Δ* Γ1*) (s2 : SubstTele M2 Δ* Γ2*)
-          {θ : _} (rθ : RC Γ1* θ) 
-          {α : _} (rα : Q Γ* A* (snd (RC-++-fst s1 rθ)) (fund Γ* A* _ M1) (fund Γ* A* _ M2) α) 
-          →    (semsubstmiddle M1 Δ* Γ1* s1 θ)
-            == (semsubstmiddle M2 Δ* Γ2* s2 (fst (RC-tr Γ* Δ* s1 s2 rθ rα)))
+  RC-tr : ∀ {Γ A} (Γ* : Ctx Γ) {A* : Ty Γ* A} (M1 M2 : Tm Γ* A*) (Δ* : TelescopeTy (Γ* , A*)) 
+          {θ : _} (rθ : RC (Γ* ++ (substt Δ* M1)) θ) 
+          {α : _} (rα : Q Γ* A* (snd (RC-++-fst (substt Δ* M1) rθ)) (fund Γ* A* _ M1) (fund Γ* A* _ M2) α) 
+        → Σ \ θ2 → RC ((Γ* , A*) ++ Δ*) θ2 × (semsubstmiddle Δ* M1 θ == θ2)
 
-  sempathmiddle-back : ∀ {Γ A Γ' Γ1 Γ2} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} {Γ1* : Ctx Γ1} {Γ2* : Ctx Γ2} {A* : Ty Γ* A} {M1 M2 : Tm Γ* A*} 
-          {Δ* : TelescopeTy (Γ* , A*) Γ'*}
-          (s1 : SubstTele M1 Δ* Γ1*) (s2 : SubstTele M2 Δ* Γ2*)
-          {θ2 : _} (rθ2 : RC Γ2* θ2) 
-          {α : _} (rα : Q Γ* A* (snd (RC-++-fst s2 rθ2)) (fund Γ* A* _ M1) (fund Γ* A* _ M2) α) 
-          →    (semsubstmiddle M2 Δ* Γ2* s2 θ2)
-            == (semsubstmiddle M1 Δ* Γ1* s1 (fst (RC-tr-back Γ* Δ* s1 s2 rθ2 rα)))
+  fund-tr' : ∀ {Γ A} (Γ* : Ctx Γ) {A* : Ty Γ* A} (M1 M2 : Tm Γ* A*) (Δ* : TelescopeTy (Γ* , A*)) 
+          {C : _} (C* : Ty ((Γ* , A*) ++ Δ*) C) 
+          {θ : _} (rθ : RC (Γ* ++ (substt Δ* M1)) θ) 
+          {α : _} (rα : Q Γ* A* (snd (RC-++-fst (substt Δ* M1) rθ)) (fund Γ* A* _ M1) (fund Γ* A* _ M2) α) 
+          {N : _} (rN : R ((Γ* , A*) ++ Δ*) C* (RC-middle Δ* M1 rθ) N)
+        → R ((Γ* , A*) ++ Δ*) C* (fst (snd (RC-tr {Γ}{A} Γ* {A*} M1 M2 Δ* {θ} rθ {α} rα))) (transport C (snd (snd (RC-tr Γ* M1 M2 Δ* rθ rα))) N)
+  fund-tr' Γ* M1 M2 Δ* C* rθ rα rN = {!C*!}
 
-  fund-tr' : ∀ {Γ A Γ' Γ1 Γ2} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} {Γ1* : Ctx Γ1} {Γ2* : Ctx Γ2} {A* : Ty Γ* A} {M1 M2 : Tm Γ* A*} 
-          (Δ* : TelescopeTy (Γ* , A*) Γ'*) 
-          (s1 : SubstTele M1 Δ* Γ1*) (s2 : SubstTele M2 Δ* Γ2*)
-          {C : _} (C* : Ty Γ'* C) 
-          {θ : _} (rθ : RC Γ1* θ) 
-          {α : _} (rα : Q Γ* A* (snd (RC-++-fst s1 rθ)) (fund Γ* A* _ M1) (fund Γ* A* _ M2) α) 
-          {N : _} (rN : R Γ'* C* (RC-middle s1 rθ) N)
-        → R Γ'* C* (RC-middle s2 (snd (RC-tr _ _ s1 s2 rθ rα))) (transport C (sempathmiddle s1 s2 rθ rα) N)
-
-  fund-tr- : ∀ {Γ A Γ' Γ1 Γ2} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} {Γ1* : Ctx Γ1} {Γ2* : Ctx Γ2} {A* : Ty Γ* A} {M1 M2 : Tm Γ* A*} 
-          (Δ* : TelescopeTy (Γ* , A*) Γ'*) 
-          (s1 : SubstTele M1 Δ* Γ1*) (s2 : SubstTele M2 Δ* Γ2*)
-          {C : _} (C* : Ty Γ'* C) 
-          {θ2 : _} (rθ2 : RC Γ2* θ2) 
-          {α : _} (rα : Q Γ* A* (snd (RC-++-fst s2 rθ2)) (fund Γ* A* _ M1) (fund Γ* A* _ M2) α) 
-          {N : _} (rN : R Γ'* C* (RC-middle s1 (snd (RC-tr-back _ _ s1 s2 rθ2 rα))) N)
-        → R Γ'* C* (RC-middle s2 rθ2) (transport C {!! (sempathmiddle-back s1 s2 rθ2 rα)!} N)
-  fund-tr- = {!!}
-
-  fund-tr-back' : ∀ {Γ A Γ' Γ1 Γ2} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} {Γ1* : Ctx Γ1} {Γ2* : Ctx Γ2} {A* : Ty Γ* A} {M1 M2 : Tm Γ* A*} 
-          (Δ* : TelescopeTy (Γ* , A*) Γ'*) 
-          (s1 : SubstTele M1 Δ* Γ1*) (s2 : SubstTele M2 Δ* Γ2*)
-          {C : _} (C* : Ty Γ'* C) 
-          {θ : _} (rθ : RC Γ2* θ) 
-          {α : _} (rα : Q Γ* A* (snd (RC-++-fst s2 rθ)) (fund Γ* A* _ M1) (fund Γ* A* _ M2) α) 
-          {N : _} (rN : R Γ'* C* (RC-middle s2 rθ) N)
-        → R Γ'* C* (RC-middle s1 (snd (RC-tr-back _ _ s1 s2 rθ rα))) (transport C (sempathmiddle-back s1 s2 rθ rα) N)
-  fund-tr-back' = {!!}
-
-  RC-tr ._ .· ST-· ST-· rθ1 rα = _ , rθ1
-  RC-tr Γ* .(Δ* , B*) (ST-, Δ* Γ''* B* s1) (ST-, .Δ* Γ''*₁ .B* s2) rθ1 rα = _ , (snd (RC-tr Γ* Δ* s1 s2 (fst rθ1) rα) , fund-tr' _ s1 s2 B* (fst rθ1) rα (snd rθ1)) 
-
-  RC-tr-back ._ .· ST-· ST-· rθ1 rα = _ , rθ1
-  RC-tr-back Γ* .(Δ* , B*) (ST-, Δ* Γ''* B* s1) (ST-, .Δ* Γ''*₁ .B* s2) rθ1 rα = _ , (snd (RC-tr-back Γ* Δ* s1 s2 (fst rθ1) rα) , fund-tr-back' _ s1 s2 B* (fst rθ1) rα (snd rθ1)) 
-
-  sempathmiddle ST-· ST-· rθ {α} rα = pair≃ id α
-  sempathmiddle (ST-, Δ* Γ''* B* s1) (ST-, .Δ* Γ''*₁ .B* s2) rθ rα = pair≃ (sempathmiddle s1 s2 (fst rθ) rα) id
-
-  sempathmiddle-back ST-· ST-· rθ {α} rα = pair≃ id (! α)
-  sempathmiddle-back (ST-, Δ* Γ''* B* s1) (ST-, .Δ* Γ''*₁ .B* s2) rθ rα = pair≃ (sempathmiddle-back s1 s2 (fst rθ) rα) id
-
-  fund-tr' Δ* s1 s2 bool rθ rα rN = {!!}
-  fund-tr' Δ* s1 s2 prop rθ rα rN = {!!}
-  fund-tr' Δ* s1 s2 (proof M) rθ rα rN = {!!}
-  fund-tr' Δ* s1 s2 (Π A* B*) rθ rα rN = λ x rx → coe {!!}
-                                                    (fund-tr- (Δ* , A*) (ST-, _ _ _ s1) (ST-, _ _ _ s2) B* (snd (RC-tr _ Δ* s1 s2 rθ rα) , _) {!!}
-                                                     (rN _ (fund-tr-back' Δ* s1 s2 A* {!!} rα rx)))
-  fund-tr' Δ* s1 s2 (id C* M N) rθ rα rN = {!!}
-  fund-tr' Δ* s1 s2 (w C* C*₁) rθ rα rN = {!!}
-  fund-tr' Δ* s1 s2 (subst M Δ*₁ C*₁ st) rθ rα rN = {!!}
-  fund-tr' Δ* s1 s2 (subst1 C*₁ M) rθ rα rN = {!!}
-  fund-tr' Δ* s1 s2 (ex C* C*₁ C*₂) rθ rα rN = {!!}
+  RC-tr Γ* {A* = A*} M1 M2 · rθ {α} rα = _ , (rθ , fund Γ* A* rθ M2) , pair≃ id α
+  RC-tr Γ* M1 M2 (Δ* , B*) rθ rα = _ , (fst (snd (RC-tr{_}{_} Γ* {_} M1 M2 Δ* {_} (fst rθ) {_} rα)) , fund-tr' Γ* _ _ Δ* B* (fst rθ) rα (snd rθ)) , pair≃ (snd (snd (RC-tr Γ* M1 M2 Δ* (fst rθ) rα))) id
 
   fund .(Γ* , A*) .(w A* A*) (rθ , rM) (v {Γ} {A} {Γ*} {A*}) = rM
   fund .(Γ* , A*) .(w A* B*) (rθ , rM) (w {Γ} {A} {B} {Γ*} {A*} {B*} M) = fund Γ* B* rθ M
@@ -290,7 +236,7 @@ module computational-interp.hcanon.HSetProof-Telescope2 where
   fund-refl ._ (w {Γ* = Γ*} A* B*) rθ rM = fund-refl Γ* B* (fst rθ) rM
   fund-refl Γ* (subst1{_}{_}{_}{._}{A0*} B* M) rθ rM = fund-refl (Γ* , A0*) B* (rθ , fund Γ* A0* rθ M) rM
   fund-refl ._ (ex{Γ* = Γ*} A* B* C*) rθ rM = fund-refl _ C* _ rM
-  fund-refl Γ''* (subst Δ* B* M st) rθ rM = {!!}
+  fund-refl ._ (subst Δ* B* M) rθ rM = {!!}
 
   fund-sym : ∀ {Γ A θ M N α} (Γ* : Ctx Γ) (A* : Ty Γ* A) (rθ : RC Γ* θ)
                (rM : R Γ* A* rθ M) (rN : R Γ* A* rθ N)
@@ -305,7 +251,7 @@ module computational-interp.hcanon.HSetProof-Telescope2 where
   fund-sym ._ (w {Γ* = Γ*} A* B*) rθ rM rN rα = fund-sym Γ* B* (fst rθ) rM rN rα
   fund-sym Γ* (subst1{_}{_}{_}{._}{A*} B* M) rθ rM rN rα = fund-sym (Γ* , A*) B* (rθ , _) rM rN rα
   fund-sym ._ (ex _ _ C*) rθ rM rN rα = fund-sym _ C* _ rM rN rα
-  fund-sym Γ''* (subst Δ* B* M st) rθ rM rN rα = {!!}
+  fund-sym ._ (subst Δ* B* M) rθ rM rN rα = {!!}
 
   fund-trans : ∀ {Γ A θ M N O α β} (Γ* : Ctx Γ) (A* : Ty Γ* A) (rθ : RC Γ* θ)
                (rM : R Γ* A* rθ M) (rN : R Γ* A* rθ N) (rO : R Γ* A* rθ O) 
@@ -324,7 +270,7 @@ module computational-interp.hcanon.HSetProof-Telescope2 where
   fund-trans ._ (w {Γ* = Γ*} A*  B*) rθ rM rN rO qMN qNO = fund-trans Γ* B* (fst rθ) rM rN rO qMN qNO
   fund-trans Γ* (subst1{_}{_}{_}{._}{A*} B* M) rθ rM rN rO qMN qNO = fund-trans (Γ* , A*) B* (rθ , _) rM rN rO qMN qNO
   fund-trans ._ (ex _ _ C*) rθ rM rN rO qMN qNO = fund-trans _ C* _ rM rN rO qMN qNO
-  fund-trans Γ''* (subst Δ* B* M st) rθ rM rN rO qMN qNO = {!!}
+  fund-trans ._ (subst Δ* B* M) rθ rM rN rO qMN qNO = {!!}
 
   fund-ap : ∀ {Γ A B θ M1 M2 α} 
            (Γ* : Ctx Γ) {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} (f : Tm (Γ* , A*) B*) (rθ : RC Γ* θ)
