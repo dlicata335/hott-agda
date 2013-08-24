@@ -69,7 +69,7 @@ module lib.Prods where
   pair≃⁻ : {A : Set} {B : A -> Set} {p q : Σ B} 
         -> (α : (fst p) ≃ (fst q)) -> (snd p) ≃ transport B (! α) (snd q) 
         -> p ≃ q
-  pair≃⁻ {A}{B}{p}{q} α β = pair≃ α (ap≃ (transport-inv-2 B α) ∘ ap (transport B α) β)
+  pair≃⁻ {A}{B}{p}{q} α β = pair≃ α ((transport-inv-2' B α) ∘ ap (transport B α) β)
 
   snd≃⁻ : {A : Type} {B : A -> Type} {p q : Σ B} -> (c : p ≃ q) -> (snd p) ≃ transport B (! (fst≃ c)) (snd q)
   snd≃⁻ {p = p} {q = .p} id = id

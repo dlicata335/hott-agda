@@ -193,6 +193,9 @@ module lib.Paths where
  transport-inv-2 : {A : Type} (B : A -> Type) {M N : A} (α : M ≃ N) -> (\y -> transport B α (transport B (! α) y)) ≃ (\ x -> x)
  transport-inv-2 _ id = id
 
+ transport-inv-2' : {A : Type} (B : A -> Type) {M N : A} (α : M ≃ N) -> {y : _} -> transport B α (transport B (! α) y) ≃ y
+ transport-inv-2' B α = coe (! (move-transport-right≃ B α)) id
+
  transport-isequiv : ∀ {A : Type} {M N : A} (B : A → Type) (α : M ≃ N) 
                   -> IsEquiv (transport B α)
  transport-isequiv {A}{M} B α = isequiv (transport B (! α)) (λ x → ap≃ (transport-inv-1 B α)) (λ x → ap≃ (transport-inv-2 B α)) 
