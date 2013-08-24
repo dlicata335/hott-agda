@@ -1,0 +1,19 @@
+== total substitutions ==
+
+HSetLang  -- language definition
+HSetProof2 -- main proof
+
+HSetProof -- before adding the action on maps to R_pi
+HSetProof3 -- try binary definition of Q_Pi
+              ap for application seems better, but still requires some massaging.
+
+
+== telescopes ==
+
+HSetLang-Telescope2/HSetProof-Telescope2 -- use indexing instead;
+                                         basic definitions go through, but transport_Pi
+                                         doesn't seem to work.  
+
+HSetLang-Telescope/HSetProof-Telescope -- first attempt, using decoding functions.
+                                       gets into trouble because Agda won't split
+

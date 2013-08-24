@@ -181,6 +181,16 @@ module computational-interp.hcanon.HSetProof-Telescope2 where
           {N : _} (rN : R Γ'* C* (RC-middle s1 rθ) N)
         → R Γ'* C* (RC-middle s2 (snd (RC-tr _ _ s1 s2 rθ rα))) (transport C (sempathmiddle s1 s2 rθ rα) N)
 
+  fund-tr- : ∀ {Γ A Γ' Γ1 Γ2} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} {Γ1* : Ctx Γ1} {Γ2* : Ctx Γ2} {A* : Ty Γ* A} {M1 M2 : Tm Γ* A*} 
+          (Δ* : TelescopeTy (Γ* , A*) Γ'*) 
+          (s1 : SubstTele M1 Δ* Γ1*) (s2 : SubstTele M2 Δ* Γ2*)
+          {C : _} (C* : Ty Γ'* C) 
+          {θ2 : _} (rθ2 : RC Γ2* θ2) 
+          {α : _} (rα : Q Γ* A* (snd (RC-++-fst s2 rθ2)) (fund Γ* A* _ M1) (fund Γ* A* _ M2) α) 
+          {N : _} (rN : R Γ'* C* (RC-middle s1 (snd (RC-tr-back _ _ s1 s2 rθ2 rα))) N)
+        → R Γ'* C* (RC-middle s2 rθ2) (transport C {!! (sempathmiddle-back s1 s2 rθ2 rα)!} N)
+  fund-tr- = {!!}
+
   fund-tr-back' : ∀ {Γ A Γ' Γ1 Γ2} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} {Γ1* : Ctx Γ1} {Γ2* : Ctx Γ2} {A* : Ty Γ* A} {M1 M2 : Tm Γ* A*} 
           (Δ* : TelescopeTy (Γ* , A*) Γ'*) 
           (s1 : SubstTele M1 Δ* Γ1*) (s2 : SubstTele M2 Δ* Γ2*)
@@ -188,7 +198,7 @@ module computational-interp.hcanon.HSetProof-Telescope2 where
           {θ : _} (rθ : RC Γ2* θ) 
           {α : _} (rα : Q Γ* A* (snd (RC-++-fst s2 rθ)) (fund Γ* A* _ M1) (fund Γ* A* _ M2) α) 
           {N : _} (rN : R Γ'* C* (RC-middle s2 rθ) N)
-        → R Γ'* C* (RC-middle s1 (snd (RC-tr-back _ _ s1 s2 rθ rα))) (transport C (sempathmiddle-back s1 s2 rθ rα) {!!})
+        → R Γ'* C* (RC-middle s1 (snd (RC-tr-back _ _ s1 s2 rθ rα))) (transport C (sempathmiddle-back s1 s2 rθ rα) N)
   fund-tr-back' = {!!}
 
   RC-tr ._ .· ST-· ST-· rθ1 rα = _ , rθ1
@@ -207,8 +217,8 @@ module computational-interp.hcanon.HSetProof-Telescope2 where
   fund-tr' Δ* s1 s2 prop rθ rα rN = {!!}
   fund-tr' Δ* s1 s2 (proof M) rθ rα rN = {!!}
   fund-tr' Δ* s1 s2 (Π A* B*) rθ rα rN = λ x rx → coe {!!}
-                                                    (fund-tr' (Δ* , A*) (ST-, _ _ _ s1) (ST-, _ _ _ s2) B* (rθ , _) rα
-                                                     (rN _ (coe {!!} (fund-tr-back' Δ* s1 s2 A* (snd (RC-tr _ Δ* s1 s2 rθ rα)) (coe {!!} rα) rx))))
+                                                    (fund-tr- (Δ* , A*) (ST-, _ _ _ s1) (ST-, _ _ _ s2) B* (snd (RC-tr _ Δ* s1 s2 rθ rα) , _) {!!}
+                                                     (rN _ (fund-tr-back' Δ* s1 s2 A* {!!} rα rx)))
   fund-tr' Δ* s1 s2 (id C* M N) rθ rα rN = {!!}
   fund-tr' Δ* s1 s2 (w C* C*₁) rθ rα rN = {!!}
   fund-tr' Δ* s1 s2 (subst M Δ*₁ C*₁ st) rθ rα rN = {!!}
