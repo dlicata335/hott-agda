@@ -64,7 +64,7 @@ module computational-interp.hcanon.HSetLang where
   interps · θ = <>
   interps (θ'* , M*) θ = interps θ'* θ , interp M* θ
 
-  unlam : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → Tm (Γ* , A*) B*
+--  unlam : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → Tm (Γ* , A*) B*
 
   data Tm where
     v    : ∀ {Γ A} {Γ* : Ctx Γ} {A* : Ty Γ* A} → Tm (Γ* , A*) (w A* A*)
@@ -91,6 +91,7 @@ module computational-interp.hcanon.HSetLang where
           → (x : Tm Γ* bool) → Tm Γ* (subst1 C* x)
     lam  : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm (Γ* , A*) B* → Tm Γ* (Π A* B*)
     app  : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → (M* : Tm Γ* A*) → Tm Γ* (subst1 B* M*)
+    unlam : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → Tm (Γ* , A*) B*
     refl : ∀ {Γ A} {Γ* : Ctx Γ} {A* : Ty Γ* A} (M : Tm Γ* A*) → Tm Γ* (id A* M M) 
     tr   : ∀ {Γ Γ' C} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} 
          (C* : Ty Γ'* C) {θ1 θ2 : Subst Γ* Γ'*} (α : PathSubst θ1 θ2) → Tm Γ* (subst C* θ1) →  Tm Γ* (subst C* θ2)
@@ -146,6 +147,7 @@ module computational-interp.hcanon.HSetLang where
   interp (if{Γ}{_}{C}{C*} M1 M2 M) θ = interp-if C* M M1 M2 θ
   interp (lam M) θ = λ x → interp M (θ , x)
   interp (app M N) θ = (interp M θ) (interp N θ)
+  interp (unlam M) θ = interp M (fst θ) (snd θ)
   interp (refl M) θ = id
   interp (tr{Γ}{A}{C} C* δ N) θ = transport C (interpps δ θ) (interp N θ) 
   interp (uap f g) θ = ua (interp-uap-eqv f g θ) 
@@ -155,15 +157,15 @@ module computational-interp.hcanon.HSetLang where
   interpps · θ = id
   interpps (δ , α) θ = pair≃ (interpps δ θ) (interp α θ)
 
-  unlam{Γ}{A}{B}{Γ*}{A*}{B*} f = deq (app wf' v) -- deq (app {A* = w A* A*}{B* = {!w (w A* A*) B*!}} (deq (w{A* = A*} f)) v)
-    where wf : Tm (Γ* , A*) (w A* (Π A* B*))
-          wf = w f
+  -- unlam{Γ}{A}{B}{Γ*}{A*}{B*} f = deq (app wf' v) -- deq (app {A* = w A* A*}{B* = {!w (w A* A*) B*!}} (deq (w{A* = A*} f)) v)
+  --   where wf : Tm (Γ* , A*) (w A* (Π A* B*))
+  --         wf = w f
 
-          B1 : Ty ((Γ* , A*) , w A* A*) (λ θ → B (fst θ))
-          B1 = w (w A* A*) B*
+  --         B1 : Ty ((Γ* , A*) , w A* A*) (λ θ → B (fst θ))
+  --         B1 = w (w A* A*) B*
 
-          wf' : Tm (Γ* , A*) (Π (w A* A*) (ex A* A* B1)) 
-          wf' = deq wf
+  --         wf' : Tm (Γ* , A*) (Π (w A* A*) (ex A* A* B1)) 
+  --         wf' = deq wf
 
   -- can't inline these because we need the prior cases of interp to be available
   interp-if {_}{C} C* M M1 M2 θ = if (λ x → (C (θ , x))) / interp M θ then interp M1 θ else (interp M2 θ)
