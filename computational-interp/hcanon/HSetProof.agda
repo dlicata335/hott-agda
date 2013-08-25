@@ -174,6 +174,17 @@ module computational-interp.hcanon.HSetProof where
   Q ._ (ex {Γ* = Γ*} A* B* C*) ((rθ , ra) , rb) rM rN α = Q ((Γ* , A*) , w A* B*) C* ((rθ , rb) , ra) rM rN α
   Q ._ (subst{_}{_}{_}{Γ*}{Γ'*} B* θ'*) rθ rM rN α = Q Γ'* B* (funds Γ* Γ'* rθ θ'*) rM rN α
 
+  QΠ-alt : ∀ {Γ θ A B M N β} (Γ* : Ctx Γ) (A* : Ty Γ* A) (B* : Ty (Γ* , A*) B) (rθ : RC Γ* θ) 
+              (rM : R Γ* (Π A* B*) rθ M) (rN : R Γ* (Π A* B*) rθ N)
+         → Q Γ* (Π A* B*) rθ rM rN β
+         → ∀ {x y α} → (rx : R Γ* A* rθ x) (ry : R Γ* A* rθ y) (rα : Q Γ* A* rθ (fund-transport Γ* A* rθ rθ (fund-refls Γ* rθ) rx) ry α)
+         → Q (Γ* , A*) B* (rθ , ry) (fund-transport (Γ* , A*) B* (rθ , rx) (rθ , ry) 
+                                                (id , α , id , fund-refls Γ* rθ , rα)
+                                                (fst rM _ rx))
+                                      (fst rN _ ry)
+                                      (ap≃₁ β α ∘ transport-pair≃-assoc α B)
+  QΠ-alt = {!!}
+
 
   -- ----------------------------------------------------------------------
   -- transport for R/Q
@@ -610,7 +621,11 @@ module computational-interp.hcanon.HSetProof where
   fund-ap Γ* (tr C* α f) rθ1 rθ2 rδ = {!!}
   fund-ap Γ* (uap f₂ f₃) rθ1 rθ2 rδ = <>
 -}
-  fund-ap ._ (unlam {Γ* = Γ*} {A* = A*} {B* = B*} M) rθ1 rθ2 (δ1 , α1 , eq , rδ1 , rα1) = 
+  fund-ap ._ (unlam {Γ* = Γ*} {A* = A*} {B* = B*} M) (rθ1 , rM1) (rθ2 , rM2) (δ1 , α1 , eq , rδ1 , rα1) = ?
+    transportQ (Γ* , A*) B* _ _ ? 
+      (QΠ-alt Γ* A* B* rθ2 _ _ (fund-ap Γ* M rθ1 rθ2 rδ1)
+       (fund-transport Γ* A* rθ1 rθ2 rδ1 rM1) rM2 (fund-trans Γ* A* rθ2 _ _ _ (fund-transport-id Γ* A* rθ2 (fund-refls Γ* rθ2) {!!} _) rα1))
+{-
     transportQ (Γ* , A*) B* rθ2 _ _ {!!} 
       (fund-trans (Γ* , A*) B* rθ2 _ _ _ (fund-trans (Γ* , A*) B* rθ2 _ _ _ (coe {!!}
                                                                               (fund-sym (Γ* , A*) B* _ _ _ 
@@ -623,6 +638,8 @@ module computational-interp.hcanon.HSetProof where
                                                                                      (snd rθ2) rα1))))))
                                             (fund-sym (Γ* , A*) B* rθ2 _ _ (transportRQ (Γ* , A*) B* rθ2 _)))
          (fund-ap Γ* M (fst rθ1) (fst rθ2) rδ1 _ (snd rθ2)))
+-}
+
   fund-ap Γ* (deq f) rθ1 rθ2 rδ = {!fund-ap Γ* f rθ1 rθ2 rδ!}
   fund-ap Γ* _ rθ1 rθ2 rδ = {!!}
 {-
