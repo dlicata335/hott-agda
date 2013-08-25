@@ -74,17 +74,17 @@ module computational-interp.hcanon.HSetLang where
     unit  : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* prop
     unit⁺  : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* prop
     void  : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* prop
-    `∀    : ∀ {Γ} {Γ* : Ctx Γ} (A* : Tm Γ* prop) (B* : Tm (Γ* , proof A*) prop) → Tm Γ* prop
+    -- `∀    : ∀ {Γ} {Γ* : Ctx Γ} (A* : Tm Γ* prop) (B* : Tm (Γ* , proof A*) prop) → Tm Γ* prop
     <>    : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* (proof unit)
     <>⁺     : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* (proof unit⁺)
     split1 : ∀ {Γ} {Γ* : Ctx Γ} {C : _} (C* : Ty (Γ* , proof unit⁺) C)
           → Tm Γ* (subst1 C* <>⁺) 
           → (x : Tm Γ* (proof unit⁺)) → Tm Γ* (subst1 C* x)
     abort : ∀ {Γ C} {Γ* : Ctx Γ} {C* : Ty Γ* C} → Tm Γ* (proof void) → Tm Γ* C*
-    plam  : ∀ {Γ} {Γ* : Ctx Γ} {A* : Tm Γ* prop} {B* : Tm (Γ* , proof A*) prop}
-          → Tm (Γ* , proof A*) (proof B*) → Tm Γ* (proof (`∀ A* B*))
-    papp  : ∀ {Γ} {Γ* : Ctx Γ} {A* : Tm Γ* prop} {B* : Tm (Γ* , proof A*) prop}
-          → Tm Γ* (proof (`∀ A* B*)) → (M* : Tm Γ* (proof A*)) → Tm Γ* (subst1 (proof B*) M*)
+    -- plam  : ∀ {Γ} {Γ* : Ctx Γ} {A* : Tm Γ* prop} {B* : Tm (Γ* , proof A*) prop}
+    --       → Tm (Γ* , proof A*) (proof B*) → Tm Γ* (proof (`∀ A* B*))
+    -- papp  : ∀ {Γ} {Γ* : Ctx Γ} {A* : Tm Γ* prop} {B* : Tm (Γ* , proof A*) prop}
+    --       → Tm Γ* (proof (`∀ A* B*)) → (M* : Tm Γ* (proof A*)) → Tm Γ* (subst1 (proof B*) M*)
     if    : ∀ {Γ C} {Γ* : Ctx Γ} {C* : Ty (Γ* , bool) C} 
           → Tm Γ* (subst1 C* true) 
           → Tm Γ* (subst1 C* false) 
@@ -118,8 +118,8 @@ module computational-interp.hcanon.HSetLang where
   interp-<>⁺ : ∀ {Γ} {Γ* : Ctx Γ} {θ : Γ} → (interp {Γ* = Γ*} unit⁺ θ)
   interp-split1 : ∀ {Γ} {Γ* : Ctx Γ} {C : _} (C*  : Ty (Γ* , proof unit⁺) C) (M1  : Tm Γ* (subst1 C* <>⁺))  (M : Tm Γ* (proof unit⁺)) (θ : Γ) → C (θ , interp M θ)
   interp-abort : ∀ {Γ A} {Γ* : Ctx Γ} (A* : Ty Γ* A) → Tm Γ* (proof void) → (θ : Γ) → (A θ)
-  interp-plam : ∀ {Γ} {Γ* : Ctx Γ} {A : _} {B : _}→ (M : Tm (Γ* , _) (proof B)) (θ : Γ) → (interp (`∀ A B) θ)
-  interp-papp  : ∀ {Γ} {Γ* : Ctx Γ} {A : _} {B : _} → (M : Tm Γ* (proof (`∀ A B))) → (N : Tm Γ* (proof A)) (θ : Γ) → (interp B (θ , interp N θ))
+  -- interp-plam : ∀ {Γ} {Γ* : Ctx Γ} {A : _} {B : _}→ (M : Tm (Γ* , _) (proof B)) (θ : Γ) → (interp (`∀ A B) θ)
+  -- interp-papp  : ∀ {Γ} {Γ* : Ctx Γ} {A : _} {B : _} → (M : Tm Γ* (proof (`∀ A B))) → (N : Tm Γ* (proof A)) (θ : Γ) → (interp B (θ , interp N θ))
   interp-uap-eqv : ∀ {Γ} {Γ* : Ctx Γ} {P : Tm Γ* prop} {Q : Tm Γ* prop} 
            (f : Tm (Γ* , proof P) (w (proof P) (proof Q)))
            (g : Tm (Γ* , proof Q) (w (proof Q) (proof P)))
@@ -136,13 +136,13 @@ module computational-interp.hcanon.HSetLang where
   interp unit _ = Unit
   interp unit⁺ _ = Unit⁺
   interp void _ = Void
-  interp (`∀ A B) θ = (x : interp A θ) -> interp B (θ , x)
+  --  interp (`∀ A B) θ = (x : interp A θ) -> interp B (θ , x)
   interp <> θ = interp-<>
   interp <>⁺ θ = interp-<>⁺
   interp (split1 C* M1 M) θ = interp-split1 C* M1 M θ
   interp (abort{_}{_}{_}{A*} M) θ = interp-abort A* M θ
-  interp (plam M) θ = interp-plam M θ
-  interp (papp M N) θ = interp-papp M N θ
+  -- interp (plam M) θ = interp-plam M θ
+  -- interp (papp M N) θ = interp-papp M N θ
   interp (if{Γ}{_}{C}{C*} M1 M2 M) θ = interp-if C* M M1 M2 θ
   interp (lam M) θ = λ x → interp M (θ , x)
   interp (app M N) θ = (interp M θ) (interp N θ)
@@ -171,8 +171,8 @@ module computational-interp.hcanon.HSetLang where
   interp-<>⁺ = <>⁺
   interp-split1 {_}{_}{C} C* M1 M θ = split1⁺ (λ x → C (θ , x)) (interp M1 θ) (interp M θ)
   interp-abort _ M θ = Sums.abort (interp M θ)
-  interp-plam M θ = λ x → interp M (θ , x)
-  interp-papp M N θ = interp M θ (interp N θ)
+  -- interp-plam M θ = λ x → interp M (θ , x)
+  -- interp-papp M N θ = interp M θ (interp N θ)
   interp-uap-eqv f g θ = (improve (hequiv (λ x → interp f (θ , x)) (λ y → interp g (θ , y)) FIXME1 FIXME2))  where
     postulate FIXME1 : _
               FIXME2 : _
