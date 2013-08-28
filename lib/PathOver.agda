@@ -122,6 +122,11 @@ module lib.PathOver where
               → {θ1 θ2 : Δ} {δ : θ1 == θ2}
               → PathOver (\ θ → Type) δ A B == Equiv A B 
 
+  PathOverType-changeover : {Δ : Type} {θ1 θ2 : Δ} {δ δ' : θ1 == θ2} (eq : δ == δ') {M1 : _} {M2 : _} → 
+               (α : PathOver (\ _ -> Type) δ M1 M2)
+             → coe PathOverType α == coe PathOverType (changeover (\ _ -> Type) eq α)
+  PathOverType-changeover id α = id
+    
   -- ----------------------------------------------------------------------
   -- "computation steps"
 
