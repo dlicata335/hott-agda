@@ -36,22 +36,28 @@ module lib.PathOver where
 
   -- funny way of saying functoriality
   PathOver-transport-∘ : {Δ : Type} (A : Δ → Type) {θ1 θ2 θ3 : Δ} (δ1 : θ1 == θ2) (δ2 : θ2 == θ3) {M1 : A θ1}
-                           → PathOver A δ2 (transport A δ1 M1) (transport A (δ2 ∘ δ1) M1)
+                       → PathOver A δ2 (transport A δ1 M1) (transport A (δ2 ∘ δ1) M1)
   PathOver-transport-∘ _ id id = id
-
-  PathOver-transport-right : {Δ : Type} (A : Δ → Type) {θ1 θ2 : Δ} (δ : θ1 == θ2) {M1 : A θ1}
-                           → PathOver A δ M1 (transport A δ M1)
-  PathOver-transport-right A δ = PathOver-transport-∘ A id δ
-
-  PathOver-transport-left : {Δ : Type} (A : Δ → Type) {θ1 θ2 : Δ} (δ : θ1 == θ2) {M2 : A θ2}
-                          → PathOver A δ (transport A (! δ) M2) M2
-  PathOver-transport-left _ id = id
 
   PathOver∘-transport : {Δ : Type} (A : Δ → Type) 
                       → ∀ {θ1 θ2 θ3} {δ2 : θ2 == θ3} (δ1 : θ1 == θ2) → ∀ {M1 M3} 
                       →  (PathOver A (δ2 ∘ δ1) M1 M3)
                       == (PathOver A δ2 (transport A δ1 M1) M3) 
   PathOver∘-transport A id = id
+
+  PathOver-transport-right : {Δ : Type} (A : Δ → Type) {θ1 θ2 : Δ} (δ : θ1 == θ2) {M1 : A θ1}
+                           → PathOver A δ M1 (transport A δ M1)
+  PathOver-transport-right A δ {M1} =
+    changeover A (∘-unit-l δ)
+      (coe (! (PathOver∘-transport A δ {M1 = M1} {M3 = transport A δ M1}))
+           id) 
+    -- or PathOver-transport-∘ A id δ
+
+  PathOver-transport-left : {Δ : Type} (A : Δ → Type) {θ1 θ2 : Δ} (δ : θ1 == θ2) {M2 : A θ2}
+                          → PathOver A δ (transport A (! δ) M2) M2
+  PathOver-transport-left _ id = id
+
+  -- implies het to hom if hom is defined as path over refl!
 
 {-
   path-ind : {Γ : Type} {A : Γ → Type} {M : (θ : Γ) → A θ} 
