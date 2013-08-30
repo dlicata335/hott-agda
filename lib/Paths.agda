@@ -27,6 +27,13 @@ module lib.Paths where
                → C N P
  path-induction _ b id = b
 
+ path-induction-l : {A : Type} {M : A}
+                  (C : (x : A) → Path x M → Type)
+               → (C M id)
+               → {N : A} → (P : Path N M)
+               → C N P
+ path-induction-l _ b id = b
+
  path-induction-equiv : {B : Type} {b : B} {C : (y : B) -> Path b y → Type}
                    → Equiv ((y : B) (p : Path b y) → C y p)
                            (C b id)

@@ -28,6 +28,15 @@ module lib.PathOver where
   pair= : {Δ : Type} {A : Δ → Type} {θ1 θ2 : Δ} (δ : θ1 == θ2) {M1 : A θ1} {M2 : A θ2} → PathOver A δ M1 M2 → (θ1 , M1) == (θ2 , M2)
   pair= ._ id = id
 
+  !Σ : {Δ : Type} {A : Δ → Type} {θ1 θ2 : Δ} (δ : θ1 == θ2) {M1 : A θ1} {M2 : A θ2} → (α : PathOver A δ M1 M2) 
+      → ! (pair= δ α) == pair= (! δ) (!o α)
+  !Σ .id id = id
+
+  ∘Σ : {Δ : Type} {A : Δ → Type} {θ1 θ2 θ3 : Δ} (δ2 : θ2 == θ3) (δ1 : θ1 == θ2)
+        {M1 : A θ1} {M2 : A θ2} {M3 : _} → (α2 : PathOver A δ2 M2 M3) (α1 : PathOver A δ1 M1 M2) 
+      → (pair= δ2 α2) ∘ (pair= δ1 α1) == pair= (δ2 ∘ δ1) (α2 ∘o α1)
+  ∘Σ .id .id id id = id
+
   Σ=β1 : {A : Type} {B : A -> Type} {p q : Σ B} 
        (α : Path (fst p) (fst q)) 
        (β : PathOver B α (snd p) (snd q))
@@ -197,6 +206,15 @@ module lib.PathOver where
 
     PathOverType-id : {Δ : Type} {θ : Δ} {A : Type} → coe (PathOverType{_}{_}{_}{θ}) id == (id-equiv{A})
 
+    PathOverType-!  : {Δ : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {A B : Type} {α : PathOver (\ _ -> Type) δ A B}
+                    → coe PathOverType (!o α) == (!equiv (coe PathOverType α))
+
+  PathOverType-∘ : {Δ : Type} {A B C : Type}
+              → {θ1 θ2 θ3 : Δ} {δ2 : θ2 == θ3} {δ1 : θ1 == θ2}
+              → (α2 : PathOver (\ θ → Type) δ2 B C) (α1 : PathOver (\ θ → Type) δ1 A B) 
+              → (coe PathOverType α2) ∘equiv (coe PathOverType α1) == coe PathOverType (α2 ∘o α1)
+  PathOverType-∘ id id = (! PathOverType-id ∘ pair≃ id (HProp-unique (IsEquiv-HProp (λ x → x)) _ _)) ∘ ap2 _∘equiv_ PathOverType-id PathOverType-id
+
   PathOverType-changeover : {Δ : Type} {θ1 θ2 : Δ} {δ δ' : θ1 == θ2} (eq : δ == δ') {M1 : _} {M2 : _} → 
                (α : PathOver (\ _ -> Type) δ M1 M2)
              → coe PathOverType α == coe PathOverType (changeover (\ _ -> Type) eq α)
@@ -274,6 +292,14 @@ module lib.PathOver where
            -> PathOver (\ a -> C (a , f a)) α M1 M2
            → PathOver C (pair= α (apdo f α)) M1 M2
   over-apd-inverse C id f = over-o-ap C {λ x → x , f x} {_} {_} {id}
+
+  transport-Πo : ∀ {Γ} (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
+            {θ1 θ2 : Γ} (δ : θ1 == θ2) (f : (x : A θ1) -> B θ1 x) 
+         -> transport (\ γ -> (x : A γ) -> B γ x) δ f ==
+            (\ x -> transport (\ (p : Σ \ (γ : Γ) -> A γ) -> B (fst p) (snd p))
+                          (pair= δ (PathOver-transport-left A δ))
+                          (f (transport A (! δ) x)))
+  transport-Πo _ _ id f = id
 
   path-to-pathover : {Δ : Type} (A : Δ → Type) {θ : Δ} {M N : A θ} → M == N → PathOver A id M N
   path-to-pathover A id = id
