@@ -36,7 +36,7 @@ module computational-interp.hcanon.HSetProof-PathOver where
                 coh1 id id id = id
 
   -- ----------------------------------------------------------------------
-  -- definition of reducibility
+  -- types 
 
   RC : ∀ {Γ} → (Γ* : Ctx Γ) (θ : Γ) → MetaType
   QC : ∀ {Γ θ1 θ2} → (Γ* : Ctx Γ) (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) (δ : θ1 == θ2) → MetaType
@@ -46,84 +46,89 @@ module computational-interp.hcanon.HSetProof-PathOver where
           (rδ : QC Γ* rθ1 rθ2 δ)
           (A* : Ty Γ* A) → R Γ* A* rθ1 M1 → R Γ* A* rθ2 M2 → (α : PathOver A δ M1 M2) → MetaType
 
-  fund : ∀ {Γ A θ} (Γ* : Ctx Γ) (A* : Ty Γ* A) (rθ : RC Γ* θ) (M : Tm Γ* A*) → R Γ* A* rθ (interp M θ)
-  funds : ∀ {Γ Γ' θ} (Γ* : Ctx Γ) (Γ'* : Ctx Γ') (rθ : RC Γ* θ) (θ'* : Subst Γ* Γ'*) → RC Γ'* (interps θ'* θ)
-  fundps : ∀ {Γ Γ' θ} (Γ* : Ctx Γ) (Γ'* : Ctx Γ') (rθ : RC Γ* θ) (θ1* θ2* : Subst Γ* Γ'*) (δ : PathSubst θ1* θ2*) 
-         → QC Γ'* (funds Γ* Γ'* rθ θ1*) (funds Γ* Γ'* rθ θ2*) (interpps δ θ)
+  postulate
+    fund : ∀ {Γ A θ} (Γ* : Ctx Γ) (A* : Ty Γ* A) (rθ : RC Γ* θ) (M : Tm Γ* A*) → R Γ* A* rθ (interp M θ)
+    funds : ∀ {Γ Γ' θ} (Γ* : Ctx Γ) (Γ'* : Ctx Γ') (rθ : RC Γ* θ) (θ'* : Subst Γ* Γ'*) → RC Γ'* (interps θ'* θ)
+    fundps : ∀ {Γ Γ' θ} (Γ* : Ctx Γ) (Γ'* : Ctx Γ') (rθ : RC Γ* θ) (θ1* θ2* : Subst Γ* Γ'*) (δ : PathSubst θ1* θ2*) 
+           → QC Γ'* (funds Γ* Γ'* rθ θ1*) (funds Γ* Γ'* rθ θ2*) (interpps δ θ)
 
-  fund-transport : ∀ {Γ' C θ1 θ2 δ N} (Γ'* : Ctx Γ') (C* : Ty Γ'* C) 
-          (rθ1 : RC Γ'* θ1) (rθ2 : RC Γ'* θ2) 
-          (rδ : QC Γ'* rθ1 rθ2 δ) 
-          (rN : R Γ'* C* rθ1 N) 
-        → R Γ'* C* rθ2 (transport C δ N)
-
-  fund-ap : ∀ {Γ' B θ1 θ2 δ} 
-           (Γ'* : Ctx Γ') {B* : Ty Γ'* B} (f : Tm Γ'* B*) (rθ1 : RC Γ'* θ1) (rθ2 : RC Γ'* θ2)
-           (rδ : QC Γ'* rθ1 rθ2 δ)
-          → QOver rδ B* (fund Γ'* B* rθ1 f) (fund Γ'* B* rθ2 f) (apdo (interp f) δ)
-
-  fund-aps : ∀ {Γ Γ' θ1 θ2 δ} (Γ* : Ctx Γ) {Γ'* : Ctx Γ'} (θ'* : Subst Γ* Γ'*)
-           (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) (rδ : QC Γ* rθ1 rθ2 δ)
-           → QC Γ'* (funds Γ* Γ'* rθ1 θ'*) (funds Γ* Γ'* rθ2 θ'*) (ap (interps θ'*) δ)
+  fund-refls : ∀ {Γ θ} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → QC Γ* rθ rθ id
 
   postulate
+    fund-refl : ∀ {Γ C θ1 N} (Γ* : Ctx Γ) (C* : Ty Γ* C) 
+             (rθ1 : RC Γ* θ1) (rN : R Γ* C* rθ1 N) 
+             → QOver (fund-refls _ rθ1) C* rN rN id
+
+    fund-!s : ∀ {Γ θ1 θ2 δ} (Γ* : Ctx Γ)  
+             (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) 
+             → QC Γ* rθ1 rθ2 δ
+             → QC Γ* rθ2 rθ1 (! δ)
+  
+    fund-! : ∀ {Γ θ1 θ2 δ C M1 M2 α} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} (rδ : QC Γ* rθ1 rθ2 δ)
+           → (C* : Ty Γ* C) 
+             (rM1 : R Γ* C* rθ1 M1) (rM2 : R Γ* C* rθ2 M2) 
+             (rα : QOver rδ C* rM1 rM2 α) 
+           → QOver (fund-!s Γ* rθ1 rθ2 rδ) C* rM2 rM1 (!o α)
+  
+    fund-∘s : ∀ {Γ θ1 θ2 θ3 δ2 δ1} (Γ* : Ctx Γ)  
+             (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) (rθ3 : RC Γ* θ3)
+             → QC Γ* rθ2 rθ3 δ2 → QC Γ* rθ1 rθ2 δ1
+             → QC Γ* rθ1 rθ3 (δ2 ∘ δ1)
+  
+    fund-∘ : ∀ {Γ θ1 θ2 θ3 δ2 δ1 C M1 M2 M3 α2 α1} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} {rθ3 : RC Γ* θ3}
+               (rδ2 : QC Γ* rθ2 rθ3 δ2) (rδ1 : QC Γ* rθ1 rθ2 δ1)
+               (C* : Ty Γ* C) 
+               {rM1 : R Γ* C* rθ1 M1} {rM2 : R Γ* C* rθ2 M2} {rM3 : R Γ* C* rθ3 M3}
+               (rα2 : QOver rδ2 C* rM2 rM3 α2) (rα1 : QOver rδ1 C* rM1 rM2 α1) 
+             → QOver (fund-∘s Γ* rθ1 rθ2 rθ3 rδ2 rδ1) C* rM1 rM3 (α2 ∘o α1)
+  
+  fund-changeover : ∀ {Γ θ1 θ2 δ δ' A M1 M2 α} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} 
+            (rδ : QC Γ* rθ1 rθ2 δ) (rδ' : QC Γ* rθ1 rθ2 δ') 
+            (A* : Ty Γ* A) (rM1 : R Γ* A* rθ1 M1) (rM2 : R Γ* A* rθ2 M2)
+            (eq : δ == δ')
+            (rα : QOver rδ A* rM1 rM2 α)
+            → QOver rδ' A* rM1 rM2 (changeover A eq α)
+
+  postulate
+    fund-transport : ∀ {Γ' C θ1 θ2 δ N} (Γ'* : Ctx Γ') (C* : Ty Γ'* C) 
+            (rθ1 : RC Γ'* θ1) (rθ2 : RC Γ'* θ2) 
+            (rδ : QC Γ'* rθ1 rθ2 δ) 
+            (rN : R Γ'* C* rθ1 N) 
+          → R Γ'* C* rθ2 (transport C δ N)
+
     fund-transport! : ∀ {Γ' C θ1 θ2 δ N} (Γ'* : Ctx Γ') (C* : Ty Γ'* C) 
             (rθ1 : RC Γ'* θ1) (rθ2 : RC Γ'* θ2) 
             (rδ : QC Γ'* rθ1 rθ2 δ) 
             (rN : R Γ'* C* rθ2 N) 
           → R Γ'* C* rθ1 (transport C (! δ) N)
 
-  fund-refls : ∀ {Γ θ} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → QC Γ* rθ rθ id
+    fund-PathOver∘-transport : ∀ {Γ θ1 θ2 θ3 δ2 δ1 A M1 M3 α} {Γ* : Ctx Γ} (A* : Ty Γ* A)
+               {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} {rθ3 : RC Γ* θ3}
+               (rδ2 : QC Γ* rθ2 rθ3 δ2) (rδ1 : QC Γ* rθ1 rθ2 δ1) {rM1 : R Γ* A* rθ1 M1} {rM3 : R Γ* A* rθ3 M3}
+             → QOver (fund-∘s Γ* rθ1 rθ2 rθ3 rδ2 rδ1) A* rM1 rM3 α
+             → QOver rδ2 A* (fund-transport Γ* A* rθ1 rθ2 rδ1 rM1) rM3 (coe (PathOver∘-transport A δ1) α)
+  
+    fund-transport-left : ∀ {Γ C θ1 θ2 δ N} (Γ* : Ctx Γ) (C* : Ty Γ* C) 
+             (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) (rδ : QC Γ* rθ1 rθ2 δ)
+             (rN : R Γ* C* rθ2 N) 
+           → QOver rδ C* (fund-transport! Γ* C* rθ1 rθ2 rδ rN) rN (PathOver-transport-left C δ)
+  
+    fund-transport-right : ∀ {Γ C θ1 θ2 δ M} (Γ* : Ctx Γ) (C* : Ty Γ* C) 
+             (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) (rδ : QC Γ* rθ1 rθ2 δ)
+             (rM : R Γ* C* rθ1 M) 
+           → QOver rδ C* rM (fund-transport Γ* C* rθ1 rθ2 rδ rM) (PathOver-transport-right C δ)
+  
+    fund-aps : ∀ {Γ Γ' θ1 θ2 δ} (Γ* : Ctx Γ) {Γ'* : Ctx Γ'} (θ'* : Subst Γ* Γ'*)
+             (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) (rδ : QC Γ* rθ1 rθ2 δ)
+             → QC Γ'* (funds Γ* Γ'* rθ1 θ'*) (funds Γ* Γ'* rθ2 θ'*) (ap (interps θ'*) δ)
+  
+    fund-ap : ∀ {Γ' B θ1 θ2 δ} 
+             (Γ'* : Ctx Γ') {B* : Ty Γ'* B} (f : Tm Γ'* B*) (rθ1 : RC Γ'* θ1) (rθ2 : RC Γ'* θ2)
+             (rδ : QC Γ'* rθ1 rθ2 δ)
+            → QOver rδ B* (fund Γ'* B* rθ1 f) (fund Γ'* B* rθ2 f) (apdo (interp f) δ)
 
-  fund-refl-over : ∀ {Γ C θ1 N} (Γ* : Ctx Γ) (C* : Ty Γ* C) 
-           (rθ1 : RC Γ* θ1) (rN : R Γ* C* rθ1 N) 
-           → QOver (fund-refls _ rθ1) C* rN rN id
-
-  fund-!s : ∀ {Γ θ1 θ2 δ} (Γ* : Ctx Γ)  
-           (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) 
-           → QC Γ* rθ1 rθ2 δ
-           → QC Γ* rθ2 rθ1 (! δ)
-
-  fund-! : ∀ {Γ θ1 θ2 δ C M1 M2 α} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} (rδ : QC Γ* rθ1 rθ2 δ)
-         → (C* : Ty Γ* C) 
-           (rM1 : R Γ* C* rθ1 M1) (rM2 : R Γ* C* rθ2 M2) 
-           (rα : QOver rδ C* rM1 rM2 α) 
-         → QOver (fund-!s Γ* rθ1 rθ2 rδ) C* rM2 rM1 (!o α)
-
-  fund-∘s : ∀ {Γ θ1 θ2 θ3 δ2 δ1} (Γ* : Ctx Γ)  
-           (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) (rθ3 : RC Γ* θ3)
-           → QC Γ* rθ2 rθ3 δ2 → QC Γ* rθ1 rθ2 δ1
-           → QC Γ* rθ1 rθ3 (δ2 ∘ δ1)
-
-  fund-∘ : ∀ {Γ θ1 θ2 θ3 δ2 δ1 C M1 M2 M3 α2 α1} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} {rθ3 : RC Γ* θ3}
-             (rδ2 : QC Γ* rθ2 rθ3 δ2) (rδ1 : QC Γ* rθ1 rθ2 δ1)
-             (C* : Ty Γ* C) 
-             {rM1 : R Γ* C* rθ1 M1} {rM2 : R Γ* C* rθ2 M2} {rM3 : R Γ* C* rθ3 M3}
-             (rα2 : QOver rδ2 C* rM2 rM3 α2) (rα1 : QOver rδ1 C* rM1 rM2 α1) 
-           → QOver (fund-∘s Γ* rθ1 rθ2 rθ3 rδ2 rδ1) C* rM1 rM3 (α2 ∘o α1)
-
-  fund-transport-left : ∀ {Γ C θ1 θ2 δ N} (Γ* : Ctx Γ) (C* : Ty Γ* C) 
-           (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) (rδ : QC Γ* rθ1 rθ2 δ)
-           (rN : R Γ* C* rθ2 N) 
-         → QOver rδ C* (fund-transport! Γ* C* rθ1 rθ2 rδ rN) rN (PathOver-transport-left C δ)
-
-  fund-transport-right : ∀ {Γ C θ1 θ2 δ M} (Γ* : Ctx Γ) (C* : Ty Γ* C) 
-           (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) (rδ : QC Γ* rθ1 rθ2 δ)
-           (rM : R Γ* C* rθ1 M) 
-         → QOver rδ C* rM (fund-transport Γ* C* rθ1 rθ2 rδ rM) (PathOver-transport-right C δ)
-
-  fund-changeover : ∀ {Γ θ1 θ2 δ δ' A M1 M2 α} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} 
-          (rδ : QC Γ* rθ1 rθ2 δ) (rδ' : QC Γ* rθ1 rθ2 δ') 
-          (A* : Ty Γ* A) (rM1 : R Γ* A* rθ1 M1) (rM2 : R Γ* A* rθ2 M2)
-          (eq : δ == δ')
-          (rα : QOver rδ A* rM1 rM2 α)
-          → QOver rδ' A* rM1 rM2 (changeover A eq α)
-
-  fund-PathOver∘-transport : ∀ {Γ θ1 θ2 θ3 δ2 δ1 A M1 M3 α} {Γ* : Ctx Γ} (A* : Ty Γ* A)
-             {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} {rθ3 : RC Γ* θ3}
-             (rδ2 : QC Γ* rθ2 rθ3 δ2) (rδ1 : QC Γ* rθ1 rθ2 δ1) {rM1 : R Γ* A* rθ1 M1} {rM3 : R Γ* A* rθ3 M3}
-           → QOver (fund-∘s Γ* rθ1 rθ2 rθ3 rδ2 rδ1) A* rM1 rM3 α
-           → QOver rδ2 A* (fund-transport Γ* A* rθ1 rθ2 rδ1 rM1) rM3 (coe (PathOver∘-transport A δ1) α)
+  -- ----------------------------------------------------------------------
+  -- definition of the relation
 
   RC · θ = Unit
   RC (Γ* , A*) (θ , M) = Σ (λ (sθ : RC Γ* θ) → R Γ* A* sθ M)
@@ -142,10 +147,9 @@ module computational-interp.hcanon.HSetProof-PathOver where
   R Γ* (proof M) rθ pf = R-proof Γ* M rθ pf
   R Γ* (Π{Γ}{A}{B} A* B*) {θ} rθ M = 
    Σ \ (rM : (N : (A θ)) (rN : R Γ* A* rθ N) → R (Γ* , A*) B* (rθ , rN) (M N)) →
-       ((rid : QC Γ* rθ rθ id) -- FIXME leftover... do we need this quantifer? could just do it for fund-refls
-        {N1 N2 : (A θ)} {α : PathOver A id N1 N2} (rN1 : R Γ* A* rθ N1) (rN2 : R Γ* A* rθ N2) 
-        (rα : QOver rid A* rN1 rN2 α) 
-        → QOver {Γ* = (Γ* , A*)} (id , α , id , rid , rα) B* (rM _ rN1) (rM _ rN2) {!!}) -- FIXME mismatch between total substitutions and not
+       ({N1 N2 : (A θ)} {α : PathOver A id N1 N2} (rN1 : R Γ* A* rθ N1) (rN2 : R Γ* A* rθ N2) 
+        (rα : QOver (fund-refls Γ* rθ) A* rN1 rN2 α) 
+        → QOver {Γ* = (Γ* , A*)} (id , α , id , (fund-refls Γ* rθ) , rα) B* (rM _ rN1) (rM _ rN2) (apdo1 M α))
   R Γ* (pathOver {Δ* = Δ*} A* {θ1* = θ1*} {θ2* = θ2*} δ* M N) rθ α = R-pathOver Γ* Δ* A* θ1* θ2* δ* M N rθ α 
   R ._ (w{Γ* = Γ*} A* B*) {θ , _} (rθ , _) M = 
     R Γ* B* rθ M
@@ -166,14 +170,18 @@ module computational-interp.hcanon.HSetProof-PathOver where
       (rβ : QOver rδ A* rN1 rN2 β) →
       QOver {Γ* = Γ* , A*} {rθ1 = rθ1 , rN1} {rθ2 = rθ2 , rN2} (_ , _ , id , rδ , rβ) B* (fst rM1 _ rN1) (fst rM2 _ rN2) (coe PathOverΠ α _ _ β)
   QOver rδ (pathOver _ _ _ _) rM1 rM2 α = Unit
-  QOver {δ = δ} rδ (subst {A = A} A* θ'*) rM1 rM2 α = QOver (fund-aps _ θ'* _ _ rδ) A* rM1 rM2 {!!}
-  QOver (δ1 , α1 , eq , rδ1 , rα1) (w A* A*₁) rM1 rM2 α = QOver rδ1 A*₁ rM1 rM2 {!!}
-  QOver {δ = δ} rδ (subst1 {B = B} A*₁ M) rM1 rM2 α = QOver (_ , _ , id , rδ , fund-ap _ M _ _ rδ) A*₁ rM1 rM2 {!!}
+  QOver {δ = δ} rδ (subst {A = A} A* θ'*) rM1 rM2 α = QOver (fund-aps _ θ'* _ _ rδ) A* rM1 rM2 (over-o-ap A α)
+  QOver (δ1 , α1 , eq , rδ1 , rα1) (w {B = B} A* A*₁) rM1 rM2 α = QOver rδ1 A*₁ rM1 rM2 (changeover B (Σ=β1 δ1 α1 ∘ ap (ap fst) eq) (over-o-ap B {fst} α))
+  QOver {δ = δ} rδ (subst1 {B = B} A*₁ M) rM1 rM2 α = QOver (_ , _ , id , rδ , fund-ap _ M _ _ rδ) A*₁ rM1 rM2 (over-apd-inverse B δ (interp M) α)
 
   -- ----------------------------------------------------------------------
   -- transport for R/Q
 
-  postulate
+  -- need this early
+  fund-refls · rθ = <>
+  fund-refls (Γ* , A*) rθ = id , id , id , fund-refls Γ* (fst rθ) , fund-refl Γ* A* (fst rθ) (snd rθ)
+
+  abstract
     transportR : ∀ {Γ A θ M M'} (Γ* : Ctx Γ) (A* : Ty Γ* A) (rθ : RC Γ* θ) → M == M' → 
                R Γ* A* rθ M → R Γ* A* rθ M'
     transportQOver : ∀ {Γ θ1 θ2 δ A M1 M2} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} 
@@ -181,43 +189,107 @@ module computational-interp.hcanon.HSetProof-PathOver where
           (A* : Ty Γ* A) → (rM : R Γ* A* rθ1 M1) → (rN : R Γ* A* rθ2 M2) → {α α' : PathOver A δ M1 M2} (p : α == α')
           → QOver rδ A* rM rN α → QOver rδ A* rM rN α'
     transportRQ : ∀ {Γ A θ M1 M2} {α : M1 == M2} (Γ* : Ctx Γ) (A* : Ty Γ* A) (rθ : RC Γ* θ) (rM1 : R Γ* A* rθ M1) 
-              → QOver (fund-refls Γ* rθ) A* (transportR Γ* A* rθ α rM1) rM1 {!!}
+              → QOver (fund-refls Γ* rθ) A* (transportR Γ* A* rθ α rM1) rM1 (path-to-pathover A (! α))
+  
+    QOver-irrel : ∀ {Γ θ1 θ2 δ A M1 M2} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} 
+                (rδ rδ' : QC Γ* rθ1 rθ2 δ)
+                (A* : Ty Γ* A) (rM1 : R Γ* A* rθ1 M1) (rM2 : R Γ* A* rθ2 M2) {α : PathOver A δ M1 M2}
+              → QOver rδ A* rM1 rM2 α
+              → QOver rδ' A* rM1 rM2 α
 
-  {- PERF
-  transportR Γ* bool rθ p (Inl x) = Inl (x ∘ ! p)
-  transportR Γ* bool rθ p (Inr x) = Inr (x ∘ ! p)
-  transportR Γ* prop rθ p rφ = cand (λ φ' q x → redP rφ φ' (q ∘ p) x) 
-                                    (λ {Q1}{Q2}{α1}{α2}{p2}{p2} propo path elt rp1 → 
-                                       transportPfull rφ propo (propo ∘ α1 ∘ p ≃〈 ap (λ x → x ∘ p) path ∘ ∘-assoc propo α1 p 〉 (α2 ∘ p ∎)) 
-                                                      elt rp1)
-  transportR Γ* (proof M) rθ p rM = transportP (fund Γ* prop rθ M) _ id _ _ p rM 
-  transportR Γ* (Π A* B*) rθ p rM = (λ N rn → transportR (Γ* , A*) B* (rθ , rn) (ap≃ p) (fst rM N rn)) , {!!}
-  transportR ._ (w {Γ* = Γ*} A1* A2*) rθ p rM = transportR Γ* A2* (fst rθ) p rM
-  transportR Γ* (subst1{Γ}{A0}{B}{._}{A0*} B* M0) rθ p rM = transportR (Γ* , A0*) B* (rθ , _) p rM
-  transportR Γ* (id A* M* N*) rθ p rα = transportQ Γ* A* rθ (fund Γ* A* rθ M*) (fund Γ* A* rθ N*) p rα
-  transportR Γ* (subst{Γ}{Γ'}{B}{._}{Γ'*} B* θ'*) rθ p rM = transportR Γ'* B* (funds Γ* Γ'* rθ θ'*) p rM
+    transportR Γ* bool rθ p (Inl x) = Inl (x ∘ ! p)
+    transportR Γ* bool rθ p (Inr x) = Inr (x ∘ ! p)
+    transportR Γ* prop rθ p rφ = cand (λ φ' q x → redP rφ φ' (q ∘ p) x) 
+                                      (λ {Q1}{Q2}{α1}{α2}{p2}{p2} propo path elt rp1 → 
+                                         transportPfull rφ propo (propo ∘ α1 ∘ p ≃〈 ap (λ x → x ∘ p) path ∘ ∘-assoc propo α1 p 〉 (α2 ∘ p ∎)) 
+                                                        elt rp1)
+    transportR Γ* (proof M) rθ p rM = transportP (fund Γ* prop rθ M) _ id _ _ p rM 
+    transportR {M = M} {M' = M'} Γ* (Π {B = B} A* B*) rθ p rM = 
+     (λ N rn → transportR (Γ* , A*) B* (rθ , rn) (ap≃ p) (fst rM N rn)) ,  
+     (λ {N1} {_}{α} rn1 rn2 rα → transportQOver _ B* _ _ 
+      (path-induction-homo (λ N2 α₁ → transport (λ x → x) (changeover= B (∘-unit-l (pair= id α₁))) (!o (path-to-pathover B (! (ap (λ f → f N2) p))) ∘o path-induction-homo'' (λ x p₁ → PathOver B (pair= id p₁) (M N1) (M x)) id α₁ ∘o path-to-pathover B (! (ap (λ f → f N1) p))) == path-induction-homo'' (λ x p₁ → PathOver B (pair= id p₁) (M' N1) (M' x)) id α₁)
+                           (path-induction (λ _ p₁ → !o (path-to-pathover B (! (ap (λ f → f N1) p₁))) ∘o id ∘o path-to-pathover B (! (ap (λ f → f N1) p₁)) == id) 
+                                           id p)
+                           α)
+      (fund-changeover _ _ B* _ _ (∘-unit-l (pair= id _))
+                                      (fund-∘ _ _ B* (fund-! _ B* _ _ (transportRQ {α = ap≃ p} _ B* _ (fst rM _ rn2)))
+                                       (fund-∘ _ _ B* (snd rM _ _ rα)
+                                         (transportRQ {α = ap≃ p} _ B* _ (fst rM _ rn1))))))
+    transportR ._ (w {Γ* = Γ*} A1* A2*) rθ p rM = transportR Γ* A2* (fst rθ) p rM
+    transportR Γ* (pathOver A* δ* M* N*) rθ p rα = transportQOver _ A* _ _ p rα
+    transportR Γ* (subst1{Γ}{A0}{B}{._}{A0*} B* M0) rθ p rM = transportR (Γ* , A0*) B* (rθ , fund Γ* A0* rθ M0) p rM
+    transportR Γ* (subst{Γ}{Γ'}{B}{._}{Γ'*} B* θ'*) rθ p rM = transportR Γ'* B* (funds Γ* Γ'* rθ θ'*) p rM
+  
+    transportQOver rδ bool rM rN p q = <>
+    transportQOver rδ prop rM rN p q = (λ x rx → transportP rN _ _ _ _ (ap (λ z → fst (coe PathOverType z) x) p) (fst q _ rx)) ,
+                                       (λ x rx → transportP rM _ _ _ _ (ap (λ z → IsEquiv.g (snd (coe PathOverType z)) x) p) (snd q _ rx))
+    transportQOver rδ (proof M) rM rN p q = <>
+    transportQOver rδ (Π A* A*₁) rM rN p q = λ rn1 rn2 rβ → transportQOver _ A*₁ _ _ (ap (λ z → coe PathOverΠ z _ _ _) p) (q _ _ rβ)
+    transportQOver rδ (pathOver A* δ* M* N*) rM rN p q = <>
+    transportQOver rδ (subst {A = A} A* θ'*) rM rN p q = transportQOver _ A* _ _ (ap (over-o-ap A) p) q
+    transportQOver rδ (w {B = B} A* A*₁) rM rN p q = transportQOver _ A*₁ _ _ (ap
+                                                                                 (λ z →
+                                                                                    transport (λ x → x)
+                                                                                    (changeover= B
+                                                                                     (Σ=β1 (fst rδ) (fst (snd rδ)) ∘ ap (ap fst) (fst (snd (snd rδ)))))
+                                                                                    (over-o-ap B z))
+                                                                                 p) q
+    transportQOver {δ = δ} rδ (subst1 {B = B} A*₁ M) rM rN p q = transportQOver _ A*₁ _ _ (ap (over-apd-inverse B δ (interp M)) p) q
 
-  transportQ Γ* bool rθ rM rN p q = <>
-  transportQ Γ* prop rθ rM rN p q = (λ x rx → transportP rN _ id _ _ (ap (λ z → transport (λ x₁ → x₁) z x) p) (fst q _ rx)) , 
-                                   (λ y ry → transportP rM _ id _ _ (ap (λ z → transport (λ x₁ → x₁) (! z) y) p) (snd q _ ry))
-  transportQ Γ* (proof M) rθ rM rN p q = <>
-  transportQ Γ* (Π A* B*) rθ rM rN p q = (λ x rx → transportQ (Γ* , A*) B* (rθ , rx) (fst rM _ rx) (fst rN _ rx) (ap (λ z → ap≃ z {x}) p) (q x rx))
-  transportQ Γ* (id A* M N) rθ rM rN p q = <>
-  transportQ ._ (w{Γ* = Γ*} A* B*) rθ rM rN p q = transportQ Γ* B* (fst rθ) rM rN p q
-  transportQ .Γ* (subst1{_}{_}{_}{Γ*}{A0*} B* M) rθ rM rN p q = transportQ (Γ* , A0*) B* (rθ , fund Γ* A0* rθ M) rM rN p q
-  transportQ .Γ* (subst{_}{_}{_}{Γ*}{Γ'*} B* θ'*) rθ rM rN p q = transportQ Γ'* B* (funds Γ* Γ'* rθ θ'*) rM rN p q
-
-  transportRQ Γ* bool rθ rM1 = <>
-  transportRQ {M1 = P} {M2 = Q} {α = α} Γ* prop rθ rP = (λ q rq → transportPfull rP (! α) (!-inv-l α ∘ ∘-assoc (! α) id α) id rq) , (λ p rp → transportPfull rP α (! (∘-unit-l α)) (ap (λ x → coe x p) (! (!-invol α))) rp)
-  transportRQ Γ* (proof M) rθ rM1 = <>
-  transportRQ {α = α} Γ* (Π A* A*₁) rθ rM1 = λ x rx → transportQ (Γ* , A*) A*₁ (rθ , rx) _ _ (! (ap-! (λ f → f x) α))
-                                                        (transportRQ {α = ap (λ f → f x) α} (Γ* , A*) A*₁ (rθ , rx)
-                                                         (fst rM1 x rx))
-  transportRQ Γ* (id A* M N) rθ rM1 = <>
-  transportRQ .(Γ* , A*) (w {Γ} {A} {B} {Γ*} A* A*₁) rθ rM1 = transportRQ Γ* A*₁ (fst rθ) rM1
-  transportRQ Γ* (subst1 {A* = A*} B* M) rθ rM1 = transportRQ (Γ* , A*) B* (rθ , fund Γ* A* rθ M) rM1
-  transportRQ _ (subst B* θ) rθ rM1 = transportRQ _ B* (funds _ _ rθ θ) rM1
-  -}
+    transportRQ Γ* bool rθ rM1 = <>
+    transportRQ {M1 = P} {M2 = Q} {α = α} Γ* prop rθ rM1 =
+      (λ x rx → transportPfull rM1 (! α) (!-inv-l α ∘ ∘-assoc (! α) id α)
+                (path-induction
+                   (λ Q' α₁ →
+                      (x₁ : _) →
+                      transport (λ x₂ → x₂) (! α₁) x₁ ==
+                      fst
+                      (transport (λ x₂ → x₂) PathOverType
+                       (path-to-pathover (λ _ → Set) (! α₁)))
+                      x₁)
+                   (λ _ → ap≃ (! (ap fst PathOverType-id))) α x) rx) , 
+      (λ x rx → transportPfull rM1 α (! (∘-unit-l α)) 
+         (path-induction (λ Q₁ α₁ → (x₁ : _) → transport (λ x₂ → x₂) α₁ x₁ == IsEquiv.g (snd (transport (λ x₂ → x₂) PathOverType (path-to-pathover (λ _ → Set) (! α₁)))) x₁)
+                         (λ _ → ap≃ (! (ap (λ z → IsEquiv.g (snd z)) PathOverType-id))) α x) rx)
+    transportRQ Γ* (proof M) rθ rM1 = <>
+    transportRQ {M1 = M1} {α = α} Γ* (Π {B = B} A* B*) rθ rM1 = 
+     λ{N1}{_}{β} rn1 rn2 rβ → transportQOver _ B* _ _ (path-induction-homo
+                                                         (λ N2 β₁ →
+                                                            path-induction-homo''
+                                                            (λ x p → PathOver B (pair= id p) (M1 N1) (M1 x)) id β₁
+                                                            ∘o path-to-pathover B (! (ap (λ f → f N1) α))
+                                                            ==
+                                                            transport (λ x → x) PathOverΠ
+                                                            (path-to-pathover (λ θ → (x : _) → B (θ , x)) (! α)) N1 N2 β₁)
+                                                         (path-induction
+                                                            (λ _ α₁ →
+                                                               id ∘o path-to-pathover B (! (ap (λ f → f N1) α₁)) ==
+                                                               transport (λ x → x) PathOverΠ
+                                                               (path-to-pathover (λ θ → (x : _) → B (θ , x)) (! α₁)) N1 N1 id)
+                                                            (! (PathOverΠ-id M1)) α) β)
+                                                        (QOver-irrel _ _ B* _ _
+                                                         (fund-∘ _ _ B* (snd rM1 _ _ rβ)
+                                                          (transportRQ _ B* (rθ , rn1) (fst rM1 _ rn1))))
+    transportRQ Γ* (pathOver A* δ* M* N*) rθ rM1 = <>
+    transportRQ {α = α} Γ* (subst {A = A} A* θ'*) rθ rM1 = transportQOver _ A* _ _ (path-induction
+                                                                                      (λ _ α₁ →
+                                                                                         path-to-pathover A (! α₁) ==
+                                                                                         over-o-ap A (path-to-pathover (λ θ → A (interps θ'* θ)) (! α₁)))
+                                                                                      id α)
+                                             (QOver-irrel _ _ A* _ _ (transportRQ _ A* _ rM1))
+    transportRQ {α = α} .(Γ* , A*) (w {Γ} {A} {B} {Γ*} A* A*₁) rθ rM1 = transportQOver _ A*₁ _ _ (path-induction
+                                                                                                    (λ _ α₁ →
+                                                                                                       path-to-pathover B (! α₁) ==
+                                                                                                       over-o-ap B (path-to-pathover (λ θ → B (fst θ)) (! α₁)))
+                                                                                                    id α)
+                                                                  (QOver-irrel _ _ A*₁ _ _ (transportRQ _ A*₁ _ rM1))
+    transportRQ {α = α} Γ* (subst1 {B = B} B* M) rθ rM1 = 
+      transportQOver _ B* _ _ (path-induction
+                                 (λ _ α₁ →
+                                    path-to-pathover B (! α₁) ==
+                                    over-o-ap B (path-to-pathover (λ θ → B (θ , interp M θ)) (! α₁)))
+                                 id α)
+      (QOver-irrel _ _ B* _ _ (transportRQ _ B* _ rM1)) 
 
   -- definitionally equal types give coercable R's
   -- FIXME it's no longer true that these are actually definitionally equal,
@@ -228,41 +300,49 @@ module computational-interp.hcanon.HSetProof-PathOver where
     R-deq : ∀ {Γ A θ M} (Γ* : Ctx Γ) (A* A1* : Ty Γ* A) (rθ : RC Γ* θ) → R Γ* A* rθ M → R Γ* A1* rθ M
     -- R-deq Γ* A* A1* rθ = lib.PrimTrustMe.unsafe-cast
 
-  QOver-irrel : ∀ {Γ θ1 θ2 δ A M1 M2} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} 
-                (rδ rδ' : QC Γ* rθ1 rθ2 δ)
-                (A* : Ty Γ* A) (rM1 : R Γ* A* rθ1 M1) (rM2 : R Γ* A* rθ2 M2) {α : PathOver A δ M1 M2}
-              → QOver rδ A* rM1 rM2 α
-              → QOver rδ' A* rM1 rM2 α
   QOver-irrel rδ rδ' A* rM1 rM2 rα = fund-changeover rδ rδ' A* rM1 rM2 id rα
 
   -- ----------------------------------------------------------------------
+  -- proofs of the QOver operations and properties
 
-  abstract
-    fund-changeover rδ rδ' bool rM1 rM2 eq rα = <>
-    fund-changeover rδ rδ' prop rM1 rM2 eq rα = 
-      (λ x rx → transportP rM2 _ _ _ _ (ap (λ y → fst y x) (PathOverType-changeover eq _)) (fst rα x rx)) , 
-      {!!}
-    fund-changeover rδ rδ' (proof M) rM1 rM2 eq rα = <>
-    fund-changeover rδ rδ' (Π A* A*₁) rM1 rM2 eq rα = λ rn1 rn2 rβ → transportQOver _ A*₁ _ _ {!!}
-                                                                       (fund-changeover _ _ A*₁ _ _ {!!}
-                                                                        (rα _ _ (fund-changeover rδ' rδ A* _ _ (! eq) rβ)))
-    fund-changeover rδ rδ' (pathOver A* δ* M* N*) rM1 rM2 eq rα = <>
-    fund-changeover rδ rδ' (subst A* θ'*) rM1 rM2 eq rα = 
-      transportQOver _ A* _ _ {!!}
-        (fund-changeover (fund-aps _ θ'* _ _ rδ) (fund-aps _ θ'* _ _ rδ')
-         A* rM1 rM2 (ap (ap (interps θ'*)) eq) rα)
-    fund-changeover rδ rδ' (w A* A*₁) rM1 rM2 eq rα = {!!}
-    fund-changeover rδ rδ' (subst1 A*₁ M) rM1 rM2 eq rα = {!!}
-  
-    fund-refl-over Γ* bool rθ1 rN = <>
-    fund-refl-over Γ* prop rθ1 rN = (λ x rx → transportP rN _ _ _ _ {!!} rx) , (λ y ry → {!!})
-    fund-refl-over Γ* (proof M) rθ1 rN = <>
-    fund-refl-over Γ* (Π C* C*₁) rθ1 rN = λ {N1} {N2} {β} rN1 rN2 rβ → transportQOver _ C*₁ _ _ {!!} (snd rN (fund-refls Γ* rθ1) rN1 rN2 rβ)
-    fund-refl-over Γ* (pathOver C* δ* M N) rθ1 rN = <>
-    fund-refl-over Γ* (subst C* θ'*) rθ1 rN = transportQOver _ C* _ _ {!!}
-                                                (fund-changeover _ _ C* _ _ id (fund-refl-over _ C* _ rN))
-    fund-refl-over .(Γ* , C*) (w {Γ} {A} {B} {Γ*} C* C*₁) rθ1 rN = {!!}
-    fund-refl-over Γ* (subst1 C*₁ M) rθ1 rN = {!!}
+  fund-changeover rδ rδ' bool rM1 rM2 eq rα = <>
+  fund-changeover rδ rδ' prop rM1 rM2 eq rα = 
+    (λ x rx → transportP rM2 _ _ _ _ (ap (λ y → fst y x) (PathOverType-changeover eq _)) (fst rα x rx)) , 
+    (λ x rx → transportP rM1 _ _ _ _ (ap (λ y → IsEquiv.g (snd y) x) (PathOverType-changeover eq _)) (snd rα x rx))
+  fund-changeover rδ rδ' (proof M) rM1 rM2 eq rα = <>
+  fund-changeover {δ = δ} {δ' = δ'} {α = α} rδ rδ' (Π {A = A} {B = B} A* A*₁) rM1 rM2 eq rα = 
+    λ {_}{_}{β} rn1 rn2 rβ → transportQOver _ A*₁ _ _ (coh eq α β )
+      (fund-changeover _ _ A*₁ _ _ (path-induction (λ δ'' eq₁ → (n1 : _) (n2 : _) (β₁ : PathOver A δ'' n1 n2) → pair= δ (transport (λ x → x) (changeover= A (! eq₁)) β₁) == pair= δ'' β₁) (λ _ _ _ → id) eq _ _ β)
+                                  (rα _ _ (fund-changeover rδ' rδ A* _ _ (! eq) rβ))) where
+     coh : {δ : _} {δ' : _} (eq : δ == δ') {M1 : _} {M2 : _} (α : PathOver (λ θ → (x : A θ) → B (θ , x)) δ M1 M2)
+           {n1 : _} {n2 : _} (β : PathOver A δ' n1 n2) → 
+           Id (transport (λ x → x) (changeover= B (path-induction (λ δ'' eq₁ → (n1 : A _) (n2 : A _) (β₁ : PathOver A δ'' n1 n2) → Id (pair= δ (transport (λ x → x) (changeover= A (! eq₁)) β₁)) (pair= δ'' β₁)) (λ _ _ _ → id) eq n1 n2 β)) (transport (λ x → x) PathOverΠ α n1 n2 (transport (λ x → x) (changeover= A (! eq)) β))) (transport (λ x → x) PathOverΠ (transport (λ x → x) (changeover= (λ θ → (x : A θ) → B (θ , x)) eq) α) n1 n2 β)
+     coh id α β = id
+  fund-changeover rδ rδ' (pathOver A* δ* M* N*) rM1 rM2 eq rα = <>
+  fund-changeover {δ' = δ'} {α = α} rδ rδ' (subst {A = A} A* θ'*) rM1 rM2 eq rα = 
+    transportQOver _ A* _ _ (coh {eq = eq} α) (fund-changeover (fund-aps _ θ'* _ _ rδ) (fund-aps _ θ'* _ _ rδ')
+       A* rM1 rM2 (ap (ap (interps θ'*)) eq) rα) where
+          coh : ∀ {δ M1 M2} → {eq : δ == δ'} (α : PathOver (λ θ → A (interps θ'* θ)) δ M1 M2) →
+            (transport (λ x → x) (changeover= A (ap (ap (interps θ'*)) eq))
+             (over-o-ap A α)) ==
+            (over-o-ap A
+             (transport (λ x → x) (changeover= (λ θ → A (interps θ'* θ)) eq) α))
+          coh {eq = id} α = id
+  fund-changeover rδ rδ' (w A* A*₁) rM1 rM2 eq rα = {!!}
+  fund-changeover {δ = δ} {α = α} rδ rδ' (subst1 {B = A₁} A*₁ M) rM1 rM2 eq rα = 
+    transportQOver _ A*₁ _ _ (path-induction (λ δ' eq₁ → Id (transport (λ x → x) (changeover= A₁ (ap (λ x → pair= x (apdo (interp M) x)) eq₁)) (over-apd-inverse A₁ δ (interp M) α)) (over-apd-inverse A₁ δ' (interp M) (transport (λ x → x) (changeover= (λ θ → A₁ (θ , interp M θ)) eq₁) α))) id eq) 
+       (fund-changeover _ _ A*₁ _ _ (ap (λ x → pair= x (apdo (interp M) x)) eq) rα)
+
+  {-
+    fund-refl Γ* bool rθ1 rN = <>
+    fund-refl Γ* prop rθ1 rN = (λ x rx → transportP rN _ _ _ _ {!!} rx) , (λ y ry → {!!})
+    fund-refl Γ* (proof M) rθ1 rN = <>
+    fund-refl Γ* (Π C* C*₁) rθ1 rN = λ {N1} {N2} {β} rN1 rN2 rβ → transportQOver _ C*₁ _ _ {!!} (snd rN rN1 rN2 rβ)
+    fund-refl Γ* (pathOver C* δ* M N) rθ1 rN = <>
+    fund-refl Γ* (subst C* θ'*) rθ1 rN = transportQOver _ C* _ _ {!!}
+                                                (fund-changeover _ _ C* _ _ id (fund-refl _ C* _ rN))
+    fund-refl .(Γ* , C*) (w {Γ} {A} {B} {Γ*} C* C*₁) rθ1 rN = {!!}
+    fund-refl Γ* (subst1 C*₁ M) rθ1 rN = {!!}
 
     fund-!s · rθ1 rθ2 rδ = <>
     fund-!s (Γ* , A*) rθ1 rθ2 (δ1 , α1 , eq , rδ1 , rα1)  = ! δ1 , !o α1 , {!coh!} , fund-!s Γ* _ _ rδ1 , fund-! rδ1 A* _ _ rα1
@@ -303,29 +383,7 @@ module computational-interp.hcanon.HSetProof-PathOver where
     fund-∘ rδ2 rδ1 (subst1 A*₁ M) rα2 rα1 = {!!}
 
   -- ----------------------------------------------------------------------
-  -- fundamental theorem
-
-{-PERF
-  fund-<> : ∀ {Γ θ} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → R Γ* (proof unit) rθ <>
-  fund-<>⁺ : ∀ {Γ θ} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → R Γ* (proof unit⁺) rθ <>⁺
-  fund-abort : ∀ {Γ θ C} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → Tm Γ* (proof void) → C
--}
-
-{- FIXME later
-  fund-lam= : ∀ {Γ A B} (Γ* : Ctx Γ) (A* : Ty Γ* A) (B* : Ty (Γ* , A*) B)
-              (f g : Tm Γ* (Π A* B*))
-              (α : Tm (Γ* , A*) (id B* (unlam f) (unlam g)))
-              {θ : Γ} (rθ : RC Γ* θ)
-            → (x : _) (rx : _) → _
--}
-
-{-
-  fund-split1 : ∀ {Γ θ} (Γ* : Ctx Γ) {C : _} (C* : Ty (Γ* , proof unit⁺) C)
-          → (M1 : Tm Γ* (subst1 C* <>⁺) )
-          → (M : Tm Γ* (proof unit⁺))
-          → (rθ : RC Γ* θ)
-          → R Γ* (subst1 C* M) rθ (interp (split1 C* M1 M) θ)
--}
+  -- transport and properties
 
   fund-transport-proof : ∀ {Γ' θ1 θ2 δ} (Γ'* : Ctx Γ') (P* : Tm Γ'* prop) 
           (rθ1 : RC Γ'* θ1) (rθ2 : RC Γ'* θ2) 
@@ -419,6 +477,39 @@ module computational-interp.hcanon.HSetProof-PathOver where
   fund-transport-right Γ* (subst1 C*₁ M) rθ1 rθ2 rδ rN = {!!}
 -}
 
+  -- ----------------------------------------------------------------------
+  -- fundamental theorem
+
+  funds Γ* .· rθ · = <>
+  funds Γ* ._ rθ (θ'* , M) = funds Γ* _ rθ θ'* , fund _ _ rθ M
+
+  fundps Γ* · rθ θ1* θ2* δ = <>
+  fundps Γ* (Γ'* , A) rθ (θ1* , M1) (θ2* , M2) (δ* , α*) = 
+    _ , _ , id , fundps Γ* Γ'* rθ θ1* θ2* δ* , fund Γ* (pathOver A δ* M1 M2) rθ α*
+  fundps Γ* Γ'* rθ θ1* ._ refls = fund-refls Γ'* (funds Γ* Γ'* rθ θ1*)
+
+{-PERF
+  fund-<> : ∀ {Γ θ} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → R Γ* (proof unit) rθ <>
+  fund-<>⁺ : ∀ {Γ θ} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → R Γ* (proof unit⁺) rθ <>⁺
+  fund-abort : ∀ {Γ θ C} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → Tm Γ* (proof void) → C
+-}
+
+{- FIXME later
+  fund-lam= : ∀ {Γ A B} (Γ* : Ctx Γ) (A* : Ty Γ* A) (B* : Ty (Γ* , A*) B)
+              (f g : Tm Γ* (Π A* B*))
+              (α : Tm (Γ* , A*) (id B* (unlam f) (unlam g)))
+              {θ : Γ} (rθ : RC Γ* θ)
+            → (x : _) (rx : _) → _
+-}
+
+{-
+  fund-split1 : ∀ {Γ θ} (Γ* : Ctx Γ) {C : _} (C* : Ty (Γ* , proof unit⁺) C)
+          → (M1 : Tm Γ* (subst1 C* <>⁺) )
+          → (M : Tm Γ* (proof unit⁺))
+          → (rθ : RC Γ* θ)
+          → R Γ* (subst1 C* M) rθ (interp (split1 C* M1 M) θ)
+-}
+
 {-
   fund-tr1-bool : ∀ {Γ C θ M1 M2 α N} (Γ* : Ctx Γ) (C* : Ty (Γ* , bool) C) (rθ : RC Γ* θ)
           (rM1 : R Γ* bool rθ M1) (rM2 : R Γ* bool rθ M2) 
@@ -480,7 +571,7 @@ module computational-interp.hcanon.HSetProof-PathOver where
 -}
   fund .Γ* .(Π A* B*) rθ (lam {Γ} {A} {B} {Γ*} {A*} {B*} M) =
     (λ N rN → fund (Γ* , A*) B* (rθ , rN) M) , 
-    (λ rid {N1} {N2} {α} rN1 rN2 rα → transportQOver _ B* _ _ {!!} (fund-ap (Γ* , A*) M (rθ , rN1) (rθ , rN2) (id , α , id , rid , rα))) 
+    (λ {N1} {N2} {α} rN1 rN2 rα → transportQOver _ B* _ _ {!!} (fund-ap (Γ* , A*) M (rθ , rN1) (rθ , rN2) (id , α , id , (fund-refls Γ* rθ) , rα))) 
   fund .Γ* .(subst1 B* N) rθ (app {Γ} {A} {B} {Γ*} {A*} {B*} M N) = fst (fund Γ* (Π A* B*) rθ M) _ (fund Γ* A* rθ N)
 {-
   fund .Γ* .(id A* M* M*) rθ (refl{_}{_}{Γ*}{A*} M*) = fund-refl Γ* A* rθ (fund Γ* A* rθ M*)
@@ -520,16 +611,8 @@ module computational-interp.hcanon.HSetProof-PathOver where
                                                   (fund Γ* (subst1 C* <>⁺) rθ M1))
 -}
 
-  fund-refls · rθ = <>
-  fund-refls (Γ* , A*) rθ = id , id , id , fund-refls Γ* (fst rθ) , fund-refl-over Γ* A* (fst rθ) (snd rθ)
-
-  funds Γ* .· rθ · = <>
-  funds Γ* ._ rθ (θ'* , M) = funds Γ* _ rθ θ'* , fund _ _ rθ M
-
-  fundps Γ* · rθ θ1* θ2* δ = <>
-  fundps Γ* (Γ'* , A) rθ (θ1* , M1) (θ2* , M2) (δ* , α*) = 
-    _ , _ , id , fundps Γ* Γ'* rθ θ1* θ2* δ* , fund Γ* (pathOver A δ* M1 M2) rθ α*
-  fundps Γ* Γ'* rθ θ1* ._ refls = fund-refls Γ'* (funds Γ* Γ'* rθ θ1*)
+  -- ----------------------------------------------------------------------
+  -- ap 
 
   fund-aps Γ* · rθ1 rθ2 rδ = <>
   fund-aps Γ* (_,_ {Γ'* = Γ'*} {A* = A*} θ'* M) rθ1 rθ2 rδ = _ , _ , {!coh!} , fund-aps Γ* θ'* rθ1 rθ2 rδ , fund-ap _ M rθ1 rθ2 rδ
@@ -618,4 +701,5 @@ module computational-interp.hcanon.HSetProof-PathOver where
                                        (apd (split1⁺ (λ x → Bool) (interp (deq true) <>))
                                         (! (fund · (proof unit⁺) <> example))))
   test = id
+-}
 -}
