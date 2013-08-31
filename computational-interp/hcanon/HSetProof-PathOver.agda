@@ -1,7 +1,13 @@
 {-# OPTIONS --type-in-type --no-termination-check #-}
 
--- FIXME: status of the uses of == in the proof? 
-
+{- BIG ISSUES:
+   (1) What to do about definitional equality.
+       What's an example where it doesn't come out on the nose?
+   (2) Status of the uses of == in the proof...
+       What type theory is this about?  Why can we do path induction for δ?
+   (3) When do/don't we need consistency?
+-}
+   
 open import lib.Prelude 
 open import lib.PathOver
 open BoolM 
