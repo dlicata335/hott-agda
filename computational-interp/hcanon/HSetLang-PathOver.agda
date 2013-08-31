@@ -104,7 +104,7 @@ module computational-interp.hcanon.HSetLang-PathOver where
           → (x : Tm Γ* bool) → Tm Γ* (subst1 C* x)
     lam  : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm (Γ* , A*) B* → Tm Γ* (Π A* B*)
     app  : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → (M* : Tm Γ* A*) → Tm Γ* (subst1 B* M*)
-    unlam : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → Tm (Γ* , A*) B*
+    --  unlam : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → Tm (Γ* , A*) B*
     refl : ∀ {Γ Δ A} {Γ* : Ctx Γ} {Δ* : Ctx Δ} {A* : Ty Δ* A} {θ* : Subst Γ* Δ*} (M : Tm Γ* (subst A* θ*))
          → Tm Γ* (pathOver A* refls M M) 
     tr   : ∀ {Γ Γ' C} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} 
@@ -157,7 +157,7 @@ module computational-interp.hcanon.HSetLang-PathOver where
   interp (if{Γ}{_}{C}{C*} M1 M2 M) θ = interp-if C* M M1 M2 θ
   interp (lam M) θ = λ x → interp M (θ , x)
   interp (app M N) θ = (interp M θ) (interp N θ)
-  interp (unlam M) θ = interp M (fst θ) (snd θ)
+  -- interp (unlam M) θ = interp M (fst θ) (snd θ)
   interp (refl M) θ = id
   interp (tr{Γ}{A}{C} C* δ N) θ = transport C (interpps δ θ) (interp N θ) 
   interp (deq M) θ = interp M θ
