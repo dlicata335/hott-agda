@@ -609,7 +609,7 @@ module computational-interp.hcanon.HSetProof where
   fund-ap Γ* (tr C* α f) rθ1 rθ2 rδ = {!!}
   fund-ap Γ* (uap f₂ f₃) rθ1 rθ2 rδ = <>
 -}
-  fund-ap ._ (unlam {Γ* = Γ*} {A* = A*} {B* = B*} M) (rθ1 , rM1) (rθ2 , rM2) (δ1 , α1 , eq , rδ1 , rα1) = ?
+  fund-ap ._ (unlam {Γ* = Γ*} {A* = A*} {B* = B*} M) (rθ1 , rM1) (rθ2 , rM2) (δ1 , α1 , eq , rδ1 , rα1) = {!!}
     -- transportQ (Γ* , A*) B* rθ2 _ _ {!!} 
     --   (fund-trans (Γ* , A*) B* rθ2 _ _ _ (fund-trans (Γ* , A*) B* rθ2 _ _ _ (coe {!!}
     --                                                                           (fund-sym (Γ* , A*) B* _ _ _ 

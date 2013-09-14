@@ -234,6 +234,29 @@ module lib.PathOver where
   path-to-pathover : {Δ : Type} (A : Δ → Type) {θ : Δ} {M N : A θ} → M == N → PathOver A id M N
   path-to-pathover A id = id
 
+  apdo-split-def :{Δ : Type} {C : Δ → Unit⁺ → Type} 
+               (f : (θ : Δ) → C θ <>⁺)
+               (M : Δ → Unit⁺)
+               {θ1 θ2 : Δ} (δ : θ1 == θ2) 
+               (x y : Unit⁺) (α : PathOver (λ _ → Unit⁺) δ x y) →
+               PathOver (λ z → C (fst z) (snd z)) (pair= δ α)
+                        (split1⁺ (C θ1) (f θ1) x)
+                        (split1⁺ (C θ2) (f θ2) y)
+  apdo-split-def {C = C} f M δ = split1⁺ _ (split1⁺ _ (λ α → changeover (λ p → C (fst p) (snd p)) FIXME  -- need UIP for Unit⁺ and some massaging
+                                                                (over-o-ap (λ p → C (fst p) (snd p)) {θ1 = λ θ → θ , <>⁺}
+                                                                 (apdo f δ))))
+                  where postulate FIXME : {A : Type} -> A
+
+  postulate
+    apdo-split : {Δ : Type} {C : Δ → Unit⁺ → Type} 
+               (f : (θ : Δ) → C θ <>⁺)
+               (M : Δ → Unit⁺)
+               {θ1 θ2 : Δ} (δ : θ1 == θ2) 
+               → coe PathOverΠ (apdo (\ θ → split1⁺ (\ x → (C θ x)) (f θ)) δ) ==
+                 (\ x y α → apdo-split-def {C = C} f M δ x y α) 
+    -- apdo-split f M id = λ≃ (split1⁺ _ (λ≃ (split1⁺ _ (λ≃ (λ α → {!!})))))
+             
+
   Square : ∀{Δ} {θ11 θ12 θ21 θ22 : Δ} → (δ1- : θ11 == θ12) (δ2- : θ21 == θ22) (δ-1 : θ11 == θ21) (δ-2 : θ12 == θ22) → Type
   Square δ1- δ2- δ-1 δ-2 = δ-2 == δ2- ∘ δ-1 ∘ ! δ1-
 

@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type --no-termination-check #-}
+{-# OPTIONS --type-in-type --no-termination-check  #-}
 
 {- BIG ISSUES:
    (1) What to do about definitional equality.
@@ -316,14 +316,35 @@ module computational-interp.hcanon.HSetProof-PathOver where
                                  id α)
       (QOver-irrel _ _ B* _ _ (transportRQ _ B* _ rM1)) 
 
+  -- ----------------------------------------------------------------------
   -- definitionally equal types give coercable R's
   -- FIXME it's no longer true that these are actually definitionally equal,
   -- because of the Q components of R_Pi---e.g. there are transportR's in different places
   -- for different definitionally equal types (see the case for unlam, e.g.).  
   -- But maybe we can still get a coercion here?
+
+  {-
+  R-deq-bool : ∀ {Γ A θ M} (Γ* : Ctx Γ) (A1* : Ty Γ* A) → (eq : A == \ _ -> Bool) -- really only need equality, not paths
+                           (rθ : RC Γ* θ) → R Γ* bool rθ M → R Γ* A1* rθ (coe (! (ap≃ eq)) M)
+  R-deq-bool Γ* bool eq rθ rM = {!!}
+  R-deq-bool Γ* prop eq rθ rM = {!!}
+  R-deq-bool Γ* (proof M₁) eq rθ rM = {!!}
+  R-deq-bool {θ = θ} Γ* (Π A1* A1*₁) eq rθ rM = {!ap≃ eq {θ}!}
+  R-deq-bool Γ* (subst A1* θ'*) eq rθ rM = {!!}
+  R-deq-bool Γ* (pathOver A1* δ* M* N*) eq rθ rM = {!!}
+  R-deq-bool .(Γ* , A1*) (w {Γ} {A} {B} {Γ*} A1* A1*₁) eq rθ rM = {!!}
+  R-deq-bool Γ* (subst1 A1*₁ M₁) eq rθ rM = {!!}
+  -}
+
   postulate
     R-deq : ∀ {Γ A θ M} (Γ* : Ctx Γ) (A* A1* : Ty Γ* A) (rθ : RC Γ* θ) → R Γ* A* rθ M → R Γ* A1* rθ M
     -- R-deq Γ* A* A1* rθ = lib.PrimTrustMe.unsafe-cast
+
+    Q-deq : ∀ {Γ A θ1 θ2 δ M1 M2 α} 
+              {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} (rδ : QC Γ* rθ1 rθ2 δ)
+              (A* A1* : Ty Γ* A) {rM1 : R Γ* A* rθ1 M1} {rM2 : R Γ* A* rθ2 M2}
+            → QOver rδ A* rM1 rM2 α
+            → QOver rδ A1* (R-deq _ A* A1* rθ1 rM1) (R-deq _ A* A1* rθ2 rM2) α
 
   QOver-irrel rδ rδ' A* rM1 rM2 rα = fund-changeover rδ rδ' A* rM1 rM2 id rα
 
@@ -682,21 +703,14 @@ module computational-interp.hcanon.HSetProof-PathOver where
                                                (fund-refl _ (subst A* θ*) _ (fund _ (subst A* θ*) _ M*))
   fund .Γ* ._ rθ (tr{Γ}{A}{C}{Γ*}{Γ'*} C* {θ1}{θ2} δ N) = fund-transport Γ'* C* (funds Γ* Γ'* rθ θ1) (funds Γ* Γ'* rθ θ2) (fundps Γ* Γ'* rθ θ1 θ2 δ) (fund Γ* _ rθ N) 
 
-  fund {θ = θ} .Γ* ._ rθ (uap{Γ}{Γ*}{P}{Q} f* g*) = {!!} , {!!} -- FIXME avoid/deal with equality
-{-
-       (λ x rx → transportP (fund Γ* prop rθ Q) _ id (interp f* (θ , x)) (coe (interp (uap{P = P}{Q = Q} f* g*) θ) x) 
-                     (! (ap≃ (type≃β (interp-uap-eqv{P = P}{Q = Q} f* g* θ))))
-                     (fund (Γ* , proof P) (w (proof P) (proof Q)) (rθ , rx) f*)) , 
-       (λ x rx → transportP (fund Γ* prop rθ P) _ id (interp g* (θ , x)) (coe (! (interp (uap{P = P}{Q = Q} f* g*) θ)) x) 
-                     (! (ap≃ (type≃β! (interp-uap-eqv{P = P}{Q = Q} f* g* θ))))
-                     (fund (Γ* , proof Q) (w (proof Q) (proof P)) (rθ , rx) g*)) 
--}
-  -- later fund Γ* ._ rθ (lam={A* = A*}{B* = B*} f* g* α*) = λ x rx → fund-lam= Γ*  A* B* f* g* α* rθ x rx
-
+  fund {θ = θ} .Γ* ._ rθ (uap{Γ}{Γ*}{P}{Q} f* g*) = coe {!!} -- make lemma
+    (Q-deq _ prop (subst prop ·) {fund _ prop rθ P} {fund _ prop rθ Q} ((λ x rx → transportP (fund Γ* prop rθ Q) _ _ _ _ {!univalenceβ!} (fund _ _ (rθ , rx) f*)) , 
+     {!FIXME symmetric!}))
   fund .Γ* .A* rθ (deq{Γ}{A}{Γ*}{A1*}{A*} M) = R-deq Γ* A1* A* rθ (fund Γ* A1* rθ M) 
   fund Γ* ._ rθ <>⁺ = fund-<>⁺ Γ* rθ
   fund Γ* ._ rθ (split1 C* M1 M) = fund-split1 Γ* C* M1 M rθ 
   -- fund ._ B* rθ (unlam {Γ* = Γ*} {A* = A*} M) = fst (fund Γ* (Π A* B*) (fst rθ) M) _ (snd rθ)
+  -- later fund Γ* ._ rθ (lam={A* = A*}{B* = B*} f* g* α*) = λ x rx → fund-lam= Γ*  A* B* f* g* α* rθ x rx
 
   fund-<> Γ* rθ = <>
   fund-<>⁺ Γ* rθ = id
@@ -705,13 +719,11 @@ module computational-interp.hcanon.HSetProof-PathOver where
   --                                        (fst (fund Γ* (Π A* B*) rθ g*) x rx) (! (Π≃β (λ x₁ → interp α* (_ , x₁)))) 
   --                                        (fund (Γ* , A*) _ (rθ , rx) α*) 
 
-  fund-split1 {θ = θ} Γ* {C} C* M1 M rθ = {!FIXME!}
-{-
-    transportR (Γ* , proof unit⁺) C* (rθ , (fund Γ* (proof unit⁺) rθ M)) (apd (split1⁺ (λ x → C (θ , x)) (interp M1 θ)) (! (fund Γ* (proof unit⁺) rθ M))) 
-                                          (fund-tr1-unit⁺ {α = ! (fund Γ* (proof unit⁺) rθ M)}
-                                                  Γ* C* rθ id (fund Γ* (proof unit⁺) rθ M) <>  -- uses the fact that all paths are reducible in Prooff(-)
-                                                  (fund Γ* (subst1 C* <>⁺) rθ M1))
--}
+  fund-split1 {θ = θ} Γ* {C} C* M1 M rθ = transportR _ C* _ (apd (split1⁺ (λ x → C (θ , x)) (interp M1 θ))
+                                                               (! (fund Γ* (proof unit⁺) rθ M))
+                                                               ∘ {!coh!})
+                                            (fund-tr1-unit⁺ {α = path-to-pathover (λ _ → Unit⁺) (! (fund Γ* (proof unit⁺) rθ M))} Γ* C* rθ id (fund Γ* (proof unit⁺) rθ M) <>
+                                             (fund Γ* (subst1 C* <>⁺) rθ M1))
 
   -- ----------------------------------------------------------------------
   -- ap 
@@ -734,7 +746,7 @@ module computational-interp.hcanon.HSetProof-PathOver where
   fund-ap Γ* void rθ1 rθ2 rδ = (λ x x₁ → x₁) , (λ y x → x) 
   fund-ap Γ* <> rθ1 rθ2 rδ = <>
   fund-ap Γ* <>⁺ rθ1 rθ2 rδ = <>
-  fund-ap Γ* (split1 C* f f₁) rθ1 rθ2 rδ = {!FIXME!}
+  fund-ap Γ* (split1 C* f f₁) rθ1 rθ2 rδ = {!fund _ (proof unit⁺) rθ1 f₁ !}
   fund-ap Γ* (abort f) rθ1 rθ2 rδ = Sums.abort (fund Γ* (proof void) rθ1 f) 
   fund-ap Γ* (if f f₁ f₂) rθ1 rθ2 rδ = {!FIXME!}
   fund-ap {δ = δ} Γ* (lam {A = A} {A* = A*} {B* = B*} f) rθ1 rθ2 rδ = 
@@ -775,7 +787,7 @@ module computational-interp.hcanon.HSetProof-PathOver where
          (fund-ap Γ* M (fst rθ1) (fst rθ2) rδ1 _ (snd rθ2)))
   fund-ap Γ* (lam= f f₁ f₂) rθ1 rθ2 rδ = <>
 -}
-  fund-ap Γ* (deq f) rθ1 rθ2 rδ = {!fund-ap Γ* f rθ1 rθ2 rδ!} -- FIXME
+  fund-ap Γ* (deq{A* = A*} {A'* = A'*} f) rθ1 rθ2 rδ = Q-deq _ A* A'* (fund-ap Γ* f rθ1 rθ2 rδ) 
 
 {-
   example : Tm · (proof unit⁺)
