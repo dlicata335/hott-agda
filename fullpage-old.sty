@@ -1,0 +1,33 @@
+% This is FULLPAGE.STY by H.Partl, Version 2 as of 15 Dec 1988.
+% Document Style Option to fill the paper just like Plain TeX.
+% Modified for LaTeX2e by R. Harper October 1997.
+     
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{fullpage}[1997/10/06]
+
+\DeclareOption{a4paper}{
+\addtolength{\hoffset}{-3mm}
+\addtolength{\voffset}{8mm}
+}
+
+\setlength{\topmargin}{0pt}
+\addtolength{\topmargin}{-\headheight}
+\addtolength{\topmargin}{-\headsep}
+     
+\setlength{\textheight}{8.9in}
+     
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{\oddsidemargin}
+\setlength{\marginparwidth}{0.5in}
+     
+\setlength{\textwidth}{6.5in}
+     
+\ProcessOptions
+     
+% For users of A4 paper: The above values are suited for american 8.5x11in
+% paper. If your output driver performs a conversion for A4 paper, keep
+% those values. If your output driver conforms to the TeX standard (1in/1in),
+% then you should add the following commands to center the text on A4 paper:
+     
+% \advance\hoffset by -3mm  % A4 is narrower.
+% \advance\voffset by  8mm  % A4 is taller.

@@ -1,0 +1,427 @@
+%% macros for PL and types
+%% uses \mathtt for code
+%% not my primary style: everything is prefixed
+
+%% the cause of all this duplication is that it is much easier to type
+%% things when each macro dumps code into the desired format
+%% hence we have copied of all of these that do tt
+
+%% convention: copy into individual-directory/types-local.sty when 
+%% something needs to close over a particular version of these macros
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% basic expressions
+
+% code is mathtt
+\newcommand{\MTdcd}[1]{\ensuremath{\mathtt{#1}}}
+% a kind
+\newcommand{\MTkd}[1]{\MTdcd{#1}}
+% a type or type constructor
+\newcommand{\MTtp}[1]{\MTdcd{#1}}
+\newcommand{\MTcn}[1]{\MTtp{#1}}
+% a term
+\newcommand{\MTtm}[1]{\MTdcd{#1}}
+
+% term : type
+\newcommand{\MTtptm}[2]{\ensuremath{\MTtm{#1} \, \MTdcd{:} \, \MTtp{#2}}}
+\newcommand{\MTtptmns}[2]{\ensuremath{\MTtm{#1} \MTdcd{:} \MTtp{#2}}}
+% type :: kind
+\newcommand{\MTkdcn}[2]{\ensuremath{\MTcn{#1} \, \MTdcd{::} \, \MTkd{#2}}}
+\newcommand{\MTkdcnns}[2]{\ensuremath{\MTcn{#1}\MTdcd{::}\MTkd{#2}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% constructing types and kinds
+
+% an arrow type/kind
+\newcommand{\MTlarr}[3]{\ensuremath{\MTdcd{#2}\rightarrow_{\MTdcd{#1}} \MTdcd{#3}}}
+\newcommand{\MTarr}[2]{\MTlarr{}{#1}{#2}}
+
+\newcommand{\MTarrr}[3]{\MTarr{#1}{{\MTarr{#2}{#3}}}}
+\newcommand{\MTarrrr}[4]{\MTarr{#1}{{\MTarr{#2}{\MTarr{#3}{#4}}}}}
+
+% dependent function classifier/kind with : 
+\newcommand{\MTpicl}[3]{\ensuremath{\MTdcd{\Pi}\,\MTtptmns{#1}{#2}.\,\MTdcd{#3}}}
+% dependent pair classifier with :
+\newcommand{\MTsigmacl}[3]{\ensuremath{\MTdcd{\Sigma}\,\MTtptmns{#1}{#2}.\,\MTdcd{#3}}}
+
+% dependent function with :: and a level marker
+\newcommand{\MTlPicl}[4]{\ensuremath{\MTdcd{\Pi_{#1}}\,\MTkdcnns{#2}{#3}.\,\MTdcd{#4}}}
+\newcommand{\MTPicl}[3]{\MTlPicl{}{#1}{#2}{#3}}
+% dependent pair with :: and a level marker
+\newcommand{\MTlSigmacl}[4]{\ensuremath{\MTdcd{\Sigma_{#1}}\,\MTkdcnns{#2}{#3}.\,\MTdcd{#4}}}
+\newcommand{\MTSigmacl}[3]{\MTlSigmacl{}{#1}{#2}{#3}}
+
+% forall type with kind
+\newcommand{\MTforalltp}[3]{\ensuremath{\MTdcd{\forall}\,\MTkdcnns{#1}{#2}.\,\MTdcd{#3}}}
+% exists type with kind
+\newcommand{\MTexiststp}[3]{\ensuremath{\MTdcd{\exists}\,\MTkdcnns{#1}{#2}.\,\MTdcd{#3}}}
+
+% product type/kind
+\newcommand{\MTlprd}[3]{\ensuremath{\MTdcd{#2} \times_{\MTdcd{#1}} \MTdcd{#3}}}
+\newcommand{\MTprd}[2]{\MTlprd{}{#1}{#2}}
+
+% sum type/kind
+\newcommand{\MTlsm}[3]{\ensuremath{\MTdcd{#2} +_{\MTdcd{#1}} \MTdcd{#3}}}
+\newcommand{\MTsm}[2]{\MTlsm{}{#1}{#2}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% lambdas
+
+% an untyped lambda 
+\newcommand{\MTulam}[2]{\MTtm{\lambda\,#1.\,#2}}
+
+% a typed lambda
+\newcommand{\MTlam}[3]{\MTtm{\lambda\,\MTtptmns{#1}{#2}.\,#3}}
+
+% a lambda with a level marker 
+\newcommand{\MTllamc}[4]{\MTdcd{\lambda_{#1}\,\MTkdcnns{#2}{#3}.\,#4}}
+\newcommand{\MTlamc}[3]{\llam{c}{#1}{#2}{#3}}
+
+% juxtaposition with spacing
+% this doesn't get used just for application--also for some primitive
+% constructors that have the same syntax, etc
+\newcommand{\MTapp}[2]{\MTdcd{#1 \: #2}}
+\newcommand{\MTappp}[3]{\MTdcd{#1 \: #2 \: #3}}
+\newcommand{\MTapppp}[4]{\MTdcd{#1 \: #2 \: #3 \: #4}}
+\newcommand{\MTappppp}[5]{\MTdcd{#1 \: #2 \: #3 \: #4 \: #5}}
+\newcommand{\MTapppppp}[6]{\MTdcd{#1 \: #2 \: #3 \: #4 \: #5 \: #6}}
+
+% put parens around each arg, associating to the left
+\newcommand{\MTlpapp}[2]{\MTdcd{#1\,(#2)}}
+\newcommand{\MTlpappp}[3]{\MTdcd{#1(#2)(#3)}}
+\newcommand{\MTlpapppp}[4]{\MTdcd{#1\,(#2)\,(#3)\,(#4)}}
+\newcommand{\MTlpappppp}[5]{\MTdcd{#1\,(#2)\,(#3)\,(#4)\,(#5)}}
+\newcommand{\MTlpapppppp}[6]{\MTdcd{#1\,(#2)\,(#3)\,(#4)\,(#5)\,(#6)}}
+
+% put parens around args, associating to the right 
+\newcommand{\MTrpapp}[2]{\MTdcd{#1\,(#2)}}
+\newcommand{\MTrpappp}[3]{\MTdcd{#1\,(#2\,(#3))}}
+\newcommand{\MTrpapppp}[4]{\MTdcd{#1\,(#2\,(#3\,(#4)))}}
+\newcommand{\MTrpappppp}[5]{\MTdcd{#1\,(#2\,(#3\,(#4\,(#5))))}}
+\newcommand{\MTrpapppppp}[6]{\MTdcd{#1\,(#2\,(#3\,(#4\,(#5\,(#6)))))}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Lambdas
+
+% a capital Lambda with ::
+\newcommand{\MTlLamc}[4]{\MTdcd{\Lambda_{#1}\,\MTkdcnns{#2}{#3}.\,#4}}
+\newcommand{\MTLamc}[3]{\MTlLamc{}{#1}{#2}{#3}}
+
+% juxtaposition with brackets 1[2]
+\newcommand{\MTApp}[2]{\MTlApp{}{#1}{#2}}
+\newcommand{\MTAppp}[3]{\MTlAppp{}{#1}{#2}{#3}}
+\newcommand{\MTApppp}[4]{\MTlApppp{}{#1}{#2}{#3}{#4}}
+\newcommand{\MTAppppp}[5]{\MTlAppppp{}{#1}{#2}{#3}{#4}{#5}}
+\newcommand{\MTApppppp}[6]{\MTlApppppp{}{#1}{#2}{#3}{#4}{#5}{#6}}
+
+% bracket application with a level marker
+\newcommand{\MTlApp}[3]{\MTdcd{#2[#3]_{#1}}}
+\newcommand{\MTlAppp}[4]{\MTdcd{#2[#3][#4]_{#1}}}
+\newcommand{\MTlApppp}[5]{\MTdcd{#2[#3][#4][#5]_{#1}}}
+\newcommand{\MTlAppppp}[6]{\MTdcd{#2[#3][#4][#5][#6]_{#1}}}
+\newcommand{\MTlApppppp}[7]{\MTdcd{#2[#3][#4][#5][#6][#7]_{#1}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% existentials 
+
+\newcommand{\MTlpack}[4]{\ensuremath{\MTapppp{pack_{#1}}{(#2,#3)}{as}{#4}}}
+\newcommand{\MTlunpack}[5]{\ensuremath{\MTdcd{unpack_{#1}}\:\MTdcd{(#2,#3)}\:\MTdcd{=}\,\MTdcd{#4}\:\MTdcd{in}\:\MTdcd{#5}}}
+
+\newcommand{\MTpack}[3]{\MTlpack{}{#1}{#2}{#3}}
+\newcommand{\MTunpack}[4]{\MTlunpack{}{#1}{#2}{#3}{#4}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% pairs and unit
+
+% with a level marker
+\newcommand{\MTlpair}[3]{\ensuremath{\MTdcd{(#2,#3)_{#1}}}}
+\newcommand{\MTlfst}[2]{\app{fst_{#1}}{#2}}
+\newcommand{\MTlsnd}[2]{\app{snd_{#1}}{#2}}
+
+\newcommand{\MTlemptytuple}[1]{\MTdcd{()_{#1}}}
+
+%% without
+\newcommand{\MTpair}[2]{\MTlpair{}{#1}{#2}}
+\newcommand{\MTfst}[1]{\MTlfst{}{#1}}
+\newcommand{\MTsnd}[1]{\MTlsnd{}{#1}}
+
+\newcommand{\MTemptytuple}[0]{\MTlemptytuple{}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% sums and void
+
+% with a level marker
+\newcommand{\MTlinl}[3]{\MTapp{inl_{#1}[#2]}{#3}}
+\newcommand{\MTlinr}[3]{\MTapp{inr_{#1}[#2]}{#3}}
+\newcommand{\MTlcase}[6]{\ensuremath{\MTdcd{case_{#1}}\:\MTdcd{#2}\:\MTdcd{of}\:
+  (\MTapp{inl}{#3}\,\MTdcd{\Rightarrow}\,\MTdcd{#4}\:\MTdcd{|}\:\MTapp{inr}{#5}\,\MTdcd{\Rightarrow}\,\MTdcd{#6} )}}
+
+\newcommand{\MTcase}[5]{\MTlcase{}{#1}{#2}{#3}{#4}{#5}}
+
+\newcommand{\MTlabort}[3]{\MTapp{abort_{#1}[#2]}{#3}}
+
+\newcommand{\MTinl}[2]{\MTlinl{}{#1}{#2}}
+\newcommand{\MTinr}[2]{\MTlinr{}{#1}{#2}}
+
+
+\newcommand{\MTabort}[2]{\MTlabort{}{#1}{#2}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% lets
+
+% let val
+\newcommand{\MTletval}[3]{\ensuremath{\MTdcd{let}\:\MTdcd{val}\:\MTdcd{#1}\,\MTdcd{=}\,\MTdcd{#2}\:\MTdcd{in}\:\MTdcd{#3}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% fix
+
+\newcommand{\MTfix}[3]{\ensuremath{\MTdcd{fix}}\,\MTtptmns{#1}{#2}.\,\MTdcd{#3}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% propositions
+
+\newcommand{\MTandp}[2]{\MTdcd{#1\wedge#2}}
+\newcommand{\MTorp}[2]{\MTdcd{#1\vee#2}}
+\newcommand{\MTimplp}[2]{\MTdcd{#1\supset#2}}
+\newcommand{\MTnotp}[1]{\MTdcd{\urcorner#1}}
+\newcommand{\MTforallp}[3]{\ensuremath{\MTdcd{\forall}\,\MTkdcnns{#1}{#2}.\,\MTdcd{#3}}}
+\newcommand{\MTexistsp}[3]{\ensuremath{\MTdcd{\exists}\,\MTkdcnns{#1}{#2}.\,\MTdcd{#3}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% substitution
+\newcommand{\MTswap}{\leftrightarrow}
+\newcommand{\MTgetssubst}[3]{\ensuremath{[\MTdcd{#1} \leftarrow \MTdcd{#2}] \MTdcd{#3}}}
+
+\newcommand{\MTlsubst}[3]{\ensuremath{[\MTdcd{#1} / \MTdcd{#2}] \MTdcd{#3}}}
+\newcommand{\MTrsubst}[3]{\ensuremath{\MTdcd{#1} [\MTdcd{#2} / \MTdcd{#3}]}}
+\newcommand{\MTsubst}[3]{\MTlsubst{#1}{#2}{#3}}
+
+%% subst into context : don't \MTdcd the third position
+\newcommand{\MTcsubst}[3]{\ensuremath{[\MTdcd{#1} / \MTdcd{#2}] #3}}
+
+%% C / x
+\newcommand{\MTsubstfor}[2]{\ensuremath{\MTdcd{#1} / \MTdcd{#2}}}
+
+%% M [ s ]
+\newcommand{\MTresubst}[2]{\ensuremath{\MTdcd{#1} [ #2 ]}}
+\newcommand{\MTlesubst}[2]{\ensuremath{[ #2 ] \MTdcd{#1}}}
+\newcommand{\MTesubst}[2]{\MTresubst{#1}{#2}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% big-step (evaluation relation)
+\newcommand{\MTevalsto}[2]{\ensuremath{\MTdcd{#1}\hookrightarrow\MTdcd{#2}}}
+
+% small-step (transition system)
+\newcommand{\MTstep}[2]{\ensuremath{\MTdcd{#1}\mapsto \MTdcd{#2}}}
+\newcommand{\MTstepsign}[0]{\mapsto}
+% reflexive, transitive closures
+\newcommand{\MTsteprt}[2]{\ensuremath{\MTdcd{#1}\mapsto^{\ast}\MTdcd{#2}}}
+% stuck
+\newcommand{\MTstuck}[1]{\ensuremath{\MTdcd{#1}\not\mapsto}}
+
+%value
+\newcommand{\MTval}[1]{\ensuremath{\MTapp{#1}{value}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% typing
+
+% gamma proves t has type tau judgement
+\newcommand{\MToftp}[3]{\ensuremath{#1\,\vdash \MTtm{#2} \, \MTdcd{:} \, \MTcn{#3}}}
+\newcommand{\MTcatoftp}[2]{\MTtptm{#1}{#2}}
+% \Gamma
+\newcommand{\MToftpg}[2]{\MToftp{\Gamma}{#1}{#2}}
+% empty context
+\newcommand{\MToftpe}[2]{\MToftp{\cdot}{#1}{#2}}
+
+% well-formed type
+\newcommand{\MTwftp}[2]{\ensuremath{#1\,\vdash \MTdcd{#2}\:\MTdcd{type}}}
+\newcommand{\MTwfkd}[2]{\ensuremath{#1\,\vdash \MTdcd{#2}\:\MTdcd{kind}}}
+\newcommand{\MTwftpd}[1]{\ensuremath{\Delta\,\vdash \MTdcd{#1}\:\MTdcd{type}}}
+\newcommand{\MTwfkdd}[1]{\ensuremath{\Delta\,\vdash \MTdcd{#1}\:\MTdcd{kind}}}
+
+% subtyping 
+\newcommand{\MTsubtp}[2]{\ensuremath{\MTdcd{#1} <: \MTdcd{#2}}}
+
+% ctx proves A has kind k
+\newcommand{\MTofkd}[3]{\ensuremath{#1 \, \vdash \MTcn{#2} \, \MTdcd{::} \, \MTkd{#3}}}
+% \Delta
+\newcommand{\MTofkdd}[2]{\MTofkd{\Delta}{#1}{#2}}
+% empty context
+\newcommand{\MTofkde}[2]{\MTofkd{\cdot}{#1}{#2}}
+
+% delta ; gamma proves E has type A judgement
+\newcommand{\MToftpd}[4]{\ensuremath{#1 \, ;\, #2\,\vdash \MTtm{#3} \, \MTdcd{:} \, \MTcn{#4}}}
+\newcommand{\MToftpdd}[3]{\MToftpd{\Delta}{#1}{#2}{#3}}
+\newcommand{\MToftpddg}[2]{\MToftpd{\Delta}{\Gamma}{#1}{#2}}
+\newcommand{\MToftpdde}[2]{\MToftpd{\Delta}{\cdot}{#1}{#2}}
+
+% definitional equality
+\newcommand{\MTdeqtm}[4]{\ensuremath{#1\,\vdash\,\MTtm{#2} \, \equiv \, \MTtm{#3} \, \MTdcd{:} \, \MTtp{#4}}}
+\newcommand{\MTdeqtmg}[3]{\MTdeqtm{\Gamma}{#1}{#2}{#3}}
+\newcommand{\MTdeqtmd}[5]{\ensuremath{#1 ; #2\,\vdash\,\MTtm{#3} \, \equiv \, \MTtm{#4} \, \MTdcd{:} \, \MTtp{#5}}}
+%types
+\newcommand{\MTdeqtp}[3]{\ensuremath{#1\,\vdash\,\MTtp{#2} \, \equiv \, \MTtp{#3} \, \MTdcd{type}}}
+\newcommand{\MTdeqtpd}[2]{\MTdeqtp{\Delta}{#1}{#2}}
+%kinds
+\newcommand{\MTdeqkd}[3]{\ensuremath{#1\,\vdash\,\MTkd{#2} \, \equiv \, \MTkd{#3} \, \MTdcd{kind}}}
+\newcommand{\MTdeqkdd}[2]{\MTdeqkd{\Delta}{#1}{#2}}
+%constructors
+\newcommand{\MTdeqcn}[4]{\ensuremath{#1\,\vdash\,\MTcn{#2} \, \equiv \, \MTcn{#3} \, \MTdcd{::} \, \MTdcd{#4}}}
+\newcommand{\MTdeqcnd}[3]{\MTdeqcn{\Delta}{#1}{#2}{#3}}
+
+%% Gamma |-_Sigma ...
+
+\newcommand{\MTwfsig}[1]{\ensuremath{#1\, {\MTdcd{sig}}}}
+
+\newcommand{\MToftps}[4]{\ensuremath{#1 \, \vdash_{#2} \MTtm{#3} \, \MTdcd{:} \, \MTcn{#4}}}
+\newcommand{\MTofkds}[4]{\ensuremath{#1 \, \vdash_{#2} \MTtm{#3} \, \MTdcd{:} \, \MTcn{#4}}}
+\newcommand{\MTwfkds}[3]{\ensuremath{#1 \, \vdash_{#2} \MTtm{#3} \, \MTdcd{kind}}}
+\newcommand{\MTwfctxs}[2]{\ensuremath{\vdash_{#1} \, #2\, \MTdcd{ctx}}}
+
+\newcommand{\MToftpss}[3]{\MToftps{#1}{\Sigma}{#2}{#3}}
+\newcommand{\MTofkdss}[3]{\MTofkds{#1}{\Sigma}{#2}{#3}}
+\newcommand{\MTwfkdss}[2]{\MTwfkds{#1}{\Sigma}{#2}}
+\newcommand{\MTwfctxss}[1]{\MTwfctxs{\Sigma}{#1}}
+
+\newcommand{\MToftpssg}[2]{\MToftps{\Gamma}{\Sigma}{#1}{#2}}
+\newcommand{\MTofkdssg}[2]{\MTofkds{\Gamma}{\Sigma}{#1}{#2}}
+\newcommand{\MTwfkdssg}[1]{\MTwfkds{\Gamma}{\Sigma}{#1}}
+
+%% type-directed equality algorithms
+
+%% algorithmic equality of kinds
+\newcommand{\MTnormeqkd}[3]{\ensuremath{#1\,\vdash\,\MTkd{#2} \, \Longleftrightarrow \, \MTkd{#3} \, \MTdcd{kind}}}
+\newcommand{\MTnormeqkdp}[2]{\MTnormeqkd{\Psi}{#1}{#2}}
+
+% weak head reduction
+\newcommand{\MTwhr}[2]{\ensuremath{\MTdcd{#1}\stackrel{\mathrm{whr}}{\longrightarrow} \MTdcd{#2}}}
+\newcommand{\MTnotwhr}[1]{\ensuremath{\MTdcd{#1}
+    \stackrel{\mathrm{whr}}{\not{\longrightarrow}}}}
+\newcommand{\MTwhrrt}[2]{\ensuremath{\MTdcd{#1}\stackrel{\mathrm{whr}}{\longrightarrow^{*}} \MTdcd{#2}}}
+\newcommand{\MTwhn}[2]{\ensuremath{\MTdcd{#1}\stackrel{\mathrm{whn}}{\longrightarrow}
+    \MTdcd{#2}}}
+
+%% normal equality of constructors
+\newcommand{\MTnormeqcn}[4]{\ensuremath{#1\,\vdash\,\MTcn{#2} \, \Longleftrightarrow \, \MTcn{#3} \, \MTdcd{::} \, \MTdcd{#4}}}
+\newcommand{\MTnormeqcnp}[3]{\MTnormeqcn{\Psi}{#1}{#2}{#3}}
+
+%% neutral equality of constructors
+\newcommand{\MTneuteqcn}[4]{\ensuremath{#1\,\vdash\,\MTcn{#2} \, \longleftrightarrow \, \MTcn{#3} \, \MTdcd{::} \, \MTdcd{#4}}}
+\newcommand{\MTneuteqcnp}[3]{\MTneuteqcn{\Psi}{#1}{#2}{#3}}
+
+\newcommand{\MTlrcn}[4]{\ensuremath{#1\,\vdash\,\MTcn{#2} \, = \, \MTcn{#3} \,
+    \in \, \sem{\MTkd{#4}}}}
+\newcommand{\MTlrcnp}[3]{\MTlrcn{\Psi}{#1}{#2}{#3}}
+
+\newcommand{\MTlrsbst}[4]{\ensuremath{#1\,\vdash\,\MTcn{#2} \, = \, \MTcn{#3} \, \in \, \sem{#4}}}
+\newcommand{\MTlrsbstp}[3]{\MTlrsbst{\Psi}{#1}{#2}{#3}}
+
+\newcommand{\MTidsubst}[1]{\ensuremath{\MTdcd{id}_{#1}}}
+
+\newcommand{\MTliesapart}[2]{\ensuremath{\MTdcd{#1} \MTdcd{\#} \MTdcd{#2}}}
+\newcommand{\MTliesapartc}[2]{\ensuremath{\MTdcd{#1} \MTdcd{\#} #2}}
+
+%% canonical and atomic forms / bidirectional
+
+%% the arrow provides enough space, visually
+%% Gamma |-_Sigma ...
+\newcommand{\MTchecktms}[4]{\ensuremath{#1 \, \vdash_{#2} \MTdcd{#3} \stackrel{\leftarrow}{:} \MTdcd{#4}}}
+\newcommand{\MTchecktps}[4]{\ensuremath{#1 \, \vdash_{#2} \MTdcd{#3} \stackrel{\leftarrow}{\MTdcd{#4}}}}
+\newcommand{\MTsynthtms}[4]{\ensuremath{#1 \, \vdash_{#2} \MTdcd{#3} \stackrel{\rightarrow}{:} \MTdcd{#4}}}
+\newcommand{\MTsynthtps}[4]{\MTsynthtms{#1}{#2}{#3}{#4}}
+\newcommand{\MTcheckkds}[3]{\ensuremath{#1 \, \vdash_{#2} \MTdcd{#3} \stackrel{\leftarrow}{\MTdcd{kind}}}}
+
+\newcommand{\MTchecktmss}[3]{\MTchecktms{#1}{\Sigma}{#2}{#3}}
+\newcommand{\MTchecktpss}[3]{\MTchecktps{#1}{\Sigma}{#2}{#3}}
+\newcommand{\MTsynthtmss}[3]{\MTsynthtms{#1}{\Sigma}{#2}{#3}}
+\newcommand{\MTsynthtpss}[3]{\MTsynthtps{#1}{\Sigma}{#2}{#3}}
+\newcommand{\MTcheckkdss}[2]{\MTcheckkds{#1}{\Sigma}{#2}}
+
+\newcommand{\MTchecktm}[3]{\MTchecktms{#1}{}{#2}{#3}}
+\newcommand{\MTchecktp}[3]{\MTchecktps{#1}{}{#2}{#3}}
+\newcommand{\MTsynthtm}[3]{\MTsynthtms{#1}{}{#2}{#3}}
+\newcommand{\MTsynthtp}[3]{\MTsynthtps{#1}{}{#2}{#3}}
+\newcommand{\MTcheckkd}[2]{\MTcheckkds{#1}{}{#2}}
+
+\newcommand{\MTchecktmssg}[2]{\MTchecktms{\G}{\Sigma}{#1}{#2}}
+\newcommand{\MTchecktpssg}[2]{\MTchecktps{\G}{\Sigma}{#1}{#2}}
+\newcommand{\MTsynthtmssg}[2]{\MTsynthtps{\G}{\Sigma}{#1}{#2}}
+\newcommand{\MTsynthtpssg}[2]{\MTsynthtps{\G}{\Sigma}{#1}{#2}}
+\newcommand{\MTcheckkdssg}[1]{\MTcheckkds{\G}{\Sigma}{#1}}
+
+\newcommand{\MTchecktmg}[2]{\MTchecktms{\G}{}{#1}{#2}}
+\newcommand{\MTchecktpg}[2]{\MTchecktps{\G}{}{#1}{#2}}
+\newcommand{\MTsynthtmg}[2]{\MTsynthtms{\G}{}{#1}{#2}}
+\newcommand{\MTsynthtpg}[2]{\MTsynthtps{\G}{}{#1}{#2}}
+\newcommand{\MTcheckkdg}[1]{\MTcheckkds{\G}{}{#1}}
+
+\newcommand{\MTchecksig}[1]{\ensuremath{#1 \, \stackrel{\leftarrow}{\MTdcd{sig}}}}
+\newcommand{\MTchecksigs}[2]{\ensuremath{\vdash_{#1} \, #2 \, \stackrel{\leftarrow}{\MTdcd{sig}}}}
+
+\newcommand{\MTcheckctxs}[2]{\ensuremath{\vdash_{#1} \, #2 \, \stackrel{\leftarrow}{\MTdcd{ctx}}}}
+\newcommand{\MTcheckctxss}[1]{\MTcheckctxs{\Sigma}{#1}}
+\newcommand{\MTcheckctx}[1]{\ensuremath{#1 \: \stackrel{\leftarrow}{\MTdcd{ctx}}}}
+\newcommand{\MTcatcheckctx}[1]{\ensuremath{#1\, \stackrel{\leftarrow}{\MTdcd{ctx}}}}
+
+\newcommand{\MTlhsubst}[5]{\ensuremath{[\MTdcd{#1} / \MTdcd{#2}]^{#3}_{\MTdcd{#4}} \MTdcd{#5}}}
+\newcommand{\MTlhsubsteq}[6]{\ensuremath{\MTlhsubst{#1}{#2}{#3}{#4}{#5} = \MTdcd{#6}}}
+\newcommand{\MTlhsubstc}[5]{\ensuremath{[\MTdcd{#1} / \MTdcd{#2}]^{#3}_{\MTdcd{#4}} #5}}
+\newcommand{\MTlhsubstceq}[6]{\ensuremath{\MTlhsubstc{#1}{#2}{#3}{#4}{#5} = #6}}
+
+\newcommand{\MTcatsynthtm}[2]{\ensuremath{\MTdcd{#1} \stackrel{\rightarrow}{:} \MTdcd{#2}}}
+\newcommand{\MTcatsynthtp}[2]{\MTcatsynthtm{#1}{#2}}
+%% thinner notation for assumptions in ctx because the normal one is too
+%% wide, visually
+\newcommand{\MTtcatsynthtm}[2]{\MTtptm{#1}{#2}}
+\newcommand{\MTtcatsynthtp}[2]{\MTtptm{#1}{#2}}
+
+\newcommand{\MTcatchecktm}[2]{\ensuremath{\MTdcd{#1} \stackrel{\leftarrow}{:} \MTdcd{#2}}}
+\newcommand{\MTcatchecktp}[2]{\MTcatchecktm{#1}{#2}}
+
+
+% subordination
+\newcommand{\MTsubord}[2]{\ensuremath{\MTdcd{#1} \preceq \MTdcd{#2}}}
+\newcommand{\MTsubords}[3]{\ensuremath{\MTdcd{#1} \preceq_{#2} \MTdcd{#3}}}
+\newcommand{\MTnotsubord}[2]{\ensuremath{\MTdcd{#1} \not \preceq \MTdcd{#2}}}
+\newcommand{\MTnotsubords}[3]{\ensuremath{\MTdcd{#1} \not \preceq_{#2} \MTdcd{#3}}}
+%% just the relation symbol
+\newcommand{\MTsubordsymb}[0]{\ensuremath{\preceq}}
+\newcommand{\MTsubordssymb}[1]{\ensuremath{\preceq_#1}}
+
+\newcommand{\MTrestrict}[2]{\ensuremath{#1 |_\MTdcd{#2}}}
+\newcommand{\MTrestricteq}[3]{\ensuremath{#1 |_\MTdcd{#2} = #3}}
+\newcommand{\MTrestrictsubord}[2]{\ensuremath{#1 \! |_\MTdcd{#2}}}
+%% with the extra args
+\newcommand{\MTrestricts}[3]{\ensuremath{#1 |^{#2}_\MTdcd{#3}}}
+\newcommand{\MTrestrictseq}[4]{\ensuremath{#1 |^{#2}_\MTdcd{#3} = #4}}
+
+
+\newcommand{\MTworldlt}[3]{\ensuremath{#1 \lesssim_\MTdcd{#2} #3}}
+\newcommand{\MTworldnotlt}[3]{\ensuremath{#1 \not \lesssim_\MTdcd{#2} #3}}
+\newcommand{\MTworldeq}[3]{\ensuremath{#1 \equiv_\MTdcd{#2} #3}}
+
+\newcommand{\MTlhead}[2]{\ensuremath{|\MTtp{#2}|_{\mathit{#1}}}}
+\newcommand{\MThead}[1]{\MTlhead{}{#1}}
+\newcommand{\MTheadeq}[2]{\ensuremath{\MTlhead{}{#1} = \MTtp{#2}}}
+
+%% erasure
+\newcommand{\MTerase}[1]{\ensuremath{\p{\MTdcd{#1}}^{\MTdcd{-}}}}
+\newcommand{\MTeraseeq}[2]{\ensuremath{\p{\MTdcd{#1}}^{\MTdcd{-}} = #2}}
+\newcommand{\MTcerase}[1]{\ensuremath{\p{#1}^{\MTdcd{-}}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% encodings 
+
+\newcommand{\MTcorners}[1]{\ensuremath{\,\ulcorner\MTdcd{#1}\urcorner\,}}
+\newcommand{\MTacorners}[1]{\ensuremath{\,\llcorner\MTdcd{#1}\lrcorner\,}}
+\newcommand{\MTchurch}[1]{\MTdcd{\overline{#1}}}
