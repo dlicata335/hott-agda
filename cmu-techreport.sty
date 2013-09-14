@@ -1,0 +1,276 @@
+% cmu-techreport.sty created 25 April 1998 by Robert Harper
+% based on cmu-titlepage.sty by Robert Harper and David Long
+% thanks to Darrell Kindred and Andrzej Filinski for help with floats
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cmu-techreport}
+\newlength{\saveparindent}
+\setlength{\saveparindent}{\parindent}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+\def\title#1{\gdef\@title{#1}}
+
+\def\author#1{\gdef\@author{#1}}
+
+% the following is adapted from latex.tex to flag multiple authors
+\def\and{%%                             % \begin{tabular} 
+\gdef\@multipleauthors{}%
+\end{tabular}\hskip 1em plus .17fil\begin{tabular}[t]{c}%% \end{tabular}
+}
+
+\def\date#1{\gdef\@date{#1}}
+\gdef\@date{\today}          % default is today's date
+
+% keywords
+\def\keywords#1{\gdef\@keywords{#1}}
+
+% technical report number
+\def\trnumber#1{\gdef\@trnumber{#1}}
+\gdef\@trnumber{CMU-CS-??-???}
+
+% declaring citation information sets up formatting too
+\def\citationinfo#1{\gdef\@citationinfo{\vskip 2em\begin{quote}{\small #1}\end{quote}\par}}
+\gdef\@citationinfo{}
+
+% declaring copyright information sets up formatting too
+\def\copyrightnotice#1{\gdef\@copyrightnotice{\vfill\begin{center}{\small #1}\end{center}\par}}
+\gdef\@copyrightnotice{}
+
+% unmarked footnote
+\long\def\unmarkedfootnote#1{{\xdef\@thefnmark{}\@footnotetext
+{\ifcase\@ptsize\small\else\relax\fi#1}}}
+% Must be a certain size to be readable after copying
+
+% support acknowledgement, defaults to empty
+\def\support#1{\begingroup\def\protect{\noexpand\protect\noexpand}\xdef\@support{\@support\protect\unmarkedfootnote{#1}}\endgroup}
+\gdef\@support{}
+
+% standardized arpa contract citations
+
+% these just store away the arguments for later consideration
+\def\arpasupport#1{\gdef\@arpasupport{#1}}	% could check validity here
+\def\othersupport#1{\gdef\@othersupport{#1}}
+\def\authorsupport#1{\gdef\@authorsupport{#1}}
+\let\@authorsupport=\relax
+
+% generate ``author'' or ``authors,'' depending on the number of
+% authors
+\def\authororauthors{\@ifundefined{@multipleauthors}{author}{authors}}
+
+% generate the standardized support message, set up the disclaimer
+\def\arpablurb#1{\ifcase#1
+% Ergo
+\unmarkedfootnote{This research was supported in part by the Office of
+Naval Research%
+\@ifundefined{@othersupport}{ and in part}{, in part}
+by the Defense Advanced Research Projects
+Agency, monitored by the Office of Naval Research under Contract
+N00014-84-K-0415, ARPA Order No.~5404%
+\@ifundefined{@othersupport}{.}{, and in part by \@othersupport.}
+\@authorsupport
+\gdef\@arpadisclaimer{\unmarkedfootnote{The views and conclusions
+contained in this document are those of the \authororauthors\ and
+should not be interpreted as representing the official policies,
+either expressed or implied, of ONR, DARPA%
+\@ifundefined{@otherdisclaimer}{\relax}{, \@otherdisclaimer} or the
+U.S.~government.}}}
+\or % OldSpeech
+\unmarkedfootnote{This research was supported%
+\@ifundefined{@othersupport}{\relax}{ in part}
+by the Defense Advanced Research Projects Agency and monitored
+by the Space and Naval Warfare Systems Command under Contract
+N00039-91-C-0158, ARPA Order No.~7239%
+\@ifundefined{@othersupport}{.}{, and in part by \@othersupport.}
+\@authorsupport
+\gdef\@arpadisclaimer{\unmarkedfootnote{The views and conclusions
+contained in this document are those of the \authororauthors\ and
+should not be interpreted as representing the official policies,
+either expressed or implied, of DARPA%
+\@ifundefined{@otherdisclaimer}{\relax}{, \@otherdisclaimer} or the
+U.S.~government.}}}
+\or % Speech
+\unmarkedfootnote{This research was supported%
+\@ifundefined{@othersupport}{\relax}{ in part}
+by the Department of the Navy, Naval Research Laboratory under Grant
+No. N00014-93-1-2005%
+\@ifundefined{@othersupport}{.}{, and in part by \@othersupport.}
+\@authorsupport
+\gdef\@arpadisclaimer{\unmarkedfootnote{The views and conclusions
+contained in this document are those of the \authororauthors\ and
+should not be interpreted as representing the official policies,
+either expressed or implied, of %
+\@ifundefined{@otherdisclaimer}{the U.S.
+government.}{{\@otherdisclaimer} or the U.S. government.}}}}
+\or % Basic
+\unmarkedfootnote{This research was sponsored%
+\@ifundefined{@othersupport}{\relax}{ in part}
+by the Avionics Laboratory, Wright Research and Development Center,
+Aeronautical Systems Division (AFSC), U.S. Air Force, Wright-Patterson
+AFB, Ohio 45433-6543 under Contract F33615-90-C-1465, ARPA Order
+No.~7597%
+\@ifundefined{@othersupport}{.}{, and in part by \@othersupport.}
+\@authorsupport
+\gdef\@arpadisclaimer{\unmarkedfootnote{The views and conclusions
+contained in this document are those of the \authororauthors\ and
+should not be interpreted as representing the official policies,
+either expressed or implied, of %
+\@ifundefined{@otherdisclaimer}{the U.S.
+government.}{{\@otherdisclaimer} or the U.S. government.}}}}
+\or % Strategic
+\unmarkedfootnote{This research was sponsored%
+\@ifundefined{@othersupport}{\relax}{ in part}
+by The Defense Advanced Research Projects Agency, Information Science
+and Technology Office, under the title ``Research on Parallel
+Computing'', ARPA Order No.~7330, issued by DARPA/CMO under Contract
+MDA972-90-C-0035%
+\@ifundefined{@othersupport}{.}{, and in part by \@othersupport.}
+\@authorsupport
+\gdef\@arpadisclaimer{\unmarkedfootnote{The views and conclusions
+contained in this document are those of the \authororauthors\ and
+should not be interpreted as representing the official policies,
+either expressed or implied, of %
+\@ifundefined{@otherdisclaimer}{the U.S.
+government.}{{\@otherdisclaimer} or the U.S. government.}}}}
+\or % HTK
+\unmarkedfootnote{This research was sponsored%
+\@ifundefined{@othersupport}{\relax}{ in part}
+by the Defense Advanced Research Projects Agency, Information Science
+and Technology Office, under the title ``Research on Parallel
+Computing'', ARPA Order No.~7330.  Work furnished in
+connection with this research is provided under prime contract
+MDA972-90-C-0035 issued by DARPA/CMO to Carnegie Mellon University 
+and under its subcontract, No.~334918-58792 with Networks Systems
+Corporation.
+\@ifundefined{@othersupport}{\relax}{This work was also sponsored in
+part by \@othersupport.}
+\@authorsupport
+\gdef\@arpadisclaimer{\unmarkedfootnote{The views and conclusions
+contained in this document are those of the \authororauthors\ and
+should not be interpreted as representing the official policies,
+either expressed or implied, of %
+\@ifundefined{@otherdisclaimer}{the U.S.
+government.}{{\@otherdisclaimer} or the U.S. government.}}}}
+\or % Original Fox Contract (1991)
+\unmarkedfootnote{This research was sponsored%
+\@ifundefined{@othersupport}{\relax}{ in part}
+by the Defense Advanced Research Projects Agency, CSTO, under the title ``The
+Fox Project: Advanced Development of Systems Software'', ARPA Order No.~8313,
+issued by ESD/AVS under Contract No.~F19628-91-C-0168%
+\@ifundefined{@othersupport}{.}{, and in part by \@othersupport.}
+\@authorsupport
+\gdef\@arpadisclaimer{\unmarkedfootnote{The views and conclusions contained in
+this document are those of the \authororauthors\ and should not be interpreted
+as representing official policies, either expressed or implied, of %
+\@ifundefined{@otherdisclaimer}{the Defense Advanced Research Projects Agency
+or the U.S. Government.}{{\@otherdisclaimer}, the Defense Advanced Research
+Projects Agency, or the U.S. Government}}}}
+\or % Fox Renewal (1995)
+\unmarkedfootnote{This research was sponsored%
+\@ifundefined{@othersupport}{\relax}{ in part}
+by the Advanced Research Projects Agency CSTO under the title ``The Fox
+Project: Advanced Languages for Systems Software'', ARPA Order No.~C533,
+issued by ESC/ENS under Contract No.~F19628-95-C-0050%
+\@ifundefined{@othersupport}{.}{, and in part by \@othersupport.}
+\@authorsupport
+\gdef\@arpadisclaimer{\unmarkedfootnote{The views and conclusions contained in
+this document are those of the \authororauthors\ and should not be interpreted
+as representing official policies, either expressed or implied, of %
+\@ifundefined{@otherdisclaimer}{the Advanced Research Projects Agency
+or the U.S. Government.}{{\@otherdisclaimer}, the Advanced Research
+Projects Agency, or the U.S. Government}}}}
+\fi}
+
+% disclaimer information may be omitted, defaults to the standard
+% disclaimer
+\def\disclaimer#1{\begingroup\def\protect{\noexpand\protect\noexpand}\xdef\@disclaimer{\protect\unmarkedfootnote{#1}}\endgroup}
+\def\otherdisclaimer#1{\gdef\@otherdisclaimer{#1}}
+
+% abstract is a figure so it can float to next page if needed
+\long\def\abstract#1{\long\gdef\@abstract{\vfil\begin{figure}[hp]\begin{center}\textbf{Abstract}\end{center}#1\end{figure}\par\vfil}}
+\gdef\@abstract{}
+
+% code to build the title page
+\def\maketitle{
+% calculate skip needed to ensure that title appears in the cut-out
+\newlength{\@cutoutvskip}
+\setlength{\@cutoutvskip}{2.1875 true in}	% position of cut-out
+\addtolength{\@cutoutvskip}{-1 true in}		% printer margin
+\addtolength{\@cutoutvskip}{-\topmargin}
+\addtolength{\@cutoutvskip}{-\headheight}
+\addtolength{\@cutoutvskip}{-\headsep}
+%
+\begin{titlepage}
+\let\footnoterule\relax
+\vglue\@cutoutvskip
+\begin{center}
+\begin{minipage}[t]{4.75in}	% must be a minipage due to \thanks
+\vbox to 2in{
+\vfill
+\begin{center}
+{\Large \strut \@title\par}
+\vfill
+{\large \begin{tabular}[t]{c}\@author\end{tabular}\par}
+\smallskip
+{\large \@date\par}
+\smallskip
+{\sc \@trnumber\par}
+\end{center}
+\vfill}
+\end{minipage}
+\end{center}
+\vskip 3em
+\begin{center}
+School of Computer Science \\
+Carnegie Mellon University \\
+Pittsburgh, PA 15213
+\end{center} \par
+\@citationinfo
+% these are footnotes; abstract must appear afterwards
+\@thanks
+\@ifundefined{@arpasupport}{\@support}{%
+\expandafter\ifx\csname\@arpasupport\endcsname\ergo
+\arpablurb0
+\else
+\expandafter\ifx\csname\@arpasupport\endcsname\oldspeech
+\arpablurb1
+\else
+\expandafter\ifx\csname\@arpasupport\endcsname\speech
+\arpablurb2
+\else
+\expandafter\ifx\csname\@arpasupport\endcsname\basic
+\arpablurb3
+\else
+\expandafter\ifx\csname\@arpasupport\endcsname\strategic
+\arpablurb4
+\else
+\expandafter\ifx\csname\@arpasupport\endcsname\HTK
+\arpablurb5
+\else
+\expandafter\ifx\csname\@arpasupport\endcsname\oldfox
+\arpablurb6
+\else
+\expandafter\ifx\csname\@arpasupport\endcsname\fox
+\arpablurb7
+\else
+\typeout{Bad ARPA support key --- ignoring} \fi \fi \fi \fi \fi \fi \fi \fi}
+\@ifundefined{@disclaimer}{\@ifundefined{@arpadisclaimer}{\relax}{\@arpadisclaimer}}{\@disclaimer}
+\@abstract
+\@copyrightnotice
+% This hack will inhibit creation of a float page (containing the
+% abstract) between the title page and the keywords page, by setting
+% an impossible (> 1) lower bound on the fraction of a float page
+% occupied by floats.  The scope of this definition ends at the
+% \end{titlepage}.
+\renewcommand{\floatpagefraction}{10}
+% this documented method doesn't work:
+% \suppressfloats
+\end{titlepage}
+\@ifundefined{@keywords}{}{\vspace*{\fill}\textbf{Keywords:\ }\@keywords}
+% flush abstract if it floated; make sure text starts on a facing page
+\cleardoublepage
+\pagestyle{plain}
+\setcounter{page}{1}
+\setcounter{footnote}{0}
+\setcounter{figure}{0}
+\setlength{\parindent}{\saveparindent}
+\let\support\relax\gdef\@support{}\gdef\@author{}\gdef\@title{}\gdef\@trnumber{}\gdef\@citationinfo{}\gdef\@copyrightnotice{}\gdef\@abstract{}\let\maketitle\relax}
