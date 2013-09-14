@@ -1,0 +1,146 @@
+\documentclass{drl-common/llncs}
+
+\usepackage{multicol}
+\usepackage{mathptmx}
+\usepackage{color}
+\usepackage[cmex10]{amsmath}
+%% \usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{drl-common/proof}
+\usepackage{drl-common/typesit}
+\usepackage{drl-common/typescommon}
+\usepackage[square,numbers,sort]{natbib}
+\usepackage{arydshln}
+\usepackage{graphics}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage{drl-common/lagdatotex}
+\usepackage{relsize}
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathmorphing}
+
+\usepackage{ucs}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+\newcommand{\noagda}[0]{}
+                                                                                                                                                 
+\usepackage{graphicx}                                                                                                                                          
+\newcommand\Shamrock{\includegraphics[width=0.6em]{sham}}                                                                                                      
+\newcommand\Shamrockv[1]{\ensuremath{\includegraphics[width=0.6em]{sham}_{#1}}}  
+
+\DeclareUnicodeCharacter{8594}{$\shortrightarrow$}
+\DeclareUnicodeCharacter{9001}{$\langle$}
+\DeclareUnicodeCharacter{9002}{$\rangle$}
+\DeclareUnicodeCharacter{12314}{$\llbracket$}
+\DeclareUnicodeCharacter{12315}{$\rrbracket$}
+\DeclareUnicodeCharacter{8872}{$\vDash$}
+\DeclareUnicodeCharacter{9711}{\ensuremath{\bigcirc}}
+\DeclareUnicodeCharacter{9675}{$\circ$}
+\DeclareUnicodeCharacter{9671}{$\Diamond$}
+\DeclareUnicodeCharacter{9657}{$\triangleright$}
+\DeclareUnicodeCharacter{8640}{$\rightharpoonup$}
+\DeclareUnicodeCharacter{8659}{$\Downarrow$}
+\DeclareUnicodeCharacter{8984}{$\Shamrock$}
+
+\newcommand\textPsi{$\Psi$}
+\newcommand\textXi{$\Xi$}
+\newcommand\textxi{$\xi$}
+\newcommand\textDelta{$\Delta$}
+\newcommand\textGamma{$\Gamma$}
+\newcommand\textsigma{$\sigma$}
+\newcommand\textSigma{$\Sigma$}
+\newcommand\textPi{$\Pi$}
+\newcommand\textrho{$\rho$}
+\newcommand\textphi{$\varphi$}
+\newcommand\texttau{$\tau$}
+\newcommand\texteta{$\eta$}
+\newcommand\textalpha{$\alpha$}
+\newcommand\textbeta{$\beta$}
+\newcommand\textepsilon{$\epsilon$}
+\newcommand\textkappa{$\kappa$}
+\newcommand\textOmega{$\Omega$}
+\newcommand\textmho{$\mho$}
+\newcommand\textgamma{$\gamma$}
+\newcommand\textlambda{$\lambda$}
+\newcommand\textpi{$\pi$}
+\newcommand\texttheta{$\theta$}
+\newcommand\textdelta{$\delta$}
+
+\usepackage{fancyvrb}
+
+\newcommand{\ttt}[1]{\texttt{#1}}
+
+\usepackage{drl-common/code}
+\DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\small,fontfamily=tt}
+
+\newcommand{\ignore}[1]{}
+
+%% small tightcode, with space around it
+\newenvironment{stcode}
+{\smallskip
+\begin{small}
+\begin{tightcode}}
+{\end{tightcode}
+\end{small}
+\smallskip}
+
+%% \input{macros}
+
+\hyphenation{func-tor-ially}
+
+\begin{document}
+
+\title{Formalizing $\pi_n(S^n)$ in Homotopy Type Theory}
+
+\author{Daniel R. Licata\inst{1} and Guillaume Brunerie\inst{2}}
+
+\institute{Wesleyan University \\ \url{dlicata@wesleyan.edu} 
+\and
+?}
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+%% \author{\IEEEauthorblockN{Daniel R. Licata}
+%% \IEEEauthorblockA{Institute for Advanced Study\\
+%% \url{drl@cs.cmu.edu}}
+%% \and
+%% \IEEEauthorblockN{Michael Shulman}
+%% \IEEEauthorblockA{Institute for Advanced Study\\
+%% \url{mshulman@ias.edu}}
+
+\thanks{This material is based in part upon work supported by the
+  National Science Foundation under grants CCF-1116703 and DMS-1128155
+  and by the
+  Institute for Advanced Study's Oswald Veblen fund.  Any opinions,
+  findings, and conclusions or recommendations expressed in this
+  material are those of the author(s) and do not necessarily reflect the
+  views of the National Science Foundation or any other sponsoring entity.
+}
+
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+\section{Introduction}
+
+
+
+
+\textbf{Acknowledgments} We thank the participants in the 
+Institute for Advanced Study's special year on homotopy type theory
+for uncountably many helpful conversations.  
+
+%% \setlength{\bibsep}{-1pt} %% dirty trick: make this negative
+{ \small
+% \linespread{0.84}
+\bibliographystyle{abbrvnat}
+\bibliography{drl-common/cs}
+}
+
+\end{document}
+
