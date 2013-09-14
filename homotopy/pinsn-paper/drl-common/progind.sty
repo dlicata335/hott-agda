@@ -1,0 +1,148 @@
+% paramind stuff that's not of general typesy use
+%% these macros premise that the stuff in types.sty is defined
+%% and they use whatever code formatting that uses 
+%% so it's fine to use this with either the old version or the new version
+
+\newcommand{\lbcannot}[6]{\appppp{#2}{because_{#1}}{#3}{as}{\p{\kdcn{#4}{#5}\,.\,#6}}}
+
+% because without the level or type annotation
+
+
+% kinds
+\newcommand{\isquant}[2]{\ensuremath{#1\,\vdash \dcd{#2}\:\dcd{quant}}}
+
+\newcommand{\Pikd}[3]{\lPicl{k}{#1}{#2}{#3}}
+\newcommand{\arrkd}[2]{\larr{k}{#1}{#2}}
+
+\newcommand{\Sigmakd}[3]{\lSigmacl{k}{#1}{#2}{#3}}
+\newcommand{\prdkd}[2]{\lprd{k}{#1}{#2}}
+
+\newcommand{\smkd}[2]{\lsm{k}{#1}{#2}}
+
+\newcommand{\pf}[1]{\kd{PF(#1)}}
+
+%propositional equality
+\newcommand{\peq}[3]{\dcd{EQ_{#1}(#2, #3)}}
+\newcommand{\id}[3]{\dcd{Id_{#1}(#2, #3)}}
+%constants
+\newcommand{\idrefl}[1]{\lpapp{refl}{#1}}
+
+% number propositions
+%prop equality for number
+\newcommand{\ltn}[2]{\dcd{Lt_N(#1, #2)}}
+\newcommand{\gtn}[2]{\dcd{Gt_N(#1, #2)}}
+\newcommand{\lten}[2]{\dcd{Lte_N(#1, #2)}}
+\newcommand{\gten}[2]{\dcd{Gte_N(#1, #2)}}
+
+%% Since we've eliminated the constructor level, these are just the type syntax
+\newcommand{\arrowc}[2]{\arr{#1}{#2}}
+\newcommand{\prodc}[2]{\prd{#1}{#2}}
+\newcommand{\sumc}[2]{\sm{#1}{#2}}
+\newcommand{\allc}[2]{\app{\forall_{#1}}{#2}}
+\newcommand{\existsc}[2]{\app{\exists_{#1}}{#2}}
+\newcommand{\natc}[1]{\app{nat}{#1}}
+\newcommand{\listc}[1]{\app{list}{#1}}
+\newcommand{\unitc}[0]{\tp{unit}} 
+\newcommand{\voidc}[0]{\tp{void}}
+
+% constructor-level terms
+\newcommand{\inlc}[2]{\linl{c}{#1}{#2}}
+\newcommand{\inrc}[2]{\linr{c}{#1}{#2}}
+\newcommand{\casec}[8]{\appp{\lcase{c}{#1}{#2}{#3}{#4}{#5}}{as}{\p{\kdcn{#6}{#7}\,.\,#8}}}
+\newcommand{\casecna}[5]{\lcase{c}{#1}{#2}{#3}{#4}{#5}}
+\newcommand{\abortc}[2]{\labort{c}{#1}{#2}}
+\newcommand{\pairc}[3]{\appp{\lpair{c}{#1}{#2}}{as}{\p{#3}}}
+\newcommand{\fstc}[1]{\lfst{c}{#1}}
+\newcommand{\sndc}[1]{\lsnd{c}{#1}}
+\newcommand{\emptytuplec}[0]{\lemptytuple{c}}
+
+\newcommand{\NATrecnaverbose}[5]{\ensuremath{\dcd{NATrec}\:\dcd{#1}\:\dcd{of}\:(\dcd{z}\,\dcd{\Rightarrow}\,\dcd{#2}\:\dcd{|}\:\app{s}{#3}\,\dcd{with}\,\dcd{#4}\,\dcd{\Rightarrow}\,\dcd{#5})}}
+\newcommand{\NATcaseverbose}[6]{\ensuremath{\dcd{NATcase}\:\dcd{#1}\:\dcd{of}\:(\dcd{z}\,\dcd{\Rightarrow}\,\dcd{#2}\:\dcd{|}\:\app{s}{#3}\,\dcd{\Rightarrow}\,\dcd{#4})\:\dcd{as}\:\kdcnns{#5}{N}.\,\tm{#6}}}
+\newcommand{\NATrecverbose}[7]{\ensuremath{\dcd{NATrec}\:\dcd{#1}\:\dcd{of}\:(\dcd{z}\,\dcd{\Rightarrow}\,\dcd{#2}\:\dcd{|}\:\app{s}{#3}\,\dcd{with}\,\dcd{#4}\,\dcd{\Rightarrow}\,\dcd{#5})\:\dcd{as}\:\kdcnns{#6}{N}.\,\tm{#7}}}
+
+\newcommand{\NATrec}[7]{\ensuremath{\dcd{NATrec}[\cn{#6}.\cn{#7}](\cn{#1},\cn{#2},\cn{#3}.\cn{#4}.\cn{#5})}}
+\newcommand{\NATcase}[6]{\ensuremath{\dcd{NATcase}[\cn{#5}.\cn{#6}](\cn{#1},\cn{#2},\cn{#3}.\cn{#4})}}
+
+\newcommand{\eqnzz}[0]{\ensuremath{\cn{eqn\_zz}}}
+\newcommand{\eqnss}[3]{\ensuremath{\dcd{eqn\_ss}(\cn{#1},\cn{#2},\cn{#3})}}
+
+\newcommand{\EQNrec}[8]{\ensuremath{\dcd{EQ_Nrec}[\cn{#3}.\cn{#4}.\cn{#5}.\cn{#8}](\cn{#1},\cn{#2},\cn{#3}.\cn{#4}.\cn{#5}.\cn{#6}.\cn{#7})}}
+\newcommand{\EQNcase}[7]{\ensuremath{\dcd{EQ_Ncase}[\cn{#3}.\cn{#4}.\cn{#5}.\cn{#7}](\cn{#1},\cn{#2},\cn{#3}.\cn{#4}.\cn{#5}.\cn{#6})}}
+
+\newcommand{\natcase}[7]{\ensuremath{\dcd{natcase}[\cn{#6}.\tp{#7}](\tm{#1},\tm{#2},\tm{#3}.\cn{#4}.\tm{#5})}}
+
+\newcommand{\listcase}[8]{\ensuremath{\dcd{listcase}[\cn{#7}.\tp{#8}](\tm{#1},\tm{#2},\tm{#3}.\tm{#4}.\cn{#5}.\tm{#6})}}
+
+
+% constructor-level proof terms
+\newcommand{\lampf}[3]{\llamc{pf}{#1}{#2}{#3}}
+\newcommand{\inlpf}[2]{\linl{pf}{#1}{#2}}
+\newcommand{\inrpf}[2]{\linr{pf}{#1}{#2}}
+\newcommand{\casepf}[5]{\lcase{pf}{#1}{#2}{#3}{#4}{#5}}
+\newcommand{\abortpf}[2]{\labort{pf}{#1}{#2}}
+\newcommand{\pairpf}[2]{\lpair{pf}{#1}{#2}}
+\newcommand{\fstpf}[1]{\lfst{pf}{#1}}
+\newcommand{\sndpf}[1]{\lsnd{pf}{#1}}
+\newcommand{\unitpf}[0]{\lunit{pf}}
+
+% types
+\newcommand{\tpi}[1]{\tp{Tp(#1)}}
+
+%terms
+\newcommand{\bcannot}[5]{\lbcannot{}{#1}{#2}{#3}{#4}{#5}}
+\newcommand{\bc}[2]{\appp{#1}{because}{#2}}
+\newcommand{\addone}[1]{\app{+1}{#1}}
+
+\newcommand{\hd}[2]{\app{hd}{#2}}
+\newcommand{\tl}[2]{\app{tl}{#1}}
+
+\newcommand{\casea}[7]
+{\ensuremath{\dcd{case}\p{\dcd{#1},\tptmns{#2}{#3}.\tm{#4},\tptmns{#5}{#6}.\tm{#7}}}}
+\newcommand{\unpacka}[7]
+{\ensuremath{\dcd{unpack}[\cn{#7}]
+    \p{\tm{#1},
+      \kdcnns{#2}{#3}.\tptmns{#4}{\p{\app{#5}{#2}}}.\tm{#6}}}}
+\newcommand{\packa}[3]{\ensuremath{\dcd{pack}[\cn{#3}]{\p{\cn{#1},\tm{#2}}}}}
+      
+\newcommand{\suc}[2]{\ensuremath{\app{succ[#1]}{#2}}}
+
+\newcommand{\cons}[3]{\ensuremath{\appp{cons[#2]}{#1}{#3}}}
+
+%% erased kinds
+
+\newcommand{\Kh}[0]{\dcd{\widehat{K}}}
+\newcommand{\Lh}[0]{\dcd{\widehat{L}}}
+
+\newcommand{\That}[0]{\kd{\widehat{TYPE}}}
+\newcommand{\Nhat}[0]{\kd{\widehat{NAT}}}
+\newcommand{\Uhat}[0]{\kd{\widehat{UNIT}}}
+\newcommand{\Vhat}[0]{\kd{\widehat{VOID}}}
+\newcommand{\EQNhat}[0]{\kd{\widehat{EQ_N}}}
+\newcommand{\LTNhat}[0]{\kd{\widehat{LT_N}}}
+\newcommand{\arrhat}[2]{\ensuremath{\kd{#1}\widehat{\rightarrow}_{\dcd{k}}\dcd{#2}}}
+
+%% algorithmic equality judgements
+
+\newcommand{\normeqcntype}[3]{\ensuremath{#1\,\vdash\,\cn{#2} \, \Longleftrightarrow_{\kd{TYPE}} \, \cn{#3}}}
+\newcommand{\normeqcntypep}[2]{\normeqcntype{\Psi}{#1}{#2}}
+
+\newcommand{\normeqcnnat}[3]{\ensuremath{#1\,\vdash\,\cn{#2} \, \Longleftrightarrow_{\kd{NAT}} \, \cn{#3}}}
+\newcommand{\normeqcnnatp}[2]{\normeqcnnat{\Psi}{#1}{#2}}
+
+\newcommand{\normeqcneqn}[3]{\ensuremath{#1\,\vdash\,\cn{#2} \, \Longleftrightarrow_{\kd{EQ_N}} \, \cn{#3}}}
+\newcommand{\normeqcneqnp}[2]{\normeqcneqn{\Psi}{#1}{#2}}
+
+\newcommand{\whnorm}[1]{\ensuremath{\app{#1}{whnorm}}}
+\newcommand{\whneut}[1]{\ensuremath{\app{#1}{whneut}}}
+
+\newcommand{\algkdcn}[2]{\ensuremath{\cn{#1}\,\stackrel{\rightarrow}{\dcd{::}}\,\kd{#2}}}
+\newcommand{\algtptm}[2]{\ensuremath{\tm{#1}\,\stackrel{\rightarrow}{\dcd{:}}\,\cn{#2}}}
+\newcommand{\algwfkd}[2]{\ensuremath{#1\,\vdash \dcd{#2}\:\stackrel{\rightarrow}{\dcd{kind}}}}
+\newcommand{\algofkd}[3]{\ensuremath{#1\,\vdash\algkdcn{#2}{#3}}}
+\newcommand{\algoftpd}[4]{\ensuremath{#1;#2\,\vdash\algtptm{#3}{#4}}}
+
+\newcommand{\ctxttoalgctx}[1]{\ensuremath{\p{#1}^{+}}}
+
+\newcommand{\basekd}[1]{\app{#1}{base}}
+
+%% 

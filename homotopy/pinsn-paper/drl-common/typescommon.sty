@@ -1,0 +1,41 @@
+%% types macros that are independent of the particular formatting
+
+% for BNF
+\newcommand{\spb}{\ensuremath{\,|\,}}
+
+% parenthesization
+\newcommand{\p}[1]{(#1)}
+\newcommand{\br}[1]{[#1]}
+
+% inference rule label
+\newcommand{\irl}[1]{\texttt{#1}}
+
+% putting rule premises on multiple lines
+\newcommand{\irbelow}[2]{\deduce{#1}{#2}}
+
+\newcommand{\irabove}[2]{\deduce{#2}{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% equality
+\newcommand{\aeq}{\ensuremath{=_\alpha}}
+\newcommand{\beq}{\ensuremath{=_\beta}}
+\newcommand{\eeq}{\ensuremath{=_\eta}}
+\newcommand{\beeq}{\ensuremath{=_\beta\eta}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% hypothetical judgements
+
+\newcommand{\hypothj}[2]{\ensuremath{{#1\,\vdash\,#2}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% semantics brackets 
+
+\newcommand{\sem}[1]{\ensuremath{[ \! [ #1 ] \! ]}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% encoding and decoding
+% these don't apply formatting---who knows what the languages are going
+% to be
+
+\newcommand{\enc}[2]{\ensuremath{#1 \: \gg \: #2}}
+\newcommand{\dec}[2]{\ensuremath{#1 \: \ll \: #2}}
