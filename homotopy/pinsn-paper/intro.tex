@@ -1,0 +1,61 @@
+\section{Introduction}
+
+Homotopy type theory~\citep{...} is an extension of Martin-L\:of's
+intensional type theory with new principles such as Voevodsky's
+univalence axiom~\citep{...} and higher-dimensional inductive
+types~\citep{...}.  These extensions are interesting both from a
+computer science perspective, where they imbue the equality apparatus of
+type theory with new computational meaning, and from a mathematical
+perspective, where they allow higher-dimensional mathematics to be
+expressed cleanly and elegantly in type theory.  One example of
+higher-dimensional mathematics is the subject of homotopy theory, a
+branch of algebraic topology.  In homotopy theory, one studies
+topological spaces by way of their points, paths between points,
+\emph{homotopies}, or paths between paths, and then homotopies between
+homotopies, homotopies between homotopies, and so on.  This infinite
+tower of concepts---spaces, points, paths, homotopies, \ldots---is
+modeled in type theory by types, elements of types, proofs of equality
+of elements, proofs of equality of proofs of equality, and so on.  A
+space corresponds to a type $A$. Points of a space correspond to
+elements $a,b : A$. Paths in a space elements of the identity type, or
+propositional equality, which we notate $p : a =_A b$.  Homotopies
+between paths $p$ and $q$ correspond to elements of the iterated
+identity type $p =_{a =_A b} q$.  The general equality apparatus of type
+theory allows one to define all of the operations and properties of
+paths.  These include identity paths $\dsd{id} : a = a$ (reflexivity of
+equality), inverse paths $! p : b = a$ when $p : a = b$ (symmetry of
+equality), and composition of paths $q \circ p : a = c$ when $p : a = b$ and
+$q : b = c$ (transitivity of equality), as well as homotopies relating
+these operations (for example, $id \circ p = p$), and homotopies
+relating these homotopies, etc.  This equips each type with the
+structure of an \emph{$\infty$-groupoid}~\citep{...}.  
+
+Basic topological spaces are defined using \emph{higher inductive
+  types}, which generalize ordinary inductive types by allowing
+constructors not only for elements of the type, but for paths (proofs of
+equality).  For example, a circle
+
+[fig]
+
+is represented by a higher inductive type with two constructors
+
+\[
+\begin{array}{l}
+\dsd{base} : S^1 \\
+\dsd{loop} : \dsd{base} =_{S^1} \dsd{base} \\
+\end{array}
+\]
+
+This says that \dsd{base} is a point on the circle, while \dsd{loop} is
+a path from \dsd{base} to \dsd{base}.  The groupoid equips $S^1$ with
+operations such as inverses (e.g. $! \dsd{loop}$) and composition
+(e.g. $\dsd{loop} \circ \dsd{!  loop}$), and homotopies (e.g. inverses
+cancel--- $\dsd{loop} \circ ! \dsd{loop} = \dsd{id}$).  
+
+Assume familiarity with LICS paper and HoTT book.  
+
+
+higher-dimensional mathematics, we mean subjects such as homotopy theory
+
+, we mean subjects such as homotopy theory and category
+theory, which study infinite
