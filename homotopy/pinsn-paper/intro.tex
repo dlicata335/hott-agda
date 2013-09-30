@@ -12,18 +12,18 @@ perspective, where they allow higher-dimensional mathematics to be
 expressed cleanly and elegantly in type theory.  One example of
 higher-dimensional mathematics is the subject of homotopy theory, a
 branch of algebraic topology.  In homotopy theory, one studies
-topological spaces by way of their points, paths between points,
-\emph{homotopies}, or paths between paths, and then homotopies between
-homotopies, and so on.  This infinite tower of concepts---spaces,
+topological spaces by way of their points, paths (between points),
+\emph{homotopies} (paths between paths), and homotopies between
+homotopies (paths between paths between paths), and so on.  This infinite tower of concepts---spaces,
 points, paths, homotopies, and so on---is modeled in type theory by
 types, elements of types, proofs of equality of elements, proofs of
 equality of proofs of equality, and so on.  A space corresponds to a
 type $A$. Points of a space correspond to elements $a,b : A$. Paths in a
-space elements of the identity type (propositional equality), which we
+space are modeled by elements of the identity type (propositional equality), which we
 notate $p : a =_A b$.  Homotopies between paths $p$ and $q$ correspond
 to elements of the iterated identity type $p =_{a =_A b} q$.  The
-general equality apparatus of type theory allows one to define all of
-the operations and properties of paths.  These include identity paths
+rules for the propositional equality type allow one to define the
+operations on paths that are considered in homotopy theory.  These include identity paths
 $\dsd{id} : a = a$ (reflexivity of equality), inverse paths $\inv p : b
 = a$ when $p : a = b$ (symmetry of equality), and composition of paths
 $q \comp p : a = c$ when $p : a = b$ and $q : b = c$ (transitivity of
@@ -40,7 +40,7 @@ One basic question in algebraic topology is calculating the
 \emph{homotopy groups} of a space.  Given a space $X$ with a
 distinguished point $x_0$, $\pi_1(X,x_0)$, the \emph{fundamental group},
 is the group of loops at $x_0$, with composition as the group operation.
-The fundamental group is the first in a sequence of \emph{homotopy
+This fundamental group is the first in a sequence of \emph{homotopy
   groups}, which provide higher-dimensional information about a space:
 the homotopy groups $\pi_n(X,x_0)$ ``count'' the $n$-dimensional loops in 
 that space.  $\pi_2(X,x_0)$ is the group of homotopies between
@@ -118,9 +118,10 @@ One enticing idea is to use homotopy type theory to calculate homotopy
 groups: by doing so, we can give computer-checked proofs of these
 calculations, and we can potentially exploit constructivity and the
 type-theoretic perspective $\infty$-groupoids to attack these difficult
-problems in algebraic topology.  Fortunately, it is simple to pose the
-problem of calculating a homotopy group in homotopy type theory.  First,
-we describe a space using \emph{higher inductive types}, which
+problems in algebraic topology.  To pose the problem of calculating a
+homotopy group in homotopy type theory, we use two ingredients.  
+
+First, we describe basic spaces using \emph{higher inductive types}, which
 generalize ordinary inductive types by allowing constructors not only
 for elements of the type, but for paths (proofs of equality).  For
 example, the circle is represented by a higher inductive type with two
@@ -134,11 +135,79 @@ constructors
 \]
 
 This says that \dsd{base} is a point on the circle, while \dsd{loop} is
-a path from \dsd{base} to \dsd{base}.  
+a path from \dsd{base} to \dsd{base}.  In type theory, we express that 
+$S^1$ is the \emph{free} type with these generators by an elimination
+rule: to define a function from $S^1$ into any other type $C$, it
+suffices to give a point in $c : C$, which is the image of \dsd{base}, and a
+loop $p : c =_C c$, which is the image of \dsd{loop}:
 
+\newcommand{\Sonerec}[3]{\dsd{S^1\mathord{-}rec}_{#1}(#2,#3)}
 
+\[
+\begin{array}{ll}
+\infer{\tptm {\Sonerec C c p} {S^1 \to C} }
+      {c : C & p : c =_C c}
+\end{array}
+\]
+That is, to define a function $S^1 \to C$, it suffices to find a
+``circle'' in $C$, which gives the image of the generators.  
 
+The computation rules for this elimination rule are as follows:
+\[
+\begin{array}{l}
+\Sonerec C c p \dsd{base} :\equiv c \\
+\dsd{ap} (\Sonerec C c p) \dsd{loop} :\equiv p 
+\end{array}
+\]
+%
+\dsd{ap} (``\textbf{a}ction on \textbf{p}aths'') applies a function $f : A \to B$ to a path $p : a =_A a'$
+to produce a path $f a =_B f a'$.  Note that the first computation rule
+is a definitional equality, while the second is a propositional
+equality/path---while future versions of homotopy type theory might take
+this to be a definitional equality, the known semantics of higher
+inductive types justifies only a propositional
+equality~\citep{shulmanlumsdaine}.  To express freeness, we also need to
+know that $\Sonerec{C}{c}{p}$ is the unique such map, up to homotopy.  This can be
+expressed either by generalizing the simple elimination rule to a
+dependent elimination rule, or by adding an $\eta$-equality axiom (see
+\citet{kristina} for a discussion of these alternatives for ordinary
+inductive types).  
 
-Assume familiarity with LICS paper and HoTT book.  
+The second ingredient is to define the homotopy groups of a type.  
+One might think that we could define the homotopy groups by iterating
+the identity type:
+
+\[
+\begin{array}{rcl}
+\pi_1(X,x_0) & := & x_0 =_X x_0 \\
+\pi_2(X,x_0) & := & id_{{x_0}} =_{{(x_0 =_X x_0)}} id_{{x_0}} \\
+\pi_3(X,x_0) & := & id_{{id_{x_0}}} =_{(id_{{x_0}} =_{{x_0 =_X x_0}} id_{{x_0}})} id_{{id_{x_0}}} \\
+\end{array}
+\]
+and so on.  However, these iterated identity types may still have
+non-trivial higher-dimensional structure.  The $n^th$ homotopy group
+considers only the structure up to level $n$, so we need to ``kill'' the
+higher-dimensional structure of these types.  Thus, we first define the
+\emph{$n^{th}$ loop space} $\Omega^n(X,x_0)$ as
+
+\[
+\begin{array}{rcl}
+\Omega_1(X,x_0) & := & x_0 =_X x_0 \\
+\Omega_2(X,x_0) & := & id_{{x_0}} =_{{(x_0 =_X x_0)}} id_{{x_0}} \\
+\Omega_3(X,x_0) & := & id_{{id_{x_0}}} =_{(id_{{x_0}} =_{{x_0 =_X x_0}} id_{{x_0}})} id_{{id_{x_0}}} \\
+\end{array}
+\]
+
+Then we can define 
+\[
+\begin{array}{rcl}
+\pi_n(X,x_0) & := & ||\Omega^n(X,x_0)||_0 \\
+\end{array}
+\]
+where $||A||_0$, the \emph{0-truncation of $A$}, is a \emph{set} (a type
+with no higher structure---any two paths are homotopic) constructed by
+killing the higher-dimensional structure of $A$.  For a more leisurely
+introduction to these definitions, we refer the reader to \citet{LICS}
+and \citet{hottbook}.
 
 

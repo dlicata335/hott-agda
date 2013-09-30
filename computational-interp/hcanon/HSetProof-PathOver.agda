@@ -68,40 +68,39 @@ module computational-interp.hcanon.HSetProof-PathOver where
 
   fund-refls : ∀ {Γ θ} → (Γ* : Ctx Γ) (rθ : RC Γ* θ) → QC Γ* rθ rθ id
 
-  postulate
-    fund-refl : ∀ {Γ C θ1 N} (Γ* : Ctx Γ) (C* : Ty Γ* C) 
-               (rθ1 : RC Γ* θ1) (rN : R Γ* C* rθ1 N) 
-               → QOver (fund-refls _ rθ1) C* rN rN id
+  fund-refl : ∀ {Γ C θ1 N} (Γ* : Ctx Γ) (C* : Ty Γ* C) 
+             (rθ1 : RC Γ* θ1) (rN : R Γ* C* rθ1 N) 
+             → QOver (fund-refls _ rθ1) C* rN rN id
+
+  fund-!s : ∀ {Γ θ1 θ2 δ} (Γ* : Ctx Γ)  
+             (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) 
+             → QC Γ* rθ1 rθ2 δ
+             → QC Γ* rθ2 rθ1 (! δ)
+
+  fund-! : ∀ {Γ θ1 θ2 δ C M1 M2 α} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} (rδ : QC Γ* rθ1 rθ2 δ)
+           → (C* : Ty Γ* C) 
+             (rM1 : R Γ* C* rθ1 M1) (rM2 : R Γ* C* rθ2 M2) 
+             (rα : QOver rδ C* rM1 rM2 α) 
+           → QOver (fund-!s Γ* rθ1 rθ2 rδ) C* rM2 rM1 (!o α)
+
+  fund-∘s : ∀ {Γ θ1 θ2 θ3 δ2 δ1} (Γ* : Ctx Γ)  
+             (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) (rθ3 : RC Γ* θ3)
+             → QC Γ* rθ2 rθ3 δ2 → QC Γ* rθ1 rθ2 δ1
+             → QC Γ* rθ1 rθ3 (δ2 ∘ δ1)
   
-    fund-!s : ∀ {Γ θ1 θ2 δ} (Γ* : Ctx Γ)  
-               (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) 
-               → QC Γ* rθ1 rθ2 δ
-               → QC Γ* rθ2 rθ1 (! δ)
+  fund-∘ : ∀ {Γ θ1 θ2 θ3 δ2 δ1 C M1 M2 M3 α2 α1} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} {rθ3 : RC Γ* θ3}
+               (rδ2 : QC Γ* rθ2 rθ3 δ2) (rδ1 : QC Γ* rθ1 rθ2 δ1)
+               (C* : Ty Γ* C) 
+               {rM1 : R Γ* C* rθ1 M1} {rM2 : R Γ* C* rθ2 M2} {rM3 : R Γ* C* rθ3 M3}
+               (rα2 : QOver rδ2 C* rM2 rM3 α2) (rα1 : QOver rδ1 C* rM1 rM2 α1) 
+             → QOver (fund-∘s Γ* rθ1 rθ2 rθ3 rδ2 rδ1) C* rM1 rM3 (α2 ∘o α1)
   
-    fund-! : ∀ {Γ θ1 θ2 δ C M1 M2 α} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} (rδ : QC Γ* rθ1 rθ2 δ)
-             → (C* : Ty Γ* C) 
-               (rM1 : R Γ* C* rθ1 M1) (rM2 : R Γ* C* rθ2 M2) 
-               (rα : QOver rδ C* rM1 rM2 α) 
-             → QOver (fund-!s Γ* rθ1 rθ2 rδ) C* rM2 rM1 (!o α)
-  
-    fund-∘s : ∀ {Γ θ1 θ2 θ3 δ2 δ1} (Γ* : Ctx Γ)  
-               (rθ1 : RC Γ* θ1) (rθ2 : RC Γ* θ2) (rθ3 : RC Γ* θ3)
-               → QC Γ* rθ2 rθ3 δ2 → QC Γ* rθ1 rθ2 δ1
-               → QC Γ* rθ1 rθ3 (δ2 ∘ δ1)
-    
-    fund-∘ : ∀ {Γ θ1 θ2 θ3 δ2 δ1 C M1 M2 M3 α2 α1} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} {rθ3 : RC Γ* θ3}
-                 (rδ2 : QC Γ* rθ2 rθ3 δ2) (rδ1 : QC Γ* rθ1 rθ2 δ1)
-                 (C* : Ty Γ* C) 
-                 {rM1 : R Γ* C* rθ1 M1} {rM2 : R Γ* C* rθ2 M2} {rM3 : R Γ* C* rθ3 M3}
-                 (rα2 : QOver rδ2 C* rM2 rM3 α2) (rα1 : QOver rδ1 C* rM1 rM2 α1) 
-               → QOver (fund-∘s Γ* rθ1 rθ2 rθ3 rδ2 rδ1) C* rM1 rM3 (α2 ∘o α1)
-    
-    fund-changeover : ∀ {Γ θ1 θ2 δ δ' A M1 M2 α} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} 
-              (rδ : QC Γ* rθ1 rθ2 δ) (rδ' : QC Γ* rθ1 rθ2 δ') 
-              (A* : Ty Γ* A) (rM1 : R Γ* A* rθ1 M1) (rM2 : R Γ* A* rθ2 M2)
-              (eq : δ == δ')
-              (rα : QOver rδ A* rM1 rM2 α)
-              → QOver rδ' A* rM1 rM2 (changeover A eq α)
+  fund-changeover : ∀ {Γ θ1 θ2 δ δ' A M1 M2 α} {Γ* : Ctx Γ} {rθ1 : RC Γ* θ1} {rθ2 : RC Γ* θ2} 
+            (rδ : QC Γ* rθ1 rθ2 δ) (rδ' : QC Γ* rθ1 rθ2 δ') 
+            (A* : Ty Γ* A) (rM1 : R Γ* A* rθ1 M1) (rM2 : R Γ* A* rθ2 M2)
+            (eq : δ == δ')
+            (rα : QOver rδ A* rM1 rM2 α)
+            → QOver rδ' A* rM1 rM2 (changeover A eq α)
   postulate 
     fund-transport : ∀ {Γ' C θ1 θ2 δ N} (Γ'* : Ctx Γ') (C* : Ty Γ'* C) 
               (rθ1 : RC Γ'* θ1) (rθ2 : RC Γ'* θ2) 
@@ -351,8 +350,6 @@ module computational-interp.hcanon.HSetProof-PathOver where
   -- ----------------------------------------------------------------------
   -- proofs of the QOver operations and properties
 
-{-PERF: Just some path inductions left to do here
-
   fund-changeover rδ rδ' bool rM1 rM2 eq rα = <>
   fund-changeover rδ rδ' prop rM1 rM2 eq rα = 
     (λ x rx → transportP rM2 _ _ _ _ (ap (λ y → fst y x) (PathOverType-changeover eq _)) (fst rα x rx)) , 
@@ -469,7 +466,6 @@ module computational-interp.hcanon.HSetProof-PathOver where
   fund-∘ rδ2 rδ1 (w A* A*₁) rα2 rα1 = transportQOver _ A*₁ _ _ {!coh!} (fund-∘ _ _ A*₁ rα2 rα1)
   fund-∘ rδ2 rδ1 (subst1 A*₁ M) rα2 rα1 = transportQOver _ A*₁ _ _ {!coh!}
                                             (fund-changeover _ _ A*₁ _ _ {!coh!} (fund-∘ _ _ A*₁ rα2 rα1))
--}
 
   -- ----------------------------------------------------------------------
   -- transport and properties
