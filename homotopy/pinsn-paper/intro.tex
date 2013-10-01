@@ -2,10 +2,10 @@
 
 \section{Introduction}
 
-Homotopy type theory~\citep{...} is an extension of Martin-L\"of's
+Homotopy type theory~\citep{awodeywarren09identity,voevodsky11wollic} is an extension of Martin-L\"of's
 intensional type theory with new principles such as Voevodsky's
-univalence axiom~\citep{...} and higher-dimensional inductive
-types~\citep{...}.  These extensions are interesting both from a
+univalence axiom~\citep{nps90mltt,hofmann97syntaxandsemantics,martinlof71itt} and higher-dimensional inductive
+types~\citep{lumsdaine+13hits}.  These extensions are interesting both from a
 computer science perspective, where they imbue the equality apparatus of
 type theory with new computational meaning, and from a mathematical
 perspective, where they allow higher-dimensional mathematics to be
@@ -31,7 +31,7 @@ equality), as well as homotopies relating these operations (for example,
 $id \comp p = p$), and homotopies relating these homotopies, etc.  This
 equips each type with the structure of a (weak)
 \emph{$\infty$-groupoid}, as studied in higher category
-theory~\citep{...}.  In category theoretic terminology, the elements of
+theory~\citep{lumsdaine09omega,vandenberggarner10groupoids}.  In category theoretic terminology, the elements of
 a type correspond to objects (or 0-cells), the proofs of equality of
 elements to morphisms (1-cells), the proofs of equality of proofs of
 equality to 2-morphisms (2-cells), and so on.
@@ -109,7 +109,7 @@ generators can construct higher-dimensional paths.  An example of this
 is that $\pi_3(S^2)$, the group of homotopies between homotopies
 (3-cells) on the sphere, is also \Z, \emph{despite the fact that there
   are no generators for 3-cells in the presentation of the sphere!}  The
-paths arise from the applying the algebraic operations of a
+paths arise from the applying the algebraic operations of an
 $\infty$-groupoid to the 2-cell generator $\dsd{loop_2}$---and this
 action across levels is one reason that homotopy groups are so difficult
 to calculate.  
@@ -156,7 +156,7 @@ The computation rules for this elimination rule are as follows:
 \[
 \begin{array}{l}
 \Sonerec C c p \dsd{base} :\equiv c \\
-\dsd{ap} (\Sonerec C c p) \dsd{loop} :\equiv p 
+\dsd{ap} (\Sonerec C c p) \dsd{loop} := p 
 \end{array}
 \]
 %
@@ -166,11 +166,11 @@ is a definitional equality, while the second is a propositional
 equality/path---while future versions of homotopy type theory might take
 this to be a definitional equality, the known semantics of higher
 inductive types justifies only a propositional
-equality~\citep{shulmanlumsdaine}.  To express freeness, we also need to
+equality~\citep{lumsdaine+13hits}.  To express freeness, we also need to
 know that $\Sonerec{C}{c}{p}$ is the unique such map, up to homotopy.  This can be
 expressed either by generalizing the simple elimination rule to a
 dependent elimination rule, or by adding an $\eta$-equality axiom (see
-\citet{kristina} for a discussion of these alternatives for ordinary
+\citep{sojakova12inductive} for a discussion of these alternatives for ordinary
 inductive types).  
 
 The second ingredient is to define the homotopy groups of a type.  
@@ -185,10 +185,10 @@ the identity type:
 \end{array}
 \]
 and so on.  However, these iterated identity types may still have
-non-trivial higher-dimensional structure.  The $n^th$ homotopy group
+non-trivial higher-dimensional structure.  The $n^{th}$ homotopy group
 considers only the structure up to level $n$, so we need to ``kill'' the
 higher-dimensional structure of these types.  Thus, we first define the
-\emph{$n^{th}$ loop space} $\Omega^n(X,x_0)$ as
+\emph{$n^{th}$ loop space} $\Omega^n(X,x_0)$ so that
 
 \[
 \begin{array}{rcl}
@@ -197,6 +197,7 @@ higher-dimensional structure of these types.  Thus, we first define the
 \Omega_3(X,x_0) & := & id_{{id_{x_0}}} =_{(id_{{x_0}} =_{{x_0 =_X x_0}} id_{{x_0}})} id_{{id_{x_0}}} \\
 \end{array}
 \]
+and so on
 
 Then we can define 
 \[
@@ -207,7 +208,75 @@ Then we can define
 where $||A||_0$, the \emph{0-truncation of $A$}, is a \emph{set} (a type
 with no higher structure---any two paths are homotopic) constructed by
 killing the higher-dimensional structure of $A$.  For a more leisurely
-introduction to these definitions, we refer the reader to \citet{LICS}
-and \citet{hottbook}.
+introduction to these definitions, we refer the reader to previous work~\citep{ls13pi1s1,uf13hott-book}.
 
+Using these two ingredients, we can pose the question of calculating a
+homotopy group of a space in homotopy type theory: the task is to define
+a group isomorphism between the type $\pi_n(X,x_0)$ (with path
+composition as the group structure) and an explicit description of a
+group like $\mathbb{Z}$.  In this note, we give a calculation of the
+fact that $\pi_n(S^n) = \mathbb{Z}$. That is, we describe a proof in
+homotopy type theory that the $n^{th}$ homotopy group of the
+$n$-dimensional sphere is isomorphic to $\mathbb{Z}$.  This proof is
+interesting for several reasons:
 
+\begin{itemize}
+
+\item Calculating $\pi_n(S^n)$ is a relatively
+  easy theorem in algebraic topology (e.g. it would come early in a
+  graduate algebraic topology course), but it is more complex than many of
+  the results that had previously been proved in homotopy type theory.
+  For example, it was one of the first results about an infinite family
+  of spaces, of variable dimension.
+
+\item When doing homotopy theory in a constructive/synthetic
+  style in homotopy type theory, there is always the possibility that
+  classical results will not be provable---the logical axioms for spaces
+  might not be strong enough to prove certain classical theorems about them.
+  Our proof shows that the characterization of $\pi_n(S^n)$ does follow
+  from a higher-inductive description of the spheres, in the presence of
+  univalence, which provides stronger evidence for the usefulness of
+  these definitions and methods.    
+
+\item The proof is not a transcription of a textbook homotopy theoretic
+  proof, but mixes classical ideas with type-theoretic ones.  
+
+\item The type-theoretic techniques used here have been applied in other
+  proofs.  For example, the proof described here led to a simpler proof
+  of a more general theorem, the Freudenthal Suspension Theorem
+  (Lumsdaine's proof is described in the HoTT book~\citep{uf13hott-book}), which
+  gives a shorter calculation of $\pi_n(S^n)$ (also described in the
+  HoTT book).  This, in turn, led to a proof of an even more general
+  theorem, the Blakers-Massey theorem~\citep{fll13blakersmassey}.  
+
+\item We give a direct higher-inductive definition of the
+  $n$-dimensional sphere $S^n$ as the free type with a base point
+  \dsd{base} and a loop in $\Omega^n(S^n)$.  This definition does not
+  fall into the collection of higher inductive types that has been
+  formally justified by a semantics, because it involves a path
+  constructor at a variable level (i.e. in $\Omega^n$, where $n$ is an
+  internal natural number variable).  However, our result shows that it is a useful
+  characterization of the spheres to work with, and it has prompted some
+  work on generalizing schemas for higher inductive types to account for
+  these sorts of definitions.
+
+\item The proof we present here includes an investigation of some of the
+  type-theoretic structure of loop spaces.  We will characterize
+  $\Omega^n(A)$ for various types $A$, which explains how concepts such
+  as function extensionality and univalence induce paths at higher
+  levels.  This characterization could potentially inform investigations
+  into the computational interpretation of univalence, a major open
+  problem.  
+
+\item The proof has been formalized in Agda~\citep{norell07thesis}, and
+  is available on GitHub in the repository
+  \url{github.com/dlicata335/hott-agda}.  The proof includes a library
+  of lemmas about iterated loop spaces that is independent of the
+  particular application to $n$-dimensional spheres.
+\end{itemize}
+
+In the remainder of this paper, we give an informal proof sketch of some
+of the interesting aspects of the proof, and discuss the Agda
+formalization.  From this point forward, we assume that the reader is
+familiar with the calculation of $\pi_1(S^1)$~\citep{ls13pi1s1} and with
+Part I and Chapter 8 of the HoTT book~\citep{uf13hott-book}.  
