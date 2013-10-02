@@ -1,0 +1,400 @@
+
+\section{Overview of the Proof}
+
+\subsection{Definition of the Spheres}
+
+We define the $n$-dimensional sphere $S^n$ as a higher inductive type
+with one point \dsd{base}, and one loop in the $n^{th}$ loop space
+of $S^n$ at \dsd{base}:
+
+\[
+\begin{array}{l}
+\dsd{base}_n : S^n \\
+\dsd{loop}_n : \Omega^n(S^n,\dsd{base}) \\
+\end{array}
+\]
+
+The corresponding elimination rule, \emph{sphere recursion}, says that
+to define a function $S^n \to C$, it suffices to give a point $c:C$ and
+a loop in $\Omega^n(C,c)$:
+\[
+\infer{\tptm {\Srec n C c p} {S^n \to C} }
+      {C : \dsd{type} & c : C & p : \Omega^n(C,c)}
+\]
+The computation rules for this elimination rule are as follows:
+\[
+\begin{array}{l}
+\Srec n C c p \dsd{base}_n :\equiv c \\
+\dsd{ap}^n (\Srec n C c p) \dsd{loop}_n := p 
+\end{array}
+\]
+where $\dsd{ap}^n$ applies a function $f : A \to B$ to an
+$n$-dimensional loop in $\Omega^n(A,a)$ to get an $n$-dimensional loop
+in $\Omega^n(B,f a)$.  We discuss the definition of $\Omega^n(X,x_0)$
+and $ap^n$ in Section~\ref{sec:loopspace} below.
+
+We also require a dependent elimination rule, \emph{sphere
+induction}:
+\[
+\infer{\tptm {\Selim n C c p} {\picl{x}{S^n}{C(x)}} }
+      {C : S^n \to \dsd{type} & c : C(\dsd{base}) & p : \Omega^n_{\dsd{loop_n}}(C,c)}
+\]
+Here, the type $\Omega^n_{p}(C,c)$ represents an ``$n$-dimensional
+loop-over-a-loop''; it is well-formed when $C : A \to Type$ and 
+$p : \Omega^n(A,a)$ and $c : C(a)$ (for some $A$ and $a$).  Topoligically, it represents an
+$n$-dimensional path in
+the total space of $C$ that projects down to $p$.  We discuss the
+definition of $\Omega^n_{p}(C,c)$ in Section~\ref{sec:loopspace} below.  
+The computation rules
+for sphere induction would be similar to those for sphere recursion, but
+we happen not to have needed them in our proof. 
+
+Note that the constructor $\dsd{loop}_n$ is a path whose level depends
+on $n$: for $n = 1$, it is a path, for $n = 2$, it is a path between
+paths, and so on.  Because of this, the above definition of $S^n$ does
+not fall into any of the schemas for higher inductive types that have
+been formally studied.  However, it seems like a sensible notion,
+because for any fixed $n$, it expands to a type a higher inductive
+constructor would be permitted to have: For $n = 1$, it is $\dsd{base}
+=_{S^1} \dsd{base}$, for $n=2$, it is $\dsd{id} =_{\dsd{base} =_{S^2}
+  \dsd{base}} \dsd{id}$, and so on.  All of these are iterated identity
+types in $S^n$, which is the type being defined.  We leave it to future
+work to justify this kind of definition semantically.  Another
+possible justification would be to take the above rules not as a specification of a
+higher-inductive type, but as an interface, and implement it by the
+ definition of $S^n$ by iterated suspension~\citep[Section 6.5]{uf13hott-book}.  
+
+\subsection{Calculation of $\pi_n(S^n)$}
+
+We now describe the calculation that $\pi_n(S^n) = \mathbb{Z}$.\footnote{We
+write $\pi_n(X)$ for $\pi_n(X,x_0)$ (and similarly for $\Omega$) when the
+base point is clear from context; and for the spheres, the base point is
+always the constructor $\dsd{base}_n$.}  Formally, this statement means
+that there is a group isomorphism between the group $\pi_n(S^n)$ (with
+composition as the group operation) and the additive group
+$\mathbb{Z}$.  In what follows, we will discuss the proof that the
+\emph{type} $\pi_n(S^n)$ is equivalent (and hence equal, by univalence) to the
+type $\mathbb{Z}$, and omit the proof that this equivalence sends
+composition to addition.   
+
+The
+first step is an induction on $n$.  In the base case, we use the
+homotopy type theory proof of $\pi_1(S^1) = \mathbb{Z}$ described in
+previous work~\citep{ls13pi1s1}.  In the inductive step, the key lemma
+is that $\pi_{n+1}(S^{n+1}) = \pi_n(S^n)$, which, combined with the
+inductive hypothesis gives the result.  
+
+To show that $\pi_{n+1}(S^{n+1}) = \pi_n(S^n)$, we calculate as
+follows:\footnote{We use the convention of eliding the base point
+  heavily here.  The base point of $\Omega(A)$ is $\dsd{id}_a$, when
+  $a$ is the base point of $A$.  The base point of $||A||_k$ is $|a|$,
+  where $a$ is the base point of $A$, and $|-|$ is the constructor for
+  the $n$-truncation type $||A||_n$~\citep[Section 7.3]{uf13hott-book}.}
+
+\[
+\begin{array}{rcll}
+\pi_{n+1}(S^{n+1}) & = & ||\Omega^{n+1}(S^{n+1})||_0 & \text{definition}\\
+                  & = & ||\Omega^{n}(\Omega(S^{n+1}))||_0 & \text{unfold $\Omega^{n+1}$} \\
+                  & = & \Omega^{n}(||\Omega(S^{n+1})||_n) & \text{swap truncation and loop space} \\
+                  & = & \Omega^{n}(||S^{n}||_n) & \text{main lemma} \\
+                  & = & ||\Omega^{n}(S^{n})||_0 & \text{swap truncation and loop space} \\
+                  & = & \pi_n(S^n) & \text{definition} \\
+\end{array}
+\]
+
+Several of these steps are relatively easy lemmas.  For example, we can
+unfold $\Omega^{n+1}(X)$ as $\Omega^n(\Omega(X))$---one might
+take this as the definition of $\Omega^{n+1}$, but for the definition
+below it is a lemma.  Additionally, there is a rule for swapping
+a truncation with a loop space, incrementing the index:
+\[
+||\Omega(X)||_n = \Omega(||X||_{n+1})
+\]
+Intuitively, $||\Omega(X)||_n$ is a type built from $\Omega(X)$ by
+equating all $n+1$-cells in $\Omega(X)$.  However, $\Omega(X)$ is the
+space of 1-cells (paths) in $X$, so the $n$-cells in $\Omega(X)$ are the
+$(n+1)$-cells in $X$.  Thus, it is equivalent to equate all $n+2$-cells in
+$X$, and then take the loop space.  Iterating this reasoning gives the
+equation used above, that
+\[
+||\Omega^n(X)||_0 = \Omega^n(||X||_{n})
+\]
+
+This reasoning reduces the problem to proving the main lemma, that 
+\[
+||\Omega(S^{n+1})||_n = ||S^{n}||_n
+\]
+That is, the loop space on the $n+1$-sphere is equivalent to the
+$n$-sphere, when appropriately truncated.  $\Omega(S^{n+1})$ is, by
+definition, the type $\dsd{base}_{n+1} =_{S^{n+1}} \dsd{base}_{n+1}$, 
+so this lemma is characterizing (the truncation of) a path space of a
+higher-inductive type.  A general template for doing such
+characterizations is the 
+\emph{encode-decode method}~\citep[Section 8.9]{uf13hott-book}, which we
+apply here.  
+
+\subsection{The encode-decode argument}
+
+The bulk of the proof consists of proving that $||\Omega(S^{n+1})||_n =
+||S^{n}||_n$.  To build intution, consider the case of
+$||\Omega(S^2)||_1 = ||S^1||_1$.  Setting aside the truncations for the
+moment, this means we are comparing $S^1$ (the circle) with loops on
+$S^2$ (the sphere).  The idea is to set up a correspondence where the
+base point of the circle ($\dsd{base_1}$) corresponds to the constant
+path at the base point of the sphere ($id_{\dsd{base}_2}$), and going
+$n$ times around the loop of the circle ($\dsd{loop}_1^n$) corresponds to
+going $n$ times around the surface of the sphere ($\dsd{loop}_2^n$).  Any
+1-dimensional loop on the sphere is homotopic to the constant path, so
+the type $\Omega(S^2)$ has only one element (up to homotopy), just like
+$S^1$ does.  Moreover, this correspondence between loops on the circle
+and 2-dimensional loops on the sphere will turn out to be a bijection as
+well---intuitively, \emph{every} loop on the circle is $\dsd{loop}^n$
+for some $n$, and \emph{every} 2-loop on the sphere is $\dsd{loop}_2^n$
+for some $n$---though proving this fact is what we are doing in this
+section.  Thus, it should at least be intuitively plausible that the
+structure of points and loops on the circle is the same as the structure
+of loops and 2-dimensional loops on the sphere.  But the loops and
+2-dimensional loops on the sphere are the points and loops of the loop
+space of the sphere, $\Omega(S^2)$, so the points and loops of $S^1$ are
+the same as the points and loops of $\Omega(S^2)$.
+
+However, it is not the case that $S^1$ and $\Omega(S^2)$ are equivalent
+types, because $S^2$ has non-trivial 3-dimensional paths, while $S^1$
+has only trivial 2-dimensional paths.  Thus, the situation is that the
+points and paths of $S^1$ are in correspondence with the points and
+paths of $\Omega(S^2)$, but the correspondence does not extend to higher
+dimensions.  The role of the truncation is to account for this
+difference.  Comparing $||S^1||_1$ with $||\Omega(S^2)||_1$ considers
+only points and paths, not any higher-dimensional cells, and restricted
+to points and paths the above correspondence is in fact an equivalence.
+
+To prove the lemma, we proceed as follows.  First, we define a map $S^n \to
+\Omega(S^{n+1})$ by sphere recursion, where 
+\[
+\begin{array}{l}
+\dsd{promote} : S^n \to \Omega(S^{n+1}) \\
+\dsd{promote}(\dsd{base}_n) :\equiv \dsd{id}_{\dsd{base}_{n+1}} \\
+\dsd{ap}^n \: \dsd{promote} \: (\dsd{loop}_n) := \dsd{loop}_{n+1}
+\end{array}
+\]
+This is one direction of the correspondence described above, which
+sends, for example, loops on the circle to 2-dimensional loops on the
+sphere.  Because functions are functors, we specify only the action on
+the generators \dsd{base} and \dsd{loop}; the function automatically
+preserves identity, composition, etc., and thus takes the $n$-fold
+composition $\dsd{loop}_1^n$ to the $n$-fold composition
+$\dsd{loop}_2^n$, as described above.  Thinking of $S^{n+1}$ as the
+suspension of $S^n$, this map is the \emph{meridan map} of the
+suspension, which embeds $X$ into $\Omega(\Sigma X)$---i.e. the unit of
+the loop space/suspension adjunction.  
+
+Because truncation is functorial, this map extends to a map $||S^n||_n
+\to ||\Omega(S^{n+1})||_n$:
+\[
+\begin{array}{l}
+\dsd{decode'} : ||S^n||_n \to ||\Omega(S^{n+1})|| \\
+\dsd{decode'}(|x|) = \dsd{promote}(x)
+\end{array}
+\]
+(where peeling off the truncation is permitted by
+truncation-elimination, because $||-||_n$ is an $n$-type).
+
+We would like to show that this map is an equivalence.  To define the
+inverse map $||\Omega(S^{n+1})||_n \to ||S^n||_n$, we need to define a
+map out of (the truncation of) a path space.  One central tool for doing
+this is univalence: we define a map from $S^{n+1}$ into the universe, so
+that paths in $S^{n+1}$ are sent to equivalences, and then apply the
+equivalence determined by a path to the base point of $||S^n||_n$.  In
+this case, we define a fibration \dsd{Codes} by sphere recursion
+\[
+\begin{array}{l}
+\dsd{Codes} : S^{n+1} \to \dsd{type} \\
+\dsd{Codes}(\dsd{base}_{n+1}) :\equiv ||S^{n}||_n \\
+\dsd{ap}^n \: \dsd{Codes} \: (\dsd{loop}_{n+1}) := (\ldots : \Omega^{n+1}(\dsd{type},||S^{n}||_n)) \\
+\end{array}
+\]
+The fiber over the base point is $||S^{n}||$, so \dsd{Codes} will send a
+loop in $\Omega(S^{n+1}$ (which, recall, is notation for $base_{n+1}
+=_{S^{n+1}} base_{n+1}$) to an equivalence $||S^{n}||_n \equiv
+||S^{n}||_n$.  Thus, we can define a function $\dsd{encode'} : ||\Omega(S^{n+1})||_n \to
+||S^n||_n$ by applying $\dsd{Codes}$ to the given path (after peeling
+off the truncation brackets), and then
+applying the resulting equivalence to $|\dsd{base}_n|$:
+\[
+\begin{array}{l}
+\dsd{encode'} : ||\Omega(S^{n+1})||_n \to ||S^n||_n \\
+\dsd{encode'}(|p|) = (\dsd{ap}(\dsd{Codes}) p) |\dsd{base}_n|
+\end{array}
+\]
+
+Eliding truncations for a moment, the term $\dsd{ap}^n(\dsd{encode'})$
+is a function from $\Omega^n(\Omega(S^{n+1}))$ to $\Omega^n(S^n)$, so it
+determines a function from $\Omega^{n+1}(S^{n+1})$ to
+$\Omega^n(S^n)$\footnote{Recall that $\Omega^{n+1} =
+  \Omega^n(\Omega(X))$ is a lemma, rather than a definitional equality,
+  for our definition of $\Omega^n$}.  Because we would like \dsd{encode'}
+to be inverse to \dsd{decode'}, we need to fill in the $\ldots$ in the
+definition of \dsd{Codes} so that $\dsd{ap}^n \: \dsd{encode'}$ sends
+$\dsd{loop}_{n+1}$ to $\dsd{loop}_n$ (modulo truncations and the
+equivalence expanding $\Omega^{n+1}$).  Thus, we need an element of
+$\Omega^{n+1}(\dsd{type},||S^n||_n)$ that is somehow determined by 
+$\dsd{loop}_n$, so that we get $\dsd{loop}_n$ back out when we apply it.  
+
+The key maneuver is to apply an equivalence between
+$\Omega^{n+1}(\dsd{type},A)$ and $\picl{x}{A}{}{\Omega^n(A,x)}$.  That is,
+an $n+1$-dimensional loop in the space of types with base point $A$ is
+the same as a family of $n$-dimensional loops in $A$, given for each
+point in $A$.  Then, in this case, we need to give 
+\[
+\picl{x}{||S^n||_n}{}{\Omega^n(||S^n||_n,x)}
+\]
+which (modulo the truncation manipulation) is defined by
+sphere-elimination, sending $\dsd{base}_n$ to $\dsd{loop}_n$, and
+proving that this choice respects $\dsd{loop}_n$.  For $n=1$, a small
+calculation is needed to prove this final condition, and any greater $n$
+it is trivial by truncation reasons.  This ``packages up''
+$\dsd{loop}_n$ in the \dsd{Codes} fibration in such a way that
+\dsd{encode'} extracts it.  The key maneuver is one of the operations
+defined in our loop space library, defined below.  
+
+Now that we have defined \dsd{encode'} and \dsd{decode'}, the task is to
+show that they are mutually inverse.  The remaining steps required to do
+so are as follows:
+\begin{itemize}
+\item First, we do a calculation to show that
+  $\dsd{encode'}(\dsd{decode'} c) = c$.  The proof uses
+  sphere-elimination, and calculations with the loop space
+  library---this is where we prove that \dsd{encode'} takes
+  $\dsd{loop}_{n+1}$ back to $\dsd{loop}_n$
+
+\item The definition of \dsd{encode'} given above in fact has a more
+  general type: it works not only for loops, but for paths to any
+  endpoint $x$:
+\[
+\dsd{encode} : \picl{x}{S^{n+1}}{} \dsd{base}_{n+1} =_{S^{n+1}} x \to \dsd{Codes}(x)
+\dsd{encode}(|p|) = (\dsd{ap}(\dsd{Codes}) p) |\dsd{base}_n|
+\]
+
+\item Through a somewhat involved calculation with the loop space library,
+  we can show that \dsd{decode'} extends to a function
+
+\[
+\dsd{decode} : \picl{x}{S^{n+1}}{} \dsd{Codes}(x) \to \dsd{base}_{n+1} =_{S^{n+1}} x 
+\]
+This function is defined by sphere elimination; 
+when \dsd{x} is $\dsd{base}_{n+1}$, the function is \dsd{decode'}; 
+the calculation shows that this choice respects the loop. 
+
+\item Now that we have generalized to \dsd{encode} and \dsd{decode}, it
+  is easy to show that 
+  \[
+  \dsd{encode}_x(\dsd{decode}_x(p)) = p, \all 
+  x : S^{n+1}, |p| : || \dsd{base}_{n+1} = x ||$ 
+  \] by path
+  induction, because on the identity path, it is true by definition.
+\end{itemize}
+
+
+\subsection{Loop space library}
+\label{sec:loopspace}
+
+
+\ignore{
+    Loop : (n : Positive) (A : Type) (base : A) → Type
+    Loop One A b = Path b b
+    Loop (S n) A b = Path {Loop n A b} (id^ n) (id^ n)
+
+    id^ : ∀ n {A b} → Loop n A b
+    id^ One = id
+    id^ (S n) = id{_}{id^ n}
+
+    ap^ : ∀ {A B} → (n : _) → (f : A → B) → {base : A} → Loop n A base → Loop n B (f base)
+    ap^ One   f {base} l = ap f l 
+    ap^ (S n) f {base} l = adjust (ap^-id n f) (ap (ap^ n f) l)
+
+  Loop' : Positive -> (A : Type) -> A -> Type
+  Loop' One A a = Path a a
+  Loop' (S k) A a = Loop' k (Path a a) id
+
+  ap^' : ∀ n {A B} {a : A} (f : A -> B) 
+       -> Loop' n A a
+       -> Loop' n B (f a)
+  ap^' One f α = ap f α
+  ap^' (S n) f α = ap^' n (ap f) α
+
+
+    rebase : ∀ n → ∀ {A a a'} (α : a ≃ a') -> Loop n A a → Loop n A a'
+    rebase One α l = α ∘ l ∘ ! α
+    rebase (S n) α l = adjust (rebase-id n α) (ap (rebase n α) l)
+
+    rebase-id : ∀ n → ∀ {A} {a a' : A} (α : a ≃ a') -> rebase n α (id^ n) ≃ id^ n
+    rebase-id One α = !-inv-with-middle-r α id
+    rebase-id (S n) α = !-inv-with-middle-r (rebase-id n α) id
+
+  transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
+                        transport (Loop n A) α ≃ rebase n α
+
+  mutual 
+    LoopOver : (n : Positive) {A : Type} {a : A} (α : Loop n A a) 
+             → (B : A -> Type) (b : B a) → Type
+    LoopOver One α B b = transport B α b ≃ b
+    LoopOver (S n) α B b = Path {LoopOver n (id^ n) B b}
+                                (transport (λ x → LoopOver n x B b) α (idOver n B b)) 
+                                (idOver n B b)
+
+    idOver : (n : Positive) {A : Type} {a : A} (B : A → Type) (b : B a) 
+           → LoopOver n (id^ n) B b
+    idOver One B b = id
+    idOver (S n) B b = id{_}{idOver n B b}
+
+  ∘^ : ∀ n {A a} → Loop n A a → Loop n A a → Loop n A a
+  !^ : ∀ n → ∀ {A a} → Loop n A a → Loop n A a 
+
+  and various properties, ike associativity, unit, involution
+
+  eqv : ∀ n → Equiv (Loop (S n) A a) (Loop n (Path a a) id) 
+
+  ap^-S' : ∀ {A B} → (n : _) → (f : A → B) → {a : A} 
+                    (α : Loop (S n) A a)
+                  → ap^ (S n) f α ≃ loopN1S n (ap^ n (ap f) (loopSN1 n α))
+
+  ap^-idfunc : ∀ {A} {a : A} → (n : _) (α : Loop n A a) → ap^ n (\ (x : A) -> x) α ≃ α
+
+  ap^-! : ∀ n → ∀ {A B} {a : A} → (f : A → B) → (α : Loop n A a)
+          → ap^ n f (!^ n α) ≃ !^ n (ap^ n f α)
+
+  ap^-o : ∀ {A B C} → (n : _) → (g : B → C) (f : A → B)
+          → {a : A} (α : Loop n A a)
+          → ap^ n (g o f) α ≃ ap^ n g (ap^ n f α) 
+  
+  
+  !^-ap^! : ∀ n {A} {a : A} (α : Loop n (Path a a) id) -> !^ n α ≃ ap^ n ! α
+  !^-ap^! One α = HigherHomotopyAbelian.inverse-same _ _ α
+
+  
+  Equiv ((x : A) → Loop n (B x) (f x)) (Loop n ((x : A) -> B x) f)
+
+  Equiv (Loop n (A → A) (coe p)) (Loop n (Path{Type} A A) p)
+
+  Equiv ((a : A) -> Loop n A a) (Loop (S n) Type A)
+
+  LoopOverS :  (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) 
+             → (B : A -> Type) (b : B a) → Type
+  LoopOverS n {A}{a} α B b = 
+    Path{Loop n (B a) b} 
+        (apt n (ap^ (S n) B α) b)
+        (id^ n)
+
+    LoopOverS≃ : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) → (B : A -> Type) (b : B a) 
+               → LoopOver (S n) α B b ≃ LoopOverS n α B b 
+
+    ap^ (S n) (\ A -> Trunc k A) α ≃ λt n (Trunc-elim (λ tβ → Loop n (Trunc k A) tβ)
+                                                      (λ _ → Loop-preserves-level n k Trunc-level) 
+                                                      (λ x → ap^ n [_] (apt n α x))) 
+
+    ap^ (S n) (\ A -> Trunc k A) α
+
+    (ap^ (S n) (\ x -> f x ≃ g x) α)
+
+    Loop-Trunc : ∀ (n : Positive) (k : Nat) {A} {a} → Loop n (Trunc (tlp (n +pn k)) A) [ a ] ≃ Trunc (tl k) (Loop n A a)
+}
