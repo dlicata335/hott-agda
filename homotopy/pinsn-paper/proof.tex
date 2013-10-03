@@ -19,7 +19,7 @@ to define a function $S^n \to C$, it suffices to give a point $c:C$ and
 a loop in $\Omega^n(C,c)$:
 \[
 \infer{\tptm {\Srec n C c p} {S^n \to C} }
-      {C : \dsd{type} & c : C & p : \Omega^n(C,c)}
+      {C : \dsd{Type} & c : C & p : \Omega^n(C,c)}
 \]
 The computation rules for this elimination rule are as follows:
 \[
@@ -37,7 +37,7 @@ We also require a dependent elimination rule, \emph{sphere
 induction}:
 \[
 \infer{\tptm {\Selim n C c p} {\picl{x}{S^n}{C(x)}} }
-      {C : S^n \to \dsd{type} & c : C(\dsd{base}) & p : \Omega^n_{\dsd{loop_n}}(C,c)}
+      {C : S^n \to \dsd{Type} & c : C(\dsd{base}) & p : \Omega^n_{\dsd{loop_n}}(C,c)}
 \]
 Here, the type $\Omega^n_{p}(C,c)$ represents an ``$n$-dimensional
 loop-over-a-loop''; it is well-formed when $C : A \to Type$ and 
@@ -46,8 +46,7 @@ $n$-dimensional path at $c$ in
 the total space of $C$ that projects down to $p$.  We discuss the
 definition of $\Omega^n_{p}(C,c)$ in Section~\ref{sec:loopspace} below.  
 The computation rules
-for sphere induction would be similar to those for sphere recursion, but
-we happen not to have needed them in our proof. 
+for sphere induction are similar to those for sphere recursion.   
 
 Note that the constructor $\dsd{loop}_n$ is a path whose level depends
 on $n$: for $n = 1$, it is a path, for $n = 2$, it is a path between
@@ -68,8 +67,9 @@ higher-inductive type, but as an interface, and implement it by the
 
 We now describe the calculation that $\pi_n(S^n) = \mathbb{Z}$.\footnote{We
 write $\pi_n(X)$ for $\pi_n(X,x_0)$ (and similarly for $\Omega$) when the
-base point is clear from context; and for the spheres, the base point is
-always the constructor $\dsd{base}_n$.}  Formally, this statement means
+base point is clear from context.  For the spheres, if we elide the base
+point, it is
+the constructor $\dsd{base}_n$.}  Formally, this statement means
 that there is a group isomorphism between the group $\pi_n(S^n)$ (with
 composition as the group operation) and the additive group
 $\mathbb{Z}$.  In what follows, we will discuss the proof that the
@@ -138,29 +138,27 @@ apply here.
 The bulk of the proof consists of proving that $||\Omega(S^{n+1})||_n =
 ||S^{n}||_n$.  To build intuition, consider the case of
 $||\Omega(S^2)||_1 = ||S^1||_1$.  Setting aside the truncations for the
-moment, this means we are comparing points on $S^1$ (the circle) with loops on
-$S^2$ (the sphere).  The idea is to set up a correspondence where the
-base point of the circle ($\dsd{base_1}$) corresponds to the constant
-path at the base point of the sphere ($id_{\dsd{base}_2}$), and going
-$n$ times around the loop of the circle ($\dsd{loop}_1^n$) corresponds
-to going $n$ times around the surface of the sphere ($\dsd{loop}_2^n$).
-% FIXME(G): What follows is complete nonsense to me.
-% Are you using the fact that there is only one point in S^1, namely base? This
-% might be true for some definition of "there is" but it's very confusing, both
-% to type theorists and to mathematicians.
-Informally, the points of the circle are in bijection with the loops on
-the sphere, because up to homotopy there is only one of each.  And the
-loops on the circle are in bijection with the 2-loops on the sphere,
-because \emph{every} loop on the circle is $\dsd{loop}^n$ for some $n$,
-and \emph{every} 2-loop on the sphere is $\dsd{loop}_2^n$ for some
-$n$---though proving this fact is what we are doing in this section.
-Thus, it should at least be intuitively plausible that the structure of
-points and loops on the circle is the same as the structure of loops and
-2-dimensional loops on the sphere.  But the loops and 2-dimensional
-loops on the sphere are the points and loops of the loop space of the
-sphere, $\Omega(S^2)$, so the points and loops of $S^1$ are the same as
-the points and loops of $\Omega(S^2)$.
-% /FIXME(G)
+moment, this means we are comparing points on $S^1$ (the circle) with
+loops on $S^2$ (the sphere).  The idea is to set up a correspondence
+where the base point of the circle ($\dsd{base_1}$) corresponds to the
+constant path at the base point of the sphere ($\dsd{id}_{\dsd{base}_2}$), and
+going $n$ times around the loop of the circle ($\dsd{loop}_1^n$)
+corresponds to going $n$ times around the surface of the sphere
+($\dsd{loop}_2^n$).  In classical topology, it is clear that this
+correspondence induces a bijection between the set of points on the
+circle and the set of loops on the sphere (both considered up to
+homotopy): the circle has one connected component, and any loop on the
+sphere can be contracted to the constant loop.  Moreover, it induces a
+bijection between the set of loops on the circle and the set of 2-loops
+on the sphere (again considered up to homotopy), because \emph{every}
+loop on the circle is $\dsd{loop}^n$ for some $n$, and \emph{every}
+2-loop on the sphere is $\dsd{loop}_2^n$ for some $n$. While proving
+these facts is essentially what we are doing in this section, it should
+at least be intuitively plausible that the points and loops on the
+circle are the same as the loops and 2-dimensional loops on the sphere.
+But the loops and 2-dimensional loops on the sphere are the points and
+loops of the loop space of the sphere, $\Omega(S^2)$, so the points and
+loops of $S^1$ are the same as the points and loops of $\Omega(S^2)$.
 
 However, it is not the case that $S^1$ and $\Omega(S^2)$ are equivalent
 types, because $S^2$ has non-trivial 3-dimensional paths, while $S^1$
@@ -181,16 +179,17 @@ To prove the lemma, we proceed as follows.  First, we define a map $S^n \to
 \dsd{ap}^n \: \dsd{promote} \: (\dsd{loop}_n) := \dsd{loop}_{n+1}
 \end{array}
 \]
-Note that the third line is well typed because $\dsd{loop}_{n+1}$ can be seen
+In the third line, we omit a coercion from $\Omega^{n+1}(S^{n+1})$, the type
+of $\dsd{loop}_{n+1}$, to the required type $\Omega^n(\Omega(S^{n+1}))$---$\dsd{loop}_{n+1}$ can be seen
 as an $n$-dimensional loop in $\Omega(S^{n+1})$.
 This is one direction of the correspondence described above, which
 sends, for example, loops on the circle to 2-dimensional loops on the
 sphere.  Because functions are functors, we specify only the action on
 the generators $\dsd{base}_n$ and $\dsd{loop}_n$; the function automatically
-preserves identity, composition, etc., and thus takes the $n$-fold
+preserves identity, composition, etc., and thus, for example, takes the $n$-fold
 composition $\dsd{loop}_1^n$ to the $n$-fold composition
-$\dsd{loop}_2^n$, as described above.  Thinking of $S^{n+1}$ as the
-suspension of $S^n$, this map is the \emph{meridan map} of the
+$\dsd{loop}_2^n$, as desired.  Thinking of $S^{n+1}$ as the
+suspension of $S^n$, this is the meridan map of the
 suspension, which embeds $X$ into $\Omega(\Sigma X)$---i.e. it's the unit of
 the suspension/loop space adjunction.
 
@@ -217,15 +216,15 @@ this case, we define a fibration \dsd{Codes} by sphere recursion
 \begin{array}{l}
 \dsd{Codes} : S^{n+1} \to \dsd{Type} \\
 \dsd{Codes}(\dsd{base}_{n+1}) :\equiv ||S^{n}||_n \\
-\dsd{ap}^n \: \dsd{Codes} \: (\dsd{loop}_{n+1}) := (\ldots : \Omega^{n+1}(\dsd{type},||S^{n}||_n)) \\
+\dsd{ap}^n \: \dsd{Codes} \: (\dsd{loop}_{n+1}) := (\ldots : \Omega^{n+1}(\dsd{Type},||S^{n}||_n)) \\
 \end{array}
 \]
-The fiber over the base point is $||S^{n}||_n$, so \dsd{Codes} will send a
-point in $\Omega(S^{n+1})$ (which, recall, is notation for $\dsd{base}_{n+1}
+The fiber over the base point is $||S^{n}||_n$, so \dsd{Codes} will send
+an element of $\Omega(S^{n+1})$ (which, recall, is notation for $\dsd{base}_{n+1}
 =_{S^{n+1}} \dsd{base}_{n+1}$) to an equivalence $||S^{n}||_n \simeq
 ||S^{n}||_n$.  Thus, we can define a function $\dsd{encode'} : ||\Omega(S^{n+1})||_n \to
 ||S^n||_n$ by applying $\dsd{Codes}$ to the given path (after peeling
-off the truncation brackets), and then
+off the truncation brackets, which is allowed because the result is an $n$-type), and then
 applying the resulting equivalence to $|\dsd{base}_n|$:
 \[
 \begin{array}{l}
@@ -236,27 +235,27 @@ applying the resulting equivalence to $|\dsd{base}_n|$:
 
 Eliding truncations for a moment, the term $\dsd{ap}^n(\dsd{encode'})$
 is a function from $\Omega^n(\Omega(S^{n+1}))$ to $\Omega^n(S^n)$, so it
-determines a function from $\Omega^{n+1}(S^{n+1})$ to
-$\Omega^n(S^n)$\footnote{Recall that $\Omega^{n+1} =
+determines\footnote{Recall that $\Omega^{n+1} =
   \Omega^n(\Omega(X))$ is a lemma, rather than a definitional equality,
-  for our definition of $\Omega^n$}.  Because we would like \dsd{encode'}
+  for our definition of $\Omega^n$} a function from $\Omega^{n+1}(S^{n+1})$ to
+$\Omega^n(S^n)$.  Because we would like \dsd{encode'}
 to be inverse to \dsd{decode'}, we need to fill in the $\ldots$ in the
 definition of \dsd{Codes} so that $\dsd{ap}^n \: \dsd{encode'}$ sends
 $\dsd{loop}_{n+1}$ to $\dsd{loop}_n$ (modulo truncations and the
 equivalence expanding $\Omega^{n+1}$).  Thus, we need an element of
-$\Omega^{n+1}(\dsd{type},||S^n||_n)$ that is somehow determined by 
+$\Omega^{n+1}(\dsd{Type},||S^n||_n)$ that is somehow determined by 
 $\dsd{loop}_n$, so that we get $\dsd{loop}_n$ back out when we apply it.  
 
 The key maneuver is to apply an equivalence between
-$\Omega^{n+1}(\dsd{type},A)$ and $\picl{x}{A}{}{\Omega^n(A,x)}$
+$\Omega^{n+1}(\dsd{Type},A)$ and $\picl{x}{A}{}{\Omega^n(A,x)}$
 (discussed below).  That is,
 an $n+1$-dimensional loop in the space of types with base point $A$ is
 the same as a family of $n$-dimensional loops in $A$, given for each
-point in $A$.  Then, in this case, we need to give an element of type
+point in $A$.  This reduces the problem to giving an element of type
 \[
 \picl{x}{||S^n||_n}{}{\Omega^n(||S^n||_n,x)}
 \]
-which (modulo the truncation manipulation) is defined by
+which (modulo some truncation manipulation) is defined by
 sphere-elimination, sending $\dsd{base}_n$ to $\dsd{loop}_n$, and
 proving that this choice respects $\dsd{loop}_n$.  For $n=1$, a small
 calculation is needed to prove this final condition, and for any greater $n$
@@ -272,7 +271,7 @@ so are as follows:
   $\dsd{encode'}(\dsd{decode'} c) = c$.  The proof uses
   sphere-elimination, and calculations with the loop space
   library---this is where we prove that \dsd{encode'} takes
-  $\dsd{loop}_{n+1}$  to $\dsd{loop}_n$
+  $\dsd{loop}_{n+1}$  to $\dsd{loop}_n$.
 
 \item The definition of \dsd{encode'} given above in fact has a more
   general type: it works not only for loops, but for paths to any
@@ -308,80 +307,106 @@ reader to the Agda proof.
 \subsection{Loop space library}
 \label{sec:loopspace}
 
+Next, we give a brief overview of some of the key lemmas in the loop
+space library.
 
-\ignore{
-    Loop : (n : Positive) (A : Type) (base : A) → Type
-    Loop One A b = Path b b
-    Loop (S n) A b = Path {Loop n A b} (id^ n) (id^ n)
+\subsection{Loop spaces}
+First, we define
+\[
+\begin{array}{l}
+\Omega(X : \dsd{Type},x_0 : X) : \dsd{Type}\\
+\Omega(X,x_0) :\equiv x_0 =_X x_0 \\
+\\
+\Omega^{n \ge 1}(X : \dsd{Type} , x_0 : X) : \dsd{Type}\\
+\Omega^1(X,x_0) :\equiv \Omega(X,x_0) \\
+\Omega^{1+n}(X,x_0) :\equiv \Omega(\Omega^n(X,x_0), \dsd{id}^n) \\
+\\ 
+\dsd{id}^n : \Omega(X,x_0) \\
+\dsd{id}^1 :\equiv \dsd{id}_{x_0} \\
+\dsd{id}^{1+n} :\equiv \dsd{id}_{\dsd{id}^n} \\
+\end{array}
+\]
+That is, we define $\Omega^n$ mutually with a point $\dsd{id}^n$ of it.   
+This definition unfolds as $\Omega^{n+1}(X) = \Omega(\Omega^n(X))$.  An
+alternative is to define
 
-    id^ : ∀ n {A b} → Loop n A b
-    id^ One = id
-    id^ (S n) = id{_}{id^ n}
+\[
+\begin{array}{l}
+\Omega'^1(X,x_0) :\equiv \Omega(X,x_0) \\
+\Omega'^{1+n}(X,x_0) :\equiv \Omega'^n(\Omega(X),\dsd{id}_{x_0})
+\end{array}
+\]
+i.e. $\Omega'^{1+n}(X) = \Omega'^n(\Omega(X))$.  In the library, we
+prove that these two definitions are equivalent, so we can unfold
+$\Omega^{n+1}$ in both ways.  The current loop space library takes
+$\Omega$ as the main definition and uses $\Omega'$ as an auxilary
+notion.  However, since the different definitions have different   
+definitional behaviors, it would be interesting to try revising the
+library based on taking $\Omega'$ as the main notion, to see if it is
+simpler or not.  
 
-    ap^ : ∀ {A B} → (n : _) → (f : A → B) → {base : A} → Loop n A base → Loop n B (f base)
-    ap^ One   f {base} l = ap f l 
-    ap^ (S n) f {base} l = adjust (ap^-id n f) (ap (ap^ n f) l)
+In addition to $\dsd{id}^n$, there are also inverse and composition
+operations on each loop space:
+\[
+\begin{array}{l}
+!^n (l : \Omega^n(X,x_0)) : \Omega^n(X,x_0) \\
+(l_1 : \Omega^n(X,x_0)) \comp^n (l_2 : \Omega^n(X,x_0)) : \Omega^n(X,x_0)
+\end{array}
+\]
+We prove various groupoid laws for these operations (unit, involution).
 
-  Loop' : Positive -> (A : Type) -> A -> Type
-  Loop' One A a = Path a a
-  Loop' (S k) A a = Loop' k (Path a a) id
+Many loop space operations are  defined by induction on $n$.  For
+example, consider applying a function to a loop.  Intuitively, the idea
+is that $\dsd{ap}^n \: f l$ iterates \dsd{ap} to apply $f$ at the
+appropriate level.  For example, $\dsd{ap}^2 \: f$ should be $\dsd{ap}
+(\dsd{ap} \: f)$, while $\dsd{ap}^3 \: f$ should be $\dsd{ap}
+(\dsd{ap} \: (\dsd{ap} \: f))$.  In general, it is defined as follows:
+\[
+\begin{array}{l}
+\dsd{ap}^n (f : X \to Y) (l : \Omega^n(X,x_0)) : \Omega^n(Y,f x_0) \\
+\dsd{ap}^1 \: f \: l :\equiv \dsd{ap} f l \\
+\dsd{ap}^{1+n} \: f \: l :\equiv \dsd{ap^n\mathord{-}id } \comp \dsd{ap} (ap^n f) l \comp (! \dsd{ap^n\mathord{-}id }) \\
+\end{array}
+\]
+In the $1+n$ case, $l : \Omega(\Omega^n(X))$.  The recursive call
+$\dsd{ap}^n f$ has type $\Omega^n(X,x_0) \to \Omega^n(Y, f x_0)$.  Thus, 
+using \dsd{ap} to apply this to the path $l$ gives an element of 
+\[
+\dsd{ap}^n \: f \: \dsd{id}^n = \dsd{ap}^n \: f \: \dsd{id}^n
+\]
+We require an element of $\dsd{id}^{n} = \dsd{id}^n$, so we compose on
+both sides with a proof \dsd{ap^n\mathord{-}id} that $\dsd{ap}^n$
+preserves identities.  Many definitions on $\Omega^n$ follow this
+template: an induction on $n$, defined mututally with a lemma stating
+preservation of identities.  $\dsd{ap}^n$ also preserves inverses and
+composition, and is functorial in the function position:
+\[
+\begin{array}{l}
+\dsd{ap}^n(\lambda x.x) l = l \\
+\dsd{ap}^n(g \comp f) l = \dsd{ap}^n \: g (\dsd{ap}^n \: f \: l) 
+\end{array}
+\]
+Another key lemma is that $\dsd{ap}^{1+n}$ can be unfolded in the other
+assocativity: above, we essentially defined $\dsd{ap}^{1+n} =
+\dsd{ap}(\dsd{ap}^n f)$.  Using the equivalence between $\Omega$ and
+$\Omega'$, we can prove that it is also equal to $\dsd{ap}^n(\dsd{ap}
+f)$ (with the appropriate coercions inserted).   
 
-  ap^' : ∀ n {A B} {a : A} (f : A -> B) 
-       -> Loop' n A a
-       -> Loop' n B (f a)
-  ap^' One f α = ap f α
-  ap^' (S n) f α = ap^' n (ap f) α
+Some properties hold only for $n\ge2$.  For example, 
+\[
+\dsd{ap}^n \: ! \: l = !^n l 
+\]
+This follows from the Eckmann-Hilton argument, which shows that the
+higher homotopy groups are abelian, and that the two different ways of
+composing higher-dimensional loops are homotopic.  
+
+\subsubsection{Loops in Types}
 
 
-    rebase : ∀ n → ∀ {A a a'} (α : a ≃ a') -> Loop n A a → Loop n A a'
-    rebase One α l = α ∘ l ∘ ! α
-    rebase (S n) α l = adjust (rebase-id n α) (ap (rebase n α) l)
+\subsubsection{Loops over a Loop}
 
-    rebase-id : ∀ n → ∀ {A} {a a' : A} (α : a ≃ a') -> rebase n α (id^ n) ≃ id^ n
-    rebase-id One α = !-inv-with-middle-r α id
-    rebase-id (S n) α = !-inv-with-middle-r (rebase-id n α) id
 
-  transport-Loop-base : ∀ n → ∀ {A a a'} (α : a ≃ a') →
-                        transport (Loop n A) α ≃ rebase n α
-
-  mutual 
-    LoopOver : (n : Positive) {A : Type} {a : A} (α : Loop n A a) 
-             → (B : A -> Type) (b : B a) → Type
-    LoopOver One α B b = transport B α b ≃ b
-    LoopOver (S n) α B b = Path {LoopOver n (id^ n) B b}
-                                (transport (λ x → LoopOver n x B b) α (idOver n B b)) 
-                                (idOver n B b)
-
-    idOver : (n : Positive) {A : Type} {a : A} (B : A → Type) (b : B a) 
-           → LoopOver n (id^ n) B b
-    idOver One B b = id
-    idOver (S n) B b = id{_}{idOver n B b}
-
-  ∘^ : ∀ n {A a} → Loop n A a → Loop n A a → Loop n A a
-  !^ : ∀ n → ∀ {A a} → Loop n A a → Loop n A a 
-
-  and various properties, ike associativity, unit, involution
-
-  eqv : ∀ n → Equiv (Loop (S n) A a) (Loop n (Path a a) id) 
-
-  ap^-S' : ∀ {A B} → (n : _) → (f : A → B) → {a : A} 
-                    (α : Loop (S n) A a)
-                  → ap^ (S n) f α ≃ loopN1S n (ap^ n (ap f) (loopSN1 n α))
-
-  ap^-idfunc : ∀ {A} {a : A} → (n : _) (α : Loop n A a) → ap^ n (\ (x : A) -> x) α ≃ α
-
-  ap^-! : ∀ n → ∀ {A B} {a : A} → (f : A → B) → (α : Loop n A a)
-          → ap^ n f (!^ n α) ≃ !^ n (ap^ n f α)
-
-  ap^-o : ∀ {A B C} → (n : _) → (g : B → C) (f : A → B)
-          → {a : A} (α : Loop n A a)
-          → ap^ n (g o f) α ≃ ap^ n g (ap^ n f α) 
-  
-  
-  !^-ap^! : ∀ n {A} {a : A} (α : Loop n (Path a a) id) -> !^ n α ≃ ap^ n ! α
-  !^-ap^! One α = HigherHomotopyAbelian.inverse-same _ _ α
-
-  
+\ignore{  
   Equiv ((x : A) → Loop n (B x) (f x)) (Loop n ((x : A) -> B x) f)
 
   Equiv (Loop n (A → A) (coe p)) (Loop n (Path{Type} A A) p)
@@ -408,6 +433,8 @@ reader to the Agda proof.
 
     Loop-Trunc : ∀ (n : Positive) (k : Nat) {A} {a} → Loop n (Trunc (tlp (n +pn k)) A) [ a ] ≃ Trunc (tl k) (Loop n A a)
 }
+
+\subsection{Computational Content}
 
 %%% Local Variables:
 %%% mode: latex
