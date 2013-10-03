@@ -64,6 +64,7 @@ higher-inductive type, but as an interface, and implement it by the
  definition of $S^n$ by iterated suspension~\citep[Section 6.5]{uf13hott-book}.  
 
 \subsection{Calculation of $\pi_n(S^n)$}
+\label{sec:pinsn}
 
 We now describe the calculation that $\pi_n(S^n) = \mathbb{Z}$.\footnote{We
 write $\pi_n(X)$ for $\pi_n(X,x_0)$ (and similarly for $\Omega$) when the
@@ -486,41 +487,42 @@ lemmas, we have that
 & = & \picl{x}{A}{} \Omega^n(A, x) & \text{loop in function type}\\
 \end{array}
 \]
-This is the ``key manuveur'' that we used to define the \dsd{Codes}
+This equivalence is the ``key maneuver'' that we used to define the \dsd{Codes}
 fibration in Section~\ref{sec:encode-decode} above.  
-
-
 
 \subsubsection{Loops over a Loop}
 
+The notion of a ``path over a path'' is a key ingredient of the
+dependent elimination rule for higher inductive types.  Given $p : a_1
+=_A a_2$, and a fibration $B : A \to \dsd{Type}$, a path over $p$ relates
+$b_1 : B(a_1)$ to $b_2 : B(a_2)$.  This is a kind of heterogeneous
+equality~\citep{mcbride00thesis} between elements of different instances
+of $B$.  However, the notion of a path over a path need not be taken as
+primitive, since it can be represented by a homogeneous path
+$\dsd{transport}_B \: p \: b_1 =_{B(a_2)} b_2$.  
 
-\ignore{  
-  Equiv (Loop n (A → A) (coe p)) (Loop n (Path{Type} A A) p)
+In the library, we define an $n$-dimensional loop over a loop
+$\Omega^n_p(B,b_0)$ (where $p : \Omega^n(A,a_0)$ and $b_0 : B(a_0)$) by
+induction on $n$, using \dsd{transport} at each level to account for the
+heterogeniety.  For small $n$, this definition gives the expected
+dependent elimination rule for, e.g., $S^1$ and $S^2$ and $S^3$, the
+specific spheres whose higher inductive elimination rule had previously been written out.  For example, for
+$S^2$, sphere elimination with $B : S^2 \to \dsd{Type}$ and $b :
+B(\dsd{base})$ requires a proof of 
+\[
+(\dsd{transport} (\lambda x. (\dsd{transport} \: B \: x \: b) = b) \: \dsd{loop} \: \dsd{id}) = \dsd{id}
+\]
 
-  Equiv ((a : A) -> Loop n A a) (Loop (S n) Type A)
-
-  LoopOverS :  (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) 
-             → (B : A -> Type) (b : B a) → Type
-  LoopOverS n {A}{a} α B b = 
-    Path{Loop n (B a) b} 
-        (apt n (ap^ (S n) B α) b)
-        (id^ n)
-
-    LoopOverS≃ : (n : Positive) {A : Type} {a : A} (α : Loop (S n) A a) → (B : A -> Type) (b : B a) 
-               → LoopOver (S n) α B b ≃ LoopOverS n α B b 
-
-    ap^ (S n) (\ A -> Trunc k A) α ≃ λt n (Trunc-elim (λ tβ → Loop n (Trunc k A) tβ)
-                                                      (λ _ → Loop-preserves-level n k Trunc-level) 
-                                                      (λ x → ap^ n [_] (apt n α x))) 
-
-    ap^ (S n) (\ A -> Trunc k A) α
-
-    (ap^ (S n) (\ x -> f x ≃ g x) α)
-
-    Loop-Trunc : ∀ (n : Positive) (k : Nat) {A} {a} → Loop n (Trunc (tlp (n +pn k)) A) [ a ] ≃ Trunc (tl k) (Loop n A a)
-}
-
-\subsection{Computational Content}
+A key lemma relates this definition of loop-over-a-loop to an alternate
+characterization, which coalesces all of the \dsd{transport}s into a
+single use of $\dsd{ap}^n$ combined with the equivalence defined above
+between $\Omega^{1+n}(\dsd{Type},A)$ and $\picl{x}{A}{} \Omega^n(A, x)$.  
+The reason this lemma is important is that we then give rules for
+$\dsd{ap}^n A$ driven by the structure of $A$, such as when $A$
+is $\lambda x.A_1(x) \to A_2(x)$ or when $A$ is $\lambda x.f(x) = g(x)$
+or when $A$ is $\lambda x.||A_1(x)||_k$.  These rules are
+higher-dimensional analogues of the computation rules for
+$\dsd{transport}_A$ that are driven by the structure of $A$.  
 
 %%% Local Variables:
 %%% mode: latex
