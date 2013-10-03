@@ -142,21 +142,20 @@ moment, this means we are comparing $S^1$ (the circle) with loops on
 $S^2$ (the sphere).  The idea is to set up a correspondence where the
 base point of the circle ($\dsd{base_1}$) corresponds to the constant
 path at the base point of the sphere ($id_{\dsd{base}_2}$), and going
-$n$ times around the loop of the circle ($\dsd{loop}_1^n$) corresponds to
-going $n$ times around the surface of the sphere ($\dsd{loop}_2^n$).  Any
-1-dimensional loop on the sphere is homotopic to the constant path, so
-the type $\Omega(S^2)$ has only one element (up to homotopy), just like
-$S^1$ does.  Moreover, this correspondence between loops on the circle
-and 2-dimensional loops on the sphere will turn out to be a bijection as
-well---intuitively, \emph{every} loop on the circle is $\dsd{loop}^n$
-for some $n$, and \emph{every} 2-loop on the sphere is $\dsd{loop}_2^n$
-for some $n$---though proving this fact is what we are doing in this
-section.  Thus, it should at least be intuitively plausible that the
-structure of points and loops on the circle is the same as the structure
-of loops and 2-dimensional loops on the sphere.  But the loops and
-2-dimensional loops on the sphere are the points and loops of the loop
-space of the sphere, $\Omega(S^2)$, so the points and loops of $S^1$ are
-the same as the points and loops of $\Omega(S^2)$.
+$n$ times around the loop of the circle ($\dsd{loop}_1^n$) corresponds
+to going $n$ times around the surface of the sphere ($\dsd{loop}_2^n$).
+Informally, the points of the circle are in bijection with the loops on
+the sphere, because up to homotopy there is only one of each.  And the
+loops on the circle are in bijection with the 2-loops on the sphere,
+because \emph{every} loop on the circle is $\dsd{loop}^n$ for some $n$,
+and \emph{every} 2-loop on the sphere is $\dsd{loop}_2^n$ for some
+$n$---though proving this fact is what we are doing in this section.
+Thus, it should at least be intuitively plausible that the structure of
+points and loops on the circle is the same as the structure of loops and
+2-dimensional loops on the sphere.  But the loops and 2-dimensional
+loops on the sphere are the points and loops of the loop space of the
+sphere, $\Omega(S^2)$, so the points and loops of $S^1$ are the same as
+the points and loops of $\Omega(S^2)$.
 
 However, it is not the case that $S^1$ and $\Omega(S^2)$ are equivalent
 types, because $S^2$ has non-trivial 3-dimensional paths, while $S^1$
@@ -214,8 +213,8 @@ this case, we define a fibration \dsd{Codes} by sphere recursion
 \end{array}
 \]
 The fiber over the base point is $||S^{n}||$, so \dsd{Codes} will send a
-loop in $\Omega(S^{n+1}$ (which, recall, is notation for $base_{n+1}
-=_{S^{n+1}} base_{n+1}$) to an equivalence $||S^{n}||_n \equiv
+loop in $\Omega(S^{n+1}$ (which, recall, is notation for $\dsd{base}_{n+1}
+=_{S^{n+1}} \dsd{base}_{n+1}$) to an equivalence $||S^{n}||_n \simeq
 ||S^{n}||_n$.  Thus, we can define a function $\dsd{encode'} : ||\Omega(S^{n+1})||_n \to
 ||S^n||_n$ by applying $\dsd{Codes}$ to the given path (after peeling
 off the truncation brackets), and then
@@ -241,7 +240,8 @@ $\Omega^{n+1}(\dsd{type},||S^n||_n)$ that is somehow determined by
 $\dsd{loop}_n$, so that we get $\dsd{loop}_n$ back out when we apply it.  
 
 The key maneuver is to apply an equivalence between
-$\Omega^{n+1}(\dsd{type},A)$ and $\picl{x}{A}{}{\Omega^n(A,x)}$.  That is,
+$\Omega^{n+1}(\dsd{type},A)$ and $\picl{x}{A}{}{\Omega^n(A,x)}$
+(discussed below).  That is,
 an $n+1$-dimensional loop in the space of types with base point $A$ is
 the same as a family of $n$-dimensional loops in $A$, given for each
 point in $A$.  Then, in this case, we need to give 
@@ -251,11 +251,10 @@ point in $A$.  Then, in this case, we need to give
 which (modulo the truncation manipulation) is defined by
 sphere-elimination, sending $\dsd{base}_n$ to $\dsd{loop}_n$, and
 proving that this choice respects $\dsd{loop}_n$.  For $n=1$, a small
-calculation is needed to prove this final condition, and any greater $n$
+calculation is needed to prove this final condition, and for any greater $n$
 it is trivial by truncation reasons.  This ``packages up''
 $\dsd{loop}_n$ in the \dsd{Codes} fibration in such a way that
-\dsd{encode'} extracts it.  The key maneuver is one of the operations
-defined in our loop space library, defined below.  
+\dsd{encode'} extracts it.    
 
 Now that we have defined \dsd{encode'} and \dsd{decode'}, the task is to
 show that they are mutually inverse.  The remaining steps required to do
@@ -265,35 +264,38 @@ so are as follows:
   $\dsd{encode'}(\dsd{decode'} c) = c$.  The proof uses
   sphere-elimination, and calculations with the loop space
   library---this is where we prove that \dsd{encode'} takes
-  $\dsd{loop}_{n+1}$ back to $\dsd{loop}_n$
+  $\dsd{loop}_{n+1}$  to $\dsd{loop}_n$
 
 \item The definition of \dsd{encode'} given above in fact has a more
   general type: it works not only for loops, but for paths to any
   endpoint $x$:
 \[
-\dsd{encode} : \picl{x}{S^{n+1}}{} \dsd{base}_{n+1} =_{S^{n+1}} x \to \dsd{Codes}(x)
+\begin{array}{l}
+\dsd{encode} : \picl{x}{S^{n+1}}{} (\dsd{base}_{n+1} =_{S^{n+1}} x) \to \dsd{Codes}(x)\\
 \dsd{encode}(|p|) = (\dsd{ap}(\dsd{Codes}) p) |\dsd{base}_n|
+\end{array}
 \]
 
 \item Through a somewhat involved calculation with the loop space library,
   we can show that \dsd{decode'} extends to a function
 
 \[
-\dsd{decode} : \picl{x}{S^{n+1}}{} \dsd{Codes}(x) \to \dsd{base}_{n+1} =_{S^{n+1}} x 
+\dsd{decode} : \picl{x}{S^{n+1}}{} \dsd{Codes}(x) \to (\dsd{base}_{n+1} =_{S^{n+1}} x)
 \]
 This function is defined by sphere elimination; 
-when \dsd{x} is $\dsd{base}_{n+1}$, the function is \dsd{decode'}; 
-the calculation shows that this choice respects the loop. 
+when \dsd{x} is $\dsd{base}_{n+1}$, the function is \dsd{decode'}; then
+we have to prove that this choice respects the \dsd{loop}. 
 
 \item Now that we have generalized to \dsd{encode} and \dsd{decode}, it
   is easy to show that 
   \[
-  \dsd{encode}_x(\dsd{decode}_x(p)) = p, \all 
-  x : S^{n+1}, |p| : || \dsd{base}_{n+1} = x ||$ 
+  \Pi x : S^{n+1}, p : || \dsd{base}_{n+1} = x ||.  \dsd{encode}_x(\dsd{decode}_x(p)) = p
   \] by path
   induction, because on the identity path, it is true by definition.
 \end{itemize}
-
+%
+The details of these steps are somewhat intricate, so we refer the
+reader to the Agda proof.  
 
 \subsection{Loop space library}
 \label{sec:loopspace}

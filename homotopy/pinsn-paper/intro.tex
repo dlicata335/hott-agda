@@ -141,8 +141,6 @@ rule: to define a function from $S^1$ into any other type $C$, it
 suffices to give a point in $c : C$, which is the image of \dsd{base}, and a
 loop $p : c =_C c$, which is the image of \dsd{loop}:
 
-\newcommand{\Sonerec}[3]{\dsd{S^1\mathord{-}rec}_{#1}(#2,#3)}
-
 \[
 \begin{array}{ll}
 \infer{\tptm {\Sonerec C c p} {S^1 \to C} }
@@ -192,12 +190,12 @@ higher-dimensional structure of these types.  Thus, we first define the
 
 \[
 \begin{array}{rcl}
-\Omega_1(X,x_0) & := & x_0 =_X x_0 \\
-\Omega_2(X,x_0) & := & id_{{x_0}} =_{{(x_0 =_X x_0)}} id_{{x_0}} \\
-\Omega_3(X,x_0) & := & id_{{id_{x_0}}} =_{(id_{{x_0}} =_{{x_0 =_X x_0}} id_{{x_0}})} id_{{id_{x_0}}} \\
+\Omega^1(X,x_0) & := & x_0 =_X x_0 \\
+\Omega^2(X,x_0) & := & id_{{x_0}} =_{{(x_0 =_X x_0)}} id_{{x_0}} \\
+\Omega^3(X,x_0) & := & id_{{id_{x_0}}} =_{(id_{{x_0}} =_{{x_0 =_X x_0}} id_{{x_0}})} id_{{id_{x_0}}} \\
 \end{array}
 \]
-and so on
+and so on.  We write $\Omega(X,x_0)$ for $\Omega^1(X,x_0)$.  
 
 Then we can define 
 \[
@@ -222,12 +220,12 @@ interesting for several reasons:
 
 \begin{itemize}
 
-\item Calculating $\pi_n(S^n)$ is a relatively
-  easy theorem in algebraic topology (e.g. it would come early in a
-  graduate algebraic topology course), but it is more complex than many of
-  the results that had previously been proved in homotopy type theory.
-  For example, it was one of the first results about an infinite family
-  of spaces, of variable dimension.
+\item Calculating $\pi_n(S^n)$ is a relatively easy theorem in algebraic
+  topology (e.g. it would be covered in a first- or second-year graduate
+  algebraic topology course), but it is more complex than many of the
+  results that had previously been proved in homotopy type theory.  For
+  example, it was one of the first results about an infinite family of
+  spaces, of variable dimension.
 
 \item When doing homotopy theory in a constructive/synthetic
   style in homotopy type theory, there is always the possibility that
@@ -236,7 +234,14 @@ interesting for several reasons:
   Our proof shows that the characterization of $\pi_n(S^n)$ does follow
   from a higher-inductive description of the spheres, in the presence of
   univalence, which provides stronger evidence for the usefulness of
-  these definitions and methods.    
+  these definitions and methods.  
+
+  Moreover, while we do not yet have a full computational interpretation
+  of univalence, one can see, in the proof, a computational process that
+  transforms $n$-dimensional loops on the $n$-sphere into integers.
+  This is one of the first examples of computation with
+  arbitrary-dimensional structures that has been considered in homotopy
+  type theory.  
 
 \item The proof is not a transcription of a textbook homotopy theoretic
   proof, but mixes classical ideas with type-theoretic ones.  
