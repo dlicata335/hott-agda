@@ -134,6 +134,7 @@ characterizations is the
 apply here.  
 
 \subsection{The encode-decode argument}
+\label{sec:encode-decode}
 
 The bulk of the proof consists of proving that $||\Omega(S^{n+1})||_n =
 ||S^{n}||_n$.  To build intuition, consider the case of
@@ -310,7 +311,7 @@ reader to the Agda proof.
 Next, we give a brief overview of some of the key lemmas in the loop
 space library.
 
-\subsection{Loop spaces}
+\subsubsection{Definitions, groupoid and functor structure}
 First, we define
 \[
 \begin{array}{l}
@@ -327,7 +328,7 @@ First, we define
 \end{array}
 \]
 That is, we define $\Omega^n$ mutually with a point $\dsd{id}^n$ of it.   
-This definition unfolds as $\Omega^{n+1}(X) = \Omega(\Omega^n(X))$.  An
+This definition unfolds as $\Omega^{1+n}(X) = \Omega(\Omega^n(X))$.  An
 alternative is to define
 
 \[
@@ -338,7 +339,7 @@ alternative is to define
 \]
 i.e. $\Omega'^{1+n}(X) = \Omega'^n(\Omega(X))$.  In the library, we
 prove that these two definitions are equivalent, so we can unfold
-$\Omega^{n+1}$ in both ways.  The current loop space library takes
+$\Omega^{1+n}$ in both ways.  The current loop space library takes
 $\Omega$ as the main definition and uses $\Omega'$ as an auxilary
 notion.  However, since the different definitions have different   
 definitional behaviors, it would be interesting to try revising the
@@ -357,7 +358,7 @@ We prove various groupoid laws for these operations (unit, involution).
 
 Many loop space operations are  defined by induction on $n$.  For
 example, consider applying a function to a loop.  Intuitively, the idea
-is that $\dsd{ap}^n \: f l$ iterates \dsd{ap} to apply $f$ at the
+is that $\dsd{ap}^n \: f \: l$ iterates \dsd{ap} to apply $f$ at the
 appropriate level.  For example, $\dsd{ap}^2 \: f$ should be $\dsd{ap}
 (\dsd{ap} \: f)$, while $\dsd{ap}^3 \: f$ should be $\dsd{ap}
 (\dsd{ap} \: (\dsd{ap} \: f))$.  In general, it is defined as follows:
@@ -365,17 +366,17 @@ appropriate level.  For example, $\dsd{ap}^2 \: f$ should be $\dsd{ap}
 \begin{array}{l}
 \dsd{ap}^n (f : X \to Y) (l : \Omega^n(X,x_0)) : \Omega^n(Y,f x_0) \\
 \dsd{ap}^1 \: f \: l :\equiv \dsd{ap} f l \\
-\dsd{ap}^{1+n} \: f \: l :\equiv \dsd{ap^n\mathord{-}id } \comp \dsd{ap} (ap^n f) l \comp (! \dsd{ap^n\mathord{-}id }) \\
+\dsd{ap}^{1+n} \: f \: l :\equiv \dsd{ap^n\text{-}id } \comp \dsd{ap} (\dsd{ap}^n f) l \comp (! \dsd{ap^n\text{-}id }) \\
 \end{array}
 \]
 In the $1+n$ case, $l : \Omega(\Omega^n(X))$.  The recursive call
-$\dsd{ap}^n f$ has type $\Omega^n(X,x_0) \to \Omega^n(Y, f x_0)$.  Thus, 
+$\dsd{ap}^n f$ has type $\Omega^n(X,x_0) \to \Omega^n(Y, f(x_0))$.  Thus, 
 using \dsd{ap} to apply this to the path $l$ gives an element of 
 \[
 \dsd{ap}^n \: f \: \dsd{id}^n = \dsd{ap}^n \: f \: \dsd{id}^n
 \]
 We require an element of $\dsd{id}^{n} = \dsd{id}^n$, so we compose on
-both sides with a proof \dsd{ap^n\mathord{-}id} that $\dsd{ap}^n$
+both sides with a proof \dsd{ap^n\text{-}id} that $\dsd{ap}^n$
 preserves identities.  Many definitions on $\Omega^n$ follow this
 template: an induction on $n$, defined mututally with a lemma stating
 preservation of identities.  $\dsd{ap}^n$ also preserves inverses and
@@ -402,13 +403,98 @@ composing higher-dimensional loops are homotopic.
 
 \subsubsection{Loops in Types}
 
+For many types $A$, one can give a straightforward characterization of
+the paths in $A$.  For example:
+\begin{itemize}
+\item Paths $f =_{A \to B} g$ are equivalent
+to paths $\picl{x}{A}{f x =_B g x}$ by function extensionality.
+\item Paths $A
+=_\dsd{Type} B$ are equivalent to equivalences between $A$ and $B$ by
+univalence.
+\item Paths $e_1 =_{A \simeq B} e_2$ between equivalences are equivalent
+  to paths $e_1 =_{A \to B} e_2$ (where we implicitly cast $e_i$ from an
+  equivalence to a function) because being an equivalence is an hprop.
+\end{itemize}
+
+One important piece of the loop space library is an investigation of how
+these characterizations extend to higher-dimensional loop spaces.
+
+\paragraph{Functions.}
+
+First, we characterize $\Omega^n(\picl{x}{A}{B},f)$.  For $n=1$, it is
+equal to $\picl{x}{A}{} \Omega^n(B, f x)$ by function extensionality.
+For $n = 2$, the question is to characterize the type
+\[
+\dsd{id}_f =_{f =_{\picl{x}{A}{B}} f} \dsd{id}_f
+\]
+But by \dsd{ap}plying function extensionality (and its action on $\dsd{id}_f$), this type
+is equivalent to
+\[
+\lambda x. \dsd{id}_{f x} =_{\picl{x}{A}{f x =_{B(x)} f x}} \lambda x. \dsd{id}_{f x}
+\]
+Using function extensionality again, this type is equivalent to
+\[
+\picl{x}{A} \dsd{id}_{f x} =_{f x =_{B(x)} f x} \dsd{id}_{f x}
+\]
+which is $\picl{x}{A}{}\Omega^2(B x, f x)$.  
+
+Indeed, in general, we prove
+\[
+\Omega^n(\picl{x}{A}{B},f) = \picl{x}{A}{}\Omega^n(B(x),f x) 
+\]
+That is, a loop in a function space is a family of loops.  
+
+\paragraph{Paths between types.}
+
+Second, we characterize $\Omega^n(A =_{\dsd{Type}} A, p)$, where $p$ is
+path in the universe from $A$ to $A$.  Consider $n = 1$: by unvialence,
+we know that $\Omega(A = A , p)$ is equivalent to $\Omega(A \simeq A, p*)$,
+where $p^*$ is the equivalence induced by the path $p$.  But a path
+between equivalences is equivalent to a path between the underlying
+functions: an equivalence between $A$ and $B$ is a pair $(f , i)$ where
+$f : A \to B$ and $i : \dsd{IsEquiv}(f)$, and being an equivalence is an
+hprop, so the second components of such pairs are always equal.  Thus, 
+\[
+\Omega(A = A , p) = \Omega(A \to A, \dsd{coe}(p))
+\]
+where $\dsd{coe}(p : A = B) : A \to B$---i.e. \dsd{coe} (``coerce'') can be thought
+of as turning the path into an equivalence, and then selecting the
+``forward'' direction.  We can prove by induction that this rule extends
+to higher dimensions, so that 
+\[
+\Omega^n(A = A , p) = \Omega^n(A \to A, \dsd{coe}(p))
+\]
+
+\paragraph{Loop spaces.}
+
+The theorem mentioned above relating $\Omega$ and $\Omega'$ (the different unfoldings of
+$\Omega^{1+n}$) also fits this pattern: it characterizes an
+$n$-dimensional loop in a loop space as an $1+n$-dimensional loop in the
+underlying space:
+\[
+\Omega^n(\Omega(A),\dsd{id}_a) = \Omega^{1+n}(A,a)
+\]
+
+\paragraph{Putting it all together.}  Combining the previous three
+lemmas, we have that
+\[
+\begin{array}{rcll}
+\Omega^{1+n}(\dsd{Type},A) & = & 
+      \Omega^n(\Omega(\dsd{Type},A) , \dsd{id}_A) & \text{loop in loop space} \\
+& = & \Omega^n(A =_{\dsd{Type}} A , \dsd{id}_A) & \text{definition} \\
+& = & \Omega^n(A \to A , \lambda x.x) & \text{loop in path between types}\\
+& = & \picl{x}{A}{} \Omega^n(A, x) & \text{loop in function type}\\
+\end{array}
+\]
+This is the ``key manuveur'' that we used to define the \dsd{Codes}
+fibration in Section~\ref{sec:encode-decode} above.  
+
+
 
 \subsubsection{Loops over a Loop}
 
 
 \ignore{  
-  Equiv ((x : A) → Loop n (B x) (f x)) (Loop n ((x : A) -> B x) f)
-
   Equiv (Loop n (A → A) (coe p)) (Loop n (Path{Type} A A) p)
 
   Equiv ((a : A) -> Loop n A a) (Loop (S n) Type A)
