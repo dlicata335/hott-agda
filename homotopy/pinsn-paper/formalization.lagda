@@ -4,9 +4,9 @@
 \section{Formalization}
 
 The calculation of $\pi_n(S^n)$ described in Sections~\ref{sec:pinsn}
-and \ref{sec:encode-decode} is in the file |homotopy/PiNSN.agda|; it is
+and \ref{sec:encode-decode} is in |homotopy/PiNSN.agda|; it is
 about 250 lines of code.  The loop space library described in
-Section~\ref{sec:loopspace} is in the files in the directory
+Section~\ref{sec:loopspace} is in 
 |lib/loopspace/|; it is about 1500 lines of code.  The proof of
 $\pi_n(S^n)$, including specifying the lemmas it uses from the loop
 space library, took a few days.  The loop space library then took a
@@ -30,8 +30,8 @@ get quite long, so it would be difficult to do these calculations, or to
 have confidence that they were done correctly, without the use of a
 proof checker.
 
-It is worth describing one key formalization technique that we developed for
-this proof, which is a combination of a mathematical and a pragmatic insight. 
+It is worth describing one new device that we developed for
+this proof, which is a combination of a mathematical and a engineering insight. 
 Often in this proof, we are manipulating paths that have the form 
 |p ∘ q ∘ ! p| (|q| conjugated by |p|),  
 where |q| is thought of as ``the actual path of interest'' and |p| is some
@@ -39,25 +39,24 @@ where |q| is thought of as ``the actual path of interest'' and |p| is some
 Early in the development of the proof, we got stuck, because manipulating
 these coercions explicitly gets quite cumbersome.  
 
-The pragmatic insight is that, if we define a function |adj p q| that
+The engineering insight is that, if we define a function |adj p q| that
 returns |p ∘ q ∘ !p|, but make it \emph{abstract} (i.e. hide its
-definition), then Agda will fill in in terms of the form
+definition), then Agda can fill in in terms of the form
 |adj _ q| in the middle of an equational calculation by unification.  By stating the
 coercions at the beginning and end of the proof, and using lemmas that
-propogate this information without explicitly mentioning it, we need not
+propagate this information without explicitly mentioning it, we need not
 state the coercions at each step of the proof.  Though |adj p q| is
 abstract, we export a propositional equality equating it to |p ∘ q ∘
 !p|, so that we can use this technique in the intermediate steps of a
 calculation; the overall theorem is the same. 
 
-The mathematical insight is that, in an equational calculation about
-elements of a doubly-iterated identity type (i.e. an equation whose
-subjects are at least paths between paths), for any coercions |q|
+The mathematical insight is that, for an element |p| of a
+doubly-iterated identity type (i.e. when |p| is at least a path between paths), for any coercions |q|
 and |q'| of the same type, |(q ∘ p ∘ ! q) = (q' ∘ p ∘ !q')|.  This is a
 consequence of the higher homotopy groups being abelian.  
 
 Combining these two insights, we can let Agda infer the coercions as we
-procede through the steps of the proof, and then, at the end, when we
+proceed through the steps of the proof, and then, at the end, when we
 need the inferred coercion to turn out to be a specific one, we simply
 apply the lemma.  As a practical matter, this technique for managing
 these coercions was essential to our being able to complete this proof.  
@@ -92,12 +91,12 @@ adj id (a x) ≃〈 ... 〉
 a x ∎
 \end{code}
 %
-Moreover, if we did not appeal to the fact that coercions give equal results,
+Moreover, if we did not appeal to the fact that any two coercions give equal results,
 it is unclear how we would even prove, between the second-to-last and
 third-to-last lines, that 
 \begin{code}
 ((ap^-id n (λ f₁ → f₁ x) ∘ ap (λ f' → apl n f' x) (λl-id n)) ∘ ap≃ (! (β n (λ x₁ → id^ n)))) = id
 \end{code}
-since the inferred coercion uses several loop space lemmas that are
-defined by induction on |n|, and it is unclear how to prove that they
-cancel each other.  
+The inferred coercion (the left-hand-side of this equation) uses
+several loop space lemmas that are defined by induction on |n|, and it
+is unclear how to prove that they cancel each other.
