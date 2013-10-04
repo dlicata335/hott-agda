@@ -32,7 +32,7 @@ $\dsd{id} : a = a$ (reflexivity of equality), inverse paths $\inv p : b
 = a$ when $p : a = b$ (symmetry of equality), and composition of paths
 $q \comp p : a = c$ when $p : a = b$ and $q : b = c$ (transitivity of
 equality), as well as homotopies relating these operations (for example,
-$id \comp p = p$), and homotopies relating these homotopies, etc.  This
+$\dsd{id} \comp p = p$), and homotopies relating these homotopies, etc.  This
 equips each type with the structure of a (weak)
 \emph{$\infty$-groupoid}, as studied in higher category
 theory~\citep{lumsdaine09omega,vandenberggarner10groupoids}.  In category theoretic terminology, the elements of
@@ -76,7 +76,7 @@ and one loop:
 \dsd{base} is a point (object) on the circle, and \dsd{loop} is a path
 (morphism) from \dsd{base} to itself.  That the circle is the free
 $\infty$-groupoid on these generators means that all the points, paths,
-homotopies, \ldots on the circle are constructed by applying the
+homotopies, etc.~on the circle are constructed by applying the
 $\infty$-groupoid operations to these generators in a free way.  The generator
 \dsd{loop} represents ``going around the circle once
 counter-clockwise.''  Using the groupoid operations, one can construct
@@ -189,8 +189,8 @@ the identity type:
 \[
 \begin{array}{rcl}
 \pi_1(X,x_0) & := & x_0 =_X x_0 \\
-\pi_2(X,x_0) & := & id_{{x_0}} =_{{(x_0 =_X x_0)}} id_{{x_0}} \\
-\pi_3(X,x_0) & := & id_{{id_{x_0}}} =_{(id_{{x_0}} =_{{x_0 =_X x_0}} id_{{x_0}})} id_{{id_{x_0}}} \\
+\pi_2(X,x_0) & := & \dsd{id}_{{x_0}} =_{{(x_0 =_X x_0)}} \dsd{id}_{{x_0}} \\
+\pi_3(X,x_0) & := & \dsd{id}_{{\dsd{id}_{x_0}}} =_{(\dsd{id}_{{x_0}} =_{{x_0 =_X x_0}} \dsd{id}_{{x_0}})} \dsd{id}_{{\dsd{id}_{x_0}}} \\
 \end{array}
 \]
 and so on.  However, these iterated identity types may still have
@@ -202,8 +202,8 @@ higher-dimensional structure of these types.  Thus, we first define the
 \[
 \begin{array}{rcl}
 \Omega^1(X,x_0) & := & x_0 =_X x_0 \\
-\Omega^2(X,x_0) & := & id_{{x_0}} =_{{(x_0 =_X x_0)}} id_{{x_0}} \\
-\Omega^3(X,x_0) & := & id_{{id_{x_0}}} =_{(id_{{x_0}} =_{{x_0 =_X x_0}} id_{{x_0}})} id_{{id_{x_0}}} \\
+\Omega^2(X,x_0) & := & \dsd{id}_{{x_0}} =_{{(x_0 =_X x_0)}} \dsd{id}_{{x_0}} \\
+\Omega^3(X,x_0) & := & \dsd{id}_{{\dsd{id}_{x_0}}} =_{(\dsd{id}_{{x_0}} =_{{x_0 =_X x_0}} \dsd{id}_{{x_0}})} \dsd{id}_{{\dsd{id}_{x_0}}} \\
 \end{array}
 \]
 and so on.  We write $\Omega(X,x_0)$ for $\Omega^1(X,x_0)$.  
@@ -220,9 +220,9 @@ with no higher structure---any two paths are homotopic) constructed by
 two paths between the same two points.  For a more leisurely
 introduction to these definitions, we refer the reader to previous work~\citep{ls13pi1s1,uf13hott-book}.
 
-Using these two ingredients, we can pose the question of calculating
-homotopy groups of spaces like the spheres:
-define a space $X$ as a
+Using these two ingredients, we can use homotopy type theory to
+calculate homotopy groups of spaces:
+define the space $X$ as a
 higher inductive type, and give
 a group isomorphism between the type $\pi_n(X,x_0)$ (with path
 composition as the group structure) and an explicit description of a
@@ -234,7 +234,7 @@ interesting for several reasons:
 
 \begin{itemize}
 
-\item Calculating $\pi_n(S^n)$ is a relatively easy theorem in algebraic
+\item Calculating $\pi_n(S^n)$ is a fairly easy theorem in algebraic
   topology (e.g. it would be covered in a first- or second-year graduate
   algebraic topology course), but it is more complex than many of the
   results that had previously been proved in homotopy type theory.  For
