@@ -123,68 +123,45 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
                                              ∘ transport-→-pre' (λ z0 → Path (inm z) z0) (gluer z') _)
     -}
 
-{-
-  -- ENH might be easier to do the uniqueness if written out as a coe with pathsfrom contractible
-  center : (z : Z) (w : W) (p : Path (inm z) w) → Codes z w p
-  center z ._ id = [ inm z , id ]
+  center :  (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) (α : Path (inm x1 y1 p1) w) → (Codes x1 y1 p1 w α)
+  center x1 y1 p1 .(inm x1 y1 p1) id = [ inm (id , ! (∘-assoc (! (gluel x1 y1 p1)) id (gluel x1 y1 p1)) ∘ ! (!-inv-l (gluel x1 y1 p1)))
+                                             (id , ! (∘-assoc (! (gluer x1 y1 p1)) id (gluer x1 y1 p1)) ∘ ! (!-inv-l (gluer x1 y1 p1)))
+                                             (id , {!!}) ] -- need definition of Codesm
 
-  Codes-contr : (z : Z) (w : W) (p : Path (inm z) w) → Contractible (Codes z w p)
-  Codes-contr z w p = center z w p , {!!}
-    
-  codes-r-connected : ConnectedMap i+j codes-r
-  codes-r-connected (z1 , y , p) = ntype (Codes-contr z1 (inr y) p)
+  Codes-contr : (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) (α : Path (inm x1 y1 p1) w) → Contractible (Codes x1 y1 p1 w α)
+  Codes-contr x1 y1 p1 w α = center x1 y1 p1 w α , {!the big diagram chase goes here!}
 
-  -- could use eq instead
-  glue-map-connected' : (z1 : Z) (y : Y) (p : inl (f z1) ≃ inr y) -> Contractible (Trunc i+j (HFiber glue-map (f z1 , y , p)))
-  glue-map-connected' z1 y p = {!fact1!} , {!TODO!} where
-    fact1 : Trunc i+j (HFiber glue-map (f z1 , y , (p ∘ ! (gluel z1)) ∘ gluel z1))
-    fact1 = extend i+j codes-r codes-r-connected
-              (λ {(z , y , p) → Trunc i+j (HFiber glue-map (f z , y , p ∘ gluel z)) , Trunc-level})
-              (λ { (z1 , z2 , p) → [ z2 , (coe (! (Path-Pullback inl inr)) (! p , id , {!OK!})) ] }) 
-              (z1 , y , p ∘ ! (gluel z1))
-  {-
-    -- didn't fill in the proof terms, but this works
-    eq' : ∀ z y p → (HFiber codes-r (z , y , p ∘ ! (gluel z)))
-                  ≃ (HFiber glue-map (f z , y , p)) 
-    eq' z y p = 
-           HFiber codes-r (z , y , p ∘ ! (gluel z)) ≃〈 {!!} 〉 
-           (Σ \ z1 → Σ \ z2 -> Σ \ (p12 : f z1 ≃ f z2) → codes-r (z1 , z2 , p12) ≃ (z , y , p ∘ ! (gluel z))) ≃〈 {!!} 〉 
-           (Σ \ z1 → Σ \ z2 -> Σ \ (p12 : f z1 ≃ f z2) → Path{Z×WY} (z1 , g z2 , (gluelr z2 ∘ ap inl p12 ∘ ! (gluel z1))) (z , y , p ∘ ! (gluel z))) ≃〈 {!!} 〉 
-
-           (Σ \ z2 ->
-            Σ \ (p12 : f z ≃ f z2) →
-            Σ \ (py : Path (g z2) y) → 
-                ap inr py ∘ (gluelr z2 ∘ ap inl p12 ∘ ! (gluel z))
-                ≃ p ∘ ! (gluel z)) ≃〈 {!!} 〉 -- rearrange; the ! comes from p12 and p12' being flipped
-
-            (Σ \ z2 ->
-             Σ \ (p12' : f z2 ≃ f z) ->
-             Σ \ (py : g z2 ≃ y) → 
-               ap inr py ∘ gluelr z2 ≃ p ∘ ap inl p12') ≃〈 {!!} 〉
-
-            (Σ \ z2 -> Path{X×WY} (f z2 , g z2 , gluelr z2) (f z , y , p)) ≃〈 id 〉
-            (_ ∎)
-
-    eq : Step2-∞Topos ≃ Step2-TT 
-    eq = ap {M = \ z y → (p : inm z ≃ inr y) → Contractible (Trunc i+j (HFiber codes-r (z , y , p)))} 
-            (λ B → (z : Z) (y : Y) → B z y)
-            (λ≃ (λ z → λ≃ (λ y → apΠ' (pre∘-equiv (gluel z))
-                                       (λ p → ap (λ A → Contractible (Trunc i+j A)) (eq' z y p)))))
-  -}
--}
+  cπ1 : ConnectedMap i {Σ \ x -> Σ \ y → P x y}{X} fst
+  cπ1 = λ x → {!cf x!} -- and contract with J
 
   glue-map-total : (Σ \ x → Σ \ y → P x y) → Σ \ x → Σ \ y → Path{W} (inl x) (inr y)
   glue-map-total (x , y , p) = (x , y , glue-map x y p)
+  
+  glue-map-connected''' : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
+                      → (y : Y) (α : Path {W} (inm x1 y1 p1) (inr y))
+                      → Contractible (Trunc i+j (Σ \ (p2 : P x1 y) → glue-map x1 y p2 == α ∘ ! (gluel x1 y1 p1)))
+  glue-map-connected''' x1 y1 p1 y = Codes-contr x1 y1 p1 (inr y)
 
-  glue-map-connected : ((x : X) (y : Y) (p : Path{W} (inl x) (inr y)) 
-            → Contractible (Trunc i+j (HFiber glue-map-total (x , y , p))))
-  glue-map-connected = {!!}
-    -- extend i f cf
-    --                    (λ x' →
-    --                      ((y' : _) (p' : _) → Contractible (Trunc i+j (HFiber glue-map (x' , y' , p')))) ,
-    --                        raise-HProp (Πlevel (λ _ → Πlevel (λ _ → Contractible-is-HProp _))))
-    --                    glue-map-connected'
+  glue-map-connected'' : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
+                      → (y : Y) (α : Path {W} (inm x1 y1 p1) (inr y))
+                      → Contractible (Trunc i+j (HFiber glue-map-total (x1 , y , α ∘ ! (gluel x1 y1 p1))))
+  glue-map-connected'' = {!glue-map-connected''!} -- simplify HFiber of projections 
 
+  glue-map-connected' : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
+                      → (y : Y) (α : Path {W} (inl x1) (inr y))
+                      → Contractible (Trunc i+j (HFiber glue-map-total (x1 , y , α)))
+  glue-map-connected' = {!glue-map-connected''!}   -- because composition with ! (gluel x1 y1 p1) is an equivalence
+
+  glue-map-connected : ((x : X) (y : Y) (α : Path{W} (inl x) (inr y)) 
+            → Contractible (Trunc i+j (HFiber glue-map-total (x , y , α))))
+  glue-map-connected x y α = extend i fst cπ1
+                               (λ x' →
+                                  ((y' : _) (p' : _) →
+                                   Contractible (Trunc i+j (HFiber glue-map-total (x' , y' , p'))))
+                                  ,
+                                  raise-HProp
+                                  (Πlevel (λ _ → Πlevel (λ _ → Contractible-is-HProp _))))
+                               (λ p₁ → glue-map-connected' (fst p₁) (fst (snd p₁)) (snd (snd p₁))) x y α
 
   theorem : ConnectedMap i+j glue-map-total
   theorem (x , y , p) = ntype (glue-map-connected x y p)
