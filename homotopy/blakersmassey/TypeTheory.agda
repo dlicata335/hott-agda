@@ -78,6 +78,17 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   codes-r : (x1 : X) (y1 : Y) (p1 : P x1 y1) (y2 : Y) (α : Path{W} (inm x1 y1 p1) (inr y2)) → Type
   codes-r x1 y1 p1 y2 α = Σ (λ (p2 : P x1 y2) → glue-map x1 y2 p2 == α ∘ ! (gluel x1 y1 p1))
 
+  -- TRANSLATION:
+  -- the left and right are the translation of the inl and inr cases of the old codes-m
+  -- the P is part of the translation of the 
+  codes-m : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
+            (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
+  codes-m x1 y1 p1 x2 y2 p2 α = Pushout {Σ (λ (p : x1 == x2) → α == ! (gluel x2 y2 p2) ∘ ap inl p ∘ gluel x1 y1 p1)}
+                                        {Σ (λ (q : y1 == y2) → α == ! (gluer x2 y2 p2) ∘ ap inr q ∘ gluer x1 y1 p1)}
+                                        (λ pα1 qα2 → (transport (λ (pr : X × Y) → P (fst pr) (snd pr))
+                                                       (pair×≃ (fst pα1) (fst qα2)) p1 == p2)
+                                                     × {! some condition about snd pα1 and snd pα2 ? !} )
+
 {-
   -- source of Codes middle map
   CM = Pushout{Z}{Z×XZ}{Z×YZ} (λ z → z , z , id) (λ z → z , z , id)
@@ -89,158 +100,12 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
                            (λ z → ap (λ p → z , z , p) (!-inv-r (gluel z) ∘ ∘-assoc (gluel z) id (! (gluel z))))
                            (λ z → ap (λ p → z , z , p) (! (!-inv-l (gluer z) ∘ ∘-assoc (! (gluer z)) id (gluer z))))
 
-  module Codes-glue where
-{-
-      CM' : Z → Type
-      CM' z1 = Wedge {Σ (λ z2 → f z1 ≃ f z2)} {Σ (λ z2 → g z1 ≃ g z2)} (z1 , id) (z1 , id)
-  
-      module CM≃CM' where
-
-        to : CM → Σ CM'
-        to = Pushout-rec (λ {(z1 , z2 , p) → z1 , inl (z2 , p)})
-                                (λ z → z , inl (z , id))
-                                (λ {(z1 , z2 , p) → z1 , inr (z2 , p)})
-                                (λ _ → id)
-                                (λ z → pair≃ id (gluer _ ∘ gluel _))
-
-        from : Σ CM' → CM
-        from (z , w) = Pushout-rec (λ {(z2 , p) → inl (z , z2 , p)})
-                                      (λ _ → inm z) 
-                                      (λ {(z2 , p) → inr (z , z2 , p)})
-                                      (λ _ → gluel z)
-                                      (λ _ → gluer z)
-                                      w
-
-        abstract
-          from-to : ∀ x -> from (to x) ≃ x
-          from-to = Pushout-elim _ (λ _ → id) (λ z → gluel z) (λ _ → id)
-                                (λ z →
-                                     transport (λ z' → from (to z') ≃ z') (gluel z) id ≃〈 transport-Path (from o to) (λ x → x) (gluel z) id 〉
-                                     ap (λ x → x) (gluel z) ∘ id ∘ ! (ap (from o to) (gluel z)) ≃〈 ap (λ q → q ∘ id ∘ ! (ap (from o to) (gluel z))) (ap-id (gluel z)) 〉
-                                     (gluel z) ∘ id ∘ ! (ap (from o to) (gluel z)) ≃〈 ∘-assoc (gluel z) id (! (ap (from o to) (gluel z))) 〉
-                                     (gluel z) ∘ ! (ap (from o to) (gluel z)) ≃〈 ap (λ q → gluel z ∘ ! q) (idl z) 〉
-                                     gluel z ∎)
-                                (λ z →
-                                     transport (λ z' → Path (from (to z')) z') (gluer z) (gluel z) ≃〈 transport-Path (from o to) (\ x -> x) (gluer z) _ 〉 
-                                     ap (λ x → x) (gluer z) ∘ gluel z ∘ ! (ap (from o to) (gluer z)) ≃〈 ap (λ q → q ∘ gluel z ∘ ! (ap (from o to) (gluer z))) (ap-id (gluer z))〉
-                                     (gluer z) ∘ gluel z ∘ ! (ap (from o to) (gluer z)) ≃〈 ∘-assoc (gluer z) (gluel z) (! (ap (from o to) (gluer z)))〉  
-                                     ((gluer z) ∘ gluel z) ∘ ! (ap (from o to) (gluer z)) ≃〈 ap (\ x -> ((gluer z) ∘ gluel z) ∘ ! x) (idr z) 〉  
-                                     ((gluer z) ∘ gluel z) ∘ ! ((gluer z) ∘ gluel z) ≃〈 !-inv-r ((gluer z) ∘ gluel z) 〉  
-                                     id ∎) where
-                  idl : (z : _) → (ap (from o to) (gluel z)) ≃ id
-                  idl z = (ap (from o to) (gluel z)) ≃〈 ap-o from to (gluel z)  〉
-                          (ap from (ap to (gluel z))) ≃〈 {!β!}  〉
-                          id ∎
-  
-                  idr : (z : _) → (ap (from o to) (gluer z)) ≃ gluer z ∘ gluel z
-                  idr z = (ap (from o to) (gluer z)) ≃〈 ap-o from to (gluer z)  〉
-                          (ap from (ap to (gluer z))) ≃〈 {!β!}  〉
-                          (ap from (pair≃ id (gluer _ ∘ gluel _))) ≃〈 {!! (∘-Σ id id (gluer _) (gluel _))!}  〉
-                          (ap from (pair≃ id (gluer _) ∘ (pair≃ id (gluel _)))) ≃〈 ap-∘ from (pair≃ id (gluer _)) (pair≃ id (gluel _))  〉
-                          (ap from (pair≃ id (gluer _)) ∘ ap from (pair≃ id (gluel _))) ≃〈 {!β!}  〉
-                          (gluer z ∘ ap from (pair≃ id (gluel _))) ≃〈 {!β!}  〉
-                          gluer z ∘ gluel z ∎
-  
-          to-from : ∀ x -> to (from x) ≃ x
-          to-from (z , w) = Pushout-elim (\ w -> to (from (z , w)) ≃ (z , w))
-                                         (λ _ → id) (λ z' → pair≃ id (gluel z')) (λ _ → id)
-                                         {!OK!} {!OK!} w
-
-        eqv : Equiv CM (Σ CM')
-        eqv = improve (hequiv to from from-to to-from)
-
-        path : CM ≃ (Σ CM')
-        path = ua eqv
-
-      cΣ1 : ∀ z → Connected i (Σ (λ z2 → f z ≃ f z2))
-      cΣ1 z = transport (Connected i) (apΣ' id-equiv (λ z' → flip≃)) (cf (f z))
-
-      cΣ2 : ∀ z → Connected j (Σ (λ z2 → g z ≃ g z2))
-      cΣ2 z = transport (Connected j) (apΣ' id-equiv (λ z' → flip≃)) (cg (g z))
-  
-      CM'-to-prod : ∀ z -> CM' z -> (Σ (λ z2 → f z ≃ f z2)) × (Σ (λ z2 → g z ≃ g z2))
-      CM'-to-prod z = wedge-to-prod
-
-      CM'-to-prod-connected : ∀ z → ConnectedMap i+j (CM'-to-prod z)
-      CM'-to-prod-connected z = WedgeToProd.ci _ _ (cΣ1 z) (cΣ2 z)
--}
-      Z×XZ×YZ = Σ \ z -> (Σ (λ z2 → f z ≃ f z2)) × (Σ (λ z2 → g z ≃ g z2))
-{-
-      ΣCM'-to-prod : Σ CM' → Z×XZ×YZ
-      ΣCM'-to-prod = fiberwise-to-total CM'-to-prod
-
-      CM-to-prod : CM → Z×XZ×YZ
-      CM-to-prod = ΣCM'-to-prod o CM≃CM'.to
-
-      CM-to-prod-connected : ConnectedMap i+j CM-to-prod
-      CM-to-prod-connected = transport (\ (p : Σ \(A : Type) → A → Z×XZ×YZ) → ConnectedMap i+j (snd p))
-                                       (pair≃ (! CM≃CM'.path)
-                                              ((ap (λ x → fiberwise-to-total CM'-to-prod o x) (type≃β CM≃CM'.eqv ∘ ap coe (!-invol CM≃CM'.path))) ∘ transport-→-pre (! CM≃CM'.path) _)) 
-                                       (fiberwise-to-total-connected i+j CM'-to-prod CM'-to-prod-connected)
--}
---        PB-r = Σ \ (p1 : Z×WZ) → Σ \ (p2 : Z×XZ) → codes-r p2 ≃ g2 p1
-
-      module Prod≃Pullback-L where
-        PB-l = Pullback codes-l f2 
-
-        -- could do this by (1) writing maps and checking composites
-        --                  (2) chain of type equivalences, but will be annoying to calculate that the map is right
-        --                  (3) showing universal property of pullback
-
-        postulate
-          FIXME : ∀ {A} → A
-
-        prod-pb : Z×XZ×YZ → PB-l
-        prod-pb (z1 , (z2 , p2) , (z3 , p3)) = (z3 , z1 , !  p3) , 
-                                                (z3 , z2 , gluel z2 ∘ ap inl p2 ∘ ! (gluel z1) ∘ ! (gluer z1) ∘ ! (ap inr p3) ∘ gluer z3) , 
-                                                coe (! (Path-Pullback inm inl)) (id , p2 , FIXME)
-
-        mutual
-          pb-prod' : ∀ z1 z2 (p : inm z1 ≃ inm z2) z3 z4 (q : _) → 
-                       (Σ \ (s : z3 ≃ z1) → Σ \ (t : (f z4) ≃ (f z2)) → 
-                             (ap inl t ∘ ! (gluer z4 ∘ gluel z4) ∘ ap inr q ∘ gluer z3)
-                           ≃ ((! (gluel z2) ∘ p) ∘ ap inm s))
-                     → Z×XZ×YZ
-          pb-prod' z1 z2 p .z1 z4 q (id , t , w) = z4 , (z2 , t) , z1 , ! q  -- doesn't use p and w 
-  
-          pb-prod : PB-l → Z×XZ×YZ
-          pb-prod ((z3 , z4 , q) , (z1 , z2 , p) , r) = pb-prod' z1 z2 p z3 z4 q (coe (Path-Pullback _ _) r)
-
-
-        comp1 : (x : _) → pb-prod (prod-pb x) ≃ x
-        comp1 (z1 , (z2 , p2) , (z3 , p3)) =
-          (pb-prod (prod-pb (z1 , (z2 , p2) , z3 , p3))) ≃〈 id 〉 
-          pb-prod' z3 z2 (gluel z2 ∘ ap inl p2 ∘ ! (gluel z1) ∘ ! (gluer z1) ∘ ! (ap inr p3) ∘ gluer z3)
-                   z3 z1 (! p3) (coe (Path-Pullback inm inl {z3}{z3}{f z1}{f z2}{ ! (gluelr z1) ∘ ap inr (! p3) ∘ gluer z3}) (coe (! (Path-Pullback inm inl)) (id , p2 , FIXME))) ≃〈 ap (pb-prod' z3 z2 (gluel z2 ∘ ap inl p2 ∘ ! (gluel z1) ∘ ! (gluer z1) ∘ ! (ap inr p3) ∘ gluer z3) z3 z1 (! p3)) (ap≃ (transport-inv-2 (λ x → x) (Path-Pullback inm inl {z3} {z3} {f z1} {f z2} { ! (gluelr z1) ∘ ap inr (! p3) ∘ gluer z3}))) 〉 
-          (z1 , (z2 , p2) , z3 , ! (! p3)) ≃〈 pair≃ id (pair≃ id (pair≃ id (!-invol p3))) 〉
-          (z1 , (z2 , p2) , z3 , p3) ∎
-
-        comp2 : (x : _) → prod-pb (pb-prod x) ≃ x
-        comp2 = {!!} 
-
-
-        prod≃pb-l : PB-l ≃ Z×XZ×YZ
-        prod≃pb-l = {!!}
-
-
-{-      
-  
-      eqvmr : (z z' : Z) (p : inm z ≃ inm z')
-        → Equiv (Trunc i+j (HFiber codes-m (z , z' , p)))
-                (Trunc i+j (HFiber codes-r (g2 (z , z' , p))))
-      eqvmr z z' p = {!!}
-
-      eqvlm : (z z' : Z) (p : inm z ≃ inm z')
-        → Equiv (Trunc i+j (HFiber codes-l (f2 (z , z' , p))))
-                (Trunc i+j (HFiber codes-m (z , z' , p)))
-      eqvlm z z' p = {!!}
--}
 -}
 
   Codes : (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) → Path (inm x1 y1 p1) w → Type
   Codes x1 y1 p1 = Pushout-elim _ 
                          (λ x2 α → Trunc i+j (codes-l x1 y1 p1 x2 α)) 
-                         {!!} -- (λ z' p → Trunc i+j (HFiber codes-m (z , z' , p)))
+                         (λ x2 y2 p2 α → Trunc i+j (codes-m x1 y1 p1 x2 y2 p2 α)) 
                          (λ y2 α → Trunc i+j (codes-r x1 y1 p1 y2 α))
                          {!!}
                          {!!}
