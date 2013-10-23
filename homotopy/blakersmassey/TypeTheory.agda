@@ -82,6 +82,7 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   -- TRANSLATION:
   -- the left and right are the translation of the inl and inr cases of the old codes-m
   -- the P is part of the translation of the 
+{-
   codes-m : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
             (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
   codes-m x1 y1 p1 x2 y2 p2 α = Pushout {Σ (λ (p : x1 == x2) → α == ! (gluel x2 y2 p2) ∘ ap inl p ∘ gluel x1 y1 p1)}
@@ -90,6 +91,42 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
                                                        (pair×≃ (fst pα1) (fst qα2)) p1 == p2)
                                                      × {! some condition about snd pα1 and snd pα2 ? !} )
 
+-}
+
+  CM : Type
+  CM = LowFat0%Fiber.Pushout
+      { Σ (λ x → Σ (λ y → P x y)) }
+      { Σ (λ (x1' : X) → Σ (λ (y' : Y) → Σ (λ (x2' : X) → P x1' y' × P x2' y'))) }
+      { Σ (λ (y1' : Y) → Σ (λ (x' : X) → Σ (λ (y2' : Y) → P x' y1' × P x' y2'))) } 
+      (λ {(x , (y , z)) → (x , (y , (x , (z , z))))})
+      (λ {(x , (y , z)) → (y , (x , (y , (z , z))))})
+
+  codes-m-map : CM → Σ \ (x1 : X) → Σ \ (y1 : Y) -> Σ \ (p1 : P x1 y1) -> 
+                     Σ \ (x2 : X) → Σ \ (y2 : Y) -> Σ \ (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) 
+  codes-m-map = (Pushout.Pushout-rec
+        { C = Σ (λ (x1' : X) → Σ (λ (y1' : Y) → Σ (λ (z11' : P x1' y1') →
+              Σ (λ (x2' : X) → Σ (λ (y2' : Y) → Σ (λ (z22' : P x2' y2') →
+              Path {W} (inm _ _ z11') (inm _ _ z22'))))))) }
+        (λ {(x1' ,(y1' ,(x2' , (z11' , z21'))))
+          → (x1' ,(y1' ,(z11' ,(x2' ,(y1' ,(z21' ,
+               (! (gluer _ _ z21')) ∘ (gluer x1' y1' z11'))))))) })
+        (λ {(y1' ,(x1' ,(y2' , (z11' , z12'))))
+          → (x1' ,(y1' ,(z11' ,(x1' ,(y2' ,(z12' ,
+               (! (gluel _ _ z12')) ∘ gluel _ _ z11')))))) }) 
+        (λ z → ap
+                 (λ h →
+                    fst z ,
+                    fst (snd z) , snd (snd z) , fst z , fst (snd z) , snd (snd z) , h)
+                 (! (! (!-inv-l (gluer _ _ _)) ∘ !-inv-l (gluel _ _ _)))))
+
+  codes-m : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
+            (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
+  codes-m x1 y1 p1 x2 y2 p2 α = Σ (λ
+    (zzz : CM)
+    → (codes-m-map zzz  
+      == ((x1 ,(y1 ,(p1 ,(x2 ,(y2 ,(p2 , α))))))) ))
+
+{-
 {-
   -- source of Codes middle map
   CM = Pushout{Z}{Z×XZ}{Z×YZ} (λ z → z , z , id) (λ z → z , z , id)
@@ -125,9 +162,11 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
     -}
 
   center :  (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) (α : Path (inm x1 y1 p1) w) → (Codes x1 y1 p1 w α)
-  center x1 y1 p1 .(inm x1 y1 p1) id = [ inm (id , ! (∘-assoc (! (gluel x1 y1 p1)) id (gluel x1 y1 p1)) ∘ ! (!-inv-l (gluel x1 y1 p1)))
-                                             (id , ! (∘-assoc (! (gluer x1 y1 p1)) id (gluer x1 y1 p1)) ∘ ! (!-inv-l (gluer x1 y1 p1)))
-                                             (id , {!!}) ] -- need definition of Codesm
+  center x1 y1 p1 .(inm x1 y1 p1) id = [ (LowFat0%Fiber.inl (x1 , (y1 , (x1 , (p1 , p1))))) , 
+                                         (ap (λ z → x1 , y1 , p1 , x1 , y1 , p1 , z) (!-inv-l (gluer x1 y1 p1))) ] 
+                                         -- [ inm (id , ! (∘-assoc (! (gluel x1 y1 p1)) id (gluel x1 y1 p1)) ∘ ! (!-inv-l (gluel x1 y1 p1)))
+                                         --       (id , ! (∘-assoc (! (gluer x1 y1 p1)) id (gluer x1 y1 p1)) ∘ ! (!-inv-l (gluer x1 y1 p1)))
+                                         --      (id , {!!}) ] -- need definition of Codesm
 
   Codes-contr : (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) (α : Path (inm x1 y1 p1) w) → Contractible (Codes x1 y1 p1 w α)
   Codes-contr x1 y1 p1 w α = center x1 y1 p1 w α , {!the big diagram chase goes here!}
@@ -166,3 +205,4 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
 
   theorem : ConnectedMap i+j glue-map-total
   theorem (x , y , p) = ntype (glue-map-connected x y p)
+-}
