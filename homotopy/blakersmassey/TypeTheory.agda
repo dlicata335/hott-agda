@@ -1,89 +1,21 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude
-open FatPushout
+open FatPushoutFib
 open ConnectedMap
 open Truncation
 
--- P : X → Y → Type
--- Z = Σ x,y.Z x y
--- f = π1 
--- g = π1 o π2
--- for each x:X, { y:Y & z:P x y } is i-connected
-module homotopy.blakersmassey.ooTopos (Z X Y : Type) 
-                                      (i' j' : _)
-                                      (f : Z → X) (g : Z → Y)
-                                      (cf : ConnectedMap (S i') f) (cg : ConnectedMap (S j') g) where
-  -- FIXME move
-  Pullback : ∀ {Z X Y : Type} → (f : X → Z) (g : Y → Z) → Type
-  Pullback {_}{X}{Y} f g = Σ \ x -> Σ \ y -> f x ≃ g y
-
-  Path-Pullback-Type : ∀ {Z X Y : Type} → (f : X → Z) (g : Y → Z) → 
-                       (x x' : X) (y y' : Y) (p : f x ≃ g y) (p' : f x' ≃ g y')
-                  → Type
-  Path-Pullback-Type f g x x' y y' p p' = Σ \(px : Path x x') -> Σ \(py : Path y y') → ap g py ∘ p ≃ p' ∘ ap f px
-
-  postulate
-    Path-Pullback : ∀ {Z X Y : Type} → (f : X → Z) (g : Y → Z) → 
-                    ∀ {x x' y y' p p'} 
-                    → Path{Pullback f g} (x , y , p) (x' , y' , p')
-                    ≃ Path-Pullback-Type f g x x' y y' p p'
---  Path-Pullback f g = {!!}
-
-{-
-
-  fiberwise-to-total : ∀ {A} {B1 B2 : A → Type} (f : ∀ a → B1 a → B2 a) → Σ B1 → Σ B2
-  fiberwise-to-total f (a , b) = (a , f a b)
- 
-  fiberwise-to-total-connected : ∀ n {A} {B1 B2 : A → Type} (f : ∀ a → B1 a → B2 a)
-       → (∀ a → ConnectedMap n (f a))
-       → ConnectedMap n (fiberwise-to-total f)
-  fiberwise-to-total-connected n f cf (a , b2) = transport (λ A → NType -2 (Trunc n A))
-                                   (! (({!commute and path induction!} ∘ apΣ' id-equiv (λ a' → apΣ' id-equiv (λ b1 → ! ΣPath.path))) ∘ Σassoc.path))
-                                   (cf a b2)
-
-  module ConnectedMapOnFibers 
-               (n : _) {A B C : _} (h : C → B) 
-               (f : B → A) (g : C → A) 
-               (α : f o h ≃ g)
-               (ch : ConnectedMap n h)
-               (a : A) where
-
-    h' : HFiber g a → HFiber f a
-    h' (c , p) = h c , p ∘ ap≃ α
-
-    h'-connected-ump : ConnectedMapUMP n h'
-    h'-connected-ump P br = (λ {(b , p) → ext b p}) ,
-                            ext-β where
-      ext : (b : B) → (p : Path (f b) a) → fst (P (b , p))
-      ext = ConnectedMap.extend n h ch
-               (\ b -> ((p : _) → fst (P (b , p))) , Πlevel (\ p -> snd (P (b , p))))
-               (λ c (p : f (h c) ≃ a) → transport (\ p -> fst (P (h c , p)))
-                                                  (!-inv-l-back p (ap≃ α) ∘ ! (∘-assoc p (! (ap≃ α)) (ap≃ α)))
-                                                  (br (c , p ∘ ! (ap≃ α))))
-
-      ext-β : (x : HFiber g a) → ext (fst (h' x)) (snd (h' x)) ≃ br x
-      ext-β (c , p) =   adjustment ∘ 
-                        ap≃
-                        (extendβ n h ch
-                         (λ b →
-                            ((p' : _) → fst (P (b , p'))) , Πlevel (λ p' → snd (P (b , p'))))
-                         (λ c' (p' : f (h c') ≃ a) →
-                            transport (λ p0 → fst (P (h c' , p0)))
-                            (!-inv-l-back p' (ap≃ α) ∘ ! (∘-assoc p' (! (ap≃ α)) (ap≃ α)))
-                            (br (c' , p' ∘ ! (ap≃ α))))
-                         c)
-                        {p ∘ ap≃ α} where
-       adjustment : (transport (λ p0 → fst (P (h c , p0)))
-                          (!-inv-l-back (p ∘ ap≃ α) (ap≃ α) ∘
-                           ! (∘-assoc (p ∘ ap≃ α) (! (ap≃ α)) (ap≃ α)))
-                          (br (c , (p ∘ ap≃ α) ∘ ! (ap≃ α))))
-               ≃ (br (c , p))
-       adjustment = apd (λ p' → br (c , p'))
-                        (!-inv-r-back p (ap≃ α) ∘ !(∘-assoc p (ap≃ α) (! (ap≃ α))))
-                    ∘ {!!}
+{- TRANASLATION GUIDE:
+ P : X → Y → Type
+ Z = Σ x,y. P x y
+ f : Z → X = π1 
+ g : Z → Y = π1 o π2
+ cf is equivalent to f (i.e. π1) being connected, and similarly for cg
 -}
-
+module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
+                                         (i' j' : _)
+                                         (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
+                                         (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where
 
   i : TLevel
   i = S i'
@@ -93,38 +25,60 @@ module homotopy.blakersmassey.ooTopos (Z X Y : Type)
 
   i+j = plus2 i' j'
 
-  W = Pushout f g -- TODO: pushout for predicate
+  W = Pushout P
                                        
-  X×WY = Pullback{W} inl inr -- ∀ (x , y) → P x y → inl x == inr y
-  gluelr : (z : Z) → Path{W} (inl (f z)) (inr (g z))
-  gluelr z = gluer z ∘ gluel z
+  glue-map : (x : X) (y : Y) → P x y → Path{W} (inl x) (inr y)
+  glue-map x y p = gluer x y p ∘ gluel x y p
 
-  glue-map : Z → X×WY 
-  glue-map z = (f z , g z , gluelr z)
-
+{- For the translation guides:
   Z×WY = Pullback{W} inm inr
   Z×WX = Pullback{W} inm inl
   Z×WZ = Pullback{W} inm inm
 
-  g2 : Z×WZ → Z×WY
-  g2 (z1 , z2 , p) = z1 , g z2 , gluer z2 ∘ p
-
-  f2 : Z×WZ → Z×WX
-  f2 (z1 , z2 , p) = z1 , f z2 , ! (gluel z2) ∘ p
-
   Z×XZ = Pullback{X} f f 
   Z×YZ = Pullback{Y} g g 
+-}
 
+  -- TRANSLATION GUIDE: 
+  -- ZxXZ → ZxWX
+  -- expands to (x1,y1,p1) (x2,y2,p2) (p3 : y1 = y2) ->
+  --            (x1,y1,p1) x2 such that inm(x1,y1,p1) == inl x2
+  -- the map here was (z1 , z2 , p) = z1 , f z2 , ! (gluelr z2) ∘ ap inr p ∘ gluer z1
+  -- 
+  -- so the hfiber of this is those 
+  --    x1 y1 p1 x2 α as below
+  -- such that there exist (x1',y1',p1') (x2',y2',p2') (p3' : y1' = y2')
+  --    such that ((x1,y1,p1),x2,α) == ((x1',y1',p1'),x2',!(gluelr x2' y2' p2') ∘ ap inr p3' ∘ gluer x1' y1' p1')
+  --
+  -- breaking apart the path in the Σ
+  -- the hfiber of this is those 
+  --    x1 y1 p1 x2 α as below
+  -- such that there exist (x1',y1',p1') (x2',y2',p2') (p3' : y1' = y2') where
+  --    (x1,y1,p1) == (x1',y1',p1')
+  --    x2 == x2'
+  --    α = !(gluelr x2' y2' p2') ∘ ap inr p3' ∘ gluer x1' y1' p1'
+  --
+  -- so we can contract away x1' y1' p1' x2' y2' by path induction, unifying
+  --    x1 = x1'
+  --    y1 = y1' = y2'
+  --    p1 = p1'
+  --    x2 = x2'
+  --    p3 = refl
+  -- which reduces the formula to 
+  -- there exist p2' such that
+  --    α = !(gluelr x2 y1 p2') ∘ gluer x1 y1 p1
+  --
+  -- is this where we stop, or is there more simplification to do?  
+  
+  codes-l : (x1 : X) (y1 : Y) (p1 : P x1 y1) (x2 : X) (α : Path{W} (inm x1 y1 p1) (inl x2)) → Type
+  codes-l x1 y1 p1 x2 α = Σ (λ (p2' : P x2 y1) → α == ! (glue-map x2 y1 p2') ∘ gluer x1 y1 p1)
 
-  -- note: could rewrite these as maps of fibrations, since they leave fst unchanged,
-  -- but that didn't seem to help much.  
-
+{-
   codes-r : Z×XZ → Z×WY
   codes-r (z1 , z2 , p) = z1 , g z2 , (gluelr z2 ∘ ap inl p ∘ ! (gluel z1))
+-}
 
-  codes-l : Z×YZ → Z×WX -- g z' = f z 
-  codes-l (z1 , z2 , p) = z1 , f z2 , ! (gluelr z2) ∘ ap inr p ∘ gluer z1
-
+{-
   -- source of Codes middle map
   CM = Pushout{Z}{Z×XZ}{Z×YZ} (λ z → z , z , id) (λ z → z , z , id)
 
@@ -281,12 +235,13 @@ module homotopy.blakersmassey.ooTopos (Z X Y : Type)
                 (Trunc i+j (HFiber codes-m (z , z' , p)))
       eqvlm z z' p = {!!}
 -}
+-}
 
-  Codes : (z : Z) (w : W) → Path (inm z) w → Type
-  Codes z = Pushout-elim _ 
-                         (λ x p → Trunc i+j (HFiber codes-l (z , x , p))) 
-                         (λ z' p → Trunc i+j (HFiber codes-m (z , z' , p)))
-                         (λ y p → Trunc i+j (HFiber codes-r (z , y , p)))
+  Codes : (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) → Path (inm x1 y1 p1) w → Type
+  Codes x1 y1 p1 = Pushout-elim _ 
+                         (λ x2 α → Trunc i+j (codes-l x1 y1 p1 x2 α)) 
+                         {!!} -- (λ z' p → Trunc i+j (HFiber codes-m (z , z' , p)))
+                         {!!} -- (λ y p → Trunc i+j (HFiber codes-r (z , y , p)))
                          {!!}
                          {!!}
                          -- (λ z' →
@@ -303,12 +258,13 @@ module homotopy.blakersmassey.ooTopos (Z X Y : Type)
                                              ∘ transport-→-pre' (λ z0 → Path (inm z) z0) (gluer z') _)
     -}
 
+{-
   -- ENH might be easier to do the uniqueness if written out as a coe with pathsfrom contractible
   center : (z : Z) (w : W) (p : Path (inm z) w) → Codes z w p
   center z ._ id = [ inm z , id ]
 
   Codes-contr : (z : Z) (w : W) (p : Path (inm z) w) → Contractible (Codes z w p)
-  Codes-contr z w p = center z w p , {!HFiber codes-l!}
+  Codes-contr z w p = center z w p , {!!}
     
   codes-r-connected : ConnectedMap i+j codes-r
   codes-r-connected (z1 , y , p) = ntype (Codes-contr z1 (inr y) p)
@@ -350,15 +306,20 @@ module homotopy.blakersmassey.ooTopos (Z X Y : Type)
             (λ≃ (λ z → λ≃ (λ y → apΠ' (pre∘-equiv (gluel z))
                                        (λ p → ap (λ A → Contractible (Trunc i+j A)) (eq' z y p)))))
   -}
+-}
+
+  glue-map-total : (Σ \ x → Σ \ y → P x y) → Σ \ x → Σ \ y → Path{W} (inl x) (inr y)
+  glue-map-total (x , y , p) = (x , y , glue-map x y p)
 
   glue-map-connected : ((x : X) (y : Y) (p : Path{W} (inl x) (inr y)) 
-            → Contractible (Trunc i+j (HFiber glue-map (x , y , p))))
-  glue-map-connected = extend i f cf
-                       (λ x' →
-                         ((y' : _) (p' : _) → Contractible (Trunc i+j (HFiber glue-map (x' , y' , p')))) ,
-                           raise-HProp (Πlevel (λ _ → Πlevel (λ _ → Contractible-is-HProp _))))
-                       glue-map-connected'
+            → Contractible (Trunc i+j (HFiber glue-map-total (x , y , p))))
+  glue-map-connected = {!!}
+    -- extend i f cf
+    --                    (λ x' →
+    --                      ((y' : _) (p' : _) → Contractible (Trunc i+j (HFiber glue-map (x' , y' , p')))) ,
+    --                        raise-HProp (Πlevel (λ _ → Πlevel (λ _ → Contractible-is-HProp _))))
+    --                    glue-map-connected'
 
-  theorem : ConnectedMap i+j glue-map
+
+  theorem : ConnectedMap i+j glue-map-total
   theorem (x , y , p) = ntype (glue-map-connected x y p)
-

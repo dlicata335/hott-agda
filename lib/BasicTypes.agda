@@ -36,6 +36,7 @@ module lib.BasicTypes where
   open import lib.NConnected public
   open import lib.Pushout public
   open import lib.PushoutFat public
+  open import lib.PushoutFatFib public
 
   open import lib.Group public
 
