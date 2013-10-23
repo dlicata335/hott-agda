@@ -1,6 +1,7 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.First
+open import lib.Nat
 
 module lib.Sums where
 
@@ -9,6 +10,10 @@ module lib.Sums where
   data Either (a : Set) (b : Set) : Set where
     Inl : a -> Either a b
     Inr : b -> Either a b
+
+  data Fin : Nat → Set where
+    Z : ∀ {n} → Fin (S n) 
+    S : ∀ {n} → Fin n → Fin (S n)
 
   module Sums where
     case : {A B : Type} (C : Either A B → Type) 

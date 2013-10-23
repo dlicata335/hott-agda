@@ -5,6 +5,11 @@ open FatPushout
 open ConnectedMap
 open Truncation
 
+-- P : X → Y → Type
+-- Z = Σ x,y.Z x y
+-- f = π1 
+-- g = π1 o π2
+-- for each x:X, { y:Y & z:P x y } is i-connected
 module homotopy.blakersmassey.ooTopos (Z X Y : Type) 
                                       (i' j' : _)
                                       (f : Z → X) (g : Z → Y)
@@ -88,9 +93,9 @@ module homotopy.blakersmassey.ooTopos (Z X Y : Type)
 
   i+j = plus2 i' j'
 
-  W = Pushout f g
+  W = Pushout f g -- TODO: pushout for predicate
                                        
-  X×WY = Pullback{W} inl inr 
+  X×WY = Pullback{W} inl inr -- ∀ (x , y) → P x y → inl x == inr y
 
   gluelr : (z : Z) → Path{W} (inl (f z)) (inr (g z))
   gluelr z = gluer z ∘ gluel z
@@ -118,7 +123,7 @@ module homotopy.blakersmassey.ooTopos (Z X Y : Type)
   codes-r : Z×XZ → Z×WY
   codes-r (z1 , z2 , p) = z1 , g z2 , (gluelr z2 ∘ ap inl p ∘ ! (gluel z1))
 
-  codes-l : Z×YZ → Z×WX
+  codes-l : Z×YZ → Z×WX -- g z' = f z 
   codes-l (z1 , z2 , p) = z1 , f z2 , ! (gluelr z2) ∘ ap inr p ∘ gluer z1
 
   -- source of Codes middle map
@@ -258,7 +263,7 @@ module homotopy.blakersmassey.ooTopos (Z X Y : Type)
           (z1 , (z2 , p2) , z3 , p3) ∎
 
         comp2 : (x : _) → prod-pb (pb-prod x) ≃ x
-        comp2 
+        comp2 = {!!} 
 
 
         prod≃pb-l : PB-l ≃ Z×XZ×YZ
@@ -276,6 +281,7 @@ module homotopy.blakersmassey.ooTopos (Z X Y : Type)
         → Equiv (Trunc i+j (HFiber codes-l (f2 (z , z' , p))))
                 (Trunc i+j (HFiber codes-m (z , z' , p)))
       eqvlm z z' p = {!!}
+-}
 
   Codes : (z : Z) (w : W) → Path (inm z) w → Type
   Codes z = Pushout-elim _ 
@@ -283,14 +289,15 @@ module homotopy.blakersmassey.ooTopos (Z X Y : Type)
                          (λ z' p → Trunc i+j (HFiber codes-m (z , z' , p)))
                          (λ y p → Trunc i+j (HFiber codes-r (z , y , p)))
                          {!!}
-                         (λ z' →
-                              λ≃
-                              (λ p →
-                                 ap (λ p' → Trunc i+j (HFiber codes-r p')) (pair≃ id (pair≃ id (!-inv-r-front (gluer z') p))) ∘
-                                 ua (Codes-glue.eqvmr z z' (! (gluer z') ∘ p)) ∘
-                                 ap (λ p' → Trunc i+j (HFiber codes-m (z , z' , p')))
-                                 (transport-Path-right (! (gluer z')) p))
-                              ∘ transport-→-pre' (λ z0 → Path (inm z) z0) (gluer z') _)
+                         {!!}
+                         -- (λ z' →
+                         --      λ≃
+                         --      (λ p →
+                         --         ap (λ p' → Trunc i+j (HFiber codes-r p')) (pair≃ id (pair≃ id (!-inv-r-front (gluer z') p))) ∘
+                         --         ua (Codes-glue.eqvmr z z' (! (gluer z') ∘ p)) ∘
+                         --         ap (λ p' → Trunc i+j (HFiber codes-m (z , z' , p')))
+                         --         (transport-Path-right (! (gluer z')) p))
+                         --      ∘ transport-→-pre' (λ z0 → Path (inm z) z0) (gluer z') _)
     {-
                            (λ z' → λ≃ (λ p → ua (Codes-gluer.eqv z z' p) ∘
                                              ap (λ p' → Trunc i+j (HFiber codes-m (z , z' , p'))) (transport-Path-right (! (gluer z')) p))
@@ -355,4 +362,4 @@ module homotopy.blakersmassey.ooTopos (Z X Y : Type)
 
   theorem : ConnectedMap i+j glue-map
   theorem (x , y , p) = ntype (glue-map-connected x y p)
--}
+
