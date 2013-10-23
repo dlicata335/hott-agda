@@ -1,6 +1,19 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
+-- pushout of two maps f and g.
+-- e.g. S2 = Pushout {S1}{Unit}{Unit} cst cst
+--      has north, south, and a circle of points in between
+
 open import lib.First
+open import lib.NConnected
+open import lib.Prods
+open import lib.Functions
+open import lib.Paths 
+open import lib.NType
+open import lib.Universe
+open import lib.Truncations
+open import lib.WEq
+open Truncation
 
 module lib.Pushout where
 
@@ -8,31 +21,33 @@ module lib.Pushout where
 
     module P where
       private
-        data Pushout' (A B : Type) (P : A → B → Type) : Type where
-          inl' : A → Pushout' A B P
-          inr' : B → Pushout' A B P
+        data Pushout' {Z X Y : Type} (f : Z → X) (g : Z → Y) : Type where
+          inl' : X → Pushout' f g 
+          inr' : Y → Pushout' f g
 
+      Pushout : {Z X Y : Type} (f : Z → X) (g : Z → Y) → Type 
       Pushout = Pushout'
 
-      inl : ∀ {A B P} → A → Pushout A B P
+      inl : ∀ {Z X Y}{f : Z → X}{g : Z → Y} → X → Pushout f g
       inl = inl'
 
-      inr : ∀ {A B P} → B → Pushout A B P
+      inr : ∀ {Z X Y}{f : Z → X}{g : Z → Y} → Y → Pushout f g
       inr = inr'
 
       postulate {- HoTT Axiom -}
-        cross : ∀ {A B P} → {a : A} → {b : B} → (p : P a b) → 
-                        Path{Pushout A B P} (inl a) (inr b)
+        glue : ∀ {Z X Y} {f : Z → X}{g : Z → Y} (z : Z) → Path{Pushout f g} (inl (f z)) (inr (g z))
 
-      Pushout-rec : {A B C : Type}
-                    {P : A → B → Type}
-                    (f : (a : A) → C)
-                    (g : (b : B) → C)
-                    (cross' : (a : A) → (b : B) → (p : P a b) → Path (f a) (g b)) →
-                    Pushout A B P → C
-      Pushout-rec f _ _ (inl' a) = f a
-      Pushout-rec _ g _ (inr' b) = g b
+      Pushout-rec : {Z X Y C : Type} 
+                    {f : Z → X} {g : Z → Y}
+                    (b1 : X → C)
+                    (b3 : Y → C)
+                    (glue' : (z : Z) → (b1 (f z)) ≃ b3 (g z))
+                  → Pushout f g → C
+      Pushout-rec b1 _ _ (inl' x) = b1 x
+      Pushout-rec _ b3 _ (inr' y) = b3 y
 
+{-
+      TODO: β rules
       postulate {- HoTT Axiom -}
         Pushout-rec/βcross : {A B C : Type}
                              {P : A → B → Type}
@@ -44,29 +59,17 @@ module lib.Pushout where
                             (a : A) → (b : B) → (p : P a b) → 
                             Path (ap (Pushout-rec f g cross') (cross p))
                                  (cross' a b p)
-      -- FIXME path β
+-}
 
-      Pushout-elim : {A B : Type}
-                     {P : A → B → Type}
-                     (C : Pushout A B P → Type)
-                     (f : (a : A) → C (inl a))
-                     (g : (b : B) → C (inr b))
-                     (cross' : (a : A) → (b : B) → (p : P a b) → 
-                           Path (transport C (cross p) (f a)) (g b)) →
-                     (x : Pushout A B P) → C x
-      Pushout-elim _ f g H' (inl' a) = f a
-      Pushout-elim _ f g H' (inr' b) = g b
-
-      postulate {- HoTT Axiom -}
-        Pushout-elim/βcross : {A B C : Type}
-                              {P : A → B → Type}
-                              (C : Pushout A B P → Type)
-                              (f : (a : A) → C (inl a))
-                              (g : (b : B) → C (inr b))
-                              (cross' : (a : A) → (b : B) → (p : P a b) →
-                                      Path (transport C (cross p) (f a)) (g b)) →
-                            (a : A) → (b : B) → (p : P a b) → 
-                            Path (apd (Pushout-elim C f g cross') (cross p))
-                                 (cross' a b p)
+      Pushout-elim : {Z X Y : Type} 
+                    {f : Z → X} {g : Z → Y}
+                    (C : Pushout f g -> Type)
+                    (b1 : (x : X) → C (inl x))
+                    (b3 : (y : Y) → C (inr y))
+                    (glue' : (z : Z) → transport C (glue z) (b1 (f z)) ≃ b3 (g z))
+                  → (p : Pushout f g) → C p
+      Pushout-elim _ b1 _ _ (inl' x) = b1 x
+      Pushout-elim _ _ b3 _ (inr' y) = b3 y
 
     open P public
+

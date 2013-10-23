@@ -30,14 +30,12 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   glue-map : (x : X) (y : Y) → P x y → Path{W} (inl x) (inr y)
   glue-map x y p = gluer x y p ∘ ! (gluel x y p)
 
-{- For the translation guides:
-  Z×WY = Pullback{W} inm inr
-  Z×WX = Pullback{W} inm inl
-  Z×WZ = Pullback{W} inm inm
-
-  Z×XZ = Pullback{X} f f 
-  Z×YZ = Pullback{Y} g g 
--}
+  -- TRANSLATION GUIDE:
+  -- Z×WY = Pullback{W} inm inr
+  -- Z×WX = Pullback{W} inm inl
+  -- Z×WZ = Pullback{W} inm inm
+  -- Z×XZ = Pullback{X} f f 
+  -- Z×YZ = Pullback{Y} g g 
 
   -- TRANSLATION GUIDE: 
   -- ZxXZ → ZxWX
@@ -77,6 +75,9 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
 
   codes-r : (x1 : X) (y1 : Y) (p1 : P x1 y1) (y2 : Y) (α : Path{W} (inm x1 y1 p1) (inr y2)) → Type
   codes-r x1 y1 p1 y2 α = Σ (λ (p2 : P x1 y2) → glue-map x1 y2 p2 == α ∘ ! (gluel x1 y1 p1))
+
+
+  module LowFat0%Fiber = Pushout 
 
   -- TRANSLATION:
   -- the left and right are the translation of the inl and inr cases of the old codes-m
