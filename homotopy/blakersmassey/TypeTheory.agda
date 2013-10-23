@@ -28,7 +28,7 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   W = Pushout P
                                        
   glue-map : (x : X) (y : Y) → P x y → Path{W} (inl x) (inr y)
-  glue-map x y p = gluer x y p ∘ gluel x y p
+  glue-map x y p = gluer x y p ∘ ! (gluel x y p)
 
 {- For the translation guides:
   Z×WY = Pullback{W} inm inr
@@ -68,15 +68,15 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   -- there exist p2' such that
   --    α = !(gluelr x2 y1 p2') ∘ gluer x1 y1 p1
   --
+  -- rearrange to gluelr x2 y1 p2' = gluer x1 y1 p1 ∘ ! α per Eric
+  --
   -- is this where we stop, or is there more simplification to do?  
   
   codes-l : (x1 : X) (y1 : Y) (p1 : P x1 y1) (x2 : X) (α : Path{W} (inm x1 y1 p1) (inl x2)) → Type
-  codes-l x1 y1 p1 x2 α = Σ (λ (p2' : P x2 y1) → α == ! (glue-map x2 y1 p2') ∘ gluer x1 y1 p1)
+  codes-l x1 y1 p1 x2 α = Σ (λ (p2' : P x2 y1) → (glue-map x2 y1 p2') == (gluer x1 y1 p1) ∘ ! α)
 
-{-
-  codes-r : Z×XZ → Z×WY
-  codes-r (z1 , z2 , p) = z1 , g z2 , (gluelr z2 ∘ ap inl p ∘ ! (gluel z1))
--}
+  codes-r : (x1 : X) (y1 : Y) (p1 : P x1 y1) (y2 : Y) (α : Path{W} (inm x1 y1 p1) (inr y2)) → Type
+  codes-r x1 y1 p1 y2 α = Σ (λ (p2 : P x1 y2) → glue-map x1 y2 p2 == α ∘ ! (gluel x1 y1 p1))
 
 {-
   -- source of Codes middle map
@@ -241,7 +241,7 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   Codes x1 y1 p1 = Pushout-elim _ 
                          (λ x2 α → Trunc i+j (codes-l x1 y1 p1 x2 α)) 
                          {!!} -- (λ z' p → Trunc i+j (HFiber codes-m (z , z' , p)))
-                         {!!} -- (λ y p → Trunc i+j (HFiber codes-r (z , y , p)))
+                         (λ y2 α → Trunc i+j (codes-r x1 y1 p1 y2 α))
                          {!!}
                          {!!}
                          -- (λ z' →

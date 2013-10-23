@@ -38,14 +38,14 @@ module lib.PushoutFatFib where
       inm = inm'
 
       postulate {- HoTT Axiom -}
-        gluel : ∀ {X Y} {P : X → Y → Type} (x : X) (y : Y) → (p : P x y) → Path{Pushout P} (inl x) (inm x y p)
+        gluel : ∀ {X Y} {P : X → Y → Type} (x : X) (y : Y) → (p : P x y) → Path{Pushout P} (inm x y p) (inl x)
         gluer : ∀ {X Y} {P : X → Y → Type} (x : X) (y : Y) → (p : P x y) → Path{Pushout P} (inm x y p) (inr y)
 
       Pushout-rec : {X Y : Type} {P : X → Y → Type} {C : Type}
                     (b1 : X → C)
                     (b2 : (x : X) (y : Y) (p : P x y) → C)
                     (b3 : Y → C)
-                    (gluel' : (x : X) (y : Y) (p : P x y) → (b1 x) ≃ b2 x y p)
+                    (gluel' : (x : X) (y : Y) (p : P x y) →  b2 x y p ≃ (b1 x))
                     (gluer' : (x : X) (y : Y) (p : P x y) → (b2 x y p) ≃ b3 y)
                   → Pushout P → C
       Pushout-rec b1 _ _ _ _ (inl' x) = b1 x
@@ -60,7 +60,7 @@ module lib.PushoutFatFib where
                     (b1 : (x : X) → C (inl x))
                     (b2 : (x : X) (y : Y) (p : P x y) → C (inm x y p))
                     (b3 : (y : Y) → C (inr y))
-                    (gluel' : (x : X) (y : Y) (p : P x y) → transport C (gluel x y p) (b1 x) ≃ b2 x y p)
+                    (gluel' : (x : X) (y : Y) (p : P x y) → transport C (gluel x y p) (b2 x y p) ≃ (b1 x))
                     (gluer' : (x : X) (y : Y) (p : P x y) → transport C (gluer x y p) (b2 x y p) ≃ b3 y)
                   → (z : Pushout P) → C z
       Pushout-elim _ b1 _ _ _ _ (inl' x) = b1 x
