@@ -152,10 +152,39 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
                                                    {!!}
                                                    cm1 cm2
 
+  module OverZ (x0 : X) (y0 : Y) (p0 : P x0 y0) where
+
+    xXZ : Type
+    xXZ = Σ (λ (y1 : Y) → (P x0 y0) × (P x0 y1))
+
+    xYZ : Type
+    xYZ = Σ (λ (x1 : X) → (P x0 y0) × (P x1 y0))
+
+    xWZ : Type
+    xWZ = Σ (λ (x1 : X) → Σ (λ (y1 : Y) → Σ (λ (p1 : P x1 y1) → Path{W} (inm x0 y0 p0) (inm x1 y1 p1))))
+
+    CM : Type
+    CM = Pushout.Wedge {xXZ} {xYZ} (y0 , (p0 , p0)) (x0 , (p0 , p0))
+
+    codes-m-map : CM → xWZ
+    codes-m-map = Pushout.Pushout-rec left-map right-map (λ z → pair≃ id (pair≃ id (pair≃ id (! (!-inv-l (gluer _ _ _)) ∘ !-inv-l (gluel _ _ _)))))
+      where left-map : xXZ → xWZ
+            left-map (y , p , p') = x0 , (y , (p' , ! (gluel _ _ p') ∘ gluel x0 y0 p0))
+
+            right-map : xYZ → xWZ
+            right-map (x , p , p')  = x , (y0 , (p' , ! (gluer _ _ p') ∘ gluer x0 y0 p0))
+
+    codes-m : xWZ → Type
+    codes-m (x1 , y1 , p1 , α) = HFiber codes-m-map (x1 , (y1 , (p1 , α)))
+
+    {- It is this map which should be an equivalence up to truncation and should imply to one below ... -}
+    equiv-map : CM → xXZ × xYZ
+    equiv-map = Pushout.wedge-to-prod 
+
   module CodesMWedge where
     CM : (x1 : X) (y1 : Y) (p1 : P x1 y1) → Type
     CM x1 y1 p1 = Pushout.Wedge {Σ \ y2 -> P x1 y2} {Σ \ x2 → P x2 y1} (y1 , p1) (x1 , p1) 
-    
+
     ×WZ : (x1 : X) (y1 : Y) (p1 : P x1 y1) → Type
     ×WZ x1 y1 p1 = Σ \ (x2 : X) -> Σ \ (y2 : Y) → Σ \ (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2)
 
