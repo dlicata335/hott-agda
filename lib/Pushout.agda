@@ -21,27 +21,27 @@ module lib.Pushout where
 
     module P where
       private
-        data Pushout' {Z X Y : Type} (f : Z → X) (g : Z → Y) : Type where
+        data Pushout' {ZZ X Y : Type} (f : ZZ → X) (g : ZZ → Y) : Type where
           inl' : X → Pushout' f g 
           inr' : Y → Pushout' f g
 
-      Pushout : {Z X Y : Type} (f : Z → X) (g : Z → Y) → Type 
+      Pushout : {ZZ X Y : Type} (f : ZZ → X) (g : ZZ → Y) → Type 
       Pushout = Pushout'
 
-      inl : ∀ {Z X Y}{f : Z → X}{g : Z → Y} → X → Pushout f g
+      inl : ∀ {ZZ X Y}{f : ZZ → X}{g : ZZ → Y} → X → Pushout f g
       inl = inl'
 
-      inr : ∀ {Z X Y}{f : Z → X}{g : Z → Y} → Y → Pushout f g
+      inr : ∀ {ZZ X Y}{f : ZZ → X}{g : ZZ → Y} → Y → Pushout f g
       inr = inr'
 
       postulate {- HoTT Axiom -}
-        glue : ∀ {Z X Y} {f : Z → X}{g : Z → Y} (z : Z) → Path{Pushout f g} (inl (f z)) (inr (g z))
+        glue : ∀ {ZZ X Y} {f : ZZ → X}{g : ZZ → Y} (z : ZZ) → Path{Pushout f g} (inl (f z)) (inr (g z))
 
-      Pushout-rec : {Z X Y C : Type} 
-                    {f : Z → X} {g : Z → Y}
+      Pushout-rec : {ZZ X Y C : Type} 
+                    {f : ZZ → X} {g : ZZ → Y}
                     (b1 : X → C)
                     (b3 : Y → C)
-                    (glue' : (z : Z) → (b1 (f z)) ≃ b3 (g z))
+                    (glue' : (z : ZZ) → (b1 (f z)) ≃ b3 (g z))
                   → Pushout f g → C
       Pushout-rec b1 _ _ (inl' x) = b1 x
       Pushout-rec _ b3 _ (inr' y) = b3 y
@@ -61,15 +61,27 @@ module lib.Pushout where
                                  (cross' a b p)
 -}
 
-      Pushout-elim : {Z X Y : Type} 
-                    {f : Z → X} {g : Z → Y}
+      Pushout-elim : {ZZ X Y : Type} 
+                    {f : ZZ → X} {g : ZZ → Y}
                     (C : Pushout f g -> Type)
                     (b1 : (x : X) → C (inl x))
                     (b3 : (y : Y) → C (inr y))
-                    (glue' : (z : Z) → transport C (glue z) (b1 (f z)) ≃ b3 (g z))
+                    (glue' : (z : ZZ) → transport C (glue z) (b1 (f z)) ≃ b3 (g z))
                   → (p : Pushout f g) → C p
       Pushout-elim _ b1 _ _ (inl' x) = b1 x
       Pushout-elim _ _ b3 _ (inr' y) = b3 y
 
     open P public
 
+    Wedge : {A B : Type} (a0 : A) (b0 : B) → Type
+    Wedge {A}{B} a0 b0 = Pushout {Unit}{A}{B} (\ _ -> a0) (\ _ -> b0)
+
+    wedge-to-prod : ∀ {A B} {a0 : A} {b0 : B} → (Wedge a0 b0) → A × B
+    wedge-to-prod {a0 = a0} {b0 = b0} = Pushout-rec (λ a → a , b0) (λ b → a0 , b) (\ _ -> id) 
+
+    module WedgeToProd {A B : Type} {m n : _} (a0 : A) (b0 : B) (cA : Connected (S m) A) (cB : Connected (S n) B) where
+
+      i = wedge-to-prod {A}{B}{a0}{b0}
+
+      postulate 
+        i-connected : ConnectedMap.ConnectedMap (plus2 m n) i
