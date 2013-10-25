@@ -70,9 +70,11 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   --
   -- is this where we stop, or is there more simplification to do?  
   
+  -- HFiber of Z×YZ -> Z×WX
   codes-l : (x1 : X) (y1 : Y) (p1 : P x1 y1) (x2 : X) (α : Path{W} (inm x1 y1 p1) (inl x2)) → Type
   codes-l x1 y1 p1 x2 α = Σ (λ (p21 : P x2 y1) → (glue-map x2 y1 p21) == (gluer x1 y1 p1) ∘ ! α)
 
+  -- HFiber of Z×XZ -> Z×WY
   codes-r : (x1 : X) (y1 : Y) (p1 : P x1 y1) (y2 : Y) (α : Path{W} (inm x1 y1 p1) (inr y2)) → Type
   codes-r x1 y1 p1 y2 α = Σ (λ (p12 : P x1 y2) → glue-map x1 y2 p12 == α ∘ ! (gluel x1 y1 p1))
 
@@ -83,13 +85,11 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   codes-l-Z x1 y1 p1 x2 y2 p2 α = 
        Σ (λ (p21 : P x2 y1) → glue-map _ _ p21 == (gluer _ _ p1) ∘ ! (gluel _ _ p2 ∘ α))
 
-  -- α == ! (gluel _ _ p2) ∘ ! (glue-map x2 y1 p3) ∘ gluer _ _ p1)
-
-  -- HFiber of the map from Z×XZ×YZ → Z×WZ, with the hfiber simplified away
-  codes-m-r : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
+  -- codes-r pulled back along Z×WZ → Z×WX to be over Z×WZ;
+  codes-r-Z : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
              (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
-  codes-m-r x1 y1 p1 x2 y2 p2 α = 
-       Σ (λ (p3 : P x1 y2) → α == ! (gluer x2 y2 p2) ∘ glue-map x1 y2 p3 ∘  gluel x1 y1 p1)
+  codes-r-Z x1 y1 p1 x2 y2 p2 α = 
+       Σ (λ (p12 : P x1 y2) → glue-map x1 y2 p12 == (gluer x2 y2 p2) ∘ α ∘ ! (gluel x1 y1 p1))
 
 
   Z = Σ (λ x → Σ (λ y → P x y)) 
@@ -165,10 +165,10 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
     codes-m : (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
     codes-m x2 y2 p2 α = HFiber codes-m-map (x2 , y2 , p2 , α)
 
-    -- intermediate definitions of codes-m-l and codes-m-r that are a little more hfibered up
     ZxX-xYZ = ((Σ \ y2 -> P x1 y2) × Σ \ x2 → P x2 y1)
 
 
+{-
     -- FIXME: note these two might be swapped
 
     codes-m-l-map : ZxX-xYZ -> -×WZ 
@@ -190,7 +190,7 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
 
     m-r==m-r' : (x2 : X) (y2 : Y) (p2 : P x2 y2) (α : Path{W} (inm x1 y1 p1) (inm x2 y2 p2))
                → codes-m-r' x2 y2 p2 α 
-               == codes-m-r x1 y1 p1 x2 y2 p2 α 
+               == codes-r-Z x1 y1 p1 x2 y2 p2 α 
     m-r==m-r' x2 y2 p2 α = {!!}
 
     -- so it suffices to show that these exist and are i+j connected
@@ -207,6 +207,7 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
                → codes-m x2 y2 p2 α 
                -> codes-m-l' x2 y2 p2 α 
     m==m-r' x2 y2 p2 α (cm1 , cm2) = {!Pushout.wedge-to-prod cm1!} 
+-}
 
   module CodesMPushout where
     codes-m : (x1 : X) (y1 : Y) (p1 : P x1 y1)
