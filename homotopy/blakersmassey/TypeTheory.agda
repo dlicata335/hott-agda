@@ -288,6 +288,7 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
                       → Contractible (Trunc i+j (HFiber glue-map-total (x1 , y , α ∘ ! (gluel x1 y1 p1))))
   glue-map-connected'' = {!glue-map-connected''!} -- simplify HFiber of projections 
 
+  -- suffices to consider glue-map-total o f(=π1) : Z×WY → W
   glue-map-connected' : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
                       → (y : Y) (α : Path {W} (inl x1) (inr y))
                       → Contractible (Trunc i+j (HFiber glue-map-total (x1 , y , α)))
