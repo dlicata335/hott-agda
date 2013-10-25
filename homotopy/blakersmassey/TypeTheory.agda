@@ -155,31 +155,49 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   module OverZ (x0 : X) (y0 : Y) (p0 : P x0 y0) where
 
     xXZ : Type
-    xXZ = Σ (λ (y1 : Y) → (P x0 y0) × (P x0 y1))
+    xXZ = Σ (λ (y1 : Y) → (P x0 y1))
 
     xYZ : Type
-    xYZ = Σ (λ (x1 : X) → (P x0 y0) × (P x1 y0))
+    xYZ = Σ (λ (x1 : X) → (P x1 y0))
 
     xWZ : Type
     xWZ = Σ (λ (x1 : X) → Σ (λ (y1 : Y) → Σ (λ (p1 : P x1 y1) → Path{W} (inm x0 y0 p0) (inm x1 y1 p1))))
 
     CM : Type
-    CM = Pushout.Wedge {xXZ} {xYZ} (y0 , (p0 , p0)) (x0 , (p0 , p0))
+    CM = Pushout.Wedge {xXZ} {xYZ} (y0 , p0) (x0 , p0)
 
     codes-m-map : CM → xWZ
     codes-m-map = Pushout.Pushout-rec left-map right-map (λ z → pair≃ id (pair≃ id (pair≃ id (! (!-inv-l (gluer _ _ _)) ∘ !-inv-l (gluel _ _ _)))))
       where left-map : xXZ → xWZ
-            left-map (y , p , p') = x0 , (y , (p' , ! (gluel _ _ p') ∘ gluel x0 y0 p0))
+            left-map (y1 , p1) = x0 , (y1 , (p1 , ! (gluel _ _ p1) ∘ gluel _ _ p0))
 
             right-map : xYZ → xWZ
-            right-map (x , p , p')  = x , (y0 , (p' , ! (gluer _ _ p') ∘ gluer x0 y0 p0))
+            right-map (x1 , p1)  = x1 , (y0 , (p1 , ! (gluer _ _ p1) ∘ gluer _ _ p0))
 
     codes-m : xWZ → Type
-    codes-m (x1 , y1 , p1 , α) = HFiber codes-m-map (x1 , (y1 , (p1 , α)))
+    codes-m (x1 , y1 , p1 , α) = HFiber codes-m-map (x1 , y1 , p1 , α)
 
-    {- It is this map which should be an equivalence up to truncation and should imply to one below ... -}
+    -- These are just compositions with the projection, which doesn't look right...
+    codes-m-l-map : xXZ × xYZ → xWZ
+    codes-m-l-map ((y1 , p1) , (x1 , p2)) = x0 , (y1 , (p1 , ! (gluel _ _ p1) ∘ gluel _ _ p0))
+
+    codes-m-r-map : xXZ × xYZ → xWZ
+    codes-m-r-map ((y1 , p1) , (x1 , p2)) = x1 , (y0 , (p2 , ! (gluer _ _ p2) ∘ gluer _ _ p0))
+
+    codes-m-l : xWZ → Type
+    codes-m-l (x1 , y1 , p1 , α) = HFiber codes-m-l-map (x1 , y1 , p1 , α)
+
+    codes-m-r : xWZ → Type
+    codes-m-r (x1 , y1 , p1 , α) = HFiber codes-m-r-map (x1 , y1 , p1 , α)
+
+    {- It is this map which should be an equivalence up to truncation and should imply the one below ... -}
     equiv-map : CM → xXZ × xYZ
     equiv-map = Pushout.wedge-to-prod 
+
+    equiv-map-is-equiv : IsWEq (Trunc-func {i+j} equiv-map)
+    equiv-map-is-equiv = {!!}
+
+    fiber-l-equiv : (z : xWZ) → IsWEq 
 
   module CodesMWedge where
     CM : (x1 : X) (y1 : Y) (p1 : P x1 y1) → Type
