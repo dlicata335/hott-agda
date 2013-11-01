@@ -25,7 +25,15 @@ module lib.Nat where
     _+_ : Nat -> Nat -> Nat
     _+_ Z n = n
     _+_ (S n) n' = S (n + n')
+
+    +-rh-Z : (n : Nat) → n == (n + Z)
+    +-rh-Z Z = id
+    +-rh-Z (S n) = ap S (+-rh-Z n)
   
+    +-assoc : (n m p : Nat) → n + (m + p) == (n + m) + p
+    +-assoc Z m p = id
+    +-assoc (S n) m p = ap S (+-assoc n m p)
+
     max : Nat -> Nat -> Nat
     max  Z    m      = m
     max (S n)  Z     = S n
