@@ -145,6 +145,21 @@ module metatheory.Time where
              1 + ((fst r) + (n1 x (snd r)))
     for-S {b1 = b1} = id
 
+    {- so Time.miter x (n0 , b0) (\ p r → n1 p r , b1 p r) 
+       defines a function 
+
+       T(x) by
+       T(x) = (Tc(x) , Tp(x))
+
+       Tp(x) by
+       Tp(0) = b0
+       Tp(x+1) = b1 x Tp(x)
+
+       Tc(x) by
+       Tc(0) = 1 + n0
+       Tc(x+1) = 1 + Tc(x) + n1 x Tp(x)
+    -}
+
   idfunc : Tm [] (nat ⇒ nat) 
   idfunc = lam (v i0)
 
@@ -195,6 +210,13 @@ plus
         ,
         snd
         (InterpTime.miter x (0 , x₁) (λ p r → 1 , S r))))
+
+so
+
+Tc(x) where x is the size of the first number is defined by
+Tc(0) = 1
+Tc(1+x) = 2 + Tc(x)
+Note that this is independent of x₁, the size of the second number.
 -}  
 
 {-
@@ -227,6 +249,17 @@ mult
             snd
             (InterpTime.miter x₁ (0 , r) (λ p₁ r₁ → 1 , S r₁))))))
 
+So 
+
+-- recurrence for plus
+Sc(x₁)
+Sc(0) = 1 
+Sc(1+x) = 1 + Sc(x) + 1
+
+Tc(x,x₁) 
+Tc(0,x₁) = 2
+Tc(1+x,x₁) = 3 + Tc(x) + Sc(x₁)
+
 -}
 
 {- summorial 1: depends on the potential of the recursive call
@@ -257,6 +290,20 @@ mult
          ,
          snd
          (InterpTime.miter r (0 , S p) (λ p₁ r₁ → 1 , S r₁)))))
+
+-- recurrence for plus
+Sc(y)
+Sc(0) = 1
+Sc(1+y) = 2 + Sc(y)
+
+Tp(x)
+Tp(0) = 0
+Tp(1+x) = TODO
+
+Tc(x)
+Tc(0) = 2
+Tc(1+x) = 1 + Tc(x) + Sc(Tp(x))
+
 -}
 
 {- summorial 2
