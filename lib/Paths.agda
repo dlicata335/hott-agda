@@ -373,8 +373,7 @@ module lib.Paths where
               -> Path (ap∘ (d ∘ c) (b ∘ a)) (ap∘ d b ∘ ap∘ c a)
  ichange-type id id id id = id
 
-
-    -- interderivability
+ -- interderivability
  module PaulinMohring where
    jayfrompm : {A : Type} (C : (x y : A) -> Path x y -> Type)
      -> {M N : A} -> (P : Path M N)

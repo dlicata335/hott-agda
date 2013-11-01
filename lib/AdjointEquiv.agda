@@ -77,7 +77,29 @@ module lib.AdjointEquiv where
  transport-IsEquiv-g id e = id
 
 
+ module ApEquiv where
+    apPath : {A B : Type} → (α : A == B) → {M N : A} → Path M N == Path (coe α M) (coe α N)
+    apPath α = ap (λ (p : Σ (λ A → A × A)) → Path (fst (snd p)) (snd (snd p))) (pair≃ α (ap≃ (transport-× α (λ x → x) (λ x → x)))) 
 
-   
+    wrap : {A  B : Type} (f : Equiv A B) → {M N : A} → Equiv (Path M N) (Path (fst f M) (fst f N))
+    wrap f {M}{N} = coe-equiv (ap (λ f₁ → Path (f₁ M) (f₁ N)) (type≃β f)) ∘equiv coe-equiv (apPath (ua f) {M} {N})
+
+    calculate-map : {A B : Type} (f : Equiv A B) {M N : A} (α : M == N)
+         → fst (wrap f {M}{N}) α == ap (fst f) α
+    calculate-map f {M} id = coe (ap (λ f₁ → Path (f₁ M) (f₁ M)) (type≃β f)) (coe (apPath (ua f) {M} {M}) id) ≃〈 ap (λ z → coe (ap (λ f₁ → Path (f₁ M) (f₁ M)) (type≃β f)) (z id)) (apPath-is-ap (ua f)) 〉 
+                    coe (ap (λ f₁ → Path (f₁ M) (f₁ M)) (type≃β f)) (ap (coe (ua f)) id) ≃〈 id 〉 
+                    coe (ap (λ f₁ → Path (f₁ M) (f₁ M)) (type≃β f)) id ≃〈 reduction (type≃β f) id 〉 
+                    (ap≃ (type≃β f)) ∘ ! (ap≃ (type≃β f)) ≃〈 !-inv-r (ap≃ (type≃β f)) 〉 
+                    id ∎ where
+      apPath-is-ap : {A B : Type} → (α : A == B) → {M N : A} → coe (apPath α {M}{N}) == ap (coe α)
+      apPath-is-ap id = λ≃ (λ x → ! (ap-id x))
+
+      reduction : {A B : Type} {M N : A} {f g : A → B} (β : Path f g) (α : Path (f M) (f N))
+           →  coe (ap (λ f₁ → Path (f₁ M) (f₁ N)) β) α
+           == (ap≃ β {N} ∘ α) ∘ ! (ap≃ β {M})
+      reduction id α = ! (∘-unit-l α)
+ 
+    thm : {A B : Type} (f : Equiv A B) {M N : A} → IsEquiv {Path M N} (ap (fst f))
+    thm f = transport IsEquiv (λ≃ (calculate-map f)) (snd (wrap f))
                
  

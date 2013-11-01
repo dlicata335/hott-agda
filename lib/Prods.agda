@@ -316,4 +316,3 @@ module lib.Prods where
                pair×≃ (ap (λ _ → y) α) (ap (λ x → f (x)) α)
   ap-×-snd _ _ id = id
 
-      
