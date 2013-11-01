@@ -79,7 +79,7 @@ module lib.AdjointEquiv where
 
  module ApEquiv where
     apPath : {A B : Type} → (α : A == B) → {M N : A} → Path M N == Path (coe α M) (coe α N)
-    apPath α = ap (λ (p : Σ (λ A → A × A)) → Path (fst (snd p)) (snd (snd p))) (pair≃ α (ap≃ (transport-× α (λ x → x) (λ x → x)))) 
+    apPath id = id 
 
     wrap : {A  B : Type} (f : Equiv A B) → {M N : A} → Equiv (Path M N) (Path (fst f M) (fst f N))
     wrap f {M}{N} = coe-equiv (ap (λ f₁ → Path (f₁ M) (f₁ N)) (type≃β f)) ∘equiv coe-equiv (apPath (ua f) {M} {N})
