@@ -409,3 +409,8 @@ module lib.Paths where
      -> (f : A -> B)
      -> Path (jayfrompm2 (\ _ _ _ -> B) P f) (f N)
    fire-jay-const2 {A}{B} P f = jay (λ x y p → Path (jayfrompm2 (λ _ _ _ → B) p f) (f y)) P (\ _ -> id)
+
+
+   transport-→-post : ∀ {C A B : Set} (δ : B ≃ C) (f : A -> B) 
+         -> transport (\ X -> A -> X) δ f ≃ (transport (\ X -> X) δ o f)
+   transport-→-post id f = id 
