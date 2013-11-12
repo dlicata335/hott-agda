@@ -253,6 +253,12 @@ module lib.Prods where
         (b : (\ (x : A) → B x) ≃ (\ (x : A) → B' (coe a x)))
       → Σ B ≃ Σ B'
   apΣ id id = id
+
+  apΣ-l : {A A' : Type} {B : A → Type} {B' : A' → Type}
+        (a : A ≃ A')
+        (b : (\ (x : A') → B (coe (! a) x)) ≃ B')
+      → Σ B ≃ Σ B'
+  apΣ-l id id = id
  
   -- build in some β reduction
   apΣ' : {A A' : Type} {B : A → Type} {B' : A' → Type}
