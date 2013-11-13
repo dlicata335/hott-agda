@@ -322,3 +322,12 @@ module lib.Prods where
                pair×≃ (ap (λ _ → y) α) (ap (λ x → f (x)) α)
   ap-×-snd _ _ id = id
 
+  hfiber-fst : ∀ {A} {B : A → Type} (a : A) → B a == Σ \ (p : Σ B) → fst p == a
+  hfiber-fst {B = B} a = ua (improve (hequiv (λ b → (a , b) , id) (λ p₁ → transport B (snd p₁) (snd (fst p₁))) (λ _ → id) (λ {((a1 , b) , p) → path-induction-l (λ a2 p₁ → (b₁ : B a2) → Id ((a , transport B p₁ b₁) , id) ((a2 , b₁) , p₁)) (λ _ → id) p b})))
+
+  fiberwise-to-total : {A : Type} {B B' : A → Type} → (f : (a : A) → B a → B' a) → Σ B → Σ B'
+  fiberwise-to-total f (a , b) = (a , f a b)
+
+  -- need to write this one out; would follow from ua and funext
+  fiberwise-equiv-to-total : ∀ {A} {B B' : A → Type} → ((x : A) → B x == B' x) → (Σ B) == (Σ B')
+  fiberwise-equiv-to-total h = ua (improve (hequiv (fiberwise-to-total (\ x -> coe (h x))) (fiberwise-to-total (λ x → coe (! (h x)))) (λ x → pair≃ id (ap≃ (transport-inv-1 (λ x₁ → x₁) (h (fst x))))) (λ y → pair≃ id (ap≃ (transport-inv-2 (λ x → x) (h (fst y)))))))
