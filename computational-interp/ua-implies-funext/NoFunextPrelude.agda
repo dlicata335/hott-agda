@@ -395,26 +395,11 @@ module NoFunextPrelude where
  pre∘-equiv : ∀ {A} {a b c : A} → (a == b) -> Equiv (b == c) (a == c)
  pre∘-equiv α = (improve (hequiv (λ β → β ∘ α) (λ β' → β' ∘ ! α) (λ β → !-inv-r-back β α ∘ ! (∘-assoc β α (! α))) (λ β → !-inv-l-back β α ∘ ! (∘-assoc β (! α) α))))
 
- -- write out by hand for better definitional behavior
- apΣ-l-eqv : {A A' : Type} {B : A → Type} 
-       (a : A ≃ A')
-     → Σ B ≃ Σ (\ (x : A') → B (IsEquiv.g (snd a) x))
- apΣ-l-eqv {B = B} a = improve (hequiv (λ p → fst a (fst p) , transport B (! (IsEquiv.α (snd a) _)) (snd p))
-                                       (λ p → IsEquiv.g (snd a) (fst p) , snd p) 
-                                       {!!} {!!} ) where 
-           postulate FIXME : {A : Type} → A
+ pair= : {A : Type} {B : A -> Type} {p q : Σ B} -> (α : (fst p) == (fst q)) -> (transport B α (snd p)) == (snd q) -> p == q
+ pair= {p = x , y} {q = .x , .y} id id = id
 
- apΣ-l : {A A' : Type} {B : A → Type} {B' : A' → Type}
-       (a : A == A')
-       (b : (\ (x : A') → B (coe (! a) x)) == B')
-     → Σ B == Σ B'
- apΣ-l id id = id
-
- -- build in some β reduction
- apΣ-l' : {A A' : Type} {B : A → Type} 
-       (a : Equiv A A')
-     → (Σ B) == (Σ (\ (x : A') → B (IsEquiv.g (snd a) x)))
- apΣ-l' {B = B} e = apΣ-l (ua e) (ap (λ y → λ x → B (y x)) (type=β! e))
+ snd= : {A : Type} {B : A -> Type} {p q : Σ B} -> (c : p == q) -> (transport B (ap fst c) (snd p)) == (snd q)
+ snd= {p = p} {q = .p} id = id
 
  transport-inv-1 : {A : Type} (B : A -> Type) {M N : A} (α : M == N) -> (\y -> transport B (! α) (transport B α y)) == (\ x -> x)
  transport-inv-1 _ id = id
@@ -425,6 +410,16 @@ module NoFunextPrelude where
  transport-ap-assoc' : {A B : Type} (C : B → Type) (f : A → B) {M N : A} (α : Path M N) 
                      → Path (transport (\ x -> C (f x)) α) (transport C (ap f α))
  transport-ap-assoc' C f id = id 
+
+ -- can derive this from univalence, but here we write it out by hand for better definitional behavior
+ apΣ-l≃ : {A A' : Type} {B : A → Type} 
+       (a : A ≃ A')
+     → Σ B ≃ Σ (\ (x : A') → B (IsEquiv.g (snd a) x))
+ apΣ-l≃ {B = B} a = improve (hequiv (λ p → fst a (fst p) , transport B (! (IsEquiv.α (snd a) _)) (snd p))
+                                       (λ p → IsEquiv.g (snd a) (fst p) , snd p) 
+                                       (λ x → pair= (IsEquiv.α (snd a) (fst x)) (ap= (transport-inv-2 B (IsEquiv.α (snd a) (fst x)))))
+                                       (λ x → pair= (IsEquiv.β (snd a) (fst x)) ((ap= (transport-inv-2 B (IsEquiv.α (snd a) (IsEquiv.g (snd a) (fst x)))) ∘ ap= (ap (λ z → transport B z) (! (IsEquiv.γ (snd (!equiv a)) (fst x))))) ∘
+                                                                                   ap= (transport-ap-assoc' B (IsEquiv.g (snd a)) (IsEquiv.β (snd a) (fst x))))))  
 
  transport-→-post : ∀ {C A B : Set} (δ : B == C) (f : A -> B) 
        -> transport (\ X -> A -> X) δ f == (transport (\ X -> X) δ o f)
@@ -440,42 +435,46 @@ module NoFunextPrelude where
  HFiber : {A B : Type} -> (A -> B) -> B -> Type
  HFiber f y = Σ \x -> Path (f x) y
 
- hfiber-fst-eqv : ∀ {A} {B : A → Type} (a : A) → B a ≃ HFiber {A = Σ B} fst a
- hfiber-fst-eqv {B = B} a = (improve (hequiv (λ b → (a , b) , id) (λ p₁ → transport B (snd p₁) (snd (fst p₁))) (λ _ → id) (λ {((a1 , b) , p) → path-induction-l (λ a2 p₁ → (b₁ : B a2) → Id ((a , transport B p₁ b₁) , id) ((a2 , b₁) , p₁)) (λ _ → id) p b})))
+ hfiber-fst≃ : ∀ {A} {B : A → Type} (a : A) → B a ≃ HFiber {A = Σ B} fst a
+ hfiber-fst≃ {B = B} a = (improve (hequiv (λ b → (a , b) , id) (λ p₁ → transport B (snd p₁) (snd (fst p₁))) (λ _ → id) (λ {((a1 , b) , p) → path-induction-l (λ a2 p₁ → (b₁ : B a2) → Id ((a , transport B p₁ b₁) , id) ((a2 , b₁) , p₁)) (λ _ → id) p b})))
 
+{- commented out to avoid unnecessary use of UA
  hfiber-fst : ∀ {A} {B : A → Type} (a : A) → B a == HFiber {A = Σ B} fst a
- hfiber-fst {B = B} a = ua (hfiber-fst-eqv a)
+ hfiber-fst {B = B} a = ua (hfiber-fst≃ a)
+-}
 
  fiberwise-to-total : {A : Type} {B B' : A → Type} → (f : (a : A) → B a → B' a) → Σ B → Σ B'
  fiberwise-to-total f (a , b) = (a , f a b)
 
  -- need to write this one out; would follow from ua and funext
  -- NOTE for products: uses ap of , and fst
- fiberwise-equiv-to-total-eqv : ∀ {A} {B B' : A → Type} → ((x : A) → B x ≃ B' x) → (Σ B) ≃ (Σ B')
- fiberwise-equiv-to-total-eqv h = (improve (hequiv (fiberwise-to-total (\ x -> fst (h x)))
+ fiberwise-equiv-to-total≃ : ∀ {A} {B B' : A → Type} → ((x : A) → B x ≃ B' x) → (Σ B) ≃ (Σ B')
+ fiberwise-equiv-to-total≃ h = (improve (hequiv (fiberwise-to-total (\ x -> fst (h x)))
                                                    (fiberwise-to-total (λ x → IsEquiv.g (snd (h x))))
                                                    (λ x → ap (λ y → fst x , y) (IsEquiv.α (snd (h (fst x))) _))
                                                    (λ x → ap (λ y → fst x , y) (IsEquiv.β (snd (h (fst x))) _))))
 
+{- commented out to avoid unnecessary use of UA
  fiberwise-equiv-to-total : ∀ {A} {B B' : A → Type} → ((x : A) → B x ≃ B' x) → (Σ B) == (Σ B')
- fiberwise-equiv-to-total h = ua (fiberwise-equiv-to-total-eqv h)
+ fiberwise-equiv-to-total h = ua (fiberwise-equiv-to-total≃ h)
+-}
 
- fiberwise-equiv-from-total-eqv : ∀ {A} {B B' : A → Type} → 
+ fiberwise-equiv-from-total≃ : ∀ {A} {B B' : A → Type} → 
                                (t : (Σ B) ≃ (Σ B'))
                             → ((y : Σ B) → fst (fst t y) == fst y)
                             → ((x : A) → B x ≃ B' x)
- fiberwise-equiv-from-total-eqv {A}{B}{B'} t f x = 
-                      B x ≃〈 hfiber-fst-eqv x 〉 
-                      HFiber {(Σ B)} fst x ≃〈 apΣ-l-eqv t 〉 
-                      HFiber {(Σ B')} (fst o (IsEquiv.g (snd t))) x ≃〈 fiberwise-equiv-to-total-eqv (λ x₁ → pre∘-equiv (f (IsEquiv.g (snd t) x₁) ∘ ap fst (! (IsEquiv.β (snd t) _)))) 〉
-                      HFiber {(Σ B')} fst x ≃〈 !equiv (hfiber-fst-eqv x) 〉
+ fiberwise-equiv-from-total≃ {A}{B}{B'} t f x = 
+                      B x ≃〈 hfiber-fst≃ x 〉 
+                      HFiber {(Σ B)} fst x ≃〈 apΣ-l≃ t 〉 
+                      HFiber {(Σ B')} (fst o (IsEquiv.g (snd t))) x ≃〈 fiberwise-equiv-to-total≃ (λ x₁ → pre∘-equiv (f (IsEquiv.g (snd t) x₁) ∘ ap fst (! (IsEquiv.β (snd t) _)))) 〉
+                      HFiber {(Σ B')} fst x ≃〈 !equiv (hfiber-fst≃ x) 〉
                       B' x ∎∎
 
- fiberwise-equiv-from-total-eqv-β : ∀ {A} {B B' : A → Type} → 
+ fiberwise-equiv-from-total≃-β : ∀ {A} {B B' : A → Type} → 
                                (t : (Σ B) ≃ (Σ B'))
                             → (f : (y : Σ B) → fst (fst t y) == fst y)
-                            → ((x : A) (b : B x) → (fst (fiberwise-equiv-from-total-eqv t f x) b) == transport B' (f (x , b)) (snd (fst t (x , b))))
- fiberwise-equiv-from-total-eqv-β {B' = B'} t f x b = 
+                            → ((x : A) (b : B x) → (fst (fiberwise-equiv-from-total≃ t f x) b) == transport B' (f (x , b)) (snd (fst t (x , b))))
+ fiberwise-equiv-from-total≃-β {B' = B'} t f x b = 
    ap {M = transport (λ x₁ → Id (fst x₁) x) (! (IsEquiv.α (snd t) (x , b))) id ∘ f (IsEquiv.g (snd t) (fst t (x , b))) ∘ ap fst (! (IsEquiv.β (snd t) (fst t (x , b))))} {N = f (x , b)} 
       (λ z → transport B' z (snd (fst t (x , b))))
       (apd f (IsEquiv.α (snd t) (x , b)) ∘ 
@@ -498,17 +497,15 @@ module NoFunextPrelude where
  Paths : Type → Type
  Paths A = Σ \ (p : A × A) → fst p == snd p
 
- contract-Paths-eqv : ∀ {A} → Equiv (Paths A) A
- contract-Paths-eqv {A} = (improve (hequiv (\ {((x , y) , p) -> x})
+ contract-Paths≃ : ∀ {A} → Equiv (Paths A) A
+ contract-Paths≃ {A} = (improve (hequiv (\ {((x , y) , p) -> x})
                                        (λ x → (x , x) , id)
                                        α (λ _ → id) )) where
                  α : (x : Paths A) → ((fst (fst x) , fst (fst x)) , id) == x
                  α ((x , y) , p) = path-induction (λ y₁ p₁ → ((x , x) , id) == ((x , y₁) , p₁)) id p
 
+{- commented out to avoid unnecessary use of UA
  contract-Paths : ∀ {A} → (Paths A) == A
- contract-Paths = ua contract-Paths-eqv 
-
- -- for funext-comp 
- snd= : {A : Type} {B : A -> Type} {p q : Σ B} -> (c : p == q) -> (transport B (ap fst c) (snd p)) == (snd q)
- snd= {p = p} {q = .p} id = id
+ contract-Paths = ua contract-Paths≃ 
+-}
  

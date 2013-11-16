@@ -17,17 +17,17 @@ module Funext2 where
   
   abstract
     funextt : ∀ {A B} → Equiv (Paths (A → B)) (Homotopies A B)
-    funextt {A} {B} = Paths (A → B) ≃〈 contract-Paths-eqv {A → B} 〉 
-                      (A → B) ≃〈 coe-equiv (ap (λ y → A → y) (ua (!equiv (contract-Paths-eqv {B})))) 〉 
+    funextt {A} {B} = Paths (A → B) ≃〈 contract-Paths≃ {A → B} 〉 
+                      (A → B) ≃〈 coe-equiv (ap (λ y → A → y) (ua (!equiv (contract-Paths≃ {B})))) 〉 
                       (A → Paths B) ≃〈 swap 〉 
                       Homotopies A B ∎∎
   
     funextt-id : ∀ {A B} (f : A → B) → fst funextt ((f , f) , id) == ((f , f) , λ x → id)
     funextt-id {A} f = fst funextt ((f , f) , id) =〈 id 〉 
-                       fst swap (coe (ap (λ y → A → y) (ua (!equiv (contract-Paths-eqv)))) f) =〈 ap (fst swap) (ap= (! (transport-ap-assoc' (λ x → x) (λ y → A → y) (ua (!equiv contract-Paths-eqv))))) 〉 
-                       fst swap (transport (λ y → A → y) (ua (!equiv (contract-Paths-eqv))) f) =〈 ap (fst swap) (transport-→-post (ua (!equiv contract-Paths-eqv)) f) 〉 
-                       fst swap (coe (ua (!equiv (contract-Paths-eqv))) o f) =〈 ap (λ z → fst swap (z o f)) (type=β (!equiv contract-Paths-eqv)) 〉 
-                       fst swap (fst (!equiv (contract-Paths-eqv)) o f) =〈 id 〉 
+                       fst swap (coe (ap (λ y → A → y) (ua (!equiv (contract-Paths≃)))) f) =〈 ap (fst swap) (ap= (! (transport-ap-assoc' (λ x → x) (λ y → A → y) (ua (!equiv contract-Paths≃))))) 〉 
+                       fst swap (transport (λ y → A → y) (ua (!equiv (contract-Paths≃))) f) =〈 ap (fst swap) (transport-→-post (ua (!equiv contract-Paths≃)) f) 〉 
+                       fst swap (coe (ua (!equiv (contract-Paths≃))) o f) =〈 ap (λ z → fst swap (z o f)) (type=β (!equiv contract-Paths≃)) 〉 
+                       fst swap (fst (!equiv (contract-Paths≃)) o f) =〈 id 〉 
                        ((f , f) , (λ x → id)) ∎
 
   preserves-fst : ∀ {A B} → (α : Paths (A → B)) 
@@ -35,10 +35,10 @@ module Funext2 where
   preserves-fst {A}{B} ((f , .f) , id) = ap fst (funextt-id f)
 
   funext : {A B : Type} (f g : A → B) → (f == g) ≃ ((x : A) → f x == g x)
-  funext {A}{B} f g = fiberwise-equiv-from-total-eqv funextt preserves-fst (f , g)
+  funext {A}{B} f g = fiberwise-equiv-from-total≃ funextt preserves-fst (f , g)
 
   funext-id : {A B : Type} (f : A → B) → fst (funext f f) id == (λ x → id)
-  funext-id {A} f = _ =〈  fiberwise-equiv-from-total-eqv-β funextt preserves-fst (f , f) id  〉
+  funext-id {A} f = _ =〈  fiberwise-equiv-from-total≃-β funextt preserves-fst (f , f) id  〉
                       (transport (λ fg → (x : A) → Id (fst fg x) (snd fg x)) 
                                  (ap fst (funextt-id f))
                                  (snd (fst funextt ((f , f) , id)))) =〈 snd= (funextt-id f) 〉 

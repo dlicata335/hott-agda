@@ -13,11 +13,11 @@ module Funext where
               coe (! (ap (λ y → A → y) (contract-Paths {B})) ∘ (contract-Paths {A → B})) ((f , f) , id) =〈 ap (λ h → coe (h ∘ contract-Paths {A → B}) ((f , f) , id)) (! (ap-! (λ y → A → y) (contract-Paths {B}))) 〉
               coe ((ap (λ y → A → y) (! (contract-Paths {B}))) ∘ (contract-Paths {A → B})) ((f , f) , id) =〈 ap= (transport-∘ (λ x → x) (ap (λ y → A → y) (! (contract-Paths {B}))) (contract-Paths {A → B})) 〉
               (coe (ap (λ y → A → y) (! (contract-Paths {B}))) o coe (contract-Paths {A → B})) ((f , f) , id) =〈 id 〉
-              (coe (ap (λ y → A → y) (! (contract-Paths {B}))) (coe (contract-Paths {A → B}) ((f , f) , id))) =〈 ap (λ z → coe (ap (λ y → A → y) (! (contract-Paths {B}))) z) (ap= (type=β contract-Paths-eqv)) 〉
+              (coe (ap (λ y → A → y) (! (contract-Paths {B}))) (coe (contract-Paths {A → B}) ((f , f) , id))) =〈 ap (λ z → coe (ap (λ y → A → y) (! (contract-Paths {B}))) z) (ap= (type=β contract-Paths≃)) 〉
               (coe (ap (λ y → A → y) (! (contract-Paths {B}))) f) =〈 ap= (! (transport-ap-assoc' (λ x → x) (λ y → A → y) (! contract-Paths))) 〉
               (transport (λ y → A → y) (! (contract-Paths {B})) f) =〈 transport-→-post (! contract-Paths) f 〉
               (\ g -> coe (! (contract-Paths {B})) o g) f =〈 id 〉 
-              (coe (! (contract-Paths {B})) o f) =〈 ap (λ x → x o f) (type=β! contract-Paths-eqv) 〉 
+              (coe (! (contract-Paths {B})) o f) =〈 ap (λ x → x o f) (type=β! contract-Paths≃) 〉 
               (λ x → ((f x) , (f x)) , id) ∎ 
 
   left : ∀ {A B} → (A → Paths B) → A → B

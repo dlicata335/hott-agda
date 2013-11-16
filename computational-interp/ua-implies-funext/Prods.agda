@@ -4,6 +4,19 @@ open import NoFunextPrelude
 
 module Prods where
 
+  -- this is written out by hand in NoFunextPrelude, but that requires pair= 
+  apΣ-l : {A A' : Type} {B : A → Type} {B' : A' → Type}
+        (a : A == A')
+        (b : (\ (x : A') → B (coe (! a) x)) == B')
+      → Σ B == Σ B'
+  apΣ-l id id = id
+ 
+  -- build in some β reduction
+  apΣ-l' : {A A' : Type} {B : A → Type} 
+        (a : Equiv A A')
+      → (Σ B) == (Σ (\ (x : A') → B (IsEquiv.g (snd a) x)))
+  apΣ-l' {B = B} e = apΣ-l (ua e) (ap (λ y → λ x → B (y x)) (type=β! e))
+
   eqv : ∀ {A B} → Paths (A × B) == (Paths A × Paths B)
   eqv {A} {B} = ! (ap2 (λ x y → x × y) (contract-Paths {A}) (contract-Paths {B})) ∘ (contract-Paths {A × B})
 
@@ -85,7 +98,7 @@ module Prods where
   pairext : {A B : Type} (f g : A × B) → (f == g) == ((fst f == fst g) × (snd f == snd g))
   pairext {A}{B} f g = f == g =〈 hfiber-fst {B = λ fg → fst fg == snd fg} (f , g) 〉 
                        Σ (λ (p : Paths (A × B)) → fst p == (f , g)) =〈 apΣ-l eqv id 〉 
-                       Σ (λ (q : Paths A × Paths B) → fst (coe (! eqv) q) == (f , g)) =〈 fiberwise-equiv-to-total (λ p1 → ua (pre∘-equiv (preserves-fst (coe (! eqv) p1) ∘ ! (ap leftright (ap= (transport-inv-2 (λ x → x) eqv)))))) 〉 
+                       Σ (λ (q : Paths A × Paths B) → fst (coe (! eqv) q) == (f , g)) =〈 fiberwise-equiv-to-total {! (λ p1 → ua (pre∘-equiv (preserves-fst (coe (! eqv) p1) ∘ ! (ap leftright (ap= (transport-inv-2 (λ x → x) eqv)))))) !} 〉 
                        Σ (λ (q : Paths A × Paths B) → (left q , right q) == (f , g)) =〈 ua (laststep f g) 〉 
                        (((fst f == fst g) × (snd f == snd g)) ∎)
 
