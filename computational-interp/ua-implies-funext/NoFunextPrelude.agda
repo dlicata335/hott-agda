@@ -102,6 +102,12 @@ module NoFunextPrelude where
  !-inv-l-back : {A : Type} {M N P : A} (q : Path N M) (p : Path N P) → Path (q ∘ ! p ∘ p) q
  !-inv-l-back id id = id
 
+ move-right-! :  {A : Type} {M N P : A}
+                (β : Path P N) (α : Path M N) (γ : Path M P)
+             → Path (! β ∘ α) γ
+             → Path α (β ∘ γ)
+ move-right-! id id γ x = ! (∘-unit-l γ) ∘ x
+
  square-id : {A : Type} {x : A} (p : x == x) -> (p ∘ p) == p → p == id
  square-id p α = !-inv-r p ∘ ap (λ x' → x' ∘ ! p) α ∘ ∘-assoc p p (! p) ∘ ap (λ x' → p ∘ x') (! (!-inv-r p))
 
@@ -140,6 +146,11 @@ module NoFunextPrelude where
                 → (p' : _) → Path (transport (\ x → Path (f x) (g x)) p p')
                                     ((ap g p) ∘ p' ∘ (! (ap f p)))
  transport-Path _ _ id p' = ! (∘-unit-l p')
+
+ transport-Path-pre' : {Γ A : Type} {g : A} (f : Γ → A) {M N : Γ} (p : Path M N)
+                → (p' : _) → Path (transport (\ x → Path (f x) g) p p')
+                                    (p' ∘ (! (ap f p)))
+ transport-Path-pre' _ id p' = id
 
  transport-Path-right :  {A : Type} {M N P : A} 
    (α' : Path N P) (α : Path M N)
@@ -215,6 +226,8 @@ module NoFunextPrelude where
  Equiv : Type -> Type -> Type
  Equiv A B = Σ (IsEquiv{A}{B})
 
+ _≃_ = Equiv
+
  equiv : {A B : Type}
      (f : A → B)
      (g : B → A)
@@ -272,6 +285,36 @@ module NoFunextPrelude where
                 (ap f (η x)) ∘ ap (f o g) (ξ ((f x))) ∘ ! (ap (f o g) (ξ (f x)))                  =〈 ap (λ a → ap f (η x) ∘ a) (!-inv-r (ap (f o g) (ξ (f x)))) 〉 
                 (ap f (η x) ∎)) 
 
+ id-equiv : ∀ {A} -> Equiv A A
+ id-equiv = ( (\ x -> x) , isequiv (λ x → x) (\ _ -> id) (\ _ -> id) (\ _ -> id))
+
+ !equiv : ∀ {A B} → Equiv A B → Equiv B A
+ !equiv (f , isequiv g α β γ) = 
+   equiv g f β α 
+    (λ y → α (g y)                                                                       =〈 ! (∘-assoc (α (g y)) (ap (λ x → g (f x)) (α (g y))) (! (α (g (f (g y)))))) ∘ move-right-right-! (α (g y)) (! (α (g (f (g y))))) _ (move-right-! (α (g y)) (α (g y) ∘ ! (! (α (g (f (g y)))))) _ (! (ap-by-id (λ x → ! (α x)) (α (g y))))) 〉 
+           α (g y) ∘ ap (g o f) (α (g y)) ∘ ! (α (g (f (g y))))                          =〈 ap (λ a → α (g y) ∘ a ∘ ! (α (g (f (g y))))) (ap (ap g) (! (γ (g y))) ∘ ap-o g f (α (g y))) 〉 
+           α (g y) ∘ ap g (β (f (g y))) ∘ ! (α (g (f (g y))))                            =〈 ap (λ a → α (g y) ∘ ap g a ∘ ! (α (g (f (g y))))) (inverses-natural g f β) 〉 
+           α (g y) ∘ ap g (ap (f o g) (β y)) ∘ ! (α (g (f (g y))))                      =〈 ap (λ a → α (g y) ∘ a ∘ ! (α (g (f (g y))))) (ap-o (g o f) g (β y) ∘ ! (ap-o g (f o g) (β y))) 〉 
+           α (g y) ∘ ap (g o f) (ap g (β y)) ∘ ! (α (g (f (g y))))                      =〈 ap (λ a → α (g y) ∘ a ∘ ! (α (g (f (g y))))) (ap (λ a → ! (α (g y)) ∘ ap g (β y) ∘ a) (!-invol (α (g (f (g y))))) ∘ ap-by-id (λ x → ! (α x)) (ap g (β y))) 〉 
+           α (g y) ∘ (! (α (g y)) ∘ (ap g (β y)) ∘ α (g (f (g y)))) ∘ ! (α (g (f (g y)))) =〈 rassoc-1-3-1 (α (g y)) (! (α (g y))) (ap g (β y)) (α (g (f (g y)))) (! (α (g (f (g y)))))〉 
+           α (g y) ∘ ! (α (g y)) ∘ (ap g (β y)) ∘ α (g (f (g y))) ∘ ! (α (g (f (g y))))   =〈 !-inv-r-front _ _ 〉 
+           (ap g (β y)) ∘ α (g (f (g y))) ∘ ! (α (g (f (g y))))                          =〈 !-inv-r-back (ap g (β y)) (α (g (f (g y)))) 〉 
+           (ap g (β y) ∎))
+
+ -- ENH: can probably do this one without changing α or β too
+ _∘equiv_ : ∀ {A B C} -> Equiv B C → Equiv A B -> Equiv A C
+ _∘equiv_ (f , isequiv g α β γ) (f' , isequiv g' α' β' γ') = 
+    improve (hequiv (f o f') (g' o g) (λ x → α' x ∘ ap g' (α (f' x))) (λ y → β y ∘ ap f (β' (g y))))
+
+ _≃〈_〉_ : (x : Type) {y z : Type} → Equiv x y → Equiv y z → Equiv x z
+ _ ≃〈 p1 〉 p2 = (p2 ∘equiv p1)
+
+ _∎∎ : (x : Type) → Equiv x x
+ _∎∎ _ = id-equiv
+
+ infix  2 _∎∎
+ infixr 2 _≃〈_〉_ 
+ 
 
  -- ----------------------------------------------------------------------
  -- univalence
@@ -352,12 +395,27 @@ module NoFunextPrelude where
  pre∘-equiv : ∀ {A} {a b c : A} → (a == b) -> Equiv (b == c) (a == c)
  pre∘-equiv α = (improve (hequiv (λ β → β ∘ α) (λ β' → β' ∘ ! α) (λ β → !-inv-r-back β α ∘ ! (∘-assoc β α (! α))) (λ β → !-inv-l-back β α ∘ ! (∘-assoc β (! α) α))))
 
+ -- write out by hand for better definitional behavior
+ apΣ-l-eqv : {A A' : Type} {B : A → Type} 
+       (a : A ≃ A')
+     → Σ B ≃ Σ (\ (x : A') → B (IsEquiv.g (snd a) x))
+ apΣ-l-eqv {B = B} a = improve (hequiv (λ p → fst a (fst p) , transport B (! (IsEquiv.α (snd a) _)) (snd p))
+                                       (λ p → IsEquiv.g (snd a) (fst p) , snd p) 
+                                       {!!} {!!} ) where 
+           postulate FIXME : {A : Type} → A
+
  apΣ-l : {A A' : Type} {B : A → Type} {B' : A' → Type}
        (a : A == A')
        (b : (\ (x : A') → B (coe (! a) x)) == B')
      → Σ B == Σ B'
  apΣ-l id id = id
- 
+
+ -- build in some β reduction
+ apΣ-l' : {A A' : Type} {B : A → Type} 
+       (a : Equiv A A')
+     → (Σ B) == (Σ (\ (x : A') → B (IsEquiv.g (snd a) x)))
+ apΣ-l' {B = B} e = apΣ-l (ua e) (ap (λ y → λ x → B (y x)) (type=β! e))
+
  transport-inv-1 : {A : Type} (B : A -> Type) {M N : A} (α : M == N) -> (\y -> transport B (! α) (transport B α y)) == (\ x -> x)
  transport-inv-1 _ id = id
 
@@ -382,16 +440,60 @@ module NoFunextPrelude where
  HFiber : {A B : Type} -> (A -> B) -> B -> Type
  HFiber f y = Σ \x -> Path (f x) y
 
+ hfiber-fst-eqv : ∀ {A} {B : A → Type} (a : A) → B a ≃ HFiber {A = Σ B} fst a
+ hfiber-fst-eqv {B = B} a = (improve (hequiv (λ b → (a , b) , id) (λ p₁ → transport B (snd p₁) (snd (fst p₁))) (λ _ → id) (λ {((a1 , b) , p) → path-induction-l (λ a2 p₁ → (b₁ : B a2) → Id ((a , transport B p₁ b₁) , id) ((a2 , b₁) , p₁)) (λ _ → id) p b})))
+
  hfiber-fst : ∀ {A} {B : A → Type} (a : A) → B a == HFiber {A = Σ B} fst a
- hfiber-fst {B = B} a = ua (improve (hequiv (λ b → (a , b) , id) (λ p₁ → transport B (snd p₁) (snd (fst p₁))) (λ _ → id) (λ {((a1 , b) , p) → path-induction-l (λ a2 p₁ → (b₁ : B a2) → Id ((a , transport B p₁ b₁) , id) ((a2 , b₁) , p₁)) (λ _ → id) p b})))
+ hfiber-fst {B = B} a = ua (hfiber-fst-eqv a)
 
  fiberwise-to-total : {A : Type} {B B' : A → Type} → (f : (a : A) → B a → B' a) → Σ B → Σ B'
  fiberwise-to-total f (a , b) = (a , f a b)
 
  -- need to write this one out; would follow from ua and funext
  -- NOTE for products: uses ap of , and fst
- fiberwise-equiv-to-total : ∀ {A} {B B' : A → Type} → ((x : A) → B x == B' x) → (Σ B) == (Σ B')
- fiberwise-equiv-to-total h = ua (improve (hequiv (fiberwise-to-total (\ x -> coe (h x))) (fiberwise-to-total (λ x → coe (! (h x)))) (λ x → ap (\ y -> fst x , y) (ap= (transport-inv-1 (λ x₁ → x₁) (h (fst x))))) (λ y → ap (\ x -> fst y , x) (ap= (transport-inv-2 (λ x → x) (h (fst y)))))))
+ fiberwise-equiv-to-total-eqv : ∀ {A} {B B' : A → Type} → ((x : A) → B x ≃ B' x) → (Σ B) ≃ (Σ B')
+ fiberwise-equiv-to-total-eqv h = (improve (hequiv (fiberwise-to-total (\ x -> fst (h x)))
+                                                   (fiberwise-to-total (λ x → IsEquiv.g (snd (h x))))
+                                                   (λ x → ap (λ y → fst x , y) (IsEquiv.α (snd (h (fst x))) _))
+                                                   (λ x → ap (λ y → fst x , y) (IsEquiv.β (snd (h (fst x))) _))))
+
+ fiberwise-equiv-to-total : ∀ {A} {B B' : A → Type} → ((x : A) → B x ≃ B' x) → (Σ B) == (Σ B')
+ fiberwise-equiv-to-total h = ua (fiberwise-equiv-to-total-eqv h)
+
+ fiberwise-equiv-from-total-eqv : ∀ {A} {B B' : A → Type} → 
+                               (t : (Σ B) ≃ (Σ B'))
+                            → ((y : Σ B) → fst (fst t y) == fst y)
+                            → ((x : A) → B x ≃ B' x)
+ fiberwise-equiv-from-total-eqv {A}{B}{B'} t f x = 
+                      B x ≃〈 hfiber-fst-eqv x 〉 
+                      HFiber {(Σ B)} fst x ≃〈 apΣ-l-eqv t 〉 
+                      HFiber {(Σ B')} (fst o (IsEquiv.g (snd t))) x ≃〈 fiberwise-equiv-to-total-eqv (λ x₁ → pre∘-equiv (f (IsEquiv.g (snd t) x₁) ∘ ap fst (! (IsEquiv.β (snd t) _)))) 〉
+                      HFiber {(Σ B')} fst x ≃〈 !equiv (hfiber-fst-eqv x) 〉
+                      B' x ∎∎
+
+ fiberwise-equiv-from-total-eqv-β : ∀ {A} {B B' : A → Type} → 
+                               (t : (Σ B) ≃ (Σ B'))
+                            → (f : (y : Σ B) → fst (fst t y) == fst y)
+                            → ((x : A) (b : B x) → (fst (fiberwise-equiv-from-total-eqv t f x) b) == transport B' (f (x , b)) (snd (fst t (x , b))))
+ fiberwise-equiv-from-total-eqv-β {B' = B'} t f x b = 
+   ap {M = transport (λ x₁ → Id (fst x₁) x) (! (IsEquiv.α (snd t) (x , b))) id ∘ f (IsEquiv.g (snd t) (fst t (x , b))) ∘ ap fst (! (IsEquiv.β (snd t) (fst t (x , b))))} {N = f (x , b)} 
+      (λ z → transport B' z (snd (fst t (x , b))))
+      (apd f (IsEquiv.α (snd t) (x , b)) ∘ 
+       ! ((ap
+             (λ z → z ∘ f (IsEquiv.g (snd t) (fst t (x , b))) ∘ ap fst (! (IsEquiv.β (snd t) (fst t (x , b)))))
+             ((! (transport-Path-pre' fst (! (IsEquiv.α (snd t) (x , b))) id)) ∘ 
+               ! (∘-unit-l (! (ap fst (! (IsEquiv.α (snd t) (x , b)))))) ∘
+               ! (ap ! (ap-! fst (IsEquiv.α (snd t) (x , b)))) ∘ 
+               ! (!-invol (ap fst (IsEquiv.α (snd t) (x , b)))))
+             ∘ ap {M = ! (ap (λ z → fst (fst t z)) (IsEquiv.α (snd t) (x , b)))}
+                 {N = ap fst (! (IsEquiv.β (snd t) (fst t (x , b))))}
+                 (λ z →
+                    ap fst (IsEquiv.α (snd t) (x , b)) ∘
+                    f (IsEquiv.g (snd t) (fst t (x , b))) ∘ z)
+                 (! (ap-! fst (IsEquiv.β (snd t) (fst t (x , b))))
+                  ∘ ap ! (ap (ap fst) (! (IsEquiv.γ (snd t) (x , b))) 
+                  ∘ ap-o fst (λ z → fst t z) (IsEquiv.α (snd t) (x , b))))) ∘
+          transport-Path (λ z → fst (fst t z)) fst (IsEquiv.α (snd t) (x , b)) _))
 
  Paths : Type → Type
  Paths A = Σ \ (p : A × A) → fst p == snd p
@@ -406,3 +508,7 @@ module NoFunextPrelude where
  contract-Paths : ∀ {A} → (Paths A) == A
  contract-Paths = ua contract-Paths-eqv 
 
+ -- for funext-comp 
+ snd= : {A : Type} {B : A -> Type} {p q : Σ B} -> (c : p == q) -> (transport B (ap fst c) (snd p)) == (snd q)
+ snd= {p = p} {q = .p} id = id
+ 

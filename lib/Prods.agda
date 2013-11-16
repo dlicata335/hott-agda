@@ -331,3 +331,10 @@ module lib.Prods where
   -- need to write this one out; would follow from ua and funext
   fiberwise-equiv-to-total : ∀ {A} {B B' : A → Type} → ((x : A) → B x == B' x) → (Σ B) == (Σ B')
   fiberwise-equiv-to-total h = ua (improve (hequiv (fiberwise-to-total (\ x -> coe (h x))) (fiberwise-to-total (λ x → coe (! (h x)))) (λ x → pair≃ id (ap≃ (transport-inv-1 (λ x₁ → x₁) (h (fst x))))) (λ y → pair≃ id (ap≃ (transport-inv-2 (λ x → x) (h (fst y)))))))
+
+  -- with η for Σ, you don't need funext
+  AC : {A : Type} {B : A → Type} {C : (x : A) → B x → Type} 
+     → Equiv ((x : A) → Σ \ y -> C x y)
+             (Σ \ (f : (x : A) → B x) → (x : A) → C x (f x))
+  AC = improve (hequiv (λ f → (λ x → fst (f x)) , (λ x → snd (f x))) (λ g x → fst g x , snd g x) (λ f → id) (λ y → id))
+
