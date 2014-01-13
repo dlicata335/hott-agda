@@ -78,6 +78,9 @@ module computational-interp.Cube where
                      → (b : (b : B a) → P (reflo n b))
                      → (c : CubeOver B n (refl n a)) → P c
   cubeover-induction = {!!}
+
+  apd-Cube : {A : Type} {B : A → Type} (n : Nat) (f : (x : A) → B x) → (a : Cube n A) → CubeOver B n a
+  apd-Cube n f c = {!!}
                      
 
   ctxops : {A : Type} {B : A → Type} (n : Nat) 
@@ -133,88 +136,23 @@ module computational-interp.Cube where
     conjecture a1 a2 α = ua (improve (hequiv (λ {(((a1' , b1) , (a2' , b2) , αβ) , eq) → {!(b1 , b2 , ?)!}})
                                            (λ {(b1 , b2 , β) → ((a1 , b1) , (a2 , b2) , pair= α β) , {!!}}) {!!} {!!}))
 
-  module Coprod (A : Type) (B : Type) where
+  test : {Γ : Type} {A : Γ → Type} {M N : (x : Γ) → A x} (θ : Γ) → Type
+  test {Γ}{A}{M}{N} θ = CubeOver
+                          (λ (p₁ : Σ (λ (θ₁ : Γ) → A θ₁ × A θ₁)) →
+                             fst (snd p₁) == snd (snd p₁))
+                          0 (θ , (M θ) , (N θ))
+  
+  up' : ∀ {n} {Γ : Type} {A : Γ → Type} {M N : (x : Γ) → A x} (θ : Cube n Γ) 
+      → CubeOver (\ x -> M x == N x) n θ
+      → CubeOver A (S n) (θ , θ , id) 
+  up' {n} {M = M} {N = N} θ c = (pair n θ (apd-Cube n M θ) , (pair n θ (apd-Cube n M θ) , {!fst c!})) , {!!}
 
-    eqv : Paths' (Either A B) == Either (Paths' A) (Paths' B)
-    eqv = ap2 Either (! (contract-Paths' {A})) (! (contract-Paths' {B}))  ∘ (contract-Paths' {Either A B})
+  CubeOver' : {A : Type} (B : A → Type) (n : Nat) → Cube n A → Type
+  CubeOver' B Z a = B a
+  CubeOver' B (S n) (a1 , a2 , α) = Σ (λ (x : CubeOver' B n a1) → 
+                                   Σ (λ (y : CubeOver' B n a2) → 
+                                        PathOver (CubeOver' B n) α x y))
 
-    C : (x y : Either A B) → Type
-    C (Inl a) (Inl a') = a == a'
-    C (Inr b) (Inr b') = b == b'
-    C _ _ = Void
-
-    step : (a : A) → coe (! eqv) (Inl ((a , a) , id)) == ((Inl a , Inl a) , id)
-    step = {!!}
-
-    e' : (p : Either A B × Either A B) → Equiv (Σ \ (q : Paths' (Either A B)) → fst q == p) (C (fst p) (snd p))
-    e' p = improve (hequiv l {!!} {!!} {!!}) where
-      l : (Σ \ (q : Paths' (Either A B)) → fst q == p) → _
-      l = {!!}
-
-    e : (p : Either A B × Either A B) → Equiv (Σ \ (q : Either (Paths' A) (Paths' B)) → fst (coe (! eqv) q) == p) (C (fst p) (snd p)) 
-    e p = improve (hequiv l (r p) {!!} {!!}) where
-      l : Σ (λ q → fst (coe (! eqv) q) == p) -> _
-      l (Inl ((x , .x) , id) , eq) = path-induction (λ p₁ eq₁ → C (fst p₁) (snd p₁)) (transport (λ x₁ → C (fst (fst x₁)) (snd (fst x₁))) (! (step x)) id) eq
-      l (Inr ((y , .y) , id) , eq) = {!!}
-
-      r : (p : Either A B × Either A B) → (C (fst p) (snd p)) -> (Σ \ (q : Either (Paths' A) (Paths' B)) → fst (coe (! eqv) q) == p)
-      r (Inl x , Inl y) c = (Inl ((x , y) , c)) , {!!}
-      r (Inl x , Inr y) ()
-      r (Inr x , Inl y) c = {!!}
-      r (Inr x , Inr y) c = {!!}
-{-
-    C : (a a' : A) → Either (Paths' A) (Paths' B) → Type
-    C a a' (Inl ((a1 , a1'), p)) = (a == a1) × (a' == a1')
-    C a a' (Inr _) = Void 
-
-    coprod2 : (a a' : A) (p : Paths' (Either A B)) → C a a' (coe eqv p) == (fst p == (Inl a , Inl a'))
-    coprod2 a a' ((Inl x , .(Inl x)) , id) = {!!}
-    coprod2 a a' ((Inr x , .(Inr x)) , id) = {!!}
-
-    coprod3 : (a a' : A) (p : Either (Paths' A) (Paths' B)) → C a a' p == (fst (coe (! eqv) p) == (Inl a , Inl a'))
-    coprod3 a a' (Inl ((x , .x) , id)) = (a == x) × (a' == x) ≃〈 {!!} 〉
-                                         Path {(Either A B × Either A B)} (Inl x , Inl x) (Inl a , Inl a') ≃〈 {!!} 〉 
-                                         (fst (coe (! eqv) (Inl ((x , x) , id))) == (Inl a , Inl a') ∎)
-    coprod3 a a' (Inr ((x , .x) , id)) = {!!}
--}
-
-{-
-
-
-    fiberwise-eqv : {A : Type} {B B' : A → Type} → (f : (a : A) → B a → B' a)
-                  → IsEquiv {(Σ B)} {(Σ B')} (fiberwise-to-total f) 
-                  → (a : A) → B a == B' a
-    fiberwise-eqv f (isequiv g α β _) a = ua (improve (hequiv (f a) (λ b' → coe {!!} (snd (g (a , b')))) {!!} {!!}))
-
-    movearg : ∀ {A B} → Equiv (A → Paths' B) (Σ (λ (p₁ : (A → B) × (A → B)) → (x : A) → fst p₁ x == snd p₁ x)) 
-    movearg = improve (hequiv ((λ f →
-                                      ((\ x -> fst (fst (f x))) , (λ x₁ → snd (fst (f x₁)))) ,
-                                      (λ x₁ → snd (f x₁))))
-                               (λ x x₁ → ((fst (fst x) x₁) , (snd (fst x) x₁)) , (snd x x₁))
-                               (λ _ → id) (λ _ → id))
-
-    funext : {A B : Type} (f g : A → B) → (f == g) == ((x : A) → f x == g x)
-    funext {A} {B} f g = fiberwise-eqv {A = (A → B) × (A → B)} {B = \ p → fst p == snd p} {B' = \ p → (x : A) → fst p x == snd p x}
-                                       (λ {(f , g) → λ p₁ x → ap≃ p₁ {x}})
-                                       STS
-                                       (f , g) where
-        tot : (Paths' (A → B)) → Σ (λ (p₁ : (A → B) × (A → B)) → (x : A) → fst p₁ x == snd p₁ x)
-        tot = fiberwise-to-total {A = (A → B) × (A → B)} {B = \ p → fst p == snd p} {B' = \ p → (x : A) → fst p x == snd p x} (λ {(f , g) → λ p₁ x → ap≃ p₁ {x}})
-
-        e : Equiv (Paths' (A → B)) (Σ (λ (p₁ : (A → B) × (A → B)) → (x : A) → fst p₁ x == snd p₁ x))
-        e = movearg ∘equiv coe-equiv eqv
-
-        STS : IsEquiv {Paths' (A → B)} {Σ (λ (p₁ : (A → B) × (A → B)) → (x : A) → fst p₁ x == snd p₁ x)} 
-                      tot
-        STS = transport IsEquiv (fst e ≃〈 {!!} 〉 
-                                 fst movearg o coe eqv ≃〈 {!!} 〉 
-                                 fst movearg o coe (! (ap (\ y -> A → y) (contract-Paths' {B}))) o coe (contract-Paths' {A → B}) ≃〈 {!!} 〉 
-                                 fst movearg o coe (ap (\ y -> A → y) (! (contract-Paths' {B}))) o coe (contract-Paths' {A → B}) ≃〈 {!!} 〉 
-                                 fst movearg o (\ z -> coe (! (contract-Paths' {B})) o z) o coe (contract-Paths' {A → B}) ≃〈 {!!} 〉 
-                                 ((λ f →
-                                      ((\ x -> fst (fst (f x))) , (λ x₁ → snd (fst (f x₁)))) ,
-                                      (λ x₁ → snd (f x₁)))) o (\ z -> coe (! (contract-Paths' {B})) o z) o coe (contract-Paths' {A → B}) ≃〈 {!!} 〉 
-                                 (\ p -> fst p , λ x → ap≃ (snd p) {x}) ≃〈 {!!} 〉 
-                                 tot ∎)
-                                (snd e) 
--}
+  pair' : {A : Type} {B : A → Type} (n : Nat) → (Σ \ (a : Cube n A) →  CubeOver' B n a) → Cube n (Σ B)
+  pair' Z p = p
+  pair' (S n) ((a1 , a2 , α) , (b1 , b2 , β)) = pair' n (a1 , b1) , pair' n (a2 , b2) , ap (pair' n) (pair= α β)
