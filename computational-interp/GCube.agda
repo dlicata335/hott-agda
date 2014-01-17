@@ -31,7 +31,7 @@ module computational-interp.GCube where
     BoundaryPath (S n) (c1 , c1' , p11') (c2 , c2' , p22') = 
       Σ (λ (p12 : CubePath n c1 c2) → 
       Σ (λ (p1'2' : CubePath n c1' c2') → 
-        Inside (S n) {!!}))
+        {!"p11' = p22' over p12 , p1'2'"? !}))
 
     CubePath n c1 c2 = 
       Σ (λ (p : BoundaryPath n (d n c1) (d n c2)) → Inside (S n) (c1 , c2 , p))
