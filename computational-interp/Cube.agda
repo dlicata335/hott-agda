@@ -156,3 +156,48 @@ module computational-interp.Cube where
   pair' : {A : Type} {B : A → Type} (n : Nat) → (Σ \ (a : Cube n A) →  CubeOver' B n a) → Cube n (Σ B)
   pair' Z p = p
   pair' (S n) ((a1 , a2 , α) , (b1 , b2 , β)) = pair' n (a1 , b1) , pair' n (a2 , b2) , ap (pair' n) (pair= α β)
+
+
+
+  module Foo (A : Type) where
+
+    Cube' : Nat → Type 
+    Boundary : Nat → Type
+    d : (n : Nat) → Cube' n → Boundary n
+    Inside : (n : Nat) → Boundary (S n) → Type
+
+    Boundary 0 = Unit
+    Boundary (S n) = Σ λ (c1 : Cube' n) → Σ \ (c2 : Cube' n) → d n c1 == d n c2
+
+    Cube' 0 = A
+    Cube' (S n) = Σ \ (b : Boundary (S n)) → Inside n b
+
+    d Z c = <>
+    d (S n) c = fst c
+
+    -- theorem
+    Inside Z (c1 , c2 , b) = c1 == c2
+    Inside (S n) ((.b2 , α1) , (b2 , α2) , id) = α1 == α2
+
+    mutual
+      expand : (n : Nat) → A → Cube' n 
+      expand Z x = x
+      expand (S n) x = (expand n x , expand n x , id) , expand-in n x
+  
+      expand-in : (n : Nat) → (x : A) → Inside n (expand n x , expand n x , id)
+      expand-in Z x = id
+      expand-in (S n) x = id
+
+    pt : (n : Nat) → Cube' n → A
+    pt Z c = c
+    pt (S n) c = pt n (fst (fst c))
+
+    pt-expand : (n : Nat) (c : Cube' n) → expand n (pt n c) == c
+    pt-expand Z c = id
+    pt-expand (S Z) ((.c2 , c2 , b) , id) = {!UIP for Unit!}
+    pt-expand (S (S n)) (((.b2 , .i2) , (b2 , i2) , id) , id) = pair= (pair= (pt-expand (S n) (b2 , i2)) {!!}) {!!}  --grungy but should work 
+
+    test' : _
+    test' = {!Cube' 2!}
+
+

@@ -73,7 +73,7 @@ module homotopy.Pi2HSusp (A : Type)
               Path{Trunc (tl 1) (Path {(Susp A)} No So) }
                    [ mer (a ⊙ a') ] [ (mer a ∘ ! (mer a0) ∘ mer a') ]
     homomorphism = ConnectedProduct.wedge-elim {A = A} {B = A} A-Connected A-Connected
-                      (λ a a' → _ , use-level (Trunc-level{tl 1}) _ _)
+                      (λ a a' → _ , use-level (Trunc-level {tl 1}) _ _)
                       (Inr id) {a0} {a0}
                       (λ a → [ (mer (a0 ⊙ a)) ] ≃〈 ap ([_]) (ap mer (unitl a)) 〉
                              [ (mer a) ] ≃〈 ap ([_]) (! (!-inv-r-front (mer a0) (mer a))) 〉
