@@ -96,9 +96,8 @@ module homotopy.Pi2HSusp (A : Type)
   decode {x} = Susp-elim (\ x ->  Codes x → P x)
                          decode'
                          (λ a → [ (mer a) ])
-                         (λ a → transport-→-from-square Codes P (mer a)
-                                      decode' (λ a' → [ (mer a') ]) 
-                                      (λ≃ (STS a)))
+                         (λ a → transport-→-from-square Codes P (mer a) decode' (λ a' → [ mer a' ])
+                                  (λ≃ (STS a)))
                          x where
     abstract
      STS : (a a' : A) → transport P (mer a) (decode' a') ≃ [ mer (transport Codes (mer a) a') ]

@@ -22,7 +22,7 @@ module homotopy.KGn where
              (A-level : NType (tl 1) A)
              (H-A : H-Structure A a0) where
   
-      module FS = homotopy.FreudenthalIteratedSuspension1 A a0 A-Connected A-level H-A
+      module FS = homotopy.FreudenthalIteratedSuspension1 A a0 A-Connected 
     
       KG : Positive → Type
       KG n = Trunc (tlp n) (FS.Susp'^ n)

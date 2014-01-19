@@ -17,8 +17,7 @@ open import homotopy.KG1
 module homotopy.FreudenthalIteratedSuspension1 (A : Type) 
                                                (a0 : A)
                                                (A-Connected : Connected (S (S -2)) A)
-                                               (A-level : NType (tl 1) A)
-                                               (H-A : H-Structure A a0) where
+                                               where
 
       Susp'^ : Positive → Type
       Susp'^ n = (Susp^ (n -1pn) A)
@@ -34,6 +33,7 @@ module homotopy.FreudenthalIteratedSuspension1 (A : Type)
       Susp'^-Connected' (S (S n')) = coe (ap (λ x → NType -2 (Trunc (S (tl (pos2nat n'))) (Susp^ x A))) (ap pos2nat (pos2nat-+1np n')))
                                      (Susp'^-Connected (pos2nat (S n'))) 
   
+
       Susp'^-Connected'' : (n : Positive) → Connected (tlp n) (Susp'^ (n +1))
       Susp'^-Connected'' n = coe (ap (λ x → NType -2 (Trunc x (Susp^ (pos2nat n) A))) (tl-pos2nat-tlp n ∘ ! (-2ptl-S (S n)))) 
                           (Susp'^-Connected' (n +1))
