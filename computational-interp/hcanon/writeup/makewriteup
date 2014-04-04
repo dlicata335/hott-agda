@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for i in `cat lagda.txt`; do /Users/drl/Library/Haskell/bin/lhs2tex --agda $i.lagda -o $i.lao; done
+pdflatex writeup
+# bibtex paper
+# pdflatex paper
+# pdflatex paper

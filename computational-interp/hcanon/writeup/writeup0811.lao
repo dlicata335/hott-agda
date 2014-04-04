@@ -1,0 +1,1067 @@
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+\ReadOnlyOnce{agda.fmt}%
+
+
+\RequirePackage[T1]{fontenc}
+\RequirePackage[utf8x]{inputenc}
+\RequirePackage{ucs}
+\RequirePackage{amsfonts}
+
+\providecommand\mathbbm{\mathbb}
+
+% TODO: Define more of these ...
+\DeclareUnicodeCharacter{737}{\textsuperscript{l}}
+\DeclareUnicodeCharacter{8718}{\ensuremath{\blacksquare}}
+\DeclareUnicodeCharacter{8759}{::}
+\DeclareUnicodeCharacter{9669}{\ensuremath{\triangleleft}}
+\DeclareUnicodeCharacter{8799}{\ensuremath{\stackrel{\scriptscriptstyle ?}{=}}}
+\DeclareUnicodeCharacter{10214}{\ensuremath{\llbracket}}
+\DeclareUnicodeCharacter{10215}{\ensuremath{\rrbracket}}
+
+% TODO: This is in general not a good idea.
+\providecommand\textepsilon{$\epsilon$}
+\providecommand\textmu{$\mu$}
+
+
+%Actually, varsyms should not occur in Agda output.
+
+% TODO: Make this configurable. IMHO, italics doesn't work well
+% for Agda code.
+
+\renewcommand\Varid[1]{\mathord{\textsf{#1}}}
+\let\Conid\Varid
+\newcommand\Keyword[1]{\textsf{\textbf{#1}}}
+\EndFmtInput
+
+
+\ignore{
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mbox{\enskip\{-\# OPTIONS --type-in-type --no-termination-check  \#-\}\enskip}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Keyword{open}\;\Keyword{import}\;\Varid{lib.Prelude}{}\<[E]%
+\\
+\>[B]{}\Keyword{open}\;\Conid{BoolM}{}\<[E]%
+\\
+\>[B]{}\Keyword{import}\;\Varid{lib.PrimTrustMe}{}\<[E]%
+\\
+\>[B]{}\Keyword{open}\;\Keyword{import}\;\Varid{computational-interp.hcanon.HSetLang}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Keyword{module}\;\Varid{computational-interp.hcanon.HSetProof}\;\Keyword{where}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+}
+
+I'm using an intrinsic encoding of syntax.  The syntax is necessary
+because we need to define the logical relation/prove the fundamental
+theorem by induction, and we can't induct on all Agda terms inside Agda.
+
+\begin{itemize}
+\item \ensuremath{\Conid{Ctx}\;\Conid{Γ}}, where Γ is an Agda type, is syntax representing a context, which interprets to Γ:
+\noagda\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Keyword{data}\;\Conid{Ctx}\;\Keyword{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{·}\;{}\<[9]%
+\>[9]{}\mathbin{:}\;\Conid{Ctx}\;\Conid{Unit}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\anonymous ,\anonymous \;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\mskip1.5mu\}\;\Varid{→}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;\Varid{→}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\;\Varid{→}\;\Conid{Ctx}\;(\Conid{Σ}\;\Conid{A}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\item \ensuremath{\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}}, where \ensuremath{\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}} and \ensuremath{\Conid{A}\;\mathbin{:}\;\Conid{Γ}\;\Varid{→}\;\Conid{Type}}, 
+is syntax representing a type, which decodes to the Agda type \ensuremath{\Conid{A}}.  
+
+\noagda \begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{54}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Keyword{data}\;\Conid{Ty}\;\Keyword{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{bool}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;\Conid{Ty}\;\Conid{Γ*}\;(\lambda \;\anonymous \;\to \;\Conid{Bool}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{prop}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;\Conid{Ty}\;\Conid{Γ*}\;(\lambda \;\anonymous \;\to \;\Conid{Type}){}\<[54]%
+\>[54]{}\mbox{\onelinecomment  really small hprops?}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{proof}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;(\Conid{M}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{prop})\;\Varid{→}\;\Conid{Ty}\;\Conid{Γ*}\;(\lambda \;\Varid{θ}\;\Varid{→}\;(\Varid{interp}\;\Conid{M}\;\Varid{θ})){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Π}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Conid{B}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[5]{}\hsindent{6}{}\<[11]%
+\>[11]{}(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;(\Conid{B*}\;\mathbin{:}\;\Conid{Ty}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B})\;{}\<[E]%
+\\
+\>[5]{}\hsindent{3}{}\<[8]%
+\>[8]{}\Varid{→}\;\Conid{Ty}\;\Conid{Γ*}\;(\lambda \;\Varid{θ}\;\Varid{→}\;(\Varid{x}\;\mathbin{:}\;\Conid{A}\;\Varid{θ})\;\Varid{→}\;(\Conid{B}\;(\Varid{θ},\Varid{x}))){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{id}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;(\Conid{M}\;\Conid{N}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Conid{A*})\;{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}\Varid{→}\;\Conid{Ty}\;\Conid{Γ*}\;(\lambda \;\Varid{θ}\;\Varid{→}\;\Varid{interp}\;\Conid{M}\;\Varid{θ}\;\equiv \;\Varid{interp}\;\Conid{N}\;\Varid{θ}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mbox{\onelinecomment  some explicit structural properties}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{w}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Conid{B}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;(\Conid{B*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{B})\;\Varid{→}\;\Conid{Ty}\;(\Conid{Γ*},\Conid{A*})\;(\lambda \;\Varid{θ}\;\Varid{→}\;\Conid{B}\;(\Varid{fst}\;\Varid{θ})){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{subst1}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Conid{B}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;(\Conid{B*}\;\mathbin{:}\;\Conid{Ty}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B})\;{}\<[E]%
+\\
+\>[5]{}\hsindent{11}{}\<[16]%
+\>[16]{}(\Conid{M}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Conid{A*})\;\Varid{→}\;\Conid{Ty}\;\Conid{Γ*}\;(\lambda \;\Varid{θ}\;\Varid{→}\;\Conid{B}\;(\Varid{θ},\Varid{interp}\;\Conid{M}\;\Varid{θ})){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{ex}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Conid{B}\;\Conid{C}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;(\Conid{B*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{B})\;{}\<[E]%
+\\
+\>[5]{}\hsindent{3}{}\<[8]%
+\>[8]{}\Varid{→}\;\Conid{Ty}\;((\Conid{Γ*},\Conid{A*}),\Varid{w}\;\Conid{A*}\;\Conid{B*})\;\Conid{C}\;{}\<[E]%
+\\
+\>[5]{}\hsindent{3}{}\<[8]%
+\>[8]{}\Varid{→}\;\Conid{Ty}\;((\Conid{Γ*},\Conid{B*}),\Varid{w}\;\Conid{B*}\;\Conid{A*})\;(\lambda \;\Varid{θ}\;\Varid{→}\;\Conid{C}\;((\Varid{fst}\;(\Varid{fst}\;\Varid{θ}),\Varid{snd}\;\Varid{θ}),\Varid{snd}\;(\Varid{fst}\;\Varid{θ}))){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\item \ensuremath{\Conid{Tm}\;\Conid{Γ*}\;\Conid{A*}}, where \ensuremath{\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}} and \ensuremath{\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}}, is syntax representing a 
+term, which decodes to a function \ensuremath{(\Varid{θ}\;\mathbin{:}\;\Conid{Γ})\;\Varid{→}\;\Conid{A}\;\Varid{θ}}:
+
+\noagda \begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{interp}\;{}\<[11]%
+\>[11]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{→}\;(\Varid{θ}\;\mathbin{:}\;\Conid{Γ})\;\Varid{→}\;(\Conid{A}\;\Varid{θ}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Then we just give the typing rules; \ensuremath{\Varid{interp}} is defined like you would expect:
+
+\noagda \begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{10}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Keyword{data}\;\Conid{Tm}\;\Keyword{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mbox{\onelinecomment  last variable}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{v}\;{}\<[10]%
+\>[10]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;\Varid{→}\;\Conid{Tm}\;(\Conid{Γ*},\Conid{A*})\;(\Varid{w}\;\Conid{A*}\;\Conid{A*}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mbox{\onelinecomment  general weakening}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{w}\;{}\<[10]%
+\>[10]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Conid{B}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{B*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{B}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[10]{}\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;\Conid{B*}\;\Varid{→}\;\Conid{Tm}\;(\Conid{Γ*},\Conid{A*})\;(\Varid{w}\;\Conid{A*}\;\Conid{B*}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{true}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{bool}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{false}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{bool}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{unit}\;{}\<[11]%
+\>[11]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{prop}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{unit⁺}\;{}\<[12]%
+\>[12]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{prop}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{void}\;{}\<[11]%
+\>[11]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{prop}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}`\Varid{∀}\;{}\<[11]%
+\>[11]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;(\Conid{A*}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{prop})\;(\Conid{B*}\;\mathbin{:}\;\Conid{Tm}\;(\Conid{Γ*},\Varid{proof}\;\Conid{A*})\;\Varid{prop})\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{prop}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{<>}\;{}\<[11]%
+\>[11]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{proof}\;\Varid{unit}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{<>⁺}\;{}\<[13]%
+\>[13]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{proof}\;\Varid{unit⁺}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{split1}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{C}\;\mathbin{:}\;\anonymous \mskip1.5mu\}\;(\Conid{C*}\;\mathbin{:}\;\Conid{Ty}\;(\Conid{Γ*},\Varid{proof}\;\Varid{unit⁺})\;\Conid{C})\;{}\<[E]%
+\\
+\>[5]{}\hsindent{6}{}\<[11]%
+\>[11]{}\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{subst1}\;\Conid{C*}\;\Varid{<>⁺})\;{}\<[E]%
+\\
+\>[5]{}\hsindent{6}{}\<[11]%
+\>[11]{}\Varid{→}\;(\Varid{x}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{proof}\;\Varid{unit⁺}))\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{subst1}\;\Conid{C*}\;\Varid{x}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{abort}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{C}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{C*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{C}\mskip1.5mu\}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{proof}\;\Varid{void})\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;\Conid{C*}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{plam}\;{}\<[11]%
+\>[11]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{prop}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{B*}\;\mathbin{:}\;\Conid{Tm}\;(\Conid{Γ*},\Varid{proof}\;\Conid{A*})\;\Varid{prop}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[11]{}\Varid{→}\;\Conid{Tm}\;(\Conid{Γ*},\Varid{proof}\;\Conid{A*})\;(\Varid{proof}\;\Conid{B*})\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{proof}\;(`\Varid{∀}\;\Conid{A*}\;\Conid{B*})){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{papp}\;{}\<[11]%
+\>[11]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{prop}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{B*}\;\mathbin{:}\;\Conid{Tm}\;(\Conid{Γ*},\Varid{proof}\;\Conid{A*})\;\Varid{prop}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[11]{}\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{proof}\;(`\Varid{∀}\;\Conid{A*}\;\Conid{B*}))\;\Varid{→}\;(\Conid{M*}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{proof}\;\Conid{A*}))\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{subst1}\;(\Varid{proof}\;\Conid{B*})\;\Conid{M*}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{if}\;{}\<[11]%
+\>[11]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{C}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{C*}\;\mathbin{:}\;\Conid{Ty}\;(\Conid{Γ*},\Varid{bool})\;\Conid{C}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[11]{}\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{subst1}\;\Conid{C*}\;\Varid{true})\;{}\<[E]%
+\\
+\>[11]{}\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{subst1}\;\Conid{C*}\;\Varid{false})\;{}\<[E]%
+\\
+\>[11]{}\Varid{→}\;(\Varid{x}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{bool})\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{subst1}\;\Conid{C*}\;\Varid{x}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{lam}\;{}\<[10]%
+\>[10]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Conid{B}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{B*}\;\mathbin{:}\;\Conid{Ty}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[10]{}\Varid{→}\;\Conid{Tm}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B*}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Conid{Π}\;\Conid{A*}\;\Conid{B*}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{app}\;{}\<[10]%
+\>[10]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Conid{B}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{B*}\;\mathbin{:}\;\Conid{Ty}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[10]{}\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Conid{Π}\;\Conid{A*}\;\Conid{B*})\;\Varid{→}\;(\Conid{M*}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Conid{A*})\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{subst1}\;\Conid{B*}\;\Conid{M*}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{refl}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;(\Conid{M}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Conid{A*})\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{id}\;\Conid{A*}\;\Conid{M}\;\Conid{M}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{tr}\;{}\<[10]%
+\>[10]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Conid{C}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[10]{}\hsindent{2}{}\<[12]%
+\>[12]{}(\Conid{C*}\;\mathbin{:}\;\Conid{Ty}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C})\;\{\mskip1.5mu \Conid{M1}\;\Conid{M2}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Conid{A*}\mskip1.5mu\}\;(\Varid{α}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{id}\;\Conid{A*}\;\Conid{M1}\;\Conid{M2}))\;{}\<[E]%
+\\
+\>[10]{}\Varid{→}\;{}\<[13]%
+\>[13]{}\Conid{Tm}\;\Conid{Γ*}\;(\Varid{subst1}\;\Conid{C*}\;\Conid{M1})\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{subst1}\;\Conid{C*}\;\Conid{M2}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{uap}\;{}\<[10]%
+\>[10]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{P}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{prop}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Q}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Varid{prop}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[10]{}\hsindent{2}{}\<[12]%
+\>[12]{}(\Varid{f}\;\mathbin{:}\;\Conid{Tm}\;(\Conid{Γ*},\Varid{proof}\;\Conid{P})\;(\Varid{w}\;(\Varid{proof}\;\Conid{P})\;(\Varid{proof}\;\Conid{Q})))\;{}\<[E]%
+\\
+\>[10]{}\hsindent{2}{}\<[12]%
+\>[12]{}(\Varid{g}\;\mathbin{:}\;\Conid{Tm}\;(\Conid{Γ*},\Varid{proof}\;\Conid{Q})\;(\Varid{w}\;(\Varid{proof}\;\Conid{Q})\;(\Varid{proof}\;\Conid{P})))\;{}\<[E]%
+\\
+\>[10]{}\hsindent{2}{}\<[12]%
+\>[12]{}\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{id}\;\Varid{prop}\;\Conid{P}\;\Conid{Q}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{deq}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\Conid{A'*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;\Conid{A'*}\mbox{\onelinecomment  any two ways of saying the same type are equal}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{lam=}\;{}\<[11]%
+\>[11]{}\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Conid{B}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{B*}\;\mathbin{:}\;\Conid{Ty}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[11]{}\hsindent{1}{}\<[12]%
+\>[12]{}(\Varid{f}\;\Varid{g}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;(\Conid{Π}\;\Conid{A*}\;\Conid{B*}))\;{}\<[E]%
+\\
+\>[11]{}\hsindent{1}{}\<[12]%
+\>[12]{}(\Varid{α}\;\mathbin{:}\;\Conid{Tm}\;(\Conid{Γ*},\Conid{A*})\;(\Varid{id}\;\Conid{B*}\;(\Varid{unlam}\;\Varid{f})\;(\Varid{unlam}\;\Varid{g})))\;{}\<[E]%
+\\
+\>[11]{}\hsindent{1}{}\<[12]%
+\>[12]{}\Varid{→}\;\Conid{Tm}\;\Conid{Γ*}\;(\Varid{id}\;\anonymous \;\Varid{f}\;\Varid{g}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{itemize}
+
+Here's the definition of candidates so far:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{4}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{21}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{22}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Conid{Propo}\;\mathrel{=}\;\Conid{Type}\mbox{\onelinecomment  really small hprops?}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Keyword{record}\;\Conid{Candidate}\;(\Conid{P}\;\mathbin{:}\;\Conid{Propo})\;\mathbin{:}\;\Conid{MetaType}\;\Keyword{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{1}{}\<[4]%
+\>[4]{}\Varid{constructor}\;\Varid{cand}{}\<[E]%
+\\
+\>[3]{}\hsindent{1}{}\<[4]%
+\>[4]{}\Keyword{field}{}\<[E]%
+\\
+\>[4]{}\hsindent{1}{}\<[5]%
+\>[5]{}\Varid{redP}\;{}\<[21]%
+\>[21]{}\mathbin{:}\;(\Conid{Q}\;\mathbin{:}\;\Conid{Propo})\;\Varid{→}\;\Conid{P}\;\equiv \;\Conid{Q}\;\Varid{→}\;\Conid{Q}\;\Varid{→}\;\Conid{MetaType}{}\<[E]%
+\\
+\>[4]{}\hsindent{1}{}\<[5]%
+\>[5]{}\mbox{\onelinecomment  redP respects paths in all positions}{}\<[E]%
+\\
+\>[4]{}\hsindent{1}{}\<[5]%
+\>[5]{}\mbox{\onelinecomment  (this is what transport would be if it were (Σ \ Q -> P == Q × Q) → Type)}{}\<[E]%
+\\
+\>[4]{}\hsindent{1}{}\<[5]%
+\>[5]{}\Varid{transportPfull}\;\mathbin{:}\;\{\mskip1.5mu \Conid{Q1}\;\Conid{Q2}\;\mathbin{:}\;\Conid{Propo}\mskip1.5mu\}\;\{\mskip1.5mu \Varid{α1}\;\mathbin{:}\;\Conid{P}\;\equiv \;\Conid{Q1}\mskip1.5mu\}\;\{\mskip1.5mu \Varid{α2}\;\mathbin{:}\;\Conid{P}\;\equiv \;\Conid{Q2}\mskip1.5mu\}\;\{\mskip1.5mu \Varid{p1}\;\mathbin{:}\;\Conid{Q1}\mskip1.5mu\}\;\{\mskip1.5mu \Varid{p2}\;\mathbin{:}\;\Conid{Q2}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[5]{}\hsindent{17}{}\<[22]%
+\>[22]{}(\Varid{propo}\;\mathbin{:}\;\Conid{Q1}\;\equiv \;\Conid{Q2})\;(\Varid{path}\;\mathbin{:}\;\Varid{propo}\;\Varid{∘}\;\Varid{α1}\;\equiv \;\Varid{α2})\;(\Varid{elt}\;\mathbin{:}\;\Varid{coe}\;\Varid{propo}\;\Varid{p1}\;\equiv \;\Varid{p2})\;{}\<[E]%
+\\
+\>[5]{}\hsindent{15}{}\<[20]%
+\>[20]{}\Varid{→}\;\Varid{redP}\;\Conid{Q1}\;\Varid{α1}\;\Varid{p1}\;\Varid{→}\;\Varid{redP}\;\Conid{Q2}\;\Varid{α2}\;\Varid{p2}{}\<[E]%
+\\
+\>[3]{}\hsindent{1}{}\<[4]%
+\>[4]{}\mbox{\onelinecomment  special case: redP respects homotopy of elements}{}\<[E]%
+\\
+\>[3]{}\hsindent{1}{}\<[4]%
+\>[4]{}\Varid{transportP}\;{}\<[20]%
+\>[20]{}\mathbin{:}\;(\Conid{Q}\;\mathbin{:}\;\Conid{Propo})\;(\Varid{α}\;\mathbin{:}\;\Conid{P}\;\equiv \;\Conid{Q})\;\Varid{→}\;(\Varid{p1}\;\Varid{p2}\;\mathbin{:}\;\Conid{Q})\;\Varid{→}\;\Varid{p1}\;\equiv \;\Varid{p2}\;\Varid{→}\;\Varid{redP}\;\Conid{Q}\;\Varid{α}\;\Varid{p1}\;\Varid{→}\;\Varid{redP}\;\Conid{Q}\;\Varid{α}\;\Varid{p2}{}\<[E]%
+\\
+\>[3]{}\hsindent{1}{}\<[4]%
+\>[4]{}\Varid{transportP}\;\anonymous \;\Varid{α}\;\anonymous \;\anonymous \;\Varid{β}\;\Varid{r}\;\mathrel{=}\;\Varid{transportPfull}\;\Varid{id}\;(\Varid{∘-unit-l}\;\Varid{α})\;\Varid{β}\;\Varid{r}{}\<[E]%
+\\
+\>[3]{}\Keyword{open}\;\Conid{Candidate}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\ensuremath{\Conid{MetaType}} is a synonym For \ensuremath{\Conid{Type}} that I'm using for "metalanguage
+types", as opposed to things like \ensuremath{\Conid{Γ}} and \ensuremath{\Conid{A}}, which I'm thinking of as
+object language types.  The key idea is that you're never allowed to
+\ensuremath{\Varid{transport}} at a family of \ensuremath{\Conid{MetaType}}s: don't think of these as fibrant.  
+So we need to implement transport explicitly.  
+
+\ensuremath{\Varid{redP}} is a predicate on all propositions equal to \ensuremath{\Conid{P}}.  \ensuremath{\Varid{transportPfull}}
+is like transport for this predicate: given equal propositions, paths,
+and elements, you get a transport function.  A special case that comes
+up often is just transforming the proof \ensuremath{\Varid{p1}}.  
+
+Because of the intrinsic encoding, the definition of the logical
+relation and the proof of the fundamental theorem is one big mutual
+definition:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{6}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Conid{RC}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;(\Varid{θ}\;\mathbin{:}\;\Conid{Γ})\;\Varid{→}\;\Conid{MetaType}{}\<[E]%
+\\
+\>[3]{}\Conid{R}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\mskip1.5mu\}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;\Varid{→}\;\{\mskip1.5mu \Varid{θ}\;\mathbin{:}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ}\;\Varid{→}\;(\Conid{A}\;\Varid{θ})\;\Varid{→}\;\Conid{MetaType}{}\<[E]%
+\\
+\>[3]{}\Conid{Q}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\mskip1.5mu\}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;\Varid{→}\;\{\mskip1.5mu \Varid{θ}\;\mathbin{:}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;(\Varid{rθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{3}{}\<[6]%
+\>[6]{}\Varid{→}\;\{\mskip1.5mu \Conid{M}\;\Conid{N}\;\mathbin{:}\;\Conid{A}\;\Varid{θ}\mskip1.5mu\}\;\Varid{→}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M}\;\Varid{→}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{N}\;\Varid{→}\;(\Varid{α}\;\mathbin{:}\;\Conid{M}\;\equiv \;\Conid{N})\;\Varid{→}\;\Conid{MetaType}{}\<[E]%
+\\
+\>[3]{}\Varid{fund}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Varid{θ}\mskip1.5mu\}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;(\Varid{rθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;\Varid{→}\;(\Conid{M}\;\mathbin{:}\;\Conid{Tm}\;\Conid{Γ*}\;\Conid{A*})\;\Varid{→}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;(\Varid{interp}\;\Conid{M}\;\Varid{θ}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\ensuremath{\Conid{R}} is what Carlo was calling \ensuremath{\Conid{E}}: it's the logical predicate on terms.
+It takes (1) a syntactic context \ensuremath{\Conid{Γ*}} (2) a syntactcic type \ensuremath{\Conid{A*}} (3) a
+reducible substitution \ensuremath{\Varid{θ}} and (4) a "semantic" term \ensuremath{\Conid{M}}---i.e. an
+element of the Agda type \ensuremath{\Conid{A}\;\Varid{θ}}---\emph{not} a syntactic term \ensuremath{\Conid{M*}}.  This
+way, \ensuremath{\Conid{R}} is defined on \emph{definitional} equivalence classes of terms,
+and we can prove homotopies between terms as usual in Agda, rather than
+having to do it inside the encoded language.  We don't need to think of
+it as being defined on homotopy-equivalence-classes; we'll come back to
+this below.
+
+\ensuremath{\Conid{Q}} is the corresponding thing for paths: given two reducible terms \ensuremath{\Conid{M}} and \ensuremath{\Conid{N}},
+it is a predicate on paths between them.  
+
+\ensuremath{\Conid{RC}} says that an element of a context is reducible if everything in it is reducible:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Conid{RC}\;\Varid{·}\;\Varid{θ}\;\mathrel{=}\;\Conid{Unit}{}\<[E]%
+\\
+\>[3]{}\Conid{RC}\;(\Conid{Γ*},\Conid{A*})\;(\Varid{θ},\Conid{M})\;\mathrel{=}\;\Conid{Σ}\;(\Varid{λ}\;(\Varid{sθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;\Varid{→}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{sθ}\;\Conid{M}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\ensuremath{\Varid{fund}} (fundamental theorem) says that the interpretation of \ensuremath{\Conid{M}} is always in the relation.  
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Conid{R}\;\anonymous \;\Varid{bool}\;\Varid{rθ}\;\Conid{M}\;\mathrel{=}\;\Conid{Either}\;(\Conid{M}\;\equiv \;\Conid{True})\;(\Conid{M}\;\equiv \;\Conid{False}){}\<[E]%
+\\
+\>[3]{}\Conid{R}\;\Conid{Γ*}\;\Varid{prop}\;\Varid{rθ}\;\Conid{P}\;\mathrel{=}\;\Conid{Candidate}\;\Conid{P}{}\<[E]%
+\\
+\>[3]{}\Conid{R}\;\Conid{Γ*}\;(\Varid{proof}\;\Conid{M})\;\Varid{rθ}\;\Varid{pf}\;\mathrel{=}\;\Conid{R-proof}\;\Conid{Γ*}\;\Conid{M}\;\Varid{rθ}\;\Varid{pf}{}\<[E]%
+\\
+\>[3]{}\Conid{R}\;\Conid{Γ*}\;(\Conid{Π}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{B}\mskip1.5mu\}\;\Conid{A*}\;\Conid{B*})\;\{\mskip1.5mu \Varid{θ}\mskip1.5mu\}\;\Varid{rθ}\;\Conid{M}\;\mathrel{=}\;(\Conid{N}\;\mathbin{:}\;(\Conid{A}\;\Varid{θ}))\;(\Varid{rN}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{N})\;\Varid{→}\;\Conid{R}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B*}\;(\Varid{rθ},\Varid{rN})\;(\Conid{M}\;\Conid{N}){}\<[E]%
+\\
+\>[3]{}\Conid{R}\;\Conid{Γ*}\;(\Varid{id}\;\Conid{A*}\;\Conid{M}\;\Conid{N})\;\Varid{rθ}\;\Varid{α}\;\mathrel{=}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;(\Varid{fund}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M})\;(\Varid{fund}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{N})\;\Varid{α}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+OK, now the definition of \ensuremath{\Conid{R}}: at \ensuremath{\Varid{bool}}, you either have a path to true
+or a path to false.  At \ensuremath{\Varid{prop}}, you have a candidate.  At Π it's the
+usual thing.  At \ensuremath{\Varid{id}} it's \ensuremath{\Conid{Q}}.  For Agda reasons, the case for \ensuremath{\Varid{proof}\;\Conid{M}} needs to be broken out into a separate lemma, so it is below.  We
+also need cases for the explicit structural properties, which just
+manipulate the context in the appropriate way (compare with the usual
+statement of compositionality):
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Conid{R}\;\Varid{.\char95 }\;(\Varid{w}\;\{\mskip1.5mu \Conid{Γ*}\;\mathrel{=}\;\Conid{Γ*}\mskip1.5mu\}\;\Conid{A*}\;\Conid{B*})\;\{\mskip1.5mu \Varid{θ},\anonymous \mskip1.5mu\}\;(\Varid{rθ},\anonymous )\;\Conid{M}\;\mathrel{=}\;{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{R}\;\Conid{Γ*}\;\Conid{B*}\;\Varid{rθ}\;\Conid{M}{}\<[E]%
+\\
+\>[3]{}\Conid{R}\;\Varid{.Γ*}\;(\Varid{subst1}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A0}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{B}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A0*}\mskip1.5mu\}\;\Conid{B*}\;\Conid{M0})\;\{\mskip1.5mu \Varid{θ}\mskip1.5mu\}\;\Varid{rθ}\;\Conid{M}\;\mathrel{=}\;{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{R}\;(\Conid{Γ*},\Conid{A0*})\;\Conid{B*}\;(\Varid{rθ},\Varid{fund}\;\anonymous \;\Conid{A0*}\;\Varid{rθ}\;\Conid{M0})\;\Conid{M}{}\<[E]%
+\\
+\>[3]{}\Conid{R}\;\Varid{.\char95 }\;(\Varid{ex}\;\{\mskip1.5mu \Conid{Γ*}\;\mathrel{=}\;\Conid{Γ*}\mskip1.5mu\}\;\Conid{A*}\;\Conid{B*}\;\Conid{C*})\;((\Varid{rθ},\Varid{rb}),\Varid{ra})\;\Conid{M}\;\mathrel{=}\;\Conid{R-ex}\;\Conid{Γ*}\;\Conid{A*}\;\Conid{B*}\;\Conid{C*}\;\Varid{rθ}\;\Varid{rb}\;\Varid{ra}\;\Conid{M}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Conid{R-ex}\;\Conid{Γ*}\;\Conid{A*}\;\Conid{B*}\;\Conid{C*}\;\Varid{rθ}\;\Varid{rb}\;\Varid{ra}\;\Conid{M}\;\mathrel{=}\;\Conid{R}\;((\Conid{Γ*},\Conid{A*}),\Varid{w}\;\Conid{A*}\;\Conid{B*})\;\Conid{C*}\;((\Varid{rθ},\Varid{ra}),\Varid{rb})\;\Conid{M}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Now, \ensuremath{\Conid{R}\;\Conid{Γ*}\;(\Varid{proof}\;\Varid{φ})\;\Varid{rθ}\;\Varid{pf}} is defined as follows:  
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Conid{R-proof}\;\Conid{Γ*}\;\Varid{φ}\;\Varid{rθ}\;\Varid{pf}\;\mathrel{=}\;\Varid{redP}\;(\Varid{fund}\;\Conid{Γ*}\;\Varid{prop}\;\Varid{rθ}\;\Varid{φ})\;\Varid{φ}\;\Varid{id}\;\Varid{pf}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+That is, the interpretation of φ gives you a candidate, and you ask that
+the predicate for the candidate (which works for any type equal to φ)
+holds at \ensuremath{\Varid{φ}}, \ensuremath{\Varid{id}}, \ensuremath{\Varid{pf}}.
+
+On to Q:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mbox{\onelinecomment  is this an hprop in the metalanguage?}{}\<[E]%
+\\
+\>[3]{}\Conid{Q}\;\Conid{Γ*}\;\Varid{bool}\;\Varid{rθ}\;\Varid{rM}\;\Varid{rN}\;\Varid{α}\;\mathrel{=}\;\Conid{Unit}{}\<[32]%
+\>[32]{}\mbox{\onelinecomment  FIXME: should we insist that it's refl?}{}\<[E]%
+\\
+\>[3]{}\Conid{Q}\;\Conid{Γ*}\;\Varid{prop}\;\Varid{rθ}\;\Varid{rM}\;\Varid{rN}\;\Varid{α}\;\mathrel{=}\;((\Varid{x}\;\mathbin{:}\;\anonymous )\;\Varid{→}\;\Varid{redP}\;\Varid{rM}\;\anonymous \;\Varid{id}\;\Varid{x}\;\Varid{→}\;\Varid{redP}\;\Varid{rN}\;\anonymous \;\Varid{id}\;(\Varid{coe}\;\Varid{α}\;\Varid{x}))\;\Varid{×}\;((\Varid{y}\;\mathbin{:}\;\anonymous )\;\Varid{→}\;\Varid{redP}\;\Varid{rN}\;\anonymous \;\Varid{id}\;\Varid{y}\;\Varid{→}\;\Varid{redP}\;\Varid{rM}\;\anonymous \;\Varid{id}\;(\Varid{coe}\;(\mathbin{!}\;\Varid{α})\;\Varid{y})){}\<[E]%
+\\
+\>[3]{}\Conid{Q}\;\Conid{Γ*}\;(\Varid{proof}\;\Conid{M})\;\Varid{rθ}\;\Varid{rM}\;\Varid{rN}\;\Varid{α}\;\mathrel{=}\;\Conid{Unit}{}\<[E]%
+\\
+\>[3]{}\Conid{Q}\;\Conid{Γ*}\;(\Conid{Π}\;\Conid{A*}\;\Conid{B*})\;\Varid{rθ}\;\Varid{rM}\;\Varid{rN}\;\Varid{α}\;\mathrel{=}\;(\Varid{x}\;\mathbin{:}\;\anonymous )\;(\Varid{rx}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{x})\;\Varid{→}\;\Conid{Q}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B*}\;(\Varid{rθ},\Varid{rx})\;(\Varid{rM}\;\anonymous \;\Varid{rx})\;(\Varid{rN}\;\anonymous \;\Varid{rx})\;(\Varid{ap≃}\;\Varid{α}){}\<[E]%
+\\
+\>[3]{}\Conid{Q}\;\Conid{Γ*}\;(\Varid{id}\;\Conid{A*}\;\Conid{M}\;\Conid{N})\;\Varid{rθ}\;\Varid{rM}\;\Varid{rN}\;\Varid{α}\;\mathrel{=}\;\Conid{Unit}{}\<[E]%
+\\
+\>[3]{}\Conid{Q}\;\Varid{.\char95 }\;(\Varid{w}\;\{\mskip1.5mu \Conid{Γ*}\;\mathrel{=}\;\Conid{Γ*}\mskip1.5mu\}\;\Conid{A*}\;\Conid{B*})\;\Varid{rθ}\;\Varid{rM}\;\Varid{rN}\;\Varid{α}\;\mathrel{=}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{B*}\;(\Varid{fst}\;\Varid{rθ})\;\Varid{rM}\;\Varid{rN}\;\Varid{α}{}\<[E]%
+\\
+\>[3]{}\Conid{Q}\;\Varid{.\char95 }\;(\Varid{subst1}\;\{\mskip1.5mu \anonymous \mskip1.5mu\}\;\{\mskip1.5mu \anonymous \mskip1.5mu\}\;\{\mskip1.5mu \anonymous \mskip1.5mu\}\;\{\mskip1.5mu \Conid{Γ*}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A0*}\mskip1.5mu\}\;\Conid{B*}\;\Conid{M})\;\Varid{rθ}\;\Varid{rM}\;\Varid{rN}\;\Varid{α}\;\mathrel{=}\;\Conid{Q}\;(\Conid{Γ*},\Conid{A0*})\;\Conid{B*}\;(\Varid{rθ},\Varid{fund}\;\Conid{Γ*}\;\Conid{A0*}\;\Varid{rθ}\;\Conid{M})\;\Varid{rM}\;\Varid{rN}\;\Varid{α}{}\<[E]%
+\\
+\>[3]{}\Conid{Q}\;\Varid{.\char95 }\;(\Varid{ex}\;\{\mskip1.5mu \Conid{Γ*}\;\mathrel{=}\;\Conid{Γ*}\mskip1.5mu\}\;\Conid{A*}\;\Conid{B*}\;\Conid{C*})\;((\Varid{rθ},\Varid{ra}),\Varid{rb})\;\Varid{rM}\;\Varid{rN}\;\Varid{α}\;\mathrel{=}\;\Conid{Q}\;((\Conid{Γ*},\Conid{A*}),\Varid{w}\;\Conid{A*}\;\Conid{B*})\;\Conid{C*}\;((\Varid{rθ},\Varid{rb}),\Varid{ra})\;\Varid{rM}\;\Varid{rN}\;\Varid{α}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Thus far, I haven't needed anything out of \ensuremath{\Conid{Q}} at \ensuremath{\Varid{bool}}, \ensuremath{\Varid{proof}\;\Conid{M}}, and
+\ensuremath{\Varid{id}}, so they're just \ensuremath{\Conid{Unit}}.  However, I could imagine saying more
+here... e.g. at \ensuremath{\Varid{bool}} we might say that the path reduces to refl or
+something like that.  I'm trying the proof with the weakest conditions
+possible first, because if that works it would be interesting. 
+
+OK, now we "just" need to prove the fundamental theorem.  But of course
+there's lots of other structure that you need, too, all mutually.  I
+haven't thought through whether the induction works yet.
+
+Here are the lemmas I've needed so far.  If you want to read the proofs
+that I have so far, the full version of this is on github
+(\url{https://github.com/dlicata335/hott-agda/blob/master/computational-interp/hcanon/HSetProof.agda})
+
+We need to implement transport for \ensuremath{\Conid{Q}} / \ensuremath{\Conid{R}}; think of this as closure under head expansion.   
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{transportQ}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\mskip1.5mu\}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;\Varid{→}\;\{\mskip1.5mu \Varid{θ}\;\mathbin{:}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;(\Varid{rθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{11}{}\<[14]%
+\>[14]{}\Varid{→}\;\{\mskip1.5mu \Conid{M}\;\Conid{N}\;\mathbin{:}\;\Conid{A}\;\Varid{θ}\mskip1.5mu\}\;\Varid{→}\;(\Varid{rM}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M})\;\Varid{→}\;(\Varid{rN}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{N})\;\Varid{→}\;\{\mskip1.5mu \Varid{α}\;\Varid{α'}\;\mathbin{:}\;\Conid{M}\;\equiv \;\Conid{N}\mskip1.5mu\}\;(\Varid{p}\;\mathbin{:}\;\Varid{α}\;\equiv \;\Varid{α'})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{11}{}\<[14]%
+\>[14]{}\Varid{→}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{rM}\;\Varid{rN}\;\Varid{α}\;\Varid{→}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{rM}\;\Varid{rN}\;\Varid{α'}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Varid{transportR}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Varid{θ}\;\Conid{M}\;\Conid{M'}\mskip1.5mu\}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;(\Varid{rθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;\Varid{→}\;\Conid{M}\;\equiv \;\Conid{M'}\;\Varid{→}\;{}\<[E]%
+\\
+\>[3]{}\hsindent{13}{}\<[16]%
+\>[16]{}\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M}\;\Varid{→}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M'}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Proof: induction on \ensuremath{\Conid{A*}}, using \ensuremath{\Varid{transportPfull}} for the candidates.  
+
+Note: I \emph{think} we can get away without proving that these are
+bijections/equivalences, which would be hard because it invovles
+reasoing \emph{about} the proof of the fundamental lemma.  So far, all
+I've needed is that \emph{up to \ensuremath{\Conid{Q}}} \ensuremath{\mathbin{!}\;\Varid{α}} cancels \ensuremath{\Varid{transport}}ing \ensuremath{\Conid{M}}: 
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{transportRQ}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Varid{θ}\;\Conid{M1}\;\Conid{M2}\mskip1.5mu\}\;\{\mskip1.5mu \Varid{α}\;\mathbin{:}\;\Conid{M1}\;\equiv \;\Conid{M2}\mskip1.5mu\}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;(\Varid{rθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;(\Varid{rM1}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M1})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{12}{}\<[15]%
+\>[15]{}\Varid{→}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;(\Varid{transportR}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{α}\;\Varid{rM1})\;\Varid{rM1}\;(\mathbin{!}\;\Varid{α}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+This lemma is really important because it lets you massage by a beta
+reduction step "for free": it looks like it's saying that any \ensuremath{\Varid{α}} is
+reducible, but only when it is relating \ensuremath{\Varid{rM1}} and \ensuremath{\Varid{transportR}\;\Varid{...}\;\Varid{rM1}}.  
+
+Warning: sticky bit: The one place where this semantic definitional
+equality bites is in showing that any two types with the same denotation
+have the same relation (or, at least, that we can get between them):
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Conid{R-deq}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Varid{θ}\;\Conid{M}\mskip1.5mu\}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;(\Conid{A*}\;\Conid{A1*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;(\Varid{rθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;\Varid{→}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M}\;\Varid{→}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A1*}\;\Varid{rθ}\;\Conid{M}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Proof: I doubt this can be Agdaed for this representation, because we
+have no way to induct on definitional equality; haven't thought about
+how to prove it on paper yet.
+
+Refl/inverses/composition are good:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{fund-refl}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\mskip1.5mu\}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;\Varid{→}\;\{\mskip1.5mu \Varid{θ}\;\mathbin{:}\;\Conid{Γ}\mskip1.5mu\}\;\Varid{→}\;(\Varid{rθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{5}{}\<[8]%
+\>[8]{}\Varid{→}\;\{\mskip1.5mu \Conid{M}\;\mathbin{:}\;\Conid{A}\;\Varid{θ}\mskip1.5mu\}\;\Varid{→}\;(\Varid{rM}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{5}{}\<[8]%
+\>[8]{}\Varid{→}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{rM}\;\Varid{rM}\;\Varid{id}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Varid{fund-sym}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Varid{θ}\;\Conid{M}\;\Conid{N}\;\Varid{α}\mskip1.5mu\}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;(\Varid{rθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{13}{}\<[16]%
+\>[16]{}(\Varid{rM}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M})\;(\Varid{rN}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{N})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{9}{}\<[12]%
+\>[12]{}\Varid{→}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{rM}\;\Varid{rN}\;\Varid{α}\;{}\<[E]%
+\\
+\>[3]{}\hsindent{9}{}\<[12]%
+\>[12]{}\Varid{→}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{rN}\;\Varid{rM}\;(\mathbin{!}\;\Varid{α}){}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Varid{fund-trans}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Varid{θ}\;\Conid{M}\;\Conid{N}\;\Conid{O}\;\Varid{α}\;\Varid{β}\mskip1.5mu\}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;(\Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A})\;(\Varid{rθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{13}{}\<[16]%
+\>[16]{}(\Varid{rM}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M})\;(\Varid{rN}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{N})\;(\Varid{rO}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{O})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{11}{}\<[14]%
+\>[14]{}\Varid{→}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{rM}\;\Varid{rN}\;\Varid{α}\;{}\<[E]%
+\\
+\>[3]{}\hsindent{11}{}\<[14]%
+\>[14]{}\Varid{→}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{rN}\;\Varid{rO}\;\Varid{β}\;{}\<[E]%
+\\
+\>[3]{}\hsindent{11}{}\<[14]%
+\>[14]{}\Varid{→}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{rM}\;\Varid{rO}\;(\Varid{β}\;\Varid{∘}\;\Varid{α}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Proof: induction on \ensuremath{\Conid{A}}.  
+
+\ensuremath{\Varid{transport}} and \ensuremath{\Varid{ap}} are good:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{fund-tr}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Conid{C}\;\Varid{θ}\;\Conid{M1}\;\Conid{M2}\;\Varid{α}\;\Conid{N}\mskip1.5mu\}\;(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;(\Conid{C*}\;\mathbin{:}\;\Conid{Ty}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C})\;(\Varid{rθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{8}{}\<[11]%
+\>[11]{}(\Varid{rM1}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M1})\;(\Varid{rM2}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M2})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{8}{}\<[11]%
+\>[11]{}(\Varid{rα}\;\mathbin{:}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{α})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{8}{}\<[11]%
+\>[11]{}(\Varid{rN}\;\mathbin{:}\;\Conid{R}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM1})\;\Conid{N})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{6}{}\<[9]%
+\>[9]{}\Varid{→}\;\Conid{R}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;(\Varid{transport}\;(\lambda \;\Varid{x}\;\Varid{→}\;\Conid{C}\;(\Varid{θ},\Varid{x}))\;\Varid{α}\;\Conid{N}){}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Varid{fund-ap}\;\mathbin{:}\;\Varid{∀}\;\{\mskip1.5mu \Conid{Γ}\;\Conid{A}\;\Conid{B}\;\Varid{θ}\;\Conid{M1}\;\Conid{M2}\;\Varid{α}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[3]{}\hsindent{9}{}\<[12]%
+\>[12]{}(\Conid{Γ*}\;\mathbin{:}\;\Conid{Ctx}\;\Conid{Γ})\;\{\mskip1.5mu \Conid{A*}\;\mathbin{:}\;\Conid{Ty}\;\Conid{Γ*}\;\Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{B*}\;\mathbin{:}\;\Conid{Ty}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B}\mskip1.5mu\}\;(\Varid{f}\;\mathbin{:}\;\Conid{Tm}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B*})\;(\Varid{rθ}\;\mathbin{:}\;\Conid{RC}\;\Conid{Γ*}\;\Varid{θ})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{9}{}\<[12]%
+\>[12]{}(\Varid{rM1}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M1})\;(\Varid{rM2}\;\mathbin{:}\;\Conid{R}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Conid{M2})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{9}{}\<[12]%
+\>[12]{}(\Varid{rα}\;\mathbin{:}\;\Conid{Q}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{α})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{8}{}\<[11]%
+\>[11]{}\Varid{→}\;\Conid{Q}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B*}\;(\Varid{rθ},\Varid{rM2})\;{}\<[E]%
+\\
+\>[11]{}\hsindent{4}{}\<[15]%
+\>[15]{}(\Varid{fund-tr}\;\Conid{Γ*}\;\Conid{B*}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B*}\;(\Varid{rθ},\Varid{rM1})\;\Varid{f}))\;{}\<[E]%
+\\
+\>[11]{}\hsindent{4}{}\<[15]%
+\>[15]{}(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{B*}\;(\Varid{rθ},\Varid{rM2})\;\Varid{f})\;{}\<[E]%
+\\
+\>[11]{}\hsindent{4}{}\<[15]%
+\>[15]{}(\Varid{apd}\;(\lambda \;\Varid{x}\;\to \;\Varid{interp}\;\Varid{f}\;(\Varid{θ},\Varid{x}))\;\Varid{α}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+
+I haven't done much of \ensuremath{\Varid{ap}} yet.  for \ensuremath{\Varid{transport}}, it goes like you
+would expect: at bool, it's pretty obvious.  At \ensuremath{\Varid{prop}}, you make a new
+candidate, exploiting composing up in the predicate equality.  For
+\ensuremath{\Varid{proof}\;\Conid{P}}, you the fact that \ensuremath{\Varid{ap}} is reducible (which gives you that \ensuremath{\Varid{ap}\;\Conid{P}\;\Varid{α}} is a good equivalence).  For \ensuremath{\Varid{id}}, you do the usual reduction to
+sym/trans/ap.  I think the fact that \ensuremath{\Varid{ap}\;(\Varid{transport}\;\Conid{C}\;\Varid{α})\;\Varid{β}} is good may
+need to be a separate lemma.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{33}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{44}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{50}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{51}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{61}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{fund-tr}\;\{\mskip1.5mu \Varid{α}\;\mathrel{=}\;\Varid{α}\mskip1.5mu\}\;\Conid{Γ*}\;\Varid{bool}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;(\Conid{Inl}\;\Varid{x})\;\mathrel{=}\;\Conid{Inl}\;(\Varid{x}\;\Varid{∘}\;\Varid{ap≃}\;(\Varid{transport-constant}\;\Varid{α})){}\<[E]%
+\\
+\>[3]{}\Varid{fund-tr}\;\{\mskip1.5mu \Varid{α}\;\mathrel{=}\;\Varid{α}\mskip1.5mu\}\;\Conid{Γ*}\;\Varid{bool}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;(\Conid{Inr}\;\Varid{x})\;\mathrel{=}\;\Conid{Inr}\;(\Varid{x}\;\Varid{∘}\;\Varid{ap≃}\;(\Varid{transport-constant}\;\Varid{α})){}\<[E]%
+\\
+\>[3]{}\Varid{fund-tr}\;\{\mskip1.5mu \Varid{α}\;\mathrel{=}\;\Varid{α}\mskip1.5mu\}\;\Conid{Γ*}\;\Varid{prop}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;\Varid{rN}\;\mathrel{=}\;\Varid{cand}\;(\Varid{λ}\;\Varid{φ'}\;\Varid{p}\;\Varid{x'}\;\Varid{→}\;\Varid{redP}\;\Varid{rN}\;\Varid{φ'}\;(\Varid{p}\;\Varid{∘}\;\mathbin{!}\;(\Varid{ap≃}\;(\Varid{transport-constant}\;\Varid{α})))\;\Varid{x'})\;{}\<[E]%
+\\
+\>[3]{}\hsindent{48}{}\<[51]%
+\>[51]{}\{\mskip1.5mu \mathbin{!!}\mskip1.5mu\}{}\<[E]%
+\\
+\>[3]{}\Varid{fund-tr}\;\{\mskip1.5mu \Varid{α}\;\mathrel{=}\;\Varid{α}\mskip1.5mu\}\;\Conid{Γ*}\;(\Varid{proof}\;\Conid{M})\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;\Varid{rN}\;\mathrel{=}\;\Varid{transportP}\;(\Varid{fund}\;(\Conid{Γ*},\anonymous )\;\Varid{prop}\;(\Varid{rθ},\Varid{rM2})\;\Conid{M})\;\anonymous \;\Varid{id}\;\anonymous \;\anonymous \;(\mathbin{!}\;(\Varid{ap≃}\;(\Varid{transport-ap-assoc}\;(\Varid{λ}\;\Varid{x}\;\Varid{→}\;\Varid{interp}\;\Conid{M}\;(\anonymous ,\Varid{x}))\;\Varid{α})))\;{}\<[E]%
+\\
+\>[3]{}\hsindent{58}{}\<[61]%
+\>[61]{}(\Varid{fst}\;\Varid{ap-is-reducible}\;\anonymous \;\Varid{rN})\;\Keyword{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{8}{}\<[11]%
+\>[11]{}\Varid{ap-is-reducible}\;\mathbin{:}\;\Conid{Q}\;\Conid{Γ*}\;\Varid{prop}\;\Varid{rθ}\;(\Varid{fund}\;(\Conid{Γ*},\anonymous )\;\Varid{prop}\;(\Varid{rθ},\Varid{rM1})\;\Conid{M})\;(\Varid{fund}\;(\Conid{Γ*},\anonymous )\;\Varid{prop}\;(\Varid{rθ},\Varid{rM2})\;\Conid{M})\;(\Varid{ap}\;(\lambda \;\Varid{x}\;\to \;\Varid{interp}\;\Conid{M}\;(\anonymous ,\Varid{x}))\;\Varid{α}){}\<[E]%
+\\
+\>[3]{}\hsindent{8}{}\<[11]%
+\>[11]{}\Varid{ap-is-reducible}\;\Keyword{with}\;\Varid{fund-ap}\;\Conid{Γ*}\;\Conid{M}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}{}\<[E]%
+\\
+\>[3]{}\hsindent{8}{}\<[11]%
+\>[11]{}\Varid{...}\;\mid \;(\Varid{left},\Varid{right})\;\mathrel{=}\;(\Varid{λ}\;\Varid{x}\;\Varid{rx}\;\Varid{→}\;\Varid{transportPfull}\;(\Varid{fund}\;(\Conid{Γ*},\anonymous )\;\Varid{prop}\;(\Varid{rθ},\Varid{rM2})\;\Conid{M})\;\Varid{id}\;\Varid{id}\;\{\mskip1.5mu \mathbin{!!}\mskip1.5mu\}\;{}\<[E]%
+\\
+\>[11]{}\hsindent{33}{}\<[44]%
+\>[44]{}(\Varid{left}\;(\Varid{coe}\;(\mathbin{!}\;(\Varid{ap≃}\;(\Varid{transport-constant}\;\Varid{α})))\;\Varid{x})\;{}\<[E]%
+\\
+\>[44]{}\hsindent{6}{}\<[50]%
+\>[50]{}\{\mskip1.5mu \mathbin{!!}\mskip1.5mu\})){}\<[E]%
+\\
+\>[11]{}\hsindent{22}{}\<[33]%
+\>[33]{},\{\mskip1.5mu \mathbin{!!}\mskip1.5mu\}{}\<[E]%
+\\
+\>[3]{}\Varid{fund-tr}\;\{\mskip1.5mu \Conid{Γ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A0}\mskip1.5mu\}\;\{\mskip1.5mu \Varid{.\char95 }\mskip1.5mu\}\;\{\mskip1.5mu \Varid{θ}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{M1}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{M2}\mskip1.5mu\}\;\{\mskip1.5mu \Varid{α}\mskip1.5mu\}\;\{\mskip1.5mu \Varid{f}\mskip1.5mu\}\;\Conid{Γ*}\;\{\mskip1.5mu \Conid{A0*}\mskip1.5mu\}\;(\Conid{Π}\;\{\mskip1.5mu \Varid{.\char95 }\mskip1.5mu\}\;\{\mskip1.5mu \Conid{A}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{B}\mskip1.5mu\}\;\Conid{A*}\;\Conid{B*})\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;\Varid{rf}\;\mathrel{=}\;{}\<[E]%
+\\
+\>[3]{}\hsindent{8}{}\<[11]%
+\>[11]{}\Varid{λ}\;\Varid{x}\;\Varid{rx}\;\Varid{→}\;\{\mskip1.5mu \Varid{!fund-tr}\;\Conid{Γ*}\;\Conid{B*}\;\Varid{?}\;(\Varid{rf}\;\anonymous \;(\Varid{fund-tr}\;\Conid{Γ*}\;\Conid{A*}\;\Varid{rθ}\;\Varid{rM2}\;\Varid{rM1}\;\Varid{?}\;\Varid{rx}))\;\mathbin{!}\mskip1.5mu\}\mbox{\onelinecomment  need Sigmas / generalization to contexts}{}\<[E]%
+\\
+\>[3]{}\Varid{fund-tr}\;\{\mskip1.5mu \Varid{θ}\;\mathrel{=}\;\Varid{θ}\mskip1.5mu\}\;\{\mskip1.5mu \Varid{α}\;\mathrel{=}\;\Varid{α}\mskip1.5mu\}\;\{\mskip1.5mu \Conid{N}\;\mathrel{=}\;\Varid{β}\mskip1.5mu\}\;\Conid{Γ*}\;\{\mskip1.5mu \Conid{A*}\mskip1.5mu\}\;(\Varid{id}\;\{\mskip1.5mu \Conid{A}\;\mathrel{=}\;\Conid{C}\mskip1.5mu\}\;\Conid{C*}\;\Conid{M}\;\Conid{N})\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;\Varid{rβ}\;\mathrel{=}\;{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{transportQ}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;\Conid{M})\;(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;\Conid{N})\;{}\<[E]%
+\\
+\>[5]{}\hsindent{11}{}\<[16]%
+\>[16]{}(\mathbin{!}\;(\Varid{transport-Path-d}\;(\Varid{λ}\;\Varid{x}\;\Varid{→}\;\Varid{interp}\;\Conid{M}\;(\Varid{θ},\Varid{x}))\;(\Varid{λ}\;\Varid{x}\;\Varid{→}\;\Varid{interp}\;\Conid{N}\;(\Varid{θ},\Varid{x}))\;\Varid{α}\;\Varid{β}))\;{}\<[E]%
+\\
+\>[5]{}\hsindent{11}{}\<[16]%
+\>[16]{}(\Varid{fund-trans}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;\anonymous \;\anonymous \;\anonymous \;(\Varid{fund-trans}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;\anonymous \;\anonymous \;\anonymous \;\Varid{!rMα}\;\Varid{aprβ})\;\Varid{rNα})\;\Keyword{where}{}\<[E]%
+\\
+\>[5]{}\hsindent{6}{}\<[11]%
+\>[11]{}\Varid{rMα}\;\mathbin{:}\;\Conid{Q}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;{}\<[E]%
+\\
+\>[11]{}\hsindent{7}{}\<[18]%
+\>[18]{}(\Varid{fund-tr}\;\Conid{Γ*}\;\Conid{C*}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM1})\;\Conid{M}))\;{}\<[E]%
+\\
+\>[11]{}\hsindent{7}{}\<[18]%
+\>[18]{}(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;\Conid{M})\;(\Varid{apd}\;(\Varid{λ}\;\Varid{x}\;\Varid{→}\;\Varid{interp}\;\Conid{M}\;(\Varid{θ},\Varid{x}))\;\Varid{α}){}\<[E]%
+\\
+\>[5]{}\hsindent{6}{}\<[11]%
+\>[11]{}\Varid{rMα}\;\mathrel{=}\;\Varid{fund-ap}\;\Conid{Γ*}\;\{\mskip1.5mu \anonymous \mskip1.5mu\}\;\{\mskip1.5mu \Conid{C*}\mskip1.5mu\}\;\Conid{M}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}{}\<[E]%
+\\[\blanklineskip]%
+\>[5]{}\hsindent{6}{}\<[11]%
+\>[11]{}\Varid{!rMα}\;\mathbin{:}\;\Conid{Q}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;{}\<[E]%
+\\
+\>[11]{}\hsindent{7}{}\<[18]%
+\>[18]{}(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;\Conid{M})\;{}\<[E]%
+\\
+\>[11]{}\hsindent{7}{}\<[18]%
+\>[18]{}(\Varid{fund-tr}\;\Conid{Γ*}\;\Conid{C*}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM1})\;\Conid{M}))\;(\mathbin{!}\;(\Varid{apd}\;(\Varid{λ}\;\Varid{x}\;\Varid{→}\;\Varid{interp}\;\Conid{M}\;(\Varid{θ},\Varid{x}))\;\Varid{α})){}\<[E]%
+\\
+\>[5]{}\hsindent{6}{}\<[11]%
+\>[11]{}\Varid{!rMα}\;\mathrel{=}\;\Varid{fund-sym}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;\anonymous \;\anonymous \;\Varid{rMα}{}\<[E]%
+\\[\blanklineskip]%
+\>[5]{}\hsindent{6}{}\<[11]%
+\>[11]{}\Varid{rNα}\;\mathbin{:}\;\Conid{Q}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;{}\<[E]%
+\\
+\>[11]{}\hsindent{7}{}\<[18]%
+\>[18]{}(\Varid{fund-tr}\;\Conid{Γ*}\;\Conid{C*}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM1})\;\Conid{N}))\;{}\<[E]%
+\\
+\>[11]{}\hsindent{7}{}\<[18]%
+\>[18]{}(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;\Conid{N})\;(\Varid{apd}\;(\Varid{λ}\;\Varid{x}\;\Varid{→}\;\Varid{interp}\;\Conid{N}\;(\Varid{θ},\Varid{x}))\;\Varid{α}){}\<[E]%
+\\
+\>[5]{}\hsindent{6}{}\<[11]%
+\>[11]{}\Varid{rNα}\;\mathrel{=}\;\Varid{fund-ap}\;\Conid{Γ*}\;\{\mskip1.5mu \anonymous \mskip1.5mu\}\;\{\mskip1.5mu \Conid{C*}\mskip1.5mu\}\;\Conid{N}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}{}\<[E]%
+\\[\blanklineskip]%
+\>[5]{}\hsindent{6}{}\<[11]%
+\>[11]{}\Varid{aprβ}\;\mathbin{:}\;\Conid{Q}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM2})\;{}\<[E]%
+\\
+\>[11]{}\hsindent{7}{}\<[18]%
+\>[18]{}(\Varid{fund-tr}\;\Conid{Γ*}\;\Conid{C*}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM1})\;\Conid{M}))\;{}\<[E]%
+\\
+\>[11]{}\hsindent{7}{}\<[18]%
+\>[18]{}(\Varid{fund-tr}\;\Conid{Γ*}\;\Conid{C*}\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;(\Varid{fund}\;(\Conid{Γ*},\Conid{A*})\;\Conid{C*}\;(\Varid{rθ},\Varid{rM1})\;\Conid{N}))\;{}\<[E]%
+\\
+\>[11]{}\hsindent{7}{}\<[18]%
+\>[18]{}(\Varid{ap}\;(\Varid{transport}\;(\Varid{λ}\;\Varid{z}\;\Varid{→}\;\Conid{C}\;(\Varid{θ},\Varid{z}))\;\Varid{α})\;\Varid{β}){}\<[E]%
+\\
+\>[5]{}\hsindent{6}{}\<[11]%
+\>[11]{}\Varid{aprβ}\;\mathrel{=}\;\{\mskip1.5mu \mathbin{!}\;(\Varid{transport}\;(\Varid{λ}\;\Varid{z}\;\Varid{→}\;\Conid{C}\;(\Varid{θ},\Varid{z}))\;\Varid{α})\;\mathbin{!}\mskip1.5mu\}{}\<[E]%
+\\
+\>[3]{}\Varid{fund-tr}\;\{\mskip1.5mu \Varid{α}\;\mathrel{=}\;\Varid{α}\mskip1.5mu\}\;\Conid{Γ*}\;\{\mskip1.5mu \Conid{A*}\mskip1.5mu\}\;(\Varid{w}\;\Varid{.A*}\;\Conid{B*})\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;\Varid{rN}\;\mathrel{=}\;\Varid{transportR}\;\Conid{Γ*}\;\Conid{B*}\;\Varid{rθ}\;(\mathbin{!}\;(\Varid{ap≃}\;(\Varid{transport-constant}\;\Varid{α})))\;\Varid{rN}{}\<[E]%
+\\
+\>[3]{}\Varid{fund-tr}\;\Conid{Γ*}\;(\Varid{subst1}\;\Conid{A₃}\;\Conid{M})\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;\Conid{M₁}\;\mathrel{=}\;\{\mskip1.5mu \mathbin{!!}\mskip1.5mu\}{}\<[E]%
+\\
+\>[3]{}\Varid{fund-tr}\;\Varid{.\char95 }\;(\Varid{ex}\;\anonymous \;\anonymous \;\anonymous )\;\Varid{rθ}\;\Varid{rM1}\;\Varid{rM2}\;\Varid{rα}\;\Conid{M₁}\;\mathrel{=}\;\{\mskip1.5mu \mathbin{!!}\mskip1.5mu\}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{document}
+

@@ -1,0 +1,162 @@
+\documentclass[10pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{multicol}
+\usepackage{mathptmx}
+\usepackage{color}
+\usepackage[cmex10]{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage[square,numbers,sort]{natbib}
+\usepackage{arydshln}
+\usepackage{graphics}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage{lagdatotex}
+\usepackage{relsize}
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathmorphing}
+
+\usepackage{ucs}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+\newcommand{\noagda}[0]{}
+                                                                                                                                                 
+\usepackage{graphicx}                                                                                                                                          
+\newcommand\Shamrock{\includegraphics[width=0.6em]{sham}}                                                                                                      
+\newcommand\Shamrockv[1]{\ensuremath{\includegraphics[width=0.6em]{sham}_{#1}}}  
+
+\DeclareUnicodeCharacter{8594}{$\shortrightarrow$}
+\DeclareUnicodeCharacter{9001}{$\langle$}
+\DeclareUnicodeCharacter{9002}{$\rangle$}
+\DeclareUnicodeCharacter{12314}{$\llbracket$}
+\DeclareUnicodeCharacter{12315}{$\rrbracket$}
+\DeclareUnicodeCharacter{8872}{$\vDash$}
+\DeclareUnicodeCharacter{9711}{\ensuremath{\bigcirc}}
+\DeclareUnicodeCharacter{9675}{$\circ$}
+\DeclareUnicodeCharacter{9671}{$\Diamond$}
+\DeclareUnicodeCharacter{9657}{$\triangleright$}
+\DeclareUnicodeCharacter{8640}{$\rightharpoonup$}
+\DeclareUnicodeCharacter{8659}{$\Downarrow$}
+\DeclareUnicodeCharacter{8984}{$\Shamrock$}
+
+\newcommand\textPsi{$\Psi$}
+\newcommand\textXi{$\Xi$}
+\newcommand\textxi{$\xi$}
+\newcommand\textDelta{$\Delta$}
+\newcommand\textGamma{$\Gamma$}
+\newcommand\textsigma{$\sigma$}
+\newcommand\textSigma{$\Sigma$}
+\newcommand\textPi{$\Pi$}
+\newcommand\textrho{$\rho$}
+\newcommand\textphi{$\varphi$}
+\newcommand\texttau{$\tau$}
+\newcommand\texteta{$\eta$}
+\newcommand\textalpha{$\alpha$}
+\newcommand\textbeta{$\beta$}
+\newcommand\textepsilon{$\epsilon$}
+\newcommand\textkappa{$\kappa$}
+\newcommand\textOmega{$\Omega$}
+\newcommand\textmho{$\mho$}
+\newcommand\textgamma{$\gamma$}
+\newcommand\textlambda{$\lambda$}
+\newcommand\textpi{$\pi$}
+\newcommand\texttheta{$\theta$}
+\newcommand\textdelta{$\delta$}
+
+\usepackage{fancyvrb}
+
+\newcommand{\ttt}[1]{\texttt{#1}}
+
+\newcommand{\ignore}[1]{}
+
+\hyphenation{func-tor-ially}
+
+%% disguise from Agda 
+\newenvironment{noagdacode}
+  {\begin{code}}
+  {\end{code}}
+
+\newcommand\ecmd[1]{\textbf{#1}}
+
+\begin{document}
+
+\title{Homotopy Canoncity by Logical Relations: HSets}
+
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+\author{DRL \qquad CA \qquad RWH}
+
+\maketitle
+
+If this all works, I'm pretty psyched about it:
+
+\begin{enumerate}
+
+\item It gives an operational semantics for hset-type-theory, and maybe
+  for 1-type-type-theory as well (see below).  
+
+\item We can run it in Agda, so it could be used as the basis for a
+  tactic library.  Of course, there would be a lot of work quoting terms
+  written in full Agda into the little embedded type theory that the
+  proof works for.  
+
+\item It gives a new justification for function extensionality, in terms
+  of regular (Per-approved) intensional type theory.  Related work: There's the
+  Hofmann setoid model, which doesn't model everything, and the
+  Altenkirch one / OTT, which requires proof irrelvance.  Here, we'll
+  show that pure intensional type theory (with induction-recursion,
+  etc. but without any funny business in the identity type) can prove
+  canonicity (and consistency?) for type theory with funext.  
+
+\item I had an idea in the car yesterday about the puzzling
+  ``off-by-one'' phenomenon in the Coquand/Barras work.  
+
+  Consider hset-type-theory, where all types are hsets, with a univalent
+  universe of hprops.  I know of three proofs of canonicity for this:
+
+  Coquand/Barras interpret types as simplicial sets, but they always go
+  one level higher than the type theory itself.  In this case, they
+  interpret a type as (essentially) a type as a setoid, so it really has
+  points and paths.
+
+  In contrast, the Shulman proof for hset-type-theory interprets types
+  as things-glued-with-sets, so a type is more like a set than a setoid.
+
+  There's also the OTT datapoint, which justifies hset-type-theory
+  essentially by interpreting types as sets---this comes out in the fact
+  that the way they do things, there aren't any constraints on paths,
+  other than consistency.  
+
+  I have a guess about what's going on: to prove canonicity (like in
+  Coquand/Barras), you need the extra level.  To prove canonicity
+  \emph{from consistency}, you don't (like in OTT).  We can ask Mike
+  whether he used consistency to test my claim.  
+
+  The upshot for this work is that I think we should be able to prove
+  canonicity for hset-type-theory, or prove canonicity-from-consistency
+  for 1-type-type-theory, using pretty much the same proof.  That is, so
+  far, I don't see a spot where the proof below would break if we put
+  Bool in the unverse, except that we'd need to assume that there is no
+  proof of true = false.  On the other hand, I think that we could
+  change $Q_{bool}$ in such a way that we wouldn't need consistency---a
+  path is reducible at bool the endpoints are both true or both false,
+  but not if one is true and the other is false.  But we couldn't make
+  the corresponding definition if bool were in the universe (for the
+  current notion of candidate, which doesn't allow you to specify a
+  relation for the identity type of things in the universe).
+
+  If the details on this work out, it would placate my confusion about
+  this issue.
+\end{enumerate}
+
+\input{writeup0811.lao}
+
+\end{document}
+
