@@ -129,3 +129,18 @@ module homotopy.Pi2HSusp (A : Type)
            (Loop One (τ₁ (Path{(Susp A)} No No)) [ id ]) ≃〈 ap-Loop≃ One main-lemma (ap≃ (type≃β main-lemma-eqv) {[ id ]}) 〉
            (Loop One A a0) ≃〈 ! (UnTrunc.path (tl 0) (Loop One A a0) (use-level A-level _ _)) 〉
            π One A a0 ∎
+
+  ∘π : {n : Positive} {A : Type} {a0 : A} → π n A a0 → π n A a0 → π n A a0
+  ∘π {n} = Trunc-rec (Πlevel (λ _ → Trunc-level)) (λ p → Trunc-rec Trunc-level (λ q → [ ∘^ n p q ]))
+
+{- TODO: check that it preserves composition 
+  π2Susp-comp : (∀ (p q :  (π (S One) (Susp A) No)) → coe π2Susp (∘π {S One} q p) == ∘π {One} (coe π2Susp q) (coe π2Susp p))
+  π2Susp-comp = Trunc-elim _ (λ _ → Πlevel (λ _ → path-preserves-level Trunc-level)) 
+                (λ p → Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
+                (λ q → coe π2Susp [ q ∘ p ] =〈 {!ap-Loop≃ One!} 〉
+                        (∘π {One} (coe π2Susp [ q ]) (coe π2Susp [ p ]) ∎)))
+
+-- coe (ap (\ (X,x) → Path{X} x x) (e , p))
+-- == transport (\ (X,x) → Path{X} x x) (e : X1 = X2 , p : coe e x1 == x2) : x1 ={X1} x1 → x2 ={X2} x2 
+-- == \ q -> ap (coe e) q conjugated by p
+-}

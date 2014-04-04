@@ -75,3 +75,21 @@ module Coprod where
 
     coprod : (x y : Either A B) → (x == y) ≃ C x y
     coprod x y = fiberwise-equiv-from-total≃ coprodt pres-fst (x , y)
+
+
+    module Direct where
+      l : Either A B -> Either (Paths A) (Paths B)
+      l (Inl x) = Inl ((x , x) , id)
+      l (Inr x) = Inr ((x , x) , id)
+
+      r : Either (Paths A) (Paths B) → Either A B
+      r (Inl ((x , _) , _)) = Inl x
+      r (Inr ((x , _) , _)) = Inr x
+
+      lr : (x : _) → l (r x) == x
+      lr (Inl ((.snd , snd) , id)) = id
+      lr (Inr ((.snd , snd) , id)) = id
+
+      rl : (x : _) → r (l x) == x
+      rl (Inl x) = id
+      rl (Inr x) = id
