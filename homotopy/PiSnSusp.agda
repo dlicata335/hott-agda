@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type --without-K #-}
+{-# OPTIONS --type-in-type --new-without-K #-}
 
 open import lib.Prelude
 import homotopy.FreudenthalIteratedSuspension1
@@ -37,7 +37,7 @@ module homotopy.PiSNSusp where
     red = ((Π≃β mult-hom {S¹.base}) ∘ ap (λ x → ap≃ x {S¹.base}) (S¹.βloop/rec (\ x -> x) (mult-loop))) ∘ ap-o (λ f → f S¹.base) mult S¹.loop
 
 
-  module SS = homotopy.FreudenthalIteratedSuspension1 (S¹.S¹) S¹.base (S^-Connected 0) S¹-is-Gpd H-S¹
+  module SS = homotopy.FreudenthalIteratedSuspension1 (S¹.S¹) S¹.base (S^-Connected 0) 
 
   π1[Sn+1] : (n : Positive) -> π One (S^ (n +1)) (base^ (n +1)) ≃ Unit
   π1[Sn+1] n = π1Connected≃Unit (tlp n) (S^ (S n)) (base^ (S n)) (SS.Susp'^-Connected'' n) (1<=pos n)

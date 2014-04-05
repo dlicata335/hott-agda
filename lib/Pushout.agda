@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type --without-K #-}
+{-# OPTIONS --type-in-type --new-without-K #-}
 
 -- pushout of two maps f and g.
 -- e.g. S2 = Pushout {S1}{Unit}{Unit} cst cst
