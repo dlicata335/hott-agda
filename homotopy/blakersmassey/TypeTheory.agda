@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type --without-K #-}
+{-# OPTIONS --type-in-type --new-without-K #-}
 
 open import lib.Prelude hiding (Z ; ntype)
 open FatPushoutFib
@@ -101,9 +101,10 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   -- this definition of 
   -- codes-m is basically the same as in ooTopos, except for
   -- a slight rearrangement, which lets you skip a few equality proofs
+  -- THIS IS THE DEFINITION OF codes-m
   module CodesMHFibPushout where
     CM : Type
-    CM = Pushout.Pushout
+    CM = FatPushout.Pushout
         { Z }
         { Z×YZ }
         { Z×XZ } 
@@ -111,20 +112,25 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
         (λ {(x , y , p) → (y , x , y , p , p)})
   
     codes-m-map : CM → Z×WZ
-    codes-m-map = (Pushout.Pushout-rec {C = Z×WZ}
+    codes-m-map = (FatPushout.Pushout-rec 
           (λ {(x1' , y1' , x2' , p11' , p21')
             → (x1' , y1' , p11' , x2' , y1' , p21' , (! (gluer _ _ p21')) ∘ (gluer x1' y1' p11')) })
+          (λ { (x , y , p) → x , y , p , x , y , p , id })
           (λ {(y1' , x1' , y2' ,  p11' , p12')
             → (x1' , y1' , p11' , x1' , y2' , p12' , (! (gluel _ _ p12')) ∘ gluel _ _ p11') }) 
-          (λ z → ap
-                   (λ h →
-                      fst z ,
-                      fst (snd z) , snd (snd z) , fst z , fst (snd z) , snd (snd z) , h)
-                   (! (! (!-inv-l (gluer _ _ _)) ∘ !-inv-l (gluel _ _ _)))))
+          -- (λ z → ap
+          --          (λ h →
+          --             fst z ,
+          --             fst (snd z) , snd (snd z) , fst z , fst (snd z) , snd (snd z) , h)
+          --          (! (! (!-inv-l (gluer _ _ _)) ∘ !-inv-l (gluel _ _ _))))
+                   {!!} {!!})
   
     codes-m : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
               (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
     codes-m x1 y1 p1 x2 y2 p2 α = HFiber codes-m-map ((x1 , y1 , p1 , x2 , y2 , p2 , α))
+
+    -- Lemma: Σ Z×WZ codes-m == CM
+  
 
   {-
     codes-m->m-l : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
@@ -157,6 +163,10 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
     right-map : -×YZ → -×WZ
     right-map (x2 , p21) = x2 , y1 , p21 , ! (gluer _ _ p21) ∘ gluer _ _ p1
 
+  
+
+{-
+    -- don't use this
     codes-m-map : CM → -×WZ 
     codes-m-map = Pushout.Pushout-rec left-map
                                       right-map 
@@ -165,8 +175,11 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
     codes-m : (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
     codes-m x2 y2 p2 α = HFiber codes-m-map (x2 , y2 , p2 , α)
 
-    ZxX-xYZ = ((Σ \ y2 -> P x1 y2) × Σ \ x2 → P x2 y1)
+    ZxX-xYZ = (Z×X- × -×YZ)
 
+    -- use wedge into prod
+    -- therefore Σ z. stuff here is i+j 
+-}
 
 {-
     -- FIXME: note these two might be swapped
@@ -263,11 +276,12 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
     -}
 
   center :  (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) (α : Path (inm x1 y1 p1) w) → (Codes x1 y1 p1 w α)
-  center x1 y1 p1 .(inm x1 y1 p1) id = [ (Pushout.inl (x1 , (y1 , (x1 , (p1 , p1))))) , 
-                                         (ap (λ z → x1 , y1 , p1 , x1 , y1 , p1 , z) (!-inv-l (gluer x1 y1 p1))) ] 
-                                         -- [ inm (id , ! (∘-assoc (! (gluel x1 y1 p1)) id (gluel x1 y1 p1)) ∘ ! (!-inv-l (gluel x1 y1 p1)))
-                                         --       (id , ! (∘-assoc (! (gluer x1 y1 p1)) id (gluer x1 y1 p1)) ∘ ! (!-inv-l (gluer x1 y1 p1)))
-                                         --      (id , {!!}) ] -- need definition of Codesm
+  center x1 y1 p1 .(inm x1 y1 p1) id = [ {!inm ? !} , {!!} ]
+                                       -- [ (Pushout.inl (x1 , (y1 , (x1 , (p1 , p1))))) , 
+                                       --   (ap (λ z → x1 , y1 , p1 , x1 , y1 , p1 , z) (!-inv-l (gluer x1 y1 p1))) ]
+                                       -- [ inm (id , ! (∘-assoc (! (gluel x1 y1 p1)) id (gluel x1 y1 p1)) ∘ ! (!-inv-l (gluel x1 y1 p1)))
+                                       --       (id , ! (∘-assoc (! (gluer x1 y1 p1)) id (gluer x1 y1 p1)) ∘ ! (!-inv-l (gluer x1 y1 p1)))
+                                       --       (id , {!!}) ] -- need definition of Codesm
 
   Codes-contr : (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) (α : Path (inm x1 y1 p1) w) → Contractible (Codes x1 y1 p1 w α)
   Codes-contr x1 y1 p1 w α = center x1 y1 p1 w α , {!the big diagram chase goes here!}
