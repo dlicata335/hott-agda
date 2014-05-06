@@ -12,10 +12,10 @@ open Truncation
  g : Z → Y = π1 o π2
  cf is equivalent to f (i.e. π1) being connected, and similarly for cg
 -}
-module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
-                                         (i' j' : _)
-                                         (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
-                                         (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where
+module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type)
+                                              (i' j' : _)
+                                              (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
+                                              (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where
 
   i : TLevel
   i = S i'
@@ -98,20 +98,16 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   Z×WZ = Σ \ (x1 : X) → Σ \ (y1 : Y) -> Σ \ (p1 : P x1 y1) -> 
                      Σ \ (x2 : X) → Σ \ (y2 : Y) -> Σ \ (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) 
 
-  -- this definition of 
-  -- codes-m is basically the same as in ooTopos, except for
-  -- a slight rearrangement, which lets you skip a few equality proofs
-  module CodesMHFibPushout where
-    CM : Type
-    CM = Pushout.Pushout
+  ⟨Z×XZ⟩+Z⟨Z×YZ⟩ : Type
+  ⟨Z×XZ⟩+Z⟨Z×YZ⟩ = Pushout.Pushout
         { Z }
         { Z×YZ }
         { Z×XZ } 
         (λ {(x , y , p) → (x , y , x , p , p)})
         (λ {(x , y , p) → (y , x , y , p , p)})
   
-    codes-m-map : CM → Z×WZ
-    codes-m-map = (Pushout.Pushout-rec {C = Z×WZ}
+  codes-m-map : ⟨Z×XZ⟩+Z⟨Z×YZ⟩ → Z×WZ
+  codes-m-map = (Pushout.Pushout-rec {C = Z×WZ}
           (λ {(x1' , y1' , x2' , p11' , p21')
             → (x1' , y1' , p11' , x2' , y1' , p21' , (! (gluer _ _ p21')) ∘ (gluer x1' y1' p11')) })
           (λ {(y1' , x1' , y2' ,  p11' , p12')
@@ -122,34 +118,20 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
                       fst (snd z) , snd (snd z) , fst z , fst (snd z) , snd (snd z) , h)
                    (! (! (!-inv-l (gluer _ _ _)) ∘ !-inv-l (gluel _ _ _)))))
   
-    codes-m : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
-              (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
-    codes-m x1 y1 p1 x2 y2 p2 α = HFiber codes-m-map ((x1 , y1 , p1 , x2 , y2 , p2 , α))
+  codes-m : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
+            (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
+  codes-m x1 y1 p1 x2 y2 p2 α = HFiber codes-m-map ((x1 , y1 , p1 , x2 , y2 , p2 , α))
 
-  {-
-    codes-m->m-l : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
-                 (x2 : X) (y2 : Y) (p2 : P x2 y2) (α : Path{W} (inm x1 y1 p1) (inm x2 y2 p2))
-               → codes-m x1 y1 p1 x2 y2 p2 α 
-               → codes-l-Z x1 y1 p1 x2 y2 p2 α 
-    codes-m->m-l x1 y1 p1 x2 y2 p2 α (cm1 , cm2) = Pushout.Pushout-elim
-                                                   (λ x →
-                                                      codes-m-map x == (x1 , y1 , p1 , x2 , y2 , p2 , α) →
-                                                      codes-m-l x1 y1 p1 x2 y2 p2 α)
-                                                   (λ {(x1' , y' , x2' , p1' , p2') eq → {!!}})
-                                                   {!!}
-                                                   {!!}
-                                                   cm1 cm2
-  -}
 
-  module CodesMHFibWedge (x1 : X) (y1 : Y) (p1 : P x1 y1) where
+  module OverZ (x1 : X) (y1 : Y) (p1 : P x1 y1) where
     Z×X- = Σ \ y2 -> P x1 y2
     -×YZ = Σ \ x2 → P x2 y1
 
     -×WZ : Type
     -×WZ = Σ \ (x2 : X) -> Σ \ (y2 : Y) → Σ \ (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2)
 
-    CM : Type
-    CM = Pushout.Wedge { Z×X- } { -×YZ } (y1 , p1) (x1 , p1) 
+    ⟨Z×X-⟩∨⟨-×YZ⟩ : Type
+    ⟨Z×X-⟩∨⟨-×YZ⟩ = Pushout.Wedge { Z×X- } { -×YZ } (y1 , p1) (x1 , p1) 
     
     left-map : Z×X- → -×WZ
     left-map (y2 , p21) = x1 , y2 , p21 , ! (gluel _ _ p21) ∘ gluel _ _ p1
@@ -157,13 +139,13 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
     right-map : -×YZ → -×WZ
     right-map (x2 , p21) = x2 , y1 , p21 , ! (gluer _ _ p21) ∘ gluer _ _ p1
 
-    codes-m-map : CM → -×WZ 
-    codes-m-map = Pushout.Pushout-rec left-map
+    codes-m-map-over : ⟨Z×X-⟩∨⟨-×YZ⟩ → -×WZ 
+    codes-m-map-over = Pushout.Pushout-rec left-map
                                       right-map 
                                       (λ _ → pair≃ id (pair≃ id (pair≃ id (! (!-inv-l (gluer _ _ _)) ∘ !-inv-l (gluel _ _ _)))))
 
-    codes-m : (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
-    codes-m x2 y2 p2 α = HFiber codes-m-map (x2 , y2 , p2 , α)
+    codes-m-over : (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
+    codes-m-over x2 y2 p2 α = HFiber codes-m-map-over (x2 , y2 , p2 , α)
 
     ZxX-xYZ = ((Σ \ y2 -> P x1 y2) × Σ \ x2 → P x2 y1)
 
@@ -171,9 +153,6 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
 
   Z×YZ×XZ : Type
   Z×YZ×XZ = Σ (λ (x1 : X) → Σ (λ (y1 : Y) → Σ (λ (x2 : X) → Σ (λ (y2 : Y) → P x1 y1 × P x2 y1 × P x2 y2))))
-
-  ⟨Z×XZ⟩+Z⟨Z×YZ⟩ : Type
-  ⟨Z×XZ⟩+Z⟨Z×YZ⟩ = CodesMHFibPushout.CM
 
   pushout-to-pullback : ⟨Z×XZ⟩+Z⟨Z×YZ⟩ → Z×YZ×XZ
   pushout-to-pullback = Pushout.Pushout-rec {C = Z×YZ×XZ}
@@ -186,93 +165,23 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
   total-lemma-1 : Equiv (Σ (λ {(x1 , y1 , p1 , x2 , y2 , p2 , α) → codes-l-Z x1 y1 p1 x2 y2 p2 α})) Z×YZ×XZ
   total-lemma-1 = {!!}
 
-  total-lemma-2 : Equiv (Σ (λ {(x1 , y1 , p1 , x2 , y2 , p2 , α) → CodesMHFibPushout.codes-m x1 y1 p1 x2 y2 p2 α})) ⟨Z×XZ⟩+Z⟨Z×YZ⟩
+  total-lemma-2 : Equiv (Σ (λ {(x1 , y1 , p1 , x2 , y2 , p2 , α) → OverZ.codes-m-over x1 y1 p1 x2 y2 p2 α})) ⟨Z×XZ⟩+Z⟨Z×YZ⟩
   total-lemma-2 = {!!}
 
-  ⟨Z×X-⟩∨⟨-×YZ⟩ : (x1 : X) (y1 : Y) (p1 : P x1 y1) → Type 
-  ⟨Z×X-⟩∨⟨-×YZ⟩ = CodesMHFibWedge.CM
-
   Z×X-×YZ : (x1 : X) (y1 : Y) (p1 : P x1 y1) → Type
-  Z×X-×YZ x1 y1 p1 = CodesMHFibWedge.Z×X- x1 y1 p1 × CodesMHFibWedge.-×YZ x1 y1 p1
+  Z×X-×YZ x1 y1 p1 = OverZ.Z×X- x1 y1 p1 × OverZ.-×YZ x1 y1 p1
 
-  total-lemma-3 : Equiv (Σ (λ {(x1 , y1 , p1) → ⟨Z×X-⟩∨⟨-×YZ⟩ x1 y1 p1})) ⟨Z×XZ⟩+Z⟨Z×YZ⟩
+  total-lemma-3 : Equiv (Σ (λ {(x1 , y1 , p1) → OverZ.⟨Z×X-⟩∨⟨-×YZ⟩ x1 y1 p1})) ⟨Z×XZ⟩+Z⟨Z×YZ⟩
   total-lemma-3 = {!!}
 
   total-lemma-4 : Equiv (Σ (λ {(x1 , y1 , p1) → Z×X-×YZ x1 y1 p1})) Z×YZ×XZ
   total-lemma-4 = {!!}
 
-{-
-    -- FIXME: note these two might be swapped
-
-    codes-m-l-map : ZxX-xYZ -> -×WZ 
-    codes-m-l-map x = left-map (fst x) -- x1 , (y2 , (p12 , ! (gluel _ _ p12) ∘ gluel _ _ p1))
-
-    codes-m-r-map : ZxX-xYZ -> -×WZ 
-    codes-m-r-map x = right-map (snd x)
-    
-    codes-m-l' : (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type 
-    codes-m-l' x2 y2 p2 α = HFiber codes-m-l-map (x2 , y2 , p2 , α)
-
-    codes-m-r' : (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type 
-    codes-m-r' x2 y2 p2 α = HFiber codes-m-r-map (x2 , y2 , p2 , α)
-
-    m-l==m-l' : (x2 : X) (y2 : Y) (p2 : P x2 y2) (α : Path{W} (inm x1 y1 p1) (inm x2 y2 p2))
-               → codes-m-l' x2 y2 p2 α 
-               == codes-l-Z x1 y1 p1 x2 y2 p2 α 
-    m-l==m-l' x2 y2 p2 α = {!!}
-
-    m-r==m-r' : (x2 : X) (y2 : Y) (p2 : P x2 y2) (α : Path{W} (inm x1 y1 p1) (inm x2 y2 p2))
-               → codes-m-r' x2 y2 p2 α 
-               == codes-r-Z x1 y1 p1 x2 y2 p2 α 
-    m-r==m-r' x2 y2 p2 α = {!!}
-
-    -- so it suffices to show that these exist and are i+j connected
-
-    codes-map=codes-m-l-map : ∀ x → codes-m-map x == codes-m-l-map (Pushout.wedge-to-prod x)
-    codes-map=codes-m-l-map = Pushout.Pushout-elim _ (λ p → {!!}) {!!} {!!}
-  
-    m==m-l' : (x2 : X) (y2 : Y) (p2 : P x2 y2) (α : Path{W} (inm x1 y1 p1) (inm x2 y2 p2))
-               → codes-m x2 y2 p2 α 
-               -> codes-m-l' x2 y2 p2 α 
-    m==m-l' x2 y2 p2 α (cm1 , cm2) = {!!} 
-
-    m==m-r' : (x2 : X) (y2 : Y) (p2 : P x2 y2) (α : Path{W} (inm x1 y1 p1) (inm x2 y2 p2))
-               → codes-m x2 y2 p2 α 
-               -> codes-m-l' x2 y2 p2 α 
-    m==m-r' x2 y2 p2 α (cm1 , cm2) = {!Pushout.wedge-to-prod cm1!} 
--}
-
-  module CodesMPushout where
-    codes-m : (x1 : X) (y1 : Y) (p1 : P x1 y1)
-              (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
-    codes-m x1 y1 p1 x2 y2 p2 α = Pushout.Pushout {{!!}}
-                                                  {Σ \ (α12 : x1 == x2) → α == ! (gluel _ _ p2) ∘ ap inl α12 ∘ gluel _ _ p1} 
-                                                  {Σ \ (α12 : y1 == y2) → α == ! (gluer _ _ p2) ∘ ap inr α12 ∘ gluer _ _ p1}
-                                                  {!!}
-                                                  {!!}
-
-  open CodesMHFibPushout
-
   codes-glue-l : ∀ x1 y1 p1 → (x : X) (y : Y) (p : P x y) →
       transport (λ w → Path (inm x1 y1 p1) w → Type) (gluel x y p)
       (λ α → Trunc i+j (codes-m x1 y1 p1 x y p α))
       ≃ (λ α → Trunc i+j (codes-l x1 y1 p1 x α))
-  codes-glue-l x1 y1 p1 x y p = {!STS!} where
-    step1 :  (α : _) → 
-        (Trunc i+j (codes-m x1 y1 p1 x y p (! (gluel x y p) ∘ α)))
-      ≃ (Trunc i+j (codes-l-Z x1 y1 p1 x y p (! (gluel x y p) ∘ α)))
-    step1 = {!!}
-
-    step2 :  (α : _) → 
-        (Trunc i+j (codes-l-Z x1 y1 p1 x y p (! (gluel x y p) ∘ α)))
-      ≃ (Trunc i+j (codes-l x1 y1 p1 x α))
-    step2 α = ap (λ A → Trunc i+j (Σe (P x y1) A)) (λ≃ (λ p3 → {!cancel inverses!}))
-
-    STS :  (α : _) → 
-        (Trunc i+j (codes-m x1 y1 p1 x y p (! (gluel x y p) ∘ α)))
-      ≃ (Trunc i+j (codes-l x1 y1 p1 x α))
-    STS α = step2 α ∘ step1 α
-
+  codes-glue-l x1 y1 p1 x y p = {!!}  -- the map should be one of the total-lemmas above 
 
   Codes : (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) → Path (inm x1 y1 p1) w → Type
   Codes x1 y1 p1 = Pushout-elim (\ w -> Path (inm x1 y1 p1) w → Type)
@@ -281,26 +190,9 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
                          (λ y2 α → Trunc i+j (codes-r x1 y1 p1 y2 α))
                          (codes-glue-l x1 y1 p1)
                          {!ntype x1 y1 p1!}
-                         -- (λ z' →
-                         --      λ≃
-                         --      (λ p →
-                         --         ap (λ p' → Trunc i+j (HFiber codes-r p')) (pair≃ id (pair≃ id (!-inv-r-front (gluer z') p))) ∘
-                         --         ua (Codes-glue.eqvmr z z' (! (gluer z') ∘ p)) ∘
-                         --         ap (λ p' → Trunc i+j (HFiber codes-m (z , z' , p')))
-                         --         (transport-Path-right (! (gluer z')) p))
-                         --      ∘ transport-→-pre' (λ z0 → Path (inm z) z0) (gluer z') _)
-    {-
-                           (λ z' → λ≃ (λ p → ua (Codes-gluer.eqv z z' p) ∘
-                                             ap (λ p' → Trunc i+j (HFiber codes-m (z , z' , p'))) (transport-Path-right (! (gluer z')) p))
-                                             ∘ transport-→-pre' (λ z0 → Path (inm z) z0) (gluer z') _)
-    -}
 
   center :  (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) (α : Path (inm x1 y1 p1) w) → (Codes x1 y1 p1 w α)
-  center x1 y1 p1 .(inm x1 y1 p1) id = [ (Pushout.inl (x1 , (y1 , (x1 , (p1 , p1))))) , 
-                                         (ap (λ z → x1 , y1 , p1 , x1 , y1 , p1 , z) (!-inv-l (gluer x1 y1 p1))) ] 
-                                         -- [ inm (id , ! (∘-assoc (! (gluel x1 y1 p1)) id (gluel x1 y1 p1)) ∘ ! (!-inv-l (gluel x1 y1 p1)))
-                                         --       (id , ! (∘-assoc (! (gluer x1 y1 p1)) id (gluer x1 y1 p1)) ∘ ! (!-inv-l (gluer x1 y1 p1)))
-                                         --      (id , {!!}) ] -- need definition of Codesm
+  center x1 y1 p1 .(inm x1 y1 p1) id = {!!}
 
   Codes-contr : (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) (α : Path (inm x1 y1 p1) w) → Contractible (Codes x1 y1 p1 w α)
   Codes-contr x1 y1 p1 w α = center x1 y1 p1 w α , {!the big diagram chase goes here!}
