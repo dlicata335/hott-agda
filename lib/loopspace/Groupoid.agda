@@ -87,7 +87,7 @@ module lib.loopspace.Groupoid where
       loopN1S-id : ∀ n  → loopN1S n (id^ n) ≃ id
       loopN1S-id One = id
       loopN1S-id (S n) = !-inv-with-middle-r (loopN1S-id n) id
-  
+
       -- ENH use adjust to simplify the first couple of steps visually
       β : ∀ n x → loopN1S n (loopSN1 n x) ≃ x
       β One x = id

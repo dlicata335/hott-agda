@@ -41,14 +41,31 @@ module homotopy.KGn where
                     (indexing : Either (tlp k <tl tlp n) ((tlp k ≃ tlp n) × (tl 1 <tl tlp n))) where
 
         stable : π k (KG n) (base^ n) ≃ π (k +1) (KG (n +1)) (base^ (n +1))
-        stable = π k (KG n) (base^ n) ≃〈 π<=Trunc k n lte (FS.base'^ n) 〉 
-                 π k (FS.Susp'^ n) (FS.base'^ n) ≃〈 FS.Stable.stable k n (k<=n->k<=2n-2 k n indexing) 〉 
+        stable = π k (KG n) (base^ n)                           ≃〈 π<=Trunc k n lte (FS.base'^ n) 〉 
+                 π k (FS.Susp'^ n) (FS.base'^ n)                ≃〈 FS.Stable.stable k n (k<=n->k<=2n-2 k n indexing) 〉 
                  π (k +1) (FS.Susp'^ (n +1)) (FS.base'^ (n +1)) ≃〈 ! (π<=Trunc (k +1) (n +1) (<=SCong lte) (FS.base'^ (n +1))) 〉 
-                 π (k +1) (KG (n +1)) (base^ (n +1)) ∎  where
+                 π (k +1) (KG (n +1)) (base^ (n +1)) ∎ where
             lte : tlp k <=tl tlp n
             lte with indexing 
             ... | Inl lt = Inl lt
             ... | Inr (eq , _) = Inr eq
+
+        -- for talk
+
+        KG1 = A
+
+        stable2 : π (k +1) (KG (n +1)) (base^ (n +1)) ≃ π k (KG n) (base^ n) 
+        stable2 = π (k +1) (KG (n +1)) (base^ (n +1))                 ≃〈 (π<=Trunc (k +1) (n +1) (<=SCong lte) (FS.base'^ (n +1))) 〉
+                  π (k +1) (Susp^ (S n -1pn) KG1) (FS.base'^ (n +1))  ≃〈 ! (FS.Stable.stable k n (k<=n->k<=2n-2 k n indexing)) 〉 
+                  π k (Susp^ (n -1pn) KG1) (FS.base'^ n)              ≃〈 ! (π<=Trunc k n lte (FS.base'^ n)) 〉        
+                  π k (KG n) (base^ n) ∎ 
+            where
+            lte : tlp k <=tl tlp n
+            lte with indexing 
+            ... | Inl lt = Inl lt
+            ... | Inr (eq , _) = Inr eq
+
+        -- end for talk
 
       module BelowDiagonal where
   

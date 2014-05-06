@@ -167,6 +167,39 @@ module homotopy.blakersmassey.TypeTheory (X Y : Type) (P : X → Y → Type)
 
     ZxX-xYZ = ((Σ \ y2 -> P x1 y2) × Σ \ x2 → P x2 y1)
 
+  -- We now use the wedge into product and pre-post compose with the following equivalences as necessary
+
+  Z×YZ×XZ : Type
+  Z×YZ×XZ = Σ (λ (x1 : X) → Σ (λ (y1 : Y) → Σ (λ (x2 : X) → Σ (λ (y2 : Y) → P x1 y1 × P x2 y1 × P x2 y2))))
+
+  ⟨Z×XZ⟩+Z⟨Z×YZ⟩ : Type
+  ⟨Z×XZ⟩+Z⟨Z×YZ⟩ = CodesMHFibPushout.CM
+
+  pushout-to-pullback : ⟨Z×XZ⟩+Z⟨Z×YZ⟩ → Z×YZ×XZ
+  pushout-to-pullback = Pushout.Pushout-rec {C = Z×YZ×XZ}
+        (λ {(x1 , y1 , x2 , p11 , p21)
+          → x1 , (y1 , (x2 , (y1 , (p11 , (p21 , p21))))) })
+        (λ {(y1 , x1 , y2 ,  p11 , p12)
+          → x1 , (y1 , (x1 , (y2 , (p11 , (p11 , p12))))) })
+        (λ {(x , y , p) → id })
+
+  total-lemma-1 : Equiv (Σ (λ {(x1 , y1 , p1 , x2 , y2 , p2 , α) → codes-l-Z x1 y1 p1 x2 y2 p2 α})) Z×YZ×XZ
+  total-lemma-1 = {!!}
+
+  total-lemma-2 : Equiv (Σ (λ {(x1 , y1 , p1 , x2 , y2 , p2 , α) → CodesMHFibPushout.codes-m x1 y1 p1 x2 y2 p2 α})) ⟨Z×XZ⟩+Z⟨Z×YZ⟩
+  total-lemma-2 = {!!}
+
+  ⟨Z×X-⟩∨⟨-×YZ⟩ : (x1 : X) (y1 : Y) (p1 : P x1 y1) → Type 
+  ⟨Z×X-⟩∨⟨-×YZ⟩ = CodesMHFibWedge.CM
+
+  Z×X-×YZ : (x1 : X) (y1 : Y) (p1 : P x1 y1) → Type
+  Z×X-×YZ x1 y1 p1 = CodesMHFibWedge.Z×X- x1 y1 p1 × CodesMHFibWedge.-×YZ x1 y1 p1
+
+  total-lemma-3 : Equiv (Σ (λ {(x1 , y1 , p1) → ⟨Z×X-⟩∨⟨-×YZ⟩ x1 y1 p1})) ⟨Z×XZ⟩+Z⟨Z×YZ⟩
+  total-lemma-3 = {!!}
+
+  total-lemma-4 : Equiv (Σ (λ {(x1 , y1 , p1) → Z×X-×YZ x1 y1 p1})) Z×YZ×XZ
+  total-lemma-4 = {!!}
 
 {-
     -- FIXME: note these two might be swapped

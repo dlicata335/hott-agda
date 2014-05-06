@@ -2,7 +2,9 @@
 
 open import lib.First
 open import lib.Paths
+open import lib.Prods
 open import lib.Sums
+open import lib.Bool
 
 module lib.DecidablePath where
 
@@ -32,6 +34,40 @@ module lib.DecidablePath where
     ... | Inr r | _ with r id
     ...                | ()
 
+{-
+  module Hedberg2 {A : Set} (d : DecPath A) where
+    
+    eq : A → A → Bool
+    eq a a' with d a a'
+    ... | Inl _ = True
+    ... | Inr _ = False
+
+    l : (a a' : A) → a == a' → BoolM.Check (eq a a')
+    l a a' p with d a a'
+    ... | Inl q = <>
+    ... | Inr r = r p
+
+    r : (a a' : A) → BoolM.Check (eq a a') → a == a'
+    r a a' p with d a a'
+    ... | Inl q = q
+    ... | Inr r = Sums.abort p
+
+    c1 : (a a' : A) → (p : _) → l a a' (r a a' p) == p
+    c1 a a' p with d a a'
+    ... | Inl q = id -- uses η for Unit, but we could work around that
+    ... | Inr q = Sums.abort p
+
+    -- c2 : (a a' : A) → (p : _) → r a a' (l a a' p) == p
+    -- c2 a a' p with d a a'
+    -- ... | Inl q = {!!}
+    -- ... | Inr q = Sums.abort (q p)
+
+    c2 : (a a' : A) → (p : _) → r a a' (l a a' p) == p
+    c2 a .a id with d a a
+    ... | Inl x = {!!}
+    ... | Inr y = {!!}
+    
+-}
 {-
   module Hedberg {A : Set} (d : DecPath A) (x : A) where
 
