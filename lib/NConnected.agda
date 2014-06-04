@@ -225,6 +225,22 @@ module lib.NConnected where
            split-Trunc-dep1 n P nP branch = Trunc-elim _ (λ _ → nP _) (λ {(a , b) → branch a b})
 
 
+    fiberwise-to-total-connected : (n : TLevel) → ∀ {A} {B1 B2 : A → Type} → (f : (x : A) → B1 x → B2 x) → 
+                                 ((x : A) → ConnectedMap n (f x)) → ConnectedMap n (fiberwise-to-total f)
+    fiberwise-to-total-connected n {_}{B1} f c = ConnectedMap-from-UMP n (fiberwise-to-total f) 
+                                                                         (λ P b → (λ y → fst
+                                                                                           (ConnectedMap-has-UMP n (f (fst y)) (c (fst y))
+                                                                                            (λ z → P (fst y , z)) (λ b1 → b (fst y , b1)))
+                                                                                           (snd y)) , 
+                                                                         (λ y → snd
+                                                                                  (ConnectedMap-has-UMP n (f (fst y)) (c (fst y))
+                                                                                   (λ z → P (fst y , z)) (λ b1 → b (fst y , b1)))
+                                                                                  (snd y))) 
+
+    unfiberwise-to-total-connected : (n : TLevel) → ∀ {A} {B1 B2 : A → Type} → (f : (x : A) → B1 x → B2 x) → 
+                                 ConnectedMap n (fiberwise-to-total f) → ((x : A) → ConnectedMap n (f x))
+    unfiberwise-to-total-connected n f c x y = transport (λ A → NType -2 (Trunc n A)) rearrange-and-path-ind (c (x , y)) where
+      postulate rearrange-and-path-ind : _
 
   open ConnectedMap
 

@@ -25,8 +25,15 @@ module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type
 
   i+j = plus2 i' j'
 
-  W = Pushout P
+  W = FatPushoutFib.Pushout P
                                        
+
+  Z = Σ (λ x → Σ (λ y → P x y)) 
+  Z×YZ = Σ (λ (x1' : X) → Σ (λ (y' : Y) → Σ (λ (x2' : X) → P x1' y' × P x2' y')))
+  Z×XZ = Σ (λ (y1' : Y) → Σ (λ (x' : X) → Σ (λ (y2' : Y) → P x' y1' × P x' y2')))
+  Z×WZ = Σ \ (x1 : X) → Σ \ (y1 : Y) -> Σ \ (p1 : P x1 y1) -> 
+                     Σ \ (x2 : X) → Σ \ (y2 : Y) -> Σ \ (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) 
+
   glue-map : (x : X) (y : Y) → P x y → Path{W} (inl x) (inr y)
   glue-map x y p = gluer x y p ∘ ! (gluel x y p)
 
@@ -38,6 +45,8 @@ module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type
   -- Z×YZ = Pullback{Y} g g 
 
   -- TRANSLATION GUIDE: 
+  -- here is why precodes-l is what it is:
+  -- 
   -- ZxXZ → ZxWX
   -- expands to (x1,y1,p1) (x2,y2,p2) (p3 : y1 = y2) ->
   --            (x1,y1,p1) x2 such that inm(x1,y1,p1) == inl x2
@@ -67,36 +76,26 @@ module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type
   --    α = !(gluelr x2 y1 p2') ∘ gluer x1 y1 p1
   --
   -- rearrange to gluelr x2 y1 p2' = gluer x1 y1 p1 ∘ ! α per Eric
-  --
-  -- is this where we stop, or is there more simplification to do?  
   
   -- HFiber of Z×YZ -> Z×WX
-  codes-l : (x1 : X) (y1 : Y) (p1 : P x1 y1) (x2 : X) (α : Path{W} (inm x1 y1 p1) (inl x2)) → Type
-  codes-l x1 y1 p1 x2 α = Σ (λ (p21 : P x2 y1) → (glue-map x2 y1 p21) == (gluer x1 y1 p1) ∘ ! α)
+  precodes-l : (x1 : X) (y1 : Y) (p1 : P x1 y1) (x2 : X) (α : Path{W} (inm x1 y1 p1) (inl x2)) → Type
+  precodes-l x1 y1 p1 x2 α = Σ (λ (p21 : P x2 y1) → (glue-map x2 y1 p21) == (gluer x1 y1 p1) ∘ ! α)
 
   -- HFiber of Z×XZ -> Z×WY
-  codes-r : (x1 : X) (y1 : Y) (p1 : P x1 y1) (y2 : Y) (α : Path{W} (inm x1 y1 p1) (inr y2)) → Type
-  codes-r x1 y1 p1 y2 α = Σ (λ (p12 : P x1 y2) → glue-map x1 y2 p12 == α ∘ ! (gluel x1 y1 p1))
+  precodes-r : (x1 : X) (y1 : Y) (p1 : P x1 y1) (y2 : Y) (α : Path{W} (inm x1 y1 p1) (inr y2)) → Type
+  precodes-r x1 y1 p1 y2 α = Σ (λ (p12 : P x1 y2) → glue-map x1 y2 p12 == α ∘ ! (gluel x1 y1 p1))
 
-  -- codes-l pulled back along Z×WZ → Z×WX to be over Z×WZ;
+  -- precodes-l pulled back along Z×WZ → Z×WX to be over Z×WZ;
   -- pullback is just substitution!
-  codes-l-Z : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
-              (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
-  codes-l-Z x1 y1 p1 x2 y2 p2 α = 
+  precodes-l-Z : Z×WZ → Type
+  precodes-l-Z (x1 , y1 , p1 , x2 , y2 , p2 , α) = 
        Σ (λ (p21 : P x2 y1) → glue-map _ _ p21 == (gluer _ _ p1) ∘ ! (gluel _ _ p2 ∘ α))
 
-  -- codes-r pulled back along Z×WZ → Z×WX to be over Z×WZ;
-  codes-r-Z : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
+  -- precodes-r pulled back along Z×WZ → Z×WX to be over Z×WZ;
+  precodes-r-Z : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
              (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
-  codes-r-Z x1 y1 p1 x2 y2 p2 α = 
+  precodes-r-Z x1 y1 p1 x2 y2 p2 α = 
        Σ (λ (p12 : P x1 y2) → glue-map x1 y2 p12 == (gluer x2 y2 p2) ∘ α ∘ ! (gluel x1 y1 p1))
-
-
-  Z = Σ (λ x → Σ (λ y → P x y)) 
-  Z×YZ = Σ (λ (x1' : X) → Σ (λ (y' : Y) → Σ (λ (x2' : X) → P x1' y' × P x2' y')))
-  Z×XZ = Σ (λ (y1' : Y) → Σ (λ (x' : X) → Σ (λ (y2' : Y) → P x' y1' × P x' y2')))
-  Z×WZ = Σ \ (x1 : X) → Σ \ (y1 : Y) -> Σ \ (p1 : P x1 y1) -> 
-                     Σ \ (x2 : X) → Σ \ (y2 : Y) -> Σ \ (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) 
 
   ⟨Z×XZ⟩+Z⟨Z×YZ⟩ : Type
   ⟨Z×XZ⟩+Z⟨Z×YZ⟩ = Pushout.Pushout
@@ -106,8 +105,8 @@ module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type
         (λ {(x , y , p) → (x , y , x , p , p)})
         (λ {(x , y , p) → (y , x , y , p , p)})
   
-  codes-m-map : ⟨Z×XZ⟩+Z⟨Z×YZ⟩ → Z×WZ
-  codes-m-map = (Pushout.Pushout-rec {C = Z×WZ}
+  precodes-m-map : ⟨Z×XZ⟩+Z⟨Z×YZ⟩ → Z×WZ
+  precodes-m-map = (Pushout.Pushout-rec {C = Z×WZ}
           (λ {(x1' , y1' , x2' , p11' , p21')
             → (x1' , y1' , p11' , x2' , y1' , p21' , (! (gluer _ _ p21')) ∘ (gluer x1' y1' p11')) })
           (λ {(y1' , x1' , y2' ,  p11' , p12')
@@ -118,9 +117,8 @@ module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type
                       fst (snd z) , snd (snd z) , fst z , fst (snd z) , snd (snd z) , h)
                    (! (! (!-inv-l (gluer _ _ _)) ∘ !-inv-l (gluel _ _ _)))))
   
-  codes-m : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
-            (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
-  codes-m x1 y1 p1 x2 y2 p2 α = HFiber codes-m-map ((x1 , y1 , p1 , x2 , y2 , p2 , α))
+  precodes-m : Z×WZ → Type
+  precodes-m z = HFiber precodes-m-map z
 
 
   module OverZ (x1 : X) (y1 : Y) (p1 : P x1 y1) where
@@ -139,13 +137,13 @@ module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type
     right-map : -×YZ → -×WZ
     right-map (x2 , p21) = x2 , y1 , p21 , ! (gluer _ _ p21) ∘ gluer _ _ p1
 
-    codes-m-map-over : ⟨Z×X-⟩∨⟨-×YZ⟩ → -×WZ 
-    codes-m-map-over = Pushout.Pushout-rec left-map
+    precodes-m-map-over : ⟨Z×X-⟩∨⟨-×YZ⟩ → -×WZ 
+    precodes-m-map-over = Pushout.Pushout-rec left-map
                                       right-map 
                                       (λ _ → pair≃ id (pair≃ id (pair≃ id (! (!-inv-l (gluer _ _ _)) ∘ !-inv-l (gluel _ _ _)))))
 
-    codes-m-over : (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
-    codes-m-over x2 y2 p2 α = HFiber codes-m-map-over (x2 , y2 , p2 , α)
+    precodes-m-over : (x2 : X) (y2 : Y) (p2 : P x2 y2) → Path{W} (inm x1 y1 p1) (inm x2 y2 p2) → Type
+    precodes-m-over x2 y2 p2 α = HFiber precodes-m-map-over (x2 , y2 , p2 , α)
 
     ZxX-xYZ = ((Σ \ y2 -> P x1 y2) × Σ \ x2 → P x2 y1)
 
@@ -162,10 +160,10 @@ module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type
           → x1 , (y1 , (x1 , (y2 , (p11 , (p11 , p12))))) })
         (λ {(x , y , p) → id })
 
-  total-lemma-1 : Equiv (Σ (λ {(x1 , y1 , p1 , x2 , y2 , p2 , α) → codes-l-Z x1 y1 p1 x2 y2 p2 α})) Z×YZ×XZ
-  total-lemma-1 = {!!}
+  total-lemma-1 : Equiv (Σ precodes-l-Z) Z×YZ×XZ
+  total-lemma-1 = {!!} , {!!}
 
-  total-lemma-2 : Equiv (Σ (λ {(x1 , y1 , p1 , x2 , y2 , p2 , α) → OverZ.codes-m-over x1 y1 p1 x2 y2 p2 α})) ⟨Z×XZ⟩+Z⟨Z×YZ⟩
+  total-lemma-2 : Equiv (Σ (λ {(x1 , y1 , p1 , x2 , y2 , p2 , α) → OverZ.precodes-m-over x1 y1 p1 x2 y2 p2 α})) ⟨Z×XZ⟩+Z⟨Z×YZ⟩
   total-lemma-2 = {!!}
 
   Z×X-×YZ : (x1 : X) (y1 : Y) (p1 : P x1 y1) → Type
@@ -177,19 +175,35 @@ module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type
   total-lemma-4 : Equiv (Σ (λ {(x1 , y1 , p1) → Z×X-×YZ x1 y1 p1})) Z×YZ×XZ
   total-lemma-4 = {!!}
 
-  codes-glue-l : ∀ x1 y1 p1 → (x : X) (y : Y) (p : P x y) →
+  precodes-glue-l-map : ∀ zwz → precodes-m zwz → precodes-l-Z zwz
+  precodes-glue-l-map (x1 , y1 , p11 , x2 , y2 , p22 , α) (w , X) = 
+    Pushout.Pushout-elim
+      (λ w₁ → (X₁ : precodes-m-map w₁ == (x1 , y1 , p11 , x2 , y2 , p22 , α)) → precodes-l-Z (x1 , y1 , p11 , x2 , y2 , p22 , α))
+      {!!} {!!} {!!}
+      w X
+
+  precodes-glue-l' : ∀ zwz → Trunc i+j (precodes-m zwz) == Trunc i+j (precodes-l-Z zwz)
+  precodes-glue-l' zwz = ua (ConnectedMap-Equiv i+j {!!} {!!})
+
+  -- note: this proof may be a pain in the ass when we need to know what the equivalence is
+  precodes-glue-l : ∀ x1 y1 p1 → (x : X) (y : Y) (p : P x y) →
       transport (λ w → Path (inm x1 y1 p1) w → Type) (gluel x y p)
-      (λ α → Trunc i+j (codes-m x1 y1 p1 x y p α))
-      ≃ (λ α → Trunc i+j (codes-l x1 y1 p1 x α))
-  codes-glue-l x1 y1 p1 x y p = {!!}  -- the map should be one of the total-lemmas above 
+      (λ α → Trunc i+j (precodes-m (x1 , y1 , p1 , x , y , p , α)))
+      ≃ (λ α → Trunc i+j (precodes-l x1 y1 p1 x α))
+  precodes-glue-l x1 y1 p1 x y p = λ≃ (λ α → (ap (Trunc i+j) (apΣ id (λ≃ (λ x₁ → ap
+                                                                                (λ X₁ →
+                                                                                   Id (gluer x y1 x₁ ∘ ! (gluel x y1 x₁)) (gluer x1 y1 p1 ∘ ! X₁))
+                                                                                (!-inv-r-front (gluel x y p) α)))) ∘ precodes-glue-l' (x1 , y1 , p1 , x , y , p , (! (gluel x y p) ∘ α)))
+                                   ∘ ap (λ X₁ → Trunc i+j (precodes-m (x1 , y1 , p1 , x , y , p , X₁))) (transport-Path-right (! (gluel x y p)) α)) 
+                                   ∘ transport-→-pre' (λ w → Path (inm x1 y1 p1) w) (gluel x y p) (λ α → Trunc i+j (precodes-m (x1 , y1 , p1 , x , y , p , α)))
 
   Codes : (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) → Path (inm x1 y1 p1) w → Type
   Codes x1 y1 p1 = Pushout-elim (\ w -> Path (inm x1 y1 p1) w → Type)
-                         (λ x2 α → Trunc i+j (codes-l x1 y1 p1 x2 α)) 
-                         (λ x2 y2 p2 α → Trunc i+j (codes-m x1 y1 p1 x2 y2 p2 α)) 
-                         (λ y2 α → Trunc i+j (codes-r x1 y1 p1 y2 α))
-                         (codes-glue-l x1 y1 p1)
-                         {!ntype x1 y1 p1!}
+                         (λ x2 α → Trunc i+j (precodes-l x1 y1 p1 x2 α)) 
+                         (λ x2 y2 p2 α → Trunc i+j (precodes-m (x1 , y1 , p1 , x2 , y2 , p2 , α)))
+                         (λ y2 α → Trunc i+j (precodes-r x1 y1 p1 y2 α))
+                         (precodes-glue-l x1 y1 p1)
+                         {!!}
 
   center :  (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) (α : Path (inm x1 y1 p1) w) → (Codes x1 y1 p1 w α)
   center x1 y1 p1 .(inm x1 y1 p1) id = {!!}

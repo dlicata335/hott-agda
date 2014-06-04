@@ -229,3 +229,11 @@ module lib.Functions where
        (b : (x' : A') → B (IsEquiv.g (snd a) x') ≃ B' x')
      → ((x : A) → B x) ≃ ((x' : A') → B' x')
   apΠ' {A = A} {B = B} {B' = B'}  a b = apΠ (ua a) (λ≃ (λ x' → ap B' (! (ap≃ (type≃β a))) ∘ b (fst a x') ∘ ap B (! (IsEquiv.α (snd a) _)))) 
+
+  -- also comes up in UA implies funext, but easier to do it with funext
+  postcomp-equiv-is-equiv : ∀ {A B C} → (e : Equiv B C) → IsEquiv {A → B} {A → C} (\ f -> (fst e o f))
+  postcomp-equiv-is-equiv {A} e = transport IsEquiv ((λ≃ (λ f → λ≃ (λ x → ap (λ g → g (f x)) (type≃β e) ∘ ap≃ (transport-→-post (ua e) f)))) ∘ ! (transport-ap-assoc (λ x → A → x) (ua e))) (snd (coe-equiv (ap (λ x → A → x) (ua e))))
+
+  precomp-equiv-is-equiv : ∀ {A B C} → (e : Equiv B C) → IsEquiv {C → A} {B → A} (\ f -> (f o (fst e)))
+  precomp-equiv-is-equiv {A}{B}{C} e = transport IsEquiv (λ≃ (λ f → λ≃ (λ x → ap (λ x₁ → f x₁) (ap≃ (type≃β e) {x} ∘ ap (λ z → coe z x) (!-invol (ua e))) ∘ ap≃ (transport-→-pre (! (ua e)) f))) ∘
+                                                            ! (transport-ap-assoc (λ x → x → A) (! (ua e)))) (snd (coe-equiv (ap (λ x → x → A) (! (ua e)))))
