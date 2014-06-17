@@ -46,7 +46,7 @@ module Stream where
     Bisim.heads (middle s) = (snd (head s))
     Bisim.tails (middle s) = (middle (tail s))
   
-    to : Stream (Paths A) → (Σ \ xsys -> Bisim{A} (fst xsys) (snd xsys))
+    to : Stream (Paths A) → Bisim2 A
     to s = ((left s , right s) , middle s)
   
     from : Bisim2 A → Stream (Paths A)
