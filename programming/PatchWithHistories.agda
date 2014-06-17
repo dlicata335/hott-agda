@@ -10,6 +10,33 @@ module programming.PatchWithHistories where
               {a01 a10 a11 : A} → a00 == a01 -> a00 == a10 -> a01 == a11 -> a10 == a11 -> Type where 
     idSquare : Square id id id id
 
+
+  data Cube {A : Type} {a000 : A} : 
+    {a010 a100 a110 a001 a011 a101 a111 : A}
+    {p0-0 : a000 == a010}
+    {p-00 : a000 == a100}
+    {p-10 : a010 == a110}
+    {p1-0 : a100 == a110}
+    (f--0 : Square p0-0 p-00 p-10 p1-0)
+
+    {p0-1 : a001 == a011}
+    {p-01 : a001 == a101}
+    {p-11 : a011 == a111}
+    {p1-1 : a101 == a111}
+    (f--1 : Square p0-1 p-01 p-11 p1-1)
+
+    {p00- : a000 == a001}
+    {p01- : a010 == a011}
+    {p10- : a100 == a101}
+    {p11- : a110 == a111}
+    → Square p0-0 p00- p01- p0-1
+    → Square p-00 p00- p10- p-01
+    → Square p-10 p01- p11- p-11
+    → Square p1-0 p10- p11- p1-1
+    → Type where
+    idCube : Cube idSquare idSquare idSquare idSquare idSquare idSquare
+    
+
   data SquareOver {A : Type} (B : A → Type) {a00 : A} {b00 : B a00} : 
               {a01 a10 a11 : A} 
               {p0- : a00 == a01}
@@ -52,10 +79,48 @@ module programming.PatchWithHistories where
                     PathOver (λ x₁ → doc []ms == x₁) (add x xs) (topath xs)
                     (topath (x ::ms xs))
 
+  -- should be an equivalence
+  in-PathOver-= : {A : Type} {a' : A} 
+             → {a0 a1 : A}
+             → {p : a0 == a1}
+             → {q0 : a' == a0}
+             → {q1 : a' == a1}
+             → Square q0 id p q1
+             → PathOver (\ x -> a' == x) p q0 q1 
+  in-PathOver-= = {!!}
+
+  out-PathOver-= : {A : Type} {a' : A} 
+             → {a0 a1 : A}
+             → {p : a0 == a1}
+             → {q0 : a' == a0}
+             → {q1 : a' == a1}
+             → PathOver (\ x -> a' == x) p q0 q1 
+             → Square q0 id p q1
+  out-PathOver-= {q0 = id} id = idSquare
+
+  SquareOver-= : {A : Type} {a' : A} 
+                 {a00 : A} {a01 a10 a11 : A} 
+                 {p0- : a00 == a01}
+                 {p-0 : a00 == a10}
+                 {p-1 : a01 == a11}
+                 {p1- : a10 == a11}
+                 (f   : Square p0- p-0 p-1 p1-)
+                 {b00 : a' == a00} {b01 : a' == a01} {b10 : a' == a10} {b11 : a' == a11}  
+                 (q0- : PathOver (_==_ a') p0- b00 b01)
+                 (q-0 : PathOver (_==_ a') p-0 b00 b10)
+                 (q-1 : PathOver (_==_ a') p-1 b01 b11)
+                 (q1- : PathOver (_==_ a') p1- b10 b11)
+                 → Cube (out-PathOver-= q0-) (out-PathOver-= q1-) (out-PathOver-= q-0) idSquare f (out-PathOver-= q-1)
+                 → SquareOver (\ x -> a' == x) f 
+                              q0-
+                              q-0
+                              q-1
+                              q1-
+  SquareOver-= = {!!}
 
   contr : (x : R) → doc []ms == x
   contr = R-elim (\ x -> doc []ms == x) topath topath-square 
-                 (λ x y xs → {!!}) 
+                 (λ x y xs → SquareOver-= _ _ _ _ _ {!!}) 
     
   
     
