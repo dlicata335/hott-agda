@@ -12,7 +12,9 @@ module programming.PatchWithHistories where
 
   hrefl-Square : {A : Type} {a00 a01 : A} {p : a00 == a01} → Square p id id p
   hrefl-Square {p = id} = idSquare
-  
+
+  vrefl-Square : {A : Type} {a00 a01 : A} {p : a00 == a01} → Square id p p id
+  vrefl-Square {p = id} = idSquare
 
   data Cube {A : Type} {a000 : A} : 
     {a010 a100 a110 a001 a011 a101 a111 : A}
@@ -265,7 +267,7 @@ module programming.PatchWithHistories where
                 (extend-triangle (ex x y xs) (topath xs))
         goal7 = {!!}
 
-        -- abstract and path-induction on topath xs
+        -- abstract topath xs and then path-induction on topath xs
         goal8 : ∀ {x y xs} → Cube
                 (∘-square {p = id} {q = add y (x ::ms xs) ∘ add x xs})
                 (∘-square {p = id} {q = add x (y ::ms xs) ∘ add y xs})
@@ -283,7 +285,19 @@ module programming.PatchWithHistories where
                 idSquare
                 (ex x y xs)
                 (ex x y xs)
-        goal9 = {!!}
+        goal9 {x}{y}{xs} = goal10 (ex x y xs) where
+          goal10 : ∀ {A}
+              {a00 a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              (f   : Square p0- p-0 p-1 p1-)
+              → Cube (connection {p = p0-}) (connection {p = p1-}) vrefl-Square vrefl-Square f f 
+          goal10 idSquare = idCube
+                     
+
+
     
   
     
