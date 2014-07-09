@@ -265,18 +265,28 @@ module programming.PatchWithHistories where
                 idSquare
                 (ex x y xs)
                 (extend-triangle (ex x y xs) (topath xs))
-        goal7 = {!!}
+        goal7 {xs = xs} = goal8a {p = topath xs} where
 
-        -- abstract topath xs and then path-induction on topath xs
-        goal8 : ∀ {x y xs} → Cube
-                (∘-square {p = id} {q = add y (x ::ms xs) ∘ add x xs})
-                (∘-square {p = id} {q = add x (y ::ms xs) ∘ add y xs})
-                hrefl-Square
-                idSquare
-                (ex x y xs)
-                (ex x y xs)
-        goal8 = {!!}
-
+          -- remove all the reassociating, hopefully consistently
+          goal8a : ∀ {x y xs} {a' : _} {p : a' == doc xs} → Cube
+                  (∘-square {p = p} {q = add y (x ::ms xs) ∘ add x xs})
+                  (∘-square {p = p} {q = add x (y ::ms xs) ∘ add y xs})
+                  hrefl-Square
+                  idSquare
+                  (ex x y xs)
+                  (extend-triangle (ex x y xs) p)
+          goal8a {p = id} = goal8 where
+    
+            -- abstract topath xs and then path-induction on topath xs
+            goal8 : ∀ {x y xs} → Cube
+                    (∘-square {p = id} {q = add y (x ::ms xs) ∘ add x xs})
+                    (∘-square {p = id} {q = add x (y ::ms xs) ∘ add y xs})
+                    hrefl-Square
+                    idSquare
+                    (ex x y xs)
+                    (ex x y xs)
+            goal8 = {!!}
+  
         -- cleanup, based on things that should be true
         goal9 : ∀ {x y xs} → Cube
                 (connection {p = add y (x ::ms xs) ∘ add x xs})
