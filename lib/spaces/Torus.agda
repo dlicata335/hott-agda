@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type --without-K #-}
+{-# OPTIONS --type-in-type --new-without-K #-}
 
 open import lib.BasicTypes 
 open import lib.WEq 

@@ -1,6 +1,6 @@
 -- Proof by Peter Lumsdaine and Dan 
 
-{-# OPTIONS --type-in-type --without-K #-}
+{-# OPTIONS --type-in-type --new-without-K #-}
 
 open import lib.Prelude
 open Suspension

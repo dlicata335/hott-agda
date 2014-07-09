@@ -1,5 +1,5 @@
 
-{-# OPTIONS --type-in-type --without-K #-}
+{-# OPTIONS --type-in-type --new-without-K #-}
 
 open import lib.First
 
@@ -10,8 +10,6 @@ module lib.Nat where
     S : Nat -> Nat
 
   {-# BUILTIN NATURAL Nat #-}
-  {-# BUILTIN SUC S #-}
-  {-# BUILTIN ZERO Z #-}
 
   module NatM where
   

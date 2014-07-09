@@ -1,7 +1,7 @@
 -- FIXME move to library
 
 
-{-# OPTIONS --type-in-type --without-K #-}
+{-# OPTIONS --type-in-type --new-without-K #-}
 
 open import lib.Prelude
 

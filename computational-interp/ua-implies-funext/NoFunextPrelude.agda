@@ -509,3 +509,5 @@ module NoFunextPrelude where
  contract-Paths = ua contract-Paths≃ 
 -}
  
+ transport-constant : {A C : Type} {M N : A} -> (p : Path M N) -> Path (transport (\ _ -> C) p) (\ x -> x)
+ transport-constant id = id 
