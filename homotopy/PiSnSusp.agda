@@ -42,11 +42,10 @@ module homotopy.PiSNSusp where
   π1[Sn+1] : (n : Positive) -> π One (S^ (n +1)) (base^ (n +1)) ≃ Unit
   π1[Sn+1] n = π1Connected≃Unit (tlp n) (S^ (S n)) (base^ (S n)) (SS.Susp'^-Connected'' n) (1<=pos n)
 
-  πk[Sn]-less : ∀ k n → tlp k <tl tlp n → π k (S^ n) (base^ n) ≃ Unit
+  πk[Sn]-less : (k n : Positive) → tlp k <tl tlp n → π k (S^ n) (base^ n) ≃ Unit
   πk[Sn]-less One One (ltSR (ltSR (ltSR ())))
   πk[Sn]-less One (S n) lt = π1[Sn+1] n
-  πk[Sn]-less (S k) One lt with pos-not-<=0 k (Inl (lt-unS lt))
-  ... | () 
+  πk[Sn]-less (S k) One lt = Sums.abort (pos-not-<=0 k (Inl (lt-unS lt)))
   πk[Sn]-less (S k) (S n) lt = π (k +1) (S^ (n +1)) (base^ (n +1)) ≃〈 ! (SS.Stable.stable k n (k<=n->k<=2n-2 k n (Inl (lt-unS lt)))) 〉
                                π k (S^ n) (base^ n) ≃〈 πk[Sn]-less k n (lt-unS lt) 〉
                                Unit ∎ 

@@ -68,15 +68,14 @@ module homotopy.KGn where
         -- end for talk
 
       module BelowDiagonal where
-  
+      
         π1 : (n : Positive) → (π One (KG (n +1)) (base^ (n +1))) ≃ Unit
         π1 n = π1Connected≃Unit (tlp n) _ (base^ (n +1)) (KG-Connected'' n) (1<=pos n)
   
         πk : (k n : Positive) → (tlp k <tl tlp n) → π k (KG n) (base^ n) ≃ Unit
         πk One One (ltSR (ltSR (ltSR ())))
         πk One (S n) lt = π1 n
-        πk (S k) One lt with pos-not-<=0 k (Inl (lt-unS lt))
-        ... | () 
+        πk (S k) One lt = Sums.abort (pos-not-<=0 k (Inl (lt-unS lt)))
         πk (S k) (S n) lt = π (k +1) (KG (n +1)) (base^ (n +1)) ≃〈 ! (Stable.stable k n (Inl (lt-unS lt))) 〉
                             π k (KG n) (base^ n) ≃〈 πk k n (lt-unS lt) 〉
                             Unit ∎ 

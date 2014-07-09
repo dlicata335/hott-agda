@@ -22,7 +22,6 @@ module lib.loopspace.Truncation where
 
   abstract 
     -- if you have enough gas
-    -- FIXME rename to Loop-level
     Loop-level : ∀ n k {A} {a} → NType (tlp (n +pn k)) A → NType (tl k) (Loop n A a)
     Loop-level One k {A = A} p = use-level (transport (λ x → NType x A) (tlp+1 k) p) _ _
     Loop-level (S n) k {A} p = use-level (Loop-level n (S k) (transport (λ x → NType (tlp x) A) (! (+pn-rh-S n k)) p)) _ _
@@ -32,6 +31,8 @@ module lib.loopspace.Truncation where
     Loop-level-S One nA' = ntype (id , (λ _ → HSet-UIP (use-level nA' _ _) _ _ _ _))
     Loop-level-S (S n') nA' = transport (NType -2) (! (LoopPath.path (S n'))) (Loop-level-S n' (use-level nA' _ _))
 
+    {-# NO_TERMINATION_CHECK #-}
+    -- FIXME: doesn't work in 2.4.1 without-K 
     Loop-level-> : ∀ n k {A} {a} → NType n A → n <tl (tlp k) → NType -2 (Loop k A a)
     Loop-level-> .(S (S -2)) One {A} {a} nA (ltS {.(S (S -2))}) = ntype (id , (λ y → HSet-UIP nA _ _ _ _))
     Loop-level-> .(S -2) One nA (ltSR ltS) = use-level nA _ _
@@ -79,13 +80,15 @@ module lib.loopspace.Truncation where
 
 
   abstract
+    {-# NO_TERMINATION_CHECK #-}
+    -- FIXME: doesn't work in 2.4.1 without-K 
     HProp-Loop-in-Trunc< : ∀ k n {A t} → k <tl (tlp n) → HProp (Loop n (Trunc k A) t)
     HProp-Loop-in-Trunc< -2 One lt = increment-level (path-preserves-level Trunc-level)
     HProp-Loop-in-Trunc< -2 (S n) lt = increment-level (path-preserves-level (Loop-preserves-level n -2 (Trunc-level { -2})))
     HProp-Loop-in-Trunc< (S .(S -2)) One ltS = use-level (Trunc-level {S (S -2)}) _ _
     HProp-Loop-in-Trunc< (S .-2) One {A} {t} (ltSR ltS) = path-preserves-level Trunc-level
-    HProp-Loop-in-Trunc< (S k) One (ltSR (ltSR (ltSR ())))
-    HProp-Loop-in-Trunc< (S k) (S n) {A}{t} lt with lt-unS-right lt
+    HProp-Loop-in-Trunc< (S k) One (ltSR (ltSR (ltSR ()))) 
+    HProp-Loop-in-Trunc< (S k) (S n) {A}{t} lt with lt-unS-right lt 
     ... | Inl lt' = path-preserves-level (HProp-Loop-in-Trunc< (S k) n lt')
     ... | Inr eq = let eq = ! eq in 
                    use-level
@@ -98,4 +101,3 @@ module lib.loopspace.Truncation where
                       (HSet-Loop n {_} {transport (λ x → Trunc x A) (! eq) t}
                        (Trunc-level {tlp n} {A})))
                      _ _ 
-  

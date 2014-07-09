@@ -303,7 +303,7 @@ module programming.PatchWithHistories where
               {p-1 : a01 == a11}
               {p1- : a10 == a11}
               (f   : Square p0- p-0 p-1 p1-)
-              → Cube (connection {p = p0-}) (connection {p = p1-}) vrefl-Square vrefl-Square f f 
+              → Cube (connection { p = p0- }) (connection { p = p1- }) vrefl-Square vrefl-Square f f 
           goal10 idSquare = idCube
                      
 

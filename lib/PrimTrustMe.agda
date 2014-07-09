@@ -1,17 +1,7 @@
 
+open import Agda.Primitive
+
 module lib.PrimTrustMe where
-
-  -- universe levels
-  postulate
-    Level : Set 
-    lZ : Level
-    lS : Level -> Level
-    lmax : Level -> Level -> Level
-
-  {-# BUILTIN LEVEL     Level #-}
-  {-# BUILTIN LEVELZERO lZ  #-}
-  {-# BUILTIN LEVELSUC  lS   #-}
-  {-# BUILTIN LEVELMAX lmax #-}
 
   data PId {l : Level} {A : Set l} (M : A) : A → Set l where
     Refl : PId M M

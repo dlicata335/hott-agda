@@ -84,10 +84,11 @@ module Int where
   decidePath-Positive One One = Inl id
   decidePath-Positive One (S n) = Inr (λ ())
   decidePath-Positive (S n) One = Inr (λ ())
-  decidePath-Positive (S n) (S n') with decidePath-Positive n n'
-  ... | Inl x = Inl (ap S x)
-  ... | Inr x = Inr (x o ap tpred)
-
+  decidePath-Positive (S n) (S n') = lemma (decidePath-Positive n n') where
+    lemma : Either (n == n') (n == n' → Void) → Either (S n == S n') (S n == S n' → Void)
+    lemma (Inl p) = Inl (ap S p)
+    lemma (Inr p) = Inr (λ x → p (ap tpred x))
+  
   outject : Int -> Positive
   outject (Pos n) = n
   outject (Neg n) = n
@@ -203,7 +204,9 @@ module Int where
     pos-not-<=0 One (Inl (ltSR (ltSR ())))
     pos-not-<=0 One (Inr ())
     pos-not-<=0 (S n) lt = pos-not-<=-1 n (<=-unS lt)
-  
+
+    {-# NO_TERMINATION_CHECK #-}
+    -- FIXME: doesn't work in 2.4.1 without-K 
     1<=pos : (p : Positive) → tl 1 <=tl (tlp p)
     1<=pos One = Inr id
     1<=pos (S n) with 1<=pos n
@@ -211,8 +214,7 @@ module Int where
     ... | Inr eq = transport (λ x → tl 1 <=tl S x) eq (Inl ltS)
   
     >pos->1 : ∀ k n -> tlp k <tl tlp n -> tl 1 <tl tlp n 
-    >pos->1 k' One lt' with pos-not-<=0 k' (lt-unS-right lt')
-    ... | ()
+    >pos->1 k' One lt' = Sums.abort ( pos-not-<=0 k' (lt-unS-right lt'))
     >pos->1 One (S n') lt' = lt'
     >pos->1 (S n') (S n0) lt'' = ltSR (>pos->1 n' n0 (lt-unS lt''))
   
@@ -249,6 +251,8 @@ module Int where
                             (ap (λ x → plus2 x (-2ptl (S n))) (-2ptl-S (S n)))
                             (plus2-monotone-2 (tl (pos2nat n)) (-2ptl (S n)) (tl (pos2nat n)) (transport (λ x → x <tl tl (pos2nat n)) (! (-2ptl-S-1pn n)) (n-1<n n)))
   
+    {-# NO_TERMINATION_CHECK #-}
+    -- FIXME: doesn't work in 2.4.1 without-K 
     n<=2*n-2 : ∀ n → tl 1 <tl tlp n → tlp n <=tl 2* n -2
     n<=2*n-2 One (ltSR (ltSR y)) = Inl (ltSR y)
     n<=2*n-2 (S n) lt with (lt-unS-right lt) 
@@ -273,6 +277,8 @@ module Int where
     k<=n->k<=2n-2 k n (Inl lt)        = <=trans (Inl lt) (n<=2*n-2 n (>pos->1 k n lt))  
     k<=n->k<=2n-2 k n (Inr (eq , lt)) = <=trans (Inr eq) (n<=2*n-2 n lt)
 
+  {-# NO_TERMINATION_CHECK #-}
+  -- FIXME: doesn't work in 2.4.1 without-K 
   <=-to-+ : ∀ {n m} -> tlp n <=tl tlp m -> Σ \ k -> tlp (n +pn k) ≃ tlp m
   <=-to-+ {n}{m} (Inr p) = 0 , p ∘ ap tlp (+pn-rh-Z n)
   <=-to-+ {One} {One} (Inl (ltSR (ltSR (ltSR ()))))

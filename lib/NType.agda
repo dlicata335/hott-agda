@@ -44,18 +44,13 @@ module lib.NType where
   -2<nat Z = ltSR ltS
   -2<nat (S y) = ltSR (-2<nat y)
 
-  ltSCong : ∀ {n} {m} -> n <tl m -> (S n) <tl (S m)
-  ltSCong {n} { -2 } () 
-  ltSCong { -2 } {(S -2)} lt = ltS
-  ltSCong { -2 } { (S (S y)) } (ltSR lt') = ltSR (ltSCong lt')
-  ltSCong { (S y) } { (S y') } lt with lt-unS-right lt
-  ... | Inl a = ltSR (ltSCong a) 
-  ... | Inr b = transport (λ x → S (S y) <tl x) (ap (S o S) b) ltS 
-
   <trans : ∀ {n m p} → n <tl m → m <tl p → n <tl p
   <trans ltS q = lt-unS-left q
   <trans (ltSR y) q = <trans y (lt-unS-left q)
 
+  ltSCong : ∀ {n} {m} -> n <tl m -> (S n) <tl (S m)
+  ltSCong (ltS {n}) = ltS {S n}
+  ltSCong (ltSR p) = <trans (ltSCong p) ltS
 
   -- less than or equal to for tlevel
   _<=tl_ : TLevel -> TLevel -> Type 
@@ -97,16 +92,12 @@ module lib.NType where
   mintl<=1 : (m n : TLevel) -> mintl m n <=tl m 
   mintl<=1 -2 n = Inr id
   mintl<=1 (S m) -2 = Inl (-2< m)
-  mintl<=1 (S m) (S n) with mintl<=1 m n
-  ... | Inl lt = Inl (ltSCong lt)
-  ... | Inr eq = Inr (ap S eq)
+  mintl<=1 (S m) (S n) = <=SCong (mintl<=1 m n)
 
   mintl<=2 : (m n : TLevel) -> mintl m n <=tl n
   mintl<=2 -2 n = -2<= n
   mintl<=2 (S m) -2 = Inr id
-  mintl<=2 (S m) (S n) with mintl<=2 m n
-  ... | Inl lt = Inl (ltSCong lt)
-  ... | Inr eq = Inr (ap S eq)
+  mintl<=2 (S m) (S n) = <=SCong (mintl<=2 m n) where 
 
   mintl-comm : (m n : TLevel) → mintl m n ≃ mintl n m
   mintl-comm -2 -2 = id
