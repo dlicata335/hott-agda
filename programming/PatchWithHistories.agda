@@ -1,5 +1,5 @@
 
-{-# OPTIONS --new-without-K --type-in-type #-}
+{-# OPTIONS --without-K --type-in-type #-}
 
 open import lib.Prelude
 open import lib.PathOver using (PathOver; id ; _∘o_ ; apdo ; over-o-ap ; over-ap-o)

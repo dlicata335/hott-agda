@@ -1,4 +1,4 @@
-{-# OPTIONS --new-without-K #-}
+{-# OPTIONS --without-K #-}
 
 module lib.BasicTypes where
 

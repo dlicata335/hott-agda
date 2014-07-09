@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type --new-without-K #-}
+{-# OPTIONS --type-in-type --without-K #-}
 
 -- pushout of a predicate P : X → Y → Type
 -- includes a constructor for the "middle" space Z = Σ x,y.P(x,y).

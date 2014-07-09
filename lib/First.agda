@@ -1,4 +1,4 @@
-{-# OPTIONS --new-without-K --type-in-type #-}
+{-# OPTIONS --without-K --type-in-type #-}
 
 module lib.First where
 

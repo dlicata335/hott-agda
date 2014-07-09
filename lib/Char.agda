@@ -1,5 +1,5 @@
 
-{-# OPTIONS --type-in-type --new-without-K #-}
+{-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Nat
 open import lib.Bool

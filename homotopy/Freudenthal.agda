@@ -2,7 +2,7 @@
 
 -- about 450 lines of new library code + this file
 
-{-# OPTIONS --type-in-type --new-without-K #-}
+{-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude
 open Suspension

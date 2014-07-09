@@ -1,6 +1,6 @@
 
 
-{-# OPTIONS --type-in-type --copatterns --new-without-K #-}
+{-# OPTIONS --type-in-type --copatterns --without-K #-}
 
 open import NoFunextPrelude
 

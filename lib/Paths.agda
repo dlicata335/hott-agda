@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type --new-without-K #-}
+{-# OPTIONS --type-in-type --without-K #-}
 
 -- identity types that never use K
 -- homotopically, Id M N is thought of as a path from M to N

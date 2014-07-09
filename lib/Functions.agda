@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type --new-without-K --allow-unsolved-metas #-}
+{-# OPTIONS --type-in-type --without-K --allow-unsolved-metas #-}
 
 open import lib.First
 open import lib.Paths 

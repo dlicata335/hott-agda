@@ -1,4 +1,4 @@
-{-# OPTIONS --type-in-type --new-without-K #-}
+{-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude
 open LoopSpace
