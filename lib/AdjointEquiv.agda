@@ -102,4 +102,9 @@ module lib.AdjointEquiv where
     thm : {A B : Type} (f : Equiv A B) {M N : A} → IsEquiv {Path M N} (ap (fst f))
     thm f = transport IsEquiv (λ≃ (calculate-map f)) (snd (wrap f))
                
- 
+ elim-along-equiv : {A B : Type} 
+               → (P : B → Type) 
+               → (e : Equiv A B)
+               → ((x : A) → P (fst e x))
+               → ((y : B) → P y)
+ elim-along-equiv P e b y = transport P (IsEquiv.β (snd e) y) (b (IsEquiv.g (snd e) y))

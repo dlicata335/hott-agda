@@ -1,13 +1,9 @@
 
 {-# OPTIONS --type-in-type --without-K #-}
 
-open import lib.First
-open import lib.Paths
-open import lib.Prods
-open import lib.AdjointEquiv
-open import lib.Functions
+open import lib.BasicTypes
 
-module lib.PathOver where
+module lib.cubical.PathOver where
 
   data PathOver {Δ : Type} (A : Δ → Type) : {θ1 θ2 : Δ} (δ : θ1 == θ2) (M1 : A θ1) (M2 : A θ2) → Type where
     id : ∀ {θ1} {M1 : A θ1} → PathOver A id M1 M1
@@ -138,6 +134,18 @@ module lib.PathOver where
                      → {N : A θ1} → (P : PathOver A id M N) → C N P
   path-induction-homo C b α = path-induction-homo' id C b α
 
+  path-induction-homo-i : {Δ : Type} {A : Δ → Type} {θ1 : Δ} {M : A θ1} 
+                       (C : {x : A θ1} → PathOver A (id{_}{θ1}) M x → Type)
+                     → (C {M} id)
+                     → {N : A θ1} → (P : PathOver A id M N) → C {N} P
+  path-induction-homo-i C b α = path-induction-homo (\ _ → C) b α
+
+  path-induction-homo-e : {Δ : Type} {A : Δ → Type} {θ1 : Δ} {M : A θ1} 
+                       (C : (x : A θ1) → PathOver A (id{_}{θ1}) M x → Type)
+                     → (C M id)
+                     → (N : A θ1) → (P : PathOver A id M N) → C N P
+  path-induction-homo-e C b _ α = path-induction-homo C b α
+
   PathOver-transport-left : {Δ : Type} (A : Δ → Type) {θ1 θ2 : Δ} (δ : θ1 == θ2) {M2 : A θ2}
                           → PathOver A δ (transport A (! δ) M2) M2
   PathOver-transport-left _ id = id
@@ -257,27 +265,3 @@ module lib.PathOver where
     -- apdo-split f M id = λ≃ (split1⁺ _ (λ≃ (split1⁺ _ (λ≃ (λ α → {!!})))))
              
 
-  Square : ∀{Δ} {θ11 θ12 θ21 θ22 : Δ} → (δ1- : θ11 == θ12) (δ2- : θ21 == θ22) (δ-1 : θ11 == θ21) (δ-2 : θ12 == θ22) → Type
-  Square δ1- δ2- δ-1 δ-2 = δ-2 == δ2- ∘ δ-1 ∘ ! δ1-
-
-  natural : {Γ Δ : Type} → ∀ {θ1 θ2 θ1' θ2'} (δ : (θ : Γ) → θ1 θ == θ2 θ) (δ' : θ1' == θ2') → Square {Δ} (ap θ1 δ') (ap θ2 δ') (δ θ1') (δ θ2')
-  natural δ id = ! (∘-unit-l (δ _))
-
-  transport-PathOver-by-hand : {Δ : Type} (A : Δ → Type) {θ11 θ12 θ21 θ22 : Δ} {δ1- : θ11 == θ12} {δ2- : θ21 == θ22} {δ-1 : θ11 == θ21} {δ-2 : θ12 == θ22}
-                             → Square δ1- δ2- δ-1 δ-2
-                             → ∀ {M11 M12 M21 M22}
-                             → PathOver A δ1- M11 M12
-                             → PathOver A δ2- M21 M22 
-                             → PathOver A δ-1 M11 M21
-                             → PathOver A δ-2 M12 M22
-  transport-PathOver-by-hand A sq α1- α2- α-1 = changeover A (! sq) (α2- ∘o α-1 ∘o !o α1-)
-
-  transport-PathOver : {Γ Δ : Type} (A : Δ → Type) → {θ1 θ2 : Γ → Δ} (δ : (θ : Γ) → θ1 θ == θ2 θ) (M1 : (θ : _) → A (θ1 θ)) (M2 : (θ : _) → A (θ2 θ))
-                       {θ1' θ2' : _} (δ' : θ1' == θ2')
-                     → transport (\ θ → PathOver A (δ θ) (M1 θ) (M2 θ)) δ' == 
-                       transport-PathOver-by-hand A (natural δ δ') (over-o-ap A (apdo M1 δ')) (over-o-ap A (apdo M2 δ'))
-  transport-PathOver A δ M1 M2 id = λ≃ coh where
-    coh : {θ1 : _} {θ2 : _} {δ : θ1 == θ2} {M1 : _} {M2 : _} → (x : PathOver A δ M1 M2) →
-      x ==
-      (transport (λ x₁ → x₁) (changeover= A (! (! (∘-unit-l δ)))) (id ∘o x ∘o id))
-    coh id = id
