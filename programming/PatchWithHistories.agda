@@ -55,23 +55,27 @@ module programming.PatchWithHistories where
                                 (c1 x (y ::ms xs) ∘o c1 y xs) )
            → (x : R) → C x
 
-  ex-front : ∀ {a'} x y xs {c : a' == doc xs } → Square
+  ex-front : ∀ {a'} x y xs (c : a' == doc xs) → Square
       (add x (y ::ms xs) ∘ add y xs ∘ c)
       id 
       (ap doc (Ex x y xs))
       (add y (x ::ms xs) ∘ add x xs ∘ c)
-  ex-front x y xs {c} = coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex x y xs)) y₁) 
+  ex-front x y xs c = coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex x y xs)) y₁) 
                                  (! (∘-assoc (add x (y ::ms xs)) (add y xs) c))
                                  (! (∘-assoc (add y (x ::ms xs)) (add x xs) c))) (extend-triangle (ex y x xs) c)
 
+
+  topath-Ex-case = (λ x y xs c → over-ap-o (λ r → doc []ms == r) {θ1 = doc} (in-PathOver-= (ex-front x y xs c))) 
+
   topath : (xs : MS) → doc []ms == doc xs
-  topath = MS-ind (\ xs -> doc []ms == doc xs) id (λ x xs p → add x xs ∘ p) 
-                  (λ x y xs c → over-ap-o (λ r → doc []ms == r) {θ1 = doc} (in-PathOver-= (ex-front x y xs)))
-  
+  topath = MS-ind (\ xs -> doc []ms == doc xs) id (λ x xs p → add x xs ∘ p) topath-Ex-case
+                  
+
   topath-square : (x : Bool) (xs : MS) →
                        PathOver (λ x₁ → doc []ms == x₁) (add x xs) (topath xs)
                        (topath (x ::ms xs))
   topath-square x xs = in-PathOver-= ∘-square 
+
 
   contr : (x : R) → doc []ms == x
   contr = R-elim (\ x -> doc []ms == x) topath topath-square 
@@ -83,7 +87,13 @@ module programming.PatchWithHistories where
                 id
                 (ex x y xs)
                 (out-PathOver-= (over-o-ap (λ x₁ → doc []ms == x₁) (apdo topath (Ex y x xs))))
-        goal1 = {!!} where
+        goal1{x}{y}{xs} = transport
+                            (Cube (out-PathOver-= (topath-square y (x ::ms xs) ∘o topath-square x xs)) (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs)) (out-PathOver-= id) id (ex x y xs))
+                            (! (out-PathOver-= (over-o-ap (_==_ (doc []ms)) (apdo topath (Ex y x xs))) ≃〈 ap (λ h → out-PathOver-= (over-o-ap (_==_ (doc []ms)) h)) (MS-ind/βEx (λ xs₁ → doc []ms == doc xs₁) id (λ x₁ xs₁ p → add x₁ xs₁ ∘ p) topath-Ex-case y x xs) 〉
+                                out-PathOver-= (over-o-ap (_==_ (doc []ms)) (topath-Ex-case y x xs (topath xs))) ≃〈 ap out-PathOver-= (IsEquiv.β (snd (over-o-ap-eqv (λ x₁ → doc []ms == x₁))) (in-PathOver-= (ex-front y x xs (topath xs)))) 〉
+                                out-PathOver-= (in-PathOver-= (ex-front y x xs (topath xs))) ≃〈 PathOver-=-outin (ex-front y x xs (topath xs)) 〉
+                                ex-front y x xs (topath xs) ∎))
+                            goal2 where
  
          -- reduce apdo topath and cancel some equivalences
  
@@ -93,7 +103,7 @@ module programming.PatchWithHistories where
                  (out-PathOver-= id)
                  id
                  (ex x y xs)
-                 (ex-front y x xs {topath xs})
+                 (ex-front y x xs (topath xs))
          goal2 = goal3 where
            -- out-PathOver-= on id is horizontal reflexivity
 
@@ -103,7 +113,7 @@ module programming.PatchWithHistories where
                   hrefl-Square
                   id
                   (ex x y xs)
-                  (ex-front y x xs {topath xs})
+                  (ex-front y x xs (topath xs))
           goal3 = goal4 where
   
            -- expand definition of ex-front
@@ -120,9 +130,25 @@ module programming.PatchWithHistories where
                        (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
                       (extend-triangle (ex x y xs) (topath xs)))
            goal4{x}{y}{xs} = transport (λ x' → Cube x' (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs)) hrefl-Square id (ex x y xs) (coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex y x xs)) y₁) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs)))) (extend-triangle (ex x y xs) (topath xs)))) 
-                                       {!!} goal5 where
+                                       ∘-square-lemma goal5 where
    
-            -- composite of ∘-squares should be ∘-square of composite
+            -- composite of ∘-squares is ∘-square of composite
+
+            -- FIXME: try doing this directly in terms of squares/cubes and then translate it to path-overs
+            -- 
+            -- it says that if you have
+            --   ∘-square p q : Square p id q (q ∘ p)
+            --   ∘-square (q ∘ p) r : Square (\q ∘ p) id r (r ∘ (q ∘ p))
+            -- then horizontally composing them is the same as 
+            --   ∘-square p (r ∘ q) : Square p id (r ∘ q) ((r ∘ q) ∘ r)
+            -- up to associativity
+            -- which is basically the definition of associativity if you did everything with fillers?
+            --
+            -- the coe could be phrased as path over, too
+            ∘-square-lemma : {A : Type} {a0 a1 a2 a3 : A} {p01 : a0 == a1} {p12 : a1 == a2} {p23 : a2 == a3}
+                           → (coe (ap (Square p01 id (p23 ∘ p12)) (! (∘-assoc p23 p12 p01))) (∘-square {p = p01} {q = p23 ∘ p12}))
+                             == (out-PathOver-= (in-PathOver-= (∘-square {p = p12 ∘ p01} {q = p23}) ∘o (in-PathOver-= (∘-square{p = p01}{q = p12})))) 
+            ∘-square-lemma {p01 = id} {p12 = id} {p23 = id} = id
 
             goal5 : ∀ {x y xs} → Cube
                     (coe (ap (λ h → Square (topath xs) id (add y (x ::ms xs) ∘ add x xs) h) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))))
@@ -137,16 +163,16 @@ module programming.PatchWithHistories where
                         (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
                        (extend-triangle (ex x y xs) (topath xs)))
             goal5{x}{y}{xs} = transport (\ h -> Cube (coe (ap (λ h → Square (topath xs) id (add y (x ::ms xs) ∘ add x xs) h) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))) (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs})) h hrefl-Square id (ex x y xs) (coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex y x xs)) y₁) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs)))) (extend-triangle (ex x y xs) (topath xs))))
-                                        {!!} goal6 where
+                                        ∘-square-lemma goal6 where
      
-             -- composite of ∘-squares should be ∘-square of composite
+             -- composite of ∘-squares is ∘-square of composite
 
              goal6 : ∀ {x y xs} → Cube
                      (coe (ap (λ h → Square (topath xs) id (add y (x ::ms xs) ∘ add x xs) h) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))))
                           (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs}))
                      (coe (ap (λ h → Square (topath xs) id (add x (y ::ms xs) ∘ add y xs) h) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
                           (∘-square {p = topath xs} {q = add x (y ::ms xs) ∘ add y xs}))
-                     hrefl-Square
+                     (hrefl-Square{_}{_}{_}{topath xs})
                      id
                      (ex x y xs)
                      (coe
@@ -154,14 +180,14 @@ module programming.PatchWithHistories where
                          (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))
                          (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
                         (extend-triangle (ex x y xs) (topath xs)))
-             goal6 = {!!} where
+             goal6 = {!    !} where
      
               -- remove all the reassociating, hopefully consistently
 
               goal7 : ∀ {x y xs} → Cube
                       (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs})
                       (∘-square {p = topath xs} {q = add x (y ::ms xs) ∘ add y xs})
-                      hrefl-Square
+                      (hrefl-Square{_}{_}{_}{topath xs})
                       id
                       (ex x y xs)
                       (extend-triangle (ex x y xs) (topath xs))

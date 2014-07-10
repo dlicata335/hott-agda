@@ -16,9 +16,6 @@ module lib.cubical.Square where
   vrefl-Square : {A : Type} {a00 a01 : A} {p : a00 == a01} → Square id p p id
   vrefl-Square {p = id} = id
 
-  hvrefl-Square : {A : Type} {a1 a2 a3 : A} {p : a1 == a2} {q : a2 == a3} → Square p p q q
-  hvrefl-Square {p = id} {q = id} = id
-
   natural : {Γ Δ : Type} → ∀ {θ1 θ2 θ1' θ2'} (δ : (θ : Γ) → θ1 θ == θ2 θ) (δ' : θ1' == θ2') → Square {Δ} (ap θ1 δ') (δ θ1') (δ θ2') (ap θ2 δ')
   natural δ id = vrefl-Square
 
@@ -242,6 +239,9 @@ module lib.cubical.Square where
 
   connection : ∀ {A} {a b : A} {p : a == b} → Square id id p p 
   connection {p = id} = id
+
+  connection2 : {A : Type} {a1 a2 a3 : A} {p : a1 == a2} {q : a2 == a3} → Square p p q q
+  connection2 {p = id} {q = id} = id
 
   ∘-square : {A : Type} {a0 a1 a2 : A} {p : a0 == a1} {q : a1 == a2} 
            → Square p id q (q ∘ p)

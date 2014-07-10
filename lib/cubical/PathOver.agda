@@ -204,7 +204,8 @@ module lib.cubical.PathOver where
              → coe PathOverType α == coe PathOverType (changeover (\ _ -> Type) eq α)
   PathOverType-changeover id α = id
     
-  -- and it's an equivalence
+
+
   over-o-ap : {Γ Δ : Type} (A : Δ → Type) {θ1 : Γ → Δ} 
                {θ1' θ2' : _} {δ' : θ1' == θ2'}  → ∀ {M1 M2}
              → PathOver (A o θ1) δ' M1 M2
@@ -216,6 +217,32 @@ module lib.cubical.PathOver where
              → PathOver A (ap θ1 δ') M1 M2
              → PathOver (A o θ1) δ' M1 M2
   over-ap-o A {δ' = id} α = path-induction-homo (λ M2 _ → PathOver (A o _) id _ M2) id α
+
+  over-ap-o-ap : {Γ Δ : Type} (A : Δ → Type) {θ1 : Γ → Δ} 
+               {θ1' θ2' : _} {δ' : θ1' == θ2'}  → ∀ {M1 M2}
+             (p : PathOver A (ap θ1 δ') M1 M2)
+             → over-o-ap A (over-ap-o A p) == p
+  over-ap-o-ap A {θ1 = θ1} {δ' = id} {M1 = M1} α = path-induction-homo
+                                                     (λ M2 α₁ →
+                                                        Id
+                                                        (over-o-ap A
+                                                         (path-induction-homo''
+                                                          (λ x p → PathOver (λ x₁ → A (θ1 x₁)) id M1 x) id α₁))
+                                                        α₁)
+                                                     id α
+
+  over-o-ap-o : {Γ Δ : Type} (A : Δ → Type) {θ1 : Γ → Δ} 
+               {θ1' θ2' : _} {δ' : θ1' == θ2'}  → ∀ {M1 M2}
+             (p : PathOver (A o θ1) δ' M1 M2)
+             → over-ap-o A (over-o-ap A p) == p
+  over-o-ap-o A id = id
+
+  over-o-ap-eqv : {Γ Δ : Type} (A : Δ → Type) {θ1 : Γ → Δ} 
+               {θ1' θ2' : _} {δ' : θ1' == θ2'}  → ∀ {M1 M2} →
+             Equiv (PathOver (A o θ1) δ' M1 M2) (PathOver A (ap θ1 δ') M1 M2)
+  over-o-ap-eqv A = improve (hequiv (over-o-ap A) (over-ap-o A) (over-o-ap-o A) (over-ap-o-ap A))
+
+
 
   over-apd : {A : Type} {B : A → Type}  (C : Σ B → Type)
              {a1 a2 : A} (α : a1 == a2)

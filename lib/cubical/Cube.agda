@@ -61,7 +61,7 @@ module lib.cubical.Cube where
                  (in-PathOver-=' (∘-square-vertical f-0- f1--))
                  (in-PathOver-=' {p0- = p0-1 ∘ p00- } {p-0 = p00- } {p-1 = p-11} {p1- = p1-1 ∘ p-01}
                                  (∘-square-vertical {p-00 = p00- } {p1-0 = p0-1} {p-01 = p-01}
-                                    {p1-1 = p1-1} {p00- = p00- } {p10- = p-01} {p11- = p-11} hvrefl-Square f--1))
+                                    {p1-1 = p1-1} {p00- = p00- } {p10- = p-01} {p11- = p-11} connection2 f--1))
     
   SquareOver-='' id = id
 
