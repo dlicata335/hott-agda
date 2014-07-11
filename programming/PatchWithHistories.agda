@@ -180,9 +180,43 @@ module programming.PatchWithHistories where
                          (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))
                          (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
                         (extend-triangle (ex x y xs) (topath xs)))
-             goal6 = {!    !} where
-     
-              -- remove all the reassociating, hopefully consistently
+             goal6{x}{y}{xs} = extend-cube (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))) goal7 where
+
+              -- more idiomatic proof?
+              --   the transporting at Square should be like a horizontal composition with a vertical refl
+              --   so it makes an open box 
+
+              -- probably an instance of a more general composition lemma?
+              extend-cube : {A : Type} {a000 : A} → 
+                {a010 a100 a110 a001 a011 a101 a111 : A}
+                {p0-0 : a000 == a010}
+                {p-00 : a000 == a100}
+                {p-10 : a010 == a110}
+                {p1-0 : a100 == a110}
+                {p1-0' : a100 == a110}
+                (f1-0' : p1-0 == p1-0')   -- same as a square with two sides refl?
+                {f--0 : Square p0-0 p-00 p-10 p1-0}
+            
+                {p0-1 : a001 == a011}
+                {p-01 : a001 == a101}
+                {p-11 : a011 == a111}
+                {p1-1 : a101 == a111}
+                {p1-1' : a101 == a111}
+                (f1-1' : p1-1 == p1-1')  -- same as a square with two sides refl?
+                {f--1 : Square p0-1 p-01 p-11 p1-1}
+            
+                {p00- : a000 == a001}
+                {p01- : a010 == a011}
+                {p10- : a100 == a101}
+                {p11- : a110 == a111}
+                {f0-- : Square p0-0 p00- p01- p0-1}
+                {f-0- : Square p-00 p00- p10- p-01}
+                {f-1- : Square p-10 p01- p11- p-11}
+                {f1-- : Square p1-0 p10- p11- p1-1}
+                → Cube f--0 f--1 f0-- f-0- f-1- f1--
+                → Cube (coe (ap (λ l → Square p0-0 p-00 p-10 l) f1-0') f--0) (coe (ap (λ h → Square p0-1 p-01 p-11 h) f1-1') f--1) 
+                       f0-- f-0- f-1- (coe (ap2 (λ l1 l2 → Square l1 p10- p11- l2) f1-0' f1-1') f1--)
+              extend-cube id id c = c
 
               goal7 : ∀ {x y xs} → Cube
                       (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs})
