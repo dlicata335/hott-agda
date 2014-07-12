@@ -295,6 +295,8 @@ module lib.cubical.Square where
     → Square l (t' ∘ t) (b' ∘ b) r'
   ∘-square-horiz id s = s
 
+  _∘-square-h_ = ∘-square-horiz
+  
   square-symmetry : {A : Type}
               {a00 a01 a10 a11 : A} 
               {p0- : a00 == a01}

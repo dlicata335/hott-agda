@@ -307,6 +307,6 @@ module homotopy.TS1S1 where
             square2'
             square2'
             square1'
-    cube4 = {!!} ∘-cube-h/degen
+    cube4 = {!apdo-by-equals!} ∘-cube-h/degen
             (ap-square-id! (pair-square hrefl-square vrefl-square)) ∘-cube-h/degen
             (bifunctor-cube1' _,_ S¹.loop S¹.loop)
