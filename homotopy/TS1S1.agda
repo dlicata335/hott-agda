@@ -1,5 +1,4 @@
 {-# OPTIONS --type-in-type --without-K #-}
-
 open import lib.Prelude
 open import lib.cubical.Cubical
 
@@ -9,36 +8,17 @@ module homotopy.TS1S1 where
   module T = Torus
   open T using (T ; T-rec ; T-elim)
 
-  -- define the square as the filler of this?
-  wrap-around :
-    {A : Type}
-    {a b c d : A}
-    {l : a == b} 
-    {t : a == c} 
-    {bt : a == c} 
-    {r : c == d} 
-    {b' : b == d}  
-    {b'' : b == d} 
-    → (p : t == bt)
-    → (f : Square l bt b' r)
-    → (q : b'' == b')
-    → Cube
-      (∘-square-vertical/degen-top
-       (vertical-degen-square p)
-       (∘-square-vertical/degen-bot f
-        (vertical-degen-square (! q))))
-      f hrefl-square (horiz-degen-square p) (horiz-degen-square q) hrefl-square 
-  wrap-around id id id = id
-
   t2c : T -> S¹ × S¹
   t2c = T-rec (S¹.base , S¹.base) (pair×≃ id S¹.loop) (pair×≃ S¹.loop id) (pair-square vrefl-square hrefl-square)
 
-  c2t-loop-homotopy = (S¹-elimo _ T.q 
-                (PathOver=.in-PathOver-= 
-                  ((∘-square-vertical/degen-top
-                    (vertical-degen-square (S¹.βloop/rec T.a T.p)) 
-                    (∘-square-vertical/degen-bot (square-symmetry T.f)
-                                                (vertical-degen-square (! (S¹.βloop/rec T.a T.p))))))))
+  abstract
+    c2t-square-and-cube : Σ \ s -> Cube s (square-symmetry T.f) hrefl-square (horiz-degen-square (S¹.βloop/rec T.a T.p)) (horiz-degen-square (S¹.βloop/rec T.a T.p)) hrefl-square
+    c2t-square-and-cube = (fill-cube-left (square-symmetry T.f) hrefl-square (horiz-degen-square (S¹.βloop/rec T.a T.p)) (horiz-degen-square (S¹.βloop/rec T.a T.p)) hrefl-square)
+
+  c2t-square : Square T.q (ap (λ z → S¹-rec T.a T.p z) S¹.loop) (ap (λ z → S¹-rec T.a T.p z) S¹.loop) T.q
+  c2t-square = fst c2t-square-and-cube
+
+  c2t-loop-homotopy = (S¹-elimo (\ x -> (S¹-rec T.a T.p) x == (S¹-rec T.a T.p) x) T.q (PathOver=.in-PathOver-= c2t-square))
 
   c2t' : S¹ → S¹ → T
   c2t' x y = S¹-rec (S¹-rec T.a T.p) (λ≃ c2t-loop-homotopy) x y 
@@ -52,9 +32,9 @@ module homotopy.TS1S1 where
   cube5 : Σ \ square1'' → Σ \ square2'' → Cube (bifunctor-square1 c2t' S¹.loop S¹.loop) (square-symmetry T.f) square2'' square1'' square1'' square2''
   cube5 = _ , _ , (
           SquareOver=ND.out-SquareOver-= (apdo-by-equals _ _ S¹.loop (λ≃ reduce-c2t')) ∘-cube-h
-          degen-cube-h (ap PathOver=.out-PathOver-= (S¹.βloop/elimo _ T.q (PathOver=.in-PathOver-= (∘-square-vertical/degen-top (vertical-degen-square (S¹.βloop/rec T.a T.p)) (∘-square-vertical/degen-bot (square-symmetry T.f) (vertical-degen-square (! (S¹.βloop/rec T.a T.p)))))))) ∘-cube-h
+          degen-cube-h (ap PathOver=.out-PathOver-= (S¹.βloop/elimo _ T.q (PathOver=.in-PathOver-= c2t-square))) ∘-cube-h
           degen-cube-h (IsEquiv.β (snd PathOver=.out-PathOver-=-eqv) _)
-            ∘-cube-h (wrap-around (S¹.βloop/rec T.a T.p) (square-symmetry T.f) (S¹.βloop/rec T.a T.p)))
+            ∘-cube-h (snd c2t-square-and-cube))
 
   t2c2t : (x : T) → c2t (t2c x) == x
   t2c2t = T-elim (\ x -> c2t (t2c x) == x) 
@@ -68,7 +48,6 @@ module homotopy.TS1S1 where
                                  id id 
                                  (! (IsEquiv.β (snd PathOver=.out-PathOver-=-eqv) (square-symmetry square2)))
                                  (cube-symmetry-left-to-top goal1))) where
-
         square1 = _
         square2 = _
         goal1 : Cube (ap-square (λ z → c2t (t2c z)) T.f)
