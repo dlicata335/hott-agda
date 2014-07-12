@@ -3,6 +3,7 @@
 
 open import lib.Prelude
 open import lib.cubical.Cubical
+open PathOverPathFrom
 
 module programming.PatchWithHistories where
 
@@ -79,7 +80,7 @@ module programming.PatchWithHistories where
 
   contr : (x : R) → doc []ms == x
   contr = R-elim (\ x -> doc []ms == x) topath topath-square 
-                 (λ x y xs → SquareOver-= _ _ _ _ _ goal1) where
+                 (λ x y xs → SquareOverPathFrom.SquareOver-= _ _ _ _ _ goal1) where
         goal1 : ∀ {x y xs} → Cube
                 (out-PathOver-= (topath-square y (x ::ms xs) ∘o topath-square x xs))
                 (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs))
@@ -110,7 +111,7 @@ module programming.PatchWithHistories where
           goal3 : ∀ {x y xs} → Cube
                   (out-PathOver-= (topath-square y (x ::ms xs) ∘o topath-square x xs))
                   (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs))
-                  hrefl-Square
+                  hrefl-square
                   id
                   (ex x y xs)
                   (ex-front y x xs (topath xs))
@@ -121,7 +122,7 @@ module programming.PatchWithHistories where
            goal4 : ∀ {x y xs} → Cube
                    (out-PathOver-= (topath-square y (x ::ms xs) ∘o topath-square x xs))
                    (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs))
-                   hrefl-Square
+                   hrefl-square
                    id
                    (ex x y xs)
                    (coe
@@ -129,7 +130,7 @@ module programming.PatchWithHistories where
                        (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))
                        (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
                       (extend-triangle (ex x y xs) (topath xs)))
-           goal4{x}{y}{xs} = transport (λ x' → Cube x' (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs)) hrefl-Square id (ex x y xs) (coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex y x xs)) y₁) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs)))) (extend-triangle (ex x y xs) (topath xs)))) 
+           goal4{x}{y}{xs} = transport (λ x' → Cube x' (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs)) hrefl-square id (ex x y xs) (coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex y x xs)) y₁) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs)))) (extend-triangle (ex x y xs) (topath xs)))) 
                                        ∘-square-lemma goal5 where
    
             -- composite of ∘-squares is ∘-square of composite
@@ -154,7 +155,7 @@ module programming.PatchWithHistories where
                     (coe (ap (λ h → Square (topath xs) id (add y (x ::ms xs) ∘ add x xs) h) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))))
                          (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs}))
                     (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs))
-                    hrefl-Square
+                    hrefl-square
                     id
                     (ex x y xs)
                     (coe
@@ -162,7 +163,7 @@ module programming.PatchWithHistories where
                         (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))
                         (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
                        (extend-triangle (ex x y xs) (topath xs)))
-            goal5{x}{y}{xs} = transport (\ h -> Cube (coe (ap (λ h → Square (topath xs) id (add y (x ::ms xs) ∘ add x xs) h) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))) (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs})) h hrefl-Square id (ex x y xs) (coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex y x xs)) y₁) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs)))) (extend-triangle (ex x y xs) (topath xs))))
+            goal5{x}{y}{xs} = transport (\ h -> Cube (coe (ap (λ h → Square (topath xs) id (add y (x ::ms xs) ∘ add x xs) h) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))) (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs})) h hrefl-square id (ex x y xs) (coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex y x xs)) y₁) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs)))) (extend-triangle (ex x y xs) (topath xs))))
                                         ∘-square-lemma goal6 where
      
              -- composite of ∘-squares is ∘-square of composite
@@ -172,7 +173,7 @@ module programming.PatchWithHistories where
                           (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs}))
                      (coe (ap (λ h → Square (topath xs) id (add x (y ::ms xs) ∘ add y xs) h) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
                           (∘-square {p = topath xs} {q = add x (y ::ms xs) ∘ add y xs}))
-                     (hrefl-Square{_}{_}{_}{topath xs})
+                     (hrefl-square{_}{_}{_}{topath xs})
                      id
                      (ex x y xs)
                      (coe
@@ -221,7 +222,7 @@ module programming.PatchWithHistories where
               goal7 : ∀ {x y xs} → Cube
                       (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs})
                       (∘-square {p = topath xs} {q = add x (y ::ms xs) ∘ add y xs})
-                      (hrefl-Square{_}{_}{_}{topath xs})
+                      (hrefl-square{_}{_}{_}{topath xs})
                       id
                       (ex x y xs)
                       (extend-triangle (ex x y xs) (topath xs))
@@ -232,7 +233,7 @@ module programming.PatchWithHistories where
                 goal8a : ∀ {x y xs} {a' : _} {p : a' == doc xs} → Cube
                         (∘-square {p = p} {q = add y (x ::ms xs) ∘ add x xs})
                         (∘-square {p = p} {q = add x (y ::ms xs) ∘ add y xs})
-                        hrefl-Square
+                        hrefl-square
                         id
                         (ex x y xs)
                         (extend-triangle (ex x y xs) p)
@@ -243,7 +244,7 @@ module programming.PatchWithHistories where
                   goal8 : ∀ {x y xs} → Cube
                           (∘-square {p = id} {q = add y (x ::ms xs) ∘ add x xs})
                           (∘-square {p = id} {q = add x (y ::ms xs) ∘ add y xs})
-                          hrefl-Square
+                          hrefl-square
                           id
                           (ex x y xs)
                           (ex x y xs)
@@ -267,5 +268,5 @@ module programming.PatchWithHistories where
                         {p-1 : a01 == a11}
                         {p1- : a10 == a11}
                         (f   : Square p0- p-0 p-1 p1-)
-                        → Cube (connection { p = p0- }) (connection { p = p1- }) vrefl-Square vrefl-Square f f 
+                        → Cube (connection { p = p0- }) (connection { p = p1- }) vrefl-square vrefl-square f f 
                     goal10 id = id

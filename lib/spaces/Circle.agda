@@ -1,6 +1,7 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.BasicTypes 
+open import lib.cubical.Cubical
 
 module lib.spaces.Circle where
 
@@ -64,6 +65,7 @@ module S¹ where
                    -> Path (apd (S¹-induction C c α) loop) α
 
   open S public
+
 
   {-
   without the Unit->Unit trick, you can prove
@@ -145,6 +147,22 @@ module S¹ where
 
   ump : {X : Type} -> (S¹ -> X) ≃ (Σ[ x ∶ X ] (Id x x))
   ump {X} = ua ump-eqv
+
+  -- pathover version of eliminator
+
+  S¹-elimo :  (C : S¹ -> Type)
+              -> (c : C base) 
+                 (α : PathOver C loop c c)
+              -> (x : S¹) -> C x
+  S¹-elimo C c α x = S¹-elim C c (over-to-hom/left α) x
+
+  abstract
+    βloop/elimo :  (C : S¹ -> Type)
+                -> (c : C base) 
+                   (α : PathOver C loop c c)
+                -> apdo (S¹-elimo C c α) loop == α
+    βloop/elimo C c α = (IsEquiv.β (snd hom-to-over/left-eqv) α ∘
+                           ap (hom-to-over/left loop) (βloop/elim c (over-to-hom/left α))) ∘ apdo-apd (S¹-elimo C c α) loop
 
 
 {-

@@ -10,14 +10,14 @@ module lib.cubical.Square where
               {a01 a10 a11 : A} → a00 == a01 -> a00 == a10 -> a01 == a11 -> a10 == a11 -> Type where 
     id : Square id id id id
 
-  hrefl-Square : {A : Type} {a00 a01 : A} {p : a00 == a01} → Square p id id p
-  hrefl-Square {p = id} = id
+  hrefl-square : {A : Type} {a00 a01 : A} {p : a00 == a01} → Square p id id p
+  hrefl-square {p = id} = id
 
-  vrefl-Square : {A : Type} {a00 a01 : A} {p : a00 == a01} → Square id p p id
-  vrefl-Square {p = id} = id
+  vrefl-square : {A : Type} {a00 a01 : A} {p : a00 == a01} → Square id p p id
+  vrefl-square {p = id} = id
 
   natural : {Γ Δ : Type} → ∀ {θ1 θ2 θ1' θ2'} (δ : (θ : Γ) → θ1 θ == θ2 θ) (δ' : θ1' == θ2') → Square {Δ} (ap θ1 δ') (δ θ1') (δ θ2') (ap θ2 δ')
-  natural δ id = vrefl-Square
+  natural δ id = vrefl-square
 
 {-
   transport-PathOver-by-hand : {Δ : Type} (A : Δ → Type) {θ11 θ12 θ21 θ22 : Δ} {δ1- : θ11 == θ12} {δ2- : θ21 == θ22} {δ-1 : θ11 == θ21} {δ-2 : θ12 == θ22}
@@ -139,70 +139,99 @@ module lib.cubical.Square where
              Id (square-∘-topright-right (disc-to-square  {_}{_}{_}{_}{_} {id}{id}{p}{id} x)) (disc-to-square {_}{_}{_}{_}{_} {id}{id}{p}{id}  x)
      lemma id = id
 
-  in-PathOver-=' : {A : Type} 
-              {a00 a01 a10 a11 : A} 
-              {p0- : a00 == a01}
-              {p-0 : a00 == a10}
-              {p-1 : a01 == a11}
-              {p1- : a10 == a11}
-             → Square p0- p-0 p-1 p1-
-             → PathOver (\ x -> a00 == x) p-1 p0- (p1- ∘ p-0)
-  in-PathOver-=' id = id
+  module PathOverPathFrom where
+    in-PathOver-=' : {A : Type} 
+                {a00 a01 a10 a11 : A} 
+                {p0- : a00 == a01}
+                {p-0 : a00 == a10}
+                {p-1 : a01 == a11}
+                {p1- : a10 == a11}
+               → Square p0- p-0 p-1 p1-
+               → PathOver (\ x -> a00 == x) p-1 p0- (p1- ∘ p-0)
+    in-PathOver-=' id = id
+  
+    in-PathOver-= : {A : Type} {a' : A} 
+               → {a0 a1 : A}
+               → {p : a0 == a1}
+               → {q0 : a' == a0}
+               → {q1 : a' == a1}
+               → Square q0 id p q1
+               → PathOver (\ x -> a' == x) p q0 q1 
+    in-PathOver-= s = in-PathOver-=' s
+  
+    out-PathOver-= : {A : Type} {a' : A} 
+               → {a0 a1 : A}
+               → {p : a0 == a1}
+               → {q0 : a' == a0}
+               → {q1 : a' == a1}
+               → PathOver (\ x -> a' == x) p q0 q1 
+               → Square q0 id p q1
+    out-PathOver-= {q0} id = hrefl-square
+  
+    PathOver-=-inout : {A : Type} {a' : A} 
+               → {a0 a1 : A}
+               → {p : a0 == a1}
+               → {q0 : a' == a0}
+               → {q1 : a' == a1}
+               → (p : PathOver (\ x -> a' == x) p q0 q1 )
+               → in-PathOver-= (out-PathOver-= p) == p
+    PathOver-=-inout {q0 = id} id = id
+  
+    PathOver-=-outin' : {A : Type} 
+                {a00 a01 a10 a11 : A} 
+                {p0- : a00 == a01}
+                {p-0 : a00 == a10}
+                {p-1 : a01 == a11}
+                {p1- : a10 == a11}
+               → (s : Square p0- p-0 p-1 p1-)
+               → out-PathOver-= (in-PathOver-=' s) == square-∘-topright-right s
+    PathOver-=-outin' id = id
+  
+    PathOver-=-outin : {A : Type} {a' : A} 
+               → {a0 a1 : A}
+               → {p : a0 == a1}
+               → {q0 : a' == a0}
+               → {q1 : a' == a1}
+               → (s : Square q0 id p q1)
+               → out-PathOver-= (in-PathOver-= s) == s
+    PathOver-=-outin s = square-∘-topright-right-triangle s ∘ PathOver-=-outin' s
+  
+    PathOver-=-eqv : {A : Type} {a' : A} 
+               → {a0 a1 : A}
+               → {p : a0 == a1}
+               → {q0 : a' == a0}
+               → {q1 : a' == a1} 
+               → Equiv (PathOver (\ x -> a' == x) p q0 q1) (Square q0 id p q1)
+    PathOver-=-eqv = improve (hequiv out-PathOver-= in-PathOver-= PathOver-=-inout PathOver-=-outin)
 
-  -- should be an equivalence
-  in-PathOver-= : {A : Type} {a' : A} 
-             → {a0 a1 : A}
-             → {p : a0 == a1}
-             → {q0 : a' == a0}
-             → {q1 : a' == a1}
-             → Square q0 id p q1
-             → PathOver (\ x -> a' == x) p q0 q1 
-  in-PathOver-= s = in-PathOver-=' s
+  module PathOver= where
 
-  out-PathOver-= : {A : Type} {a' : A} 
-             → {a0 a1 : A}
-             → {p : a0 == a1}
-             → {q0 : a' == a0}
-             → {q1 : a' == a1}
-             → PathOver (\ x -> a' == x) p q0 q1 
-             → Square q0 id p q1
-  out-PathOver-= {q0} id = hrefl-Square
+    out-PathOver-= : {A B : Type} {f g : A → B}
+                {a a' : A} {p : a == a'}
+                {pa : f a == g a}
+                {pa' : f a' == g a'}
+               → PathOver (\ x -> f x == g x) p pa pa'
+               → Square pa (ap f p) (ap g p) pa'
+    out-PathOver-= id = hrefl-square
 
-  PathOver-=-inout : {A : Type} {a' : A} 
-             → {a0 a1 : A}
-             → {p : a0 == a1}
-             → {q0 : a' == a0}
-             → {q1 : a' == a1}
-             → (p : PathOver (\ x -> a' == x) p q0 q1 )
-             → in-PathOver-= (out-PathOver-= p) == p
-  PathOver-=-inout {q0 = id} id = id
-
-  PathOver-=-outin' : {A : Type} 
-              {a00 a01 a10 a11 : A} 
-              {p0- : a00 == a01}
-              {p-0 : a00 == a10}
-              {p-1 : a01 == a11}
-              {p1- : a10 == a11}
-             → (s : Square p0- p-0 p-1 p1-)
-             → out-PathOver-= (in-PathOver-=' s) == square-∘-topright-right s
-  PathOver-=-outin' id = id
-
-  PathOver-=-outin : {A : Type} {a' : A} 
-             → {a0 a1 : A}
-             → {p : a0 == a1}
-             → {q0 : a' == a0}
-             → {q1 : a' == a1}
-             → (s : Square q0 id p q1)
-             → out-PathOver-= (in-PathOver-= s) == s
-  PathOver-=-outin s = square-∘-topright-right-triangle s ∘ PathOver-=-outin' s
-
-  PathOver-=-eqv : {A : Type} {a' : A} 
-             → {a0 a1 : A}
-             → {p : a0 == a1}
-             → {q0 : a' == a0}
-             → {q1 : a' == a1} 
-             → Equiv (PathOver (\ x -> a' == x) p q0 q1) (Square q0 id p q1)
-  PathOver-=-eqv = improve (hequiv out-PathOver-= in-PathOver-= PathOver-=-inout PathOver-=-outin)
+    postulate 
+      in-PathOver-= : {A B : Type} {f g : A → B}
+                {a a' : A} {p : a == a'}
+                {pa : f a == g a}
+                {pa' : f a' == g a'}
+               → Square pa (ap f p) (ap g p) pa'
+               → PathOver (\ x -> f x == g x) p pa pa'
+      
+    out-PathOver-=-eqv : {A B : Type} {f g : A → B}
+                {a a' : A} {p : a == a'}
+                {pa : f a == g a}
+                {pa' : f a' == g a'}
+               → Equiv (PathOver (\ x -> f x == g x) p pa pa')
+                        (Square pa (ap f p) (ap g p) pa')
+    out-PathOver-=-eqv = improve (hequiv out-PathOver-= in-PathOver-= FIXME1 FIXME2) where
+      postulate FIXME1 : _
+                FIXME2 : _
+  
 
   extend-triangle : {A : Type} {a00 a01 a11 : A}
               {p0- : a00 == a01}
@@ -214,18 +243,57 @@ module lib.cubical.Square where
   extend-triangle f id = f
 
   ∘-square-vertical : {A : Type}
-    {a000 a100 a110 a001 a101 a111 : A}
-    {p-00 : a000 == a100} 
-    {p1-0 : a100 == a110} 
-    {p-01 : a001 == a101} 
-    {p1-1 : a101 == a111} 
-    {p00- : a000 == a001}  
-    {p10- : a100 == a101}  
-    {p11- : a110 == a111}  
-    → (Square p-00 p00- p10- p-01)
-    → (Square p1-0 p10- p11- p1-1)
-    → Square (p1-0 ∘ p-00) p00- p11- (p1-1 ∘ p-01)
+    {a b c d e f : A}
+    {l : a == b} 
+    {t : a == c} 
+    {bt : b == d} 
+    {r : c == d} 
+    {l' : b == e}  
+    {b' : e == f}  
+    {r' : d == f}  
+    → (Square l t bt r)
+    → (Square l' bt b' r')
+    → Square (l' ∘ l) t b' (r' ∘ r)
   ∘-square-vertical id s = s
+
+  -- FIXME: how do you get this from a Kan filling?
+  ∘-square-vertical/degen-bot : {A : Type}
+    {a b c d : A}
+    {l : a == b} 
+    {t : a == c} 
+    {bt : b == d} 
+    {r : c == d} 
+    {b' : b == d}  
+    → (Square l t bt r)
+    → (Square id bt b' id)
+    → Square l t b' r
+  ∘-square-vertical/degen-bot id s = s
+
+  ∘-square-vertical/degen-top : {A : Type}
+    {a b c d : A}
+    {l : a == b} 
+    {t : a == c} 
+    {bt : a == c} 
+    {r : c == d} 
+    {b' : b == d}  
+    → (Square id t bt id)
+    → (Square l bt b' r)
+    → Square l t b' r
+  ∘-square-vertical/degen-top s id = s
+
+  ∘-square-horiz : {A : Type}
+    {a b c d e f : A}
+    {l : a == b} 
+    {t : a == c}
+    {b : b == d}
+    {r : c == d}
+    {t' : c == e}
+    {b' : d == f}
+    {r' : e == f}
+    → (Square l t b r)
+    → (Square r t' b' r')
+    → Square l (t' ∘ t) (b' ∘ b) r'
+  ∘-square-horiz id s = s
 
   square-symmetry : {A : Type}
               {a00 a01 a10 a11 : A} 
@@ -237,6 +305,16 @@ module lib.cubical.Square where
               → Square p-0 p0- p1- p-1
   square-symmetry id = id
 
+  diag-square : {A : Type}
+              {a00 a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              (f   : Square p0- p-0 p-1 p1-)
+              → a00 == a11
+  diag-square id = id
+
   connection : ∀ {A} {a b : A} {p : a == b} → Square id id p p 
   connection {p = id} = id
 
@@ -246,4 +324,45 @@ module lib.cubical.Square where
   ∘-square : {A : Type} {a0 a1 a2 : A} {p : a0 == a1} {q : a1 == a2} 
            → Square p id q (q ∘ p)
   ∘-square {p = id} = connection
+
+
+  ap-square : {A B : Type} (g : A → B) → 
+              {a00 a01 a10 a11 : A} 
+              {l : a00 == a01}
+              {t : a00 == a10}
+              {b : a01 == a11}
+              {r : a10 == a11}
+              (f   : Square l t b r)
+              → Square (ap g l) (ap g t) (ap g b) (ap g r)
+  ap-square f id = id
+
+  horiz-degen-square : {A : Type} {a a' : A} {p q : a == a'} (r : p == q)
+                     → Square p id id q
+  horiz-degen-square {p = id}{q = .id} id = id
+  -- disc-to-square {p0- = p} {id} {id} {q}
+
+  horiz-degen-square-to-path : {A : Type} {a a' : A} {p q : a == a'} 
+                     → Square p id id q → p == q
+  horiz-degen-square-to-path {p = p} s = square-to-disc s ∘ ! (∘-unit-l p)
+
+  vertical-degen-square : {A : Type} {a a' : A} {p q : a == a'} (r : p == q)
+                     → Square id p q id
+  vertical-degen-square {p = id}{q = .id} id = id
+
+
+  pair-square : {A B : Type} 
+              {a00 a01 a10 a11 : A} 
+              {la : a00 == a01}
+              {ta : a00 == a10}
+              {ba : a01 == a11}
+              {ra : a10 == a11}
+              (fa   : Square la ta ba ra)
+              {b00 b01 b10 b11 : B} 
+              {lb : b00 == b01}
+              {tb : b00 == b10}
+              {bb : b01 == b11}
+              {rb : b10 == b11}
+              (fb   : Square lb tb bb rb)
+              → Square (pair×≃ la lb) (pair×≃ ta tb) (pair×≃ ba bb) (pair×≃ ra rb) 
+  pair-square id id = id
 

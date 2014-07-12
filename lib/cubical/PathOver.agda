@@ -193,6 +193,11 @@ module lib.cubical.PathOver where
     PathOverType-!  : {Δ : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {A B : Type} {α : PathOver (\ _ -> Type) δ A B}
                     → coe PathOverType (!o α) == (!equiv (coe PathOverType α))
 
+    PathOverΠ-NDdomain : {Δ : Type} {A : Type} {B : Δ → A → Type}
+              → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A) → B θ1 x} {g : (x : A) → B θ2 x}
+              →  PathOver (\ θ → (x : A) → B θ x) δ f g 
+              == ( (x : A) → PathOver (\ θ → B θ x) δ (f x) (g x))
+
   PathOverType-∘ : {Δ : Type} {A B C : Type}
               → {θ1 θ2 θ3 : Δ} {δ2 : θ2 == θ3} {δ1 : θ1 == θ2}
               → (α2 : PathOver (\ θ → Type) δ2 B C) (α1 : PathOver (\ θ → Type) δ1 A B) 
@@ -291,4 +296,38 @@ module lib.cubical.PathOver where
                  (\ x y α → apdo-split-def {C = C} f M δ x y α) 
     -- apdo-split f M id = λ≃ (split1⁺ _ (λ≃ (split1⁺ _ (λ≃ (λ α → {!!})))))
              
+  over-to-hom/left : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} {δ : θ1 == θ2} → ∀ {M1 M2} 
+            →  (PathOver A δ M1 M2)
+            → ((transport A δ M1) == M2) 
+  over-to-hom/left id = id
 
+  hom-to-over/left : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} (δ : θ1 == θ2) → ∀ {M1 M2} 
+            → ((transport A δ M1) == M2) 
+            → (PathOver A δ M1 M2)
+  hom-to-over/left id id = id
+
+  hom-to-over-to-hom/left : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} (δ : θ1 == θ2) → ∀ {M1 M2} 
+            → ( p : ((transport A δ M1) == M2) )
+            → over-to-hom/left (hom-to-over/left δ p) == p
+  hom-to-over-to-hom/left id id = id
+
+  over-to-hom-to-over/left : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} {δ : θ1 == θ2} → ∀ {M1 M2} 
+            → (p : PathOver A δ M1 M2)
+            → hom-to-over/left δ (over-to-hom/left p) == p
+  over-to-hom-to-over/left id = id
+
+  hom-to-over/left-eqv : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} {δ : θ1 == θ2} → ∀ {M1 M2} 
+            → Equiv((transport A δ M1) == M2) 
+               (PathOver A δ M1 M2)
+  hom-to-over/left-eqv {δ = δ} = improve
+                                  (hequiv (hom-to-over/left δ) over-to-hom/left
+                                   (hom-to-over-to-hom/left δ) over-to-hom-to-over/left)
+  
+  apdo-apd : {Δ : Type} {A : Δ → Type} (f : (θ : _) → A θ) {θ1 θ2 : Δ} (δ : θ1 == θ2) 
+           → apdo f δ == hom-to-over/left δ (apd f δ)
+  apdo-apd f id = id
