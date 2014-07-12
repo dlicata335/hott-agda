@@ -425,6 +425,14 @@ module lib.cubical.Square where
                          == pair-square hrefl-square vrefl-square
   pair-vrefl-hrefl-symmetry id id = id
 
+  square-symmetry-symmetry : {A : Type} {a00 a01 a10 a11 : A} 
+              {l : a00 == a01}
+              {t : a00 == a10}
+              {b : a01 == a11}
+              {r : a10 == a11}
+              (f   : Square l t b r)
+              -> square-symmetry (square-symmetry f) == f
+  square-symmetry-symmetry id = id
 
   ap-square-horiz-degen : {A B : Type} (f : A → B) {a1 a2 : A} {p q : a1 == a2} (r : p == q)
                   → ap-square f (horiz-degen-square r) == horiz-degen-square (ap (ap f) r)
