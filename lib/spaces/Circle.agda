@@ -164,6 +164,27 @@ module S¹ where
     βloop/elimo C c α = (IsEquiv.β (snd hom-to-over/left-eqv) α ∘
                            ap (hom-to-over/left loop) (βloop/elim c (over-to-hom/left α))) ∘ apdo-apd (S¹-elimo C c α) loop
 
+{-
+  -- haven't needed this yet
+
+  S¹-rec1 : {C : Type} {c1 c2 : C} (α12 : c1 == c2)
+             {α1 : c1 == c1} {α2 : c2 == c2}  (s : Square α1 α12 α12 α2) 
+          → {p1 p2 : S¹} → (p1 == p2)
+          → S¹-rec c1 α1 p1 == S¹-rec c2 α2 p2
+  S¹-rec1 {c1 = c1} id s {p1 = p1} id = ap (λ z → S¹-rec c1 z p1) (horiz-degen-square-to-path s)
+
+  S¹-rec1/βloop : {C : Type} {c1 c2 : C} (α12 : c1 == c2)
+             {α1 : c1 == c1} {α2 : c2 == c2}  (s : Square α1 α12 α12 α2) 
+          → S¹-rec1 α12 s S¹.loop == diag-square s
+  S¹-rec1/βloop = {!!}
+
+  ap-S¹-rec-is-1 : {A C : Type} {a1 a2 : A} (b : A → C) (l : (x : A) → b x == b x) (p : A → S¹)
+             (α : a1 == a2) 
+          → ap (\ x -> S¹-rec (b x) (l x) (p x)) α == S¹-rec1 (ap b α) (PathOver=.out-PathOver-= (apdo l α)) (ap p α)
+  ap-S¹-rec-is-1 b l p id = {!id!}
+-}
+
+
 
 {-
   module Reverse where

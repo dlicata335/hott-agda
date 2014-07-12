@@ -296,6 +296,16 @@ module lib.cubical.Square where
   ∘-square-horiz id s = s
 
   _∘-square-h_ = ∘-square-horiz
+
+  !-square-h : {A : Type}
+              {a00 a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              (f   : Square p0- p-0 p-1 p1-)
+              → Square p1- (! p-0) (! p-1) p0-
+  !-square-h id = id
   
   square-symmetry : {A : Type}
               {a00 a01 a10 a11 : A} 
@@ -367,4 +377,63 @@ module lib.cubical.Square where
               (fb   : Square lb tb bb rb)
               → Square (pair×≃ la lb) (pair×≃ ta tb) (pair×≃ ba bb) (pair×≃ ra rb) 
   pair-square id id = id
+
+
+  ap-square-symmetry : {A B : Type} (g : A → B) → 
+              {a00 a01 a10 a11 : A} 
+              {l : a00 == a01}
+              {t : a00 == a10}
+              {b : a01 == a11}
+              {r : a10 == a11}
+              (f   : Square l t b r)
+              → ap-square g (square-symmetry f) == square-symmetry (ap-square g f)
+  ap-square-symmetry _ id = id
+
+  pair-square-symmetry : {A B : Type} 
+              {a00 a01 a10 a11 : A} 
+              {la : a00 == a01}
+              {ta : a00 == a10}
+              {ba : a01 == a11}
+              {ra : a10 == a11}
+              (fa   : Square la ta ba ra)
+              {b00 b01 b10 b11 : B} 
+              {lb : b00 == b01}
+              {tb : b00 == b10}
+              {bb : b01 == b11}
+              {rb : b10 == b11}
+              (fb   : Square lb tb bb rb)
+              → square-symmetry (pair-square fa fb) == pair-square (square-symmetry fa) (square-symmetry fb)
+  pair-square-symmetry id id = id
+
+  hrefl-square-symmetry : {A : Type} {a00 a01 : A} {p : a00 == a01} 
+                         → square-symmetry (hrefl-square{p = p}) == vrefl-square
+  hrefl-square-symmetry {p = id} = id
+
+  vrefl-square-symmetry : {A : Type} {a00 a01 : A} {p : a00 == a01} 
+                         → square-symmetry (vrefl-square{p = p}) == hrefl-square
+  vrefl-square-symmetry {p = id} = id
+
+  pair-hrefl-vrefl-symmetry : {A : Type} {a00 a01 : A} (p : a00 == a01)
+                         {B : Type} {b00 b01 : A} (q : b00 == b01)
+                         → square-symmetry (pair-square (hrefl-square{p = p}) (vrefl-square{p = q}))
+                         == pair-square vrefl-square hrefl-square
+  pair-hrefl-vrefl-symmetry id id = id
+
+  pair-vrefl-hrefl-symmetry : {A : Type} {a00 a01 : A} (p : a00 == a01)
+                         {B : Type} {b00 b01 : B} (q : b00 == b01)
+                         → square-symmetry (pair-square (vrefl-square{p = p}) (hrefl-square{p = q}))
+                         == pair-square hrefl-square vrefl-square
+  pair-vrefl-hrefl-symmetry id id = id
+
+
+  ap-square-horiz-degen : {A B : Type} (f : A → B) {a1 a2 : A} {p q : a1 == a2} (r : p == q)
+                  → ap-square f (horiz-degen-square r) == horiz-degen-square (ap (ap f) r)
+  ap-square-horiz-degen _ {p = id} id = id
+
+  apdo-by-equals :
+    {Δ : Type} {A : Δ → Type} (f g : (θ : _) → A θ) {θ1 θ2 : Δ} (δ : θ1 == θ2) 
+    (p : f == g)
+    → SquareOver A hrefl-square (apdo f δ) (hom-to-over/left id (ap≃ p)) (hom-to-over/left id (ap≃ p)) (apdo g δ) 
+  apdo-by-equals f .f id id = id
+
 

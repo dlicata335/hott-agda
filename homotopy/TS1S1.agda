@@ -11,6 +11,7 @@ module homotopy.TS1S1 where
 
   -- FIXME move to lib
 
+{-
   ap-uncurry' : {A B C : Type} → (f : A → B → C) {a1 a2 : A} (p1 : a1 == a2) {b1 b2 : B} (p2 : b1 == b2)
              → ap (\ {(x , y) → (f x) y}) (pair×≃ p1 p2) == ap≃₁→ (ap f p1) p2
   ap-uncurry' f id id = id
@@ -20,140 +21,7 @@ module homotopy.TS1S1 where
 
   ap≃₁→-id-arg : {A B : Type} {f g : A → B} {x : A} → (p : f ≃ g) → (ap≃₁→ p (id{_}{x})) == ap≃ p
   ap≃₁→-id-arg id = id
-
-
-  ap-square-id! : {A : Type} {a00 a01 a10 a11 : A} 
-              {p0- : a00 == a01}
-              {p-0 : a00 == a10}
-              {p-1 : a01 == a11}
-              {p1- : a10 == a11}
-              (f   : Square p0- p-0 p-1 p1-)
-              → Cube f (ap-square (\ x -> x) f) (horiz-degen-square (! (ap-id p0-))) (horiz-degen-square (! (ap-id p-0))) (horiz-degen-square (! (ap-id p-1))) (horiz-degen-square (! (ap-id p1-))) 
-  ap-square-id! id = id
-
-  ap-square-o : {A B C : Type} (g : B → C) (f : A → B) 
-              {a00 a01 a10 a11 : A} 
-              {p0- : a00 == a01}
-              {p-0 : a00 == a10}
-              {p-1 : a01 == a11}
-              {p1- : a10 == a11}
-              (s   : Square p0- p-0 p-1 p1-)
-              → Cube (ap-square (g o f) s) (ap-square g (ap-square f s)) (horiz-degen-square (ap-o g f p0-)) (horiz-degen-square (ap-o g f p-0)) (horiz-degen-square (ap-o g f p-1)) (horiz-degen-square (ap-o g f p1-))
-  ap-square-o g f id = id
-
-  ap-square-horiz-degen : {A B : Type} (f : A → B) {a1 a2 : A} {p q : a1 == a2} (r : p == q)
-                  → ap-square f (horiz-degen-square r) == horiz-degen-square (ap (ap f) r)
-  ap-square-horiz-degen _ {p = id} id = id
-
-  apdo-by-equals :
-    {Δ : Type} {A : Δ → Type} (f g : (θ : _) → A θ) {θ1 θ2 : Δ} (δ : θ1 == θ2) 
-    (p : f == g)
-    → SquareOver A hrefl-square (apdo f δ) (hom-to-over/left id (ap≃ p)) (hom-to-over/left id (ap≃ p)) (apdo g δ) 
-  apdo-by-equals f .f id id = id
-
-  ∘-cube-horiz/degen : 
-    {A : Type}
-    {a000 a010 a100 a110 : A}
-
-    {p0-0 : a000 == a010}
-    {p-00 : a000 == a100}
-    {p-10 : a010 == a110}
-    {p1-0 : a100 == a110}
-    {f--0 : Square p0-0 p-00 p-10 p1-0}
-
-    {p0-1 : a000 == a010}
-    {p-01 : a000 == a100}
-    {p-11 : a010 == a110}
-    {p1-1 : a100 == a110}
-    {f--1 : Square p0-1 p-01 p-11 p1-1}
-
-    {f0-- : p0-0 == p0-1}
-    {f-0- : p-00 == p-01}
-    {f-1- : p-10 == p-11}
-    {f1-- : p1-0 == p1-1}
-
-    {p0-2 : a000 == a010}
-    {p-02 : a000 == a100}
-    {p-12 : a010 == a110}
-    {p1-2 : a100 == a110}
-    {f--2 : Square p0-2 p-02 p-12 p1-2}
-
-    {f0--' : p0-1 == p0-2}
-    {f-0-' : p-01 == p-02}
-    {f-1-' : p-11 == p-12}
-    {f1--' : p1-1 == p1-2}
-
-    → Cube f--0 f--1 (horiz-degen-square f0--) (horiz-degen-square f-0-) (horiz-degen-square f-1-) (horiz-degen-square f1--)
-    → Cube f--1 f--2 (horiz-degen-square f0--') (horiz-degen-square f-0-') (horiz-degen-square f-1-') (horiz-degen-square f1--')
-    → Cube f--0 f--2 (horiz-degen-square (f0--' ∘ f0--)) (horiz-degen-square (f-0-' ∘ f-0-)) (horiz-degen-square (f-1-' ∘ f-1-)) (horiz-degen-square (f1--' ∘ f1--))
-  ∘-cube-horiz/degen = {!!} 
-
-  _∘-cube-h/degen_ = ∘-cube-horiz/degen
-  infixr 10 _∘-cube-h/degen_
-
-  -- ap to inner argument first
-  -- could do it in the other order, too
-  bifunctor-square1 : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
-                     (p : a == a') (q : b == b') 
-                   → Square (ap (λ x → f x b) p)
-                             (ap (λ z → f a z) q)
-                             (ap (λ z → f a' z) q)
-                             (ap (λ x → f x b') p)
-  bifunctor-square1 f p q = PathOver=.out-PathOver-= (apdo (λ y → ap (λ x → f x y) p) q)
-
-  ap-bifunctor-id-1 : {A B C : Type} (f : A → B → C) {a : A} {b b' : B}
-                      (q : b == b') 
-                    → ap (uncurry f) (pair×≃ id q) == ap (f a) q
-  ap-bifunctor-id-1 f id = id
-
-  ap-bifunctor-id-2 : {A B C : Type} (f : A → B → C) {a a' : A} {b : B}
-                      (p : a == a') 
-                    → ap (uncurry f) (pair×≃ p id) == ap (\ x -> f x b) p
-  ap-bifunctor-id-2 f id = id
-
-  bifunctor-cube1 : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
-                   (p : a == a') (q : b == b') 
-                   → Cube (ap-square (\ {(x , y) → f x y}) (pair-square (vrefl-square {p = p}) (hrefl-square {p = q})))
-                           (square-symmetry (bifunctor-square1 f p q))
-                           (horiz-degen-square (ap-bifunctor-id-1 f q))
-                           (horiz-degen-square (ap-bifunctor-id-2 f p))
-                           (horiz-degen-square (ap-bifunctor-id-2 f p))
-                           (horiz-degen-square (ap-bifunctor-id-1 f q))
-  bifunctor-cube1 f id id = id
-
-  -- should be a symmetry of the above
-  bifunctor-cube1' : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
-                   (p : a == a') (q : b == b') 
-                   → Cube (ap-square (uncurry f) (pair-square (hrefl-square {p = p}) (vrefl-square {p = q})))
-                           (bifunctor-square1 f p q) 
-                           (horiz-degen-square (ap-bifunctor-id-2 f p)) 
-                           (horiz-degen-square (ap-bifunctor-id-1 f q)) 
-                           (horiz-degen-square (ap-bifunctor-id-1 f q))
-                           (horiz-degen-square (ap-bifunctor-id-2 f p)) 
-  bifunctor-cube1' f id id = id
-
-
-
-  -- haven't needed this yet
-
-  S¹-rec1 : {C : Type} {c1 c2 : C} (α12 : c1 == c2)
-             {α1 : c1 == c1} {α2 : c2 == c2}  (s : Square α1 α12 α12 α2) 
-          → {p1 p2 : S¹} → (p1 == p2)
-          → S¹-rec c1 α1 p1 == S¹-rec c2 α2 p2
-  S¹-rec1 {c1 = c1} id s {p1 = p1} id = ap (λ z → S¹-rec c1 z p1) (horiz-degen-square-to-path s)
-
-  S¹-rec1/βloop : {C : Type} {c1 c2 : C} (α12 : c1 == c2)
-             {α1 : c1 == c1} {α2 : c2 == c2}  (s : Square α1 α12 α12 α2) 
-          → S¹-rec1 α12 s S¹.loop == diag-square s
-  S¹-rec1/βloop = {!!}
-
-  ap-S¹-rec-is-1 : {A C : Type} {a1 a2 : A} (b : A → C) (l : (x : A) → b x == b x) (p : A → S¹)
-             (α : a1 == a2) 
-          → ap (\ x -> S¹-rec (b x) (l x) (p x)) α == S¹-rec1 (ap b α) (PathOver=.out-PathOver-= (apdo l α)) (ap p α)
-  ap-S¹-rec-is-1 b l p id = {!id!}
-
-  t2c : T -> S¹ × S¹
-  t2c = T-rec (S¹.base , S¹.base) (pair×≃ id S¹.loop) (pair×≃ S¹.loop id) (pair-square vrefl-square hrefl-square)
+-}
 
   -- FIXME bug with unification? look at the constraints
   -- NAMETHATDOESNTOCCURANYWHEREELSE : {!Nat!}
@@ -163,6 +31,9 @@ module homotopy.TS1S1 where
   -- too many things are solved to id
   -- BUG2 = S¹-rec (S¹-rec T.a T.p) (λ≃ (S¹-elimo _ T.q 
   --               (PathOver=.in-PathOver-= ((∘-square-vertical (vertical-degen-square (S¹.βloop/rec T.a T.p)) {!!})))))
+
+  t2c : T -> S¹ × S¹
+  t2c = T-rec (S¹.base , S¹.base) (pair×≃ id S¹.loop) (pair×≃ S¹.loop id) (pair-square vrefl-square hrefl-square)
 
   c2t-loop-homotopy = (S¹-elimo _ T.q 
                 (PathOver=.in-PathOver-= 
@@ -261,6 +132,27 @@ module homotopy.TS1S1 where
                                         {! SquareOver=ND.out-SquareOver-= (apdo-by-equals (λ y → ap (λ x → c2t' x y) S¹.loop) _ S¹.loop (λ≃ reduce-c2t-2''))  !} 
 
 
+  -- define the square as the filler of this?
+  wrap-around :
+    {A : Type}
+    {a b c d : A}
+    {l : a == b} 
+    {t : a == c} 
+    {bt : a == c} 
+    {r : c == d} 
+    {b' : b == d}  
+    {b'' : b == d} 
+    → (p : t == bt)
+    → (f : Square l bt b' r)
+    → (q : b'' == b')
+    → Cube
+      (∘-square-vertical/degen-top
+       (vertical-degen-square p)
+       (∘-square-vertical/degen-bot f
+        (vertical-degen-square (! q))))
+      f hrefl-square (horiz-degen-square p) (horiz-degen-square q) hrefl-square 
+  wrap-around id id id = id
+
   c2t2c : (x y : S¹) → t2c (c2t' x y) == (x , y)
   c2t2c = S¹-elimo _ (S¹-elimo _ id (PathOver=.in-PathOver-= square1)) 
                      (coe (! PathOverΠ-NDdomain) (\ x -> PathOver=.in-PathOver-= 
@@ -268,18 +160,45 @@ module homotopy.TS1S1 where
                                                             (λ x₁ → Square (S¹-elimo (λ x₂ → t2c (c2t' S¹.base x₂) == (S¹.base , x₂)) id (PathOver=.in-PathOver-= square1) x₁) (ap (λ z → t2c (c2t' z x₁)) S¹.loop) (ap (λ z → z , x₁) S¹.loop) (S¹-elimo (λ x₂ → t2c (c2t' S¹.base x₂) == (S¹.base , x₂)) id (PathOver=.in-PathOver-= square1) x₁))
                                                             square2
                                                             (coe (! (PathOver-square/= S¹.loop square2 square2)) 
-                                                              {!!}) x))) where
-    square1 : Square id (ap (λ z → t2c (c2t' S¹.base z)) S¹.loop) (ap (λ z → S¹.base , z) S¹.loop) id
-    square1 = {!!}
+                                                              (transport (λ x₁ → Cube square2 square2 x₁ (PathOver=.out-PathOver-= (apdo (λ x₂ → ap (λ z → t2c (c2t' z x₂)) S¹.loop) S¹.loop)) (PathOver=.out-PathOver-= (apdo (λ x₂ → ap (λ z → z , x₂) S¹.loop) S¹.loop)) x₁)
+                                                                 (! (IsEquiv.β (snd PathOver=.out-PathOver-=-eqv) square1 ∘ ap PathOver=.out-PathOver-= (S¹.βloop/elimo _ id (PathOver=.in-PathOver-= square1))))
+                                                                 cube3))
+                                                          x))) where
+    square1'' = _
+    square2'' = _
 
-    -- cube1 : Cube square1 (pair-square (vrefl-square{p = S¹.loop}) (hrefl-square{p = S¹.loop})) {!!} {!!} {!!} {!!}
-    -- cube1 = {!!}
+    cube5 : Cube (ap-square c2t (pair-square hrefl-square vrefl-square)) (square-symmetry T.f) square2'' square1'' square1'' square2''
+    cube5 = bifunctor-cube1' c2t' S¹.loop S¹.loop ∘-cube-h 
+            SquareOver=ND.out-SquareOver-= (apdo-by-equals _ _ S¹.loop (λ≃ reduce-c2t-2'')) ∘-cube-h
+            degen-cube-h (ap PathOver=.out-PathOver-= (S¹.βloop/elimo _ T.q (PathOver=.in-PathOver-= (∘-square-vertical/degen-top (vertical-degen-square (S¹.βloop/rec T.a T.p)) (∘-square-vertical/degen-bot (square-symmetry T.f) (vertical-degen-square (! (S¹.βloop/rec T.a T.p)))))))) ∘-cube-h
+            degen-cube-h (IsEquiv.β (snd PathOver=.out-PathOver-=-eqv) _)
+              ∘-cube-h (wrap-around (S¹.βloop/rec T.a T.p) (square-symmetry T.f) (S¹.βloop/rec T.a T.p))
+
+    square1' = _
+    square2' = _
+    cube4 : Cube
+            (PathOver=.out-PathOver-=
+              (apdo (λ x₁ → ap (λ z → t2c (c2t' z x₁)) S¹.loop) S¹.loop))
+            (PathOver=.out-PathOver-=
+              (apdo (λ x₁ → ap (λ z → z , x₁) S¹.loop) S¹.loop))
+            square1'
+            square2'
+            square2'
+            square1'
+    cube4 = !-cube-h (bifunctor-cube1' (λ x y → t2c (c2t' x y)) S¹.loop S¹.loop) ∘-cube-h
+            ap-square-o t2c c2t (pair-square hrefl-square vrefl-square) ∘-cube-h
+            ap-cube t2c cube5 ∘-cube-h
+            degen-cube-h (ap-square-symmetry t2c T.f) ∘-cube-h
+            cube-square-symmetry-left (T.βf/rec (S¹.base , S¹.base) (pair×≃ id S¹.loop) (pair×≃ S¹.loop id) (pair-square vrefl-square hrefl-square)) ∘-cube-h 
+            degen-cube-h (pair-vrefl-hrefl-symmetry S¹.loop S¹.loop) ∘-cube-h
+            (ap-square-id! (pair-square hrefl-square vrefl-square)) ∘-cube-h
+            (bifunctor-cube1' _,_ S¹.loop S¹.loop)
+
+    square1 : Square id (ap (λ z → t2c (c2t' S¹.base z)) S¹.loop) (ap (λ z → S¹.base , z) S¹.loop) id
+    square1 = _
 
     square2 : Square id (ap (λ z → t2c (c2t' z S¹.base)) S¹.loop) (ap (λ z → z , S¹.base) S¹.loop) id
-    square2 = {!!}
-
-    -- cube2 : Cube square2 (pair-square (vrefl-square{p = S¹.loop}) (hrefl-square{p = S¹.loop})) {!!} {!!} {!!} {!!}
-    -- cube2 = {!!}
+    square2 = _
 
     cube3 : Cube
             square2
@@ -290,23 +209,5 @@ module homotopy.TS1S1 where
             (PathOver=.out-PathOver-=
               (apdo (λ x₁ → ap (λ z → z , x₁) S¹.loop) S¹.loop))
             square1 
-    cube3 = {!!}
+    cube3 = cube-symmetry-left-to-top cube4
 
-    square1' : {!!}
-    square1' = {!!}
-
-    square2' : {!!}
-    square2' = {!!}
-
-    cube4 : Cube
-            (PathOver=.out-PathOver-=
-             (apdo (λ x₁ → ap (λ z → t2c (c2t' z x₁)) S¹.loop) S¹.loop))
-            (PathOver=.out-PathOver-=
-              (apdo (λ x₁ → ap (λ z → z , x₁) S¹.loop) S¹.loop))
-            square1'
-            square2'
-            square2'
-            square1'
-    cube4 = {!apdo-by-equals!} ∘-cube-h/degen
-            (ap-square-id! (pair-square hrefl-square vrefl-square)) ∘-cube-h/degen
-            (bifunctor-cube1' _,_ S¹.loop S¹.loop)
