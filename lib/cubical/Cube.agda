@@ -431,3 +431,37 @@ module lib.cubical.Cube where
               → Cube (ap-square (g o f) s) (ap-square g (ap-square f s)) (horiz-degen-square (ap-o g f p0-)) (horiz-degen-square (ap-o g f p-0)) (horiz-degen-square (ap-o g f p-1)) (horiz-degen-square (ap-o g f p1-))
   ap-square-o g f id = id
 
+  -- FIXME how do you get this from composition?
+  whisker-cube :  {A : Type} {a000 : A}  
+    {a010 a100 a110 a001 a011 a101 a111 : A}
+    {p0-0 : a000 == a010}
+    {p-00 : a000 == a100}
+    {p-10 : a010 == a110}
+    {p1-0 : a100 == a110}
+    {f--0 f--0' : Square p0-0 p-00 p-10 p1-0} -- left
+    → f--0 == f--0'
+    → 
+    {p0-1 : a001 == a011}
+    {p-01 : a001 == a101}
+    {p-11 : a011 == a111}
+    {p1-1 : a101 == a111}
+    {f--1 f--1' : Square p0-1 p-01 p-11 p1-1} -- right
+    → f--1 == f--1'
+    → 
+    {p00- : a000 == a001}
+    {p01- : a010 == a011}
+    {p10- : a100 == a101}
+    {p11- : a110 == a111}
+    {f0-- f0--' : Square p0-0 p00- p01- p0-1} -- back
+    → f0-- == f0--'
+    →
+    {f-0- f-0-' : Square p-00 p00- p10- p-01} -- top
+    → f-0- == f-0-'
+    → {f-1- f-1-' : Square p-10 p01- p11- p-11} -- bot
+    → f-1- == f-1-'
+    → {f1-- f1--' : Square p1-0 p10- p11- p1-1} -- front
+    → f1-- == f1--'
+    -> Cube f--0 f--1 f0-- f-0- f-1- f1--
+    -> Cube f--0' f--1' f0--' f-0-' f-1-' f1--'
+  whisker-cube id id id id id id c = c
+
