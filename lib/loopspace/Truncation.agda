@@ -31,16 +31,18 @@ module lib.loopspace.Truncation where
     Loop-level-S One nA' = ntype (id , (λ _ → HSet-UIP (use-level nA' _ _) _ _ _ _))
     Loop-level-S (S n') nA' = transport (NType -2) (! (LoopPath.path (S n'))) (Loop-level-S n' (use-level nA' _ _))
 
-    {-# NO_TERMINATION_CHECK #-}
-    -- FIXME: doesn't work in 2.4.1 without-K 
     Loop-level-> : ∀ n k {A} {a} → NType n A → n <tl (tlp k) → NType -2 (Loop k A a)
     Loop-level-> .(S (S -2)) One {A} {a} nA (ltS {.(S (S -2))}) = ntype (id , (λ y → HSet-UIP nA _ _ _ _))
     Loop-level-> .(S -2) One nA (ltSR ltS) = use-level nA _ _
     Loop-level-> .-2 One nA (ltSR (ltSR ltS)) = path-preserves-level nA
     Loop-level-> n One nA (ltSR (ltSR (ltSR ())))
-    Loop-level-> n (S k) {A} {a} nA lt with lt-unS-right lt
-    ... | Inl lt' = path-preserves-level (Loop-level-> n k nA lt')
-    ... | Inr eq = Loop-level-S k (transport (λ x → NType x A) eq nA) 
+    Loop-level-> n (S k) {A} {a} nA lt = cases {n} {k} {A} {a} {nA} {lt} (lt-unS-right lt) (Loop-level-> n k nA) where
+      cases : ∀ {n k A} {a : A} {nA : NType n A} {lt : n <tl S (tlp k)} →
+        (n <=tl tlp k) →
+        (n <tl tlp k → NType -2 (Loop k A a)) →
+        NType -2 (Loop (S k) A a)
+      cases {n}{k}{A}{a}{nA}{lt} (Inl lt') f = path-preserves-level (f lt')
+      cases {n}{k}{A}{a}{nA}{lt} (Inr eq) _ = Loop-level-S k (transport (λ x → NType x A) eq nA) 
   
     NType-LoopOver : ∀ n k {A} {a} (α : Loop n A a) {B} {b} → ((x : A) → NType (S k) (B x)) → NType k (LoopOver n α B b)
     NType-LoopOver One k α p = use-level (p _) _ _
@@ -80,17 +82,23 @@ module lib.loopspace.Truncation where
 
 
   abstract
-    {-# NO_TERMINATION_CHECK #-}
-    -- FIXME: doesn't work in 2.4.1 without-K 
     HProp-Loop-in-Trunc< : ∀ k n {A t} → k <tl (tlp n) → HProp (Loop n (Trunc k A) t)
     HProp-Loop-in-Trunc< -2 One lt = increment-level (path-preserves-level Trunc-level)
     HProp-Loop-in-Trunc< -2 (S n) lt = increment-level (path-preserves-level (Loop-preserves-level n -2 (Trunc-level { -2})))
     HProp-Loop-in-Trunc< (S .(S -2)) One ltS = use-level (Trunc-level {S (S -2)}) _ _
     HProp-Loop-in-Trunc< (S .-2) One {A} {t} (ltSR ltS) = path-preserves-level Trunc-level
     HProp-Loop-in-Trunc< (S k) One (ltSR (ltSR (ltSR ()))) 
-    HProp-Loop-in-Trunc< (S k) (S n) {A}{t} lt with lt-unS-right lt 
-    ... | Inl lt' = path-preserves-level (HProp-Loop-in-Trunc< (S k) n lt')
-    ... | Inr eq = let eq = ! eq in 
+    HProp-Loop-in-Trunc< (S k) (S n) {A}{t} lt = cases{k}{n}{A}{t} (lt-unS-right lt) (HProp-Loop-in-Trunc< (S k) n) where
+      cases : ∀ {k n A}
+          {t : Trunc (S k) A} →
+        (S k <=tl tlp n) →
+        (∀ {A₁}
+           {t₁ : Trunc (S k) A₁} →
+           S k <tl tlp n →
+           NType (S -2) (Loop n (Trunc (S k) A₁) t₁)) →
+        NType (S -2) (Loop (S n) (Trunc (S k) A) t)
+      cases {k}{n}{A}{t} (Inl lt') f = path-preserves-level (f lt')
+      cases {k}{n}{A}{t} (Inr eq) _ = let eq = ! eq in 
                    use-level
                      (coe
                       (ap (NType (S (S -2))) 

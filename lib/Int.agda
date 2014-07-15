@@ -205,13 +205,14 @@ module Int where
     pos-not-<=0 One (Inr ())
     pos-not-<=0 (S n) lt = pos-not-<=-1 n (<=-unS lt)
 
-    {-# NO_TERMINATION_CHECK #-}
-    -- FIXME: doesn't work in 2.4.1 without-K 
     1<=pos : (p : Positive) → tl 1 <=tl (tlp p)
     1<=pos One = Inr id
-    1<=pos (S n) with 1<=pos n
-    ... | Inl lt = Inl (ltSR lt)
-    ... | Inr eq = transport (λ x → tl 1 <=tl S x) eq (Inl ltS)
+    1<=pos (S n) = cases {n} (1<=pos n) where
+      cases :  ∀ {n} →
+        (S (S (S -2)) <=tl tlp n) →
+        (S (S (S -2)) <=tl S (tlp n))
+      cases (Inl lt) = Inl (ltSR lt)
+      cases (Inr eq) = transport (λ x → tl 1 <=tl S x) eq (Inl ltS)
   
     >pos->1 : ∀ k n -> tlp k <tl tlp n -> tl 1 <tl tlp n 
     >pos->1 k' One lt' = Sums.abort ( pos-not-<=0 k' (lt-unS-right lt'))
@@ -251,19 +252,20 @@ module Int where
                             (ap (λ x → plus2 x (-2ptl (S n))) (-2ptl-S (S n)))
                             (plus2-monotone-2 (tl (pos2nat n)) (-2ptl (S n)) (tl (pos2nat n)) (transport (λ x → x <tl tl (pos2nat n)) (! (-2ptl-S-1pn n)) (n-1<n n)))
   
-    {-# NO_TERMINATION_CHECK #-}
-    -- FIXME: doesn't work in 2.4.1 without-K 
     n<=2*n-2 : ∀ n → tl 1 <tl tlp n → tlp n <=tl 2* n -2
     n<=2*n-2 One (ltSR (ltSR y)) = Inl (ltSR y)
-    n<=2*n-2 (S n) lt with (lt-unS-right lt) 
-    ... | Inl lt' = <=trans (<=SCong (n<=2*n-2 n lt')) (Inl (2*S-2 n))
-    ... | Inr eq  = transport (λ x → S x <=tl plus2 (-2ptl (S n)) (-2ptl (S n))) eq
-                      (arith n (! eq)) where
-      arith : ∀ n -> tlp n ≃ (tl 1) → (tl 2) <=tl 2* (S n) -2
-      arith One eq' = Inr id
-      arith (S n) eq' with pos-not-<=0 n (<=-unS (Inr eq'))
-      ... | ()
-  
+    n<=2*n-2 (S n) lt = cases{n} (lt-unS-right lt) (n<=2*n-2 n) where
+      cases : ∀ {n} →
+        (S (S (S -2)) <=tl tlp n) →
+        (S (S (S -2)) <tl tlp n →
+         (tlp n <=tl plus2 (-2ptl n) (-2ptl n))) →
+        (S (tlp n) <=tl plus2 (-2ptl (S n)) (-2ptl (S n)))
+      cases {n} (Inl lt') f = <=trans (<=SCong (f lt')) (Inl (2*S-2 n))
+      cases {n} (Inr eq)  _ = transport (λ x → S x <=tl plus2 (-2ptl (S n)) (-2ptl (S n))) eq (arith n (! eq)) where
+        arith : ∀ n -> tlp n ≃ (tl 1) → (tl 2) <=tl 2* (S n) -2
+        arith One eq' = Inr id
+        arith (S n) eq' = Sums.abort (pos-not-<=0 n (<=-unS (Inr eq')))
+
     min-1nat : (m : Nat) → mintl (S -2) (tl m) ≃ (S -2)
     min-1nat Z = id
     min-1nat (S y) = id
@@ -277,15 +279,21 @@ module Int where
     k<=n->k<=2n-2 k n (Inl lt)        = <=trans (Inl lt) (n<=2*n-2 n (>pos->1 k n lt))  
     k<=n->k<=2n-2 k n (Inr (eq , lt)) = <=trans (Inr eq) (n<=2*n-2 n lt)
 
-  {-# NO_TERMINATION_CHECK #-}
-  -- FIXME: doesn't work in 2.4.1 without-K 
+
+  -- needed to move this outside to work around without-K termination restriction
+  <=-to-+-cases : ∀ {n n'} →
+        (tlp n <=tl tlp n')  →
+        ( (tlp n <=tl tlp n') → Σe Nat (λ k → Id (tlp (n +pn k)) (tlp n'))) →
+        Σe Nat (λ k → Id (tlp (n +pn k)) (S (tlp n')))
+  <=-to-+-cases {n}{n'}(Inr eq) f = S Z , (ap S eq) ∘ ap (S o tlp) (+pn-rh-Z n) ∘ ap tlp (+pn-rh-S n Z)
+  <=-to-+-cases {n} (Inl lt') f with f (Inl lt')
+  ...              | (n'' , eq''') = S n'' , ap S eq''' ∘ ap tlp (+pn-rh-S n n'')
+
   <=-to-+ : ∀ {n m} -> tlp n <=tl tlp m -> Σ \ k -> tlp (n +pn k) ≃ tlp m
   <=-to-+ {n}{m} (Inr p) = 0 , p ∘ ap tlp (+pn-rh-Z n)
   <=-to-+ {One} {One} (Inl (ltSR (ltSR (ltSR ()))))
-  <=-to-+ {S n} {One} (Inl lt) with pos-not-<=0 n (Inl (lt-unS lt))
-  ... | () 
-  <=-to-+ {n} {S n'} (Inl lt) with lt-unS-right lt
-  ... | Inr eq = S Z , (ap S eq) ∘ ap (S o tlp) (+pn-rh-Z n) ∘ ap tlp (+pn-rh-S n Z)
-  ... | Inl lt' with <=-to-+ {n}{n'} (Inl lt') 
-  ...              | (n'' , eq''') = S n'' , ap S eq''' ∘ ap tlp (+pn-rh-S n n'')
+  <=-to-+ {S n} {One} (Inl lt) = Sums.abort( pos-not-<=0 n (Inl (lt-unS lt)))
+  <=-to-+ {n} {S n'} (Inl lt) = <=-to-+-cases {n}{n'} (lt-unS-right lt) (<=-to-+ {n} {n'}) 
+
+
 

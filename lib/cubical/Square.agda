@@ -255,6 +255,8 @@ module lib.cubical.Square where
     → (Square l' bt b' r')
     → Square (l' ∘ l) t b' (r' ∘ r)
   ∘-square-vertical id s = s
+  
+  _∘-square-v_ = ∘-square-vertical
 
   -- FIXME: how do you get this from a Kan filling?
   ∘-square-vertical/degen-bot : {A : Type}
@@ -306,6 +308,16 @@ module lib.cubical.Square where
               (f   : Square p0- p-0 p-1 p1-)
               → Square p1- (! p-0) (! p-1) p0-
   !-square-h id = id
+
+  !-square-v : {A : Type}
+              {a00 a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              (f   : Square p0- p-0 p-1 p1-)
+              → Square (! p0-) (p-1) p-0 (! p1-)
+  !-square-v id = id
   
   square-symmetry : {A : Type}
               {a00 a01 a10 a11 : A} 
@@ -444,4 +456,14 @@ module lib.cubical.Square where
     → SquareOver A hrefl-square (apdo f δ) (hom-to-over/left id (ap≃ p)) (hom-to-over/left id (ap≃ p)) (apdo g δ) 
   apdo-by-equals f .f id id = id
 
-
+  apdo-square : 
+              {A : Type} {B : A → Type} (f : (x : A) → B x)
+              {a00 a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              (fa   : Square p0- p-0 p-1 p1-)
+              → SquareOver B fa (apdo f p0-) (apdo f p-0) (apdo f p-1) (apdo f p1-)
+  apdo-square f id = id
+                
