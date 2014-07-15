@@ -467,3 +467,6 @@ module lib.cubical.Square where
               → SquareOver B fa (apdo f p0-) (apdo f p-0) (apdo f p-1) (apdo f p1-)
   apdo-square f id = id
                 
+  -- FIXME better definition?
+  sides-same-square : {A : Type} {a : A} (p : a == a) → Square p p p p 
+  sides-same-square p = disc-to-square {p0- = p} {p} {p} {p} id

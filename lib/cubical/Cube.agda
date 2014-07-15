@@ -419,7 +419,11 @@ module lib.cubical.Cube where
               {p-1 : a01 == a11}
               {p1- : a10 == a11}
               (f   : Square p0- p-0 p-1 p1-)
-              → Cube f (ap-square (\ x -> x) f) (horiz-degen-square (! (ap-id p0-))) (horiz-degen-square (! (ap-id p-0))) (horiz-degen-square (! (ap-id p-1))) (horiz-degen-square (! (ap-id p1-))) 
+              → Cube f (ap-square (\ x -> x) f)
+                        (horiz-degen-square (! (ap-id p0-)))
+                        (horiz-degen-square (! (ap-id p-0)))
+                        (horiz-degen-square (! (ap-id p-1)))
+                        (horiz-degen-square (! (ap-id p1-))) 
   ap-square-id! id = id
 
   ap-square-o : {A B C : Type} (g : B → C) (f : A → B) 

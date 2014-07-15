@@ -66,7 +66,6 @@ module S¹ where
 
   open S public
 
-
   {-
   without the Unit->Unit trick, you can prove
 
@@ -96,6 +95,7 @@ module S¹ where
   Id (S¹-rec .c .p) (S¹-rec .c .q)
   -}
 
+
   -- Equivalence between (S¹ -> X) and Σe X (\ x → Id x x)
   η-rec : {C : Type} 
             (M : S¹ -> C)
@@ -109,6 +109,7 @@ module S¹ where
                            ∘ transport-Path M (S¹-rec (M base) (ap M loop)) loop id
                           )
                           N 
+
 
   η-elim : {C : S¹ -> Type} 
           (M : (x : S¹) -> C x)
@@ -164,6 +165,7 @@ module S¹ where
     βloop/elimo C c α = (IsEquiv.β (snd hom-to-over/left-eqv) α ∘
                            ap (hom-to-over/left loop) (βloop/elim c (over-to-hom/left α))) ∘ apdo-apd (S¹-elimo C c α) loop
 
+
 {-
   -- haven't needed this yet
 
@@ -211,6 +213,7 @@ module S¹ where
     reverse-is-inverse : (α : base ≃ base) → ap reverse α ≃ ! α 
     reverse-is-inverse α = path-induction P id α
 -}
+
 
   
 
