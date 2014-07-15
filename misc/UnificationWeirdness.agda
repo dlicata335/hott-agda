@@ -1,6 +1,6 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
-module misc.UniBug241 where
+module misc.UnificationWeirdness where
 
 data Id {A : Set} (M : A) : A → Set where
   id : Id M M
