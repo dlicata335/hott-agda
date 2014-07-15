@@ -59,25 +59,38 @@ module S¹ where
                -> (α : c == c)
                -> S¹ -> C
       S¹-rec a α = S¹-rec' a α (Phantom.phantom <>⁺)
+
+      postulate
+        S¹-rec-postulate : {C : Set} 
+               -> (c : C)
+               -> (α : c == c)
+               -> S¹ -> C
     
   open S public
 
--- 
-notbad : S¹.S¹ == S¹.S¹
-notbad = {!!}
-
 bad : S¹.S¹ → S¹.S¹
 bad = S¹.S¹-rec S¹.base {!!}
+-- agda2-show-constraints : ?0 := id
 
-bad' : S¹.S¹ → S¹.S¹
-bad' = S¹.S¹-rec S¹.base S¹.loop
+-- doesn't happen if we do the same thing with a postulate
+notbad1 : S¹.S¹ → S¹.S¹
+notbad1 = S¹.S¹-rec-postulate S¹.base {!!}
 
+-- we can fill the goal that is constrained to be id with loop
+fillbad : S¹.S¹ → S¹.S¹
+fillbad = S¹.S¹-rec S¹.base S¹.loop
+
+-- if there is some variable of type base=base, then the unification constraint is
+-- not generated
 notbad2 : (S¹.base == S¹.base) → S¹.S¹ → S¹.S¹
 notbad2 t = S¹.S¹-rec S¹.base {!!}
 
-notbad3 : ap bad' S¹.loop == id
+-- these don't unify
+notbad3 : (S¹.S¹-rec S¹.base S¹.loop) == (S¹.S¹-rec S¹.base id)
 notbad3 = {!id!}
 
+-- if there is something else in scope (locally)
+-- then the constraint is not generated
 l = S¹.loop
 
 notbad4 : S¹.S¹ → S¹.S¹
