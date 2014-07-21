@@ -108,3 +108,11 @@ module lib.AdjointEquiv where
                → ((x : A) → P (fst e x))
                → ((y : B) → P y)
  elim-along-equiv P e b y = transport P (IsEquiv.β (snd e) y) (b (IsEquiv.g (snd e) y))
+
+ ine : {A B : Type} → Equiv A B → B → A
+ ine (f , isequiv g _ _ _) = g
+
+ oute : {A B : Type} → Equiv A B → A → B
+ oute (f , _ ) = f
+
+ 

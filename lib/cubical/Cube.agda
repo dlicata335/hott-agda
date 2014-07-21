@@ -35,6 +35,42 @@ module lib.cubical.Cube where
     → Type where
     id : Cube id id id id id id
 
+  data CubeOver {A : Type} {a000 : A} (B : A → Type) {b000 : B a000}: 
+    {a010 a100 a110 a001 a011 a101 a111 : A}
+    {b010 : B a010} {b100 : B a100} {b110 : B a110} {b001 : B a001} {b011 : B a011} {b101 : B a101} {b111 : B a111}
+    {p0-0 : a000 == a010} {q0-0 : PathOver B p0-0 b000 b010}
+    {p-00 : a000 == a100}     {q-00 : PathOver B p-00 b000 b100}
+    {p-10 : a010 == a110}     {q-10 : PathOver B p-10 b010 b110}
+    {p1-0 : a100 == a110}     {q1-0 : PathOver B p1-0 b100 b110}
+    {f--0 : Square p0-0 p-00 p-10 p1-0} -- left
+
+    {p0-1 : a001 == a011}     {q0-1 : PathOver B p0-1 b001 b011}
+    {p-01 : a001 == a101}     {q-01 : PathOver B p-01 b001 b101}
+    {p-11 : a011 == a111}     {q-11 : PathOver B p-11 b011 b111}
+    {p1-1 : a101 == a111}     {q1-1 : PathOver B p1-1 b101 b111}
+    {f--1 : Square p0-1 p-01 p-11 p1-1} -- right
+
+    {p00- : a000 == a001}     {q00- : PathOver B p00- b000 b001}
+    {p01- : a010 == a011}     {q01- : PathOver B p01- b010 b011}
+    {p10- : a100 == a101}     {q10- : PathOver B p10- b100 b101}
+    {p11- : a110 == a111}     {q11- : PathOver B p11- b110 b111}
+    {f0-- : Square p0-0 p00- p01- p0-1} -- back
+    {f-0- : Square p-00 p00- p10- p-01} -- top
+    {f-1- : Square p-10 p01- p11- p-11} -- bot
+    {f1-- : Square p1-0 p10- p11- p1-1} -- front
+
+    → Cube f--0 f--1 f0-- f-0- f-1- f1-- 
+    → 
+    (g--0 : SquareOver B f--0 q0-0 q-00 q-10 q1-0) -- left
+    (g--1 : SquareOver B f--1 q0-1 q-01 q-11 q1-1) -- right
+    (g0-- : SquareOver B f0-- q0-0 q00- q01- q0-1) -- back
+    (g-0- : SquareOver B f-0- q-00 q00- q10- q-01) -- top
+    (g-1- : SquareOver B f-1- q-10 q01- q11- q-11) -- bot
+    (g1-- : SquareOver B f1-- q1-0 q10- q11- q1-1) -- front 
+   
+    → Type where
+    id : CubeOver B id id id id id id id
+
   -- old left and right are new top and bottom
   -- old top and bottom are new front and back
   -- old back and front are new left and right
@@ -496,3 +532,30 @@ module lib.cubical.Cube where
       → Σ \ (f--0 : Square p0-0 p-00 p-10 p1-0) → 
             Cube f--0 f--1 f0-- f-0- f-1- f1--
   -- fill-cube-left f--1 id f-0- f-1- id = {!!} -- need induction on degen square
+
+  postulate
+    CubeΣ-eqv : {A : Type} {B : A → Type} {a000 : Σ B}  
+              {a010 a100 a110 a001 a011 a101 a111 : Σ B}
+              {p0-0 : a000 == a010}
+              {p-00 : a000 == a100}
+              {p-10 : a010 == a110}
+              {p1-0 : a100 == a110}
+              {f--0 : Square p0-0 p-00 p-10 p1-0} -- left
+              {p0-1 : a001 == a011}
+              {p-01 : a001 == a101}
+              {p-11 : a011 == a111}
+              {p1-1 : a101 == a111}
+              {f--1 : Square p0-1 p-01 p-11 p1-1} -- right
+              {p00- : a000 == a001}
+              {p01- : a010 == a011}
+              {p10- : a100 == a101}
+              {p11- : a110 == a111}
+              {f0-- : Square p0-0 p00- p01- p0-1} -- back
+              {f-0- : Square p-00 p00- p10- p-01} -- top
+              {f-1- : Square p-10 p01- p11- p-11} -- bot
+              {f1-- : Square p1-0 p10- p11- p1-1} -- front
+              → Equiv (Cube f--0 f--1 f0-- f-0- f-1- f1--)
+                      (Σ \ (c : Cube (fst (oute SquareΣ-eqv f--0)) (fst (oute SquareΣ-eqv f--1)) (fst (oute SquareΣ-eqv f0--)) (fst (oute SquareΣ-eqv f-0-)) (fst (oute SquareΣ-eqv f-1-)) (fst (oute SquareΣ-eqv f1--))) → 
+                           CubeOver B c (snd (oute SquareΣ-eqv f--0)) (snd (oute SquareΣ-eqv f--1)) (snd (oute SquareΣ-eqv f0--)) (snd (oute SquareΣ-eqv f-0-)) (snd (oute SquareΣ-eqv f-1-)) (snd (oute SquareΣ-eqv f1--)))
+
+

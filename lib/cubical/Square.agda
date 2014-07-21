@@ -470,3 +470,35 @@ module lib.cubical.Square where
   -- FIXME better definition?
   sides-same-square : {A : Type} {a : A} (p : a == a) → Square p p p p 
   sides-same-square p = disc-to-square {p0- = p} {p} {p} {p} id
+
+  out-SquareΣ : {A : Type} {B : A → Type}
+                  {p00 p01 p10 p11 : Σ B}
+                  {l : p00 == p01}
+                  {t : p00 == p10}
+                  {b : p01 == p11}
+                  {r : p10 == p11}
+                → (Square l t b r) → 
+                         (Σ (λ (s1 : Square (ap fst l) (ap fst t) (ap fst b) (ap fst r)) → 
+                            SquareOver B s1
+                                       (over-o-ap B (apdo snd l))
+                                       (over-o-ap B (apdo snd t))
+                                       (over-o-ap B (apdo snd b))
+                                       (over-o-ap B (apdo snd r))))
+  out-SquareΣ id = (id , id)
+
+  
+  SquareΣ-eqv : {A : Type} {B : A → Type}
+                  {p00 p01 p10 p11 : Σ B}
+                  {l : p00 == p01}
+                  {t : p00 == p10}
+                  {b : p01 == p11}
+                  {r : p10 == p11}
+                → Equiv (Square l t b r)
+                         (Σ (λ (s1 : Square (ap fst l) (ap fst t) (ap fst b) (ap fst r)) → 
+                            SquareOver B s1
+                                       (over-o-ap B (apdo snd l))
+                                       (over-o-ap B (apdo snd t))
+                                       (over-o-ap B (apdo snd b))
+                                       (over-o-ap B (apdo snd r))))
+  SquareΣ-eqv = (out-SquareΣ , FIXME) where postulate FIXME : ∀ {A : Type} → A
+  
