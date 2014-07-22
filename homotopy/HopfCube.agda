@@ -104,10 +104,37 @@ module homotopy.HopfCube where
   -- should be trivial by h-level reasons... should be a Cube in S¹
       3t2-cube : CubeOver H {S¹.base} S²-int id id id id id id 
 
+
+  SquareOver-H-square-eqv : {b1 b2 b3 b4 : S¹.S¹} 
+                            {l : PathOver (\ x -> x) id b1 b2} 
+                            {t : PathOver (\ x -> x) id b1 b3}
+                            {b : PathOver (\ x -> x) id b2 b4}
+                            {r : PathOver (\ x -> x) id b3 b4}
+                         → Equiv (SquareOver (\ X -> X) H-square l t b r)
+                                 (Square (over-to-hom/left (b ∘o l))
+                                 (S¹.S¹-elimo _ S¹.loop (PathOver=.in-PathOver-= (fst H-square2-and-cube)) b1)
+                                 id
+                                 (over-to-hom/left (r ∘o t)))
+  SquareOver-H-square-eqv =  {! (squareover-El-eqv {s = H-square}) !}
+
+
+  H-SquareOver : SquareOver H {b00 = S¹.base} S².loop id id id id
+  H-SquareOver = {!coe ? (SquareOver-H-square-eqv !} where
+    goal1 : SquareOver (\ x -> x) {b00 = S¹.base} (ap-square H S².loop) id id id id
+    goal1 = {!!}
+
+    goal2 : SquareOver (\ x -> x) {b00 = S¹.base} (H-square) id id id id
+    goal2 = ine SquareOver-H-square-eqv {!doesn't exist!}
+
+  Hsect : (x : S².S²) → H x
+  Hsect = S².S²-elim _ S¹.base H-SquareOver
+
+  Hsect-loop : (x : S².S²) → Hsect x == Hsect x
+  Hsect-loop = S².S²-elim _ S¹.loop {!should be a cube in S¹, trivial!} -- could have picked loop, etc.
+
   3t2 : S³.S³ → Σ H
   3t2 = S³.S³-rec (S².base , S¹.base)
-                  (ine (CubeΣ-eqv{f--0 = id}{f--1 = id}{f0-- = id}{f-0- = id}{f-1- = id}{f1-- = id})
-                                 (S²-int , 3t2-cube)) where 
+                  (coe {!!} (cross-square-path-Σ {B = H} S².loop (λ≃ Hsect-loop)))
 
   SquareOver-H-loop-pathover : (b100 : S¹.S¹) → PathOver H (id{_}{S².base}) b100 b100
   SquareOver-H-loop-pathover = \b100 → (hom-to-over/left id (! (S¹.S¹-elimo _ S¹.loop (PathOver=.in-PathOver-= (fst H-square2-and-cube)) b100)))
@@ -169,7 +196,7 @@ module homotopy.HopfCube where
            ap-cube 2t3' (ine (CubeΣ-eqv{f--0 = id}{f--1 = id}{f0-- = id}{f-0- = id}{f-1- = id}{f1-- = id}) (S²-int , 3t2-cube)) ≃〈 {!!} 〉
            coe {!!}
              (SquareOver=ND.out-SquareOver-=
-              (apdo-square ? S².loop)) ≃〈 {!!} 〉 
+              (apdo-square {!S²-elim (\ x -> c2t S².base x == c2t x)!} S².loop)) ≃〈 {!!} 〉  -- (λ x → ap (λ y → 2t3 x y) {!!})
            S³.loop ∎
 
 
