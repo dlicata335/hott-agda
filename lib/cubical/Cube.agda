@@ -482,7 +482,7 @@ module lib.cubical.Cube where
                             (bifunctor-square2d f p-1 pb) 
   bifunctor-on-cube f s pb = SquareOver=ND.out-SquareOver-= (apdo-square (λ x → ap (λ y → f x (y x)) pb) s)
 
-  operation : {A : Type} {B : A → Type} 
+  cross-square-path-Σ : {A : Type} {B : A → Type} 
               {a00 a01 a10 a11 : A} 
               {p0- : a00 == a01}
               {p-0 : a00 == a10}
@@ -501,9 +501,11 @@ module lib.cubical.Cube where
                           (PathOver=.out-PathOver-= (apdo (λ b → pair= p-0 (apdo b p-0)) pb))
                           (PathOver=.out-PathOver-= (apdo (λ b → pair= p-1 (apdo b p-1)) pb))
                           (PathOver=.out-PathOver-= (apdo (λ b → pair= p1- (apdo b p1-)) pb))
-  operation id id = {!id!}
+  cross-square-path-Σ id id = FIXME where
+    postulate FIXME : {A : Type} → A
 
-  theorem : {A : Type} {B : A → Type} {C : Type}
+{-
+  cross-square-path-Σ-compute : {A : Type} {B : A → Type} {C : Type}
             (f : (x : A) → B x → C)
             {a00 a01 a10 a11 : A} 
             {p0- : a00 == a01}
@@ -519,7 +521,8 @@ module lib.cubical.Cube where
         (ap-square (λ xy → f (fst xy) (snd xy))
          (PathOver=.out-PathOver-=
           (apdo (λ b → pair= p0- (apdo b p0-)) pb)))) !} (bifunctor-on-cube f s pb)
-  theorem = {!!}
+  cross-square-path-Σ-compute = {!!}
+-}
 
 -- Square (ap (λ y → f a00 (y a00)) pb)
 --       (ap (λ z → f z (b0 z)) p0-) (ap (λ z → f z (b1 z)) p0-)
