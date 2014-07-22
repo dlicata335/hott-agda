@@ -10,6 +10,10 @@ module lib.First where
  g o f = \ x → g (f x)
  infixr 10 _o_
 
+ _od1_ : {A : Type} {B : A → Type} {C : A → Type} → (g : {x : A} → B x → C x) → (f : (x : A) → B x) → ((x : A) → C x)
+ g od1 f = \ x → g (f x)
+ infixr 10 _od1_
+
 
  -- ----------------------------------------------------------------------
  -- paths

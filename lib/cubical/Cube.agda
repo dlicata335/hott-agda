@@ -348,7 +348,7 @@ module lib.cubical.Cube where
                           {p-0 : (x : Γ) → a00 x == a10 x }
                           {p-1 : (x : Γ) → a01 x == a11 x }
                           {p1- : (x : Γ) → a10 x == a11 x }
-                          (f1   : Square (p0- x1) (p-0 x1) (p-1 x1) (p1- x1))
+                          (f1 : Square (p0- x1) (p-0 x1) (p-1 x1) (p1- x1))
                        → (f2 : Square (p0- x2) (p-0 x2) (p-1 x2) (p1- x2))
                        →     (PathOver (\ x -> Square (p0- x) (p-0 x) (p-1 x) (p1- x)) δ f1 f2)
                            == (Cube f1 f2 (PathOver=.out-PathOver-= (apdo p0- δ)) (PathOver=.out-PathOver-= (apdo p-0 δ)) (PathOver=.out-PathOver-= (apdo p-1 δ)) (PathOver=.out-PathOver-= (apdo p1- δ)))
@@ -418,6 +418,11 @@ module lib.cubical.Cube where
                              (ap (λ x → f x b') p)
   bifunctor-square1 f p q = PathOver=.out-PathOver-= (apdo (λ y → ap (λ x → f x y) p) q)
 
+  bifunctor-square2 : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
+                     (p : a == a') (q : b == b') 
+                   → Square (ap (λ y → f a y) q) (ap (λ z → f z b) p) (ap (λ z → f z b') p) (ap (λ y → f a' y) q) 
+  bifunctor-square2 f p q = PathOver=.out-PathOver-= (apdo (λ x → ap (λ y → f x y) q) p)
+
   ap-bifunctor-id-1 : {A B C : Type} (f : A → B → C) {a : A} {b b' : B}
                       (q : b == b') 
                     → ap (uncurry f) (pair×≃ id q) == ap (f a) q
@@ -448,6 +453,83 @@ module lib.cubical.Cube where
                            (horiz-degen-square (ap-bifunctor-id-1 f q))
                            (horiz-degen-square (ap-bifunctor-id-2 f p)) 
   bifunctor-cube1' f id id = id
+
+
+  bifunctor-square2d : {A C : Type} {B : A → Type} (f : (x : A) → B x → C) {a a' : A} {b1 : (x : A) → B x} {b2 : (x : A) → B x}
+                     (p : a == a') (q : b1 == b2) 
+                   → Square (ap (λ y → f a (y a)) q)
+                             (ap (λ z → f z (b1 z)) p)
+                             (ap (λ z → f z (b2 z)) p)
+                             (ap (λ y → f a' (y a')) q)
+  bifunctor-square2d f p q = PathOver=.out-PathOver-= (apdo (λ x → ap (λ y → f x (y x)) q) p)
+
+  bifunctor-on-cube : {A : Type} {B : A → Type} {C : Type}
+                      (f : (x : A) → B x → C)
+                      {a00 a01 a10 a11 : A} 
+                      {p0- : a00 == a01}
+                      {p-0 : a00 == a10}
+                      {p-1 : a01 == a11}
+                      {p1- : a10 == a11}
+                      (s   : Square p0- p-0 p-1 p1-)
+                      {b0 : (x : A) → B x}
+                      {b1 : (x : A) → B x}
+                      (pb : b0 == b1)
+                    → Cube (bifunctor-square2d f p0- pb)
+                            (bifunctor-square2d f p1- pb)
+                            (bifunctor-square2d f p-0 pb)
+                            (ap-square (λ z → f z (b0 z)) s)
+                            (ap-square (λ z → f z (b1 z)) s)
+                            (bifunctor-square2d f p-1 pb) 
+  bifunctor-on-cube f s pb = SquareOver=ND.out-SquareOver-= (apdo-square (λ x → ap (λ y → f x (y x)) pb) s)
+
+  operation : {A : Type} {B : A → Type} 
+              {a00 a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              (s   : Square p0- p-0 p-1 p1-)
+              {b0 : (x : A) → B x}
+              {b1 : (x : A) → B x}
+              (pb : b0 == b1)
+            → Cube {Σ B} {a00 , b0 a00} {a01 , b0 a01} {a10 , b0 a10} {a11 , b0 a11} 
+                          {a00 , b1 a00} {a01 , b1 a01} {a10 , b1 a10} {a11 , b1 a11} 
+                          {pair= p0- (apdo b0 p0-)} {pair= p-0 (apdo b0 p-0)}{pair= p-1 (apdo b0 p-1)}{pair= p1- (apdo b0 p1-)}
+                          (ine SquareΣ-eqv-intro (s , apdo-square b0 s))
+                          (ine SquareΣ-eqv-intro (s , apdo-square b1 s))
+                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p0- (apdo b p0-)) pb))
+                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p-0 (apdo b p-0)) pb))
+                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p-1 (apdo b p-1)) pb))
+                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p1- (apdo b p1-)) pb))
+  operation id id = {!id!}
+
+  theorem : {A : Type} {B : A → Type} {C : Type}
+            (f : (x : A) → B x → C)
+            {a00 a01 a10 a11 : A} 
+            {p0- : a00 == a01}
+            {p-0 : a00 == a10}
+            {p-1 : a01 == a11}
+            {p1- : a10 == a11}
+            (s   : Square p0- p-0 p-1 p1-)
+            {b0 : (x : A) → B x}
+            {b1 : (x : A) → B x}
+            (pb : b0 == b1)
+          → cube-symmetry-left-to-top (ap-cube (\ {(x , y) → f x y}) (operation s pb)) == 
+             coe {!(square-symmetry
+        (ap-square (λ xy → f (fst xy) (snd xy))
+         (PathOver=.out-PathOver-=
+          (apdo (λ b → pair= p0- (apdo b p0-)) pb)))) !} (bifunctor-on-cube f s pb)
+  theorem = {!!}
+
+-- Square (ap (λ y → f a00 (y a00)) pb)
+--       (ap (λ z → f z (b0 z)) p0-) (ap (λ z → f z (b1 z)) p0-)
+--       (ap (λ y → f a01 (y a01)) pb)
+
+-- Square
+--    (ap (λ xy → f (fst xy) (snd xy)) (ap (λ z → a00 , z a00) pb))
+--    (ap (λ xy → f (fst xy) (snd xy)) (pair= p0- (apdo b0 p0-)))
+--    (ap (λ xy → f (fst xy) (snd xy)) (pair= p0- (apdo b1 p0-)))
+--    (ap (λ xy → f (fst xy) (snd xy)) (ap (λ z → a01 , z a01) pb))
 
   ap-square-id! : {A : Type} {a00 a01 a10 a11 : A} 
               {p0- : a00 == a01}

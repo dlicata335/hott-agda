@@ -174,42 +174,54 @@ module lib.cubical.PathOver where
          → α == (coe (PathOver∘-transport A δ1) α) ∘o (PathOver-transport-right A δ1)
   factor∘ A {.θ3} {.θ3} {θ3} {.id} {id} id = id 
 
-  postulate
-    PathOverΠ : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
-              → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
-              →  PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g 
-              == ((x : A θ1) (y : A θ2) (α : PathOver A δ x y) → PathOver B (pair= δ α) (f x) (g y))
+  out-PathOver-constant : {Δ : Type} {A : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {M1 : A} {M2 : A} 
+                        → PathOver (\ _ -> A) δ M1 M2
+                        → M1 == M2
+  out-PathOver-constant id = id
 
-    PathOverΠ-id : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
-                 → {θ1 : Δ} (f : (x : A θ1) → B (θ1 , x)) {x : _}
-                 → coe (PathOverΠ {A = A} {B = B}{δ = id} {f = f}) id x x id == id
+  in-PathOver-constant : {Δ : Type} {A : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {M1 : A} {M2 : A} 
+                         → M1 == M2
+                         → PathOver (\ _ -> A) δ M1 M2
+  in-PathOver-constant {δ = id} id = id
 
-    PathOverType : {Δ : Type} {A B : Type}
-              → {θ1 θ2 : Δ} {δ : θ1 == θ2}
-              → PathOver (\ θ → Type) δ A B == Equiv A B 
+  PathOver-constant-eqv : {Δ : Type} {A : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {M1 : A} {M2 : A} 
+                        →
+                        Equiv (PathOver (\ _ -> A) δ M1 M2)
+                              (M1 == M2)
+  PathOver-constant-eqv = improve (hequiv out-PathOver-constant in-PathOver-constant FIXME FIXME) where
+    postulate FIXME : {A : Type} → A
 
-    PathOverType-id : {Δ : Type} {θ : Δ} {A : Type} → coe (PathOverType{_}{_}{_}{θ}) id == (id-equiv{A})
+  over-to-hom/left : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} {δ : θ1 == θ2} → ∀ {M1 M2} 
+            →  (PathOver A δ M1 M2)
+            → ((transport A δ M1) == M2) 
+  over-to-hom/left id = id
 
-    PathOverType-!  : {Δ : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {A B : Type} {α : PathOver (\ _ -> Type) δ A B}
-                    → coe PathOverType (!o α) == (!equiv (coe PathOverType α))
+  hom-to-over/left : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} (δ : θ1 == θ2) → ∀ {M1 M2} 
+            → ((transport A δ M1) == M2) 
+            → (PathOver A δ M1 M2)
+  hom-to-over/left id id = id
 
-    PathOverΠ-NDdomain : {Δ : Type} {A : Type} {B : Δ → A → Type}
-              → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A) → B θ1 x} {g : (x : A) → B θ2 x}
-              →  PathOver (\ θ → (x : A) → B θ x) δ f g 
-              == ( (x : A) → PathOver (\ θ → B θ x) δ (f x) (g x))
+  hom-to-over-to-hom/left : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} (δ : θ1 == θ2) → ∀ {M1 M2} 
+            → ( p : ((transport A δ M1) == M2) )
+            → over-to-hom/left (hom-to-over/left δ p) == p
+  hom-to-over-to-hom/left id id = id
 
-  PathOverType-∘ : {Δ : Type} {A B C : Type}
-              → {θ1 θ2 θ3 : Δ} {δ2 : θ2 == θ3} {δ1 : θ1 == θ2}
-              → (α2 : PathOver (\ θ → Type) δ2 B C) (α1 : PathOver (\ θ → Type) δ1 A B) 
-              → (coe PathOverType α2) ∘equiv (coe PathOverType α1) == coe PathOverType (α2 ∘o α1)
-  PathOverType-∘ id id = (! PathOverType-id ∘ pair≃ id (HProp-unique (IsEquiv-HProp (λ x → x)) _ _)) ∘ ap2 _∘equiv_ PathOverType-id PathOverType-id
+  over-to-hom-to-over/left : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} {δ : θ1 == θ2} → ∀ {M1 M2} 
+            → (p : PathOver A δ M1 M2)
+            → hom-to-over/left δ (over-to-hom/left p) == p
+  over-to-hom-to-over/left id = id
 
-  PathOverType-changeover : {Δ : Type} {θ1 θ2 : Δ} {δ δ' : θ1 == θ2} (eq : δ == δ') {M1 : _} {M2 : _} → 
-               (α : PathOver (\ _ -> Type) δ M1 M2)
-             → coe PathOverType α == coe PathOverType (changeover (\ _ -> Type) eq α)
-  PathOverType-changeover id α = id
-    
-
+  hom-to-over/left-eqv : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} {δ : θ1 == θ2} → ∀ {M1 M2} 
+            → Equiv((transport A δ M1) == M2) 
+               (PathOver A δ M1 M2)
+  hom-to-over/left-eqv {δ = δ} = improve
+                                  (hequiv (hom-to-over/left δ) over-to-hom/left
+                                   (hom-to-over-to-hom/left δ) over-to-hom-to-over/left)
 
   over-o-ap : {Γ Δ : Type} (A : Δ → Type) {θ1 : Γ → Δ} 
                {θ1' θ2' : _} {δ' : θ1' == θ2'}  → ∀ {M1 M2}
@@ -247,8 +259,6 @@ module lib.cubical.PathOver where
              Equiv (PathOver (A o θ1) δ' M1 M2) (PathOver A (ap θ1 δ') M1 M2)
   over-o-ap-eqv A = improve (hequiv (over-o-ap A) (over-ap-o A) (over-o-ap-o A) (over-ap-o-ap A))
 
-
-
   over-apd : {A : Type} {B : A → Type}  (C : Σ B → Type)
              {a1 a2 : A} (α : a1 == a2)
              (f : (x : A) → B x) {M1 : _} {M2 : _}
@@ -262,6 +272,58 @@ module lib.cubical.PathOver where
            -> PathOver (\ a -> C (a , f a)) α M1 M2
            → PathOver C (pair= α (apdo f α)) M1 M2
   over-apd-inverse C id f = over-o-ap C {λ x → x , f x} {_} {_} {id}
+
+  out-PathOverΠ : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+              → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
+              →  PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g 
+              → ((x : A θ1) (y : A θ2) (α : PathOver A δ x y) → PathOver B (pair= δ α) (f x) (g y))
+  out-PathOverΠ {B = B} {f = f} id x = path-induction-homo-e _ id
+
+  PathOverΠ-eqv : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+              → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
+              → Equiv (PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g)
+                      (((x : A θ1) (y : A θ2) (α : PathOver A δ x y) → PathOver B (pair= δ α) (f x) (g y)))
+  PathOverΠ-eqv = (out-PathOverΠ , FIXME) where 
+    postulate FIXME : {A : Type} → A
+
+  postulate
+
+    PathOverΠ : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+              → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
+              →  PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g 
+              == ((x : A θ1) (y : A θ2) (α : PathOver A δ x y) → PathOver B (pair= δ α) (f x) (g y))
+
+    PathOverΠ-id : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+                 → {θ1 : Δ} (f : (x : A θ1) → B (θ1 , x)) {x : _}
+                 → coe (PathOverΠ {A = A} {B = B}{δ = id} {f = f}) id x x id == id
+
+    PathOverType : {Δ : Type} {A B : Type}
+              → {θ1 θ2 : Δ} {δ : θ1 == θ2}
+              → PathOver (\ θ → Type) δ A B == Equiv A B 
+
+    PathOverType-id : {Δ : Type} {θ : Δ} {A : Type} → coe (PathOverType{_}{_}{_}{θ}) id == (id-equiv{A})
+
+    PathOverType-!  : {Δ : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {A B : Type} {α : PathOver (\ _ -> Type) δ A B}
+                    → coe PathOverType (!o α) == (!equiv (coe PathOverType α))
+
+    PathOverΠ-NDdomain : {Δ : Type} {A : Type} {B : Δ → A → Type}
+              → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A) → B θ1 x} {g : (x : A) → B θ2 x}
+              →  PathOver (\ θ → (x : A) → B θ x) δ f g 
+              == ( (x : A) → PathOver (\ θ → B θ x) δ (f x) (g x))
+
+  PathOverType-∘ : {Δ : Type} {A B C : Type}
+              → {θ1 θ2 θ3 : Δ} {δ2 : θ2 == θ3} {δ1 : θ1 == θ2}
+              → (α2 : PathOver (\ θ → Type) δ2 B C) (α1 : PathOver (\ θ → Type) δ1 A B) 
+              → (coe PathOverType α2) ∘equiv (coe PathOverType α1) == coe PathOverType (α2 ∘o α1)
+  PathOverType-∘ id id = (! PathOverType-id ∘ pair≃ id (HProp-unique (IsEquiv-HProp (λ x → x)) _ _)) ∘ ap2 _∘equiv_ PathOverType-id PathOverType-id
+
+  PathOverType-changeover : {Δ : Type} {θ1 θ2 : Δ} {δ δ' : θ1 == θ2} (eq : δ == δ') {M1 : _} {M2 : _} → 
+               (α : PathOver (\ _ -> Type) δ M1 M2)
+             → coe PathOverType α == coe PathOverType (changeover (\ _ -> Type) eq α)
+  PathOverType-changeover id α = id
+    
+
+
 
   transport-Πo : ∀ {Γ} (A : Γ -> Set) (B : (γ : Γ) -> A γ -> Set)
             {θ1 θ2 : Γ} (δ : θ1 == θ2) (f : (x : A θ1) -> B θ1 x) 
@@ -296,38 +358,9 @@ module lib.cubical.PathOver where
                  (\ x y α → apdo-split-def {C = C} f M δ x y α) 
     -- apdo-split f M id = λ≃ (split1⁺ _ (λ≃ (split1⁺ _ (λ≃ (λ α → {!!})))))
              
-  over-to-hom/left : {Δ : Type} {A : Δ → Type}
-            → ∀ {θ1 θ2} {δ : θ1 == θ2} → ∀ {M1 M2} 
-            →  (PathOver A δ M1 M2)
-            → ((transport A δ M1) == M2) 
-  over-to-hom/left id = id
-
-  hom-to-over/left : {Δ : Type} {A : Δ → Type}
-            → ∀ {θ1 θ2} (δ : θ1 == θ2) → ∀ {M1 M2} 
-            → ((transport A δ M1) == M2) 
-            → (PathOver A δ M1 M2)
-  hom-to-over/left id id = id
-
-  hom-to-over-to-hom/left : {Δ : Type} {A : Δ → Type}
-            → ∀ {θ1 θ2} (δ : θ1 == θ2) → ∀ {M1 M2} 
-            → ( p : ((transport A δ M1) == M2) )
-            → over-to-hom/left (hom-to-over/left δ p) == p
-  hom-to-over-to-hom/left id id = id
-
-  over-to-hom-to-over/left : {Δ : Type} {A : Δ → Type}
-            → ∀ {θ1 θ2} {δ : θ1 == θ2} → ∀ {M1 M2} 
-            → (p : PathOver A δ M1 M2)
-            → hom-to-over/left δ (over-to-hom/left p) == p
-  over-to-hom-to-over/left id = id
-
-  hom-to-over/left-eqv : {Δ : Type} {A : Δ → Type}
-            → ∀ {θ1 θ2} {δ : θ1 == θ2} → ∀ {M1 M2} 
-            → Equiv((transport A δ M1) == M2) 
-               (PathOver A δ M1 M2)
-  hom-to-over/left-eqv {δ = δ} = improve
-                                  (hequiv (hom-to-over/left δ) over-to-hom/left
-                                   (hom-to-over-to-hom/left δ) over-to-hom-to-over/left)
   
   apdo-apd : {Δ : Type} {A : Δ → Type} (f : (θ : _) → A θ) {θ1 θ2 : Δ} (δ : θ1 == θ2) 
            → apdo f δ == hom-to-over/left δ (apd f δ)
   apdo-apd f id = id
+
+  

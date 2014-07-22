@@ -501,4 +501,138 @@ module lib.cubical.Square where
                                        (over-o-ap B (apdo snd b))
                                        (over-o-ap B (apdo snd r))))
   SquareΣ-eqv = (out-SquareΣ , FIXME) where postulate FIXME : ∀ {A : Type} → A
+
+  -- derive from above
+  postulate
+    SquareΣ-eqv-intro : {A : Type} {B : A → Type}
+                  {p00 p01 p10 p11 : A}
+                  {l : p00 == p01}
+                  {t : p00 == p10}
+                  {b : p01 == p11}
+                  {r : p10 == p11}
+                  → ∀ {p00b p01b p10b p11b}
+                  {lb : PathOver B l p00b p01b}
+                  {tb : PathOver B t p00b p10b}
+                  {bb : PathOver B b p01b p11b}
+                  {rb : PathOver B r p10b p11b}
+                → Equiv (Square (pair= l lb) (pair= t tb) (pair= b bb) (pair= r rb))
+                         (Σ (λ (s1 : Square l t b r) → 
+                            SquareOver B s1 lb tb bb rb))
   
+  postulate
+    SquareOver-Π-eqv : {A : Type} {B1 : A → Type} {B2 : Σ B1 → Type}
+              {a00 : A} {b00 : (x : B1 a00) → B2 (a00 , x)} 
+              {a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              {f   : Square p0- p-0 p-1 p1- }
+              {b01 : (x : B1 a01) → B2 (a01 , x)} {b10 : (x : B1 a10) → B2 (a10 , x)} {b11 : (x : B1 a11) → B2 (a11 , x)}  
+              {q0- : PathOver (\ a -> (x : B1 a) → B2 (a , x)) p0- b00 b01}
+              {q-0 : PathOver (\ a -> (x : B1 a) → B2 (a , x)) p-0 b00 b10}
+              {q-1 : PathOver (\ a -> (x : B1 a) → B2 (a , x)) p-1 b01 b11}
+              {q1- : PathOver (\ a -> (x : B1 a) → B2 (a , x)) p1- b10 b11}
+              → Equiv (SquareOver (\ a -> (x : B1 a) → B2 (a , x)) f q0- q-0 q-1 q1-) 
+                      ((b100 : B1 a00) (b110 : B1 a10) (b101 : B1 a01) (b111 : B1 a11)
+                         (q10- : PathOver B1 p0- b100 b101)
+                         (q1-0 : PathOver B1 p-0 b100 b110)
+                         (q1-1 : PathOver B1 p-1 b101 b111)
+                         (q11- : PathOver B1 p1- b110 b111) →
+                         (f1 : SquareOver B1 f q10- q1-0 q1-1 q11-) → 
+                         SquareOver B2 (ine SquareΣ-eqv-intro (f , f1)) (oute PathOverΠ-eqv q0- _ _ q10-) (oute PathOverΠ-eqv q-0 _ _ q1-0) (oute PathOverΠ-eqv q-1 _ _ q1-1) (oute PathOverΠ-eqv q1- _ _ q11-))
+
+
+  postulate
+    in-square-Type : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
+                  → ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
+                  → (Square {Type} l t b r)
+
+  out-square-Type : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
+                → (Square {Type} l t b r)
+                → ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
+  out-square-Type id x = id
+
+  square-Type-eqv : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
+                → Equiv (Square {Type} l t b r)
+                        ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
+  square-Type-eqv = improve (hequiv out-square-Type in-square-Type FIXME FIXME) where
+    postulate
+      FIXME : {A : Type} → A
+
+  out-squareover-El : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} {s : (Square {Type} l t b r)}
+                          {b1 : A} {b2 : B} {b3 : C} {b4 : D}
+                          {lo : PathOver (\ X -> X) l b1 b2}
+                          {to : PathOver (\ X -> X) t b1 b3}
+                          {bo : PathOver (\ X -> X) b b2 b4}
+                          {ro : PathOver (\ X -> X) r b3 b4}
+                        → (SquareOver (\ X -> X) s lo to bo ro)
+                        → (Square{D} (over-to-hom/left (bo ∘o lo)) 
+                                      (out-square-Type s b1) 
+                                      id
+                                      (over-to-hom/left (ro ∘o to)))
+  out-squareover-El id = id
+
+  postulate
+    in-squareover-El : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} (s : (Square {Type} l t b r))
+                          {b1 : A}
+                          (b2 : B) 
+                          (lo : PathOver (\ X -> X) l b1 b2)
+                          (b3 : C)
+                          (to : PathOver (\ X -> X) t b1 b3)
+                          (b4 : D)
+                          (bo : PathOver (\ X -> X) b b2 b4)
+                          (ro : PathOver (\ X -> X) r b3 b4)
+                       → (Square (over-to-hom/left (bo ∘o lo)) 
+                                  (out-square-Type s b1) 
+                                  id
+                                  (over-to-hom/left (ro ∘o to)))
+                       → (SquareOver (\ X -> X) s lo to bo ro)
+  --in-squareover-El id = path-induction-homo-e _ (path-induction-homo-e _ (path-induction-homo-e _ {!!})) 
+
+  squareover-El-eqv : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} {s : (Square {Type} l t b r)}
+                          {b1 : A} {b2 : B} {b3 : C} {b4 : D}
+                          {lo : PathOver (\ X -> X) l b1 b2}
+                          {to : PathOver (\ X -> X) t b1 b3}
+                          {bo : PathOver (\ X -> X) b b2 b4}
+                          {ro : PathOver (\ X -> X) r b3 b4}
+                       → Equiv (SquareOver (\ X -> X) s lo to bo ro)
+                               (Square (over-to-hom/left (bo ∘o lo)) 
+                                       (out-square-Type s b1) 
+                                       id
+                                       (over-to-hom/left (ro ∘o to)))
+  squareover-El-eqv = improve (hequiv out-squareover-El (in-squareover-El _ _ _ _ _ _ _ _) FIXME FIXME) where
+    postulate FIXME : {A : Type} → A
+
+  out-SquareOver-constant : {A : Type} {B : Type} {a00 : A} {b00 : B }  
+              {a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              {f   : Square p0- p-0 p-1 p1- }
+              {b01 : B} {b10 : B} {b11 : B}  
+              {q0- : PathOver (\ _ -> B) p0- b00 b01}
+              {q-0 : PathOver (\ _ -> B) p-0 b00 b10}
+              {q-1 : PathOver (\ _ -> B) p-1 b01 b11}
+              {q1- : PathOver (\ _ -> B) p1- b10 b11}
+              → SquareOver (\ _ -> B) f q0- q-0 q-1 q1- 
+              → Square (oute PathOver-constant-eqv q0-) (oute PathOver-constant-eqv q-0) (oute PathOver-constant-eqv q-1) (oute PathOver-constant-eqv q1-)
+  out-SquareOver-constant id = id
+  
+  SquareOver-constant-eqv : {A : Type} {B : Type} {a00 : A} {b00 : B }  
+              {a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              {f   : Square p0- p-0 p-1 p1- }
+              {b01 : B} {b10 : B} {b11 : B}  
+              {q0- : PathOver (\ _ -> B) p0- b00 b01}
+              {q-0 : PathOver (\ _ -> B) p-0 b00 b10}
+              {q-1 : PathOver (\ _ -> B) p-1 b01 b11}
+              {q1- : PathOver (\ _ -> B) p1- b10 b11}
+              → Equiv (SquareOver (\ _ -> B) f q0- q-0 q-1 q1-)
+                      (Square (oute PathOver-constant-eqv q0-) (oute PathOver-constant-eqv q-0) (oute PathOver-constant-eqv q-1) (oute PathOver-constant-eqv q1-))
+  SquareOver-constant-eqv = (out-SquareOver-constant , FIXME) where
+    postulate FIXME : {A : Type} → A
