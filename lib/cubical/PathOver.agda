@@ -363,4 +363,12 @@ module lib.cubical.PathOver where
            → apdo f δ == hom-to-over/left δ (apd f δ)
   apdo-apd f id = id
 
+  ap-bifunctor-pair= : {A C : Type} {B : A → Type} (f : (x : A) → B x → C) → 
+              {a00 a01 : A} 
+              (la : a00 == a01)
+              → ∀ {b00 b01} →  
+              (lb : PathOver B la b00 b01)
+              → ap (\ {(x , y) → f x y}) (pair= la lb) ==
+                oute PathOver-constant-eqv (oute PathOverΠ-eqv (apdo f la) b00 b01 lb)
+  ap-bifunctor-pair= f .id id = id
   

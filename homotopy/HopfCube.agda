@@ -21,8 +21,23 @@ module homotopy.HopfCube where
   H-square : Square{Type}{S¹.S¹} id id id id
   H-square = in-square-Type (S¹.S¹-elimo _ S¹.loop (PathOver=.in-PathOver-= (fst H-square2-and-cube)))
 
+  postulate 
+    SquareOver-H-Square-eqv : {b1 b2 b3 b4 : S¹.S¹} 
+           {l : PathOver (\ x -> x) id b1 b2} 
+           {t : PathOver (\ x -> x) id b1 b3}
+           {b : PathOver (\ x -> x) id b2 b4}
+           {r : PathOver (\ x -> x) id b3 b4}
+         → Equiv (SquareOver (\ X -> X) H-square l t b r)
+                 (Square (over-to-hom/left (b ∘o l))
+                         (S¹.S¹-elimo _ S¹.loop (PathOver=.in-PathOver-= (fst H-square2-and-cube)) b1)
+                         id
+                         (over-to-hom/left (r ∘o t)))
+
   H : S².S² → Type
   H = S².S²-rec S¹.S¹ H-square
+
+
+
 
 {-
   interchange : {A : Type}
@@ -50,6 +65,32 @@ module homotopy.HopfCube where
               == (upleft ∘-square-v lowleft) ∘-square-h (upright ∘-square-v lowright)
   interchange {left1 = id} s1 id id {bot4 = id} s4 = {!!}
 
+  ap-interchange : {A B : Type}
+              {a00 a01 a10 a11 : A} 
+              {left1 : a00 == a01}
+              {top1 : a00 == a10}
+              {bot1 : a01 == a11}
+              {right1 : a10 == a11}
+              (upleft : Square left1 top1 bot1 right1)
+              {a20 a21 : A} 
+              {top2 : a10 == a20}
+              {bot2 : a11 == a21}
+              {right2 : a20 == a21}
+              (upright : Square right1 top2 bot2 right2)
+              {a02 a12 : A} 
+              {left3 : a01 == a02}
+              {bot3 : a02 == a12}
+              {right3 : a11 == a12}
+              (lowleft : Square left3 bot1 bot3 right3)
+              {a22 : A} 
+              {bot4 : a12 == a22}
+              {right4 : a21 == a22}
+              (lowright : Square right3 bot2 bot4 right4)
+              (f : A → B) → 
+              ap-cube f (degen-cube-h (interchange upleft upright lowleft lowright))
+              == {!degen-cube-h (interchange (ap-square f upleft) (ap-square f upright) (ap-square f lowleft) (ap-square f lowright))    !}
+  ap-interchange = {!!}
+
   int-id-s-!s-id-1 : {A : Type}
               {a20 : A} 
               {top2 : a20 == a20}
@@ -76,7 +117,17 @@ module homotopy.HopfCube where
                      (!-square-h (!-square-h (square-symmetry upright) ∘-square-h ∘-square {p = top2} {q = id}))
                      id
   int-id-s-!s-id-2 = {!!}
+-}
 
+  degen-square-h-path-eqv : {A : Type}
+                 {a a' : A} 
+                 {top : a == a'}
+                 {bot : a == a'}
+                 → Equiv (Square id top bot id)
+                         (bot == top)
+  degen-square-h-path-eqv {top = top} = improve (hequiv ((λ p → ∘-unit-l top ∘ p) o square-to-disc) (!-square-v o vertical-degen-square) FIXME FIXME) where
+    postulate FIXME : {A : Type} → A
+  
 
   -- the specific case we need, with upleft = id, botright = id, and botleft = !v upright
   interchange' : {A : Type}
@@ -90,12 +141,34 @@ module homotopy.HopfCube where
                      hrefl-square
                      (!-square-h (∘-square {q = id}))
                      id
-  interchange' = {!!}
--}
+  interchange' = elim-along-equiv _ (!equiv degen-square-h-path-eqv) (path-induction
+                                                                        (λ top2 x →
+                                                                           Cube
+                                                                           (!-square-v (fst (!equiv degen-square-h-path-eqv) x) ∘-square-h
+                                                                            fst (!equiv degen-square-h-path-eqv) x)
+                                                                           (fst (!equiv degen-square-h-path-eqv) x ∘-square-v
+                                                                            !-square-v (fst (!equiv degen-square-h-path-eqv) x))
+                                                                           id hrefl-square (!-square-h ∘-square) id)
+                                                                        id) 
+  H-SquareOver : SquareOver H S².loop id (hom-to-over/left id (! S¹.loop)) id id 
+  H-SquareOver = {!!} where 
+    goal1 : SquareOver (\ x -> x) (ap-square H S².loop) id (hom-to-over/left id (! S¹.loop)) id id 
+    goal1 = {!!}
 
-  postulate
-    S²-int : Cube{S².S²}{S².base} id id id id id id
-  -- S²-int = {!interchange' S².loop!}
+    goal2 : SquareOver (\ x -> x) (H-square) id (hom-to-over/left id (! S¹.loop)) id id 
+    goal2 = ine SquareOver-H-Square-eqv (disc-to-square {!!})
+
+  ΣH-square : Square {Σ H} (pair= id id) (pair= id (hom-to-over/left id (! S¹.loop))) (pair= id id) (pair= id id) 
+  ΣH-square = ine SquareΣ-eqv-intro (S².loop , H-SquareOver)
+
+
+  test' : Cube (!-square-v H-square ∘-square-h H-square)
+            (H-square ∘-square-v !-square-v H-square) id id
+            id id
+  test' = interchange' H-square
+
+  S²-int : Cube{S².S²}{S².base} id id id id id id
+  S²-int = {!interchange' S².loop!}
     -- whisker-cube id id id {!!} {!!} id (int-id-s-!s-id-1 S².loop ∘-cube-h 
     --                                           degen-cube-h (interchange id S².loop (!-square-v S².loop) id) ∘-cube-h
     --                                           int-id-s-!s-id-2 S².loop)
@@ -104,37 +177,9 @@ module homotopy.HopfCube where
   -- should be trivial by h-level reasons... should be a Cube in S¹
       3t2-cube : CubeOver H {S¹.base} S²-int id id id id id id 
 
-
-  SquareOver-H-square-eqv : {b1 b2 b3 b4 : S¹.S¹} 
-                            {l : PathOver (\ x -> x) id b1 b2} 
-                            {t : PathOver (\ x -> x) id b1 b3}
-                            {b : PathOver (\ x -> x) id b2 b4}
-                            {r : PathOver (\ x -> x) id b3 b4}
-                         → Equiv (SquareOver (\ X -> X) H-square l t b r)
-                                 (Square (over-to-hom/left (b ∘o l))
-                                 (S¹.S¹-elimo _ S¹.loop (PathOver=.in-PathOver-= (fst H-square2-and-cube)) b1)
-                                 id
-                                 (over-to-hom/left (r ∘o t)))
-  SquareOver-H-square-eqv =  {! (squareover-El-eqv {s = H-square}) !}
-
-
-  H-SquareOver : SquareOver H {b00 = S¹.base} S².loop id id id id
-  H-SquareOver = {!coe ? (SquareOver-H-square-eqv !} where
-    goal1 : SquareOver (\ x -> x) {b00 = S¹.base} (ap-square H S².loop) id id id id
-    goal1 = {!!}
-
-    goal2 : SquareOver (\ x -> x) {b00 = S¹.base} (H-square) id id id id
-    goal2 = ine SquareOver-H-square-eqv {!doesn't exist!}
-
-  Hsect : (x : S².S²) → H x
-  Hsect = S².S²-elim _ S¹.base H-SquareOver
-
-  Hsect-loop : (x : S².S²) → Hsect x == Hsect x
-  Hsect-loop = S².S²-elim _ S¹.loop {!should be a cube in S¹, trivial!} -- could have picked loop, etc.
-
   3t2 : S³.S³ → Σ H
   3t2 = S³.S³-rec (S².base , S¹.base)
-                  (coe {!!} (cross-square-path-Σ {B = H} S².loop (λ≃ Hsect-loop)))
+                  id
 
   SquareOver-H-loop-pathover : (b100 : S¹.S¹) → PathOver H (id{_}{S².base}) b100 b100
   SquareOver-H-loop-pathover = \b100 → (hom-to-over/left id (! (S¹.S¹-elimo _ S¹.loop (PathOver=.in-PathOver-= (fst H-square2-and-cube)) b100)))
@@ -189,14 +234,25 @@ module homotopy.HopfCube where
   2t3' : Σ H → S³.S³
   2t3' (x , y) = 2t3 x y
 
+  red1 : Cube (ap-square 2t3' ΣH-square) (oute SquareOver-constant-eqv
+                                            (oute SquareOver-Π-eqv (apdo-square 2t3 S².loop) S¹.base S¹.base
+                                             S¹.base S¹.base id (hom-to-over/left id (! S¹.loop)) id id
+                                             H-SquareOver))
+                                         _ _ _ _ 
+  red1 = ap-bifunctor-square 2t3 _ _
+
   3t2t3 : (x : S³.S³) → (2t3' (3t2 x)) == x
   3t2t3 = S³.S³-elim _ id {!  !}  where
     test : ap-cube (2t3' o 3t2) S³.loop == S³.loop
     test = ap-cube (2t3' o 3t2) S³.loop ≃〈 {!!} 〉 
            ap-cube 2t3' (ine (CubeΣ-eqv{f--0 = id}{f--1 = id}{f0-- = id}{f-0- = id}{f-1- = id}{f1-- = id}) (S²-int , 3t2-cube)) ≃〈 {!!} 〉
            coe {!!}
-             (SquareOver=ND.out-SquareOver-=
-              (apdo-square {!S²-elim (\ x -> c2t S².base x == c2t x)!} S².loop)) ≃〈 {!!} 〉  -- (λ x → ap (λ y → 2t3 x y) {!!})
+              (coe (PathOver-square/= _ _ _)
+                 (apdo
+                  (oute SquareOver-constant-eqv od1
+                   oute SquareOver-H-loop-with-boundary-eqv'
+                   (oute SquareOver-Π-eqv (apdo-square 2t3 S².loop)))
+                  S¹.loop)) ≃〈 {!!} 〉  -- (λ x → ap (λ y → 2t3 x y) {!!})
            S³.loop ∎
 
 

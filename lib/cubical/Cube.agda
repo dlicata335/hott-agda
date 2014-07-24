@@ -644,3 +644,22 @@ module lib.cubical.Cube where
                            CubeOver B c (snd (oute SquareΣ-eqv f--0)) (snd (oute SquareΣ-eqv f--1)) (snd (oute SquareΣ-eqv f0--)) (snd (oute SquareΣ-eqv f-0-)) (snd (oute SquareΣ-eqv f-1-)) (snd (oute SquareΣ-eqv f1--)))
 
 
+  postulate
+    ap-bifunctor-square : {A C : Type} {B : A → Type} (f : (x : A) → B x → C) → 
+                {a00 a01 a10 a11 : A} 
+                {la : a00 == a01}
+                {ta : a00 == a10}
+                {ba : a01 == a11}
+                {ra : a10 == a11}
+                (fa   : Square la ta ba ra)
+                → ∀ {b00 b01 b10 b11} →  
+                {lb : PathOver B la b00 b01}
+                {tb : PathOver B ta b00 b10}
+                {bb : PathOver B ba b01 b11}
+                {rb : PathOver B ra b10 b11}
+                (fb   : SquareOver B fa lb tb bb rb)
+                → Cube (ap-square (\ {(x , y) → f x y}) (ine SquareΣ-eqv-intro (fa , fb)))
+                        (oute SquareOver-constant-eqv
+                           (oute SquareOver-Π-eqv (apdo-square f fa) _ _ _ _ _ _ _ _ fb))
+                        (horiz-degen-square (ap-bifunctor-pair= f _ lb)) (horiz-degen-square (ap-bifunctor-pair= f _ tb)) (horiz-degen-square (ap-bifunctor-pair= f _ bb)) (horiz-degen-square (ap-bifunctor-pair= f _ rb))
+  -- ap-bifunctor-square f .id id = {!!}

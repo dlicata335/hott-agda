@@ -520,7 +520,30 @@ module lib.cubical.Square where
                             SquareOver B s1 lb tb bb rb))
   
   postulate
-    SquareOver-Π-eqv : {A : Type} {B1 : A → Type} {B2 : Σ B1 → Type}
+    out-SquareOver-Π-eqv : {A : Type} {B1 : A → Type} {B2 : Σ B1 → Type}
+              {a00 : A} {b00 : (x : B1 a00) → B2 (a00 , x)} 
+              {a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              {f   : Square p0- p-0 p-1 p1- }
+              {b01 : (x : B1 a01) → B2 (a01 , x)} {b10 : (x : B1 a10) → B2 (a10 , x)} {b11 : (x : B1 a11) → B2 (a11 , x)}  
+              {q0- : PathOver (\ a -> (x : B1 a) → B2 (a , x)) p0- b00 b01}
+              {q-0 : PathOver (\ a -> (x : B1 a) → B2 (a , x)) p-0 b00 b10}
+              {q-1 : PathOver (\ a -> (x : B1 a) → B2 (a , x)) p-1 b01 b11}
+              {q1- : PathOver (\ a -> (x : B1 a) → B2 (a , x)) p1- b10 b11}
+              →  (SquareOver (\ a -> (x : B1 a) → B2 (a , x)) f q0- q-0 q-1 q1-) 
+              →  ((b100 : B1 a00) (b110 : B1 a10) (b101 : B1 a01) (b111 : B1 a11)
+                         (q10- : PathOver B1 p0- b100 b101)
+                         (q1-0 : PathOver B1 p-0 b100 b110)
+                         (q1-1 : PathOver B1 p-1 b101 b111)
+                         (q11- : PathOver B1 p1- b110 b111) →
+                         (f1 : SquareOver B1 f q10- q1-0 q1-1 q11-) → 
+                         SquareOver B2 (ine SquareΣ-eqv-intro (f , f1)) (oute PathOverΠ-eqv q0- _ _ q10-) (oute PathOverΠ-eqv q-0 _ _ q1-0) (oute PathOverΠ-eqv q-1 _ _ q1-1) (oute PathOverΠ-eqv q1- _ _ q11-))
+  -- out-SquareOver-Π-eqv id _ _ _ _ _ _ _ _ f1 = {!!}
+
+  SquareOver-Π-eqv : {A : Type} {B1 : A → Type} {B2 : Σ B1 → Type}
               {a00 : A} {b00 : (x : B1 a00) → B2 (a00 , x)} 
               {a01 a10 a11 : A} 
               {p0- : a00 == a01}
@@ -541,7 +564,8 @@ module lib.cubical.Square where
                          (q11- : PathOver B1 p1- b110 b111) →
                          (f1 : SquareOver B1 f q10- q1-0 q1-1 q11-) → 
                          SquareOver B2 (ine SquareΣ-eqv-intro (f , f1)) (oute PathOverΠ-eqv q0- _ _ q10-) (oute PathOverΠ-eqv q-0 _ _ q1-0) (oute PathOverΠ-eqv q-1 _ _ q1-1) (oute PathOverΠ-eqv q1- _ _ q11-))
-
+  SquareOver-Π-eqv = out-SquareOver-Π-eqv , FIXME where
+    postulate FIXME : {A : Type} → A
 
   postulate
     in-square-Type : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
@@ -636,3 +660,4 @@ module lib.cubical.Square where
                       (Square (oute PathOver-constant-eqv q0-) (oute PathOver-constant-eqv q-0) (oute PathOver-constant-eqv q-1) (oute PathOver-constant-eqv q1-))
   SquareOver-constant-eqv = (out-SquareOver-constant , FIXME) where
     postulate FIXME : {A : Type} → A
+
