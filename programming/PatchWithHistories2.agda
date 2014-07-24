@@ -8,18 +8,18 @@ open PathOverPathFrom
 module programming.PatchWithHistories2 
        (I : Type)
        (A : I → I → Type) -- data for Cons
-       (A' : I → Type) -- data for Nil 
-       (CanExchange : ∀ {n1 n2 n2' n3} → (x : A n1 n2) (y : A n2 n3) (x' : A n1 n2') (y' : A n2' n3) → Type)  where
+       (zi : I) -- index for Nil 
+       (CompositesEqual : ∀ {n1 n2 n2' n3} → (x : A n1 n2) (y : A n2 n3) (x' : A n1 n2') (y' : A n2' n3) → Type)  where
 
   module HistoryHIT where
 
     private 
-      data MS' (n : I) : Type where
-        []ms' : A' n → MS' n
-        _::ms'_ : ∀ {n1} → (x : A n1 n) → MS' n1 → MS' n
+      data MS' : (n : I) → Type where
+        []ms' : MS' zi
+        _::ms'_ : ∀ {n n1} → (x : A n1 n) → MS' n1 → MS' n
 
     MS = MS'
-    []ms : ∀ {n} → A' n → MS' n
+    []ms : MS' zi
     []ms = []ms'
     _::ms_ : ∀ {n n1} → (x : A n1 n) → MS' n1 → MS' n
     _::ms_ = _::ms'_
@@ -28,34 +28,34 @@ module programming.PatchWithHistories2
       Ex : {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
            {y : A n2 n3}
            {y' : A n2' n3}
-           → CanExchange x y x' y'
+           → CompositesEqual x y x' y'
            → (xs : MS n1) 
         → (y ::ms (x ::ms xs)) == (y' ::ms (x' ::ms xs))
 
     MS-ind : (C : {n : I} → MS n → Type) 
-           → (c0 : {n : I} → (zi : A' n) → C ([]ms zi))
+           → (c0 : C []ms)
            → (c1 : {n1 n2 : I} (x : A n1 n2) (xs : _) → C xs → C (x ::ms xs))
            → (c2 : {n1 n2 n2' n3 : I}
                    (x : A n1 n2) (x' : A n1 n2')
                    (y : A n2 n3) (y' : A n2' n3)
-                   (ce : CanExchange x y x' y')
+                   (ce : CompositesEqual x y x' y')
                    → (xs : MS n1) 
                    → (c : C xs)
                    → PathOver C (Ex ce xs)
                                 (c1 y (x ::ms xs) (c1 x xs c))
                                 (c1 y' (x' ::ms xs) (c1 x' xs c)))
            → {n : I} → (xs : MS n) → C xs
-    MS-ind C c0 c1 c2 ([]ms' z) = c0 z
+    MS-ind C c0 c1 c2 []ms' = c0
     MS-ind C c0 c1 c2 (x ::ms' xs) = c1 x xs (MS-ind C c0 c1 c2 xs)
 
     postulate 
       MS-ind/βEx : (C : {n : I} → MS n → Type) 
-           → (c0 : {n : I} → (zi : A' n) → C ([]ms zi))
+           → (c0 : C []ms)
            → (c1 : {n1 n2 : I} (x : A n1 n2) (xs : _) → C xs → C (x ::ms xs))
            → (c2 : {n1 n2 n2' n3 : I}
                    (x : A n1 n2) (x' : A n1 n2')
                    (y : A n2 n3) (y' : A n2' n3)
-                   (ce : CanExchange x y x' y')
+                   (ce : CompositesEqual x y x' y')
                    → (xs : MS n1) 
                    → (c : C xs)
                    → PathOver C (Ex ce xs)
@@ -64,7 +64,7 @@ module programming.PatchWithHistories2
            → {n1 n2 n2' n3 : I}
                    (x : A n1 n2) (x' : A n1 n2')
                    (y : A n2 n3) (y' : A n2' n3)
-                   (ce : CanExchange x y x' y')
+                   (ce : CompositesEqual x y x' y')
                    (xs : MS n1) 
            → apdo (MS-ind C c0 c1 c2) (Ex ce xs) == c2 x x' y y' ce xs (MS-ind C c0 c1 c2 xs)
 
@@ -77,7 +77,7 @@ module programming.PatchWithHistories2
     ex  : {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
            {y : A n2 n3}
            {y' : A n2' n3}
-           (ce : CanExchange x y x' y')
+           (ce : CompositesEqual x y x' y')
            → (xs : MS n1) 
            → Square (add y (x ::ms xs) ∘ add x xs) id (ap doc (Ex ce xs)) (add y' (x' ::ms xs) ∘ add x' xs)
     R-elim : (C : R → Type)
@@ -85,7 +85,7 @@ module programming.PatchWithHistories2
            → (c1 : ∀ {n1 n2} → (x : A n1 n2) (xs : MS n1) → PathOver C (add x xs) (c0 xs) (c0 (x ::ms xs)))
            → (c2 : ∀ {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
                      {y : A n2 n3} {y' : A n2' n3}
-                     (ce : CanExchange x y x' y')
+                     (ce : CompositesEqual x y x' y')
                  → (xs : MS n1) 
                  → SquareOver C (ex ce xs) 
                                 (c1 y (x ::ms xs) ∘o c1 x xs)
@@ -94,24 +94,35 @@ module programming.PatchWithHistories2
                                 (c1 y' (x' ::ms xs) ∘o c1 x' xs) )
            → (x : R) → C x
 
-{-
-  ex-front : ∀ {a'} x y xs (c : a' == doc xs) → Square
-      (add x (y ::ms xs) ∘ add y xs ∘ c)
-      id 
-      (ap doc (Ex x y xs))
+
+  ex-front : ∀ {a'} 
+           {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
+           {y : A n2 n3}
+           {y' : A n2' n3}
+           (ce : CompositesEqual x y x' y')
+           (xs : _)
+           → (c : a' == doc xs) → Square
       (add y (x ::ms xs) ∘ add x xs ∘ c)
-  ex-front x y xs c = coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex x y xs)) y₁) 
-                                 (! (∘-assoc (add x (y ::ms xs)) (add y xs) c))
-                                 (! (∘-assoc (add y (x ::ms xs)) (add x xs) c))) (extend-triangle (ex y x xs) c)
+      id 
+      (ap doc (Ex ce xs))
+      (add y' (x' ::ms xs) ∘ add x' xs ∘ c)
+  ex-front {x = x} {y} {x'} {y'} ce xs c = coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex ce xs)) y₁) 
+                                   (! (∘-assoc (add x' (x ::ms xs)) (add x xs) c))
+                                   (! (∘-assoc (add y' (y ::ms xs)) (add y xs) c))) (extend-triangle (ex ce xs) c)
 
 
-  topath-Ex-case = (λ x y xs c → over-ap-o (λ r → doc []ms == r) {θ1 = doc} (in-PathOver-= (ex-front x y xs c))) 
+  
+  topath-Ex-case : ∀ {n1 n2 n2' n3 : I} (x : A n1 n2) (x' : A n1 n2')
+           (y : A n2 n3)
+           (y' : A n2' n3)
+           (ce : CompositesEqual x y x' y')
+           (xs : _) (c : _) → _
+  topath-Ex-case = (λ x y x' y' ce xs c → over-ap-o (λ r → doc []ms == r) {θ1 = doc} (in-PathOver-= (ex-front ce xs c))) 
 
-  topath : (xs : MS) → doc []ms == doc xs
+  topath : ∀ {n} → (xs : MS n) → doc []ms == doc xs
   topath = MS-ind (\ xs -> doc []ms == doc xs) id (λ x xs p → add x xs ∘ p) topath-Ex-case
-                  
 
-  topath-square : (x : A) (xs : MS) →
+  topath-square : ∀ {n1 n2} (x : A n1 n2) (xs : MS n1) →
                        PathOver (λ x₁ → doc []ms == x₁) (add x xs) (topath xs)
                        (topath (x ::ms xs))
   topath-square x xs = in-PathOver-= ∘-square 
@@ -119,57 +130,65 @@ module programming.PatchWithHistories2
 
   contr : (x : R) → doc []ms == x
   contr = R-elim (\ x -> doc []ms == x) topath topath-square 
-                 (λ x y xs → SquareOverPathFrom.SquareOver-= _ _ _ _ _ goal1) where
-        goal1 : ∀ {x y xs} → Cube
+                 (λ ce xs → SquareOverPathFrom.SquareOver-= _ _ _ _ _ goal1) where
+        goal1 : ∀ {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
+                     {y : A n2 n3} {y' : A n2' n3}
+                     {ce : CompositesEqual x y x' y'} {xs : _} → Cube
                 (out-PathOver-= (topath-square y (x ::ms xs) ∘o topath-square x xs))
-                (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs))
+                (out-PathOver-= (topath-square y' (x' ::ms xs) ∘o topath-square x' xs))
                 (out-PathOver-= id)
                 id
-                (ex x y xs)
-                (out-PathOver-= (over-o-ap (λ x₁ → doc []ms == x₁) (apdo topath (Ex y x xs))))
-        goal1{x}{y}{xs} = transport
-                            (Cube (out-PathOver-= (topath-square y (x ::ms xs) ∘o topath-square x xs)) (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs)) (out-PathOver-= id) id (ex x y xs))
-                            (! (out-PathOver-= (over-o-ap (_==_ (doc []ms)) (apdo topath (Ex y x xs))) ≃〈 ap (λ h → out-PathOver-= (over-o-ap (_==_ (doc []ms)) h)) (MS-ind/βEx (λ xs₁ → doc []ms == doc xs₁) id (λ x₁ xs₁ p → add x₁ xs₁ ∘ p) topath-Ex-case y x xs) 〉
-                                out-PathOver-= (over-o-ap (_==_ (doc []ms)) (topath-Ex-case y x xs (topath xs))) ≃〈 ap out-PathOver-= (IsEquiv.β (snd (over-o-ap-eqv (λ x₁ → doc []ms == x₁))) (in-PathOver-= (ex-front y x xs (topath xs)))) 〉
-                                out-PathOver-= (in-PathOver-= (ex-front y x xs (topath xs))) ≃〈 PathOver-=-outin (ex-front y x xs (topath xs)) 〉
-                                ex-front y x xs (topath xs) ∎))
+                (ex ce xs)
+                (out-PathOver-= (over-o-ap (λ x₁ → doc []ms == x₁) (apdo topath (Ex ce xs))))
+        goal1{x = x}{x'}{y}{y'}{ce}{xs} = transport
+                            (Cube (out-PathOver-= (topath-square y (x ::ms xs) ∘o topath-square x xs)) (out-PathOver-= (topath-square y' (x' ::ms xs) ∘o topath-square x' xs)) (out-PathOver-= id) id (ex ce xs))
+                            (! (out-PathOver-= (over-o-ap (_==_ (doc []ms)) (apdo topath (Ex ce xs))) ≃〈 ap (λ h → out-PathOver-= (over-o-ap (_==_ (doc []ms)) h)) (MS-ind/βEx (λ xs₁ → doc []ms == doc xs₁) id (λ x₁ xs₁ p → add x₁ xs₁ ∘ p) topath-Ex-case _ _ _ _ ce xs) 〉
+                                out-PathOver-= (over-o-ap (_==_ (doc []ms)) (topath-Ex-case _ _ _ _ ce xs (topath xs))) ≃〈 ap out-PathOver-= (IsEquiv.β (snd (over-o-ap-eqv (λ x₁ → doc []ms == x₁))) (in-PathOver-= (ex-front ce xs (topath xs)))) 〉
+                                out-PathOver-= (in-PathOver-= (ex-front ce xs (topath xs))) ≃〈 PathOver-=-outin (ex-front ce xs (topath xs)) 〉
+                                ex-front ce xs (topath xs) ∎))
                             goal2 where
  
          -- reduce apdo topath and cancel some equivalences
  
-         goal2 : ∀ {x y xs} → Cube
+         goal2 : ∀ {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
+                     {y : A n2 n3} {y' : A n2' n3}
+                     {ce : CompositesEqual x y x' y'} {xs : _}  → Cube
                  (out-PathOver-= (topath-square y (x ::ms xs) ∘o topath-square x xs))
-                 (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs))
+                 (out-PathOver-= (topath-square y' (x' ::ms xs) ∘o topath-square x' xs))
                  (out-PathOver-= id)
                  id
-                 (ex x y xs)
-                 (ex-front y x xs (topath xs))
+                 (ex ce xs)
+                 (ex-front ce xs (topath xs))
          goal2 = goal3 where
            -- out-PathOver-= on id is horizontal reflexivity
 
-          goal3 : ∀ {x y xs} → Cube
+          goal3 : ∀ {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
+                     {y : A n2 n3} {y' : A n2' n3}
+                     {ce : CompositesEqual x y x' y'} {xs : _} → Cube
                   (out-PathOver-= (topath-square y (x ::ms xs) ∘o topath-square x xs))
-                  (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs))
+                  (out-PathOver-= (topath-square y' (x' ::ms xs) ∘o topath-square x' xs))
                   hrefl-square
                   id
-                  (ex x y xs)
-                  (ex-front y x xs (topath xs))
+                  (ex ce xs)
+                  (ex-front ce xs (topath xs))
           goal3 = goal4 where
   
            -- expand definition of ex-front
 
-           goal4 : ∀ {x y xs} → Cube
+           goal4 : ∀ {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
+                     {y : A n2 n3} {y' : A n2' n3}
+                     {ce : CompositesEqual x y x' y'} {xs : _} →  Cube
                    (out-PathOver-= (topath-square y (x ::ms xs) ∘o topath-square x xs))
-                   (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs))
+                   (out-PathOver-= (topath-square y' (x' ::ms xs) ∘o topath-square x' xs))
                    hrefl-square
                    id
-                   (ex x y xs)
+                   (ex ce xs)
                    (coe
-                      (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex y x xs)) y₁)
+                      (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex ce xs)) y₁)
                        (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))
-                       (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
-                      (extend-triangle (ex x y xs) (topath xs)))
-           goal4{x}{y}{xs} = transport (λ x' → Cube x' (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs)) hrefl-square id (ex x y xs) (coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex y x xs)) y₁) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs)))) (extend-triangle (ex x y xs) (topath xs)))) 
+                       (! (∘-assoc (add y' (x' ::ms xs)) (add x' xs) (topath xs))))
+                      (extend-triangle (ex ce xs) (topath xs)))
+           goal4{x = x}{x'}{y}{y'}{ce}{xs} = transport (λ x0 → Cube x0 (out-PathOver-= (topath-square y' (x' ::ms xs) ∘o topath-square x' xs)) hrefl-square id (ex ce xs) (coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex ce xs)) y₁) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add y' (x' ::ms xs)) (add x' xs) (topath xs)))) (extend-triangle (ex ce xs) (topath xs)))) 
                                        ∘-square-lemma goal5 where
    
             -- composite of ∘-squares is ∘-square of composite
@@ -190,37 +209,41 @@ module programming.PatchWithHistories2
                              == (out-PathOver-= (in-PathOver-= (∘-square {p = p12 ∘ p01} {q = p23}) ∘o (in-PathOver-= (∘-square{p = p01}{q = p12})))) 
             ∘-square-lemma {p01 = id} {p12 = id} {p23 = id} = id
 
-            goal5 : ∀ {x y xs} → Cube
+            goal5 : ∀ {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
+                     {y : A n2 n3} {y' : A n2' n3}
+                     {ce : CompositesEqual x y x' y'} {xs : _} → Cube
                     (coe (ap (λ h → Square (topath xs) id (add y (x ::ms xs) ∘ add x xs) h) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))))
                          (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs}))
-                    (out-PathOver-= (topath-square x (y ::ms xs) ∘o topath-square y xs))
+                    (out-PathOver-= (topath-square y' (x' ::ms xs) ∘o topath-square x' xs))
                     hrefl-square
                     id
-                    (ex x y xs)
+                    (ex ce xs)
                     (coe
-                       (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex y x xs)) y₁)
+                       (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex ce xs)) y₁)
                         (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))
-                        (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
-                       (extend-triangle (ex x y xs) (topath xs)))
-            goal5{x}{y}{xs} = transport (\ h -> Cube (coe (ap (λ h → Square (topath xs) id (add y (x ::ms xs) ∘ add x xs) h) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))) (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs})) h hrefl-square id (ex x y xs) (coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex y x xs)) y₁) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs)))) (extend-triangle (ex x y xs) (topath xs))))
+                        (! (∘-assoc (add y' (x' ::ms xs)) (add x' xs) (topath xs))))
+                       (extend-triangle (ex ce xs) (topath xs)))
+            goal5{x = x}{x'}{y}{y'}{ce}{xs} = transport (\ h -> Cube (coe (ap (λ h → Square (topath xs) id (add y (x ::ms xs) ∘ add x xs) h) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))) (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs})) h hrefl-square id (ex ce xs) (coe (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex ce xs)) y₁) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add y' (x' ::ms xs)) (add x' xs) (topath xs)))) (extend-triangle (ex ce xs) (topath xs))))
                                         ∘-square-lemma goal6 where
      
              -- composite of ∘-squares is ∘-square of composite
 
-             goal6 : ∀ {x y xs} → Cube
+             goal6 : ∀ {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
+                     {y : A n2 n3} {y' : A n2' n3}
+                     {ce : CompositesEqual x y x' y'} {xs : _} → Cube
                      (coe (ap (λ h → Square (topath xs) id (add y (x ::ms xs) ∘ add x xs) h) (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))))
                           (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs}))
-                     (coe (ap (λ h → Square (topath xs) id (add x (y ::ms xs) ∘ add y xs) h) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
-                          (∘-square {p = topath xs} {q = add x (y ::ms xs) ∘ add y xs}))
+                     (coe (ap (λ h → Square (topath xs) id (add y' (x' ::ms xs) ∘ add x' xs) h) (! (∘-assoc (add y' (x' ::ms xs)) (add x' xs) (topath xs))))
+                          (∘-square {p = topath xs} {q = add y' (x' ::ms xs) ∘ add x' xs}))
                      (hrefl-square{_}{_}{_}{topath xs})
                      id
-                     (ex x y xs)
+                     (ex ce xs)
                      (coe
-                        (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex y x xs)) y₁)
+                        (ap2 (λ x₁ y₁ → Square x₁ id (ap doc (Ex ce xs)) y₁)
                          (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs)))
-                         (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))))
-                        (extend-triangle (ex x y xs) (topath xs)))
-             goal6{x}{y}{xs} = extend-cube (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add x (y ::ms xs)) (add y xs) (topath xs))) goal7 where
+                         (! (∘-assoc (add y' (x' ::ms xs)) (add x' xs) (topath xs))))
+                        (extend-triangle (ex ce xs) (topath xs)))
+             goal6{x = x}{x'}{y}{y'}{ce}{xs} = extend-cube (! (∘-assoc (add y (x ::ms xs)) (add x xs) (topath xs))) (! (∘-assoc (add y' (x' ::ms xs)) (add x' xs) (topath xs))) goal7 where
 
               -- more idiomatic proof?
               --   the transporting at Square should be like a horizontal composition with a vertical refl
@@ -258,47 +281,55 @@ module programming.PatchWithHistories2
                        f0-- f-0- f-1- (coe (ap2 (λ l1 l2 → Square l1 p10- p11- l2) f1-0' f1-1') f1--)
               extend-cube id id c = c
 
-              goal7 : ∀ {x y xs} → Cube
+              goal7 : ∀ {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
+                     {y : A n2 n3} {y' : A n2' n3}
+                     {ce : CompositesEqual x y x' y'} {xs : _} → Cube
                       (∘-square {p = topath xs} {q = add y (x ::ms xs) ∘ add x xs})
-                      (∘-square {p = topath xs} {q = add x (y ::ms xs) ∘ add y xs})
+                      (∘-square {p = topath xs} {q = add y' (x' ::ms xs) ∘ add x' xs})
                       (hrefl-square{_}{_}{_}{topath xs})
                       id
-                      (ex x y xs)
-                      (extend-triangle (ex x y xs) (topath xs))
+                      (ex ce xs)
+                      (extend-triangle (ex ce xs) (topath xs))
               goal7 {xs = xs} = goal8a {p = topath xs} where
       
                 -- abstract
 
-                goal8a : ∀ {x y xs} {a' : _} {p : a' == doc xs} → Cube
+                goal8a : ∀ {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
+                     {y : A n2 n3} {y' : A n2' n3}
+                     {ce : CompositesEqual x y x' y'} {xs : _} {a' : _} {p : a' == doc xs} → Cube
                         (∘-square {p = p} {q = add y (x ::ms xs) ∘ add x xs})
-                        (∘-square {p = p} {q = add x (y ::ms xs) ∘ add y xs})
+                        (∘-square {p = p} {q = add y' (x' ::ms xs) ∘ add x' xs})
                         hrefl-square
                         id
-                        (ex x y xs)
-                        (extend-triangle (ex x y xs) p)
+                        (ex ce xs)
+                        (extend-triangle (ex ce xs) p)
                 goal8a {p = id} = goal8 where
           
                   -- path-induction 
 
-                  goal8 : ∀ {x y xs} → Cube
+                  goal8 : ∀ {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
+                     {y : A n2 n3} {y' : A n2' n3}
+                     {ce : CompositesEqual x y x' y'} {xs : _}  → Cube
                           (∘-square {p = id} {q = add y (x ::ms xs) ∘ add x xs})
-                          (∘-square {p = id} {q = add x (y ::ms xs) ∘ add y xs})
+                          (∘-square {p = id} {q = add y' (x' ::ms xs) ∘ add x' xs})
                           hrefl-square
                           id
-                          (ex x y xs)
-                          (ex x y xs)
+                          (ex ce xs)
+                          (ex ce xs)
                   goal8 = goal9 where
         
                    -- cleanup: hrefl-Square on id is id, ∘-square on {p=id} is connection
 
-                   goal9 : ∀ {x y xs} → Cube
+                   goal9 : ∀ {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
+                     {y : A n2 n3} {y' : A n2' n3}
+                     {ce : CompositesEqual x y x' y'} {xs : _} → Cube
                            (connection {p = add y (x ::ms xs) ∘ add x xs})
-                           (connection {p = add x (y ::ms xs) ∘ add y xs})
+                           (connection {p = add y' (x' ::ms xs) ∘ add x' xs})
                            id
                            id
-                           (ex x y xs)
-                           (ex x y xs)
-                   goal9 {x}{y}{xs} = goal10 (ex x y xs) where
+                           (ex ce xs)
+                           (ex ce xs)
+                   goal9 {x}{y}{ce = ce}{xs} = goal10 (ex ce xs) where
 
                     goal10 : ∀ {A}
                         {a00 a01 a10 a11 : A} 
@@ -309,4 +340,4 @@ module programming.PatchWithHistories2
                         (f   : Square p0- p-0 p-1 p1-)
                         → Cube (connection { p = p0- }) (connection { p = p1- }) vrefl-square vrefl-square f f 
                     goal10 id = id
--}
+
