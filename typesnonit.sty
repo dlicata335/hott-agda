@@ -1,0 +1,467 @@
+%% macros for PL and types
+%% uses mathit for metavars and vars,
+%% uses mathsf for operators and words in judgements
+
+%% general convention is that a macro puts you in the right font for
+%% metavars in subterms, so you don't need to tag them over and over again.
+%% catch: this only works because the interface requires metavars and vars to be in the same font.
+
+%% convention: copy into individual-directory/types-local.sty when 
+%% something needs to close over a particular version of these macros
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% basic expressions
+
+% dan's code
+% mathit for metavars
+\newcommand{\dcd}[1]{\ensuremath{#1}}
+% mathsf for operators
+\newcommand{\dsd}[1]{\ensuremath{\mathsf{#1}}}
+%% used for contexts and other places where you need to manually
+%% knock something back into roman
+\newcommand{\drd}[1]{\ensuremath{\mathrm{#1}}}
+% a kind
+\newcommand{\kd}[1]{\dcd{#1}}
+% a type or type constructor
+\newcommand{\tp}[1]{\dcd{#1}}
+\newcommand{\cn}[1]{\dcd{#1}}
+% a term
+\newcommand{\tm}[1]{\dcd{#1}}
+
+% term : type
+\newcommand{\tptm}[2]{\ensuremath{\tm{#1} \, \dcd{:} \, \tp{#2}}}
+\newcommand{\tptmns}[2]{\ensuremath{\tm{#1} \dcd{:} \tp{#2}}}
+% type :: kind
+\newcommand{\kdcn}[2]{\ensuremath{\tp{#1} \, \dcd{::} \, \kd{#2}}}
+\newcommand{\kdtp}[2]{\kdcn{#1}{#2}}
+\newcommand{\kdcnns}[2]{\ensuremath{\tp{#1}\dcd{::}\kd{#2}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% constructing types and kinds
+
+% an arrow type/kind
+\newcommand{\larr}[3]{\ensuremath{\dcd{#2}\rightarrow_{\dcd{#1}} \dcd{#3}}}
+\newcommand{\arr}[2]{\larr{}{#1}{#2}}
+
+\newcommand{\fatarr}[2]{\ensuremath{\dcd{#1} \Rightarrow \dcd{#2}}}
+\newcommand{\Arr}[2]{\ensuremath{\dcd{#1} \Rightarrow \dcd{#2}}}
+
+\newcommand{\arrr}[3]{\arr{#1}{{\arr{#2}{#3}}}}
+\newcommand{\arrrr}[4]{\arr{#1}{{\arr{#2}{\arr{#3}{#4}}}}}
+
+% dependent function classifier/kind with : 
+\newcommand{\picl}[3]{\ensuremath{\textnormal{$\Pi$}\,\tptmns{#1}{#2}.\,\dcd{#3}}}
+% dependent pair classifier with :
+\newcommand{\sigmacl}[3]{\ensuremath{\textnormal{$\Sigma$}\,\tptmns{#1}{#2}.\,\dcd{#3}}}
+
+% dependent function with :: and a level marker
+\newcommand{\lPicl}[4]{\ensuremath{\textnormal{$\Pi$}_{\dcd{#1}}\,\kdcnns{#2}{#3}.\,\dcd{#4}}}
+\newcommand{\Picl}[3]{\lPicl{}{#1}{#2}{#3}}
+% dependent pair with :: and a level marker
+\newcommand{\lSigmacl}[4]{\ensuremath{\textnormal{$\Sigma$}_{\dcd{#1}}\,\kdcnns{#2}{#3}.\,\dcd{#4}}}
+\newcommand{\Sigmacl}[3]{\lSigmacl{}{#1}{#2}{#3}}
+
+% forall type with kind
+\newcommand{\foralltp}[3]{\ensuremath{\dcd{\forall}\,\kdcnns{#1}{#2}.\,\dcd{#3}}}
+% exists type with kind
+\newcommand{\existstp}[3]{\ensuremath{\dcd{\exists}\,\kdcnns{#1}{#2}.\,\dcd{#3}}}
+% forall type without a kind
+\newcommand{\uforall}[2]{\ensuremath{\dcd{\forall}\,\cn{#1}.\,\dcd{#2}}}
+% exists type without kind
+\newcommand{\uexists}[2]{\ensuremath{\dcd{\exists}\,\cn{#1}.\,\dcd{#2}}}
+
+% product type/kind
+\newcommand{\lprd}[3]{\ensuremath{\dcd{#2} \times_{\dcd{#1}} \dcd{#3}}}
+\newcommand{\prd}[2]{\lprd{}{#1}{#2}}
+
+%% n-nary product
+\newcommand{\nprod}[4]{\ensuremath{\{ \dcd{#1} \}_{\dcd{#2} = \dcd{#3}} ^{\dcd{#4}}}}
+
+% sum type/kind
+\newcommand{\lsm}[3]{\ensuremath{\dcd{#2} +_{\dcd{#1}} \dcd{#3}}}
+\newcommand{\sm}[2]{\lsm{}{#1}{#2}}
+
+% heterogeneous equality
+\newcommand{\id}[3]{\ensuremath{\dcd{ID}_{\dcd{#1}}(\dcd{#2}, \dcd{#3})}}
+
+% hybrid logic at and down
+\newcommand{\hyat}[2]{\ensuremath{\dcd{#1} \dcd{@} #2}}
+\newcommand{\hydown}[2]{\ensuremath{\downarrow \! \dcd{#1}.\, \dcd{#2}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% lambdas
+
+% an untyped lambda 
+\newcommand{\ulam}[2]{\tm{\lambda\,#1.\,#2}}
+
+% a typed lambda
+\newcommand{\lam}[3]{\tm{\lambda\,\tptmns{#1}{#2}.\,#3}}
+
+% a typed fn
+\newcommand{\fn}[3]{\tm{\fn\,\tptmns{#1}{#2}.\,#3}}
+
+% a constructor-level lambda with a level marker 
+\newcommand{\llamc}[4]{\dcd{\lambda_{#1}\,\kdcnns{#2}{#3}.\,#4}}
+\newcommand{\lamc}[3]{\llamc{}{#1}{#2}{#3}}
+
+% juxtaposition with spacing
+% this doesn't get used just for application--also for some primitive
+% constructors that have the same syntax, etc
+\newcommand{\app}[2]{\dcd{#1 \: #2}}
+\newcommand{\appp}[3]{\dcd{#1 \: #2 \: #3}}
+\newcommand{\apppp}[4]{\dcd{#1 \: #2 \: #3 \: #4}}
+\newcommand{\appppp}[5]{\dcd{#1 \: #2 \: #3 \: #4 \: #5}}
+\newcommand{\apppppp}[6]{\dcd{#1 \: #2 \: #3 \: #4 \: #5 \: #6}}
+
+% put parens around each arg, associating to the left
+\newcommand{\lpapp}[2]{\dcd{#1\,(#2)}}
+\newcommand{\lpappp}[3]{\dcd{#1(#2)(#3)}}
+\newcommand{\lpapppp}[4]{\dcd{#1\,(#2)\,(#3)\,(#4)}}
+\newcommand{\lpappppp}[5]{\dcd{#1\,(#2)\,(#3)\,(#4)\,(#5)}}
+\newcommand{\lpapppppp}[6]{\dcd{#1\,(#2)\,(#3)\,(#4)\,(#5)\,(#6)}}
+
+% put parens around args, associating to the right 
+\newcommand{\rpapp}[2]{\dcd{#1\,(#2)}}
+\newcommand{\rpappp}[3]{\dcd{#1\,(#2\,(#3))}}
+\newcommand{\rpapppp}[4]{\dcd{#1\,(#2\,(#3\,(#4)})}
+\newcommand{\rpappppp}[5]{\dcd{#1\,(#2\,(#3\,(#4\,(#5))))}}
+\newcommand{\rpapppppp}[6]{\dcd{#1\,(#2\,(#3\,(#4\,(#5\,(#6)))))}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Lambdas
+
+% a capital Lambda
+\newcommand{\lLam}[4]{\dcd{\Lambda_{#1}\,\kdcnns{#2}{#3}.\,#4}}
+\newcommand{\Lam}[3]{\lLam{}{#1}{#2}{#3}}
+
+\newcommand{\uLam}[2]{\dcd{\Lambda\,\cn{#1}.\,#2}}
+
+% juxtaposition with brackets 1[2]
+\newcommand{\App}[2]{\lApp{}{#1}{#2}}
+\newcommand{\Appp}[3]{\lAppp{}{#1}{#2}{#3}}
+\newcommand{\Apppp}[4]{\lApppp{}{#1}{#2}{#3}{#4}}
+\newcommand{\Appppp}[5]{\lAppppp{}{#1}{#2}{#3}{#4}{#5}}
+\newcommand{\Apppppp}[6]{\lApppppp{}{#1}{#2}{#3}{#4}{#5}{#6}}
+
+% bracket application with a level marker
+\newcommand{\lApp}[3]{\dcd{#2[#3]_{#1}}}
+\newcommand{\lAppp}[4]{\dcd{#2[#3][#4]_{#1}}}
+\newcommand{\lApppp}[5]{\dcd{#2[#3][#4][#5]_{#1}}}
+\newcommand{\lAppppp}[6]{\dcd{#2[#3][#4][#5][#6]_{#1}}}
+\newcommand{\lApppppp}[7]{\dcd{#2[#3][#4][#5][#6][#7]_{#1}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% existentials 
+
+\newcommand{\lpack}[4]{\ensuremath{\apppp{\dsd{pack}_{#1}}{(#2,#3)}{as}{#4}}}
+\newcommand{\lunpack}[5]{\ensuremath{\dsd{unpack}_{#1}\:\dcd{(#2,#3)}\:\dcd{=}\,\dcd{#4}\:\dcd{in}\:\dcd{#5}}}
+
+\newcommand{\pack}[3]{\lpack{}{#1}{#2}{#3}}
+\newcommand{\unpack}[4]{\lunpack{}{#1}{#2}{#3}{#4}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% pairs and unit
+
+% with a level marker
+\newcommand{\lpair}[3]{\ensuremath{\dcd{(#2,#3)_{#1}}}}
+\newcommand{\lfst}[2]{\app{\dsd{fst}_{#1}}{#2}}
+\newcommand{\lsnd}[2]{\app{\dsd{snd}_{#1}}{#2}}
+
+\newcommand{\lemptytuple}[1]{\dcd{()_{#1}}}
+
+%% without
+\newcommand{\pair}[2]{\lpair{}{#1}{#2}}
+\newcommand{\fst}[1]{\lfst{}{#1}}
+\newcommand{\snd}[1]{\lsnd{}{#1}}
+
+\newcommand{\emptytuple}[0]{\lemptytuple{}}
+
+\newcommand{\ntup}[4]{\ensuremath{\langle \dcd{#1} \rangle_{\dcd{#2} = \dcd{#3}} ^{\dcd{#4}}}}
+\newcommand{\proj}[2]{\ensuremath{\pi_{#1} \, \dcd{#2}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% sums and void
+
+% with a level marker
+\newcommand{\linl}[3]{\app{\dsd{inl}_{#1}[#2]}{#3}}
+\newcommand{\linr}[3]{\app{\dsd{inr}_{#1}[#2]}{#3}}
+\newcommand{\lcase}[6]{\ensuremath{\dsd{case}_{\dcd{#1}}\:\dcd{#2}\:\dcd{of}\:
+  (\app{\dsd{inl}}{#3}\,\dcd{\Rightarrow}\,\dcd{#4}\:\dcd{|}\:\app{\dsd{inr}}{#5}\,\dcd{\Rightarrow}\,\dcd{#6} )}}
+
+\newcommand{\sumscase}[5]{\lcase{}{#1}{#2}{#3}{#4}{#5}}
+
+\newcommand{\labort}[3]{\app{\dsd{abort}_{#1}[#2]}{#3}}
+
+\newcommand{\inl}[2]{\linl{}{#1}{#2}}
+\newcommand{\inr}[2]{\linr{}{#1}{#2}}
+
+
+\newcommand{\abort}[2]{\labort{}{#1}{#2}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% lets
+
+% let val
+\newcommand{\letval}[3]{\ensuremath{\dsd{let}\:\dsd{val}\:\tm{#1}\,\dcd{=}\,\tm{#2}\:\dsd{in}\:\dcd{#3}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% fix
+
+\newcommand{\fix}[3]{\ensuremath{\dsd{fix}}\,\tptmns{#1}{#2}.\,\dcd{#3}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% propositions
+
+\newcommand{\andp}[2]{\dcd{#1 \wedge #2}}
+\newcommand{\orp}[2]{\dcd{#1 \vee #2}}
+\newcommand{\implp}[2]{\dcd{#1 \supset #2}}
+\newcommand{\notp}[1]{\dcd{\urcorner#1}}
+\newcommand{\forallp}[3]{\ensuremath{\dcd{\forall}\,\kdcnns{#1}{#2}.\,\dcd{#3}}}
+\newcommand{\existsp}[3]{\ensuremath{\dcd{\exists}\,\kdcnns{#1}{#2}.\,\dcd{#3}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% substitution
+\newcommand{\swap}{\leftrightarrow}
+\newcommand{\getssubst}[3]{\ensuremath{[\dcd{#1} \leftarrow \dcd{#2}] \dcd{#3}}}
+
+\newcommand{\lsubst}[3]{\ensuremath{[\dcd{#1} / \dcd{#2}] \dcd{#3}}}
+\newcommand{\rsubst}[3]{\ensuremath{\dcd{#1} [\dcd{#2} / \dcd{#3}]}}
+\newcommand{\subst}[3]{\lsubst{#1}{#2}{#3}}
+\newcommand{\substeq}[4]{\ensuremath{\lsubst{#1}{#2}{#3} = \dcd{#4}}}
+
+%% with squiqqly braces
+\newcommand{\ssubst}[3]{\ensuremath{\{ \dcd{#1} / \dcd{#2} \} \dcd{#3}}}
+
+%% subst into context : don't \dcd the third position
+\newcommand{\csubst}[3]{\ensuremath{[\dcd{#1} / \dcd{#2}] #3}}
+
+%% C / x
+\newcommand{\substfor}[2]{\ensuremath{\dcd{#1} / \dcd{#2}}}
+
+%% M [ s ]
+\newcommand{\resubst}[2]{\ensuremath{\dcd{#1} [ #2 ]}}
+\newcommand{\lesubst}[2]{\ensuremath{[ #2 ] \dcd{#1}}}
+\newcommand{\esubst}[2]{\resubst{#1}{#2}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% big-step (evaluation relation)
+\newcommand{\evalsto}[2]{\ensuremath{\dcd{#1}\hookrightarrow\dcd{#2}}}
+
+% small-step (transition system)
+\newcommand{\step}[2]{\ensuremath{\dcd{#1}\mapsto \dcd{#2}}}
+\newcommand{\stepsign}[0]{\mapsto}
+% reflexive, transitive closures
+\newcommand{\steprt}[2]{\ensuremath{\dcd{#1}\mapsto^{\ast}\dcd{#2}}}
+% stuck
+\newcommand{\stuck}[1]{\ensuremath{\dcd{#1}\not\mapsto}}
+
+%value
+\newcommand{\val}[1]{\ensuremath{\app{#1}{\dsd{value}}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% typing
+
+% gamma proves t has type tau judgement
+\newcommand{\oftp}[3]{\ensuremath{#1 \, \vdash \dcd{#2} \, \dcd{:} \, \cn{#3}}}
+% \Gamma
+\newcommand{\oftpg}[2]{\oftp{\Gamma}{#1}{#2}}
+% empty context
+\newcommand{\oftpe}[2]{\oftp{\cdot}{#1}{#2}}
+
+% well-formed type
+\newcommand{\wftp}[2]{\ensuremath{#1\,\vdash \dcd{#2}\:\dsd{type}}}
+\newcommand{\wfkd}[2]{\ensuremath{#1\,\vdash \dcd{#2}\:\dsd{kind}}}
+\newcommand{\wftpd}[1]{\ensuremath{\Delta\,\vdash \dcd{#1}\:\dsd{type}}}
+\newcommand{\wfkdd}[1]{\ensuremath{\Delta\,\vdash \dcd{#1}\:\dsd{kind}}}
+
+% subtyping 
+\newcommand{\subtp}[2]{\ensuremath{\dcd{#1} <: \dcd{#2}}}
+
+% ctx proves tau has kind k
+\newcommand{\catofkd}[2]{\ensuremath{\cn{#1} \, \dcd{::} \, \kd{#2}}}
+\newcommand{\ofkd}[3]{\ensuremath{#1 \, \vdash \cn{#2} \, \dcd{::} \, \kd{#3}}}
+% \Delta
+\newcommand{\ofkdd}[2]{\ofkd{\Delta}{#1}{#2}}
+% empty context
+\newcommand{\ofkde}[2]{\ofkd{\dcdot}{#1}{#2}}
+
+% delta ; gamma proves t has type tau judgement
+\newcommand{\oftpd}[4]{\ensuremath{#1 \, ;\, #2\,\vdash \tm{#3} \, \dcd{:} \, \cn{#4}}}
+\newcommand{\oftpdd}[3]{\oftpd{\Delta}{#1}{#2}{#3}}
+\newcommand{\oftpddg}[2]{\oftpd{\Delta}{\Gamma}{#1}{#2}}
+\newcommand{\oftpdde}[2]{\oftpd{\Delta}{\dcdot}{#1}{#2}}
+
+% definitional equality
+\newcommand{\deqtm}[4]{\ensuremath{#1\,\vdash\,\tm{#2} \, \equiv \, \tm{#3} \, \dcd{:} \, \tp{#4}}}
+\newcommand{\deqtmg}[3]{\deqtm{\Gamma}{#1}{#2}{#3}}
+\newcommand{\deqtmd}[5]{\ensuremath{#1 ; #2\,\vdash\,\tm{#3} \, \equiv \, \tm{#4} \, \dcd{:} \, \tp{#5}}}
+%types
+\newcommand{\deqtp}[3]{\ensuremath{#1\,\vdash\,\tp{#2} \, \equiv \, \tp{#3} \, \dsd{type}}}
+\newcommand{\deqtpd}[2]{\deqtp{\Delta}{#1}{#2}}
+%kinds
+\newcommand{\deqkd}[3]{\ensuremath{#1\,\vdash\,\kd{#2} \, \equiv \, \kd{#3} \, \dsd{kind}}}
+\newcommand{\deqkdd}[2]{\deqkd{\Delta}{#1}{#2}}
+%constructors
+\newcommand{\deqcn}[4]{\ensuremath{#1\,\vdash\,\cn{#2} \, \equiv \, \cn{#3} \, \dcd{::} \, \kd{#4}}}
+\newcommand{\deqcnd}[3]{\deqcn{\Delta}{#1}{#2}{#3}}
+
+% oftp with a subscript
+\newcommand{\oftps}[4]{\ensuremath{#1 \,\vdash_{#2} \tm{#3} \, \dcd{:} \, \cn{#4}}}
+% sigma for LF
+\newcommand{\oftpss}[3]{\oftps{#1}{\Sigma}{#2}{#3}}
+
+%% well-formed context
+\newcommand{\wfctx}[1]{\ensuremath{#1 \: \dsd{ctx}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% type-directed equality algorithms
+
+%% algorithmic equality of kinds
+\newcommand{\normeqkd}[3]{\ensuremath{#1\,\vdash\,\kd{#2} \, \Longleftrightarrow \, \kd{#3} \, \dcd{kind}}}
+\newcommand{\normeqkdp}[2]{\normeqkd{\Psi}{#1}{#2}}
+
+% weak head reduction
+\newcommand{\whr}[2]{\ensuremath{\dcd{#1}\stackrel{\mathrm{whr}}{\longrightarrow} \dcd{#2}}}
+\newcommand{\notwhr}[1]{\ensuremath{\dcd{#1}
+    \stackrel{\mathrm{whr}}{\not{\longrightarrow}}}}
+\newcommand{\whrrt}[2]{\ensuremath{\dcd{#1}\stackrel{\mathrm{whr}}{\longrightarrow^{*}} \dcd{#2}}}
+\newcommand{\whn}[2]{\ensuremath{\dcd{#1}\stackrel{\mathrm{whn}}{\longrightarrow}
+    \dcd{#2}}}
+
+%% normal equality of constructors
+\newcommand{\normeqcn}[4]{\ensuremath{#1\,\vdash\,\cn{#2} \, \Longleftrightarrow \, \cn{#3} \, \dcd{::} \, \kd{#4}}}
+\newcommand{\normeqcnp}[3]{\normeqcn{\Psi}{#1}{#2}{#3}}
+
+%% neutral equality of constructors
+\newcommand{\neuteqcn}[4]{\ensuremath{#1\,\vdash\,\cn{#2} \, \longleftrightarrow \, \cn{#3} \, \dcd{::} \, \kd{#4}}}
+\newcommand{\neuteqcnp}[3]{\neuteqcn{\Psi}{#1}{#2}{#3}}
+
+\newcommand{\lrcn}[4]{\ensuremath{#1\,\vdash\,\cn{#2} \, = \, \cn{#3} \,
+    \in \, \sem{\kd{#4}}}}
+\newcommand{\lrcnp}[3]{\lrcn{\Psi}{#1}{#2}{#3}}
+
+\newcommand{\lrsbst}[4]{\ensuremath{#1\,\vdash\,\cn{#2} \, = \, \cn{#3} \, \in \, \sem{#4}}}
+\newcommand{\lrsbstp}[3]{\lrsbst{\Psi}{#1}{#2}{#3}}
+
+\newcommand{\idsubst}[1]{\ensuremath{\dcd{id}_{#1}}}
+
+\newcommand{\liesapart}[2]{\ensuremath{\dcd{#1} \, \# \, \dcd{#2}}}
+
+%% canonical and atomic forms / bidirectional
+
+%% Sigma ; Gamma |- ...
+%% note that the order of args is swapped when it was Gamma |-_Sigma ...
+%% the arrow provides enough space, visually
+\newcommand{\checktms}[4]{\ensuremath{#1 \, ; #2 \, \vdash \dcd{#3} \stackrel{\leftarrow}{:} \dcd{#4}}}
+\newcommand{\checktps}[4]{\checktms{#1}{#2}{#3}{#4}}
+\newcommand{\synthtms}[4]{\ensuremath{#1 \, ; #2 \, \vdash \dcd{#3} \stackrel{\rightarrow}{:} \dcd{#4}}}
+\newcommand{\synthtps}[4]{\synthtms{#1}{#2}{#3}{#4}}
+\newcommand{\checkkds}[3]{\ensuremath{#1 \, ; #2 \, \vdash \dcd{#3} \stackrel{\leftarrow}{\dcd{kind}}}}
+
+\newcommand{\checktmss}[3]{\checktms{\Sigma}{#1}{#2}{#3}}
+\newcommand{\checktpss}[3]{\checktps{\Sigma}{#1}{#2}{#3}}
+\newcommand{\synthtmss}[3]{\synthtms{\Sigma}{#1}{#2}{#3}}
+\newcommand{\synthtpss}[3]{\synthtps{\Sigma}{#1}{#2}{#3}}
+\newcommand{\checkkdss}[2]{\checkkds{\Sigma}{#1}{#2}}
+
+\newcommand{\checktm}[3]{\checktms{}{#1}{#2}{#3}}
+\newcommand{\checktp}[3]{\checktps{}{#1}{#2}{#3}}
+\newcommand{\synthtm}[3]{\synthtms{}{#1}{#2}{#3}}
+\newcommand{\synthtp}[3]{\synthtps{}{#1}{#2}{#3}}
+\newcommand{\checkkd}[2]{\checkkds{}{#1}{#2}}
+
+\newcommand{\checktmssg}[2]{\checktms{\Sigma}{\G}{#1}{#2}}
+\newcommand{\checktpssg}[2]{\checktps{\Sigma}{\G}{#1}{#2}}
+\newcommand{\synthtmssg}[2]{\synthtps{\Sigma}{\G}{#1}{#2}}
+\newcommand{\synthtpssg}[2]{\synthtps{\Sigma}{\G}{#1}{#2}}
+\newcommand{\checkkdssg}[1]{\checkkds{\Sigma}{\G}{#1}}
+
+\newcommand{\checktmg}[2]{\checktms{}{\G}{#1}{#2}}
+\newcommand{\checktpg}[2]{\checktps{}{\G}{#1}{#2}}
+\newcommand{\synthtmg}[2]{\synthtms{}{\G}{#1}{#2}}
+\newcommand{\synthtpg}[2]{\synthtps{}{\G}{#1}{#2}}
+\newcommand{\checkkdg}[1]{\checkkds{}{\G}{#1}}
+
+\newcommand{\checksig}[1]{\ensuremath{#1 \, \stackrel{\leftarrow}{\dcd{sig}}}}
+%% |-_subord Sigma sig
+\newcommand{\checksigs}[2]{\ensuremath{\vdash_{#1} \, #2 \, \stackrel{\leftarrow}{\dcd{sig}}}}
+
+\newcommand{\checkctxs}[2]{\ensuremath{#1 \, \vdash \, #2 \, \stackrel{\leftarrow}{\dcd{ctx}}}}
+\newcommand{\checkctxss}[1]{\checkctxs{\Sigma}{#1}}
+\newcommand{\checkctx}[1]{\checkctxs{}{#1}}
+\newcommand{\catcheckctx}[1]{\ensuremath{#1 \, \stackrel{\leftarrow}{\dcd{ctx}}}}
+
+\newcommand{\lhsubst}[5]{\ensuremath{[\dcd{#1} / \dcd{#2}]^{#3}_{\dcd{#4}} \dcd{#5}}}
+\newcommand{\lhsubsteq}[6]{\ensuremath{\lhsubst{#1}{#2}{#3}{#4}{#5} = \dcd{#6}}}
+\newcommand{\lhsubstc}[5]{\ensuremath{[\dcd{#1} / \dcd{#2}]^{#3}_{\dcd{#4}} #5}}
+\newcommand{\lhsubstceq}[6]{\ensuremath{\lhsubstc{#1}{#2}{#3}{#4}{#5} = #6}}
+
+\newcommand{\catsynthtm}[2]{\ensuremath{\dcd{#1} \stackrel{\rightarrow}{:} \dcd{#2}}}
+\newcommand{\catsynthtp}[2]{\catsynthtm{#1}{#2}}
+%% thinner notation for assumptions in ctx because the normal one is too
+%% wide, visually
+\newcommand{\tcatsynthtm}[2]{\tptm{#1}{#2}}
+\newcommand{\tcatsynthtp}[2]{\tptm{#1}{#2}}
+
+\newcommand{\catchecktm}[2]{\ensuremath{\dcd{#1} \stackrel{\leftarrow}{:} \dcd{#2}}}
+\newcommand{\catchecktp}[2]{\catchecktm{#1}{#2}}
+
+\newcommand{\expand}[3]{\ensuremath{\dcd{expand}_{#1}(\tm{#2}) = \tm{#3}}}
+
+%% bidirectional equality
+
+\newcommand{\deqkdchecks}[4]{\ensuremath{#1 \,; #2 \, \vdash \, \kd{#3} \, \equiv \, \kd{#4} \, \stackrel{\leftarrow}{\dcd{kind}}}}
+\newcommand{\deqtpchecks}[5]{\ensuremath{#1 \,; #2 \, \vdash \, \cn{#3} \, \equiv \, \cn{#4} \, \stackrel{\leftarrow}{\dcd{:}} \, \kd{#5}}}
+\newcommand{\deqtpsynths}[5]{\ensuremath{#1 \,; #2 \, \vdash \, \cn{#3} \, \equiv \, \cn{#4} \, \stackrel{\rightarrow}{\dcd{:}} \, \kd{#5}}}
+\newcommand{\deqtmchecks}[5]{\ensuremath{#1 \,; #2 \, \vdash \, \tm{#3} \, \equiv \, \tm{#4} \, \stackrel{\leftarrow}{\dcd{:}} \, \tp{#5}}}
+\newcommand{\deqtmsynths}[5]{\ensuremath{#1 \,; #2 \, \vdash \, \tm{#3} \, \equiv \, \tm{#4} \, \stackrel{\rightarrow}{\dcd{:}} \, \tp{#5}}}
+
+
+
+% subordination
+\newcommand{\subord}[2]{\ensuremath{\dcd{#1} \preceq \dcd{#2}}}
+\newcommand{\subords}[3]{\ensuremath{\dcd{#1} \preceq_{#2} \dcd{#3}}}
+\newcommand{\notsubord}[2]{\ensuremath{\dcd{#1} \not \preceq \dcd{#2}}}
+\newcommand{\notsubords}[3]{\ensuremath{\dcd{#1} \not \preceq_{#2} \dcd{#3}}}
+%% just the relation symbol
+\newcommand{\subordsymb}[0]{\ensuremath{\preceq}}
+\newcommand{\subordssymb}[1]{\ensuremath{\preceq_#1}}
+
+\newcommand{\restrict}[2]{\ensuremath{#1 |_\dcd{#2}}}
+\newcommand{\restricteq}[3]{\ensuremath{#1 |_\dcd{#2} = #3}}
+%% with the extra args
+\newcommand{\restricts}[3]{\ensuremath{#1 |^{#2}_\dcd{#3}}}
+\newcommand{\restrictseq}[4]{\ensuremath{#1 |^{#2}_\dcd{#3} = #4}}
+
+
+\newcommand{\worldlt}[3]{\ensuremath{#1 \lesssim_\dcd{#2} #3}}
+\newcommand{\worldeq}[3]{\ensuremath{#1 \equiv_\dcd{#2} #3}}
+
+\newcommand{\labhead}[2]{\ensuremath{|\tp{#2}|_{\dcd{#1}}}}
+\newcommand{\head}[1]{\labhead{}{#1}}
+\newcommand{\headeq}[2]{\ensuremath{\labhead{}{#1} = \tp{#2}}}
+
+%% erasure
+\newcommand{\erase}[1]{\ensuremath{\p{\dcd{#1}}^{\dcd{-}}}}
+\newcommand{\eraseeq}[2]{\ensuremath{\p{\dcd{#1}}^{\dcd{-}} = \dcd{#2}}}
+\newcommand{\cerase}[1]{\ensuremath{\p{#1}^{\dcd{-}}}}
+\newcommand{\ceraseeq}[2]{\ensuremath{\p{#1}^{\dcd{-}} = #2}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% encodings 
+
+\newcommand{\corners}[1]{\ensuremath{\,\ulcorner\dcd{#1}\urcorner\,}}
+\newcommand{\acorners}[1]{\ensuremath{\,\llcorner\dcd{#1}\lrcorner\,}}
+\newcommand{\church}[1]{\dcd{\overline{#1}}}
+
+\newcommand{\namederiv}[2]{\ensuremath{#1 \, \dcd{::} \, #2}}
+
