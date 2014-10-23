@@ -12,8 +12,12 @@ module homotopy.TS1S1 where
   t2c = T-rec (S¹.base , S¹.base) (pair×≃ id S¹.loop) (pair×≃ S¹.loop id) (pair-square vrefl-square hrefl-square)
 
   abstract
-    c2t-square-and-cube : Σ \ s -> Cube s (square-symmetry T.f) hrefl-square (horiz-degen-square (S¹.βloop/rec T.a T.p)) (horiz-degen-square (S¹.βloop/rec T.a T.p)) hrefl-square
-    c2t-square-and-cube = (fill-cube-left (square-symmetry T.f) hrefl-square (horiz-degen-square (S¹.βloop/rec T.a T.p)) (horiz-degen-square (S¹.βloop/rec T.a T.p)) hrefl-square)
+    c2t-square-and-cube : Σ \ s -> Cube s (square-symmetry T.f) 
+                                        hrefl-square (horiz-degen-square (S¹.βloop/rec T.a T.p))
+                                        (horiz-degen-square (S¹.βloop/rec T.a T.p)) hrefl-square
+    c2t-square-and-cube = (fill-cube-left (square-symmetry T.f) 
+                                          hrefl-square
+                                          (horiz-degen-square (S¹.βloop/rec T.a T.p)) (horiz-degen-square (S¹.βloop/rec T.a T.p)) hrefl-square)
 
   c2t-square : Square T.q (ap (λ z → S¹-rec T.a T.p z) S¹.loop) (ap (λ z → S¹-rec T.a T.p z) S¹.loop) T.q
   c2t-square = fst c2t-square-and-cube
@@ -29,7 +33,8 @@ module homotopy.TS1S1 where
   reduce-c2t' : (y : S¹) → ap (λ x → c2t' x y) S¹.loop == c2t-loop-homotopy y
   reduce-c2t' y = (Π≃β c2t-loop-homotopy ∘ ap (ap (λ f → f y)) (S¹.βloop/rec (S¹-rec T.a T.p) (λ≃ c2t-loop-homotopy))) ∘ ap-o (λ f → f y) c2t' S¹.loop
 
-  cube5 : Σ \ square1'' → Σ \ square2'' → Cube (bifunctor-square1 c2t' S¹.loop S¹.loop) (square-symmetry T.f) square2'' square1'' square1'' square2''
+  cube5 : Σ \ square1'' → Σ \ square2'' → 
+        Cube (bifunctor-square1 c2t' S¹.loop S¹.loop) (square-symmetry T.f) square2'' square1'' square1'' square2''
   cube5 = _ , _ , (
           SquareOver=ND.out-SquareOver-= (apdo-by-equals _ _ S¹.loop (λ≃ reduce-c2t')) ∘-cube-h
           degen-cube-h (ap PathOver=.out-PathOver-= (S¹.βloop/elimo _ T.q (PathOver=.in-PathOver-= c2t-square))) ∘-cube-h
@@ -64,15 +69,21 @@ module homotopy.TS1S1 where
 
   c2t2c : (x y : S¹) → t2c (c2t' x y) == (x , y)
   c2t2c = S¹-elimo _ (S¹-elimo _ id (PathOver=.in-PathOver-= square1)) 
-                     (coe (! PathOverΠ-NDdomain) (\ x -> PathOver=.in-PathOver-= 
-                                                         (S¹-elimo
-                                                            (λ x₁ → Square (S¹-elimo (λ x₂ → t2c (c2t' S¹.base x₂) == (S¹.base , x₂)) id (PathOver=.in-PathOver-= square1) x₁) (ap (λ z → t2c (c2t' z x₁)) S¹.loop) (ap (λ z → z , x₁) S¹.loop) (S¹-elimo (λ x₂ → t2c (c2t' S¹.base x₂) == (S¹.base , x₂)) id (PathOver=.in-PathOver-= square1) x₁))
-                                                            square2
-                                                            (coe (! (PathOver-square/= S¹.loop square2 square2)) 
-                                                              (transport (λ x₁ → Cube square2 square2 x₁ (PathOver=.out-PathOver-= (apdo (λ x₂ → ap (λ z → t2c (c2t' z x₂)) S¹.loop) S¹.loop)) (PathOver=.out-PathOver-= (apdo (λ x₂ → ap (λ z → z , x₂) S¹.loop) S¹.loop)) x₁)
-                                                                 (! (IsEquiv.β (snd PathOver=.out-PathOver-=-eqv) square1 ∘ ap PathOver=.out-PathOver-= (S¹.βloop/elimo _ id (PathOver=.in-PathOver-= square1))))
-                                                                 cube3))
-                                                          x))) where
+           (coe (! PathOverΠ-NDdomain) (\ x -> PathOver=.in-PathOver-= 
+             (S¹-elimo
+                (λ x₁ → Square (S¹-elimo (λ x₂ → t2c (c2t' S¹.base x₂) == (S¹.base , x₂)) id (PathOver=.in-PathOver-= square1) x₁)
+                               (ap (λ z → t2c (c2t' z x₁)) S¹.loop)
+                               (ap (λ z → z , x₁) S¹.loop)
+                               (S¹-elimo (λ x₂ → t2c (c2t' S¹.base x₂) == (S¹.base , x₂)) id (PathOver=.in-PathOver-= square1) x₁))
+                square2
+                (coe (! (PathOver-square/= S¹.loop square2 square2)) 
+                  (transport (λ x₁ → Cube square2 square2 
+                                          x₁ (PathOver=.out-PathOver-= (apdo (λ x₂ → ap (λ z → t2c (c2t' z x₂)) S¹.loop) S¹.loop))
+                                          (PathOver=.out-PathOver-= (apdo (λ x₂ → ap (λ z → z , x₂) S¹.loop) S¹.loop)) x₁)
+                     (! (IsEquiv.β (snd PathOver=.out-PathOver-=-eqv) square1 ∘ 
+                         ap PathOver=.out-PathOver-= (S¹.βloop/elimo _ id (PathOver=.in-PathOver-= square1))))
+                     cube3))
+              x))) where
     square1' = _
     square2' = _
     cube4 : Cube
@@ -97,3 +108,4 @@ module homotopy.TS1S1 where
                  (PathOver=.out-PathOver-= (apdo (λ x₁ → ap (λ z → z , x₁) S¹.loop) S¹.loop))
                  square1 
     cube3 = (cube-symmetry-left-to-top cube4)
+
