@@ -397,12 +397,12 @@ module lib.First where
    UIP-HSet : ∀ {A} -> ((x y : A) (p q : x ≃ y) -> p ≃ q) → HSet A 
    UIP-HSet u = ntype (λ x y → unique-HProp (u _ _))
 
-   -- weakening
-   -- in fact, it decrements, but often you want this lemma
    Contractible-Path : ∀ {A} -> Contractible A → (x y : A) -> Contractible (Path x y)
    Contractible-Path (acenter , apaths) x y = 
      (apaths y ∘ ! (apaths x)) , (λ α → move-left-right (apaths y) α (apaths x) (! (apd apaths α ∘ ! (transport-Path-right α (apaths x)))))
   
+   -- weakening
+   -- in fact, it decrements, but often you want this lemma
    path-preserves-level : {n : TLevel} {A : Type} -> NType n A -> {x y : A} -> NType n (Path x y)
    path-preserves-level { -2 } {A} tA {x} {y} = ntype (Contractible-Path (use-level tA) x y)
    path-preserves-level { S n } {A} tA {x} {y} = ntype (λ p q → path-preserves-level (use-level tA x y))
