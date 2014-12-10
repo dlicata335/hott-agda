@@ -372,3 +372,31 @@ module lib.cubical.PathOver where
                 oute PathOver-constant-eqv (oute PathOverΠ-eqv (apdo f la) b00 b01 lb)
   ap-bifunctor-pair= f .id id = id
   
+
+  postulate
+    PathOverΣ-eqv : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+                  → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
+                  → Equiv (PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)
+                           ((Σ \ (α : PathOver A δ (fst p) (fst q)) → PathOver B (pair= δ α) (snd p) (snd q)))
+
+  pair=o : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+         → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
+         → (α : PathOver A δ (fst p) (fst q)) 
+         → PathOver B (pair= δ α) (snd p) (snd q)
+         → (PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)
+  pair=o α β = (IsEquiv.g (snd PathOverΣ-eqv) (α , β))
+
+  fst=o : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+         → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
+         → (PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)
+         → (PathOver A δ (fst p) (fst q)) 
+  fst=o x = fst (fst PathOverΣ-eqv x)
+
+  snd=o : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+         → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
+         → (α : PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)
+         → PathOver B (pair= δ (fst=o α)) (snd p) (snd q)
+  snd=o x = snd (fst PathOverΣ-eqv x)
+
+                  
+

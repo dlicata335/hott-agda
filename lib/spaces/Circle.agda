@@ -165,10 +165,7 @@ module S¹ where
     βloop/elimo C c α = (IsEquiv.β (snd hom-to-over/left-eqv) α ∘
                            ap (hom-to-over/left loop) (βloop/elim c (over-to-hom/left α))) ∘ apdo-apd (S¹-elimo C c α) loop
 
-
 {-
-  -- haven't needed this yet
-
   S¹-rec1 : {C : Type} {c1 c2 : C} (α12 : c1 == c2)
              {α1 : c1 == c1} {α2 : c2 == c2}  (s : Square α1 α12 α12 α2) 
           → {p1 p2 : S¹} → (p1 == p2)
@@ -185,8 +182,6 @@ module S¹ where
           → ap (\ x -> S¹-rec (b x) (l x) (p x)) α == S¹-rec1 (ap b α) (PathOver=.out-PathOver-= (apdo l α)) (ap p α)
   ap-S¹-rec-is-1 b l p id = {!id!}
 -}
-
-
 
 {-
   module Reverse where

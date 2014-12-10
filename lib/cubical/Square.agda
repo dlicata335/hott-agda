@@ -231,8 +231,18 @@ module lib.cubical.Square where
     out-PathOver-=-eqv = improve (hequiv out-PathOver-= in-PathOver-= FIXME1 FIXME2) where
       postulate FIXME1 : _
                 FIXME2 : _
-  
 
+  module PathOver=D where
+
+    postulate 
+      in-PathOver-= : {A : Type} {B : A → Type} {f g : (x : A) → B x}
+                {a a' : A} {p : a == a'}
+                {pa : f a == g a}
+                {pa' : f a' == g a'}
+               → SquareOver B (vrefl-square {p = p}) (hom-to-over/left id pa) (apdo f p) (apdo g p) (hom-to-over/left id pa')
+               -- Square pa (ap f p) (ap g p) pa'
+               → PathOver (\ x -> f x == g x) p pa pa'
+      
   extend-triangle : {A : Type} {a00 a01 a11 : A}
               {p0- : a00 == a01}
               {p-1 : a01 == a11}
@@ -661,3 +671,12 @@ module lib.cubical.Square where
   SquareOver-constant-eqv = (out-SquareOver-constant , FIXME) where
     postulate FIXME : {A : Type} → A
 
+
+  postulate
+    whisker-square : {A : Type} {a00 : A} 
+                   {a01 a10 a11 : A} → {p p' : a00 == a01} -> {q q' : a00 == a10} -> {r r' : a01 == a11} -> {s s' : a10 == a11}
+                   → p == p' → q == q' → r == r' -> s == s'
+                   → Square p q r s → Square p' q' r' s'
+{-
+  whisker-square = ?
+-}
