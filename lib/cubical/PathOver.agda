@@ -146,6 +146,16 @@ module lib.cubical.PathOver where
                      → (N : A θ1) → (P : PathOver A id M N) → C N P
   path-induction-homo-e C b _ α = path-induction-homo C b α
 
+  path-induction-homo-e-eqv : {Δ : Type} {A : Δ → Type} {θ1 : Δ} {M : A θ1} 
+                       (C : (x : A θ1) → PathOver A (id{_}{θ1}) M x → Type)
+                     → Equiv (C M id) ((N : A θ1) → (P : PathOver A id M N) → C N P)
+  path-induction-homo-e-eqv C = improve (hequiv (path-induction-homo-e C) 
+                                                (λ f → f _ id) 
+                                                (λ _ → id) 
+                                                (λ f → λ≃ (λ N → λ≃ (λ α → path-induction-homo-e
+                                                                             (λ N₁ α₁ → Path (path-induction-homo-e C (f _ id) N₁ α₁) (f N₁ α₁))
+                                                                             id N α))))
+
   PathOver-transport-left : {Δ : Type} (A : Δ → Type) {θ1 θ2 : Δ} (δ : θ1 == θ2) {M2 : A θ2}
                           → PathOver A δ (transport A (! δ) M2) M2
   PathOver-transport-left _ id = id
@@ -184,12 +194,21 @@ module lib.cubical.PathOver where
                          → PathOver (\ _ -> A) δ M1 M2
   in-PathOver-constant {δ = id} id = id
 
+  PathOver-constant-eqv-in-out : {Δ : Type} {A : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {M1 : A} {M2 : A} 
+                                 (α : M1 == M2) →
+                                 (out-PathOver-constant {δ = δ} (in-PathOver-constant α)) == α
+  PathOver-constant-eqv-in-out {δ = id} id = id
+
+  PathOver-constant-eqv-out-in : {Δ : Type} {A : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {M1 : A} {M2 : A} 
+                                 (α : PathOver (\ _ -> A) δ M1 M2) →
+                                 (in-PathOver-constant {δ = δ} (out-PathOver-constant α)) == α
+  PathOver-constant-eqv-out-in id = id
+
   PathOver-constant-eqv : {Δ : Type} {A : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {M1 : A} {M2 : A} 
                         →
                         Equiv (PathOver (\ _ -> A) δ M1 M2)
                               (M1 == M2)
-  PathOver-constant-eqv = improve (hequiv out-PathOver-constant in-PathOver-constant FIXME FIXME) where
-    postulate FIXME : {A : Type} → A
+  PathOver-constant-eqv = improve (hequiv out-PathOver-constant in-PathOver-constant PathOver-constant-eqv-out-in PathOver-constant-eqv-in-out) 
 
   over-to-hom/left : {Δ : Type} {A : Δ → Type}
             → ∀ {θ1 θ2} {δ : θ1 == θ2} → ∀ {M1 M2} 
@@ -222,6 +241,18 @@ module lib.cubical.PathOver where
   hom-to-over/left-eqv {δ = δ} = improve
                                   (hequiv (hom-to-over/left δ) over-to-hom/left
                                    (hom-to-over-to-hom/left δ) over-to-hom-to-over/left)
+
+  over-to-hom : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1} → ∀ {M1 M2 : A θ1} 
+            →  (δ : PathOver A id M1 M2)
+            → (M1 == M2) 
+  over-to-hom = over-to-hom/left 
+
+  hom-to-over : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1} → ∀ {M1 M2 : A θ1} 
+            → (M1 == M2) 
+            → (PathOver A id M1 M2)
+  hom-to-over = hom-to-over/left id
 
   over-o-ap : {Γ Δ : Type} (A : Δ → Type) {θ1 : Γ → Δ} 
                {θ1' θ2' : _} {δ' : θ1' == θ2'}  → ∀ {M1 M2}
@@ -279,37 +310,73 @@ module lib.cubical.PathOver where
               → ((x : A θ1) (y : A θ2) (α : PathOver A δ x y) → PathOver B (pair= δ α) (f x) (g y))
   out-PathOverΠ {B = B} {f = f} id x = path-induction-homo-e _ id
 
+  in-PathOverΠ : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+                → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
+                → ((x : A θ1) (y : A θ2) (α : PathOver A δ x y) → PathOver B (pair= δ α) (f x) (g y))
+                →  PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g 
+  in-PathOverΠ {δ = id} h = hom-to-over (λ≃ (λ x → over-to-hom (h x x id)))
+
+  PathOverΠ-out-in : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+                   → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
+                   → (p :  PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g )
+                   → in-PathOverΠ (out-PathOverΠ p) == p
+  PathOverΠ-out-in id = ap hom-to-over (! (Π≃η id))
+
+  PathOverΠ-in-out : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+                → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
+                → (h : (x : A θ1) (y : A θ2) (α : PathOver A δ x y) → PathOver B (pair= δ α) (f x) (g y))
+                → out-PathOverΠ (in-PathOverΠ h) == h
+  PathOverΠ-in-out { A = A} {B} {θ1 = θ1} {δ = id} h = λ≃ (λ x → λ≃ (λ y → λ≃ (λ α → path-induction-homo-e
+                                                                (λ y₁ α₁ →
+                                                                   Path
+                                                                   (out-PathOverΠ (hom-to-over (λ≃ (λ x₁ → over-to-hom (h x₁ x₁ id))))
+                                                                    x y₁ α₁)
+                                                                   (h x y₁ α₁))
+                                                                ((over-to-hom-to-over/left (h x x id) ∘ ap hom-to-over (Π≃β (λ x₁ → over-to-hom (h x₁ x₁ id)))) ∘ coh (λ≃ (λ x₁ → over-to-hom (h x₁ x₁ id)))) y α))) where
+                   coh : ∀ {f g : (x : A θ1) → B (θ1 , x) } {x : A θ1} (α : f == g) →  
+                       (out-PathOverΠ {_}{A}{B}{θ1}{θ1} {δ = id} (hom-to-over/left id α) x x id)
+                       == hom-to-over (ap≃ α {x})
+                   coh id = id
+
   PathOverΠ-eqv : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
               → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
               → Equiv (PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g)
                       (((x : A θ1) (y : A θ2) (α : PathOver A δ x y) → PathOver B (pair= δ α) (f x) (g y)))
-  PathOverΠ-eqv = (out-PathOverΠ , FIXME) where 
-    postulate FIXME : {A : Type} → A
+  PathOverΠ-eqv = improve (hequiv out-PathOverΠ in-PathOverΠ PathOverΠ-out-in PathOverΠ-in-out) 
 
-  postulate
-
-    PathOverΠ : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+  PathOverΠ : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
               → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
               →  PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g 
               == ((x : A θ1) (y : A θ2) (α : PathOver A δ x y) → PathOver B (pair= δ α) (f x) (g y))
+  PathOverΠ = ua PathOverΠ-eqv
 
-    PathOverΠ-id : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
-                 → {θ1 : Δ} (f : (x : A θ1) → B (θ1 , x)) {x : _}
-                 → coe (PathOverΠ {A = A} {B = B}{δ = id} {f = f}) id x x id == id
-
-    PathOverType : {Δ : Type} {A B : Type}
-              → {θ1 θ2 : Δ} {δ : θ1 == θ2}
-              → PathOver (\ θ → Type) δ A B == Equiv A B 
-
-    PathOverType-id : {Δ : Type} {θ : Δ} {A : Type} → coe (PathOverType{_}{_}{_}{θ}) id == (id-equiv{A})
-
-    PathOverType-!  : {Δ : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {A B : Type} {α : PathOver (\ _ -> Type) δ A B}
-                    → coe PathOverType (!o α) == (!equiv (coe PathOverType α))
-
-    PathOverΠ-NDdomain : {Δ : Type} {A : Type} {B : Δ → A → Type}
+  PathOverΠ-NDdomain : {Δ : Type} {A : Type} {B : Δ → A → Type}
               → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A) → B θ1 x} {g : (x : A) → B θ2 x}
               →  PathOver (\ θ → (x : A) → B θ x) δ f g 
               == ( (x : A) → PathOver (\ θ → B θ x) δ (f x) (g x))
+  PathOverΠ-NDdomain {A = A} {B = B}{δ = id} {f}{g} = 
+    apΠ id (λ≃ (λ x → ua (hom-to-over/left-eqv ∘equiv !equiv (hom-to-over/left-eqv {δ = id})) ∘ ua (!equiv (path-induction-homo-e-eqv (λ y α → PathOver (λ z → B (fst z) (snd z)) (pair= id α) (f x) (g y)))))) ∘ PathOverΠ
+
+  PathOverΠ-id : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+                 → {θ1 : Δ} (f : (x : A θ1) → B (θ1 , x)) {x : _}
+                 → coe (PathOverΠ {A = A} {B = B}{δ = id} {f = f}) id x x id == id
+  PathOverΠ-id f {x = x} = ap≃ (ap≃ (ap≃ (ap≃ (type≃β PathOverΠ-eqv) {id}) {x}) {x}) {id}
+
+  PathOverType : {Δ : Type} {A B : Type}
+              → {θ1 θ2 : Δ} {δ : θ1 == θ2}
+              → PathOver (\ θ → Type) δ A B == Equiv A B 
+  PathOverType = ua ((coe-equiv , univalence) ∘equiv PathOver-constant-eqv)
+
+  PathOverType-id : {Δ : Type} {θ : Δ} {A : Type} → coe (PathOverType{_}{_}{_}{θ}) id == (id-equiv{A})
+  PathOverType-id = ap≃
+                      (type≃β ((coe-equiv , univalence) ∘equiv PathOver-constant-eqv))
+                      {id}
+
+  PathOverType-!  : {Δ : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {A B : Type} {α : PathOver (\ _ -> Type) δ A B}
+                    → coe PathOverType (!o α) == (!equiv (coe PathOverType α))
+  PathOverType-! {δ = id} {α = α} = path-induction-homo
+                                      (λ _ α₁ → coe PathOverType (!o α₁) == !equiv (coe PathOverType α₁))
+                                      (! (ap !equiv PathOverType-id) ∘ PathOverType-id) α
 
   PathOverType-∘ : {Δ : Type} {A B C : Type}
               → {θ1 θ2 θ3 : Δ} {δ2 : θ2 == θ3} {δ1 : θ1 == θ2}
@@ -336,6 +403,7 @@ module lib.cubical.PathOver where
   path-to-pathover : {Δ : Type} (A : Δ → Type) {θ : Δ} {M N : A θ} → M == N → PathOver A id M N
   path-to-pathover A id = id
 
+{-
   apdo-split-def :{Δ : Type} {C : Δ → Unit⁺ → Type} 
                (f : (θ : Δ) → C θ <>⁺)
                (M : Δ → Unit⁺)
@@ -344,20 +412,18 @@ module lib.cubical.PathOver where
                PathOver (λ z → C (fst z) (snd z)) (pair= δ α)
                         (split1⁺ (C θ1) (f θ1) x)
                         (split1⁺ (C θ2) (f θ2) y)
-  apdo-split-def {C = C} f M δ = split1⁺ _ (split1⁺ _ (λ α → changeover (λ p → C (fst p) (snd p)) FIXME  -- need UIP for Unit⁺ and some massaging
+  apdo-split-def {C = C} f M δ = split1⁺ _ (split1⁺ _ (λ α → changeover (λ p → C (fst p) (snd p)) ?  -- need UIP for Unit⁺ and some massaging
                                                                 (over-o-ap (λ p → C (fst p) (snd p)) {θ1 = λ θ → θ , <>⁺}
                                                                  (apdo f δ))))
-                  where postulate FIXME : {A : Type} -> A
-
-  postulate
-    apdo-split : {Δ : Type} {C : Δ → Unit⁺ → Type} 
+  
+  apdo-split : {Δ : Type} {C : Δ → Unit⁺ → Type} 
                (f : (θ : Δ) → C θ <>⁺)
                (M : Δ → Unit⁺)
                {θ1 θ2 : Δ} (δ : θ1 == θ2) 
                → coe PathOverΠ (apdo (\ θ → split1⁺ (\ x → (C θ x)) (f θ)) δ) ==
                  (\ x y α → apdo-split-def {C = C} f M δ x y α) 
     -- apdo-split f M id = λ≃ (split1⁺ _ (λ≃ (split1⁺ _ (λ≃ (λ α → {!!})))))
-             
+-}             
   
   apdo-apd : {Δ : Type} {A : Δ → Type} (f : (θ : _) → A θ) {θ1 θ2 : Δ} (δ : θ1 == θ2) 
            → apdo f δ == hom-to-over/left δ (apd f δ)
@@ -369,15 +435,16 @@ module lib.cubical.PathOver where
               → ∀ {b00 b01} →  
               (lb : PathOver B la b00 b01)
               → ap (\ {(x , y) → f x y}) (pair= la lb) ==
-                oute PathOver-constant-eqv (oute PathOverΠ-eqv (apdo f la) b00 b01 lb)
+                out-PathOver-constant (oute PathOverΠ-eqv (apdo f la) b00 b01 lb)
   ap-bifunctor-pair= f .id id = id
   
 
-  postulate
-    PathOverΣ-eqv : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+{-
+  PathOverΣ-eqv : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
                   → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
                   → Equiv (PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)
                            ((Σ \ (α : PathOver A δ (fst p) (fst q)) → PathOver B (pair= δ α) (snd p) (snd q)))
+  PathOverΣ-eqv = ?
 
   pair=o : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
          → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
@@ -397,6 +464,4 @@ module lib.cubical.PathOver where
          → (α : PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)
          → PathOver B (pair= δ (fst=o α)) (snd p) (snd q)
   snd=o x = snd (fst PathOverΣ-eqv x)
-
-                  
-
+-}

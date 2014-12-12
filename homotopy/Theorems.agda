@@ -39,5 +39,9 @@ import homotopy.KGn
 import homotopy.Whitehead
 
 
+-- torus is two circles
+
+import homotopy.TS1S1
+
 module homotopy.Theorems where
 

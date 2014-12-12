@@ -482,6 +482,7 @@ module lib.cubical.Cube where
                             (bifunctor-square2d f p-1 pb) 
   bifunctor-on-cube f s pb = SquareOver=ND.out-SquareOver-= (apdo-square (λ x → ap (λ y → f x (y x)) pb) s)
 
+{-
   cross-square-path-Σ : {A : Type} {B : A → Type} 
               {a00 a01 a10 a11 : A} 
               {p0- : a00 == a01}
@@ -503,6 +504,7 @@ module lib.cubical.Cube where
                           (PathOver=.out-PathOver-= (apdo (λ b → pair= p1- (apdo b p1-)) pb))
   cross-square-path-Σ id id = FIXME where
     postulate FIXME : {A : Type} → A
+-}
 
 {-
   cross-square-path-Σ-compute : {A : Type} {B : A → Type} {C : Type}
@@ -618,6 +620,7 @@ module lib.cubical.Cube where
             Cube f--0 f--1 f0-- f-0- f-1- f1--
   -- fill-cube-left f--1 id f-0- f-1- id = {!!} -- need induction on degen square
 
+{-
     fill-cube-top : 
       {A : Type} 
       {a000 a010 a100 a110 a001 a011 a101 a111 : A}
@@ -694,7 +697,6 @@ module lib.cubical.Cube where
                       (Σ \ (c : Cube (fst (oute SquareΣ-eqv f--0)) (fst (oute SquareΣ-eqv f--1)) (fst (oute SquareΣ-eqv f0--)) (fst (oute SquareΣ-eqv f-0-)) (fst (oute SquareΣ-eqv f-1-)) (fst (oute SquareΣ-eqv f1--))) → 
                            CubeOver B c (snd (oute SquareΣ-eqv f--0)) (snd (oute SquareΣ-eqv f--1)) (snd (oute SquareΣ-eqv f0--)) (snd (oute SquareΣ-eqv f-0-)) (snd (oute SquareΣ-eqv f-1-)) (snd (oute SquareΣ-eqv f1--)))
 
-
   postulate
     ap-bifunctor-square : {A C : Type} {B : A → Type} (f : (x : A) → B x → C) → 
                 {a00 a01 a10 a11 : A} 
@@ -714,3 +716,4 @@ module lib.cubical.Cube where
                            (oute SquareOver-Π-eqv (apdo-square f fa) _ _ _ _ _ _ _ _ fb))
                         (horiz-degen-square (ap-bifunctor-pair= f _ lb)) (horiz-degen-square (ap-bifunctor-pair= f _ tb)) (horiz-degen-square (ap-bifunctor-pair= f _ bb)) (horiz-degen-square (ap-bifunctor-pair= f _ rb))
   -- ap-bifunctor-square f .id id = {!!}
+-}

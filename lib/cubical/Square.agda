@@ -577,6 +577,7 @@ module lib.cubical.Square where
   SquareOver-Π-eqv = out-SquareOver-Π-eqv , FIXME where
     postulate FIXME : {A : Type} → A
 
+{-
   postulate
     in-square-Type : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
                   → ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
@@ -593,7 +594,9 @@ module lib.cubical.Square where
   square-Type-eqv = improve (hequiv out-square-Type in-square-Type FIXME FIXME) where
     postulate
       FIXME : {A : Type} → A
+-}
 
+{-
   out-squareover-El : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} {s : (Square {Type} l t b r)}
                           {b1 : A} {b2 : B} {b3 : C} {b4 : D}
                           {lo : PathOver (\ X -> X) l b1 b2}
@@ -651,7 +654,7 @@ module lib.cubical.Square where
               {q-1 : PathOver (\ _ -> B) p-1 b01 b11}
               {q1- : PathOver (\ _ -> B) p1- b10 b11}
               → SquareOver (\ _ -> B) f q0- q-0 q-1 q1- 
-              → Square (oute PathOver-constant-eqv q0-) (oute PathOver-constant-eqv q-0) (oute PathOver-constant-eqv q-1) (oute PathOver-constant-eqv q1-)
+              → Square (out-PathOver-constant q0-) (out-PathOver-constant q-0) (out-PathOver-constant q-1) (out-PathOver-constant q1-)
   out-SquareOver-constant id = id
   
   SquareOver-constant-eqv : {A : Type} {B : Type} {a00 : A} {b00 : B }  
@@ -667,16 +670,14 @@ module lib.cubical.Square where
               {q-1 : PathOver (\ _ -> B) p-1 b01 b11}
               {q1- : PathOver (\ _ -> B) p1- b10 b11}
               → Equiv (SquareOver (\ _ -> B) f q0- q-0 q-1 q1-)
-                      (Square (oute PathOver-constant-eqv q0-) (oute PathOver-constant-eqv q-0) (oute PathOver-constant-eqv q-1) (oute PathOver-constant-eqv q1-))
+                      (Square (out-PathOver-constant q0-) (out-PathOver-constant q-0) (out-PathOver-constant q-1) (out-PathOver-constant q1-))
   SquareOver-constant-eqv = (out-SquareOver-constant , FIXME) where
     postulate FIXME : {A : Type} → A
-
 
   postulate
     whisker-square : {A : Type} {a00 : A} 
                    {a01 a10 a11 : A} → {p p' : a00 == a01} -> {q q' : a00 == a10} -> {r r' : a01 == a11} -> {s s' : a10 == a11}
                    → p == p' → q == q' → r == r' -> s == s'
                    → Square p q r s → Square p' q' r' s'
-{-
   whisker-square = ?
 -}
