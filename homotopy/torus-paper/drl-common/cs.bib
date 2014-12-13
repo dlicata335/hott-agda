@@ -1,0 +1,3791 @@
+% defs
+
+@string{icfp = "{ACM} {SIGPLAN} {I}nternational {C}onference on {F}unctional {P}rogramming"}
+@string{jfp = "{J}ournal of {F}unctional {P}rogramming"}
+@string{popl = "{ACM} {SIGPLAN-SIGACT} {S}ymposium on {P}rinciples of {P}rogramming {L}anguages"}
+@string{tldi = "{ACM} {SIGPLAN-SIGACT} {S}ymposium on {T}ypes in {L}anguage {D}esign and {I}mplementation"}
+@String{tphols = {{I}nternational {C}onference on {T}heorem {P}roving in {H}igher-{O}rder {L}ogics}}
+@string{lics = {{IEEE} {S}ymposium on {L}ogic in {C}omputer {S}cience}}
+@string{infocomp = {{I}nformation and {C}omputation}}
+@string{cade = {{I}nternational {C}onference on {A}utomated {D}eduction}}
+@string{tlca = {{I}nternational {C}onference on {T}yped {L}ambda {C}alculi and {A}pplications}}
+@string{jacm = {{J}ournal of the {A}ssociation for {C}omputing {M}achinery}}
+@String{csl = {{C}omputer {S}cience {L}ogic}}
+@String{lfmtp = {{I}nternational {W}orkshop on {L}ogical {F}rameworks and {M}eta-{L}anguages: {T}heory and {P}ractice}}
+@String{toplas = {{ACM} {T}ransactions on {P}rogramming {L}anguages and {S}ystems}}
+@String{tocl = {{ACM} {T}ransactions on {C}omputational {L}ogic}}
+@String{esop = {{E}uropean {S}ymposium on {P}rogramming}}
+@String{pldi = {{ACM} {SIGPLAN} {C}onference on {P}rogramming {L}anguage {D}esign and {I}mplementation}}
+
+@string{ieee = "IEEE Press"}
+@string{acm = "Association for Computing Machinery"}
+@string{addison-wesley = "Addison-Wesley"}
+@string{addison-wesley-longman = "Addison Wesley Longman"}
+@string{cup = "Cambridge"}
+@string{fsf = "Free Software Foundation"}
+@string{mit-press = "MIT Press"}
+@string{springer = "Springer-Verlag"}
+@string{prentice-hall = "Prentice-Hall"}
+@string{pws = "PWS Publishing"}
+@string{mcgraw-hill = "McGraw-Hill"}
+@string{wiley = "Wiley"}
+@string {mit-lcs = "MIT Laboratory for Computer Science"}
+@string{lncs = "Lecture Notes in Computer Science"}
+@string{lnai = "Lecture Notes in Artificial Intelligence"}
+@string{w3c = "{W}orld {W}ide {W}eb {C}onsortium"}
+
+@string{o1="First"}
+@string{o2="Second"}
+@string{o3="Third"}
+@string{o4="Fourth"}
+@string{o5="Fifth"}
+@string{o6="Sixth"}
+@string{o7="Seventh"}
+@string{o8="Eighth"}
+@string{o9="Ninth"}
+@string{o10="Tenth"}
+@string{o11="Eleventh"}
+@string{o12="Twelfth"}
+@string{o13="Thirteenth"}
+@string{o14="Fourteenth"}
+@string{o15="Fifteenth"}
+@string{o16="Sixteenth"}
+@string{o17="Seventeenth"}
+@string{o18="Eighteenth"}
+@string{o19="Nineteenth"}
+@string{o20="Twentieth"}
+@string{o21="Twenty-First"}
+@string{o22="Twenty-Second"}
+@string{o23="Twenty-Third"}
+@string{o24="Twenty-Fourth"}
+@string{o25="Twenty-Fifth"}
+@string{o26="Twenty-Sixth"}
+@string{o27="Twenty-Seventh"}
+@string{o28="Twenty-Eighth"}
+@string{o29="Twenty-Ninth"}
+@string{o30="Thirtieth"}
+@string{o31="Thirty-First"}
+@string{o32="Thirty-Second"}
+
+%% ----------------------------------------------------------------------
+
+@Misc{mywebpage,
+  author = {Daniel R. Licata},
+  howpublished = {\url{http://www.cs.cmu.edu/~drl/}},
+  year = {2006}
+}
+
+@Misc{twelfwebpage,
+  author =       {Frank wPfenning and Carsten Sch\:urmann},
+  title = 	 {Twelf {W}eb page},
+  howpublished = {\url{http://www.twelf.org}},
+  year = {2006}
+}
+
+@InProceedings{altenkirch99extensional,
+  author = 	 {Thorsten Altenkirch},
+  title = 	 {Extensional Equality in Intensional Type Theory},
+  booktitle = 	 lics,
+  year =	 {1999}
+}
+
+
+@Article{abel02structural,
+  author = 	 {Andreas Abel and Thorsten Altenkirch},
+  title = 	 {A Predicative Analysis of Structural Recursion},
+  journal = 	 {Journal of Functional Programming},
+  year = 	 {2002}
+}
+
+@InProceedings{baarssweistra02dynamic,
+  author = 	 {A.I. Baars and S.D. Swierstra},
+  title = 	 {Typing dynamic typing},
+  year = 	 {2002},
+  booktitle = icfp,
+}
+
+@InProceedings{cheneyhinze02genericsdynamics,
+  author = 	 {James Cheney and Ralk Hinze},
+  title = 	 {A lightweight implementation of generics and dynamics},
+  booktitle = {Haskell Workshop},
+  year = 	 {2002},
+  location = {Pittsburgh, PA}
+}
+
+@TechReport{cheneyhinze02fcpt,
+  author = 	 {James Cheney and Ralk Hinze},
+  title = 	 {Phantom Types},
+  institution =  {Cornell University},
+  year = 	 {2003},
+  number = 	 {CUCIS TR20003-1901},
+}
+
+@Unpublished{cheneyhinze02phantomtypes,
+  note = 	 {Available from \url{http://www.informatik.uni-bonn.de/~ralf/publications/Phantom.pdf}}},
+  year = 	 {2002}
+}
+
+
+@InProceedings{altenkirch03generic,
+  author = 	 {Thorsten Altenkirch and Conor McBride},
+  title = 	 {Generic Programming Within Dependently Typed Programming},
+  booktitle = 	 {IFIP TC2 Working Conference on Generic Programming, Schloss Dagstuhl},
+  year =	 {2003}
+}
+
+
+@InBook{constable03recent,
+  author = 	 {Robert L. Constable},
+  editor = 	 {F. Kamareddine},
+  title = 	 {Recent Results in Type Theory and Their Relationship to Automath},
+  publisher = 	 {Kluwer Academic Press},
+  year = 	 {2003}
+}
+
+@InProceedings{hofmann98groupoid,
+  author = 	 {Martin Hofmann and Thomas Streicher},
+  title = 	 {The groupoid interpretation of type theory},
+  booktitle = {Twenty-five years of constructive type theory},
+  year = 	 {1998},
+  publisher = {Oxford University Press},
+}
+
+@PhdThesis{hofmann95thesis,
+  author = 	 {Martin Hofmann},
+  title = 	 {Extensional Concepts in Intensional Type Theory},
+  school = 	 {University of Edinburgh},
+  year = 	 {1995},
+}
+
+@InProceedings{hofmann95conservativity,
+  author = 	 {Martin Hofmann},
+  title = 	 {Conservativity of Equality Reflection over Intensional Type Theory},
+  booktitle = {Proc. BRA TYPES workshop},
+  year = 	 {1995},
+  volume = 	 {1158},
+  series = 	 {Springer LNCS},
+}
+
+
+@InProceedings{sheard04future,
+  author = 	 {Tim Sheard},
+  title = 	 {Languages of the Future},
+  booktitle = {Conference on Object-Oriented Programming, Systems, Languages, and Applications},
+  year = 	 {2004},
+}
+
+
+
+@Misc{sheard05omegaman,
+  author = 	 {Tim Sheard},
+  title = 	 {{$\Omega$}mega User's Guide Revision 1.1},
+  howpublished = {Available from \url{http://www.cs.pdx.edu/~sheard/Omega/}},
+  year = 	 {2005},
+}
+
+
+@InProceedings{walker04depsimp,
+  author = 	 {Xinming Ou and Gang Tan and Yitzhak Mandelbaum and David Walker},
+  title = 	 {Dynamic Typing with Dependent Types (extended abstract)},
+  booktitle = {IFIP International Conference on Theoretical Computer Science},
+  year = 	 {2004},
+}
+
+
+@InProceedings{weirich00typesafecast,
+  author = 	 {Stephanie Weirich},
+  title = 	 {Type-safe cast: functional pearl},
+  booktitle = 	 {International Conference on Functional Programming},
+  year = 	 {2000},
+}
+
+@article{weirich04typesafecast,
+  author = 	 {Stephanie Weirich},
+  title = 	 {Type-safe Cast},
+  journal = 	 {Journal of Functional Programming},
+  year = 	 {2004},
+  volume = 	 {14},
+  number = 	 {6},
+}
+
+@PhdThesis{pasalic04thesis,
+   author = 	 {Emir Pasalic},
+   title = 	 {The Role of Type Equality in Meta-Programming},
+   school = 	 {Oregon Health \& Science University, OGI School of Science \& Engineering},
+   year = 	 {2004},
+}
+
+
+@Unpublished{sarkar05proposal,
+  author = 	 {Susmit Sarkar},
+  title = 	 {A Cost-Effective Foundational Certified Code System},
+  note = 	 {Thesis Proposal, Carenegie Mellon University},
+  year = 	 {2005},
+}
+
+@InProceedings{reps05array,
+  author = 	 {Denis Gopan and  Thomas Reps and  Mooly Sagiv},
+  title = 	 {Numeric Analysis of Array Operations},
+  booktitle = popl,
+  year = 	 {2005},
+}
+
+@Unpublished{augustssonXXeqincayenne,
+  author = 	 {Lennart Augustsson},
+  title = 	 {Equality Proofs in Cayenne},
+  note = 	 {Available from \url{http://www.cs.chalmers.se/~augustss/cayenne/eqproof.ps}},
+}
+
+
+@InProceedings{crary02ltt,
+  author = 	 {Karl Crary and Joseph C. Vanderwaart},
+  title = 	 {An Expressive, Scalable Type Theory for Certified Code},
+  booktitle = {International Conference on Functional Programming},
+  year = 	 {2002},
+}
+
+@InProceedings{coquand86paradox,
+  author = {Thierry Coquand},
+  title = {An Analysis of Girard's Paradox},
+  booktite = lics,
+  year = {1986}
+}
+
+@inproceedings{xi99dep,
+author = "Hongwei Xi and Frank Pfenning",
+title = {Dependent Types in Practical Programming},
+booktitle = popl,
+year = 1999,
+}
+
+@inproceedings{xi98eliminating,
+author = "Hongwei Xi and Frank Pfenning",
+title = {Eliminating Array Bound Checking through Dependent Types},
+booktitle = "Conference on Programming Language Design and Implementation",
+year = 1998,
+}
+
+@PhdThesis{xi98thesis,
+  author = 	 {Hongwei Xi},
+  title = 	 {Dependent Types in Practical Programming},
+  school = 	 {Carnegie Mellon University},
+  year = 	 {1998},
+}
+
+@inproceedings{xi00imperative,
+author = "Hongwei Xi",
+title = {Imperative Programming with Dependent Types},
+booktitle = lics,
+year = 2000,
+}
+
+@article{xi03pattern,
+author = "Hongwei Xi",
+title = {{Dependently Typed Pattern Matching}},
+journal = "Journal of Universal Computer Science",
+volume = "9",
+number = "8",
+year = "2003"
+}
+
+@inproceedings{xi03facilitating,
+author = "Hongwei Xi",
+title = {Facilitating Program Verification with Dependent Types},
+booktitle = "International Conference on Software Engineering and Formal Methods",
+year = 2003
+}
+
+@inproceedings{xi99datastructures,
+author = "Hongwei Xi",
+title = {Dependently Typed Data Structures},
+booktitle = "Workshop on Algorithmic Aspects of Advanced Programming Languages",
+year = 1999,
+}
+
+@article{xi02termination,
+author = "Hongwei Xi",
+title = {{Dependent Types for Program Termination Verification}},
+journal = "Journal of Higher-Order and Symbolic Computation",
+year = 2002,
+}
+
+@inproceedings{xi03grdc,
+author = "Hongwei Xi and Chiyan Chen and Gang Chen",
+title = {Guarded Recursive Datatype Constructors},
+booktitle = popl,
+year = 2003,
+}
+
+@inproceedings{xi03xml,
+author = "Dengping Zhu and Hongwei Xi",
+title = {A Typeful and Tagless Representation for {XML} Documents},
+booktitle = "First Asian Symposium on Programming Languages and Systems",
+year = "2003",
+}
+
+@inproceedings{xi03cps,
+author = "Chiyan Chen and Hongwei Xi",
+title = {Implementing Typeful Program Transformations},
+booktitle = "Workshop on Partial Evaluation and Semantics Based Program Manipulation",
+year = "2003",
+}
+
+@inproceedings{xi03meta,
+author = "Chiyan Chen and Hongwei Xi",
+title = {Meta-Programming through Typeful Code Representation},
+booktitle = "International Conference on Functional Programming",
+year = 2003,
+}
+
+@inproceedings{xi03ats,
+author = "Hongwei Xi",
+title = {Applied Type System (extended abstract)},
+booktitle = "Post-workshop proceedings of {TYPES}",
+year = "2003",
+publisher = springer,
+series = lncs,
+volume = {3085},
+pages = {394--408},
+}
+
+@inproceedings{xi04objects,
+author = "Chiyan Chen and Rui Shi and Hongwei Xi",
+title = {A Typeful Approach to Object-Oriented Programming with Multiple Inheritance},
+booktitle = "International Symposium on Practical Aspects of Declarative Languages",
+year = "2004",
+}
+
+@inproceedings{xi05views,
+author = "Dengping Zhu and Hongwei Xi",
+title = {Safe Programming with Pointers through Stateful Views},
+booktitle = "International Symposium on Practical Aspects of Declarative Languages",
+year = "2005",
+}
+
+@InProceedings{chenxi05proving,
+  author = 	 {Chiyan Chen and Hongwei Xi},
+  title = 	 {Combining Programming With Theorem Proving},
+  booktitle = {International Conference on Functional Programming},
+  year = 	 {2005},
+}
+
+@InProceedings{dunfield04tridirectional,
+  author = 	 {Joshua Dunfield and Frank Pfenning},
+  title = 	 {Tridirectional Typechecking},
+  booktitle = popl,
+  year = 	 {2004},
+}
+
+@Book{milner+97definition,
+  author = 	 {Robin Milner and Mads Tofte and Robert Harper and David MacQueen},
+  ALTeditor = 	 {},
+  title = 	 {The Definition of Standard ML (Revised)},
+  publisher = 	 {MIT Press},
+  year = 	 {1997},
+}
+
+@Book{martin-lof84itt-book,
+  author = 	 {Per Martin-L{\"{o}}f},
+  ALTeditor = 	 {},
+  title = 	 {Intuitionistic Type Theory},
+  publisher = 	 {Bibliopolis},
+  year = 	 {1984},
+}
+
+@InProceedings{martin-lof75itt-predicative,
+  author = 	 {Per Martin-L{\"{o}}f},
+  title = 	 {An intuitionistic theory of types: Predicative Part},
+  booktitle = {Logic Colloquium},
+  year = 	 {1975},
+  editor = 	 {H.E. Rose and J.C. Shepherdson},
+  publisher = {Elsevier},
+}
+
+
+@Article{martin-lof79cmcp,
+  author = 	 {Per Martin-L{\"{o}}f},
+  title = 	 {Constructive Mathematics and Computer Programming},
+  journal = 	 {Logic, Methodology and Philosophy of Science},
+  year = 	 {1979},
+  volume = 	 {VI},
+  pages = 	 {153--175},
+}
+
+@PhdThesis{mcbride00thesis,
+  author = 	 {Conor McBride},
+  title = 	 {Dependently Typed Functional Programs and Their Proofs},
+  school = 	 {University of Edinburgh},
+  year = 	 {2000},
+}
+
+@Article{mcbridemckinna04view,
+  author = 	 {Conor McBride and James McKinna},
+  title = 	 {The View from the Left},
+  journal = 	 {Journal of Functional Programming},
+  year = 	 {2004},
+  volume = 	 {15},
+  number = 	 {1},
+}
+
+@inproceedings{ augustsson98cayenne,
+    author = "Lennart Augustsson",
+    title = "Cayenne - a Language with Dependent Types",
+    booktitle = "International Conference on Functional Programming",
+    year = "1998"}
+
+
+@InProceedings{westbrook+05imperative,
+  author = 	 {Edwin Westbrook and Aaron Stump and Ian Wehrman},
+  title = 	 {A Language-based Approach to Functionally Correct Imperative Programming},
+  booktitle = {International Conference on Functional Programming},
+  year = 	 {2005},
+}
+
+@inproceedings{hmm90phasedist,
+    author = "Robert Harper and John C. Mitchell and Eugenio Moggi",
+    title = "Higher-order modules and the phase distinction",
+    booktitle = "{S}ymposium on {P}rinciples of {P}rogramming {L}anguages",
+    year = "1990",
+}
+
+@InProceedings{craryweirich99lx,
+  author = 	 {Karl Crary and Stephanie Weirich},
+  title = 	 {Flexible type analysis},
+  booktitle = {International Conference on Functional Programming},
+  year = 	 {1999},
+}
+
+@InProceedings{harpermorrisett95intensional,
+  author = 	 {Robert Harper and Greg Morrisett},
+  title = 	 {Compiling Polymorphism Using Intensional Type Analysis},
+  booktitle = "{S}ymposium on {P}rinciples of {P}rogramming {L}anguages",
+  year = 	 {1995},
+}
+
+@article{ hhp93lf,
+author	=	"Robert Harper and Furio Honsell and Gordon Plotkin" ,
+title	=	"A Framework for Defining Logics" ,
+journal	=	jacm ,
+volume	=	"40" ,
+number	=	"1" ,
+year	=	"1993" ,
+}
+
+@InProceedings{pfenningschurmann99twelf,
+  author = 	 {Frank Pfenning and Carsten Sch\"urmann},
+  title = 	 {System description: Twelf - a meta-logical framework for deductive systems},
+  booktitle =    cade,
+  year = 	 {1999},  
+  pages =        {202--206},  
+  editor =       {Harald Ganzinger},
+}
+
+@Article{dybjer91families,
+  author = 	 {Peter Dybjer},
+  title = 	 {Inductive sets and families in {M}artin-{L}\"of's type theory and their set-theoretic semantics},
+  journal = 	 {{L}ogical {F}rameworks},
+  year = 	 {1991},
+}
+
+@Book{luo94book,
+  author = 	 {Zhaohui. Luo},
+  title = 	 {Computation and Reasoning: A Type Theory for Computer Science},
+  publisher = 	 {Oxford University Press},
+  year = 	 {1994},
+  volume = 	 {11},
+  series = 	 {International Series of Monographs on Computer Science},
+}
+
+@PhdThesis{girard72thesis,
+  author = 	 {Jean-Yves Girard},
+  title = 	 {Interpr\'etation fonctionelle et \'elimination des coupures de l'arithm\'etique d'ordre sup\'erieur},
+  school = 	 {Universit\'e Paris VII},
+  year = 	 {1972},
+}
+
+@InProceedings{kennedy97units,
+  author = 	 {Andrew Kennedy},
+  title = 	 {Relational Parametricity and Units of Measure},
+  booktitle = popl,
+  year = 	 {1997},
+}
+
+@Misc{nasabug99,
+  author = 	 {Douglas Isbell and Don Savage},
+  title = 	 {Mars Climate Orbiter Failure Board Releases Report, Numerous {NASA} Actions Underway in Response},
+  howpublished = {{NASA} Press Release 99-134},
+  year = 	 {1999},
+  note = 	 {\url{http://mars.jpl.nasa.gov/msp98/news/mco991110.html}},
+}
+
+
+@Misc{allen+05fortress,
+  author = 	 {Eric Allen and David Chase and Victor Luchangco and Jan-Willem Maessen and Sukyoung Ryu and Guy {Steele, Jr.} and Sam Tobin-Hochstadt},
+  title = 	 {The {F}ortress Language Specification},
+  howpublished = {\url{http://research.sun.com/projects/plrg/}},
+  year = 	 {2005},
+  note = 	 {},
+}
+
+@PhdThesis{brady05thesis,
+  author = 	 {Edwin Brady},
+  title = 	 {Practical Implementation of a Dependently Typed Functional Programming Language},
+  school = 	 {Durham University},
+  year = 	 {2005},
+}
+
+@Article{cwm02lambdar,
+  author = 	 {Karl Crary and Stephanie Weirich and Greg Morrisett},
+  title = 	 { Intensional Polymorphism in Type-Erasure Semantics},
+  journal = 	 {Journal of Functional Programming},
+  year = 	 {2002},
+  volume = 	 {12},
+  number = 	 {6},
+}
+
+@InProceedings{pfenning01proofirrel,
+  author = 	 {Frank Pfenning},
+  title = 	 {Intensionality, extensionality, and proof irrelevance in modal type theory},
+  booktitle = lics,
+  year = 	 {2001},
+}
+
+@InProceedings{hl94higherorder,
+  author = 	 {Mark Lillibridge and Robert Harper},
+  title = 	 {A Type-Theoretic Approach to Higher-Order Modules with Sharing.},
+  booktitle = popl,
+  year = 	 {1994},
+}
+
+@Article{sh04singleton,
+  author = 	 {Christopher A. Stone and Robert Harper},
+  title = 	 {Extensional Equivalence and Singleton Types},
+  journal = 	 tocl,
+  year = 	 {2004},
+}
+
+@InProceedings{dch03higherorder,
+  author = 	 { Derek Dreyer and Karl Crary and Robert Harper},
+  title = 	 {A Type Theory for Higher-Order Modules},
+  booktitle = popl,
+  year = 	 {2003},
+}
+
+
+@PhdThesis{dreyer05thesis,
+  author = 	 {Derek Dreyer},
+  title = 	 {Understanding and Evolving the ML Module System},
+  school = 	 {Carnegie Mellon University},
+  year = 	 {2005},
+  note = 	 {CMU Technical Report CMU-CS-05-131},
+}
+
+@Article{hp03lf,
+  author = 	 {Robert Harper and Frank Pfenning},
+  title = 	 {On Equivalence and Canonical Forms in the {LF} Type Theory},
+  journal = 	 tocl,
+  year = 	 {2005},
+  volume = {6}, 
+  pages = {61-101},
+}
+
+@TechReport{sarkar05lfs,
+  author = 	 {Susmit Sarkar},
+  title = 	 {Metatheory of {LF} Extended With Dependent Pair and Unit Types},
+  institution =  {Carnegie Mellon University},
+  year = 	 {2005},
+  number = 	 {CMU-CS-05-179},
+}
+
+@TechReport{vanderwaartcrary01llf,
+  author = 	 {Joseph C. Vanderwaart and Karl Crary},
+  title = 	 {A Simplified Account of the Metatheory of {L}inear {LF}},
+  institution =  {Carnegie Mellon University},
+  year = {2001},
+  number = 	 {CMU-CS-01-154},
+}
+
+
+@Book{girardlafonttaylor89proofsandtypes,
+  author = 	 {Jean-Yves Girard and Yves Lafont and Paul Taylor},
+  title = 	 {Proofs and Types},
+  publisher = 	 {Cambridge University Press},
+  year = 	 {1989},
+}
+
+
+@Article{coquandhuet88constructions,
+  author = 	 {Thierry Coquand and G\'erard P. Huet},
+  title = 	 {The Calculus of Constructions},
+  journal = 	 infocomp,
+  year = 	 {1988},
+  volume = 	 {76},
+  number = 	 {2/3},
+}
+
+@InProceedings{luo89ecc,
+  author = 	 {Zhaohui Luo},
+  title = 	 {{ECC}, an Extended Calculus of Constructions},
+  booktitle = lics,
+  year = 	 {1989},
+}
+
+@Unpublished{altenkirch+05depmatter,
+  author = 	 {Thorsten Altenkirch and Conor McBride and James McKinna},
+  title = 	 {Why Dependent Types Matter},
+  note = 	 {Draft},
+  year = 	 {2005},
+}
+
+@InProceedings{coquand92pattern,
+  author = 	 {Thierry Coquand},
+  title = 	 {Pattern Matching With Dependent Types},
+  booktitle = {Types For Proofs and Programming},
+  year = 	 {1992},
+}
+
+@PhdThesis{zenger98thesis,
+  author = 	 {Christoph Zenger},
+  title = 	 {Indizierte Typen},
+  school = 	 {Universit\:at Karlsruhe},
+  year = 	 {1998},
+}
+
+@InProceedings{mandelbaum+03effref,
+  author = 	 {Yitzhak Mandelbaum and David Walker and Robert Harper},
+  title = 	 {An Effective Theory of Type Refinements},
+  booktitle = 	 {International Conference on Functional Programming},
+  year =	 2003,
+}
+
+@TechReport{peytonjones+04gadts,
+  AUTHOR = {Simon {Peyton~Jones} and Geoffrey Washburn and Stephanie Weirich},
+  TITLE = {Wobbly types: type inference for generalised algebraic data types},
+  YEAR = 2005,
+  institution={University of Pennsylvania},
+  number={MS-CIS-05-26},
+}
+
+@InProceedings{pottier+06gadts, 	
+  author = 	 {Fran\ccois Pottier and Yann R\'egis-Gianas},
+  title = 	 {Stratified type inference for generalized algebraic data types},
+  booktitle = popl,
+  year = 	 {2006},
+}
+
+@TechReport{simonet+03gadts,
+  author = 	 {Vincent Simonet and Fran\ccois Pottier},
+  title = 	 {Constraint-based Type Inference with Guarded Algebraic Data Types},
+  institution =  {INRIA},
+  year = 	 {2003},
+}
+
+@InProceedings{sheard05ch,
+  author = 	 {Tim Sheard},
+  title = 	 {Putting {C}urry-{H}oward to Work},
+  booktitle = {Haskell Workshop},
+  year = 	 {2005}}
+}
+
+@book{constable+86nuprl-book,
+  author =    "Robert L. Constable and Stuart F. Allen and H. M. Bromley and 
+               W. R. Cleaveland and J. F. Cremer and R. W. Harper and Douglas J. Howe and 
+               T. B. Knoblock and N. P. Mendler and P. Panangaden and James T. Sasaki and
+               Scott F. Smith",
+  title="Implementing Mathematics with the {NuPRL} Proof Development System",
+  publisher={Prentice Hall},
+  year=1986
+}
+
+@Book{nederpelt+94automath,
+  editor = 	 {R.P. Nederpelt and J.H. Geuvers and R.C. de Vrijer},
+  title = 	 {Selected Papers on {AUTOMATH}},
+  publisher = 	 {North-Holland},
+  year = 	 {1994},
+  series =   {Studies in Logic and the Foundations of Mathematics},
+  volume  = {133},
+}
+
+@INPROCEEDINGS{pierceturner98local,
+  AUTHOR = {Benjamin C. Pierce and David N. Turner},
+  TITLE = {Local Type Inference},
+  YEAR = 1998,
+  BOOKTITLE = popl
+}
+
+@Book{nps90mltt,
+  author = 	 {B. Nordstr\"om and K. Peterson and J.M. Smith},
+  title = 	 {Programming in Martin-L{\"{o}}f's Type Theory, an Introduction},
+  publisher = 	 {Clarendon Press},
+  year = 	 {1990},
+}
+
+@InProceedings{crarysarkar03fpcc,
+  author = 	 {Karl Crary and Susmit Sarkar},
+  title = 	 {Foundational Certified Code in a Metalogical Framework},
+  booktitle = cade,
+  year = 	 {2003},
+  pages = {106--120},
+  publisher = springer,
+}
+
+@InProceedings{reynolds74poly,
+  author = 	 {John C. Reynolds},
+  title = 	 {Towards a theory of type structure},
+  booktitle = {Symposium on Programming},
+  year = 	 {1974},
+}
+
+@InProceedings{aydemir+05poplmark,
+  author = 	 {Brian E. Aydemir and Aaron Bohannon and Matthew Fairbairn and J. Nathan Foster and Benjamin C. Pierce and Peter Sewell and Dimitrios Vytiniotis and Geoffrey Washburn and Stephanie Weirich and Steve Zdancewic},
+  title = 	 {Mechanized metatheory for the masses: The {POPL}mark Challenge},
+  booktitle = tphols,
+  year = 	 {2005},
+  publisher = springer,
+}
+
+@Misc{twelfwikiwebpage,
+  author =       {{T}welf {E}lves},
+  title  = 	 {The {T}welf {W}iki},
+  howpublished = {Web site: \url{http://www.twelf.org/}},
+  year         = {2008}
+}
+
+@Misc{jfpwebsite,
+  title  = 	 {{J}ournal of {F}unctional {P}rogramming},
+  howpublished = {Web site: \url{http://www.cambridge.org/jfp/}},
+}
+
+
+@Misc{harpercrary05believe,
+  author = 	 {Robert Harper and Karl Crary},
+  title = 	 {How to believe a {T}welf proof},
+  howpublished = {http://www.cs.cmu.edu/~rwh/},
+  year = 	 {2005},
+}
+
+@InCollection{pfenning99logicalframeworks,
+  author = 	 {Frank Pfenning},
+  title = 	 {{L}ogical {F}rameworks},
+  booktitle = 	 {{H}andbook of {A}utomated {R}easoning},
+  editor = 	 {Alan Robinson and Andrei Voronkov},
+  publisher = 	 {Elsevier Science and MIT Press},
+  year = 	 {1999},
+}
+
+@Misc{pfenning-cd,
+  author = 	 {Frank Pfenning},
+  title = 	 {Computation and Deduction},
+  howpublished = {Draft course notes; available from \url{http://www.cs.cmu.edu/~fp/}}, 
+  year = {1997}
+}
+
+@InProceedings{michaylov91natural,
+  author = 	 {Spiro Michaylov and Frank Pfenning},
+  title = 	 {Natural semantics and some of its meta-theory in {E}lf},
+  booktitle = {{I}nternational {W}orkshop on {E}xtensions of {L}ogic {P}rogramming},
+  year = 	 {1991},
+  editor = {L.H. Eriksson and L. Halln\"as and P. Schroeder-Heister},
+  pages = {299--344},
+  location = {Stockholm, Sweden},
+  publisher = springer,
+  series = lnai, 
+  volume = {596},
+}
+
+@TechReport{pfenning93cr,
+  author = 	 {Frank Pfenning},
+  title = 	 {A proof of the {C}hurch-{R}osser theorem and its representation in a logical framework},
+  institution =  {Department of Computer Science, Carnegie Mellon University},
+  year = 	 {1992},
+  number = 	 {CMU-CS-92-186},
+}
+
+@TechReport{pfenning94cut,
+  author = 	 {Frank Pfenning},
+  title = 	 {A structural proof of cut elimination and its representation in a logical framework},
+  institution =  {Department of Computer Science, Carnegie Mellon University},
+  year = 	 {1994},
+  number = 	 {CMU-CS-94-218}, 
+}
+
+@Article{schurmann01fomega,
+  author = 	 {Carsten Sch\"urmann and Dachuan Yu and Zhaozhong Ni}, 
+  title = 	 {A Representation of {$F_\omega$} in {LF}},
+  journal = 	 {Electronic Notes in {T}heoretical {C}omputer {S}cience},
+  year = 	 {2001},
+  volume = 	 {58},
+  number = 	 {1},
+  publisher = {Elsevier},
+}
+
+@TechReport{simmons05thesis,
+  author = 	 {Robert Simmons},
+  title = 	 {Twelf as a Unified Framework for Language Formalization and Implementation},
+  institution =  {Princeton University},
+  year = 	 {2005},
+  note =   {Undergraduate Senior Thesis 18679},
+}
+
+@PhdThesis{schurmann00thesis,
+  author = 	 {Carsten Sch\"urmann},
+  title = 	 {Automating the Meta-Theory of Deductive Systems},
+  school =       {Carnegie Mellon University},
+  year = 	 {2000},
+  number = 	 {CMU-CS-00-146},
+}
+
+@InProceedings{pientka00termination,
+  author = 	 {Brigitte Pientka and Frank Pfenning},
+  title = 	 {Termination and reduction checking in the logical framework},
+  booktitle = {{W}orkshop on {A}utomation of {P}roofs by {M}athematical {I}nduction},
+  year = 	 {2000},
+  editor =      {Carsten Sch\"urmann},
+  location = {Pittsburgh, Pennsylvania},
+}
+
+@InProceedings{anderson04unique,
+  author = 	 {Penny Anderson and Frank Pfenning},
+  title = 	 {Verifying uniqueness in a logical framework},
+  booktitle = tphols,
+  year = 	 {2004},
+  editor =  {K. Slind and A. Bunker and G. Gopalakrishnan},
+  pages = {18-33}, 
+  location = {Park City, Utah},
+  publisher = {Springer},
+  series = lncs,
+  volume = {3223},
+}
+
+@inproceedings{schurmann08slr,
+  author = 	 {Jeffrey Sarnat and Carsten Sch\"urmann},
+  title = 	 {Structural Logical Relations},
+  year = 	 {2008},
+  booktitle =    lics,
+}
+
+
+@Article{cervesatopfenning02llf,
+  author = 	 {Iliano Cervesato and Frank Pfenning},
+  title = 	 {A linear logical framework},
+  journal = 	 infocomp,
+  year = 	 {2002},
+  volume = 	 {179},
+  number = 	 {1},
+  pages = 	 {19-75},
+}
+
+@TechReport{watkins+03clf-tr,
+  author = 	 {Kevin Watkins and Iliano Cervesato and Frank Pfenning and David Walker},
+  title = 	 {A concurrent logical framework {I}: Judgments and properties},
+  institution =  {Department of Computer Science, Carnegie Mellon University},
+  year = 	 {2002},
+  number = 	 {CMU-CS-02-101},
+  note = 	 {Revised May 2003},
+}
+
+@TechReport{watkins+03clf-tr-app,
+  author = 	 {Iliano Cervesato and Frank Pfenning and David Walker and Kevin Watkins},
+  title = 	 {A concurrent logical framework {II}: Examples and Applications},
+  institution =  {Department of Computer Science, Carnegie Mellon University},
+  year = 	 {2002},
+  number = 	 {CMU-CS-02-102},
+  note = 	 {Revised May 2003},
+}
+
+@PhdThesis{virga99thesis,
+  author = 	 {Roberto Virga},
+  title = 	 {Higher-Order Rewriting with Dependent Types},
+  school = 	 {Carnegie Mellon University},
+  year = 	 {1999},
+}
+
+@TechReport{nanevskimorrisett06stateful,
+  author = 	 {Aleksandar Nanevski and Greg Morrisett},
+  title = 	 {Dependent Type Theory of Stateful Higher-Order Functions},
+  institution =  {Harvard Computer Science},
+  year = 	 {2006},
+  number = 	 {TR-24-05},
+}
+
+@Unpublished{l06proving,
+  author = 	 {Daniel R. Licata},
+  title = 	 {Proving Meta-theorems With {T}welf},
+  note = 	 {Available from \url{http://www.cs.cmu.edu/~drl/}},
+  year = {2006},
+}
+
+@InProceedings{murphy+05cs5,
+  author = 	 {Tom {Murphy VII} and Karl Crary and Robert Harper},
+  title = 	 {Distributed Control Flow With Classical Modal Logic},
+  booktitle = 	 csl,
+  year =	 2005,
+  location =	 {Oxford, UK},
+  pages =	 {51--69},
+  series = lncs,
+  volume = 3634,
+  publisher = springer,
+}
+
+@InProceedings{murphy+04s5,
+  author =       {Tom {Murphy VII} and Karl Crary and Robert Harper and Frank Pfenning},
+  title =        {A Symmetric Modal Lambda Calculus for Distributed Computing},
+  booktitle =    lics,
+  year =         {2004},
+  location =      {Turku, Finland},
+  editor = {H. Ganzinger},
+  pages = {286--295}, 
+  publisher = {IEEE Press},
+}
+
+@phdthesis{murphy08thesis,
+  author = {{Murphy VII}, Tom},
+  title = {Modal Types for Mobile Code},
+  month = {January},
+  year = {2008},
+  school = {Carnegie Mellon},
+  note = {Available as technical report CMU-CS-08-126},
+}
+
+
+@TechReport{lh05dmlproofs,
+  author = 	 {Daniel R. Licata and Robert Harper},
+  title = 	 {A Formulation of {D}ependent {ML} with Explicit Equality Proofs},
+  institution =  {Department of Computer Science, Carnegie Mellon University},
+  year = 	 {2005},
+  number = 	 {CMU-CS-05-178},
+}
+
+@InProceedings{crary03talt,
+ author = "Karl Crary",
+ title = "Toward a Foundational Typed Assembly Language",
+ booktitle = popl,
+ year = "2003",
+ location = {New Orleans, Louisiana, USA},
+ pages = {198--212},
+ publisher = {ACM Press},
+}
+
+@Book{bertot+04coqdart,
+  author = 	 {Yves Bertot and Pierre Cast\'eran},
+  title = 	 {Interactive Theorem Proving and Program Development: Coq'Art: The Calculus of Inductive Constructions},
+  publisher = 	 {Springer},
+  year = 	 {2004},
+  series = 	 {{T}exts in {T}heoretical {C}omputer {S}cience},
+}
+
+@Book{nipkow+02isabelle,
+  author	= {Tobias Nipkow and Lawrence C. Paulson and Markus Wenzel},
+  title		= {Isabelle/{HOL} --- A Proof Assistant for Higher-Order Logic},
+  publisher	= springer,
+  series	= lncs,
+  volume	= 2283,
+  year		= 2002}
+
+@article{kleinnipkow04jinja,
+author={Gerwin Klein and Tobias Nipkow},
+title={A Machine-Checked Model for a {Java}-Like Language, Virtual Machine and Compiler},
+journal=toplas,
+volume = {28},
+number = {4}, 
+year = {2006}, 
+pages = {619--695},
+}
+
+@InProceedings{leroy06compiler,
+  author = 	 {Xavier Leroy},
+  title = 	 {Formal certification of a compiler back-end, or: programming a compiler with a proof assistant},
+  booktitle = popl,
+  year = 	 {2006}, 
+  publisher = "ACM Press",
+  pages = {42--54},
+  location = {Charleston, South Carolina, USA},
+}
+
+@Manual{pfenningschurmann02twelfuser,
+  author = 	 {Frank Pfenning and Carsten Sch\"urmann},
+  title = 	 {Twelf User's Guide, Version 1.4},
+  howpublished = {Available from \url{http://www.cs.cmu.edu/~twelf/guide-1-4/}},
+  year = 	 {2002},
+}
+
+@article{geuversbarendsen99observations,
+    author = "Herman Geuvers and Erik Barendsen",
+    title = "Some logical and syntactical observations concerning the first-order dependent type system {$\lambda_P$}",
+    journal = "{M}athematical {S}tructures in {C}omputer {S}cience",
+    volume = "9",
+    number = "4",
+    pages = "335-359",
+    year = "1999"
+}
+
+@InProceedings{geuvers92cr,
+  author = 	 {Herman Geuvers},
+  title = 	 {The {C}hurch-{R}osser property for $\beta\eta$-reduction in typed $\lambda$-calculi},
+  booktitle = lics,
+  year = 	 {1992},
+  editor = {A. Scedrov},
+  location = {Santa Cruz, California, USA},
+  pages = {453--460},
+  publisher = {IEEE Press}
+}
+
+@InProceedings{salvesen90cr,
+  author = 	 {Anne Salvesen},
+  title = 	 {The {C}hurch-{R}osser theorem for {LF} with $\beta\eta$-Reduction},
+  booktitle = {Unpublished notes to a talk given at the {F}irst {W}orkshop on {L}ogical {F}rameworks},
+  year = 	 {1990},
+  location = 	 {Antibes, France},
+}
+
+
+@InProceedings{goguen99lf,
+  author = 	 {Healfdene Goguen},
+  title = 	 {Soundness of the logical framework for its typed operational semantics},
+  booktitle = tlca,
+  year = 	 {1999},
+  location = 	 {L'Aquila, Italy},
+  series =  lncs,
+  volume = "1581",
+  publisher = {Springer-Verlag},
+}
+
+
+@article{120486,
+ isbn = {0-521-41300-1},
+ }
+
+@InCollection{coquand91conversion,
+ author = {Thierry Coquand},
+ title = {An algorithm for testing conversion in type theory},
+ booktitle = {Logical frameworks},
+ year = {1991},
+ pages = {255--279},
+ publisher = {Cambridge University Press},
+ address = {New York, NY, USA},
+ editor = {G\'{e}rard Huet and Gordon D. Plotkin},
+}
+
+
+@Manual{inria06coqmanual,
+  author = 	 {{Coq Development Team}},
+  title = 	 {The {C}oq Proof Assistant Reference Manual, version 8.2},
+  organization =   {INRIA},
+  year = 	 {2009},
+  note =         {Available from \url{http://coq.inria.fr/}}
+}
+
+@inproceedings{appel01foundational,
+  author =       {Andrew W. Appel},
+  title =        {Foundational Proof-Carrying Code},
+  booktitle =    lics,
+  year =         {2001},
+  pages =        {247},
+  publisher =    {IEEE Computer Society},
+  location =      {Washington, DC},
+}
+
+@InCollection{avron+89overview,
+  author = 	 {Arnon Avron and Furio Honsell and Ian A. Mason},
+  title = 	 {An overview of the {E}dinburgh {L}ogical {F}ramework},
+  booktitle = {Current Trends in Hardware Verification},
+  publisher = {Springer Verlag},
+  year = 	 {1989},
+  editor = 	 {Graham Birtwistle and P.A. Subrahmanyam},
+}
+
+@PhdThesis{miculan97thesis,
+  author = 	 {Marino Miculan},
+  title = 	 {Encoding logical theories of programs},
+  school = 	 {Dipartimento di Informatica, Universita di Pisa},
+  year = 	 {1997},
+}
+
+@Unpublished{harper06pfpl,
+  author = 	 {Robert Harper},
+  title = 	 {Practical Foundations for Programming Languages},
+  note = 	 {Draft course notes; available from \url{http://www.cs.cmu.edu/~rwh/}},
+  year = 	 {2006},
+}
+
+@inproceedings{lee+06tslf,
+  author = 	 {Daniel K. Lee and Karl Crary and Robert Harper},
+  title = 	 {Towards a Mechanized Metatheory of {S}tandard {ML}},
+  booktitle =    popl,
+  year = 	 {2007},
+  location =      {Nice, France},
+  publisher =    {ACM Press}
+}
+
+@Article{welch84lzw,
+  author = 	 {Terry A. Welch},
+  title = 	 {A technique for high performance data compression},
+  journal = 	 {IEEE Computer},
+  year = 	 {1984},
+  volume = 	 {17},
+  number = 	 {6},
+  pages = 	 {8--19},
+}
+
+@InProceedings{morrisett+99talx86,
+  author = 	 {Greg Morrisett and Karl Crary and Neal Glew and 
+                  Dan Grossman and Richard Samuels and Frederick Smith and 
+                  David Walker and Stephanie Weirich and Steve Zdancewic},
+  title = 	 {{TALx86}: A Realistic Typed Assembly Language},
+  booktitle = {{ACM} {SIGPLAN} Workshop on Compiler Support for System Software},
+  pages = 	 {25-35},
+  year = 	 {1999},
+  location = 	 {Atlanta, GA},
+}
+
+@InProceedings{watkins+04clfworkshop,
+  author = 	 {Kevin Watkins and Iliano Cervesato and Frank Pfenning and David Walker},
+  title = 	 {A concurrent logical framework: the propositional fragment.},
+  booktitle = {Types for Proofs and Programs},
+  pages = 	 {355--377},
+  year = 	 {2004},
+  editor = 	 {S. Berardi and M. Coppo and F. Damiani},
+  volume = 	 {3085},
+  series = 	 lncs,
+  publisher = springer,
+}
+%%  note = 	 {Selected papers from the Third International Workshop on Types for Proofs and Programs, Torino, Italy, April 2003},
+
+@InProceedings{watkins+04clf-lfm,
+  author = 	 {Kevin Watkins and Iliano Cervesato and Frank Pfenning and David Walker},
+  title = 	 {Specifying properties of concurrent computations in {CLF}},
+  booktitle =    {International Workshop on Logical Frameworks and Meta-Languages},
+  year = 	 {2004},
+  editor = 	 {Carsten Sch\"urmann},
+  location = 	 {Cork, Ireland},
+}
+
+@InProceedings{schurmannpfenning03coverage,
+  author = 	 {Carsten Sch\"urmann and Frank Pfenning},
+  title = 	 {A coverage checking algorithm for {LF}},
+  booktitle =    tphols,
+  year = 	 {2003},
+  location = 	 {Rome, Italy},
+  publisher =    springer
+}
+
+@InProceedings{schurmann+05nabla,
+  author = 	 {Carsten Sch\"urmann and Adam Poswolsky and Jeffrey Sarnat},
+  title = 	 {The $\nabla$-calculus: {F}unctional programming with higher-order encodings.},
+  booktitle =    tlca,
+  year = 	 {2005},
+  location =     {Nara, Japan},
+  publisher = springer
+}
+
+
+@InProceedings{appelleroy06listmachine,
+  author = 	 {Andrew Appel  and Xavier Leroy},
+  title = 	 {A List-machine Benchmark for Mechanized Metatheory},
+  booktitle = lfmtp,
+  year = 	 {2006},
+  location = 	 {Seattle, WA},
+  series = {Electronic Notes in Theoretical Computer Science},
+}
+
+@InProceedings{donnellyxi06normalization,
+  author = 	 {Kevin Donnelly and Hongwei Xi},
+  title = 	 {A Formalization of Strong Normalization for {S}imply {T}yped {L}ambda-{C}alculus and {S}ystem {F}},
+  booktitle = lfmtp,
+  year = 	 {2006},
+  location = 	 {Seattle, WA},
+  series =       {Electronic Notes in Theoretical Computer Science},
+  publisher =    {Elsevier}, 
+}
+
+@InProceedings{harrison96holtutorial,
+  author = 	 {John Harrison},
+  title = 	 {{HOL} {L}ight: {A} Tutorial Introduction},
+  booktitle =    {{F}ormal {M}ethods in {C}omputer-{A}ided {D}esign},
+  pages = 	 {265--269},
+  year = 	 {1996},
+  volume = 	 {1166},
+  series = 	 lncs,
+  publisher =    springer
+}
+
+@Book{kaufmann+00acl2book,
+  author = 	 {Matt Kaufmann and Panagiotis Manolios and J Strother Moore},
+  title = 	 {Computer-Aided Reasoning: An Approach},
+  publisher = 	 {Kluwer Academic Publishers},
+  year = 	 {2000},
+}
+
+@InProceedings{kammuller00isabellemodules,
+  author =	{Florian Kamm\"{u}ller},
+  title =	{Module reasoning in {Isabelle}},
+  year =	{2000},
+  booktitle =	cade,  
+  pages     =   {99--114},
+  location =	{Pittsburgh, PA},  
+  publisher =   {Springer-Verlag},
+  series    =   {Lecture Notes in Computer Science},
+  volume    =   {1831},  
+  editor    = {David A. McAllester},
+}
+
+@InProceedings{kammuller99locales,
+  author =	{Florian Kamm\"{u}ller and Markus Wenzel and Lawrence Paulson},
+  title =	{Locales: A sectioning concept for {Isabelle}},
+  year =	{1999},
+  pages =	{149 - 166},
+  booktitle =	tphols,
+  location =	{Nice, France}, 
+  publisher = {Springer-Verlag},
+}
+
+@Article{hl98elfmodules,
+  author = 	 {Robert Harper and Frank Pfenning},
+  title = 	 {A Module System for a Programming Language Based on the {LF} Logical Framework},
+  journal = 	 {Journal of Logic and Computation},
+  year = 	 {1998},
+  volume = 	 {8},
+  number = 	 {1},
+  pages = 	 {5--31},
+}
+
+
+@InProceedings{pfenning89elf,
+  author = 	 {Frank Pfenning},
+  title = 	 {{Elf}: A language for logic definition and verified meta-programming},
+  booktitle = lics,
+  pages = 	 {312--322},
+  year = 	 {1989},
+  location = 	 {Pacific Grove, CA},
+}
+
+@techreport{harper+:tt-interp-sml-tr,
+ author = "Robert Harper and Chris Stone",
+ title = "An Interpretation of {Standard} {ML} in Type Theory",
+ institution = "Carnegie Mellon University, School of Computer Science",
+ year = 1997,
+ number = "CMU-CS-97-147",
+}
+
+@inproceedings{miller94:lambda-prolog-modules,
+ author =     {Dale Miller},
+ title =      {A Proposal for Modules in {Lambda-Prolog}},
+ booktitle =  {ELP '93: Proceedings of the 4th International Workshop on Extensions of Logic Programming},
+ year =       {1994},
+ pages =      {206--221},
+ publisher =  {Springer-Verlag},
+ location =    {St. Andrews, UK}
+ }
+
+@inproceedings{haemmerle+:modules-for-prolog-revisited,
+  author    = {R{\'e}my Haemmerl{\'e} and
+               Fran\c{c}ois Fages},
+  title     = {Modules for Prolog Revisited},
+  booktitle = {International Conference on Logic Programming},
+  year      = {2006},
+  pages     = {41--55},
+  location   = {Seattle, WA}
+}
+
+@InProceedings{reed06hylo,
+  author = 	 {Jason Reed},
+  title = 	 {Hybridizing a Logical Framework},
+  booktitle = {International Workshop on Hybrid Logic},
+  year = 	 {2006},
+  series = 	 {Electronic Notes in Theoeretical Computer Science},
+  publisher = {Elsevier},
+  location = {Seattle, Washington, USA},
+}
+
+@InCollection{debruijn93algorithmic,
+  author = 	 {Nicolaas Govert de Bruijn},
+  title = 	 {Algorithmic definition of lambda-typed lambda calculus},
+  booktitle = 	 {Logical Environment},
+  pages = 	 {131--145},
+  publisher = {Cambridge University Press},
+  year = 	 {1993},
+  editor = 	 {G\'{e}rard Huet and Gordon D. Plotkin},
+}
+
+@PhdThesis{vandaalen80thesis,
+  author = 	 {D. T. van Daalen},
+  title = 	 {The Language Theory of {AUTOMATH}},
+  school = 	 {Technical University of Eindhoven},
+  year = 	 {1980},
+  address = 	 {Eindhoven, Netherlands},
+}
+
+@InCollection{felty91lf,
+  author = 	 {Amy Felty},
+  title = 	 {Encoding dependent types in an intuitionistic logic},
+  booktitle = 	 {Logical Frameworks},
+  pages = 	 {214--251},
+  publisher = {Cambridge University Press},
+  year = 	 {1991},
+  editor = 	 {G\'{e}rard Huet and Gordon D. Plotkin},
+}
+
+@InProceedings{schurmannstehr05holnuprl,
+  author = 	 {Carsten Sch\"urmann and Mark-Oliver Stehr},
+  title = 	 {An Executable Formalization of the {HOL/NuPRL} Connection in {T}welf},
+  booktitle = {International Conference on Logic for Programming Artificial Intelligence and Reasoning},
+  year = 	 {2005},
+  location = 	 {Montevideo, Uruguay},
+  publisher =    springer,
+}
+
+@InProceedings{gargpfenning06auth,
+  author = 	 {Deepak Garg and Frank Pfenning},
+  title = 	 {Non-Interference in Constructive Authorization Logic},
+  booktitle = {Computer Security Foundations Workshop},
+  pages = 	 {183-293},
+  year = 	 {2006},
+  location = 	 {Venice, Italy},
+}
+
+@InProceedings{acar+07consistent,
+  author = 	 {Umut A. Acar and Matthias Blume and Jacob Donham},
+  title = 	 {A Consistent Semantics of Self-Adjusting Computation},
+  booktitle = esop,
+  year = 	 {2007},
+  location = 	 {Braga, Portugal},
+  publisher = springer,
+}
+
+@INPROCEEDINGS{ahmed+05step,
+  AUTHOR = {Amal Ahmed and Matthew Fluet and Greg Morrisett},
+  TITLE = {A Step-Indexed Model of Substructural State},
+  BOOKTITLE = icfp,
+  PAGES = {78--91},
+  YEAR = 2005,
+  location = {Tallinn, Estonia},
+  PUBLISHER = {ACM Press}
+}
+
+@INPROCEEDINGS{fluet+06regions,
+  AUTHOR = {Matthew Fluet and Greg Morrisett and Amal Ahmed},
+  TITLE = {Linear Regions Are All You Need},
+  BOOKTITLE = esop,
+  PAGES = {7--21},
+  YEAR = 2006,
+  location = {Vienna, Austria},
+  PUBLISHER = springer
+}
+
+@Article{appelfelty02partial,
+  author = 	 {Andrew W. Appel and Amy P. Felty},
+  title = 	 {Dependent Types Ensure Partial Correctness of Theorem Provers},
+  journal = 	 jfp,
+  year = 	 {2002},
+  volume = 	 {14},
+  number = 	 {1},
+  pages = 	 {3--19},
+}
+
+@InProceedings{rohwedderpfenning96mode,
+  author = 	 {Ekkehard Rohwedder and Frank Pfenning},
+  title = 	 {Mode and termination checking for higher-order logic programs},
+  booktitle = esop,
+  pages = 	 {296--310},
+  year = 	 {1996},
+  editor = 	 {Hanne Riis Nielson},
+  volume = 	 {1058},
+  series = 	 lncs,
+  location = 	 {Link\"oping, Sweden},
+  publisher = springer,
+}
+
+@InCollection{pfenning91elf,
+  author = 	 {Frank Pfenning},
+  title = 	 {Logic programming in the {LF} logical framework},
+  booktitle = 	 {Logical Frameworks},
+  pages = 	 {149--181},
+  publisher = {Cambridge University Press},
+  year = 	 {1991},
+  editor = 	 {G\'{e}rard Huet and Gordon D. Plotkin},
+}
+
+@InProceedings{pfenningrohwedder92implementing,
+  author = 	 {Frank Pfenning and Ekkehard Rohwedder},
+  title = 	 {Implementing the meta-theory of deductive systems},
+  booktitle = cade,
+  pages = 	 {537--551},
+  year = 	 {1992},
+  editor = 	 {D. Kapur},
+  volume = 	 {607},
+  series = 	 lnai,
+  location = 	 {Saratoga Springs, New York},
+  publisher = springer,
+}
+
+@InProceedings{schurmannpfenning98prover,
+  author = 	 {Carsten Sch\"urmann and Frank Pfenning},
+  title = 	 {Automated theorem proving in a simple meta-logic for {LF}},
+  booktitle = cade,
+  pages = 	 {286--300},
+  year = 	 {1998},
+  editor = 	 {Claude Kirchner and H\'{e}l\`{e}ne Kirchner},
+  volume = 	 {1421},
+  series = 	 lncs,
+  location = 	 {Lindau, Germany},
+  publisher = springer,
+}
+
+
+@InProceedings{lopez+05lollimon,
+  author = 	 {Pablo L\'opez and Frank Pfenning and Jeff Polakow and Kevin Watkins},
+  title = 	 {Monadic concurrent linear logic programming},
+  booktitle = {International Symposium on Principles and Practice of Declarative Programming },
+  pages = 	 {35--46},
+  year = 	 {2005},
+  editor = 	 {Amy Felty},
+  address = 	 {Lisbon, Portugal},
+  publisher = {ACM Press},
+}
+
+@InProceedings{altenkirch+01coproduct,
+  author = 	 {Thorsten Altenkirch and Peter Dybjer and Martin Hofmann and Philip Scott},
+  title = 	 {Normalization by evaluation for typed $\lambda$-calculus with coproducts},
+  booktitle = lics,
+  pages = 	 {203--210},
+  year = 	 {2001},
+  publisher = {IEEE Press},
+}
+
+@InProceedings{ghani95coproducts,
+  author = 	 {Neil Ghani},
+  title = 	 {$\beta \eta$-equality for coproducts},
+  booktitle = tlca,
+  pages = 	 {171--185},
+  year = 	 {1995},
+  volume = 	 {902},
+  series = 	 lncs,
+  publisher = springer,
+}
+
+@InProceedings{lindley07sums,
+  author = 	 {Sam Lindley},
+  title = 	 {Extension Rewriting with Sums},
+  booktitle = tlca,
+  year = 	 {2007},
+}
+
+@inproceedings{flanagon06hybrid,
+ author = {Cormac Flanagan},
+ title = {Hybrid type checking},
+ booktitle = popl,
+ year = {2006},
+ pages = {245--256},
+ location = {Charleston, South Carolina}
+ }
+
+@InProceedings{sulzmann+07fc,
+  author = 	 {Martin Sulzmann and Manuel Chakravarty and Simon {Peyton Jones}},
+  title = 	 {System F with Type Equality Coercions},
+  booktitle = tldi,
+  year = 	 {2007},
+}
+
+
+@InProceedings{peytonjones+06wobbly,
+  author = 	 {Simon {Peyton Jones} and Dimitrios Vytiniotis and Stephanie Weirich and Geoffrey Washburn.},
+  title = 	 { Simple unification-based type inference for {GADT}s},
+  booktitle = icfp,
+  year = 	 {2006},
+}
+
+@Article{hinze00tries,
+  author = 	 {Ralf Hinze},
+  title = 	 {Generalizing generalized tries},
+  journal = 	 jfp,
+  year = 	 2000,
+  volume = 	 {10},
+  pages = 	 {327--351},
+}
+
+
+@InProceedings{fiore+99abt,
+  author = 	 {Marcelo Fiore and Gordon Plotkin and Daniele Turi},
+  title = 	 {Abstract Syntax and Variable Binding},
+  booktitle = lics,
+  year = 	 {1999},
+}
+
+@Article{schurmann+01primrec,
+  author = 	 {Carsten Sch\"{u}rmann and Jo\"{e}lle Despeyroux and Frank Pfenning},
+  title = 	 {Primitive recursion for higher-order abstract syntax},
+  journal = 	 {Theoretical Computer Science},
+  year = 	 {2001},
+  volume = 	 {266},
+  pages = 	 {1--57},
+}
+
+@InProceedings{pientka06fphoas,
+  author = 	 {Brigitte Pientka},
+  title = 	 {Functional programming with higher-order abstract syntax and explicit substitutions},
+  booktitle = { Programming Languages meets Program Verification},
+  year = 	 {2006},
+}
+
+@inproceedings{fogarty+07concoqtion,
+ author = {Seth Fogarty and Emir Pasalic and Jeremy Siek and Walid Taha},
+ title = {Concoqtion: indexed types now!},
+ booktitle = {ACM SIGPLAN symposium on Partial evaluation and semantics-based program manipulation},
+ year = {2007},
+ pages = {112--121},
+ location = {Nice, France},
+ publisher = {ACM Press},
+ address = {New York, NY, USA},
+ }
+
+@InProceedings{nanevski+06separation,
+  author = 	 {Aleksandar Nanevski and Greg Morrisett and Lars Birkedal},
+  title = 	 {Polymorphism and Separation in {H}oare {T}ype {T}heory},
+  booktitle = icfp,
+  pages = 	 {62--73},
+  year = 	 {2006},
+  address = 	 {Portland, Oregon}
+}
+
+@InCollection{harperstone00smltt,
+  author = 	 {Robert Harper and Chris Stone},
+  title = 	 {A Type-Theoretic Interpretation of {S}tandard {ML}},
+  booktitle = 	 {Proof, Language, and Interaction: Essays in Honor of Robin Milner},
+  publisher =	 {MIT Press},
+  year =	 2000,
+  editor =	 {Gordon Plotkin and Colin Stirling and Mads Tofte}
+}
+
+@Article{pitts03nom1storder,
+  author =	 {A. M. Pitts},
+  title =	 {Nominal Logic, A First Order Theory of Names and Binding},
+  journal =	 {Information and Computation},
+  year =	 2003,
+  pages =	 {165--193},
+  volume =	 186,
+}
+
+@InProceedings{pitts00freshml2000,
+  author =	 {A. M. Pitts and M. J. Gabbay},
+  title =	 {A Metalanguage for Programming with Bound Names
+                  Modulo Renaming},
+  booktitle =	 {Mathematics of Program Construction},
+  pages =	 {230--255},
+  year =	 2000,
+  editor =	 {R. Backhouse and J. N. Oliveira},
+  volume =	 1837,
+  series =	 {Lecture Notes in Computer Science},
+  publisher =	 {Springer-Verlag, Heidelberg},
+}
+
+@InProceedings{pottier07staticfreshml,
+  Author = 	 {Fran{\c{c}}ois Pottier},
+  title = 	 {Static Name Control for {FreshML}},
+  booktitle = lics,
+  year = 	 {2007},
+}
+
+@Article{pitts06alpharec,
+  author = 	 {A. M. Pitts},
+  title = 	 {Alpha-Structural Recursion and Induction},
+  journal = 	 jacm,
+  year = 	 {2006},
+  volume = 	 {53},
+  pages = 	 {459--506},
+}
+
+@InProceedings{leino04invariants,
+  author = 	 {K. Rustan M. Leino and Peter M\"uller},
+  title = 	 {Object invariants in dynamic contexts},
+  booktitle = {European Conference on Object-Oriented Programming},
+  pages = 	 {491--516},
+  year = 	 {2004},
+  address = 	 {Oslo, Norway}
+}
+
+@InProceedings{leino06model,
+  author = 	 {K. Rustan M. Leino and Peter M\"uller},
+  title = 	 {A verification methodology for model fields},
+  booktitle = {European Conference on Object-Oriented Programming},
+  year = 	 {2006},
+}
+
+@PhdThesis{peterson05thesis,
+  author = 	 {Leaf Petersen},
+  title = 	 {Certifying Compilation for Standard ML in a Type Analysis Framework},
+  school = 	 {Carnegie Mellon University},
+  year = 	 {2005},
+}
+
+@InProceedings{constablemendler85recursive,
+  author = 	 {Robert L. Constable and N. P. Mendler},
+  title = 	 {Recursive Definitions in Type Theory},
+  booktitle = {Logic of Programs},
+  pages = 	 {61-78},
+  year = 	 {1985},
+  volume = 	 {193},
+  series = 	 lncs,
+  publisher = springer,
+}
+
+
+ @Article{shao+05certifiedbinaries,
+  author = 	 {Zhong Shao and Valery Trifonov and Bratin Saha and Nikolaos Papaspyrou},
+  title = 	 {A Type System for Certified Binaries},
+  journal = 	 toplas,
+  year = 	 {2005},
+  volume = 	 {27},
+  number = 	 {1},
+  pages = 	 {1--45},
+}
+
+
+@InProceedings{chin+05qualifiers,
+  author = 	 {Brian Chin and Shane Markstrum and Todd Millstein},
+  title = 	 {Semantic Type Qualifiers},
+  booktitle = pldi,
+  year = 	 {2005},
+}
+
+@InProceedings{condit+07deplowlevel,
+  title = 	 {Dependent Types for Low-Level Programming},
+  author = 	 {Jeremy Condit and Matthew Harren and Zachary Anderson and David Gay and George C. Necula},
+  booktitle = esop,
+  year = 	 {2007},
+}
+
+  
+@InProceedings{weirich02hita,
+  author = 	 {Stephanie Weirich},
+  title = 	 {Higher-Order Intensional Type Analysis},
+  booktitle = esop,
+  pages = 	 {98--114},
+  year = 	 {2002},
+  editor = 	 {Daniel Le M\'tayer},
+  location = {Grenoble, France}
+}
+
+@inproceedings{lh09pdt,
+ author = {Daniel R. Licata and Robert Harper},
+ title = {Positively dependent types},
+ booktitle = {PLPV '09: Proceedings of the 3rd Workshop on Programming Languages Meets Program Verification},
+ year = {2009},
+ pages = {3--14},
+ location = {Savannah, GA, USA},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+@article{andreoli92focus,
+  author = {Jean-Marc Andreoli},
+  title = {Logic programming with focusing proofs in linear logic},
+  journal = {Journal of Logic and Computation},
+  year = {1992},
+  volume = 2,
+  number = 3,
+  pages = {297--347},
+}
+
+@article{girard01locus,
+  author = {Jean-Yves Girard},
+  title = {Locus Solum: From the rules of logic to the logic of rules},
+  journal = {Mathematical Structures in Computer Science},
+  volume = {11},
+  number = {3},
+  year = {2001},
+  pages = {301--506},
+  publisher = {Cambridge University Press},
+  address = {New York, NY, USA},
+ }
+
+@article{zeilberger08apal,
+  title =       "On the unity of duality",
+  author =	"Noam Zeilberger",
+  journal =     "Annals of Pure and Applied Logic",
+  year = 	"2008",
+  volume =      153,
+  number =      "1--3",
+  note =        "Special issue on ``Classical Logic and Computation''",
+}
+
+@inproceedings{zeilberger08popl,
+  author = {Noam Zeilberger},
+  title = {Focusing and higher-order abstract syntax},
+  booktitle = popl,
+  year = {2008},
+  pages = {359--369},
+  location = {San Francisco, California, USA},
+}
+
+@book{dummett91,
+  author = {Michael Dummett},
+  title = {The Logical Basis of Metaphysics},
+  publisher = {Harvard University Press},
+  address = {Cambridge, Massachusetts},
+  year = {1991},
+  pages = {xi+355},
+  series = {The William James Lectures, 1976},
+}
+
+@phdthesis{laurent02thesis,
+  author = {Olivier Laurent},
+  title  = {Etude de la polarisation en logique},
+  school = {{U}niversit\'e {A}ix-{M}arseille~{II}},
+  type   = {Th\`ese de Doctorat},
+  month  = mar,
+  year   = {2002}
+}
+
+@String{pub-sv = "Springer-Verlag"}                                             
+@String{csl07 =  "CSL 2007: Computer Science Logic"}                            
+@InProceedings{millerliang07,                                                      
+  author =       "Chuck Liang and Dale Miller",                                 
+  title =        "Focusing and Polarization in Intuitionistic Logic",           
+  booktitle =    csl07,                                                         
+  editor =       "J. Duparc and T. A. Henzinger",                               
+  volume =       "4646",                                                        
+  series =       "LNCS",                                                        
+  publisher =    pub-sv,                                                        
+  pages =        "451--465",                                                    
+  year =         "2007",                                                        
+}
+
+@article{nanevski+07cmtt,
+  author = {Aleksandar Nanevski and Frank Pfenning and Brigitte Pientka},
+  title = {Contextual modal type theory},
+  journal = {Transactions on Computational Logic},
+  year = {2007},
+  note = {To appear},
+}
+
+@inproceedings{pientka08popl,
+  title = {A type-theoretic foundation for programming with higher-order abstract syntax and first-class substitutions},
+  author = {Brigitte Pientka},
+  year = {2008},
+  booktitle = popl,
+  pages = {371--382},
+  location = {San Francisco, California, USA},
+}
+
+@inproceedings{martin-lof71iid,
+  author = {Per {Martin-L{\"{o}}f}},
+  title = {{\it Hauptsatz} for the intuitionistic theory of
+		 iterated inductive definitions},
+  booktitle = {Proceedings of the Second Scandinavian Logic Symposium},
+  year =  {1971},
+  pages = {179--216},
+  editor = {J. E. Fenstad},
+  publisher = {North Holland},
+  address = {Amsterdam},
+}
+
+@book{negrivonplato01,
+  author = {Sara Negri and Jan Von Plato},
+  title = {Structural Proof Theory},
+  publisher = {Cambridge University Press},
+  year =  {2001},
+}
+
+@inproceedings{despeyroux+95hoascoq,
+    author = {Jo{\"e}lle Despeyroux and Amy Felty and Andr\'e Hirschowitz},
+    title = {Higher-Order Abstract Syntax in {Coq}},
+    booktitle = tlca,
+    publisher = {Springer-Verlag},
+    series = lncs,
+    volume = {902},
+    address = {Edinburgh, Scotland},
+    editor = {M. Dezani-Ciancaglini and G. Plotkin},
+    pages = {124--138},
+    year = {1995},
+}
+
+@InProceedings{howe91open,
+  title = {On Computational Open-Endedness in {M}artin-{L}{\"o}f's
+		 Type Theory},
+  author = {Douglas J. Howe},
+  publisher = {IEEE Computer Society},
+  year =  {1991},
+  bibdate = {2006-04-25},
+  bibsource = {DBLP,
+		 http://dblp.uni-trier.de/db/conf/lics/lics91.html#Howe91},
+  booktitle = lics,
+  pages = {162--172},
+}
+
+@article{church40,
+  author = {Alonzo Church},
+  title = {A Formulation of the Simple Theory of Types},
+  journal = {Journal of Symbolic Logic},
+  year =  {1940},
+  volume = {5},
+  number = {1},
+  pages = {56--68},
+  topic = {higher-order-logic;},
+}
+
+@article{martin-lof96meaning,
+  author =       {Per Martin-L{\"{o}}f},
+  title =        {On the Meanings of the Logical Constants and the
+                  Justifications of the Logical Laws},
+  journal =      {Nordic Journal of Philosophical Logic},
+  year =         1996,
+  volume =       1,
+  number =       1,
+  pages =        {11--60},
+}
+
+@article{schroederheister84natnat,
+  author = {Peter Schroeder-Heister},
+  title = {A Natural Extension of Natural Deduction},
+  journal = {Journal of Symbolic Logic},
+  volume = {49},
+  number = {4},
+  pages = {1284--1300},
+  year =  {1984},
+}
+
+@InProceedings{schroederheister92cutelim,
+  author = {Peter Schroeder-Heister},
+  title = {Cut-elimination in logics with definitional reflection},
+  booktitle = {Nonclassical Logics and Information Processing},
+  publisher = {Springer},
+  series =	lncs,
+  volume = {619},
+  editor = {D. Pearce and H. Wansing},
+  pages = {146--171},
+  year =  {1992},
+}
+
+@InProceedings{schroederheister93lics,
+  author =	"Peter Schroeder-Heister",
+  title =	"Rules of Definitional Reflection",
+  pages =	"222--232",
+  editor =	"Robert L. Constable",
+  booktitle =	lics,
+  address =	"Montreal, Canada",
+  month =	jun,
+  year = 	"1993",
+  publisher =	"IEEE Computer Society Press",
+}
+
+@PhdThesis{mendler87thesis,
+  author = {Paul Francis Mendler},
+  title = {Inductive Definition in Type Theory},
+  type =  {PhD thesis ({T}echnical {R}eport {TR} 87-870)},
+  school = {Dept.\ of Computer Science, Cornell Univ.},
+  address = {Ithaca, NY},
+  month =	sep,
+  year =  {1987},
+}
+
+@InProceedings{miller00hoas,
+  author =	"Dale Miller",
+  title =	"Abstract Syntax for Variable Binders: An Overview",
+  booktitle =	"Computational Logic",
+  pages =	"239--253",
+  year = 	"2000",
+  editor =	"John Lloyd and {et. al.}",
+  number =	"1861",
+  series =	"LNAI",
+  publisher =	"Springer",
+}
+
+@InProceedings{pfenningelliott88hoas,
+  title =	"Higher-Order Abstract Syntax",
+  author =	"Frank Pfenning and Conal Elliott",
+  year = 	"1988",
+  bibdate =	"2006-02-10",
+  bibsource =	"DBLP,
+		 http://dblp.uni-trier.de/db/conf/pldi/pldi88.html#PfenningE88",
+  booktitle = pldi,
+  pages =	"199--208",
+}
+
+@InProceedings{schurmann+05triangle,
+  title =	"The [triangle]-Calculus. Functional Programming with
+		 Higher-Order Encodings",
+  author =	"Carsten Sch{\"u}rmann and Adam Poswolsky and Jeffrey
+		 Sarnat",
+  booktitle =	tlca,
+  year = 	"2005",
+  pages =	"339--353",
+}
+
+@inproceedings{poswolsky+08delphin,
+  title = {Practical Programming with Higher-Order Encodings and Dependent Types},
+  author = {Adam Poswolsky and Carsten Sch{\"u}rmann},
+  booktitle = esop,
+  year = 2008,
+  location = {Budapest, Hungary},
+}
+
+@TechReport{miller90,
+  title =	"An Extension to {ML} to Handle Bound Variables in Data
+		 Structures: Preliminary Report",
+  author =	"Dale Miller",
+  year = 	"1990",
+  month =	aug,
+  institution =  "University of Pennsylvania, Department of Computer and Information Science",
+}
+
+@InCollection{coquand+89cic,
+  author =	"Thierry Coquand and Christine Paulin-Mohring",
+  title =	"Inductively defined types",
+  booktitle =	lncs,
+  number =      "389",
+  publisher =	"Springer-Verlag",
+  year = 	"1989",
+}
+
+@inproceedings{aydemir+08popl,
+ author = {Brian Aydemir and Arthur Chargu\'{e}raud and Benjamin C. Pierce and Randy Pollack and Stephanie Weirich},
+ title = {Engineering formal metatheory},
+ booktitle = popl,
+ year = {2008},
+ pages = {3--15},
+ location = {San Francisco, California, USA},
+ }
+
+@article{mckinnapollack99some,
+    author = "James McKinna and Robert Pollack",
+    title = "Some Lambda Calculus and Type Theory Formalized",
+    journal = "Journal of Automated Reasoning",
+    volume = "23",
+    number = "3-4",
+    pages = "373-409",
+    year = "1999"
+}
+
+@Article{debruijn72,
+  author =	"Nicolaas G. de Bruijn",
+  title =	"A Lambda Calculus Notation with Nameless Dummies, a
+		 Tool for Automatic Formula Manipulation, with
+		 Application to the Church-Rosser Theorem",
+  journal =	"Indagationes Mathematicae",
+  volume =	"34",
+  pages =	"381--392",
+  year = 	"1972",
+  keywords =	"bruijn functional",
+}
+
+@inproceedings{millertiu03lics,
+  author =	"Dale Miller and Alwen Fernanto Tiu",
+  title =	"A Proof Theory for Generic Judgments: An extended
+		 abstract",
+  pages =	"118--127",
+  booktitle =	lics,
+  year =	{2003},
+  location =    "Ottawa, Canada",
+}
+
+@PhdThesis{norell07thesis,
+  author = 	 {Ulf Norell},
+  title = 	 {Towards a practical programming language based on dependent type theory},
+  school = 	 {Chalmers University of Technology},
+  year = 	 {2007},
+}
+
+@InProceedings{shinwell+03freshmlicfp,
+  author =	 {M. R. Shinwell and A. M. Pitts and M. J. Gabbay},
+  title =	 {Fresh{ML}: Programming with Binders Made Simple},
+  booktitle =	 {{ACM SIGPLAN} International Conference on
+                  Functional Programming},
+  pages =	 {263--274},
+  year =	 2003,
+  month =	 "August",
+}
+
+@InProceedings{hofmann99hoas,
+  author = 	 {Martin Hofmann},
+  title = 	 {Semantical analysis of higher-order abstract syntax},
+  booktitle = lics,
+  year = 	 {1999},
+}
+
+@InProceedings{sewell+07ott,
+  author = {Peter Sewell and Francesco Zappa Nardelli and Scott Owens
+            and Gilles Peskine and Thomas Ridge and Susmit Sarkar and Rok Strni\v{s}a }, 
+  title  = {Ott: Effective Tool Support for the Working Semanticist},
+  booktitle = icfp,
+  year = 	 {2007},
+}
+
+@InProceedings{momigliano+07hybridisabelle,
+  author = 	 {A. Momigliano and A. Martin and A. Felty},
+  title = 	 {Two-Level Hybrid: A System for Reasoning Using Higher-Order Abstract Syntax},
+  booktitle = lfmtp,
+  year = 	 {2007},
+}
+
+@article{girard93unity,
+ author = {Jean-Yves Girard},
+ title = "On the unity of logic",
+ journal = "Annals of pure and applied logic",
+ volume = "59",
+ number = "3",
+ pages = "201--217",
+ year = "1993",
+}
+
+@TechReport{chlipala07generic,
+  author = 	 {Adam Chlipala},
+  title = 	 {Generic Programming and Proving for Programming Language Metatheory},
+  institution =  {Electrical Engineering and Computer Science, University of California, Berkeley},
+  year = 	 {2007},
+  number = 	 {UCB/EECS-2007-147},
+}
+
+@InProceedings{gabbaypitts99nominal,
+  author = 	 {M.~J.~Gabbay and A.~M.~Pitts},
+  title = 	 {A New Approach to Abstract Syntax Involving Binders},
+  booktitle = 	 lics,
+  year = 	 "1999",
+  publisher =    ieee,
+  pages = 	 {214--224},
+}
+
+
+@Article{urban08nominal,
+  author = 	 {Christian Urban},
+  title = 	 {Nominal Techniques in {I}sabelle/{HOL}},
+  journal = 	 {Journal of Automatic Reasoning},
+  year =         {2008},
+  note = 	 {To appear.},
+}
+
+@Article{debruijn72debruijn,
+  author = 	 {{Nicolaas Govert} {de Bruijn}},
+  title = 	 {Lambda Calculus Notation with Nameless Dummies},
+  year = 	 {1972},
+  journal = 	 {Indagationes Mathematicae},
+  volume = 	 {34},
+  pages = 	 {381--392},
+}
+
+@Article{bucalo+06contexts,
+  title = 	 {Consistency of the Theory of Contexts},
+  author = 	 {Anna Bucalo and Martin Hofmann and Furio Honsell and Marino Miculan and Ivan Scagnetto},
+  journal = 	 jfp,
+  year = 	 {2006},
+  volume = 	 {16},
+  number = 	 {3},
+  pages = 	 {327--395},
+  month = 	 {May},
+}
+
+@InProceedings{despeyrouxlelu99dependent,
+  author = 	 {Jo\"{e}lle Despeyroux and Pierre Leleu},
+  title = 	 {Primitive recursion for higher-order abstract syntax with dependant types. },
+  booktitle = {Workshop on Intuitionistic  Modal Logics and Applications},
+  year = 	 {1999},
+  address = 	 {Tento, Italy},
+}
+
+@inproceedings{ambler+02hybridoriginal,
+ author = {Simon Ambler and Roy L. Crole and Alberto Momigliano},
+ title = {Combining Higher Order Abstract Syntax with Tactical Theorem Proving and (Co)Induction},
+ booktitle = tphols,
+ year = {2002},
+ pages = {13--30},
+ publisher = springer,
+ address = {London, UK},
+ }
+
+@inproceedings{caprettafelty06hybridcoq,
+  author      = {Venanzio Capretta and Amy Felty},
+  title       = {Combining de {B}ruijn Indices and Higher-Order Abstract Syntax in {C}oq},
+  booktitle   = {Proceedings of TYPES 2006},
+  series      = lncs,
+  volume      = {4502},
+  publisher   = springer,
+  pages       = {63--77},
+  year        = 2007
+}
+%  editor      = {Thorsten Altenkirch and Conor McBride},
+
+@inproceedings{hickey+06reflection,
+ author = {Jason Hickey and Aleksey Nogin and Xin Yu and Alexei Kopylov},
+ title = {Mechanized meta-reasoning using a hybrid {HOAS}/de {B}ruijn representation and reflection},
+ booktitle = icfp,
+ year = {2006},
+ pages = {172--183},
+ location = {Portland, Oregon, USA},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+@InProceedings{ambler+03definitional,
+  author = 	 {Simon Ambler and Roy Crole and A. Momigliano},
+  title = 	 {A Definitional Approach to Primitive Recursion over Higher Order Abstract Syntax},
+  booktitle = {Workshop on Mechanized reasoning about languages with variable binding},
+  year = 	 {2003},
+  month = 	 {June},
+  publisher = acm,
+}
+
+@TechReport{lzh08focbind-tr,
+  author = 	 {Daniel R. Licata and Noam Zeilberger and Robert Harper},
+  title = 	 {Focusing on Binding and Computation},
+  institution =  {Carnegie Mellon University School of Computer Science},
+  year = 	 2008,
+  number = 	 {CMU--CS--08--101},
+  address = 	 {Pittsburgh, PA},
+  month = 	 {April}}
+}
+
+
+@InProceedings{lzh08focbind,
+  author = 	 {Daniel R. Licata and Noam Zeilberger and Robert Harper},
+  title = 	 {Focusing on Binding and Computation},
+  booktitle = lics,
+  year = 	 {2008},
+}
+
+@Article{hl07mechanizing,
+  author = 	 {Robert Harper and Daniel R. Licata},
+  title = 	 {Mechanizing Metatheory in a Logical Framework},
+  journal = 	 {Journal of Functional Programming},
+  year = 	 {2007},
+  month =        {July},
+  volume =       {17},
+  number =       {4--5},
+  pages  =       {613--673},
+}
+
+@inproceedings{gargpfenning06nonint,
+	author = {Deepak Garg and Frank Pfenning},
+	title = "Non-interference in Constructive Authorization Logic",
+	booktitle = "Proceedings of the 19th IEEE Computer Security Foundations Workshop (CSFW 19)",
+	year = "2006",
+	location = "Venice, Italy"
+	}
+
+@Article{cervesatopfenning03spine,
+  author = 	 {Iliano Cervesato and Frank Pfenning},
+  title = 	 {A linear spine calculus},
+  journal = 	 {Journal of Logic and Computation},
+  year = 	 {2003},
+  volume = 	 {13},
+  number = 	 {5},
+  pages = 	 {639--688},
+}
+
+
+@InProceedings{sozeau07program,
+  author = 	 {Matthieu Sozeau},
+  title = 	 {\textsc{Program}-ing Finger Trees in {C}oq},
+  booktitle = icfp,
+  year = 	 {2007},
+  publisher = acm,
+}
+
+@article{lovaspfenning08refinement,
+  author =      {William Lovas and Frank Pfenning},
+  title =       {A Bidirectional Refinement Type System for {LF}},
+  journal =     {Electronic Notes in Theoretical Computer Science},
+  volume =      {196},
+  year =        {2008},
+  pages =       {113--128},
+  keywords =    {LF, refinement types, subtyping, dependent types, intersection types},
+  urlpdf =      {http://www.cs.cmu.edu/~wlovas/papers/lfr.pdf}
+}
+
+@inproceedings{altenkirch+07ott,
+Author = {Thorsten Altenkirch and Conor McBride and Wouter Swierstra},
+Booktitle = {Programming Languages meets Program Verification Workshop},
+Title = {Observational Equality, Now!},
+Year = {2007}}
+
+@Unpublished{dunfieldpientka08case,
+  author = 	 {Joshua Dunfield and Brigitte Pientka},
+  title = 	 {Case analysis on higher-order data},
+  note = 	 {Draft: \url{http://www.cs.mcgill.ca/~complogic/beluga/}},
+  month = 	 {February},
+  year = 	 {2008},
+}
+
+@Article{hallnas91,
+  title =	"Partial inductive definitions",
+  author =	"Lars Halln{\"a}s",
+  pages =	"115--142",
+  journal =	"Theoretical Computer Science",
+  year = 	"1991",
+  month =	"16~" # sep,
+  volume =	"87",
+  number =	"1",
+}
+
+@article{avron91simple,
+ author = {Arnon Avron},
+ title = {Simple consequence relations},
+ journal = {Information and Computation},
+ volume = {92},
+ number = {1},
+ year = {1991},
+ pages = {105--139},
+ publisher = {Academic Press, Inc.},
+ address = {Duluth, MN, USA},
+ }
+
+@Article{birdpaterson99nested,
+  title =	"De {B}ruijn Notation as a Nested Datatype",
+  author =	"Richard S. Bird and Ross Paterson",
+  journal =	jfp,
+  year = 	"1999",
+  number =	"1",
+  volume =	"9",
+  bibdate =	"2004-03-19",
+  bibsource =	"DBLP,
+		 http://dblp.uni-trier.de/db/journals/jfp/jfp9.html#BirdP99",
+  pages =	"77--91",
+}
+
+@InProceedings{altenkirchreus99gadt,
+  author =	"Thorsten Altenkirch and Bernhard Reus",
+  title =	"Monadic Presentations of Lambda Terms Using
+		 Generalized Inductive Types",
+  booktitle =	"CSL 1999: Computer Science Logic",
+  publisher =	"LNCS, Springer-Verlag",
+  year = 	"1999",
+}
+
+@Unpublished{lh08dsl,
+  author = 	 {Daniel R. Licata and Robert Harper},
+  title = 	 {Dependently Typed Programming with Domain-Specific Logics},
+  note = 	 {Draft available from \url{http://www.cs.cmu.edu/~drl}},
+  month = 	 {April},
+  year = 	 {2008},
+}
+
+@article{ bellegardehook94subst,
+    author = "Fran{\c{c}}oise Bellegarde and James Hook",
+    title = "Substitution: {A} formal methods case study using monads and transformations",
+    journal = "Science of Computer Programming",
+    volume = "23",
+    number = "2--3",
+    pages = "287--311",
+    year = "1994"}
+
+@inproceedings{vaughan+08audit,
+  author       = {Jeffrey A. Vaughan and Limin Jia and Karl Mazurak and Steve
+                  Zdancewic},
+  title        = {Evidence-based Audit},
+  booktitle    = {IEEE Computer Security Foundations Symposium},
+  month        = {June},
+  year         = {2008},
+}
+
+@InProceedings{jia+08aura,
+  author = 	 {Limin Jia and Jeffrey A. Vaughan and Karl Mazurak and Jianzhou Zhao and Luke Zarko and Joseph Schorr and and Steve Zdancewic},
+  title = 	 {Aura: A programming language for authorization and audit},
+  booktitle = icfp,
+  year = 	 {2008},
+}
+
+@InProceedings{nanevski+08ynot,
+  author = 	 {Aleksandar Nanevski and Greg Morrisett and Avi Shinnar and Paul Govereau and Lars Birkedal},
+  title = 	 {Ynot: Reasoning with the Awkward Squad},
+  booktitle = icfp,
+  year = 	 {2008},
+}
+
+@unpublished{oury-swierstra:power-of-pi,
+	Note = {Accepted for presentation at ICFP 2008.},
+}
+
+
+@InProceedings{ouryswierstra08pi,
+  Author = {Nicolas Oury and Wouter Swierstra},
+  Title = {The Power of Pi},
+  booktitle = icfp,
+  year = 	 {2008},
+}
+
+@Misc{galois02cryptol,
+  author = 	 {Galois, Inc.},
+  title = 	 {Cryptol Reference Manual},
+  year = 	 {2002},
+}
+
+@TechReport{kumar07access,
+  author = 	 {Kumar Avijit and Robert Harper},
+  title = 	 {A Language for Access Control},
+  institution =  {Carnegie Mellon University, Computer Science Department},
+  year = 	 {2007},
+  number = 	 {CMU-CS-07-140},
+}
+
+@inproceedings{curienherbelin00duality,
+    author = "Pierre-Louis Curien and Hugo Herbelin",
+    title = "The duality of computation",
+    booktitle = icfp,
+    pages = "233--243",
+    year = "2000",
+}
+
+@mastersthesis{filinski89duality,
+ author = "Andrzej Filinski",
+ title = "Declarative continuations and categorical duality.",
+ school = "University of Copenhagen",
+ year = "1989",
+ note = "{C}omputer Science Department",
+}
+
+@Article{selinger01duality,
+  title =	"Control categories and duality: on the categorical
+		 semantics of the lambda-mu calculus",
+  author =	"Peter Selinger",
+  journal =	"Mathematical Structures in Computer Science",
+  year = 	"2001",
+  number =	"2",
+  volume =	"11",
+  bibdate =	"2002-02-06",
+  pages =	"207--260",
+}
+
+@phdthesis{levy01thesis,
+ author = "Paul B. Levy",
+ title = "Call-by-push-value",
+ school = "Queen Mary, University of London",
+ year = "2001",
+}
+
+@InProceedings{cheney08simple,
+  author = 	 {James Cheney},
+  title = 	 {Simple Nominal Type Theory},
+  booktitle = lfmtp,
+  year = 	 {2008},
+}
+
+@Article{awodey04brackets,
+  author = 	 {Steve Awodey and Andrej Bauer},
+  title = 	 {Propositions as [Types]},
+  journal = 	 {Journal of Logic and Computation},
+  year = 	 {2004},
+  volume = 	 {14},
+  number = 	 {4},
+  pages = 	 {447--471},
+}
+
+
+
+@PhdThesis{dunfield07thesis,
+  author =  {Joshua Dunfield},
+  title =   {A Unified System of Type Refinements},
+  school =  {Carnegie Mellon University},
+  year =    {2007},
+  month =   {August},
+  note =    {CMU-CS-07-129}
+}
+  
+@Unpublished{l08thesprop,
+  author = 	 {Daniel R. Licata},
+  title = 	 {Dependently Typed Programming with Domain-Specific Logics (Thesis Proposal)},
+  note = 	 {Available from \url{http://www.cs.cmu.edu/~drl}},
+  year = 	 {2008},
+}
+
+@INPROCEEDINGS{dybjersetzer01indrec,
+    author = {Peter Dybjer and Anton Setzer},
+    title = {Indexed induction-recursion},
+    booktitle = {Proof Theory in Computer Science},
+    year = {2001},
+    pages = {93--113},
+    publisher = {Springer}
+}
+
+@INPROCEEDINGS{plotkin02determine,
+    author = {Gordon Plotkin and John Power},
+    title = {Notions of computation determine monads},
+    booktitle = {Proc. FOSSACS 2002, Lecture Notes in Computer Science 2303},
+    year = {2002},
+    pages = {342--356},
+    publisher = {Springer}
+}
+
+@InProceedings{nanevski05comonadic,
+  title = 	 {A Modal Calculus for Exception Handling},
+  author = 	 {Aleksandar Nanevski},
+  booktitle = {Intuitionistic Modal Logic and Applications},
+  year = 	 {2005},
+}
+
+@inproceedings{swierstraaltenkirch07beauty,
+	Author = {Wouter Swierstra and Thorsten Altenkirch},
+	Booktitle = {ACM SIGPLAN Workshop on Haskell},
+	Title = {Beauty in the Beast: A Functional Semantics of the Awkward Squad},
+        Pages = {25--36},
+        Location = {Freiburg, Germany},
+	Year = {2007}
+}
+
+@article{laurent05semantics,
+ author = {Olivier Laurent},
+ title = {Syntax vs. semantics: a polarized approach},
+ journal = {Theoetical. Computer Science},
+ volume = {343},
+ number = {1-2},
+ year = {2005},
+ pages = {177--206},
+ publisher = {Elsevier Science Publishers Ltd.},
+ address = {Essex, UK},
+ }
+
+@InProceedings{chak+05associated,
+  author = 	 {Manuel Chakravarty and Gabrielle Keller and Simon {Peyton Jones}},
+  title = 	 {Associated type synonyms},
+  booktitle = icfp,
+  year = 	 {2005},
+}
+
+@InProceedings{miquel01implicit,
+  author = 	 {Alexandre Miquel},
+  title = 	 {The Implicit Calculus of Constructions: Extending Pure Type Systems with an Intersection Type Binder and Subtyping},
+  booktitle = tlca,
+  year = 	 {2001},
+}
+
+@InProceedings{chlipala08phoas,
+	author = {Adam Chlipala },
+	publisher = {ACM},
+	title = {Parametric higher-order abstract syntax for mechanized semantics},
+	year = {2008},
+        booktitle = icfp,
+}
+
+@inproceedings{washburnweirich03bananas,
+ author = { Geoffrey Washburn and Stephanie Weirich},
+ title = {Boxes go bananas: encoding higher-order abstract syntax with parametric polymorphism},
+ booktitle = icfp,
+ year = {2003},
+ pages = {249--262},
+ location = {Uppsala, Sweden},
+ publisher = {ACM},
+ }
+
+@article{abbot+05constructingspt,
+ author = { Michael Abbott and Thorsten Altenkirch and Neil Ghani},
+ title = {Containers: constructing strictly positive types},
+ journal = {Theoretic Computer Science},
+ volume = {342},
+ number = {1},
+ year = {2005},
+ pages = {3--27},
+ publisher = {Elsevier Science Publishers Ltd.},
+ address = {Essex, UK},
+ }
+
+@InProceedings{berger+91nbe,
+  author = 	 {Ulrich Berger and Helmut Schwichtenberg},
+  title = 	 {An inverse of the evaluation functional for typed $\lambda$-calculus},
+  booktitle = lics,
+  year = 	 {1991},
+}
+
+@InProceedings{dybjerfilinski00nbe,
+  author = 	 {Peter Dybjer and Andrzej Filinski},
+  title = 	 {Normalization and Partial Evaluation},
+  booktitle = {Applied Semantics: International Summer School, APPSEM 2000},
+  pages = 	 {137-192},
+  year = 	 {2000},
+  volume = 	 {2395},
+  series = 	 lncs,
+  month = 	 {September},
+  publisher = springer,
+}
+
+@inproceedings{lh09unibind,
+  author = 	 {Daniel R. Licata and Robert Harper},
+  title = 	 {A Universe of Binding and Computation},
+  booktitle =    icfp,
+  year = 	 {2009},
+}
+
+@inproceedings{zeilberger09rtcd,
+ author = {Noam Zeilberger},
+ title = {Refinement types and computational duality},
+ booktitle = {PLPV '09: Proceedings of the 3rd Workshop on Programming Languages Meets Program Verification},
+ year = {2009},
+ pages = {15--26},
+ location = {Savannah, GA, USA},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+@PhdThesis{zeilberger09thesis,
+  author = 	 {Noam Zeilberger},
+  title = 	 {The logical basis of evaluation order and pattern matching},
+  school = 	 {Carnegie Mellon University},
+  year = 	 {2009},
+}
+
+@InProceedings{crary08explicit,
+  author = 	 {Karl Crary},
+  title = 	 {Explicit Contexts in {LF}},
+  booktitle = lfmtp,
+  year = 	 {2008},
+}
+
+@InProceedings{chlipala07certifying,
+  author = 	 {Adam Chlipala},
+  title = 	 {A Certified Type-Preserving Compiler from $\lambda$-Calculus to Assembly Language},
+  booktitle = pldi,
+  year = 	 {2007},
+}
+
+
+@InProceedings{swamy+10fine,
+  AUTHOR = {Nikhil Swamy and Juan Chen and Ravi Chugh},
+  TITLE = {Enforcing Stateful Authorization and Information Flow Policies in {Fine}}, 
+  YEAR = {2010},
+  BOOKTITLE = esop,
+}
+
+@inproceedings{swamy+08fable,
+ author = {Swamy, Nikhil and Corcoran, Brian J. and Hicks, Michael},
+ title = {Fable: A Language for Enforcing User-defined Security Policies},
+ booktitle = {IEEE Symposium on Security and Privacy},
+ year = {2008},
+ pages = {369--383},
+ publisher = {IEEE Computer Society},
+ }
+
+
+@inproceedings{russo+08informationflow,
+ author = {Russo, Alejandro and Claessen, Koen and Hughes, John},
+ title = {A library for light-weight information-flow security in {H}askell},
+ booktitle = {ACM SIGPLAN Symposium on Haskell},
+ year = {2008},
+ pages = {13--24},
+ publisher = {ACM},
+ }
+
+@inproceedings{lh10agda5,
+  author        = "Daniel R. Licata and Robert Harper",
+  title         = "A monadic formalization of {ML5}",
+  booktitle     = "Workshop on Logical Frameworks and Meta-languages: Theory and Practice",
+  month         = "July",
+  year          = "2010"  }
+
+
+@inproceedings{shriram03continue,
+ author = {Krishnamurthi, Shriram},
+ title = {The {CONTINUE} Server (or, {H}ow {I} Administered {PADL} 2002 and 2003)},
+ booktitle = {International Symposium on Practical Aspects of Declarative Languages},
+ year = {2003},
+ pages = {2--16},
+ publisher = {Springer-Verlag},
+ }
+
+
+@INPROCEEDINGS{dougherty+06dynamic,
+    author = {Daniel J. Dougherty and Kathi Fisler and Shriram Krishnamurthi},
+    title = {Specifying and reasoning about dynamic access-control policies},
+    booktitle = {International Joint Conference on Automated Reasoning},
+    year = {2006},
+    pages = {632--646},
+    publisher = {Springer}
+}
+
+@INPROCEEDINGS{deyoungpfenning09reasoning,
+    author = {Henry DeYoung and Frank Pfenning},
+    title = {Reasoning about the consequences of authorization policies in a linear epistemic logic},
+   booktitle = {Workshop on Foundations of Computer Security},
+   institution = {Carnegie Mellon University},
+    year = {2009}
+}
+
+@misc{myers+jif,
+  author        = "Stephen Chong and Andrew C. Myers and K. Vikram and Lantian Zheng",
+  title         = "Jif Reference Manual",
+  howpublished  = "Available from \url{http://www.cs.cornell.edu/jif/doc/jif-3.3.0/manual.html}",
+  month         = "February",
+  year          = "2009",
+  note          = ""  }
+
+@Article{moggi91monad,
+  author =       {Eugenio Moggi},
+  title =        {Notions of computation and monads},
+  journal =      {Information And Computation},
+  year =         {1991},
+  volume =    {93},
+  number =    {1},
+}
+
+@INPROCEEDINGS{minamide+96closure,
+    author = {Yasuhiko Minamide and Greg Morrisett and Robert Harper},
+    title = {Typed Closure Conversion},
+    booktitle = popl,
+    year = {1996},
+    pages = {271--283},
+    publisher = {ACM Press}
+}
+
+@article{reed06hybrid,
+  author    = {Jason Reed},
+  title     = {Hybridizing a Logical Framework},
+  journal   = {Electr. Notes Theor. Comput. Sci.},
+  volume    = {174},
+  number    = {6},
+  year      = {2006},
+  pages     = {135-148},
+}
+
+
+@InProceedings{jiawalker04modal,
+  author =       {Limin Jia and David Walker},
+  title =        {Modal Proofs as Distributed Programs},
+  booktitle = esop,
+  year =      {2004},
+  volume =    {2986},
+  series =    lncs,
+  month =     {April},
+  publisher = {Springer},
+}
+
+@Article{daviespfenning01staged,
+  author =       {Rowan Davies and Frank Pfenning},
+  title =        {A modal analysis of staged computation},
+  journal =      jacm,
+  year =         {2001},
+  volume =    {48},
+  number =    {3},
+  pages =     {555--604},
+  month =     {May},
+}
+
+@PhdThesis{simpson93thesis,
+  author =       {Alex Simpson},
+  title =        {The Proof Theory and Semantics of Intuitionistic Modal Logic},
+  school =       {University of Edinburgh},
+  year =         {1993},
+}
+
+
+@PhdThesis{crary98thesis,
+  author =       {Karl Crary},
+  title =        {Type Theoretic Methodology for Practical Programming Languages },
+  school =       {Cornell University},
+  year =         {1998},
+}
+
+
+@Article{areces+01hybrid,
+  author =       {Carlos Areces and Patrick Blackburn and Maarten Marx},
+  title =        {Hybrid Logics: Characterization, Interpolation and Complexity},
+  journal =      {Journal of Symbolic Logic},
+  year =         {2001},
+  volume =    {66},
+  number =    {3},
+  pages =     {977-1010},
+}
+
+
+@Article{curry52lax,
+  author =       {H.B. Curry},
+  title =        {The elimination theorem when modality is present},
+  journal =      {Journal of Symbolic Logic},
+  year =         {1952},
+  volume =    {17},
+  pages =     {249--265},
+}
+
+@article{benton+98lax,
+ author = {P.N. Benton and G. M. Bierman and V. C. V. De Paiva},
+ title = {Computational types from a logical perspective},
+ journal = jfp,
+ volume = {8},
+ number = {2},
+ year = {1998},
+ pages = {177--193},
+ publisher = {Cambridge University Press},
+ address = {New York, NY, USA},
+ }
+
+@INPROCEEDINGS{Abadi+99dcc,
+    author = {Martin Abadi and Anindya Banerjee and Nevin Heintze and Jon G. Riecke},
+    title = {A Core Calculus of Dependency},
+    booktitle = {Proc. 26th ACM Symp. on Principles of Programming Languages (POPL},
+    year = {1999},
+    pages = {147--160},
+    publisher = {ACM Press}
+}
+
+@article{atkey09parametrized,
+ author = {Robert Atkey},
+ title = {Parameterised notions of computation},
+ journal = jfp,
+ volume = {19},
+ number = {3--4},
+ year = {2009},
+ pages = {335--376},
+ publisher = {Cambridge University Press},
+ address = {New York, NY, USA},
+ }
+
+
+@InProceedings{allen98notation,
+  author =       { Stuart F. Allen },
+  title =        {From dy/dx to {[]P}: {A} Matter of Notation},
+  booktitle = {Proceedings of the Conference on User Interfaces for Theorem Provers},
+  year =      {1998},
+}
+
+@InProceedings{lh10hl5,
+  author = 	 {Daniel R. Licata and Robert Harper},
+  title = 	 {A Monadic Formalization of ML5},
+  booktitle = {Workshop on Logical Framework and Meta-languages: Theory and Practice},
+  pages = 	 {69-83},
+  year = 	 {2010},
+  editor = 	 {K. Crary and M. Miculan},
+  volume = 	 {34},
+  series = 	 {EPTCS},
+}
+
+@inproceedings{ml10sectyp,
+  author        = "Jamie Morgenstern and Daniel R. Licata",
+  title         = "Security-Typed Programming within Dependently-Typed
+                  Programming",
+  booktitle     = icfp,
+  year          = "2010"  }
+
+
+@inproceedings{avijit10pcml5,
+author = {Kumar Avijit and Anupam Datta and Robert Harper},
+title = {Distributed programming with distributed authorization},
+booktitle = tldi,
+year = {2010}
+}
+
+@article{benke+03univeres,
+ author = { Marcin Benke and  Peter Dybjer and  Patrik Jansson},
+ title = {Universes for generic programs and proofs in dependent type theory},
+ journal = {Nordic Journal of Computing},
+ volume = {10},
+ number = {4},
+ year = {2003},
+ pages = {265--289},
+ publisher = {Publishing Association Nordic Journal of Computing},
+ address = {Finland},
+ }
+
+@Article{avron+98modal,
+  author =       {Arnon Avron and Furio Honsell and Marino Miculan and Cristian Paravano},
+  title =        {Encoding Modal Logics in Logical Frameworks},
+  journal =      {Studia Logica},
+  year =         {1998},
+  volume =    {60},
+  number =    {1},
+  pages =     {161--208},
+}
+
+
+@Unpublished{baezshulman07homotopyhypothesis,
+  author =       {John C. Baez and Michael Shulman},
+  title =        {Lectures on n-Categories and Cohomology},
+  note =         {Available from \url{http://arxiv.org/abs/math/0608420v2}},
+  year =      {2007},
+}
+
+@InProceedings{lumsdaine09omega,
+  author =       {Peter LeFanu Lumsdaine},
+  title =        {Weak $\omega$-Categories from Intensional Type Theory},
+  booktitle = tlca,
+  year =      {2009},
+}
+
+@article{garner09twodim,
+ author = {Garner, Richard},
+ title = {Two-dimensional models of type theory},
+ journal = {Mathematical. Structures in Computer Science},
+ volume = {19},
+ number = {4},
+ year = {2009},
+ pages = {687--736},
+ publisher = {Cambridge University Press},
+ address = {New York, NY, USA},
+ }
+
+@Unpublished{voevodsky10talk,
+  author =       {Vladimir Voevodsky},
+  title =        {The equivalence axiom and univalent models of type theory},
+  note =         {Available from \url{http://www.math.ias.edu/~vladimir/Site3/home_files/}},
+  year =      {2010}
+}
+
+@InProceedings{seely87twocat,
+  author =       {RAG Seely},
+  title =        {Modeling computations: a 2-categorical framework},
+  booktitle = lics,
+  pages =     {65--71},
+  year =      {1987}
+}
+
+@Book{godement58calculus,
+  author =    {R. Godement},
+  title =        {Th\'eorie des faisceaux},
+  publisher =    {Hermann, Paris},
+  year =         {1958},
+}
+
+@INPROCEEDINGS{Dybjer96internal,
+    author = {Peter Dybjer},
+    title = {Internal Type Theory},
+    booktitle = {International Workshop on Types for Proofs and Programs},
+    series = {Lecture Notes in Computer Science},
+    year = {1996},
+    pages = {120--134},
+    publisher = {Springer}
+}
+
+@Article{luo99coercive,
+  author = 	 {Zhaohui Luo},
+  title =        {Coercive Subtyping},
+  journal =      {Journal of Logic and Computatio},
+  year =         {1999},
+  volume =    {9},
+  number =    {1},
+}
+
+@inproceedings{barthe95implicit,
+ author = {Barthe, Gilles},
+ title = {Implicit Coercions in Type Systems},
+ booktitle = {International Workshop on Types for Proofs and Programs},
+ year = {1996},
+ pages = {1--15},
+ publisher = {Springer-Verlag},
+ address = {London, UK},
+ }
+
+@INPROCEEDINGS{hofmann97syntaxandsemantics,
+    author = {Martin Hofmann},
+    title = {Syntax and Semantics of Dependent Types},
+    booktitle = {Semantics and Logics of Computation},
+    year = {1997},
+    pages = {79--130},
+    publisher = {Cambridge University Press}
+}
+
+@Article{awodeywarren09identity,
+  author =       {S. Awodey and M. Warren},
+  title =        { Homotopy theoretic models of identity types},
+  journal =      {Mathematical Proceedings of the Cambridge Philosophical Society},
+  year =         {2009},
+}
+
+@Unpublished{cardelli90variance,
+  author =       {Luca Cardelli},
+  title =        {Notes about ${F}^\omega_{<:}$},
+  note =         {Unpublished.},
+  year =      {1990}
+}
+
+@PhdThesis{steffen98subtyping,
+  author =       {Martin Steffen},
+  title =        {Polarized Higher-Order Subtyping},
+  school =       { Universitaet Erlangen-Nuernberg},
+  year =         {1998},
+}
+
+@InProceedings{duggan+99constructors,
+  author =       {Dominic Duggan and Adriana Compagnoni},
+  title =        {Subtyping for Object Type Constructors},
+  booktitle = {Workshop On Foundations Of Object-Oriented Languages},
+  year =      {1999}
+}
+
+@InProceedings{abel10miniagda,
+  author	= {Andreas Abel},
+  title		= {MiniAgda: {I}ntegrating Sized and Dependent Types},
+  booktitle	= "Workshop on Partiality And Recursion in Interative Theorem Provers",
+  year		= {2010},
+  editor	= {Ana Bove and Ekaterina Komendantskaya and Milad Niqui}
+}
+
+@article{vandenberggarner10groupoids,
+author = {van den Berg, Benno and Garner, Richard}, 
+title = {Types are weak $\omega$-groupoids}, 
+volume = {102}, 
+number = {2}, 
+pages = {370-394}, 
+year = {2011}, 
+journal = {Proceedings of the London Mathematical Society} 
+}
+
+@PhdThesis{warren08thesis,
+  author =       {Michael A. Warren},
+  title =        {Homotopy theoretic aspects of constructive type theory},
+  school =       {Carnegie Mellon University},
+  year =         {2008}
+}
+
+@Article{gambinogarner08id,
+  author =       {Nicola Gambino and Richard Garner},
+  title =        {The identity type weak factorisation system},
+  journal =      {Theoretical Computer Science},
+  year =         {2008},
+  volume =    {409},
+  number =    {3},
+  pages =     {94--109}
+}
+
+
+@Article{gaucher03concurrency,
+  author =       {Philippe Gaucher},
+  title =        {A model category for the homotopy theory of concurrency},
+  journal =      {Homology, Homotopy, and Applications},
+  year =         {2003},
+  volume =    {5},
+  number =    {1},
+  pages =     {549--599}
+}
+
+@inproceedings{altenkirchmorris09indexed,
+ author = {Altenkirch, Thorsten and Morris, Peter},
+ title = {Indexed Containers},
+ booktitle = lics,
+ year = {2009},
+ pages = {277--285},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ }
+
+@incollection{gambinohyland04polynomial,
+    author = {Gambino, Nicola and Hyland, Martin},
+    booktitle = {Types for Proofs and Programs },
+    journal = {Types for Proofs and Programs},
+    pages = {210--225},
+    title = {Wellfounded Trees and Dependent Polynomial Functors},
+    year = {2004},
+    publisher = {Springer LNCS}
+}
+
+@TechReport{ml10sectyp-tr,
+  author =       {Jamie Morgenstern and Daniel R. Licata},
+  title =        {Security-Typed Programming within Dependently Typed Programming},
+  institution =  {Carnegie Mellon University},
+  year =         {2010},
+  number =    {CMU-CS-10-114}
+}
+
+@inproceedings{abadi08variations,
+ author = {Abadi, Mart\'{\i}n},
+ title = {Variations in Access Control Logic},
+ booktitle = {International Conference on Deontic Logic in Computer Science},
+ year = {2008},
+ pages = {96--109},
+ publisher = {Springer-Verlag},
+ }
+
+
+@Misc{kariso10automated,
+  author =    {Karim Kariso},
+  title =     {Integrating {Agda} and Automated Theorem Proving Techniques},
+  howpublished = {Talk at Dependently Typed Programming Workshop},
+  year =      {2010},
+}
+
+@inproceedings{plotkinpretnar09handlers,
+ author = {Plotkin, Gordon and Pretnar, Matija},
+ title = {Handlers of Algebraic Effects},
+ booktitle = esop,
+ year = {2009},
+ pages = {80--94},
+ publisher = {Springer-Verlag}
+ }
+10A
+@InCollection{pitts00handbook,
+  author =	 {A. M. Pitts},
+  title =	 {Categorical Logic},
+  booktitle =	 {Handbook of Logic in Computer Science, Volume
+                  5. Algebraic and Logical Structures},
+  publisher =	 {Oxford University Press},
+  year =	 2000,
+  pages =	 {39--128},
+  chapter =	 2,
+  editor =	 {S. Abramsky and D. M. Gabbay and T. S. E. Maibaum},
+}
+
+@Article{perlis82epigrams,
+  author =       {Alan Perlis},
+  title =        {Epigrams on Programming},
+  journal =      {{SIGPLAN} Notices},
+  year =         {1982},
+  volume =    {17},
+  number =    {9},
+  month =     {September},
+}
+
+@INPROCEEDINGS{miculan01contexts,
+    author = {Marino Miculan},
+    title = {Developing (Meta)Theory of $\lambda$-calculus in the Theory of Contexts},
+    booktitle = {Workshop on Mechanized Reasoning about Languages with Variable Binding (MERLIN)},
+    year = {2001},
+    pages = {65--81}
+}
+
+@inproceedings{chan88stratified,
+    author = {Chan, David},
+    booktitle = {International Conference on Logic Programming},
+    pages = {111--125},
+    title = {Constructive Negation Based on the Completed Database},
+    year = {1988}
+}
+
+@InProceedings{reed10diffpriv,
+  author =       {Jason Reed and Benjamin C. Pierce},
+  title =        {Distance Makes the Types Grow Stronger: A Calculus for Differential Privacy},
+  booktitle = icfp,
+  year =      {2010},
+}
+
+@PhdThesis{licata11thesis,
+  author =       {Daniel R. Licata},
+  title =        {Dependently Typed Programming with Domain-Specific Logics},
+  school =       {Carnegie Mellon University},
+  year =         {2011},
+  note =         {Available from \url{http://www.cs.cmu.edu/~drl/pubs/thesis/thesis.pdf}},
+}
+
+@InProceedings{fiore08second,
+  author =       {M.P. Fiore},
+  title =        {Second-order and dependently-sorted abstract syntax},
+  booktitle = lics,
+  pages =     {57-68},
+  year =      {2008},
+  publisher = {IEEE Computer Society Press},
+}
+
+@book{haskell98book
+     ,editor={Simon {Peyton Jones}}
+     ,title={Haskell 98 Language and Libraries -- The Revised Report}
+     ,publisher={Cambridge University Press}
+     ,address={Cambridge, England}
+     ,year=2003
+     }
+
+@article{hoare69logic,
+ author = {Hoare, C. A. R.},
+ title = {An axiomatic basis for computer programming},
+ journal = cacm,
+ volume = {12},
+ issue = {10},
+ month = {October},
+ year = {1969},
+ pages = {576--580},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}
+
+@InProceedings{reynolds02sep,
+  title =       {Separation Logic: A Logic for Shared Mutable Data Structures},
+  author =        {John C. Reynolds},
+  booktitle = lics,
+  year =      {2002},
+}
+
+
+
+@Book{clarke+02model,
+  author =    {Edmund M. Clarke and Orna Grumberg and Doron A. Peled},
+  title =        {Model Checking},
+  publisher =    {MIT Press},
+  year =         {2002},
+}
+
+@BOOK{platzer10book,
+  author    = {Andr{\'e} Platzer},
+  title     = {Logical Analysis of Hybrid Systems:
+               Proving Theorems for Complex Dynamics},
+  publisher = {Springer},
+  address   = {Heidelberg},
+  year      = {2010},
+}
+
+
+@Article{girard87linearlogic,
+  author =       {Jean-Yves Girard},
+  title =        {Linear logic},
+  journal =      {Theoretical Computer Science},
+  year =         {1987},
+  volume =    {50},
+  number =    {1},
+  pages =     {1--102},
+}
+
+@Article{gabbay10foundations,
+  author =       {Murdoch J. Gabbay},
+  title =        {Foundations of nominal techniques: logic and semantics of variables in abstract syntax},
+  journal =      {Bulletin of Symbolic Logic},
+  year =         {2010},
+  note =      {To appear.},
+}
+
+@InProceedings{narayanan08netflix,
+  author =       { Arvind Narayanan and V. Shmatikov},
+  title =        {Robust De-anonymization of Large Sparse Datasets (How To Break Anonymity of the Netflix Prize Dataset)},
+  booktitle = {IEEE Symposium on Security and Privacy},
+  pages =     {111--125},
+  year =      {2008},
+  month =     {May},
+  publisher = {IEEE Computer Society},
+}
+
+@INPROCEEDINGS{pouillard-pottier10fresh,
+  author = {Nicolas Pouillard and François Pottier},
+  title = {A fresh look at programming with names and binders},
+  booktitle = icfp,
+  pages = {217--228},
+  month = {September},
+  year = {2010},
+}
+
+@InProceedings{zeilberger10lics,
+  author =       {Noam Zeilberger},
+  title =        {Polarity and the logic of delimited continuations},
+  booktitle = lics,
+  year =      {2010},
+}
+
+@book{streicher91semantics,
+ author = {Streicher, Thomas},
+ title = {Semantics of type theory: correctness, completeness, and independence results},
+ year = {1991},
+ publisher = {Birkhauser Boston Inc.},
+ address = {Cambridge, MA, USA},
+}
+
+@InProceedings{mcbride10outrageous,
+  author =       {Conor McBride},
+  title =        {Outrageous But Meaningful Coincidences},
+  booktitle = {ACM SIGPLAN Workshop on Generic Programming},
+  year =      {2010},
+}
+
+@article{dybjer00indrec,
+  author =       {Peter Dybjer},
+  title =        {A general formulation of simultaneous inductive-recursive definitions in type theory},
+  journal = {Journal of Symbolic Logic},
+  pages =     {525--549},
+  year =      {2000},
+  volume =    {65},
+  number =    {2},
+  month =     {June},
+}
+
+@inproceedings{chapman+10levitation,
+ author = {Chapman, James and Dagand, Pierre-\'{E}variste and McBride, Conor and Morris, Peter},
+ title = {The gentle art of levitation},
+ booktitle = icfp,
+ year = {2010},
+ location = {Baltimore, Maryland, USA},
+ pages = {3--14},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}
+
+@Unpublished{simmonstoninho10provability,
+  author =       {Robert J. Simmons and Bernardo Toninho},
+  title =        {Logic Programming in Constructive Provability Logic},
+  note =         {Available from \url{http://www.cs.cmu.edu/~rjsimmon/papers/modlog.pdf}},
+  year =      {2010},
+}
+
+@Book{bishop67constructive,
+  author =    {Errett Bishop},
+  title =        {Foundations of constructive analysis},
+  publisher =    {McGraw-Hill},
+  year =         {1967},
+  address =   {New York},
+}
+
+@Article{pfenningdavies,
+    author = {Frank Pfenning and Rowan Davies},
+    title = {A Judgmental Reconstruction of Modal Logic},
+    journal = {Mathematical Structures in Computer Science},
+    year = {2001},
+    volume = {11}, 
+    pages = {511-540},
+}
+
+@TechReport{aydemir10lngen,
+  author =       {Brian Aydemir and Stephanie Weirich},
+  title =        {{LN}gen: Tool Support for Locally Nameless Representations},
+  institution =  {Computer and Information Science, University of Pennsylvania},
+  year =         {2010},
+  number =    { MS-CIS-10-24},
+}
+
+@Article{church40types,
+  author =       {Church, A},
+  title =        {A Formulation of the Simple Theory of Types},
+  journal =      {Journal of Symbolic Logic},
+  year =         {1940},
+  volume =    {5},
+  pages =     {56--68},
+}
+
+@Article{hilbert31omega,
+  author =       {Hilbert, D},
+  title =        {Die Grundlegung der elementaren Zahlenlehre},
+  journal =      {Mathematische Annalen },
+  year =         {1931},
+  volume =    {104},
+  pages =     {485--494},
+}
+
+@article{gentzen35,
+    author = {Gentzen, Gerhard},
+    journal = {Mathematische Zeitschrift},
+    title = {{Untersuchungen \"{u}ber das logische Schlie{\ss}en II}},
+    volume = {39},
+    year = {1935}
+}
+
+@InProceedings{dinurnissim03diffpriv,
+  author =       {Irit Dinur and Kobbi Nissim},
+  title =        {Revealing information while preserving privacy},
+  booktitle = {ACM Symposium on Principles of Database Systems},
+  year =      {2003},
+}
+
+@InProceedings{dworkmissim04diffpriv,
+  author =       {Cynthia Dwork and Kobbi Nissim},
+  title =        {Privacy-Preserving Datamining on Vertically Partitioned Databases},
+  booktitle = {International Cryptology Conference},
+  year =      {2004},
+}
+
+@InProceedings{dwork+06diffpriv,
+  author =       {Cynthia Dwork and Frank McSherry and Kobbi Nissim and Adam Smith.},
+  title =        {Calibrating Noise to Sensitivity in Private Data Analysis},
+  booktitle = {Theoretical Cryptography Conference},
+  year =      {2006},
+}
+
+@INPROCEEDINGS{gacek08generic,
+  author = {Andrew Gacek and Dale Miller and Gopalan Nadathur},
+  title = {Combining generic judgments with recursive definitions},
+  booktitle = lics,
+  month = {June},
+  year = 2008,
+  pages = {33--44},
+  publisher = {IEEE Computer Society Press},
+}
+
+@incollection{altenkirch+10relative,
+     author = {Altenkirch, Thorsten and Chapman, James and Uustalu, Tarmo},
+    booktitle = {Foundations of Software Science and Computational Structures },
+    chapter = {21},
+    pages = {297--311},
+    publisher = {Springer Berlin Heidelberg},
+    title = {{Monads Need Not Be Endofunctors}},
+    volume = {6014},
+    year = {2010}
+}
+
+@Book{dicosmo95iso,
+  author =       {Roberto Di Cosmo},
+  title =        {Isomorphisms of types: from lambda-calculus to information retrieval and language design},
+  year =      {1995},
+  publisher = {Birkhauser}
+}
+
+@InProceedings{wadler87views,
+  author =       {Philip Wadler},
+  title =        {Views: a way for pattern matching to cohabit with data abstraction},
+  booktitle = popl,
+  year =      {1987},
+}
+
+@InProceedings{barzilayallen02reflecting,
+  author =       {Eli Barzilay and Stuart Allen},
+  title =        {Reflecting Higher-Order Abstract Syntax in Nuprl},
+  booktitle = {International Conference on Theorem Proving in Higher Order Logics},
+  year =      {2002},
+}
+
+@InCollection{martinlof96analyticsynthetic,
+  author = {Per Martin-Löf},
+  title = {Analytic and Synthetic Judgements in Type Theory},
+  booktitle = {Kant and Contemporary Epistemology},
+  publisher = {Kluwer},
+  year = {1996},
+  pages = {87--99},
+}
+
+@InProceedings{wadler89free,
+  author =       {Philip Wadler},
+  title =        {Theorems for free!},
+  booktitle = {International Conference on Functional Programming and Computer Architecture},
+  year =      {1989},
+}
+
+@InProceedings{laemmelpj03scrap,
+  author =       {Ralf Laemmel and Simon {Peyton Jones}},
+  title =        {Scrap your boilerplate: a practical approach to generic programming},
+  booktitle = tldi,
+  year =      {2003},
+}
+
+@TechReport{ murphy02wizard,
+    author = "Tom {Murphy VII}",
+    title = "The Wizard of {TILT}: Efficient, Convenient and Abstract Type Representations",
+    institution = "School of Computer Science, Carnegie Mellon University",
+    year = "2002",
+    number = "CMU-CS-02-120",
+    url = "http://www.cs.cmu.edu/~tom7/papers/",
+}
+
+@inproceedings{plotkinabadi93parametricity,
+ author = {Plotkin, Gordon D. and Abadi, Mart\'{\i}n},
+ title = {A Logic for Parametric Polymorphism},
+ booktitle = {Proceedings of the International Conference on Typed Lambda Calculi and Applications},
+ year = {1993},
+ pages = {361--375},
+ numpages = {15},
+ publisher = {Springer-Verlag},
+ address = {London, UK},
+} 
+
+@Book{grandis09directed,
+  author =    {M. Grandis},
+  title =        {Directed Algebraic Topology: Models of non-reversible worlds},
+  publisher =    {Cambridge University Press},
+  year =         {2009},
+}
+
+@PhdThesis{garg09thesis,
+  author =       {Deepak Garg},
+  title =        {Proof Theory for Authorization Logic and Its Application to a Practical File System. },
+  school =       {Carnegie Mellon University},
+  year =         {2009},
+}
+
+
+@InProceedings{gargpfenning10pcfs,
+  author =       {Deepak Garg and Frank Pfenning},
+  title =        {A Proof-Carrying File System},
+  booktitle = {IEEE Symposium on Security and Privacy (Oakland)},
+  year =      {2010},
+}
+
+
+@InProceedings{wisnesky+09web,
+  author =       {Ryan Wisnesky and Gregory Malecha and Greg Morrisett},
+  title =        {Certified Web Services in Ynot},
+  booktitle = {International Workshop on Automated Specification and Verification of Web Systems},
+  year =      {2009},
+}
+
+
+@InProceedings{malecha+10database,
+  author =       {Gregory Malecha and Greg Morrisett and Avraham Shinnar and Ryan Wisnesky},
+  title =        {Toward a Verified Relational Database Management System},
+  booktitle = {popl},
+  year =      {2010},
+}
+
+@InProceedings{chlipala+09effective,
+  author =       {Adam Chlipala and Gregory Malecha and Greg Morrisett and Avraham Shinnar and Ryan Wisnesky},
+  title =        {Effective Interactive Proofs for Higher-Order Imperative Programs},
+  booktitle = {icfp},
+  year =      {2009},
+}
+
+@incollection {jay+96functorial,
+   author = {Bell\`{e}, G. and Jay, C. and Moggi, E.},
+   title = {Functorial {ML}},
+   booktitle = {Programming Languages: Implementations, Logics, and Programs},
+   series = {Lecture Notes in Computer Science},
+   editor = {Kuchen, Herbert and Doaitse Swierstra, S.},
+   publisher = {Springer Berlin / Heidelberg},
+   pages = {32-46},
+   volume = {1140},
+   year = {1996}
+}
+
+
+@InProceedings{bernardy+10parametricity,
+  author =       {Jean-Philippe Bernardy and Patrik Jansson and Ross Paterson},
+  title =        {Parametricity and dependent types},
+  booktitle = icfp,
+  year =      {2010},
+}
+
+@article{bainbridge+90functorial,
+ author = {Bainbridge, E. S. and Freyd, P. J. and Scedrov, A. and Scott, P. J.},
+ title = {Functorial polymorphism},
+ journal = {Theoretical Computer Science},
+ volume = {70},
+ issue = {1},
+ month = {January},
+ year = {1990},
+ pages = {35--64},
+ publisher = {Elsevier Science Publishers Ltd.},
+ address = {Essex, UK},
+} 
+
+
+@InProceedings{deyoung+08time,
+  author =       {Henry DeYoung and Deepak Garg and Frank Pfenning.},
+  title =        {An Authorization Logic with Explicit Time},
+  booktitle = {IEEE Computer Security Foundations Symposium},
+  year =      {2008},
+}
+
+@article{wand79ocat,
+title = "Fixed-point constructions in order-enriched categories",
+journal = "Theoretical Computer Science",
+volume = "8",
+number = "1",
+pages = "13 - 30",
+year = "1979",
+note = "",
+author = "Mitchell Wand"
+}
+
+@inproceedings{smythplotkin77domain,
+ author = {Smyth, M. B. and Plotkin, G. D.},
+ title = {The category-theoretic solution of recursive domain equations},
+ booktitle = {Symposium on Foundations of Computer Science},
+ year = {1977},
+ pages = {13--17},
+ numpages = {5},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+} 
+
+@InProceedings{crary00subtyping,
+  author =       {Karl Crary},
+  title =        {Typed Compilation of Inclusive Subtyping},
+  booktitle = icfp,
+  year =      {2000},
+}
+
+@InProceedings{mcsherrymironov09netflix,
+  author =       {Frank McSherry and Ilya Mironov},
+  title =        {Differentially Private Recommender Systems: Building Privacy into the Netflix Prize Contenders},
+  booktitle = {ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
+  year =      {2009},
+}
+
+@Unpublished{jackson96nuprlmanual,
+  author =       {Paul Jackson},
+  title =        {The Nuprl Proof Development System (Version 4.2) Reference Manual and User's Guide },
+  note =         {Available from \url{http://www.nuprl.org/documents/Jackson/Nuprl4.2Manual.html}},
+  year =         {1996},
+}
+
+@PhdThesis{jackson95thesis,
+  author =       {Paul Jackson},
+  title =        {Enhancing the Nuprl Proof Development System and Applying it to Computational Abstract Algebra},
+  school =       {Cornell University},
+  year =         {1995},
+}
+
+@Misc{voevodsky11wollic,
+  author =    {Vladimir Voevodsky},
+  title =     {Univalent Foundations of Mathematics},
+  howpublished = {Invited talk at WoLLIC 2011 18th Workshop on Logic, Language, Information and Computation},
+  year =      {2011},
+}
+
+
+@Misc{homotopytypetheoryweb,
+  title =     {Homotopy Type Theory {W}eb Site},
+  howpublished = {\url{www.homotopytypetheory.org}},
+  year =     {2011},
+}
+
+@InProceedings{lh112dtt,
+  author =       {Daniel R. Licata and Robert Harper},
+  title =        {2-Dimensional Directed Type Theory},
+  booktitle = {Mathematical Foundations of Programming Semantics (MFPS)},
+  year =      {2011}
+}
+
+@PhdThesis{paulinmohring89thesis,
+  author =       {Christine Paulin-Mohring},
+  title =        {Extraction de programmes dans le Calcul des Constructions},
+  school =       {Universit\'{e} Paris 7},
+  year =         {1989},
+}
+
+@incollection{martinlof71itt,
+title = "An Intuitionistic Theory of Types: Predicative Part",
+editor = "H.E. Rose and J.C. Shepherdson",
+booktitle = "Logic Colloquium '73, Proceedings of the Logic Colloquium",
+publisher = "Elsevier",
+year = "1975",
+volume = "80",
+pages = "73 - 118",
+series = "Studies in Logic and the Foundations of Mathematics",
+author = "Per Martin-L{\"{o}}f"
+}
+
+
+@Article{martinlof84ett,
+  title =       {Constructive Mathematics and Computer Programming},
+  author =        {P. Martin-L{\"{o}}f},
+  journal =      {Philosophical Transactions of the Royal Society of London. Series A, Mathematical and Physical Sciences},
+  year =         {1984},
+  volume =    {312},
+  number =    {1522},
+  pages =     {501--518},
+}
+
+@ARTICLE{dequeieroz+11dpaths,
+   author = {{de Queiroz}, R.~J.~G.~B. and {de Oliveira}, A.~G.},
+    title = "{Propositional equality, identity types, and direct computational paths}",
+  journal = {ArXiv e-prints},
+archivePrefix = "arXiv",
+   eprint = {1107.1901},
+ primaryClass = "cs.LO",
+     year = 2011,
+    month = {July},
+}
+
+@TechReport{lh112tt-tr,
+  author =       {Daniel R. Licata and Robert Harper},
+  title =        {Canonicity for 2-Dimensional Type Theory (Extended Version)},
+  institution =  {Carnegie Mellon University},
+  year =         {2011},
+  number =       {CMU-CS-11-143}
+}
+
+@InProceedings{sulzman+07fc-appendix,
+  author =       {Martin Sulzmann and Manuel M. T. Chakravarty and Simon Peyton Jones and Kevin Donnell},
+  title =        {System F with Type Equality Coercions},
+  booktitle = {ACM Workshop on Types in Language Design and Implementaion},
+  year =      {2007},
+  note =      {Appendix at \url{http://research.microsoft.com/~simonpj/papers/ext-f/}},
+}
+
+@Unpublished{lumsdaine+13hits,
+  author = 	 {Peter LeFanu Lumsdaine and Michael Shulman},
+  title = 	 {Higher inductive types},
+  note = 	 {In preparation},
+  year = 	 2013}
+
+@Misc{shulman11hitsblog,
+  author = 	 {Michael Shulman},
+  title = 	 {Homotopy Type Theory {VI}: higher inductive types},
+  howpublished = {\url{http://golem.ph.utexas.edu/category/2011/04/homotopy_type_theory_vi.html}},
+  month = 	 {April},
+  year = 	 2011}
+
+@Misc{lumsdaine11hitsblog,
+  author = 	 {Peter LeFanu Lumsdaine},
+  title = 	 {Higher Inductive Types: a tour of the menagerie},
+  howpublished = {\url{http://homotopytypetheory.org/2011/04/24/higher-inductive-types-a-tour-of-the-menagerie/}},
+  month = 	 {April},
+  year = 	 2011}
+
+@Unpublished{voevodsky+12simpluniv,
+  author = 	 {Chris Kapulkin and Peter LeFanu Lumsdaine and Vladimir Voevodsky},
+  title = 	 {The Simplicial Model of Univalent Foundations},
+  note = 	 {arXiv:1211.2851},
+  year = 	 2012}
+
+@Misc{shulman11pi1s1blog,
+  author = 	 {Michael Shulman},
+  title = 	 {A formal proof that $\pi_1({S}^1)=\mathbb{Z}$},
+  howpublished = {\url{http://homotopytypetheory.org/2011/04/29/a-formal-proof-that-pi1s1-is-z/}},
+  month = 	 {April},
+  year = 	 2011}
+
+@Misc{licata12pi1s1blog,
+  author = 	 {Daniel R. Licata},
+  title = 	 {A simpler proof that $\pi_1({S}^1)$ is $\mathbb{Z}$},
+  howpublished = {http://homotopytypetheory.org/2012/06/07/a-simpler-proof-that-$\pi_1$s$^1$-is-z/},
+  month = 	 {June},
+  year = 	 2012}
+
+@Misc{licata11hittrickblog,
+  author = 	 {Daniel R. Licata},
+  title = 	 {Running Circles Around (In) Your Proof Assistant; or, Quotients that Compute},
+  howpublished = {\url{http://homotopytypetheory.org/2011/04/23/running-circles-around-in-your-proof-assistant/}},
+  month = 	 {April},
+  year = 	 2011}
+
+@InProceedings{lh122tt,
+  author =       {Daniel R. Licata and Robert Harper},
+  title =        {Canonicity for 2-Dimensional Type Theory},
+  booktitle = popl,
+  year =      {2012}
+}
+
+@Article{norell08afp,
+  author =       {Ulf Norell},
+  title =        {Dependently Typed Programming in Agda},
+  journal =      {Summer school on Advanced Functional Programming},
+  year =         {2008},
+}
+
+@Article{hedberg98deciable,
+  author =       {Michael Hedberg},
+  title =        {A coherence theorem for {M}artin-{L}\"of’s type theory },
+  journal =      jfp,
+  year =         1998,
+  volume =    {8},
+  number =    {4},
+  pages =     {413--436},
+  month =     {July},
+}
+
+@book{uf13hott-book,
+        Author = {{The Univalent Foundations Program, Institute for Advanced Study}},
+        Title = {Homotopy Type Theory: Univalent Foundations Of Mathematics},
+        publisher = {Available from \url{homotopytypetheory.org/book}},
+        Year = {2013}} 
+
+@INPROCEEDINGS{mcbride+05constructions,
+    author = {Conor McBride and Healfdene Goguen and James Mckinna},
+    title = {A few constructions on constructors},
+    booktitle = {Types for Proofs and Programs (TYPES'04)},
+    year = {2005},
+    pages = {30},
+    publisher = {Springer-Verlag}
+}
+
+@InProceedings{ls13pi1s1,
+  author =       {Daniel R. Licata and Michael Shulman},
+  title =        {Calculating the Fundamental Group of the Cirlce in Homotopy Type Theory},
+  booktitle = lics,
+  year =      {2013}
+}
+
+
+@Unpublished{shulman13inversediag,
+  author = 	 {Michael Shulman},
+  title = 	 {Univalence for inverse diagrams, oplax limits, and gluing, and homotopy canonicity},
+  note = 	 {arXiv:1203.3253},
+  year = 	 2013}
+
+
+@Article{okasaki99rbt,
+  author =       {Chris Okasaki},
+  title =        {Red-Black Trees in a Functional Setting},
+  journal =      jfp,
+  year =         {1999},
+  volume =    {9},
+  number =    {4},
+  pages =     {471--477}
+}
+
+@InProceedings{sojakova12inductive,
+  author =       {Steve Awodey and Nicola Gambino and Kristina Sojakova},
+  title =        {Inductive Types in Homotopy Type Theory},
+  booktitle = lics,
+  year =      2012
+}
+
+@Unpublished{fll13blakersmassey,
+  author =       {Eric Finster and Daniel R. Licata and Peter LeFanu Lumsdaine},
+  title =        {The {B}lakers-{M}assey Theorem in $\infty$-topoi and homotopy type theory},
+  note =         {In preparation},
+  year =      {2013},
+}
+
+@InProceedings{lb13pinsn,
+  author =       {Daniel R. Licata and Guillaume Brunerie},
+  title =        {$\pi_n(S^n)$ in Homotopy Type Theory},
+  booktitle = {Certified Programs and Proofs},
+  year =      {2013},
+}
+
+@UNPUBLISHED{coquandbarras13simplicial,
+  author = {Bruno Barras and Thierry Coquand and Simon Huber},
+  title = {A Generalization of Takeuti-Gandy Interpretation},
+  year = 	 {2013},
+  note = {To appear in \emph{Mathematical Structures in Computer Science}}
+}
+
+@Unpublished{shulman13invdiag,
+  author = 	 {Michael Shulman},
+  title = 	 {Univalence for inverse diagrams and homotopy canonicity},
+  note = 	 {To appear in \emph{Mathematical Structures in Computer Science}; arXiv:1203.3253},
+  year = 	 2013}
+
+@Unpublished{coquand+13cubical,
+  author =       {Marc Bezem and Thierry Coquand and Simon Huber},
+  title =        {A model of type theory in cubical sets},
+  month =     {September},
+  year =      {2013},
+  note =    {Preprint}
+}
+
+@Unpublished{brunerie12truncation,
+  author =       {Guillaume Brunerie},
+  title =        {Truncations and truncated higher inductive types},
+  note =         {\url{http://homotopytypetheory.org/2012/09/16/truncations-and-truncated-higher-inductive-types/}},
+  year =      {2012},
+}
+
+@book {adams74stable,
+    AUTHOR = {Adams, J. F.},
+     TITLE = {Stable homotopy and generalised homology},
+      NOTE = {Chicago Lectures in Mathematics},
+ PUBLISHER = {University of Chicago Press},
+   ADDRESS = {Chicago, Ill.},
+      YEAR = {1974},
+     PAGES = {x+373},
+   MRCLASS = {55B20 (55E10)},
+  MRNUMBER = {0402720 (53 \#6534)},
+MRREVIEWER = {P. S. Landweber},
+}
+
+@book {whitehead78elements,
+    AUTHOR = {Whitehead, George W.},
+     TITLE = {Elements of homotopy theory},
+    SERIES = {Graduate Texts in Mathematics},
+    VOLUME = {61},
+ PUBLISHER = {Springer-Verlag},
+   ADDRESS = {New York},
+      YEAR = {1978},
+     PAGES = {xxi+744},
+      ISBN = {0-387-90336-4},
+   MRCLASS = {55-02},
+  MRNUMBER = {516508 (80b:55001)},
+MRREVIEWER = {Brayton Gray},
+}
+
+@Unpublished{coquand14variations,
+  author =       {Thierry Coquand},
+  title =        {Variations on Cubical Sets},
+  year =      {2014},
+  note = {Available from \url{http://www.cse.chalmers.se/~coquand/comp.pdf}}
+}
+
+
+@Unpublished{coquand14variationsdiag,
+  author =       {Thierry Coquand},
+  title =        {Variations on Cubical Sets (diagonals version)},
+  note =         {private communication},
+  year = {2014},
+}
+
+@unpublished{altenkirchkaposi14cubical,
+  author =       {Thorsten Altenkirch and Ambrus Kaposi},
+  title =        {A syntax for cubical type theory},
+  year =         {2014},
+  note =      {Available from \url{http://www.cs.nott.ac.uk/~txa/publ/ctt.pdf}}
+}
+
+@unpublished{polonsky14internalization,
+  author    = {Andrew Polonsky},
+  title     = {Internalization of extensional equality},
+  journal   = {arxiv},
+  year      = {2014},
+  note      = {Available from \url{http://arxiv.org/abs/1401.1148}}
+}
+
+@unpublished{pitts14cubical,
+  author    = {Andrew M. Pitts},
+  title     = {An Equivalent Presentation of the Bezem-Coquand-Huber Category of
+               Cubical Sets},
+  year = {2014},
+  note = {Available from \url{http://arxiv.org/abs/1401.7807}}
+}
+
