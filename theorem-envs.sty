@@ -1,0 +1,54 @@
+\newtheoremstyle{sctheorem}% name
+  {3pt}%      Space above
+  {3pt}%      Space below
+  {\itshape}%         Body font
+  {}%         Indent amount (empty = no indent, \parindent = para indent)
+  {\scshape}% Thm head font
+  {.}%        Punctuation after thm head
+  {.5em}%     Space after thm head: " " = normal interword space;
+        %       \newline = linebreak
+  {\thmname{#1}\thmnumber{ #2}\thmnote{: #3}}
+    %         Thm head spec (can be left empty, meaning `normal')
+    % Example: {\thmname{#1}\thmnumber{ #2}\thmnote{ (#3)}}
+    % #1 is the theorem classifieser,
+    % #2 is number,
+    % #3 is optional param (name of the theorem itself)
+    % The commands make these only get printed when they're non-empty 
+
+\newtheoremstyle{scdefinition}% name
+  {3pt}%      Space above
+  {3pt}%      Space below
+  {\upshape}%         Body font
+  {}%         Indent amount (empty = no indent, \parindent = para indent)
+  {\scshape}% Thm head font
+  {.}%        Punctuation after thm head
+  {.5em}%     Space after thm head: " " = normal interword space;
+        %       \newline = linebreak
+  {\thmname{#1}\thmnumber{ #2}\thmnote{: #3}}
+\theoremstyle{sctheorem}
+
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{propo}[theorem]{Proposition}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{principle}[theorem]{Principle}
+\newtheorem{definition}[theorem]{Definition}
+%% \newenvironment{proof}[1][Proof]{\begin{trivlist}
+%% \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\theoremstyle{scdefinition}
+
+\newtheorem{defin}[theorem]{Definition}
+\newtheorem{guideline}[theorem]{Guideline}
+
+\newcommand{\theoremref}[1]{\textsc{Theorem \ref{#1}}}
+\newcommand{\proporef}[1]{\textsc{Proposition \ref{#1}}}
+\newcommand{\lemmaref}[1]{\textsc{Lemma \ref{#1}}}
+\newcommand{\corollaryref}[1]{\textsc{Corollary \ref{#1}}}
+\newcommand{\definref}[1]{\textsc{Definition \ref{#1}}}
+\newcommand{\guidelineref}[1]{\textsc{Guideline \ref{#1}}}
+\newcommand{\assumptionref}[1]{\textsc{Assumption \ref{#1}}}
