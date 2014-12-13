@@ -18,7 +18,7 @@ module programming.PatchWithHistories3 (A : Type) (CanExchange : A → A → Typ
     []ms = []ms'
     _::ms_ = _::ms'_
 
-    postulate 
+    postulate {- HoTT Axiom -}
       Ex : (x y : A) (ce : CanExchange x y) (xs : MS) → (x ::ms (y ::ms xs)) == (y ::ms (x ::ms xs))
 
     MS-ind : (C : MS → Type) 
@@ -29,7 +29,7 @@ module programming.PatchWithHistories3 (A : Type) (CanExchange : A → A → Typ
     MS-ind C c0 c1 c2 []ms' = c0
     MS-ind C c0 c1 c2 (x ::ms' xs) = c1 x xs (MS-ind C c0 c1 c2 xs)
 
-    postulate 
+    postulate  {- HoTT Axiom -}
       MS-ind/βEx : (C : MS → Type) 
                  → (c0 : C []ms)
                  → (c1 : (x : _) (xs : _) → C xs → C (x ::ms xs))
@@ -39,7 +39,7 @@ module programming.PatchWithHistories3 (A : Type) (CanExchange : A → A → Typ
 
   open HistoryHIT 
 
-  postulate
+  postulate  {- HoTT Axiom -}
     R : Type
     doc : MS → R
     add : (x : A) (xs : MS) → doc xs == doc (x ::ms xs)

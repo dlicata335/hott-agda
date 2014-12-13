@@ -6,6 +6,30 @@ open import lib.cubical.PathOver
 
 module lib.cubical.Square where
 
+  module Derivable where
+     Square' : {A : Type} {a00 : A} {a01 a10 a11 : A} → a00 == a01 -> a00 == a10 -> a01 == a11 -> a10 == a11 -> Type 
+     Square' p q r s = r ∘ p == s ∘ q
+   
+     idSquare' : {A : Type} {a00 : A} → Square' {a00 = a00} id id id id
+     idSquare' = id
+   
+     Square'-induction : {A : Type} {a00 : A} 
+                         (C : {a01 a10 a11 : A} → {p : a00 == a01} {q : a00 == a10} {r : a01 == a11} {s :  a10 == a11} -> Square' p q r s → Type)
+                       → C {p = id} {q = id} {r = id} {s = id} (idSquare' {_}{a00})
+                       → {a01 a10 a11 : A} → {p : a00 == a01} {q : a00 == a10} {r : a01 == a11} {s :  a10 == a11} 
+                          (sq : Square' p q r s) → C {p = p} {q = q} {r = r} {s = s} sq
+     Square'-induction C b {p = id} {q = id} {r = id} {.id} id = b
+   
+     Square'-induction-β : {A : Type} {a00 : A} 
+                         (C : {a01 a10 a11 : A} → {p : a00 == a01} {q : a00 == a10} {r : a01 == a11} {s :  a10 == a11} -> Square' p q r s → Type)
+                       → (b : C {p = id} {q = id} {r = id} {s = id} (idSquare' {_}{a00}))
+                       → Square'-induction {a00 = a00} 
+                                           (\ {a01} {a10} {a11}{p}{q}{r}{s} sq → C {a01}{a10}{a11}{p}{q}{r}{s} sq)
+                                           b {a00} {a00} {a00} {p = id} {q = id} {r = id} {s = id} (idSquare' {A}{a00}) 
+                          == b
+     Square'-induction-β C b = id
+                     
+
   data Square {A : Type} {a00 : A} : 
               {a01 a10 a11 : A} → a00 == a01 -> a00 == a10 -> a01 == a11 -> a10 == a11 -> Type where 
     id : Square id id id id
@@ -65,6 +89,16 @@ module lib.cubical.Square where
               → p-1 ∘ p0- == p1- ∘ p-0
   square-to-disc id = id
 
+  square-to-disc' : {A : Type}
+              {a00 a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              (f   : Square p0- p-0 p-1 p1-)
+              → p-1 ∘ p0- ∘ ! p-0 == p1-
+  square-to-disc' id = id
+
   disc-to-square : {A : Type}
               {a00 a01 a10 a11 : A} 
               {p0- : a00 == a01}
@@ -104,6 +138,49 @@ module lib.cubical.Square where
               → Equiv (Square p0- p-0 p-1 p1-) (p-1 ∘ p0- == p1- ∘ p-0) 
   square-disc-eqv = (improve (hequiv square-to-disc disc-to-square square-disc-square disc-square-disc))
 
+  horiz-degen-square : {A : Type} {a a' : A} {p q : a == a'} (r : p == q)
+                     → Square p id id q
+  horiz-degen-square {p = id}{q = .id} id = id
+  -- disc-to-square {p0- = p} {id} {id} {q}
+
+  horiz-degen-square-to-path : {A : Type} {a a' : A} {p q : a == a'} 
+                     → Square p id id q → p == q
+  horiz-degen-square-to-path {p = p} s = square-to-disc s ∘ ! (∘-unit-l p)
+
+  vertical-degen-square : {A : Type} {a a' : A} {p q : a == a'} (r : p == q)
+                     → Square id p q id
+  vertical-degen-square {p = id}{q = .id} id = id
+
+
+  horiz-degen-square-induction : {A : Type} {a : A}
+                               → (C : {a' : A} {p : a == a'} {q : a == a'} (s : Square p id id q) → Type)
+                               → C id 
+                               → {a' : A} {p q : a == a'} (s : Square p id id q) → C s
+  horiz-degen-square-induction {A}{a} C b {a'}{p}{q} s = transport (λ s₁ → C s₁) (IsEquiv.α (snd square-disc-eqv) s) (coh (square-to-disc s)) where
+    coh : ∀ {a'} {p : a == a'} {q : a == a'} → (d : id ∘ p == q) → C (disc-to-square {p0- = p}{id}{id}{q} d)
+    coh {p = id} {.id} id = b
+
+  horiz-degen-square-induction1 : {A : Type} {a a' : A} {p : a == a'}
+                               → (C : {q : a == a'} (s : Square p id id q) → Type)
+                               → C {p} (hrefl-square) 
+                               → {q : a == a'} (s : Square p id id q) → C s
+  horiz-degen-square-induction1 {A}{a}{.a} {id} C b {q} s = transport (λ s₁ → C s₁) (IsEquiv.α (snd square-disc-eqv) s) (coh (square-to-disc s)) where
+     coh : ∀ {q : a == a} → (d : id == q) → C (disc-to-square {p0- = id}{id}{id}{q} d)
+     coh id = b
+
+  horiz-degen-square-induction1-β : {A : Type} {a a' : A} {p : a == a'}
+                                  → (C : {q : a == a'} (s : Square p id id q) → Type)
+                                  → (b : C {p} (hrefl-square))
+                                  → horiz-degen-square-induction1 C b (hrefl-square) == b
+  horiz-degen-square-induction1-β {p = id} C b = id
+
+  horiz-degen-square-eqv : {A : Type} {a a' : A} {p q : a == a'} 
+                         → Equiv (Square p id id q) (p == q)
+  horiz-degen-square-eqv {p = id} = improve (hequiv horiz-degen-square-to-path horiz-degen-square
+                                           (λ s →
+                                                horiz-degen-square-induction
+                                                (λ x → Path (horiz-degen-square (horiz-degen-square-to-path x)) x)
+                                                id s) (λ y → path-induction (\ _ y → Path (horiz-degen-square-to-path (horiz-degen-square y)) y) id y))
 
   square-∘-topright-right' : {A : Type}
               {a00 a01 a10 a11 : A} 
@@ -214,13 +291,32 @@ module lib.cubical.Square where
                → Square pa (ap f p) (ap g p) pa'
     out-PathOver-= id = hrefl-square
 
-    postulate 
-      in-PathOver-= : {A B : Type} {f g : A → B}
+    in-PathOver-= : {A B : Type} {f g : A → B}
                 {a a' : A} {p : a == a'}
                 {pa : f a == g a}
                 {pa' : f a' == g a'}
                → Square pa (ap f p) (ap g p) pa'
                → PathOver (\ x -> f x == g x) p pa pa'
+    in-PathOver-= {f = f} {g} {p = id} {pa} s = horiz-degen-square-induction1
+                                                  (λ {pa'} s₁ → PathOver (λ x → f x == g x) id pa pa') id s
+
+    in-out : {A B : Type} {f g : A → B}
+                {a a' : A} {p : a == a'}
+                {pa : f a == g a}
+                {pa' : f a' == g a'}
+               → (s : Square pa (ap f p) (ap g p) pa')
+               → out-PathOver-= (in-PathOver-= s) == s
+    in-out {f = f}{g} {p = id} {pa} s = horiz-degen-square-induction1 (λ s₁ → out-PathOver-= (in-PathOver-= s₁) == s₁) (ap out-PathOver-=
+                                                                                                                          (horiz-degen-square-induction1-β
+                                                                                                                           (λ {pa'} s₁ → PathOver (λ x → f x == g x) id pa pa') id)) s
+
+    out-in : {A B : Type} {f g : A → B}
+                {a a' : A} {p : a == a'}
+                {pa : f a == g a}
+                {pa' : f a' == g a'}
+               → (p : PathOver (\ x -> f x == g x) p pa pa')
+               → in-PathOver-= (out-PathOver-= p) == p
+    out-in {f = f} {g} {p = .id} {pa} id = horiz-degen-square-induction1-β (λ {pa'} s₁ → PathOver (λ x → f x == g x) id pa pa') id
       
     out-PathOver-=-eqv : {A B : Type} {f g : A → B}
                 {a a' : A} {p : a == a'}
@@ -228,13 +324,11 @@ module lib.cubical.Square where
                 {pa' : f a' == g a'}
                → Equiv (PathOver (\ x -> f x == g x) p pa pa')
                         (Square pa (ap f p) (ap g p) pa')
-    out-PathOver-=-eqv = improve (hequiv out-PathOver-= in-PathOver-= FIXME1 FIXME2) where
-      postulate FIXME1 : _
-                FIXME2 : _
+    out-PathOver-=-eqv = improve (hequiv out-PathOver-= in-PathOver-= out-in in-out) 
 
+{-
   module PathOver=D where
 
-    postulate 
       in-PathOver-= : {A : Type} {B : A → Type} {f g : (x : A) → B x}
                 {a a' : A} {p : a == a'}
                 {pa : f a == g a}
@@ -242,6 +336,8 @@ module lib.cubical.Square where
                → SquareOver B (vrefl-square {p = p}) (hom-to-over/left id pa) (apdo f p) (apdo g p) (hom-to-over/left id pa')
                -- Square pa (ap f p) (ap g p) pa'
                → PathOver (\ x -> f x == g x) p pa pa'
+      in-PathOver-= = ?
+-}
       
   extend-triangle : {A : Type} {a00 a01 a11 : A}
               {p0- : a00 == a01}
@@ -370,18 +466,8 @@ module lib.cubical.Square where
               → Square (ap g l) (ap g t) (ap g b) (ap g r)
   ap-square f id = id
 
-  horiz-degen-square : {A : Type} {a a' : A} {p q : a == a'} (r : p == q)
-                     → Square p id id q
-  horiz-degen-square {p = id}{q = .id} id = id
-  -- disc-to-square {p0- = p} {id} {id} {q}
+                                 
 
-  horiz-degen-square-to-path : {A : Type} {a a' : A} {p q : a == a'} 
-                     → Square p id id q → p == q
-  horiz-degen-square-to-path {p = p} s = square-to-disc s ∘ ! (∘-unit-l p)
-
-  vertical-degen-square : {A : Type} {a a' : A} {p q : a == a'} (r : p == q)
-                     → Square id p q id
-  vertical-degen-square {p = id}{q = .id} id = id
 
 
   pair-square : {A B : Type} 
@@ -481,6 +567,24 @@ module lib.cubical.Square where
   sides-same-square : {A : Type} {a : A} (p : a == a) → Square p p p p 
   sides-same-square p = disc-to-square {p0- = p} {p} {p} {p} id
 
+  whisker-square : {A : Type} {a00 : A} 
+                   {a01 a10 a11 : A} → {p p' : a00 == a01} -> {q q' : a00 == a10} -> {r r' : a01 == a11} -> {s s' : a10 == a11}
+                   → p == p' → q == q' → r == r' -> s == s'
+                   → Square p q r s → Square p' q' r' s'
+  whisker-square id id id id id = id
+
+  square-to-over-id : {A : Type} {a00 : A} {B : A → Type}
+                      {b00 b01 b10 b11 : B a00} 
+                      {p0- : b00 == b01}
+                      {p-0 : b00 == b10}
+                      {p-1 : b01 == b11}
+                      {p1- : b10 == b11}
+                      (f   : Square p0- p-0 p-1 p1-)
+                   → SquareOver B id (hom-to-over p0-) (hom-to-over p-0) (hom-to-over p-1) (hom-to-over p1-)
+  square-to-over-id id = id
+
+
+{-
   out-SquareΣ : {A : Type} {B : A → Type}
                   {p00 p01 p10 p11 : Σ B}
                   {l : p00 == p01}
@@ -510,11 +614,10 @@ module lib.cubical.Square where
                                        (over-o-ap B (apdo snd t))
                                        (over-o-ap B (apdo snd b))
                                        (over-o-ap B (apdo snd r))))
-  SquareΣ-eqv = (out-SquareΣ , FIXME) where postulate FIXME : ∀ {A : Type} → A
+  SquareΣ-eqv = (out-SquareΣ , ?) 
 
   -- derive from above
-  postulate
-    SquareΣ-eqv-intro : {A : Type} {B : A → Type}
+  SquareΣ-eqv-intro : {A : Type} {B : A → Type}
                   {p00 p01 p10 p11 : A}
                   {l : p00 == p01}
                   {t : p00 == p10}
@@ -528,9 +631,9 @@ module lib.cubical.Square where
                 → Equiv (Square (pair= l lb) (pair= t tb) (pair= b bb) (pair= r rb))
                          (Σ (λ (s1 : Square l t b r) → 
                             SquareOver B s1 lb tb bb rb))
-  
-  postulate
-    out-SquareOver-Π-eqv : {A : Type} {B1 : A → Type} {B2 : Σ B1 → Type}
+  SquareΣ-eqv-intro = ?
+
+  out-SquareOver-Π-eqv : {A : Type} {B1 : A → Type} {B2 : Σ B1 → Type}
               {a00 : A} {b00 : (x : B1 a00) → B2 (a00 , x)} 
               {a01 a10 a11 : A} 
               {p0- : a00 == a01}
@@ -551,7 +654,7 @@ module lib.cubical.Square where
                          (q11- : PathOver B1 p1- b110 b111) →
                          (f1 : SquareOver B1 f q10- q1-0 q1-1 q11-) → 
                          SquareOver B2 (ine SquareΣ-eqv-intro (f , f1)) (oute PathOverΠ-eqv q0- _ _ q10-) (oute PathOverΠ-eqv q-0 _ _ q1-0) (oute PathOverΠ-eqv q-1 _ _ q1-1) (oute PathOverΠ-eqv q1- _ _ q11-))
-  -- out-SquareOver-Π-eqv id _ _ _ _ _ _ _ _ f1 = {!!}
+  out-SquareOver-Π-eqv id _ _ _ _ _ _ _ _ f1 = {!!}
 
   SquareOver-Π-eqv : {A : Type} {B1 : A → Type} {B2 : Σ B1 → Type}
               {a00 : A} {b00 : (x : B1 a00) → B2 (a00 , x)} 
@@ -574,14 +677,13 @@ module lib.cubical.Square where
                          (q11- : PathOver B1 p1- b110 b111) →
                          (f1 : SquareOver B1 f q10- q1-0 q1-1 q11-) → 
                          SquareOver B2 (ine SquareΣ-eqv-intro (f , f1)) (oute PathOverΠ-eqv q0- _ _ q10-) (oute PathOverΠ-eqv q-0 _ _ q1-0) (oute PathOverΠ-eqv q-1 _ _ q1-1) (oute PathOverΠ-eqv q1- _ _ q11-))
-  SquareOver-Π-eqv = out-SquareOver-Π-eqv , FIXME where
-    postulate FIXME : {A : Type} → A
+  SquareOver-Π-eqv = out-SquareOver-Π-eqv , ?
 
-{-
-  postulate
-    in-square-Type : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
+
+  in-square-Type : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
                   → ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
                   → (Square {Type} l t b r)
+  in-square-Type = ?
 
   out-square-Type : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
                 → (Square {Type} l t b r)
@@ -591,12 +693,8 @@ module lib.cubical.Square where
   square-Type-eqv : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
                 → Equiv (Square {Type} l t b r)
                         ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
-  square-Type-eqv = improve (hequiv out-square-Type in-square-Type FIXME FIXME) where
-    postulate
-      FIXME : {A : Type} → A
--}
+  square-Type-eqv = improve (hequiv out-square-Type in-square-Type ? ?) 
 
-{-
   out-squareover-El : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} {s : (Square {Type} l t b r)}
                           {b1 : A} {b2 : B} {b3 : C} {b4 : D}
                           {lo : PathOver (\ X -> X) l b1 b2}
@@ -610,8 +708,7 @@ module lib.cubical.Square where
                                       (over-to-hom/left (ro ∘o to)))
   out-squareover-El id = id
 
-  postulate
-    in-squareover-El : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} (s : (Square {Type} l t b r))
+  in-squareover-El : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} (s : (Square {Type} l t b r))
                           {b1 : A}
                           (b2 : B) 
                           (lo : PathOver (\ X -> X) l b1 b2)
@@ -625,7 +722,7 @@ module lib.cubical.Square where
                                   id
                                   (over-to-hom/left (ro ∘o to)))
                        → (SquareOver (\ X -> X) s lo to bo ro)
-  --in-squareover-El id = path-induction-homo-e _ (path-induction-homo-e _ (path-induction-homo-e _ {!!})) 
+  in-squareover-El id = path-induction-homo-e _ (path-induction-homo-e _ (path-induction-homo-e _ {!!})) 
 
   squareover-El-eqv : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} {s : (Square {Type} l t b r)}
                           {b1 : A} {b2 : B} {b3 : C} {b4 : D}
@@ -638,8 +735,7 @@ module lib.cubical.Square where
                                        (out-square-Type s b1) 
                                        id
                                        (over-to-hom/left (ro ∘o to)))
-  squareover-El-eqv = improve (hequiv out-squareover-El (in-squareover-El _ _ _ _ _ _ _ _) FIXME FIXME) where
-    postulate FIXME : {A : Type} → A
+  squareover-El-eqv = improve (hequiv out-squareover-El (in-squareover-El _ _ _ _ _ _ _ _) ? ? ) 
 
   out-SquareOver-constant : {A : Type} {B : Type} {a00 : A} {b00 : B }  
               {a01 a10 a11 : A} 
@@ -671,13 +767,6 @@ module lib.cubical.Square where
               {q1- : PathOver (\ _ -> B) p1- b10 b11}
               → Equiv (SquareOver (\ _ -> B) f q0- q-0 q-1 q1-)
                       (Square (out-PathOver-constant q0-) (out-PathOver-constant q-0) (out-PathOver-constant q-1) (out-PathOver-constant q1-))
-  SquareOver-constant-eqv = (out-SquareOver-constant , FIXME) where
-    postulate FIXME : {A : Type} → A
-
-  postulate
-    whisker-square : {A : Type} {a00 : A} 
-                   {a01 a10 a11 : A} → {p p' : a00 == a01} -> {q q' : a00 == a10} -> {r r' : a01 == a11} -> {s s' : a10 == a11}
-                   → p == p' → q == q' → r == r' -> s == s'
-                   → Square p q r s → Square p' q' r' s'
-  whisker-square = ?
+  SquareOver-constant-eqv = (out-SquareOver-constant , ?) 
 -}
+

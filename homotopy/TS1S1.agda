@@ -76,7 +76,8 @@ module homotopy.TS1S1 where
                                (ap (λ z → z , x₁) S¹.loop)
                                (S¹-elimo (λ x₂ → t2c (c2t' S¹.base x₂) == (S¹.base , x₂)) id (PathOver=.in-PathOver-= square1) x₁))
                 square2
-                (coe (! (PathOver-square/= S¹.loop square2 square2)) 
+                (PathOver-Square.in-PathOver-Square 
+                  S¹.loop square2 square2
                   (transport (λ x₁ → Cube square2 square2 
                                           x₁ (PathOver=.out-PathOver-= (apdo (λ x₂ → ap (λ z → t2c (c2t' z x₂)) S¹.loop) S¹.loop))
                                           (PathOver=.out-PathOver-= (apdo (λ x₂ → ap (λ z → z , x₂) S¹.loop) S¹.loop)) x₁)

@@ -24,7 +24,7 @@ module programming.PatchWithHistories2
     _::ms_ : ∀ {n n1} → (x : A n1 n) → MS' n1 → MS' n
     _::ms_ = _::ms'_
 
-    postulate 
+    postulate  {- HoTT Axiom -}
       Ex : {n1 n2 n2' n3 : I} {x : A n1 n2} {x' : A n1 n2'}
            {y : A n2 n3}
            {y' : A n2' n3}
@@ -48,7 +48,7 @@ module programming.PatchWithHistories2
     MS-ind C c0 c1 c2 []ms' = c0
     MS-ind C c0 c1 c2 (x ::ms' xs) = c1 x xs (MS-ind C c0 c1 c2 xs)
 
-    postulate 
+    postulate  {- HoTT Axiom -}
       MS-ind/βEx : (C : {n : I} → MS n → Type) 
            → (c0 : C []ms)
            → (c1 : {n1 n2 : I} (x : A n1 n2) (xs : _) → C xs → C (x ::ms xs))
@@ -70,7 +70,7 @@ module programming.PatchWithHistories2
 
   open HistoryHIT 
 
-  postulate
+  postulate  {- HoTT Axiom -}
     R : Type
     doc : {n : I} → MS n → R
     add : ∀ {n1 n2} → (x : A n1 n2) (xs : MS n1) → doc xs == doc (x ::ms xs)

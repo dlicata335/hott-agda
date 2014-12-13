@@ -71,6 +71,39 @@ module lib.cubical.Cube where
     → Type where
     id : CubeOver B id id id id id id id
 
+  whisker-cube :  {A : Type} {a000 : A}  
+    {a010 a100 a110 a001 a011 a101 a111 : A}
+    {p0-0 : a000 == a010}
+    {p-00 : a000 == a100}
+    {p-10 : a010 == a110}
+    {p1-0 : a100 == a110}
+    {f--0 f--0' : Square p0-0 p-00 p-10 p1-0} -- left
+    → f--0 == f--0'
+    → 
+    {p0-1 : a001 == a011}
+    {p-01 : a001 == a101}
+    {p-11 : a011 == a111}
+    {p1-1 : a101 == a111}
+    {f--1 f--1' : Square p0-1 p-01 p-11 p1-1} -- right
+    → f--1 == f--1'
+    → 
+    {p00- : a000 == a001}
+    {p01- : a010 == a011}
+    {p10- : a100 == a101}
+    {p11- : a110 == a111}
+    {f0-- f0--' : Square p0-0 p00- p01- p0-1} -- back
+    → f0-- == f0--'
+    →
+    {f-0- f-0-' : Square p-00 p00- p10- p-01} -- top
+    → f-0- == f-0-'
+    → {f-1- f-1-' : Square p-10 p01- p11- p-11} -- bot
+    → f-1- == f-1-'
+    → {f1-- f1--' : Square p1-0 p10- p11- p1-1} -- front
+    → f1-- == f1--'
+    -> Cube f--0 f--1 f0-- f-0- f-1- f1--
+    -> Cube f--0' f--1' f0--' f-0-' f-1-' f1--'
+  whisker-cube id id id id id id c = c
+
   -- old left and right are new top and bottom
   -- old top and bottom are new front and back
   -- old back and front are new left and right
@@ -298,13 +331,103 @@ module lib.cubical.Cube where
                                 q1-
     SquareOver-= f q1 q2 q3 q4 c = SquareOver-=' f _ q1 _ q2 _ q3 q4 c
 
+  module CubePath where
+    cube-to-path :
+      {A : Type}
+      {a000 a010 a100 a110 a001 a011 a101 a111 : A}
+      {p0-0 : a000 == a010}
+      {p-00 : a000 == a100}
+      {p-10 : a010 == a110}
+      {p1-0 : a100 == a110}
+      {f--0 : Square p0-0 p-00 p-10 p1-0}
+      {p0-1 : a001 == a011}
+      {p-01 : a001 == a101}
+      {p-11 : a011 == a111}
+      {p1-1 : a101 == a111}
+      {f--1 : Square p0-1 p-01 p-11 p1-1}
+      {p00- : a000 == a001}
+      {p01- : a010 == a011}
+      {p10- : a100 == a101}
+      {p11- : a110 == a111}
+      {f0-- : Square p0-0 p00- p01- p0-1}
+      {f-0- : Square p-00 p00- p10- p-01}
+      {f-1- : Square p-10 p01- p11- p-11}
+      {f1-- : Square p1-0 p10- p11- p1-1}
+      → Cube f--0 f--1 f0-- f-0- f-1- f1--
+      → Path (whisker-square id (square-to-disc' f-0-) (square-to-disc' f-1-) id
+                ((!-square-h f0-- ∘-square-h f--0) ∘-square-h f1--)) f--1
+    cube-to-path id = id
+{-
+  module CubeSquare where
+    cube-to-square : {A : Type} {a000 : A}  
+      {a010 X : A}
+      {p0-0 : a000 == a010}
+      {p1-0 : a000 == a010}
+      (f--0 : Square p0-0 id id p1-0) -- left
+      {p0-1 : a000 == a010}
+      {p1-1 : a000 == a010}
+      (f--1 : Square p0-1 id id p1-1) -- right
+      (f0-- : Square p0-0 id id p0-1) -- back
+      (f1-- : Square p1-0 id id p1-1) -- front
+      → Cube f--0 f--1 f0-- id id f1--
+      → Square (horiz-degen-square-to-path f--0) (horiz-degen-square-to-path f0--) (horiz-degen-square-to-path f1--) (horiz-degen-square-to-path f--1)
+    cube-to-square {a000 = a000} {p0-0 = id} = horiz-degen-square-induction1 
+      (\ {p1-0} f--0 → 
+       {p0-1 : a000 == a000}
+       {p1-1 : a000 == a000}
+       (f--1 : Square p0-1 id id p1-1) -- right
+       (f0-- : Square id id id p0-1) -- back
+       (f1-- : Square p1-0 id id p1-1) -- front
+       → Cube f--0 f--1 f0-- id id f1--
+       → Square (horiz-degen-square-to-path f--0) (horiz-degen-square-to-path f0--) (horiz-degen-square-to-path f1--) (horiz-degen-square-to-path f--1))
+      {!!}
+-}
   
   module SquareOver=ND where
 
     open PathOver=
 
-    postulate
-      in-SquareOver-= : {A B : Type} {f g : A → B} 
+    in-SquareOver-= : {A B : Type} {f g : A → B} 
+                       {a00 : A} {a01 a10 a11 : A} 
+                       {p0- : a00 == a01}
+                       {p-0 : a00 == a10}
+                       {p-1 : a01 == a11}
+                       {p1- : a10 == a11}
+                       {fa   : Square p0- p-0 p-1 p1- }
+                       {b00 : f a00 == g a00} {b01 : f a01 == g a01} {b10 : f a10 == g a10} {b11 : f a11 == g a11}
+                       {q0- : PathOver (\ x -> f x == g x) p0- b00 b01}
+                       {q-0 : PathOver (\ x -> f x == g x) p-0 b00 b10}
+                       {q-1 : PathOver (\ x -> f x == g x) p-1 b01 b11}
+                       {q1- : PathOver (\ x -> f x == g x) p1- b10 b11}
+                       → Cube (out-PathOver-= q0-) (out-PathOver-= q1-) (out-PathOver-= q-0) (ap-square f fa) (ap-square g fa) (out-PathOver-= q-1)
+                       → SquareOver (\ x -> f x == g x) fa
+                                    q0-
+                                    q-0
+                                    q-1
+                                    q1-
+    in-SquareOver-= {f = f} {g} {fa = fa} {b00 = b00} {q0- = id} {q-0 = id} {q-1 = id} c = 
+      horiz-degen-square-induction1
+        (λ {p1- } fa →
+           {q1- : PathOver (λ x → f x == g x) p1- b00 b00}
+           (c₁
+            : Cube hrefl-square (out-PathOver-= q1-) hrefl-square
+              (ap-square f fa) (ap-square g fa) hrefl-square) →
+           SquareOver (λ x → f x == g x) fa id id id q1-)
+        (λ {q1- } c → transport
+         (λ x → SquareOver (λ x₁ → Id (f x₁) (g x₁)) id id id id x) (IsEquiv.β (snd hom-to-over/left-eqv) q1-)
+                        (square-to-over-id
+                         (coh {q1- = over-to-hom q1- }
+                          (whisker-cube id (! (coh2 _ q1-)) id id id id c))) ) fa c where -- need square over id is a square
+      coh : ∀ {A} {a b : A} {b00 : a == b} {q1- : b00 == b00} →
+         Cube hrefl-square (horiz-degen-square q1-) hrefl-square id id hrefl-square → Square id id id q1-
+      coh {b00 = id} {q1- } c = transport (λ x → Square id id id x) (IsEquiv.β (snd horiz-degen-square-eqv) q1- ∘ ap horiz-degen-square-to-path (CubePath.cube-to-path c)) id
+
+      coh2 : (b00' : _) (q1- : PathOver (λ x → f x == g x) id b00 b00') → (horiz-degen-square (over-to-hom q1-)) == (out-PathOver-= q1-) 
+      coh2 = path-induction-homo-e _ (coh2a b00) where
+        coh2a : ∀ {A} {a b : A} (p : a == b) → horiz-degen-square id == hrefl-square {p = p}
+        coh2a id = id
+
+    out-SquareOver-= : {A B : Type} {f g : A → B} 
                      {a00 : A} {a01 a10 a11 : A} 
                      {p0- : a00 == a01}
                      {p-0 : a00 == a10}
@@ -316,44 +439,39 @@ module lib.cubical.Cube where
                      {q-0 : PathOver (\ x -> f x == g x) p-0 b00 b10}
                      {q-1 : PathOver (\ x -> f x == g x) p-1 b01 b11}
                      {q1- : PathOver (\ x -> f x == g x) p1- b10 b11}
-                     → Cube (out-PathOver-= q0-) (out-PathOver-= q1-) (out-PathOver-= q-0) (ap-square f fa) (ap-square g fa) (out-PathOver-= q-1)
-                     → SquareOver (\ x -> f x == g x) fa
-                                  q0-
-                                  q-0
-                                  q-1
-                                  q1-
-
-      out-SquareOver-= : {A B : Type} {f g : A → B} 
-                     {a00 : A} {a01 a10 a11 : A} 
-                     {p0- : a00 == a01}
-                     {p-0 : a00 == a10}
-                     {p-1 : a01 == a11}
-                     {p1- : a10 == a11}
-                     {fa   : Square p0- p-0 p-1 p1- }
-                     {b00 : f a00 == g a00} {b01 : f a01 == g a01} {b10 : f a10 == g a10} {b11 : f a11 == g a11}
-                     {q0- : PathOver (\ x -> f x == g x) p0- b00 b01}
-                     {q-0 : PathOver (\ x -> f x == g x) p-0 b00 b10}
-                     {q-1 : PathOver (\ x -> f x == g x) p-1 b01 b11}
-                     {q1- : PathOver (\ x -> f x == g x) p1- b10 b11}
                      → SquareOver (\ x -> f x == g x) fa
                                   q0-
                                   q-0
                                   q-1
                                   q1-
                      → Cube (out-PathOver-= q0-) (out-PathOver-= q1-) (out-PathOver-= q-0) (ap-square f fa) (ap-square g fa) (out-PathOver-= q-1)
+    out-SquareOver-= {b00 = b00} id = coh b00 where 
+      coh : ∀ {a b} (p : a == b) → Cube (hrefl-square {p = p}) (hrefl-square {p = p}) (hrefl-square {p = p}) id id (hrefl-square {p = p})
+      coh id = id
 
-  postulate
-    PathOver-square/= : {Γ A : Type} {x1 x2 : Γ} (δ : x1 == x2) {a00 a01 a10 a11 : Γ → A} 
+  module PathOver-Square where
+
+    in-PathOver-Square : {Γ A : Type} {x1 x2 : Γ} (δ : x1 == x2) {a00 a01 a10 a11 : Γ → A} 
                           {p0- : (x : Γ) → a00 x == a01 x}
                           {p-0 : (x : Γ) → a00 x == a10 x }
                           {p-1 : (x : Γ) → a01 x == a11 x }
                           {p1- : (x : Γ) → a10 x == a11 x }
                           (f1 : Square (p0- x1) (p-0 x1) (p-1 x1) (p1- x1))
                        → (f2 : Square (p0- x2) (p-0 x2) (p-1 x2) (p1- x2))
-                       →     (PathOver (\ x -> Square (p0- x) (p-0 x) (p-1 x) (p1- x)) δ f1 f2)
-                           == (Cube f1 f2 (PathOver=.out-PathOver-= (apdo p0- δ)) (PathOver=.out-PathOver-= (apdo p-0 δ)) (PathOver=.out-PathOver-= (apdo p-1 δ)) (PathOver=.out-PathOver-= (apdo p1- δ)))
+                       → (Cube f1 f2 (PathOver=.out-PathOver-= (apdo p0- δ)) (PathOver=.out-PathOver-= (apdo p-0 δ)) (PathOver=.out-PathOver-= (apdo p-1 δ)) (PathOver=.out-PathOver-= (apdo p1- δ)))
+                       → (PathOver (\ x -> Square (p0- x) (p-0 x) (p-1 x) (p1- x)) δ f1 f2)
+    in-PathOver-Square id f1 f2 c = hom-to-over (coh _ _ c) where
+      coh : {A : Type}
+            {a00 a01 a10 a11 : A} 
+            {p0- : a00 == a01}
+            {p-0 : a00 == a10}
+            {p-1 : a01 == a11}
+            {p1- : a10 == a11}
+          → (f1 f2 : (Square p0- p-0 p-1 p1-))
+          → Cube f1 f2 hrefl-square hrefl-square hrefl-square hrefl-square
+          → f1 == f2
+      coh id f2 c = CubePath.cube-to-path c
 
-  -- FIXME: match with cubical sets terminology?
   degen-cube-h :{A : Type} {a000 : A} 
     {a010 a100 a110 : A}
     {p0-0 : a000 == a010}
@@ -364,49 +482,6 @@ module lib.cubical.Cube where
     -> f--0 == f--1
     → Cube f--0 f--1 hrefl-square hrefl-square hrefl-square hrefl-square
   degen-cube-h {f--0 = id} id = id
-
-{- annoying to prove and not used
-  postulate
-   ∘-cube-horiz/degen : 
-    {A : Type}
-    {a000 a010 a100 a110 : A}
-
-    {p0-0 : a000 == a010}
-    {p-00 : a000 == a100}
-    {p-10 : a010 == a110}
-    {p1-0 : a100 == a110}
-    {f--0 : Square p0-0 p-00 p-10 p1-0}
-
-    {p0-1 : a000 == a010}
-    {p-01 : a000 == a100}
-    {p-11 : a010 == a110}
-    {p1-1 : a100 == a110}
-    {f--1 : Square p0-1 p-01 p-11 p1-1}
-
-    {f0-- : p0-0 == p0-1}
-    {f-0- : p-00 == p-01}
-    {f-1- : p-10 == p-11}
-    {f1-- : p1-0 == p1-1}
-
-    {p0-2 : a000 == a010}
-    {p-02 : a000 == a100}
-    {p-12 : a010 == a110}
-    {p1-2 : a100 == a110}
-    {f--2 : Square p0-2 p-02 p-12 p1-2}
-
-    {f0--' : p0-1 == p0-2}
-    {f-0-' : p-01 == p-02}
-    {f-1-' : p-11 == p-12}
-    {f1--' : p1-1 == p1-2}
-
-    → Cube f--0 f--1 (horiz-degen-square f0--) (horiz-degen-square f-0-) (horiz-degen-square f-1-) (horiz-degen-square f1--)
-    → Cube f--1 f--2 (horiz-degen-square f0--') (horiz-degen-square f-0-') (horiz-degen-square f-1-') (horiz-degen-square f1--')
-    → Cube f--0 f--2 (horiz-degen-square (f0--' ∘ f0--)) (horiz-degen-square (f-0-' ∘ f-0-)) (horiz-degen-square (f-1-' ∘ f-1-)) (horiz-degen-square (f1--' ∘ f1--))
---  ∘-cube-horiz/degen = {!!} 
-
-  _∘-cube-h/degen_ = ∘-cube-horiz/degen
-  infixr 10 _∘-cube-h/degen_
--}
 
   -- ap to inner argument first
   -- could do it in the other order, too
@@ -482,59 +557,41 @@ module lib.cubical.Cube where
                             (bifunctor-square2d f p-1 pb) 
   bifunctor-on-cube f s pb = SquareOver=ND.out-SquareOver-= (apdo-square (λ x → ap (λ y → f x (y x)) pb) s)
 
-{-
-  cross-square-path-Σ : {A : Type} {B : A → Type} 
-              {a00 a01 a10 a11 : A} 
-              {p0- : a00 == a01}
-              {p-0 : a00 == a10}
-              {p-1 : a01 == a11}
-              {p1- : a10 == a11}
-              (s   : Square p0- p-0 p-1 p1-)
-              {b0 : (x : A) → B x}
-              {b1 : (x : A) → B x}
-              (pb : b0 == b1)
-            → Cube {Σ B} {a00 , b0 a00} {a01 , b0 a01} {a10 , b0 a10} {a11 , b0 a11} 
-                          {a00 , b1 a00} {a01 , b1 a01} {a10 , b1 a10} {a11 , b1 a11} 
-                          {pair= p0- (apdo b0 p0-)} {pair= p-0 (apdo b0 p-0)}{pair= p-1 (apdo b0 p-1)}{pair= p1- (apdo b0 p1-)}
-                          (ine SquareΣ-eqv-intro (s , apdo-square b0 s))
-                          (ine SquareΣ-eqv-intro (s , apdo-square b1 s))
-                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p0- (apdo b p0-)) pb))
-                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p-0 (apdo b p-0)) pb))
-                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p-1 (apdo b p-1)) pb))
-                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p1- (apdo b p1-)) pb))
-  cross-square-path-Σ id id = FIXME where
-    postulate FIXME : {A : Type} → A
--}
+  fill-cube-left : 
+      {A : Type} 
+      {a000 a010 a100 a110 a001 a011 a101 a111 : A}
+      {p0-0 : a000 == a010}
+      {p-00 : a000 == a100}
+      {p-10 : a010 == a110}
+      {p1-0 : a100 == a110}
+  
+      {p0-1 : a001 == a011}
+      {p-01 : a001 == a101}
+      {p-11 : a011 == a111}
+      {p1-1 : a101 == a111}
+      (f--1 : Square p0-1 p-01 p-11 p1-1) -- right
+  
+      {p00- : a000 == a001}
+      {p01- : a010 == a011}
+      {p10- : a100 == a101}
+      {p11- : a110 == a111}
+      (f0-- : Square p0-0 p00- p01- p0-1) -- back
+      (f-0- : Square p-00 p00- p10- p-01) -- top
+      (f-1- : Square p-10 p01- p11- p-11) -- bot
+      (f1-- : Square p1-0 p10- p11- p1-1) -- front
+      → Σ \ (f--0 : Square p0-0 p-00 p-10 p1-0) → 
+            Cube f--0 f--1 f0-- f-0- f-1- f1--
+  fill-cube-left {p-00 = id}  {p-10 = p-10} {p-01 = p-01} f--1 id f-0- f-1- id = 
+    horiz-degen-square-induction1
+      (λ {p-11} f-1- →
+         (f-0-₁ : Square id id id p-01) (f--2 : Square id p-01 p-11 id) →
+         Σ (λ f--0 → Cube f--0 f--2 id f-0-₁ f-1- id))
+      (λ f-0- f--1 → horiz-degen-square-induction1
+                       (λ {p-1} f-0- →
+                          (f--1 : Square id p-1 p-10 id) →
+                          Σ (λ f--0 → Cube f--0 f--1 id f-0- hrefl-square id))
+                       (λ f--1 → f--1 , (degen-cube-h id)) f-0- f--1) f-1- f-0- f--1 
 
-{-
-  cross-square-path-Σ-compute : {A : Type} {B : A → Type} {C : Type}
-            (f : (x : A) → B x → C)
-            {a00 a01 a10 a11 : A} 
-            {p0- : a00 == a01}
-            {p-0 : a00 == a10}
-            {p-1 : a01 == a11}
-            {p1- : a10 == a11}
-            (s   : Square p0- p-0 p-1 p1-)
-            {b0 : (x : A) → B x}
-            {b1 : (x : A) → B x}
-            (pb : b0 == b1)
-          → cube-symmetry-left-to-top (ap-cube (\ {(x , y) → f x y}) (operation s pb)) == 
-             coe {!(square-symmetry
-        (ap-square (λ xy → f (fst xy) (snd xy))
-         (PathOver=.out-PathOver-=
-          (apdo (λ b → pair= p0- (apdo b p0-)) pb)))) !} (bifunctor-on-cube f s pb)
-  cross-square-path-Σ-compute = {!!}
--}
-
--- Square (ap (λ y → f a00 (y a00)) pb)
---       (ap (λ z → f z (b0 z)) p0-) (ap (λ z → f z (b1 z)) p0-)
---       (ap (λ y → f a01 (y a01)) pb)
-
--- Square
---    (ap (λ xy → f (fst xy) (snd xy)) (ap (λ z → a00 , z a00) pb))
---    (ap (λ xy → f (fst xy) (snd xy)) (pair= p0- (apdo b0 p0-)))
---    (ap (λ xy → f (fst xy) (snd xy)) (pair= p0- (apdo b1 p0-)))
---    (ap (λ xy → f (fst xy) (snd xy)) (ap (λ z → a01 , z a01) pb))
 
   ap-square-id! : {A : Type} {a00 a01 a10 a11 : A} 
               {p0- : a00 == a01}
@@ -559,69 +616,99 @@ module lib.cubical.Cube where
               → Cube (ap-square (g o f) s) (ap-square g (ap-square f s)) (horiz-degen-square (ap-o g f p0-)) (horiz-degen-square (ap-o g f p-0)) (horiz-degen-square (ap-o g f p-1)) (horiz-degen-square (ap-o g f p1-))
   ap-square-o g f id = id
 
-  -- FIXME how do you get this from composition?
-  whisker-cube :  {A : Type} {a000 : A}  
-    {a010 a100 a110 a001 a011 a101 a111 : A}
+{- annoying to prove and not used
+   ∘-cube-horiz/degen : 
+    {A : Type}
+    {a000 a010 a100 a110 : A}
+
     {p0-0 : a000 == a010}
     {p-00 : a000 == a100}
     {p-10 : a010 == a110}
     {p1-0 : a100 == a110}
-    {f--0 f--0' : Square p0-0 p-00 p-10 p1-0} -- left
-    → f--0 == f--0'
-    → 
-    {p0-1 : a001 == a011}
-    {p-01 : a001 == a101}
-    {p-11 : a011 == a111}
-    {p1-1 : a101 == a111}
-    {f--1 f--1' : Square p0-1 p-01 p-11 p1-1} -- right
-    → f--1 == f--1'
-    → 
-    {p00- : a000 == a001}
-    {p01- : a010 == a011}
-    {p10- : a100 == a101}
-    {p11- : a110 == a111}
-    {f0-- f0--' : Square p0-0 p00- p01- p0-1} -- back
-    → f0-- == f0--'
-    →
-    {f-0- f-0-' : Square p-00 p00- p10- p-01} -- top
-    → f-0- == f-0-'
-    → {f-1- f-1-' : Square p-10 p01- p11- p-11} -- bot
-    → f-1- == f-1-'
-    → {f1-- f1--' : Square p1-0 p10- p11- p1-1} -- front
-    → f1-- == f1--'
-    -> Cube f--0 f--1 f0-- f-0- f-1- f1--
-    -> Cube f--0' f--1' f0--' f-0-' f-1-' f1--'
-  whisker-cube id id id id id id c = c
+    {f--0 : Square p0-0 p-00 p-10 p1-0}
 
-  postulate
-    fill-cube-left : 
-      {A : Type} 
-      {a000 a010 a100 a110 a001 a011 a101 a111 : A}
-      {p0-0 : a000 == a010}
-      {p-00 : a000 == a100}
-      {p-10 : a010 == a110}
-      {p1-0 : a100 == a110}
-  
-      {p0-1 : a001 == a011}
-      {p-01 : a001 == a101}
-      {p-11 : a011 == a111}
-      {p1-1 : a101 == a111}
-      (f--1 : Square p0-1 p-01 p-11 p1-1) -- right
-  
-      {p00- : a000 == a001}
-      {p01- : a010 == a011}
-      {p10- : a100 == a101}
-      {p11- : a110 == a111}
-      (f0-- : Square p0-0 p00- p01- p0-1) -- back
-      (f-0- : Square p-00 p00- p10- p-01) -- top
-      (f-1- : Square p-10 p01- p11- p-11) -- bot
-      (f1-- : Square p1-0 p10- p11- p1-1) -- front
-      → Σ \ (f--0 : Square p0-0 p-00 p-10 p1-0) → 
-            Cube f--0 f--1 f0-- f-0- f-1- f1--
-  -- fill-cube-left f--1 id f-0- f-1- id = {!!} -- need induction on degen square
+    {p0-1 : a000 == a010}
+    {p-01 : a000 == a100}
+    {p-11 : a010 == a110}
+    {p1-1 : a100 == a110}
+    {f--1 : Square p0-1 p-01 p-11 p1-1}
 
-{-
-    fill-cube-top : 
+    {f0-- : p0-0 == p0-1}
+    {f-0- : p-00 == p-01}
+    {f-1- : p-10 == p-11}
+    {f1-- : p1-0 == p1-1}
+
+    {p0-2 : a000 == a010}
+    {p-02 : a000 == a100}
+    {p-12 : a010 == a110}
+    {p1-2 : a100 == a110}
+    {f--2 : Square p0-2 p-02 p-12 p1-2}
+
+    {f0--' : p0-1 == p0-2}
+    {f-0-' : p-01 == p-02}
+    {f-1-' : p-11 == p-12}
+    {f1--' : p1-1 == p1-2}
+
+    → Cube f--0 f--1 (horiz-degen-square f0--) (horiz-degen-square f-0-) (horiz-degen-square f-1-) (horiz-degen-square f1--)
+    → Cube f--1 f--2 (horiz-degen-square f0--') (horiz-degen-square f-0-') (horiz-degen-square f-1-') (horiz-degen-square f1--')
+    → Cube f--0 f--2 (horiz-degen-square (f0--' ∘ f0--)) (horiz-degen-square (f-0-' ∘ f-0-)) (horiz-degen-square (f-1-' ∘ f-1-)) (horiz-degen-square (f1--' ∘ f1--))
+--  ∘-cube-horiz/degen = {!!} 
+
+  _∘-cube-h/degen_ = ∘-cube-horiz/degen
+  infixr 10 _∘-cube-h/degen_
+
+  cross-square-path-Σ : {A : Type} {B : A → Type} 
+              {a00 a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              (s   : Square p0- p-0 p-1 p1-)
+              {b0 : (x : A) → B x}
+              {b1 : (x : A) → B x}
+              (pb : b0 == b1)
+            → Cube {Σ B} {a00 , b0 a00} {a01 , b0 a01} {a10 , b0 a10} {a11 , b0 a11} 
+                          {a00 , b1 a00} {a01 , b1 a01} {a10 , b1 a10} {a11 , b1 a11} 
+                          {pair= p0- (apdo b0 p0-)} {pair= p-0 (apdo b0 p-0)}{pair= p-1 (apdo b0 p-1)}{pair= p1- (apdo b0 p1-)}
+                          (ine SquareΣ-eqv-intro (s , apdo-square b0 s))
+                          (ine SquareΣ-eqv-intro (s , apdo-square b1 s))
+                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p0- (apdo b p0-)) pb))
+                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p-0 (apdo b p-0)) pb))
+                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p-1 (apdo b p-1)) pb))
+                          (PathOver=.out-PathOver-= (apdo (λ b → pair= p1- (apdo b p1-)) pb))
+  cross-square-path-Σ id id = ?
+
+  cross-square-path-Σ-compute : {A : Type} {B : A → Type} {C : Type}
+            (f : (x : A) → B x → C)
+            {a00 a01 a10 a11 : A} 
+            {p0- : a00 == a01}
+            {p-0 : a00 == a10}
+            {p-1 : a01 == a11}
+            {p1- : a10 == a11}
+            (s   : Square p0- p-0 p-1 p1-)
+            {b0 : (x : A) → B x}
+            {b1 : (x : A) → B x}
+            (pb : b0 == b1)
+          → cube-symmetry-left-to-top (ap-cube (\ {(x , y) → f x y}) (operation s pb)) == 
+             coe {!(square-symmetry
+        (ap-square (λ xy → f (fst xy) (snd xy))
+         (PathOver=.out-PathOver-=
+          (apdo (λ b → pair= p0- (apdo b p0-)) pb)))) !} (bifunctor-on-cube f s pb)
+  cross-square-path-Σ-compute = {!!}
+
+-- Square (ap (λ y → f a00 (y a00)) pb)
+--       (ap (λ z → f z (b0 z)) p0-) (ap (λ z → f z (b1 z)) p0-)
+--       (ap (λ y → f a01 (y a01)) pb)
+
+-- Square
+--    (ap (λ xy → f (fst xy) (snd xy)) (ap (λ z → a00 , z a00) pb))
+--    (ap (λ xy → f (fst xy) (snd xy)) (pair= p0- (apdo b0 p0-)))
+--    (ap (λ xy → f (fst xy) (snd xy)) (pair= p0- (apdo b1 p0-)))
+--    (ap (λ xy → f (fst xy) (snd xy)) (ap (λ z → a01 , z a01) pb))
+
+  -- FIXME how do you get this from composition?
+
+  fill-cube-top : 
       {A : Type} 
       {a000 a010 a100 a110 a001 a011 a101 a111 : A}
       {p0-0 : a000 == a010}
@@ -646,7 +733,7 @@ module lib.cubical.Cube where
       → Σ \ (f-0- : Square p-00 p00- p10- p-01) -- top
           → Cube f--0 f--1 f0-- f-0- f-1- f1--
 
-    fill-cube-back : 
+  fill-cube-back : 
       {A : Type} 
       {a000 a010 a100 a110 a001 a011 a101 a111 : A}
       {p0-0 : a000 == a010}
@@ -670,10 +757,8 @@ module lib.cubical.Cube where
       (f1-- : Square p1-0 p10- p11- p1-1) -- front
       → Σ \       (f0-- : Square p0-0 p00- p01- p0-1) -- back
           → Cube f--0 f--1 f0-- f-0- f-1- f1--
-  
 
-  postulate
-    CubeΣ-eqv : {A : Type} {B : A → Type} {a000 : Σ B}  
+  CubeΣ-eqv : {A : Type} {B : A → Type} {a000 : Σ B}  
               {a010 a100 a110 a001 a011 a101 a111 : Σ B}
               {p0-0 : a000 == a010}
               {p-00 : a000 == a100}
@@ -697,8 +782,7 @@ module lib.cubical.Cube where
                       (Σ \ (c : Cube (fst (oute SquareΣ-eqv f--0)) (fst (oute SquareΣ-eqv f--1)) (fst (oute SquareΣ-eqv f0--)) (fst (oute SquareΣ-eqv f-0-)) (fst (oute SquareΣ-eqv f-1-)) (fst (oute SquareΣ-eqv f1--))) → 
                            CubeOver B c (snd (oute SquareΣ-eqv f--0)) (snd (oute SquareΣ-eqv f--1)) (snd (oute SquareΣ-eqv f0--)) (snd (oute SquareΣ-eqv f-0-)) (snd (oute SquareΣ-eqv f-1-)) (snd (oute SquareΣ-eqv f1--)))
 
-  postulate
-    ap-bifunctor-square : {A C : Type} {B : A → Type} (f : (x : A) → B x → C) → 
+  ap-bifunctor-square : {A C : Type} {B : A → Type} (f : (x : A) → B x → C) → 
                 {a00 a01 a10 a11 : A} 
                 {la : a00 == a01}
                 {ta : a00 == a10}
@@ -715,5 +799,5 @@ module lib.cubical.Cube where
                         (oute SquareOver-constant-eqv
                            (oute SquareOver-Π-eqv (apdo-square f fa) _ _ _ _ _ _ _ _ fb))
                         (horiz-degen-square (ap-bifunctor-pair= f _ lb)) (horiz-degen-square (ap-bifunctor-pair= f _ tb)) (horiz-degen-square (ap-bifunctor-pair= f _ bb)) (horiz-degen-square (ap-bifunctor-pair= f _ rb))
-  -- ap-bifunctor-square f .id id = {!!}
+  ap-bifunctor-square f .id id = {!!}
 -}

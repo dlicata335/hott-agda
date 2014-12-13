@@ -104,7 +104,7 @@ module programming.Patch where
       ...            | Inl _ = b
       ...            | Inr _ = c
 
-      postulate
+      postulate {- HoTT Axiom -}
         R    : Type
         mkr  : Spec → R
         edit : (c d : Char) (i : Fin n) {φ : Spec} →
@@ -119,10 +119,12 @@ module programming.Patch where
  
     patch = ('a' ↔ 'b' at Z) ∘ ('x' ↔ 'y' at (S Z)) ∘ ('s' ↔ 'b' at (S (S Z)))
 
+{-
     open Infer
     test : Path (mkr (apply-at (λ _ → Some 'd') (S Z) (None :: None :: None :: [])))
                 (mkr (apply-at (λ _ → Some 'b') Z _))
     test = edit 'a' 'b' Z ∘p edit 'c' 'd' (S Z)
+-}
 
   open Test
 

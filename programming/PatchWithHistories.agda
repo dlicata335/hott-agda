@@ -18,7 +18,7 @@ module programming.PatchWithHistories where
     []ms = []ms'
     _::ms_ = _::ms'_
 
-    postulate 
+    postulate  {- HoTT Axiom -}
       Ex : (x y : Bool) (xs : MS) → (x ::ms (y ::ms xs)) == (y ::ms (x ::ms xs))
 
     MS-ind : (C : MS → Type) 
@@ -39,7 +39,7 @@ module programming.PatchWithHistories where
 
   open HistoryHIT 
 
-  postulate
+  postulate {- HoTT Axiom -}
     R : Type
     doc : MS → R
     add : (x : Bool) (xs : MS) → doc xs == doc (x ::ms xs)
