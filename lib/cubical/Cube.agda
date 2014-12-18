@@ -6,7 +6,6 @@ open import lib.cubical.Square
 
 module lib.cubical.Cube where
 
-
   -- coordinates are yzx because we think of the principle sides as the left and the right
   -- 000 is top-back-left
   -- then faces in order are

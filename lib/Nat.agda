@@ -27,6 +27,10 @@ module lib.Nat where
     +-rh-Z : (n : Nat) → n == (n + Z)
     +-rh-Z Z = id
     +-rh-Z (S n) = ap S (+-rh-Z n)
+
+    +-rh-S : (n m : Nat) → S (n + m) == (n + (S m))
+    +-rh-S Z m = id
+    +-rh-S (S n) m = ap S (+-rh-S n m)
   
     +-assoc : (n m p : Nat) → n + (m + p) == (n + m) + p
     +-assoc Z m p = id

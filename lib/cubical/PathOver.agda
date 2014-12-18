@@ -465,3 +465,11 @@ module lib.cubical.PathOver where
          → PathOver B (pair= δ (fst=o α)) (snd p) (snd q)
   snd=o x = snd (fst PathOverΣ-eqv x)
 -}
+
+  ap-nt-over :
+    ∀ {A} {B C : A → Type} {a0 a1 : A} {b0 : B a0} {b1 : B a1}
+      {p : a0 == a1} 
+    → (f : {x : A} → B x → C x)
+    → PathOver B p b0 b1
+    → PathOver C p (f b0) (f b1)
+  ap-nt-over f id = id
