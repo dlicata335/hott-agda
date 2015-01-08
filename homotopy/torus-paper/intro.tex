@@ -1,34 +1,35 @@
 
-\emph{Synthetic homotopy theory} is an approach to developing and
-formalizing an area of mathematics known as homotopy theory.  In
-homotopy theory, one studies ``spaces'' by way of their points, paths
+
+Homotopy theory is the study of spaces by way of their points, paths
 (between points), homotopies (paths or continuous deformations between
 paths), homotopies between homotopies (paths between paths between
-paths), and so on.  In synthetic homotopy theory, spaces are described
-logically as types in homotopy type theory, an extension of Martin-L\"of
-type theory with principles inspired by category theory and homotopy
-theory~\citep{hofmann98groupoid,garner09twodim,lumsdaine09omega,vandenberggarner10groupoids,awodeywarren09identity,warren08thesis,gambinogarner08id,voevodsky11wollic,lh122tt},
-such as higher inductive
+paths), and so on.  This area of mathematics can be developed
+\emph{synthetically} by using the homotopy-theoretic structure of types in
+Martin-L\"of type
+theory~\citep{hofmann98groupoid,lumsdaine09omega,vandenberggarner10groupoids,awodeywarren09identity,warren08thesis,gambinogarner08id,voevodsky11wollic}
+to describe constructions in homotopy theory.  Using principles inspired
+by these semantics, such such as higher inductive
 types~\citep{lumsdaine+13hits,shulman11hitsblog,lumsdaine11hitsblog} and
 Voevodsky's univalence
-axiom~\citep{voevodsky11wollic,voevodsky+12simpluniv}.  Some aspects of
-homotopy theory that have been investigated in this way and formalized
-using proof assistants (Agda~\citep{norell07thesis} or
-Coq~\citep{inria06coqmanual}) include: calculations of some homotopy
-groups of spheres~\citep{ls13pi1s1,lb13pinsn,uf13hott-book};
-constructions of the Hopf fibration~\citep{uf13hott-book}, covering
-spaces~\citep{favonia-types}, and Eilinberg-MacLane
+axiom~\citep{voevodsky11wollic,voevodsky+12simpluniv}, some aspects of
+homotopy theory have been developed and formalized using the
+Agda~\citep{norell07thesis} and Coq~\citep{inria06coqmanual} proof
+assistants.  These include calculations of some homotopy groups of
+spheres~\citep{ls13pi1s1,lb13pinsn,uf13hott-book}; constructions of the
+Hopf fibration~\citep{uf13hott-book}, of covering
+spaces~\citep{favonia-types}, and of Eilinberg-MacLane
 spaces~\citep{lf14emspace}; and proofs of the Freudenthal suspension
 theorem~\citep{uf13hott-book}, the Blakers-Massey theorem, the van
-Kampen theorem~\citep{uf13hott-book}, the Mayer-Vietoris
-theorem~\citep{cavallo}.  Ideas from this line of work were also used to
-represent the patch theories that arise in version control systems using
-higher inductive types~\citep{amlh14patch}.
+Kampen theorem~\citep{uf13hott-book}, and the Mayer-Vietoris
+theorem~\citep{cavallo}.  Ideas from synthetic homotopy theory have also
+been applied to represent the patch theories that arise in version
+control systems using higher inductive types~\citep{amlh14patch}.
 
-Many of these results were posed as challenge problems during the
-2012--2013 year on univalent foundations at the Institute for Advanced
-Study.  One additional challenge problem from this list, which was
-anticipated to be \emph{less} difficult than those listed above, was
+Many of the calculations, constructions, and proofs mentioned above were
+posed as challenge problems during the 2012--2013 year on univalent
+foundations at the Institute for Advanced Study.  One additional
+challenge problem from that year, which was anticipated to be
+\emph{less} difficult than those listed above, was
 \begin{quote}
 Show that the torus is equivalent to a product of two circles.
 \end{quote}
@@ -68,18 +69,18 @@ Algebraically, the torus is the free type with two loops that commute.
 To prove that the torus is equivalent to the product of two circles
 means to give functions \verb|t2c : T → S¹ × S¹| and
 \verb|c2t : S¹ × S¹ → T| and show that they are mutually inverse (up to
-propositional equality/paths).  This task seems simple: define the
-functions back and forth using the recursion principles for the circle
-and the torus, and then prove that they are mutually inverse using the
-induction principles for the circle and the torus.  Indeed, it is not
-difficult define the two functions.  However, at the end of the IAS
-year, this problem had not been formalized in a proof assistant, though
-Sojakova had given a proof sketch, which later appeared as a heroic
-25-page proof in the exercise solutions for the homotopy type theory
-book~\citep{uf13hott-book}.  The reason for the complexity is that the
-``path algebra'' required to use the induction principles to prove that
-the functions are mutually inverse gets quite involved, because of the
-2-dimensional ``face'' constructor \verb|f|.
+propositional equality/paths).  At first glance, this task seems simple:
+define the functions back and forth using the recursion principles for
+the circle and the torus, and then prove that they are mutually inverse
+using the induction principles for the circle and the torus.  And
+indeed, it is not difficult to define the two functions.  However, at
+the end of the IAS year, this problem had not been formalized in a proof
+assistant, though Sojakova had given a proof sketch, which later
+appeared as her heroic 25-page proof in the exercise solutions for the
+homotopy type theory book~\citep{uf13hott-book}.  The reason for the
+complexity is that the ``path algebra'' required to use the induction
+principles to prove that the functions are mutually inverse gets quite
+involved, because of the 2-dimensional ``face'' constructor \verb|f|.
 
 In this paper, we develop a cubical approach to synthetic homotopy
 theory.  With this approach, this motivating example of proving that the
@@ -115,26 +116,23 @@ While our approach fits nicely with work in progress on new cubical type
 theories~\citep{us,altenkirchkaposi14cubical,coquand14variations}, the
 present paper can be conducted entirely by making appropriate
 definitions in Martin-L\"of type theory with univalence and higher
-inductive types---no new axioms are needed.  Higher cubes can be defined
-in terms of higher paths: for example, the type of squares considered
-above can be thought of as discs \verb|b ∘ l == r ∘ t|.  Moreover, the
-notions of a ``path-over-a-path'' and a ``square-over-a-square'' can be
-reduced to homogeneous paths.  This means that our constructions can be
-interpreted in the known models of homotopy type theory with univalence
-and higher inductive
+inductive types---no additional new axioms are needed.  Higher cubes can
+be defined in terms of higher paths: for example, the type of squares
+considered above can be thought of as discs \verb|b ∘ l == r ∘ t|.
+Moreover, the notions of a ``path-over-a-path'' and a
+``square-over-a-square'' can be reduced to homogeneous paths.  This
+means that our constructions can be interpreted in the known models of
+homotopy type theory with univalence and higher inductive
 types~\cite{voevodsky+12simpluniv,shulman13inversediag,lumsdaine+13hits}.
 While cubes can be reduced away in this way, for engineering reasons, we
 have found it convenient in Agda to use new inductive families to
 represent cube types; this allows us to make more effective use of
-dependent pattern matching and unification.    
+dependent pattern matching and unification.
 
 First, we give a description of the cubical approach, including a survey
 of a library (about 1500 lines of code) that contains the basic
 definitions.  Then, we discuss the proof that the torus is equivalent to
 a product of two circles.  
-
-
-
 
 %%   In type theory, a space
 %% corresponds to a type $A$. Points of a space correspond to elements $a,b

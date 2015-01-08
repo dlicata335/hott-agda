@@ -43,8 +43,8 @@ module Stream where
     right = map (snd o fst)
   
     middle : (s : Stream (Paths A)) → Bisim (left s) (right s)
-    Bisim.heads (middle s) = (snd (head s))
-    Bisim.tails (middle s) = (middle (tail s))
+    Bisim.heads (middle s) = {! (snd (head s)) !}
+    Bisim.tails (middle s) = {! (middle (tail s)) !}
   
     to : Stream (Paths A) → Bisim2 A
     to s = ((left s , right s) , middle s)

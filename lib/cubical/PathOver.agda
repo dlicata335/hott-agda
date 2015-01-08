@@ -5,6 +5,25 @@ open import lib.BasicTypes
 
 module lib.cubical.PathOver where
 
+  module PathOver' where
+    PathOver' : {Δ : Type} (A : Δ → Type) {θ1 θ2 : Δ} (δ : θ1 == θ2) (M1 : A θ1) (M2 : A θ2) → Type 
+    PathOver' A δ M1 M2 = transport A δ M1 == M2
+
+    hid : {Δ : Type} (A : Δ → Type) {θ1 : Δ} (M1 : A θ1) → PathOver' A id M1 M1
+    hid A M1 = id
+
+    elim : {Δ : Type} (A : Δ → Type) {θ1 : Δ} 
+         → (C : (θ2 : Δ) (δ : θ1 == θ2) {M1 : A θ1} (M2 : A θ2) → PathOver' A δ M1 M2 → Type)
+         → ({M1 : A θ1} → C θ1 id M1 (hid A M1))
+         → (θ2 : Δ) (δ : θ1 == θ2) {M1 : A θ1} (M2 : A θ2) (α : PathOver' A δ M1 M2) → C θ2 δ M2 α 
+    elim A {θ1} C b .θ1 id {M1} .M1 id = b
+
+    β   : {Δ : Type} (A : Δ → Type) {θ1 : Δ}
+         → (C : (θ2 : Δ) (δ : θ1 == θ2)  {M1 : A θ1} (M2 : A θ2) → PathOver' A δ M1 M2 → Type)
+         → (b : ∀ {M1} → C θ1 id M1 id)
+         →  {M1 : A θ1} → (elim A C b θ1 id M1 (hid A M1)) == b
+    β A C b = id
+  
   data PathOver {Δ : Type} (A : Δ → Type) : {θ1 θ2 : Δ} (δ : θ1 == θ2) (M1 : A θ1) (M2 : A θ2) → Type where
     id : ∀ {θ1} {M1 : A θ1} → PathOver A id M1 M1
 
@@ -21,8 +40,12 @@ module lib.cubical.PathOver where
        → PathOver A (! δ) M2 M1
   !o id = id
 
+  apdo : {Δ : Type} {A : Δ → Type} (f : (θ : _) → A θ) {θ1 θ2 : Δ} (δ : θ1 == θ2) → PathOver A δ (f θ1) (f θ2)
+  apdo f id = id
+
+
   pair= : {Δ : Type} {A : Δ → Type} {θ1 θ2 : Δ} (δ : θ1 == θ2) {M1 : A θ1} {M2 : A θ2} → PathOver A δ M1 M2 → (θ1 , M1) == (θ2 , M2)
-  pair= ._ id = id
+  pair= .id id = id
 
   !Σ : {Δ : Type} {A : Δ → Type} {θ1 θ2 : Δ} (δ : θ1 == θ2) {M1 : A θ1} {M2 : A θ2} → (α : PathOver A δ M1 M2) 
       → ! (pair= δ α) == pair= (! δ) (!o α)
@@ -39,8 +62,11 @@ module lib.cubical.PathOver where
        -> Path (ap fst (pair= α β)) α
   Σ=β1 {p = x , y} {q = .x , .y} ._ id = id
 
-  apdo : {Δ : Type} {A : Δ → Type} (f : (θ : _) → A θ) {θ1 θ2 : Δ} (δ : θ1 == θ2) → PathOver A δ (f θ1) (f θ2)
-  apdo f id = id
+  Σ=β2 : {A : Type} {B : A -> Type} {p q : Σ B} 
+       (α : Path (fst p) (fst q)) 
+       (β : PathOver B α (snd p) (snd q))
+       -> Path (apdo snd (pair= α β)) {!!}
+  Σ=β2 {p = x , y} {q = .x , .y} ._ id = id
 
   ido-constant : {Δ : Type} {A : Type} {θ1 θ2 : Δ} {M : A} (δ : θ1 == θ2) → PathOver (\ _ -> A) δ M M
   ido-constant id = id
