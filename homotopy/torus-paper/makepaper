@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in `cat lagda.txt`; do /Users/dlicata/Library/Haskell/bin/lhs2TeX --agda $i.lagda -o $i.lao; done
+for i in `cat lagda.txt`; do lhs2TeX --agda $i.lagda -o $i.lao; done
 pdflatex paper
 # bibtex paper
 # pdflatex paper
