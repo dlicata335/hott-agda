@@ -17,7 +17,9 @@ module homotopy.TS1S1 where
                                         (horiz-degen-square (S¹.βloop/rec T.a T.p)) hrefl-square
     c2t-square-and-cube = (fill-cube-left (square-symmetry T.f) 
                                           hrefl-square
-                                          (horiz-degen-square (S¹.βloop/rec T.a T.p)) (horiz-degen-square (S¹.βloop/rec T.a T.p)) hrefl-square)
+                                          (horiz-degen-square (S¹.βloop/rec T.a T.p)) 
+                                          (horiz-degen-square (S¹.βloop/rec T.a T.p))
+                                          hrefl-square)
 
   c2t-square : Square T.q (ap (λ z → S¹-rec T.a T.p z) S¹.loop) (ap (λ z → S¹-rec T.a T.p z) S¹.loop) T.q
   c2t-square = fst c2t-square-and-cube
@@ -25,7 +27,7 @@ module homotopy.TS1S1 where
   c2t-loop-homotopy = (S¹-elimo (\ x -> (S¹-rec T.a T.p) x == (S¹-rec T.a T.p) x) T.q (PathOver=.in-PathOver-= c2t-square))
 
   c2t' : S¹ → S¹ → T
-  c2t' x y = S¹-rec (S¹-rec T.a T.p) (λ≃ c2t-loop-homotopy) x y 
+  c2t' x y = S¹-rec (S¹-rec T.a T.p) (λ≃ c2t-loop-homotopy) x y -- avoid symmetry with q instead of p?
 
   c2t : S¹ × S¹ → T
   c2t (x , y) = c2t' x y

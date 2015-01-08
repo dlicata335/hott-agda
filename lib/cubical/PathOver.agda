@@ -62,12 +62,6 @@ module lib.cubical.PathOver where
        -> Path (ap fst (pair= α β)) α
   Σ=β1 {p = x , y} {q = .x , .y} ._ id = id
 
-  Σ=β2 : {A : Type} {B : A -> Type} {p q : Σ B} 
-       (α : Path (fst p) (fst q)) 
-       (β : PathOver B α (snd p) (snd q))
-       -> Path (apdo snd (pair= α β)) {!!}
-  Σ=β2 {p = x , y} {q = .x , .y} ._ id = id
-
   ido-constant : {Δ : Type} {A : Type} {θ1 θ2 : Δ} {M : A} (δ : θ1 == θ2) → PathOver (\ _ -> A) δ M M
   ido-constant id = id
 

@@ -229,6 +229,8 @@ not only holds, but satisfies its β-reduction rule definitionally.  So
 we work with a new inductive family in Agda, but everything we do could
 be translated to statements about homogeneous paths using |transport|.  
 
+NOTE: or do hott/agda path-induction into universe
+
 \subsection{Library}
 
 Next, we give a sample of some of the facts about path-overs that are
@@ -290,8 +292,8 @@ In fact, this is an equivalence, with inverse given by |ap fst| and
 for paths in a Σ-type.
 
 Next, we have lemmas characterizing path-overs based on the dependent
-type |C|; these are analogous to the rules for transporting 
-dependent types
+type |C|; these are analogous to the rules for |transport| in each
+fibration.  The proofs are just First, a path-over in a constant fibration 
 
 \begin{code}
   PathOver-constant-eqv : {Δ : Type} {A : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {M1 : A} {M2 : A} 
