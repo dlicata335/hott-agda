@@ -234,9 +234,12 @@ NOTE: or do hott/agda path-induction into universe
 \subsection{Library}
 
 Next, we give a sample of some of the facts about path-overs that are
-commonly used.  As a first example, we can compose two path-overs,
-yielding a path over the composite (we write |∘o| for composition of
-path-overs, and |∘| for composition of homogeneous paths):
+commonly used.  The proofs of all of these facts are in the companion
+code.
+
+As a first example, we can compose two path-overs, yielding a path over
+the composite (we write |∘o| for composition of path-overs, and |∘| for
+composition of homogeneous paths):
 
 \begin{code}
   _∘o_ :  {A : Type} {C : A → Type} {a1 a2 a3 : A}
@@ -305,6 +308,16 @@ hom-to-over-eqv : {A : Type} {C : A → Type}
             → ∀ {a1} → ∀ {c1 c2 : C a1} 
             → (Path{C a1} c1 c2) ≃ (PathOver C id c1 c2)
 \end{code}
+This implies that we have the usual homogeneous path induction for
+path-overs that happens to be homogeneous (|PathOver C id c1 c2|):
+\begin{code}
+path-induction-homo : 
+  {A : Type} {C : A → Type} {a1 : A} {c1 : C a1} 
+  (P : (x : C a1) → PathOver C id c1 x → Type)
+  → (C c1 id)
+  → {c2 : C a1} → (γ : PathOver C id c1 c2)
+  → P c2 γ
+\end{code}
 
 Next, we have lemmas characterizing path-overs based on the dependent
 type |C|; these are analogous to the rules for |transport| in each
@@ -325,20 +338,38 @@ is |(λ X → X)| is the equivalence between |HEq| and |PathOver| mentioned
 above).
 \begin{code}
 over-o-ap-eqv :  {A B : Type} (C : B → Type) {f : A → B} 
-                 {a1 a2 : A} {α : a1 == a2}  → ∀ {c1 c2} →
-                 → (PathOver (C o f) α c1 c2) ≃ (PathOver C (ap f α) c1 c2)
+                 {a1 a2 : A} {α : a1 == a2}
+                 {c1 : C a1} {c2 : C a2} →
+                   (PathOver (C o f) α c1 c2)
+                 ≃ (PathOver C (ap f α) c1 c2)
 \end{code}
-This is the path-over equivalent of re-associating between
-|transport (C o f) α| and |transport C (ap f α)|.  
+This is the path-over equivalent of re-associating between |transport (C
+o f) α| and |transport C (ap f α)|.  When defining the right-to-left
+direction (and proving the corresponding composite), we cannot do
+path-over induction on the proof of |(PathOver C (ap f α) c1 c2)|
+because it is not a fully general instance of the family.  Instead, we
+do path induction on |α|, and then use |path-induction-homo|.
 
+Third, we have rules for each type constructor.  For example for
+Π-types, we have
 \begin{code}
-  PathOverΠ-eqv : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
-              → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
-              → Equiv (PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g)
-                      (((x : A θ1) (y : A θ2) (α : PathOver A δ x y) → PathOver B (pair= δ α) (f x) (g y)))
-
-  PathOverΠ-NDdomain : {Δ : Type} {A : Type} {B : Δ → A → Type}
-              → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A) → B θ1 x} {g : (x : A) → B θ2 x}
-              →  PathOver (\ θ → (x : A) → B θ x) δ f g 
-              == ( (x : A) → PathOver (\ θ → B θ x) δ (f x) (g x))
+PathOverΠ-eqv : {A : Type} {B : A → Type} {C : Σ B → Type}
+  {a1 a2 : A} {α : Path a1 a2} 
+  {f : (x : B a1) → C (a1 , x)} {g : (x : B a2) → C (a2 , x)} → 
+     (PathOver (\ a → (x : B a) → C (a , x)) α f g)
+  ≃  ((x  : B a1)  (y : B a2) (β : PathOver B α x y) → 
+          PathOver C (pair= α β) (f x) (g y))
 \end{code}
+This is path-over version of function extensionality; it says that two
+functions are equal (over α) if they take two equal arguments
+(over α) to two equal results (over both α and β, because |f x : C
+(a1,x)| and |g y : C(a2,y)|).  This can be proved using the usual
+function extensionality for homogeneous paths.  
+
+%% \begin{code}
+%%   PathOverΠ-NDdomain : {Δ : Type} {A : Type} {B : Δ → A → Type}
+%%               → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A) → B θ1 x} {g : (x : A) → B θ2 x}
+%%               →  PathOver (\ θ → (x : A) → B θ x) δ f g 
+%%               == ( (x : A) → PathOver (\ θ → B θ x) δ (f x) (g x))
+%% \end{code}
+

@@ -7,11 +7,11 @@ module Funext2 where
   Homotopies : Type → Type → Type
   Homotopies A B = (Σ \ (fg : (A -> B) × (A → B)) → (x : A) → fst fg x == snd fg x)
 
-  -- uses η for Σ
+  -- uses η for Σ and Π
   rearrange : ∀ {A B} → (A → Paths B) ≃ (Homotopies A B)
   rearrange = (improve (hequiv (λ h → ((λ x → fst (fst (h x))) , (λ x → snd (fst (h x)))) , (λ x → snd (h x))) 
                           (λ i → λ x → ((fst (fst i) x) , (snd (fst i) x)) , snd i x)
-                          (λ _ → id) (λ _ → id)))
+                          (λ a → id) (λ _ → id)))
     -- this can be written with AC, but it's too annoying to do the beta reduction if you write it this way
     -- (apΣ-l' (AC {A = A} {B = λ _ → B} {C = λ _ _ → B})) ∘ ua (AC {A = A} {B = λ _ → B × B} {C = λ _ b1b2 → fst b1b2 == snd b1b2})
   
