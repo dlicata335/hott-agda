@@ -279,7 +279,7 @@ apdo :  {A : Type} {C : A → Type} (f : (a : A) → C a)
         → PathOver C α (f a1) (f a2)
 apdo f id = id
 \end{code}
-(The same |apdo| is for ``dependent |ap| producing a path-over''.)
+(The name |apdo| is for ``dependent |ap| producing a path-over''.)
 
 Next, we define the pairing of paths discussed above: A path in a
 |Σ|-type can be constructed by pairing together a path between the
@@ -360,11 +360,74 @@ PathOverΠ-eqv : {A : Type} {B : A → Type} {C : Σ B → Type}
   ≃  ((x  : B a1)  (y : B a2) (β : PathOver B α x y) → 
           PathOver C (pair= α β) (f x) (g y))
 \end{code}
-This is path-over version of function extensionality; it says that two
+This is a path-over version of function extensionality; it says that two
 functions are equal (over α) if they take two equal arguments
 (over α) to two equal results (over both α and β, because |f x : C
 (a1,x)| and |g y : C(a2,y)|).  This can be proved using the usual
 function extensionality for homogeneous paths.  
+
+\subsection{Example: Circle Elimination}
+
+Using path-over, the rules for the circle are:
+\begin{code}
+  S¹ : Type
+  base : S¹
+  loop : Path{S¹} base base
+  S¹-elimo :  (C : S¹ → Type) 
+              (b : C base) (l : PathOver C loop c c) 
+              (x : S¹) → C x
+  S¹-elimo C b l base ≡ b
+  βloop/elimo : Path (apdo (S¹-elimo C b l) loop) l
+\end{code}
+We write |S¹-elimo| (``|S¹| elimination with path-over'') for circle
+elimination, which we will also call circle induction.  To eliminate
+from the circle into a dependent type |C|, we give a point |b| in |C
+base| as the image of the |base| point, and a path from |c| to itself
+\emph{over the loop} as the image of |loop|.  We have a definitional
+computation rule for points and a propositional computation rule for
+applying the eliminator (using |apdo|) to the |loop|.  By equivalence
+between |PathOver C loop c c| and |Path (transport C loop c) c|, these
+rules are equivalent to the usual ones in terms of homogeneous path.
+
+In the case for |loop|, we will typically ``reduce'' the
+|PathOver C loop c c| goal using the type-directed moves described
+above. For example, when calculating |π₁(S¹)|~\citep{ls13pi1s1}, circle
+induction is used to define a function
+\begin{code}
+decode : (x : S¹) → Cover x → Path base x
+\end{code}
+where |Cover|, defined by circle induction, is the universal cover
+fibration.  In this case, we apply circle elimination with |C x = Cover
+x → Path base x|.  In the case for |base|, we supply a function |loop^ :
+Int → Path base base| (which type checks because |Cover base| is |Int|).
+In the case for |loop|, |PathOverΠ-eqv| is used to make progress on the
+goal, reducing it to
+\begin{code}
+(x : Cover base) (y : Cover base)
+(β : PathOver Cover loop x y) →
+PathOver  (\ p → Path base (fst p)) (pair= loop β)
+          (loop^ x) (loop^ y)
+\end{code}
+Because we are defining a non-dependent function, the fibration in the
+result does not mention |snd p|, so using |over-o-ap-eqv| to
+reassociate, and then reducing |ap fst (pair= loop β)| to |loop|, we need
+to show
+\begin{code}
+(x  : Cover base) (y : Cover base)
+(β : PathOver Cover loop x y) →
+PathOver (\ a → Path base a) loop (loop^ x) (loop^ y)
+\end{code}
+|Cover| is defined so that |PathOver Cover loop x y| is equivalent to
+|Path (x + 1) y|,
+%% (using |over-o-ap-eqv|, β-reduction for S¹-elim, and
+%% the fact that |PathOver (\ X -> X) (ua e) x y| is the same as the graph of the
+%% equivalence |e|), so we need to show
+so we need to show
+\begin{code}
+PathOver (\ a → Path base a) loop (loop^ x) (loop^ (x + 1))
+\end{code}
+For this, we need a rule for reducing |PathOver| in a |Path| type, which
+is the subject of the next section.  
 
 %% \begin{code}
 %%   PathOverΠ-NDdomain : {Δ : Type} {A : Type} {B : Δ → A → Type}
