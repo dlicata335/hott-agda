@@ -291,21 +291,47 @@ In fact, this is an equivalence, with inverse given by |ap fst| and
 |apdo snd|---these three behave like introduction and elimination rules
 for paths in a Σ-type.
 
+We have the equivalence mentioned above between |PathOver| (defined as
+an inductive family) and a homogeneous equation using |transport|:
+\begin{code}
+hom-to-over/left-eqv : {A : Type} {C : A → Type}
+  → ∀ {a1 a2} {α : Path a1 a2} → ∀ {c1 c2} 
+  → (Path (transport C α a1) a2) ≃ (PathOver C α c1 c2)
+\end{code}
+In the special case where |α| is |id|, we have that paths over
+reflexivity are the same as paths:
+\begin{code}
+hom-to-over-eqv : {A : Type} {C : A → Type}
+            → ∀ {a1} → ∀ {c1 c2 : C a1} 
+            → (Path{C a1} c1 c2) ≃ (PathOver C id c1 c2)
+\end{code}
+
 Next, we have lemmas characterizing path-overs based on the dependent
 type |C|; these are analogous to the rules for |transport| in each
-fibration.  The proofs are just First, a path-over in a constant fibration 
+dependent type.  First, a path-over in a constant fibration is the same
+as a homogeneous path:
 
 \begin{code}
-  PathOver-constant-eqv : {Δ : Type} {A : Type} {θ1 θ2 : Δ} {δ : θ1 == θ2} {M1 : A} {M2 : A} 
-                        →
-                        Equiv (PathOver (\ _ -> A) δ M1 M2)
-                              (M1 == M2)
+PathOver-constant-eqv : 
+  {A : Type} {C : Type} {a1 a2 : A}
+  {α : Path a1 a2} {c1 : C} {c2 : C} 
+  → (PathOver (λ _ → C) δ M1 M2) ≃ (Path c1 c2)
+\end{code}
+Here we write ≃ for type equivalence.  
 
+Second, a path-over in a (function) composition can be re-associated,
+moving part of the fibration into the path (the special case where |A|
+is |(λ X → X)| is the equivalence between |HEq| and |PathOver| mentioned
+above).
+\begin{code}
+over-o-ap-eqv :  {A B : Type} (C : B → Type) {f : A → B} 
+                 {a1 a2 : A} {α : a1 == a2}  → ∀ {c1 c2} →
+                 → (PathOver (C o f) α c1 c2) ≃ (PathOver C (ap f α) c1 c2)
+\end{code}
+This is the path-over equivalent of re-associating between
+|transport (C o f) α| and |transport C (ap f α)|.  
 
-  over-o-ap-eqv : {Γ Δ : Type} (A : Δ → Type) {θ1 : Γ → Δ} 
-               {θ1' θ2' : _} {δ' : θ1' == θ2'}  → ∀ {M1 M2} →
-             Equiv (PathOver (A o θ1) δ' M1 M2) (PathOver A (ap θ1 δ') M1 M2)
-
+\begin{code}
   PathOverΠ-eqv : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
               → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
               → Equiv (PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g)
