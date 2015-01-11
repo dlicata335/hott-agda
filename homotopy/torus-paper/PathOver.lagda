@@ -1,6 +1,7 @@
 %include agda.fmt
 
 \section{Heterogeneous equality}
+\label{sec:heq}
 
 The equality type that we write as |Path{A} a0 a1| is sometimes called
 \emph{homogeneous equality}, because it relates two elements |a0| and
@@ -238,29 +239,20 @@ commonly used.  The proofs of all of these facts are in the companion
 code.
 
 As a first example, we can compose two path-overs, yielding a path over
-the composite (we write |∘o| for composition of path-overs, and |∘| for
-composition of homogeneous paths):
+the composite (we write |·o| for composition of path-overs, and |·| for
+composition of homogeneous paths in diagrammatic order):
 
 \begin{code}
-  _∘o_ :  {A : Type} {C : A → Type} {a1 a2 a3 : A}
+  _·o_ :  {A : Type} {C : A → Type} {a1 a2 a3 : A}
          {α2 : Path a2 a3} {α1 : Path a1 a2}
          {c1 : C a1} {c2 : C a2} {c3 : C a3}
          (γ2 : PathOver C α2 c2 c3)
          (γ1 : PathOver C α1 c1 c2)
-         → PathOver C (α2 ∘ α1) c1 c3
-  id ∘o id = id
+         → PathOver C (α1 · α2) c1 c3
+  id ·o id = id
 \end{code}
 The proof is immediate by path-over induction, which we notate in Agda
 by pattern-matching |γ1| and |γ2| as reflexivity.  
-
-%% For this first example, it is instructive to look at what the
-%% corresponding statement is if we reduce path-over to |transport|.  For
-%% the same variables, we need
-%% \begin{code}
-%%          Path (transport C α2 c2) c3 
-%%          → Path (transport C α1 c1) c2
-%%          → Path (transport C (α2 ∘ α1) c1) c3
-%% \end{code}
 
 Next, we can invert a path-over, yielding a path over the inverse in the
 base (for the paper, we sometimes elide the quantifiers, with the

@@ -47,9 +47,9 @@ corresponds to a higher inductive type with one point constructor and
 one path constructor:
 \begin{verbatim}
 base : S¹
-loop : base == base
+loop : Path base base
 \end{verbatim}
-(we write \verb|a == b| for the propositional equality/path type).
+(we write \verb|Path a b| for the propositional equality/path type).
 Similarly, we can describe a torus
 
 [picture]
@@ -60,9 +60,9 @@ identified:
 This corresponds to the higher inductive type
 \begin{verbatim}
 a : T
-p : a == a
-q : a == a
-f : q ∘ p == p ∘ q
+p : Path a a
+q : Path a a
+f : Path (p · q) (q · p)
 \end{verbatim}
 Algebraically, the torus is the free type with two loops that commute.
 
@@ -97,20 +97,21 @@ difficult or intractable.
 
 Inspired by the cubical sets model of type
 theory~\citep{coquand+13cubical}, the main idea of the approach is to
-work with \emph{cube types} that generalize the path type \verb|a == b|.
+work with \emph{cube types} that generalize the path type \verb|Path a b|.
 For example, in this paper, we will consider a type of squares
 \verb|Square l t b r|, dependent on four lines that fit into a square:
 \begin{verbatim}
-l : a00 == a01
-r : a10 == a11
-t : a00 == a10
-b : a01 == a11
+l : Path a00 a01
+r : Path a10 a11
+t : Path a00 a10
+b : Path a01 a11
 \end{verbatim}
 [picture] and a type of cubes \verb|Cube left right front top bot back|
 dependent on its six sides (as well as their boundaries).  Another
 ingredient is to work systematically with ``path over a path'' and
 ``square over a square'' types, which represent paths and squares in a
-fibration (dependent type).
+fibration (dependent type).  These can be seen as proof-relevant notions
+of heterogeneous equality~\citep{mcbride00thesis}.  
 
 While our approach fits nicely with work in progress on new cubical type
 theories~\citep{us,altenkirchkaposi14cubical,coquand14variations}, the
@@ -118,7 +119,7 @@ present paper can be conducted entirely by making appropriate
 definitions in Martin-L\"of type theory with univalence and higher
 inductive types---no additional new axioms are needed.  Higher cubes can
 be defined in terms of higher paths: for example, the type of squares
-considered above can be thought of as discs \verb|b ∘ l == r ∘ t|.
+considered above can be thought of as discs \verb|Path (l · b) (t · r)|.
 Moreover, the notions of a ``path-over-a-path'' and a
 ``square-over-a-square'' can be reduced to homogeneous paths.  This
 means that our constructions can be interpreted in the known models of
@@ -129,10 +130,12 @@ have found it convenient in Agda to use new inductive families to
 represent cube types; this allows us to make more effective use of
 dependent pattern matching and unification.
 
-First, we give a description of the cubical approach, including a survey
-of a library (about 1500 lines of code) that contains the basic
-definitions.  Then, we discuss the proof that the torus is equivalent to
-a product of two circles.  
+We begin by discussing a notion of heterogeneous equality
+(Section~\ref{sec:heq}), and a related path-over-a-path type
+(Section~\ref{sec:pathover}).  Then, we discuss squares
+(Section~\ref{sec:square}) and cubes (Section~\ref{sec:cube}).  Next, we
+discuss the torus example (Section~\ref{sec:torus}), and briefly comment
+on some other examples using our approach (Section~\ref{sec:other}).
 
 %%   In type theory, a space
 %% corresponds to a type $A$. Points of a space correspond to elements $a,b
