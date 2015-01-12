@@ -207,15 +207,19 @@ types below.)
 
 \subsection{Implementation}
 
-The above discussion shows that |PathOver C α c1 c2| need not be an
-extension of type theory, because it can be implemented, for example, by
-|Path{C a2} (transport C α c1) c2|.  However, for engineering reasons,
-in Agda, we prefer to define it as an inductive family, because then we
-can eliminate on a path over using Agda's support for pattern matching,
-which is more convenient that invoking the elimination form directly.
-This is justified because the inductive family definition of |PathOver C
-α c1 c2| can be implemented as |Path{C a2} (transport C α c1) c2| in a
-strong sense, in that its inductive family elimination rule
+The above discussion suggests several equivalent implementations of
+path-over-a-path; we have experimented with two in
+two different Agda libraries.  In one library, it is defined as in the
+fourth option above (by path induction into the universe).  
+
+In another, it is defined as inductive family, which is useful because
+allows us to eliminate on a path-over using Agda's support for pattern
+matching, which is more convenient that invoking the elimination form
+directly.  Moreover, this does not really require an extension of the
+type theory with a new type constructor, because the inductive family
+definition of |PathOver C α c1 c2| can be implemented as |Path{C a2}
+(transport C α c1) c2| in a strong sense, in that its inductive family
+elimination rule
 \begin{code}
 PathOver-elim : {A : Type} (C : A → Type) {a1 : A} {c1 : C a1}
   → (C :  {a2 : A} (α : Path a1 a2) (c2 : C a2) 
@@ -227,10 +231,10 @@ PathOver-elim : {A : Type} (C : A → Type) {a1 : A} {c1 : C a1}
 PathOver-elim A {a1}{c1} C b .a1 id .M1 id = b
 \end{code}
 not only holds, but satisfies its β-reduction rule definitionally.  So
-we work with a new inductive family in Agda, but everything we do could
-be translated to statements about homogeneous paths using |transport|.  
-
-NOTE: or do hott/agda path-induction into universe
+we work with a new inductive family in Agda, but in pricnipel everything
+we do should be able to be translated to eliminators by extending
+~\citep{jesper}, and then the eliminator for path-over could be replaced
+by statements about homogeneous paths.
 
 \subsection{Library}
 
