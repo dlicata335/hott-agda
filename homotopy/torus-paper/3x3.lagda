@@ -2,6 +2,7 @@
 \usetikzlibrary{positioning}
 
 \section{The 3×3 lemma}
+\label{sec:threebythree}
 
 In this section, we present another example of a problem whose formalization in
 Agda has been made possible using cubical ideas.

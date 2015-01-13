@@ -125,10 +125,33 @@
 \maketitle
 
 \begin{abstract}
+Homotopy theory can be developed synthetically in homotopy type theory,
+using types to describe constructions on spaces.  The identity type has
+a central role: an element of the identity type is regarded as a path in
+a space, and iterated identity types describe higher-dimensional paths.
+While some calculations, constructions, and theorems of homotopy theory
+have been developed synthetically and formalized in proof assistants,
+some seemingly straightforward examples have proved difficult because
+the required manipulations of paths and higher-dimensional paths becomes
+complicated.  In this paper, we describe a cubical approach to
+developing homotopy theory within type theory.  One ingredient of this
+approach is to complement the identity type, which relates two elements
+of one type, with higher-dimensional cube types.  For example, we
+consider a type of squares, which is dependent on the boundary of a
+square (four points and four lines), and a type of three-dimensional
+cubes, which is dependent on the boundary of a cube.  Another ingredient
+is \emph{path-over-a-path} types and higher generalizations, which
+describe paths in fibrations that lay over a path in the base.  These
+higher-dimensional cube and path-over types can be defined in terms of
+the usual identity type, but isolating them as independent conceptual
+abstractions has allowed for the formalization of some previously
+difficult examples, such as a proof that the torus is the product of two
+circles, and a proof of a three-by-three lemma about pushouts that is
+used in the calculation of the total space of the Hopf fibration.
 \end{abstract}
 
 \section{Introduction}
-\input{intro}
+\input{intro.lao}
 
 \input{PathOver.lao}
 \input{Square.lao}
