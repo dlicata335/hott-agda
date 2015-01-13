@@ -125,7 +125,7 @@ module programming.PatchWithHistories2
   topath-square : ∀ {n1 n2} (x : A n1 n2) (xs : MS n1) →
                        PathOver (λ x₁ → doc []ms == x₁) (add x xs) (topath xs)
                        (topath (x ::ms xs))
-  topath-square x xs = in-PathOver-= ∘-square 
+  topath-square x xs = in-PathOver-= ∘-square
 
 
   contr : (x : R) → doc []ms == x

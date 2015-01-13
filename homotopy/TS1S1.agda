@@ -38,10 +38,10 @@ module homotopy.TS1S1 where
   cube5 : Σ \ square1'' → Σ \ square2'' → 
         Cube (bifunctor-square1 c2t' S¹.loop S¹.loop) (square-symmetry T.f) square2'' square1'' square1'' square2''
   cube5 = _ , _ , (
-          SquareOver=ND.out-SquareOver-= (apdo-by-equals _ _ S¹.loop (λ≃ reduce-c2t')) ∘-cube-h
-          degen-cube-h (ap PathOver=.out-PathOver-= (S¹.βloop/elimo _ T.q (PathOver=.in-PathOver-= c2t-square))) ∘-cube-h
+          SquareOver=ND.out-SquareOver-= (apdo-by-equals _ _ S¹.loop (λ≃ reduce-c2t')) ·-cube-h
+          degen-cube-h (ap PathOver=.out-PathOver-= (S¹.βloop/elimo _ T.q (PathOver=.in-PathOver-= c2t-square))) ·-cube-h
           degen-cube-h (IsEquiv.β (snd PathOver=.out-PathOver-=-eqv) _)
-            ∘-cube-h (snd c2t-square-and-cube))
+            ·-cube-h (snd c2t-square-and-cube))
 
   t2c2t : (x : T) → c2t (t2c x) == x
   t2c2t = T-elim (\ x -> c2t (t2c x) == x) 
@@ -60,13 +60,13 @@ module homotopy.TS1S1 where
         goal1 : Cube (ap-square (λ z → c2t (t2c z)) T.f)
                      (ap-square (λ z → z) T.f)
                      square1 square2 square2 square1
-        goal1 = (ap-square-o c2t t2c T.f) ∘-cube-h
+        goal1 = (ap-square-o c2t t2c T.f) ·-cube-h
                 ap-cube c2t
                   (T.βf/rec (S¹.base , S¹.base) (pair×≃ id S¹.loop)
-                   (pair×≃ S¹.loop id) (pair-square vrefl-square hrefl-square)) ∘-cube-h
-                bifunctor-cube1 c2t' S¹.loop S¹.loop ∘-cube-h 
-                cube-square-symmetry-left (snd (snd cube5)) ∘-cube-h
-                degen-cube-h (square-symmetry-symmetry T.f)  ∘-cube-h 
+                   (pair×≃ S¹.loop id) (pair-square vrefl-square hrefl-square)) ·-cube-h
+                bifunctor-cube1 c2t' S¹.loop S¹.loop ·-cube-h 
+                cube-square-symmetry-left (snd (snd cube5)) ·-cube-h
+                degen-cube-h (square-symmetry-symmetry T.f)  ·-cube-h 
                 ap-square-id! T.f
 
   c2t2c : (x y : S¹) → t2c (c2t' x y) == (x , y)
@@ -95,13 +95,13 @@ module homotopy.TS1S1 where
             (PathOver=.out-PathOver-=
               (apdo (λ x₁ → ap (λ z → z , x₁) S¹.loop) S¹.loop))
             square1' square2' square2' square1'
-    cube4 = !-cube-h (bifunctor-cube1' (λ x y → t2c (c2t' x y)) S¹.loop S¹.loop) ∘-cube-h
-            ap-square-o t2c c2t (pair-square hrefl-square vrefl-square) ∘-cube-h
-            ap-cube t2c (bifunctor-cube1' c2t' S¹.loop S¹.loop ∘-cube-h (snd (snd cube5))) ∘-cube-h
-            degen-cube-h (ap-square-symmetry t2c T.f) ∘-cube-h
-            cube-square-symmetry-left (T.βf/rec (S¹.base , S¹.base) (pair×≃ id S¹.loop) (pair×≃ S¹.loop id) (pair-square vrefl-square hrefl-square)) ∘-cube-h 
-            degen-cube-h (pair-vrefl-hrefl-symmetry S¹.loop S¹.loop) ∘-cube-h
-            (ap-square-id! (pair-square hrefl-square vrefl-square)) ∘-cube-h
+    cube4 = !-cube-h (bifunctor-cube1' (λ x y → t2c (c2t' x y)) S¹.loop S¹.loop) ·-cube-h
+            ap-square-o t2c c2t (pair-square hrefl-square vrefl-square) ·-cube-h
+            ap-cube t2c (bifunctor-cube1' c2t' S¹.loop S¹.loop ·-cube-h (snd (snd cube5))) ·-cube-h
+            degen-cube-h (ap-square-symmetry t2c T.f) ·-cube-h
+            cube-square-symmetry-left (T.βf/rec (S¹.base , S¹.base) (pair×≃ id S¹.loop) (pair×≃ S¹.loop id) (pair-square vrefl-square hrefl-square)) ·-cube-h 
+            degen-cube-h (pair-vrefl-hrefl-symmetry S¹.loop S¹.loop) ·-cube-h
+            (ap-square-id! (pair-square hrefl-square vrefl-square)) ·-cube-h
             (bifunctor-cube1' _,_ S¹.loop S¹.loop)
 
     square1 = _

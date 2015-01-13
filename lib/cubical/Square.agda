@@ -60,7 +60,7 @@ module lib.cubical.Square where
   transport-PathOver A δ M1 M2 id = {! λ≃ coh !} where
     coh : {θ1 : _} {θ2 : _} {δ : θ1 == θ2} {M1 : _} {M2 : _} → (x : PathOver A δ M1 M2) →
       x ==
-      (transport (λ x₁ → x₁) (changeover= A (! (! (∘-unit-l δ)))) (id ∘o x ∘o id))
+      (transport (λ x₁ → x₁) (changeover= A (! (! (·-unit-l δ)))) (id ∘o x ∘o id))
     coh id = id
 -}
 
@@ -182,7 +182,7 @@ module lib.cubical.Square where
                                                 (λ x → Path (horiz-degen-square (horiz-degen-square-to-path x)) x)
                                                 id s) (λ y → path-induction (\ _ y → Path (horiz-degen-square-to-path (horiz-degen-square y)) y) id y))
 
-  square-∘-topright-right' : {A : Type}
+  square-·-topright-right' : {A : Type}
               {a00 a01 a10 a11 : A} 
               {p0- : a00 == a01}
               {p-0 : a00 == a10}
@@ -190,9 +190,9 @@ module lib.cubical.Square where
               {p1- : a10 == a11}
               (f   : Square p0- p-0 p-1 p1-)
               -> Square p0- id p-1 (p1- ∘ p-0)
-  square-∘-topright-right' id = id
+  square-·-topright-right' id = id
 
-  square-∘-topright-right : {A : Type}
+  square-·-topright-right : {A : Type}
               {a00 a01 a10 a11 : A} 
               {p0- : a00 == a01}
               {p-0 : a00 == a10}
@@ -200,20 +200,20 @@ module lib.cubical.Square where
               {p1- : a10 == a11}
               (f   : Square p0- p-0 p-1 p1-)
               -> Square p0- id p-1 (p1- ∘ p-0)
-  square-∘-topright-right id = id
+  square-·-topright-right id = id
 
-  square-∘-topright-right-triangle : {A : Type} {a' : A} 
+  square-·-topright-right-triangle : {A : Type} {a' : A} 
              → {a0 a1 : A}
              → {p : a0 == a1}
              → {q0 : a' == a0}
              → {q1 : a' == a1}
              → (s : Square q0 id p q1)
-             → square-∘-topright-right s == s
-  square-∘-topright-right-triangle {q0 = id} {id} s = elim-along-equiv
-                                                         (λ (s₁ : Square id id _ id) → square-∘-topright-right s₁ == s₁)
+             → square-·-topright-right s == s
+  square-·-topright-right-triangle {q0 = id} {id} s = elim-along-equiv
+                                                         (λ (s₁ : Square id id _ id) → square-·-topright-right s₁ == s₁)
                                                          (!equiv square-disc-eqv) (λ x → lemma x) s where
      lemma : ∀ {A} {a' : A} {p : a' == a'} (x : Id p id) →
-             Id (square-∘-topright-right (disc-to-square  {_}{_}{_}{_}{_} {id}{id}{p}{id} x)) (disc-to-square {_}{_}{_}{_}{_} {id}{id}{p}{id}  x)
+             Id (square-·-topright-right (disc-to-square  {_}{_}{_}{_}{_} {id}{id}{p}{id} x)) (disc-to-square {_}{_}{_}{_}{_} {id}{id}{p}{id}  x)
      lemma id = id
 
   module PathOverPathFrom where
@@ -261,7 +261,7 @@ module lib.cubical.Square where
                 {p-1 : a01 == a11}
                 {p1- : a10 == a11}
                → (s : Square p0- p-0 p-1 p1-)
-               → out-PathOver-= (in-PathOver-=' s) == square-∘-topright-right s
+               → out-PathOver-= (in-PathOver-=' s) == square-·-topright-right s
     PathOver-=-outin' id = id
   
     PathOver-=-outin : {A : Type} {a' : A} 
@@ -271,7 +271,7 @@ module lib.cubical.Square where
                → {q1 : a' == a1}
                → (s : Square q0 id p q1)
                → out-PathOver-= (in-PathOver-= s) == s
-    PathOver-=-outin s = square-∘-topright-right-triangle s ∘ PathOver-=-outin' s
+    PathOver-=-outin s = square-·-topright-right-triangle s ∘ PathOver-=-outin' s
   
     PathOver-=-eqv : {A : Type} {a' : A} 
                → {a0 a1 : A}
@@ -348,7 +348,7 @@ module lib.cubical.Square where
               → Square (p0- ∘ p) id p-1 (p1- ∘ p)
   extend-triangle f id = f
 
-  ∘-square-vertical : {A : Type}
+  ·-square-vertical : {A : Type}
     {a b c d e f : A}
     {l : a == b} 
     {t : a == c} 
@@ -360,12 +360,12 @@ module lib.cubical.Square where
     → (Square l t bt r)
     → (Square l' bt b' r')
     → Square (l' ∘ l) t b' (r' ∘ r)
-  ∘-square-vertical id s = s
+  ·-square-vertical id s = s
   
-  _∘-square-v_ = ∘-square-vertical
+  _·-square-v_ = ·-square-vertical
 
   -- FIXME: how do you get this from a Kan filling?
-  ∘-square-vertical/degen-bot : {A : Type}
+  ·-square-vertical/degen-bot : {A : Type}
     {a b c d : A}
     {l : a == b} 
     {t : a == c} 
@@ -375,9 +375,9 @@ module lib.cubical.Square where
     → (Square l t bt r)
     → (Square id bt b' id)
     → Square l t b' r
-  ∘-square-vertical/degen-bot id s = s
+  ·-square-vertical/degen-bot id s = s
 
-  ∘-square-vertical/degen-top : {A : Type}
+  ·-square-vertical/degen-top : {A : Type}
     {a b c d : A}
     {l : a == b} 
     {t : a == c} 
@@ -387,9 +387,9 @@ module lib.cubical.Square where
     → (Square id t bt id)
     → (Square l bt b' r)
     → Square l t b' r
-  ∘-square-vertical/degen-top s id = s
+  ·-square-vertical/degen-top s id = s
 
-  ∘-square-horiz : {A : Type}
+  ·-square-horiz : {A : Type}
     {a b c d e f : A}
     {l : a == b} 
     {t : a == c}
@@ -401,9 +401,9 @@ module lib.cubical.Square where
     → (Square l t b r)
     → (Square r t' b' r')
     → Square l (t' ∘ t) (b' ∘ b) r'
-  ∘-square-horiz id s = s
+  ·-square-horiz id s = s
 
-  _∘-square-h_ = ∘-square-horiz
+  _·-square-h_ = ·-square-horiz
 
   !-square-h : {A : Type}
               {a00 a01 a10 a11 : A} 
@@ -451,9 +451,9 @@ module lib.cubical.Square where
   connection2 : {A : Type} {a1 a2 a3 : A} {p : a1 == a2} {q : a2 == a3} → Square p p q q
   connection2 {p = id} {q = id} = id
 
-  ∘-square : {A : Type} {a0 a1 a2 : A} {p : a0 == a1} {q : a1 == a2} 
+  ·-square : {A : Type} {a0 a1 a2 : A} {p : a0 == a1} {q : a1 == a2} 
            → Square p id q (q ∘ p)
-  ∘-square {p = id} = connection
+  ·-square {p = id} = connection
 
 
   ap-square : {A B : Type} (g : A → B) → 
@@ -591,6 +591,11 @@ module lib.cubical.Square where
   ·-fill : {A : Type} {x y z : A} (p : x == y) (q : y == z)
             → (p · q) == fst (fill-right p id q)
   ·-fill id id = id
+
+  -- for legacy reasons
+  ∘-square : {A : Type} {x y z : A} {p : x == y} {q : y == z}
+           → Square p id q (q ∘ p)
+  ∘-square {p = id} {q} = connection
 
 
 {-

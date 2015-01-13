@@ -182,7 +182,7 @@ module lib.cubical.Cube where
     → Cube (ap-square f f--0) (ap-square f f--1) (ap-square f f0--) (ap-square f f-0-) (ap-square f f-1-) (ap-square f f1--)
   ap-cube f id = id
 
-  _∘-cube-h_ :  {A : Type} {a000 : A}  
+  _·-cube-h_ :  {A : Type} {a000 : A}  
     {a010 a100 a110 a001 a011 a101 a111 : A}
     {p0-0 : a000 == a010}
     {p-00 : a000 == a100}
@@ -222,10 +222,10 @@ module lib.cubical.Cube where
     {f1--' : Square p1-1 p10-' p11-' p1-2} -- front'
     -> Cube f--0 f--1 f0-- f-0- f-1- f1--
     → Cube f--1 f--2 f0--' f-0-' f-1-' f1--'
-    -> Cube f--0 f--2 (f0-- ∘-square-h f0--') (f-0- ∘-square-h f-0-') (f-1- ∘-square-h f-1-') (f1-- ∘-square-h f1--')
-  id ∘-cube-h c = c
+    -> Cube f--0 f--2 (f0-- ·-square-h f0--') (f-0- ·-square-h f-0-') (f-1- ·-square-h f-1-') (f1-- ·-square-h f1--')
+  id ·-cube-h c = c
 
-  infixr 10 _∘-cube-h_
+  infixr 10 _·-cube-h_
 
   !-cube-h : {A : Type} {a000 : A}  
     {a010 a100 a110 a001 a011 a101 a111 : A}
@@ -281,9 +281,9 @@ module lib.cubical.Cube where
       → SquareOver (\ x -> a000 == x) f-1-
                    (PathOverPathFrom.in-PathOver-=' f--0)
                    (PathOverPathFrom.in-PathOver-=' f0--)
-                   (PathOverPathFrom.in-PathOver-=' (∘-square-vertical f-0- f1--))
+                   (PathOverPathFrom.in-PathOver-=' (·-square-vertical f-0- f1--))
                    (PathOverPathFrom.in-PathOver-=' {p0- = p0-1 ∘ p00- } {p-0 = p00- } {p-1 = p-11} {p1- = p1-1 ∘ p-01}
-                                   (∘-square-vertical connection2 f--1))
+                                   (·-square-vertical connection2 f--1))
       
     SquareOver-='' id = id
   
@@ -354,7 +354,7 @@ module lib.cubical.Cube where
       {f1-- : Square p1-0 p10- p11- p1-1}
       → Cube f--0 f--1 f0-- f-0- f-1- f1--
       → Path (whisker-square id (square-to-disc' f-0-) (square-to-disc' f-1-) id
-                ((!-square-h f0-- ∘-square-h f--0) ∘-square-h f1--)) f--1
+                ((!-square-h f0-- ·-square-h f--0) ·-square-h f1--)) f--1
     cube-to-path id = id
 {-
   module CubeSquare where
@@ -455,11 +455,11 @@ module lib.cubical.Cube where
                           {p-0 : (x : Γ) → a00 x == a10 x }
                           {p-1 : (x : Γ) → a01 x == a11 x }
                           {p1- : (x : Γ) → a10 x == a11 x }
-                          (f1 : Square (p0- x1) (p-0 x1) (p-1 x1) (p1- x1))
-                       → (f2 : Square (p0- x2) (p-0 x2) (p-1 x2) (p1- x2))
+                          {f1 : Square (p0- x1) (p-0 x1) (p-1 x1) (p1- x1)}
+                          {f2 : Square (p0- x2) (p-0 x2) (p-1 x2) (p1- x2)}
                        → (Cube f1 f2 (PathOver=.out-PathOver-= (apdo p0- δ)) (PathOver=.out-PathOver-= (apdo p-0 δ)) (PathOver=.out-PathOver-= (apdo p-1 δ)) (PathOver=.out-PathOver-= (apdo p1- δ)))
                        → (PathOver (\ x -> Square (p0- x) (p-0 x) (p-1 x) (p1- x)) δ f1 f2)
-    in-PathOver-Square id f1 f2 c = hom-to-over (coh _ _ c) where
+    in-PathOver-Square id {f1 = f1} {f2} c = hom-to-over (coh _ _ c) where
       coh : {A : Type}
             {a00 a01 a10 a11 : A} 
             {p0- : a00 == a01}
@@ -616,7 +616,7 @@ module lib.cubical.Cube where
   ap-square-o g f id = id
 
 {- annoying to prove and not used
-   ∘-cube-horiz/degen : 
+   ·-cube-horiz/degen : 
     {A : Type}
     {a000 a010 a100 a110 : A}
 
@@ -651,10 +651,10 @@ module lib.cubical.Cube where
     → Cube f--0 f--1 (horiz-degen-square f0--) (horiz-degen-square f-0-) (horiz-degen-square f-1-) (horiz-degen-square f1--)
     → Cube f--1 f--2 (horiz-degen-square f0--') (horiz-degen-square f-0-') (horiz-degen-square f-1-') (horiz-degen-square f1--')
     → Cube f--0 f--2 (horiz-degen-square (f0--' ∘ f0--)) (horiz-degen-square (f-0-' ∘ f-0-)) (horiz-degen-square (f-1-' ∘ f-1-)) (horiz-degen-square (f1--' ∘ f1--))
---  ∘-cube-horiz/degen = {!!} 
+--  ·-cube-horiz/degen = {!!} 
 
-  _∘-cube-h/degen_ = ∘-cube-horiz/degen
-  infixr 10 _∘-cube-h/degen_
+  _·-cube-h/degen_ = ·-cube-horiz/degen
+  infixr 10 _·-cube-h/degen_
 
   cross-square-path-Σ : {A : Type} {B : A → Type} 
               {a00 a01 a10 a11 : A} 

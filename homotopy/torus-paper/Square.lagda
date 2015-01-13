@@ -404,7 +404,7 @@ this type is the inside of the top square in the following diagram:
   \node at (4,0.5) {|A|};
   \draw[->] (4,2.25) to node[right]{} (4,0.75);
 
-  \node at (1.5,0.5) {|f|};
+  \node at (1.5,0.5) {|s|};
 
   \draw (A) to node[above] {|βt|} (B);
   \draw (B) to node[right] {|βr|} (C);
