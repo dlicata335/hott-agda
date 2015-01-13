@@ -110,8 +110,9 @@ both sides of the commutativity equality.
 
 Heterogeneous equalities of this form can be simplified using a
 \emph{factored} hetereogeneous equality type, which separates a context
-(like |Vec Nat -|) from an equality on the insides of the context.  We
-call this a ``path over a path'' type, and it can be defined as an
+(like |Vec Nat -|) from an equality on the insides of the context.  This
+is called a \emph{path over a path} or \emph{path-over} type (it is
+discussed briefly in \citep{uf13hott-book}), and it can be defined as an
 inductive family as follows:
 \begin{code}
 data PathOver  {A : Type} (C : A → Type) {a1 : A} : 
@@ -205,40 +206,38 @@ types below.)
 
 \subsection{Implementation}
 
-The above discussion suggests several equivalent implementations of
-path-over-a-path; we have experimented with two in
-two different Agda libraries.  In one library, it is defined as in the
-fourth option above (by path induction into the universe).  
-
-In another, it is defined as inductive family, which is useful because
-allows us to eliminate on a path-over using Agda's support for pattern
-matching, which is more convenient that invoking the elimination form
-directly.  Moreover, this does not really require an extension of the
-type theory with a new type constructor, because the inductive family
-definition of |PathOver C α c1 c2| can be implemented as |Path{C a2}
-(transport C α c1) c2| in a strong sense, in that its inductive family
-elimination rule
-\begin{code}
-PathOver-elim : {A : Type} (C : A → Type) {a1 : A} {c1 : C a1}
-  → (C :  {a2 : A} (α : Path a1 a2) (c2 : C a2) 
-           → PathOver C α c1 c2 → Type)
-  → C a1 id c1 id
-  → {a2 : Δ} (α : Path a1 a2) {c2 : C a2}
-     (γ : PathOver C α c1 c2)
-  → C a2 α c2 γ 
-PathOver-elim A {a1}{c1} C b .a1 id .M1 id = b
-\end{code}
-not only holds, but satisfies its β-reduction rule definitionally.  So
-we work with a new inductive family in Agda, but in pricnipel everything
-we do should be able to be translated to eliminators by extending
-~\citep{jesper}, and then the eliminator for path-over could be replaced
-by statements about homogeneous paths.
+We have experimented with two implementations of path-over in two
+different Agda libraries.  In one library, it is defined as in the fifth
+option above (by path induction into the universe).  In another library,
+it is defined as inductive family, which is useful because allows us to
+eliminate on a path-over using Agda's support for pattern matching.
+Moreover, this implementation does not really require an extension of
+the type theory with a new type constructor, because the inductive
+family definition of |PathOver C α c1 c2| can be implemented as |Path{C
+  a2} (transport C α c1) c2| in a strong sense, in that its inductive
+family elimination rule
+%% \begin{code}
+%% PathOver-elim : {A : Type} (C : A → Type) {a1 : A} {c1 : C a1}
+%%   → (C :  {a2 : A} (α : Path a1 a2) (c2 : C a2) 
+%%            → PathOver C α c1 c2 → Type)
+%%   → C a1 id c1 id
+%%   → {a2 : Δ} (α : Path a1 a2) {c2 : C a2}
+%%      (γ : PathOver C α c1 c2)
+%%   → C a2 α c2 γ 
+%% PathOver-elim A {a1}{c1} C b .a1 id .M1 id = b
+%% \end{code}
+not only holds, but satisfies its β-reduction rule definitionally.
+Therefore, assuming that everything in Agda could be translated to
+eliminators (following~\citep{jesper}), the eliminator for path-over
+could then be replaced by statements about homogeneous paths.
 
 \subsection{Library}
 
 Next, we give a sample of some of the facts about path-overs that are
-commonly used.  The proofs of all of these facts are in the companion
-code.
+commonly used.  For the paper, we sometimes elide universal quantifiers,
+with the convention that variables are quantified with the most general
+types; the proofs proofs are in the companion code.  We write ≃ for type
+equivalence.
 
 As a first example, we can compose two path-overs, yielding a path over
 the composite (we write |·o| for composition of path-overs, and |·| for
@@ -248,8 +247,7 @@ composition of homogeneous paths in diagrammatic order):
   _·o_ :  {A : Type} {C : A → Type} {a1 a2 a3 : A}
          {α2 : Path a2 a3} {α1 : Path a1 a2}
          {c1 : C a1} {c2 : C a2} {c3 : C a3}
-         (γ2 : PathOver C α2 c2 c3)
-         (γ1 : PathOver C α1 c1 c2)
+         (γ2 : PathOver C α2 c2 c3) (γ1 : PathOver C α1 c1 c2)
          → PathOver C (α1 · α2) c1 c3
   id ·o id = id
 \end{code}
@@ -257,9 +255,7 @@ The proof is immediate by path-over induction, which we notate in Agda
 by pattern-matching |γ1| and |γ2| as reflexivity.  
 
 Next, we can invert a path-over, yielding a path over the inverse in the
-base (for the paper, we sometimes elide the quantifiers, with the
-convention that the variables are universally quantified with the most
-general types):
+base :
 \begin{code}
   !o : PathOver C α c1 c2 → PathOver C (! δ) c2 c1
   !o id = id
@@ -279,7 +275,8 @@ Next, we define the pairing of paths discussed above: A path in a
 |Σ|-type can be constructed by pairing together a path between the
 left-hand sides and a path over it between the right-hand sides:
 \begin{code}
-pair= :  {A : Type} {B : A → Type} {a1 a2 : A} (α : Path a1 a2) 
+pair= :  {A : Type} {B : A → Type} 
+         {a1 a2 : A} (α : Path a1 a2) 
          {b1 : A a1} {b2 : A a2} (β : PathOver B α b1 b2)
          → Path (a1 , b1) (a2 , b2)
 pair= .id id = id
@@ -308,9 +305,7 @@ path-overs that happens to be homogeneous (|PathOver C id c1 c2|):
 path-induction-homo : 
   {A : Type} {C : A → Type} {a1 : A} {c1 : C a1} 
   (P : (x : C a1) → PathOver C id c1 x → Type)
-  → (C c1 id)
-  → {c2 : C a1} → (γ : PathOver C id c1 c2)
-  → P c2 γ
+  (C c1 id) {c2 : C a1} (γ : PathOver C id c1 c2) → P c2 γ
 \end{code}
 
 Next, we have lemmas characterizing path-overs based on the dependent
@@ -324,18 +319,16 @@ PathOver-constant-eqv :
   {α : Path a1 a2} {c1 : C} {c2 : C} 
   → (PathOver (λ _ → C) δ M1 M2) ≃ (Path c1 c2)
 \end{code}
-Here we write ≃ for type equivalence.  
 
 Second, a path-over in a (function) composition can be re-associated,
 moving part of the fibration into the path (the special case where |A|
 is |(λ X → X)| is the equivalence between |HEq| and |PathOver| mentioned
 above).
 \begin{code}
-over-o-ap-eqv :  {A B : Type} (C : B → Type) {f : A → B} 
-                 {a1 a2 : A} {α : a1 == a2}
-                 {c1 : C a1} {c2 : C a2} →
-                   (PathOver (C o f) α c1 c2)
-                 ≃ (PathOver C (ap f α) c1 c2)
+over-o-ap-eqv :  {A B : Type} (C : B → Type)
+  {f : A → B} {a1 a2 : A} {α : Path a1 a2}
+  {c1 : C a1} {c2 : C a2} → 
+  (PathOver (C o f) α c1 c2) ≃ (PathOver C (ap f α) c1 c2)
 \end{code}
 This is the path-over equivalent of re-associating between |transport (C
 o f) α| and |transport C (ap f α)|.  When defining the right-to-left
@@ -362,16 +355,13 @@ function extensionality for homogeneous paths.
 
 \subsection{Example: Circle Elimination}
 
-Using path-over, the rules for the circle are:
+For the circle type |S¹|, with constructors |base : S¹| and |loop :
+Path{S¹} base base|, the elimination rule is
 \begin{code}
-  S¹ : Type
-  base : S¹
-  loop : Path{S¹} base base
-  S¹-elimo :  (C : S¹ → Type) 
-              (b : C base) (l : PathOver C loop c c) 
-              (x : S¹) → C x
-  S¹-elimo C b l base ≡ b
-  βloop/elimo : Path (apdo (S¹-elimo C b l) loop) l
+S¹-elimo :  (C : S¹ → Type) (b : C base) (l : PathOver C loop c c) 
+              → (x : S¹) → C x
+S¹-elimo C b l base ≡ b
+βloop/elimo : Path (apdo (S¹-elimo C b l) loop) l
 \end{code}
 We write |S¹-elimo| (``|S¹| elimination with path-over'') for circle
 elimination, which we will also call circle induction.  To eliminate
@@ -379,9 +369,10 @@ from the circle into a dependent type |C|, we give a point |b| in |C
 base| as the image of the |base| point, and a path from |c| to itself
 \emph{over the loop} as the image of |loop|.  We have a definitional
 computation rule for points and a propositional computation rule for
-applying the eliminator (using |apdo|) to the |loop|.  By equivalence
-between |PathOver C loop c c| and |Path (transport C loop c) c|, these
-rules are equivalent to the usual ones in terms of homogeneous path.
+applying the eliminator (using |apdo|) to the |loop|.  By the
+equivalence between |PathOver C loop c c| and |Path (transport C loop c)
+c|, these rules are equivalent to the usual ones in terms of homogeneous
+path.
 
 In the case for |loop|, we will typically ``reduce'' the
 |PathOver C loop c c| goal using the type-directed moves described
@@ -397,8 +388,7 @@ Int → Path base base| (which type checks because |Cover base| is |Int|).
 In the case for |loop|, |PathOverΠ-eqv| is used to make progress on the
 goal, reducing it to
 \begin{code}
-(x : Cover base) (y : Cover base)
-(β : PathOver Cover loop x y) →
+(x y : Cover base) (β : PathOver Cover loop x y) →
 PathOver  (\ p → Path base (fst p)) (pair= loop β)
           (loop^ x) (loop^ y)
 \end{code}
@@ -407,8 +397,7 @@ result does not mention |snd p|, so using |over-o-ap-eqv| to
 reassociate, and then reducing |ap fst (pair= loop β)| to |loop|, we need
 to show
 \begin{code}
-(x  : Cover base) (y : Cover base)
-(β : PathOver Cover loop x y) →
+(x y  : Cover base) (β : PathOver Cover loop x y) →
 PathOver (\ a → Path base a) loop (loop^ x) (loop^ y)
 \end{code}
 |Cover| is defined so that |PathOver Cover loop x y| is equivalent to
@@ -421,7 +410,7 @@ so we need to show
 PathOver (\ a → Path base a) loop (loop^ x) (loop^ (x + 1))
 \end{code}
 For this, we need a rule for reducing |PathOver| in a |Path| type, which
-is the subject of the next section.  
+we discuss next.
 
 %% \begin{code}
 %%   PathOverΠ-NDdomain : {Δ : Type} {A : Type} {B : Δ → A → Type}
