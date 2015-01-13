@@ -8,8 +8,8 @@ The equality type that we write as |Path{A} a0 a1| is sometimes called
 |a1| of the same type |A| (where ``same'' here means
 definitional/judgemental equality).  McBride~\citep{mcbride00thesis}
 introduced a \emph{heterogeneous equality}, which is an equality type
-|a:A = b:B| that relates two elements |a:A| and |b:B| which a priori may
-have two different types, but is nonetheless inhabited only when both
+|a:A = b:B| that relates two elements |a:A| and |b:B| which may
+have two different types, though it is inhabited only when both
 the two types and the two terms are judgementally equal.  In McBride's
 work, heterogeneous equality is used to elide the reasoning why
 equations type check from the equations themselves, which simplifies a
@@ -69,13 +69,11 @@ HEq' A .A id a b = Path{A} a b
 \end{itemize}
 
 The equivalences between these types are all immediate by by path
-induction or |HEq-elim|, showing that this proof-relevant notion of
-heterogeneous equality can be expressed in terms of homogeneous
-equality: keeping the evidence that the equation type checks ``off to
-the side'' is equivalent to embedding it in the equation on either side,
-and to the more symmetric fourth option.  What we will argue in this
-paper is that it is useful to think in terms of ``off to the side''
-abstractions, even though they can be implemented in terms of
+induction or |HEq-elim|: keeping the evidence that the equation type
+checks ``off to the side'' is equivalent to embedding it in the equation
+on either side, and to the more symmetric fourth option.  What we will
+argue in this paper is that it is useful to think in terms of ``off to
+the side'' abstractions, even though they can be implemented in terms of
 homogeneous paths.
 
 %% As an aside, in a type theory with a homogeneous equality type
@@ -101,63 +99,63 @@ have the property that some of the outer structure of |A| and |B| is the
 same, and the important part of α happens inside this outer structure.
 A typical example is a heterogeneous equality 
 \begin{code}
-HEq  (Vec Nat (n + m))
-     (Vec Nat (m + n))
-     (ap (Vec Nat) (+-comm m n))
-     v1 v2
+HEq  (Vec Nat (n + m)) (Vec Nat (m + n))
+     (ap (Vec Nat) (+-comm m n)) v1 v2
 \end{code}
-In this case, both |A| and |B| have the form |Vec Nat -|, and the reason
-why the two types are equal is commutativity of addition applied inside
-the context |Vec Nat -|.  Here, we represented this as a heterogeneous
-equality using congruence (|ap|) to apply |Vec Nat| to both sides of the
-proof of commutativity of addition, constructing a path in the universe.
+where |v1 : Vec Nat (n + m)| and |v2 : Vec Nat (m + n)|.  In this case,
+both |A| and |B| have the form |Vec Nat -|, and the reason why the two
+types are equal is essentially commutativity of addition---but we need
+to use use |ap|, which is congruence of equality, to apply |Vec Nat| to
+both sides of the commutativity equality.
 
-However, we will find it convenient to think in terms of a
+Heterogeneous equalities of this form can be simplified using a
 \emph{factored} hetereogeneous equality type, which separates a context
 (like |Vec Nat -|) from an equality on the insides of the context.  We
 call this a ``path over a path'' type, and it can be defined as an
 inductive family as follows:
-\begin{code}
-data PathOverAPath  {A : Type} (C : A → Type) (a1 : A) : 
-               (a2 : A) (α : Path a1 a2)
-               (c1 : C a1) (c2 : C a2) → Type where
-  idOver : {c1 : C a1} → PathOverAPath C a1 a1 id c1 c1
-\end{code}
-That is, given a type |A| and two points |a1,a2| connected by a path
-|α|, along with a dependent type |C : A → Type|, this type relates an
-element of |C a1| to an element of |C a2|.  The constructor |idOver|
-represents \emph{reflexivity over reflexivity}, and says that any
-reflexive equation where α is also reflexivity holds.  
-
-The example above would be rendered as 
-\begin{code}
-PathOverAPath (Vec Nat) (n+m) (m+n) (+-comm m n) v1 v2
-\end{code}
-The context |C| is |Vec Nat|, which is morally applied to |n+m| to get
-the type of |v1|, to |m+n| to get the type of |v2|, and to
-|+-comm m n| to get the proof that the two types are equal.  
-
-Using implicit arguments (the path α usually provides enough information
-to infer its endpoints) and constructor overloading (Agda can infer
-whether |id| is constructing a path or a path-over-a-path, though we
-will sometimes write |idOver| for clarity), we can shorten this
-definition to
 \begin{code}
 data PathOver  {A : Type} (C : A → Type) {a1 : A} : 
                {a2 : A} (α : Path a1 a2)
                (c1 : C a1) (c2 : C a2) → Type where
   id : {c1 : C a1} → PathOver C id c1 c1
 \end{code}
-The example becomes a concise
+%% data PathOverAPath  {A : Type} (C : A → Type) (a1 : A) : 
+%%                (a2 : A) (α : Path a1 a2)
+%%                (c1 : C a1) (c2 : C a2) → Type where
+%%   idOver : {c1 : C a1} → PathOverAPath C a1 a1 id c1 c1
+That is, given a type |A| and two points |a1,a2| connected by a path
+|α|, along with a dependent type |C : A → Type|, this type relates an
+element of |C a1| to an element of |C a2|.  Because they can typically
+be inferred, we make |a1| and |a2| implicit arguments. The constructor
+|id| (note the use of constructor overloading) represents
+\emph{reflexivity over reflexivity}, and says that any reflexive
+equation where α is also reflexivity holds.  Using path-over, the
+above example is written
 \begin{code}
 PathOver (Vec Nat) (+-comm m n) v1 v2
 \end{code}
+The context |C| is |Vec Nat|, which is morally applied to |n+m| to get
+the type of |v1|, to |m+n| to get the type of |v2|, and to |+-comm m n|
+to get the proof that the two types are equal.
 
-Because types are elements of a universe, the above heterogeneous
-equality is the special case of |PathOver (λ (X : Type) → X) α a1 a2|
-(though this goes up a universe size level).  Conversely, |PathOver| can
-be expressed in terms of heterogeneous equality using |ap| as above.
-Indeed, the following types are equivalent:
+%% Using implicit arguments (the path α usually provides enough information
+%% to infer its endpoints) and constructor overloading (Agda can infer
+%% whether |id| is constructing a path or a path-over-a-path, though we
+%% will sometimes write |idOver| for clarity), we can shorten this
+%% definition to
+%% \begin{code}
+%% data PathOver  {A : Type} (C : A → Type) {a1 : A} : 
+%%                {a2 : A} (α : Path a1 a2)
+%%                (c1 : C a1) (c2 : C a2) → Type where
+%%   id : {c1 : C a1} → PathOver C id c1 c1
+%% \end{code}
+%% The example becomes a concise
+
+Because types are elements of a universe, |HEq A B α a1 a2| is the
+special case of |PathOver (λ (X : Type) → X) α a1 a2| (though this goes
+up a universe size level).  Conversely, |PathOver| can be expressed in
+terms of heterogeneous equality using |ap| as above.  Indeed, the
+following types are equivalent:
 
 \begin{itemize}
 \item The above inductive family definition of |PathOver C {a1}{a2} α c1 c2|
