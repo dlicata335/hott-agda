@@ -5,26 +5,26 @@
 
 The equality type that we write as |Path{A} a0 a1| is sometimes called
 \emph{homogeneous equality}, because it relates two elements |a0| and
-|a1| of the same type |A| (where ``same'' here means
-definitional/judgemental equality).  McBride~\citep{mcbride00thesis}
-introduced a \emph{heterogeneous equality}, which is an equality type
-|a:A = b:B| that relates two elements |a:A| and |b:B| which may
-have two different types, though it is inhabited only when both
-the two types and the two terms are judgementally equal.  In McBride's
-work, heterogeneous equality is used to elide the reasoning why
-equations type check from the equations themselves, which simplifies a
-derivation of dependent pattern matching from eliminators.  However,
-McBride's heterogeneous equality is logically equivalent to a
-homogeneous equality type satisfying uniqueness of identity
-proofs~\citep{mcbride00thesis}, which is undesireable in homotopy type
-theory, because we do not want all types to be sets.  
+|a1| whose types are definitionally/judgementally equaly.
+McBride~\citep{mcbride00thesis} introduced a \emph{heterogeneous
+  equality}, which is an equality type |a:A = b:B| that relates two
+elements |a:A| and |b:B| which may have two judgementally distinct
+types, though it is inhabited only when both the two types and the two
+terms are judgementally equal.  In McBride's work, heterogeneous
+equality is used to elide the reasoning why equations type check from
+the equations themselves, which simplifies a derivation of dependent
+pattern matching from eliminators.  However, McBride's heterogeneous
+equality is logically equivalent to a homogeneous equality type
+satisfying uniqueness of identity proofs~\citep{mcbride00thesis}, which
+is undesireable in homotopy type theory, because not all types should be
+sets.
 
 This paper provides an investigation of how to manage the reasons why
 equations type check is a setting where these reasons are proof-relevant.
 While we cannot ignore the reason why an equation type checks entirely,
 we can still keep the evidence ``off to the side'', rather than
 embedding it in the equation itself.  Specifically, we define a type
-|HEq A B α a b| where |α : Path{Type} A B| and |a:A, b:B|.  This
+|HEq A B α a b| where |α : Path{Type} A B| and |a:A| and |b:B|.  This
 heterogeneous equality relates two elements of two different types
 \emph{along a specific equality α between the types}.  The introduction
 form is a reflexivity constructor |hid : HEq A A id a a|, and the
@@ -48,16 +48,16 @@ However, this notion of heterogeneous equality need not be taken as a
 primitive, because it can be reduced to the homogeneous equality type in
 several equivalent ways.  Writing |coe : Path{Type} A B → A → B| for the
 function (defined by path induction, as |transport (λ X → X)|) that
-coerces along a homogeneous equality, the following types are
-equivalent:
-\begin{itemize}
+coerces along a homogeneous equality, the following types are equivalent
+(for the definition of equivalence in \citep{uf13hott-book}):
+\begin{enumerate}
 \item The inductive family |HEq A B α a b| defined above.
 
 \item |Path{B} (coe α a) b| -- send |a| over to |B| using the
   type equality α, and compare the result with |b|.
 
 \item |Path{A} a (coe (! α) b)| -- send |b| over to |A| using
-  the type equality α (inverted), and compare the result with |a|.
+  the equality α (inverted), and compare the result with |a|.
 
 \item Define heterogeneous equality by path induction (eliminating
   into the universe): when the type equality α is |id|, a heterogeneous
@@ -66,9 +66,9 @@ equivalent:
 \begin{code}
 HEq' A .A id a b = Path{A} a b
 \end{code}
-\end{itemize}
+\end{enumerate}
 
-The equivalences between these types are all immediate by by path
+The equivalences between these types are all immediate by path
 induction or |HEq-elim|: keeping the evidence that the equation type
 checks ``off to the side'' is equivalent to embedding it in the equation
 on either side, and to the more symmetric fourth option.  What we will
@@ -106,7 +106,7 @@ where |v1 : Vec Nat (n + m)| and |v2 : Vec Nat (m + n)|.  In this case,
 both |A| and |B| have the form |Vec Nat -|, and the reason why the two
 types are equal is essentially commutativity of addition---but we need
 to use use |ap|, which is congruence of equality, to apply |Vec Nat| to
-both sides of the commutativity equality.
+both sides of the commutativity proof.
 
 Heterogeneous equalities of this form can be simplified using a
 \emph{factored} hetereogeneous equality type, which separates a context
@@ -200,9 +200,7 @@ down to, or \emph{lays over}, |α|:
          {|pair α γ|} (b2);
   \end{tikzpicture}
 \end{center}
-
-(The path pairing |pair α γ| will be made precise when we discuss |Σ|
-types below.)
+\noindent The path pairing |pair α γ| will be made precise below.
 
 \subsection{Implementation}
 
@@ -226,22 +224,26 @@ family elimination rule
 %%   → C a2 α c2 γ 
 %% PathOver-elim A {a1}{c1} C b .a1 id .M1 id = b
 %% \end{code}
-not only holds, but satisfies its β-reduction rule definitionally.
-Therefore, assuming that everything in Agda could be translated to
-eliminators (following~\citep{jesper}), the eliminator for path-over
-could then be replaced by statements about homogeneous paths.
+is not only definable, but satisfies the accompanying β-reduction rule
+holds definitionally.  Therefore, assuming that everything in Agda could
+be translated to eliminators (see~\citep{cockx+14withoutk}), the
+eliminator for path-over could then be implemented in terms of
+homogeneous paths, before interpreting in a model.  
 
 \subsection{Library}
 
 Next, we give a sample of some of the facts about path-overs that are
 commonly used.  For the paper, we sometimes elide universal quantifiers,
 with the convention that variables are quantified with the most general
-types; the proofs proofs are in the companion code.  We write ≃ for type
+types. The proofs are in the companion code.  We write ≃ for type
 equivalence.
 
-As a first example, we can compose two path-overs, yielding a path over
-the composite (we write |·o| for composition of path-overs, and |·| for
-composition of homogeneous paths in diagrammatic order):
+Reflexivity-over-reflexivity is a constructor, and we can also invert
+and compose path-overs, which lay over the corresponding operation
+applied to the path in the base.  For example, we can compose two
+path-overs, yielding a path over the composite (we write |·o| for
+composition of path-overs, and |·| for composition of homogeneous paths
+in diagrammatic order):
 
 \begin{code}
   _·o_ :  {A : Type} {C : A → Type} {a1 a2 a3 : A}
@@ -254,12 +256,12 @@ composition of homogeneous paths in diagrammatic order):
 The proof is immediate by path-over induction, which we notate in Agda
 by pattern-matching |γ1| and |γ2| as reflexivity.  
 
-Next, we can invert a path-over, yielding a path over the inverse in the
-base :
-\begin{code}
-  !o : PathOver C α c1 c2 → PathOver C (! δ) c2 c1
-  !o id = id
-\end{code}
+%% Next, we can invert a path-over, yielding a path over the inverse in the
+%% base :
+%% \begin{code}
+%%   !o : PathOver C α c1 c2 → PathOver C (! δ) c2 c1
+%%   !o id = id
+%% \end{code}
 
 Applying a dependent function to a homogeneous path gives a path over
 it:
@@ -285,15 +287,15 @@ In fact, this is an equivalence, with inverse given by |ap fst| and
 |apdo snd|---these three behave like introduction and elimination rules
 for paths in a Σ-type.
 
-We have the equivalence mentioned above between |PathOver| (defined as
-an inductive family) and a homogeneous equation using |transport|:
+We have the equivalence between |PathOver| and a homogeneous equation
+using |transport|:
 \begin{code}
 hom-to-over/left-eqv : {A : Type} {C : A → Type}
   → ∀ {a1 a2} {α : Path a1 a2} → ∀ {c1 c2} 
   → (Path (transport C α a1) a2) ≃ (PathOver C α c1 c2)
 \end{code}
-In the special case where |α| is |id|, we have that paths over
-reflexivity are the same as paths:
+In the special case where |α| is |id|, we have that this gives that
+paths over reflexivity are the same as paths:
 \begin{code}
 hom-to-over-eqv : {A : Type} {C : A → Type}
             → ∀ {a1} → ∀ {c1 c2 : C a1} 
@@ -359,7 +361,7 @@ For the circle type |S¹|, with constructors |base : S¹| and |loop :
 Path{S¹} base base|, the elimination rule is
 \begin{code}
 S¹-elimo :  (C : S¹ → Type) (b : C base) (l : PathOver C loop c c) 
-              → (x : S¹) → C x
+            (x : S¹) → C x
 S¹-elimo C b l base ≡ b
 βloop/elimo : Path (apdo (S¹-elimo C b l) loop) l
 \end{code}
@@ -384,7 +386,7 @@ decode : (x : S¹) → Cover x → Path base x
 where |Cover|, defined by circle induction, is the universal cover
 fibration.  In this case, we apply circle elimination with |C x = Cover
 x → Path base x|.  In the case for |base|, we supply a function |loop^ :
-Int → Path base base| (which type checks because |Cover base| is |Int|).
+Int → Path base base| (by definition |Cover base| is |Int|).
 In the case for |loop|, |PathOverΠ-eqv| is used to make progress on the
 goal, reducing it to
 \begin{code}

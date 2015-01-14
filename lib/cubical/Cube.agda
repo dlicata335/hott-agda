@@ -484,59 +484,66 @@ module lib.cubical.Cube where
 
   -- ap to inner argument first
   -- could do it in the other order, too
-  bifunctor-square1 : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
+  apdo-ap : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
                      (p : a == a') (q : b == b') 
                    → Square (ap (λ x → f x b) p)
                              (ap (λ z → f a z) q)
                              (ap (λ z → f a' z) q)
                              (ap (λ x → f x b') p)
-  bifunctor-square1 f p q = PathOver=.out-PathOver-= (apdo (λ y → ap (λ x → f x y) p) q)
+  apdo-ap f p q = PathOver=.out-PathOver-= (apdo (λ y → ap (λ x → f x y) p) q)
 
-  bifunctor-square2 : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
+  apdo-ap' : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
                      (p : a == a') (q : b == b') 
                    → Square (ap (λ y → f a y) q) (ap (λ z → f z b) p) (ap (λ z → f z b') p) (ap (λ y → f a' y) q) 
-  bifunctor-square2 f p q = PathOver=.out-PathOver-= (apdo (λ x → ap (λ y → f x y) q) p)
+  apdo-ap' f p q = PathOver=.out-PathOver-= (apdo (λ x → ap (λ y → f x y) q) p)
 
-  ap-bifunctor-id-1 : {A B C : Type} (f : A → B → C) {a : A} {b b' : B}
+  ap-id-fst : {A B C : Type} (f : A → B → C) {a : A} {b b' : B}
                       (q : b == b') 
                     → ap (uncurry f) (pair×≃ id q) == ap (f a) q
-  ap-bifunctor-id-1 f id = id
+  ap-id-fst f id = id
 
-  ap-bifunctor-id-2 : {A B C : Type} (f : A → B → C) {a a' : A} {b : B}
+  ap-id-snd : {A B C : Type} (f : A → B → C) {a a' : A} {b : B}
                       (p : a == a') 
                     → ap (uncurry f) (pair×≃ p id) == ap (\ x -> f x b) p
-  ap-bifunctor-id-2 f id = id
+  ap-id-snd f id = id
 
-  bifunctor-cube1 : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
-                   (p : a == a') (q : b == b') 
-                   → Cube (ap-square (\ {(x , y) → f x y}) (pair-square (vrefl-square {p = p}) (hrefl-square {p = q})))
-                           (square-symmetry (bifunctor-square1 f p q))
-                           (horiz-degen-square (ap-bifunctor-id-1 f q))
-                           (horiz-degen-square (ap-bifunctor-id-2 f p))
-                           (horiz-degen-square (ap-bifunctor-id-2 f p))
-                           (horiz-degen-square (ap-bifunctor-id-1 f q))
-  bifunctor-cube1 f id id = id
+  apdo-ap-o : {A B C D : Type} (g : C → D) (f : A → B → C) {a a' : A} {b b' : B}
+              (p : a == a') (q : b == b') 
+            → Cube (apdo-ap (\ x y → g (f x y)) p q)
+                   (ap-square g (apdo-ap f p q))
+                   (horiz-degen-square (ap-o _ _ p)) (horiz-degen-square (ap-o _ _ q)) (horiz-degen-square (ap-o _ _ q)) (horiz-degen-square (ap-o _ _ p))
+  apdo-ap-o f g id id = id
 
-  -- should be a symmetry of the above
-  bifunctor-cube1' : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
+  apdo-ap-cube-hv : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
                    (p : a == a') (q : b == b') 
                    → Cube (ap-square (uncurry f) (pair-square (hrefl-square {p = p}) (vrefl-square {p = q})))
-                           (bifunctor-square1 f p q) 
-                           (horiz-degen-square (ap-bifunctor-id-2 f p)) 
-                           (horiz-degen-square (ap-bifunctor-id-1 f q)) 
-                           (horiz-degen-square (ap-bifunctor-id-1 f q))
-                           (horiz-degen-square (ap-bifunctor-id-2 f p)) 
-  bifunctor-cube1' f id id = id
+                           (apdo-ap f p q) 
+                           (horiz-degen-square (ap-id-snd f p)) 
+                           (horiz-degen-square (ap-id-fst f q)) 
+                           (horiz-degen-square (ap-id-fst f q))
+                           (horiz-degen-square (ap-id-snd f p)) 
+  apdo-ap-cube-hv f id id = id
 
+  -- should be a symmetry of the above
+  apdo-ap-cube-vh : {A B C : Type} (f : A → B → C) {a a' : A} {b b' : B}
+                   (p : a == a') (q : b == b') 
+                   → Cube (ap-square (\ {(x , y) → f x y}) (pair-square (vrefl-square {p = p}) (hrefl-square {p = q})))
+                           (square-symmetry (apdo-ap f p q))
+                           (horiz-degen-square (ap-id-fst f q))
+                           (horiz-degen-square (ap-id-snd f p))
+                           (horiz-degen-square (ap-id-snd f p))
+                           (horiz-degen-square (ap-id-fst f q))
+  apdo-ap-cube-vh f id id = id
 
-  bifunctor-square2d : {A C : Type} {B : A → Type} (f : (x : A) → B x → C) {a a' : A} {b1 : (x : A) → B x} {b2 : (x : A) → B x}
+  apdo-ap'd : {A C : Type} {B : A → Type} (f : (x : A) → B x → C) {a a' : A} {b1 : (x : A) → B x} {b2 : (x : A) → B x}
                      (p : a == a') (q : b1 == b2) 
                    → Square (ap (λ y → f a (y a)) q)
                              (ap (λ z → f z (b1 z)) p)
                              (ap (λ z → f z (b2 z)) p)
                              (ap (λ y → f a' (y a')) q)
-  bifunctor-square2d f p q = PathOver=.out-PathOver-= (apdo (λ x → ap (λ y → f x (y x)) q) p)
+  apdo-ap'd f p q = PathOver=.out-PathOver-= (apdo (λ x → ap (λ y → f x (y x)) q) p)
 
+{-
   bifunctor-on-cube : {A : Type} {B : A → Type} {C : Type}
                       (f : (x : A) → B x → C)
                       {a00 a01 a10 a11 : A} 
@@ -548,13 +555,14 @@ module lib.cubical.Cube where
                       {b0 : (x : A) → B x}
                       {b1 : (x : A) → B x}
                       (pb : b0 == b1)
-                    → Cube (bifunctor-square2d f p0- pb)
-                            (bifunctor-square2d f p1- pb)
-                            (bifunctor-square2d f p-0 pb)
+                    → Cube (apdo-ap'd f p0- pb)
+                            (apdo-ap'd f p1- pb)
+                            (apdo-ap'd f p-0 pb)
                             (ap-square (λ z → f z (b0 z)) s)
                             (ap-square (λ z → f z (b1 z)) s)
-                            (bifunctor-square2d f p-1 pb) 
+                            (apdo-ap'd f p-1 pb) 
   bifunctor-on-cube f s pb = SquareOver=ND.out-SquareOver-= (apdo-square (λ x → ap (λ y → f x (y x)) pb) s)
+-}
 
   fill-cube-left : 
       {A : Type} 

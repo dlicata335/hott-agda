@@ -10,7 +10,7 @@ to generalize from the above example to
 PathOver (\ x → Path (f x) (g x)) α β1 β2 
 \end{code}
 where for this to be well-typed, we need |f g : A → B| and |α : Path{A}
-a1 a2| and |β1 : Path (f a1) (g a1)| |β2 : Path (f a2) (g a2)|.  (In
+a1 a2| and |β1 : Path (f a1) (g a1)| and |β2 : Path (f a2) (g a2)|.  (In
 general |B| might depend on |A|, but the simply-typed case is a helpful
 to consider.)  The key idea is that this data naturally fits into a
 \emph{square} as follows:
@@ -37,18 +37,16 @@ Thus, to reduce the path-over, we would like a type of squares.
 
 \subsection{Definition}
 
-There are several equivalent definitions of squares.  One is to define
-the type of squares with sides |left|, |right|, |top|, |bottom| to be a
-path-over in a path type:
+There are several equivalent definitions of a type |Square left top
+bottom right|.  One is as path-over in a path type:
 \begin{code}
 PathOver (\ (x:A,y:A) → Pair x y) (pair= top bottom) left right
 \end{code}
-Another is to define a square to be a disc between composities: a square
-with sides |left| |right| |top| and |bottom| and be represented as a
-path-between-paths |Path (left · bottom) (top · right)| (or,
-equivalently, any other arragement of this equation, such as |Path bot
-(! left · top · right)|).  We can also define a new inductive family
-(dependent on four points and four lines) representing squares:
+Another is as a disc between composities---as a path-between-paths |Path
+(left · bottom) (top · right)|---or, equivalently, any other arragement
+of this equation, such as |Path bot (! left · top · right)|.  We can
+also define a new inductive family (dependent on four points, which we
+make implicit arguments, and four lines) representing squares:
 \begin{code}
 data Square {A : Type} {a00 : A} : {a01 a10 a11 : A}
       : Path a00 a01 → Path a00 a10 → 
@@ -57,7 +55,7 @@ data Square {A : Type} {a00 : A} : {a01 a10 a11 : A}
 \end{code}
 
 All of these types are equivalent:
-\begin{itemize}
+\begin{enumerate}
 \item The inductive family |Square left top bottom right|
 \item |Path (left · bottom) (top · right)|
 \item |PathOver (\ (x:A,y:A) → Path x y) (pair= top bottom) left right|
@@ -65,10 +63,10 @@ All of these types are equivalent:
 \begin{code}
 Square left id id right = Path left right
 \end{code}
-\end{itemize}
-Moreover, the second definition satisfies the inductive family
-elimination rule, including a judgemental β rule, so we can again use
-the inductive family definition but think of it as a derived notion
+\end{enumerate}
+Moreover, for the second definition, the inductive family elimination
+rule and a judgemental β rule are definable, so we can again use the
+inductive family definition but think of it as a derived notion
 semantically.
 
 \subsection{Library}
@@ -295,9 +293,9 @@ square-symmetry-eqv : Square l t b r ≃ Square t l r b
 %% connection id = id
 %% \end{code}
 
-Another operation we will need is \emph{Kan filling}~\citep{kan1950s}.
-For squares, this says that given any three sides of a cube, we can find
-a fourth that fits in a square.  For example: 
+Another operation we will need is \emph{Kan
+  filling}~\citep{kan55cubical}.  For squares, this says that given any
+three sides, we can find a fourth that fits in a square.  For example:
 \begin{code}
 fill-right :  {A : Type} {a00 a01 a10 a11 : A}
   (l : Path a00 a01) (t : Path a00 a10) (b : Path a01 a11)
@@ -332,27 +330,26 @@ fill-right id id id = (id , id)
 \end{center}
 The filling is defined by repeated path induction.  Though both the
 groupoid structure (identity, composition, inverses, the groupoid laws)
-and the Kan filling result from path induction, we can also construct
-them directly from each other.  For example, to derive the Kan filler,
-we can define |r| to be |! t · l · b|, and then, as a disc between
-composites, the required square is a |Path (l · b) (t · (! t · l · b))|
-using the groupoid laws.  Conversely, from the Kan filling we could
-define |p · q| as |fst (fill p id q)|, and then |snd (fill p id q)| is
-used to show the groupoid laws.  For historical reasons, in the Agda
-library, we have composition defined directly by path induction, rather
-than as a filler, but we nonetheless have a path
+and the Kan filling result from path induction, it is instructive to
+construct them directly from each other.  For example, to derive the Kan
+filler, we can define |r| to be |! t · l · b|, and then, as a disc
+between composites, the required square is a |Path (l · b) (t · (! t · l
+· b))| using the groupoid laws.  Conversely, from the Kan filling we
+could define |p · q| as |fst (fill p id q)|, and then |snd (fill p id
+q)| is used to show the groupoid laws.  For historical reasons, in the
+Agda library, we have composition defined directly by path induction,
+rather than as a filler, but we nonetheless have a path
 \begin{code}
-comp-fill : {A : Type} {x y z : A} (p : Path x y) (q : Path y z)
-          → Path (p · q) (fst (fill-right p id q))
+·-fill : Path (p · q) (fst (fill-right p id q))
 \end{code}
 
 \subsection{Example: Circle induction, continued}
 
-Returning to the example from the previous section, we were looking for a
+Returning to the example from the previous section, we need a
 \begin{code}
 PathOver (\ a → Path base a) loop (loop^ x) (loop^ (x + 1))
 \end{code}
-By |out-PathOver-=-eqv|, this is the same as a square
+By |out-PathOver-=-eqv|, this is the same as a 
 \begin{code}
 Square  (loop^ x) (ap (\ _ → base) loop)
         (ap (\ a → a) loop) (loop^ (x + 1))
@@ -362,7 +359,7 @@ After reducing the |ap|'s using |whisker-square|, we need a
 Square (loop^ x) id loop (loop^ (x + 1))
 \end{code}
 
-The function |loop^| is defined so that |loop^(x+1) ≡ loop^x · loop|, so we need a square
+The function |loop^| is defined so that |loop^(x+1) ≡ loop^x · loop|, so we need a 
 \begin{code}
 Square (loop^ x) id loop (loop^ x · loop)
 \end{code}
@@ -376,19 +373,20 @@ it will be useful to have a type of squares in a fibration over a square
 in the base.  As an inductive family, this is defined as:
 \begin{code}
 data SquareOver {A : Type} (B : A → Type) {a00 : A} 
-  {b00 : B a00} : {a01 a10 a11 : A} 
-  {αl : Path a00 a01} {αt : Path a00 a10}
-  {αb : Path a01 a11} {αr : Path a10 a11}
-  (s  : Square αl αt αb αr)
-  {b01 : B a01} {b10 : B a10} {b11 : B a11}  
-  (βl : PathOver B αl b00 b01) (βt : PathOver B αt b00 b10)
-  (βb : PathOver B αb b01 b11) (βr : PathOver B αr b10 b11)
-  → Type where
-    id : SquareOver B id id id id id
+ {b00 : B a00} : {a01 a10 a11 : A} 
+ {αl : Path a00 a01} {αt : Path a00 a10}
+ {αb : Path a01 a11} {αr : Path a10 a11}
+ (s  : Square αl αt αb αr)
+ {b01 : B a01} {b10 : B a10} {b11 : B a11}  
+ (βl : PathOver B αl b00 b01)(βt : PathOver B αt b00 b10)
+ (βb : PathOver B αb b01 b11)(βr : PathOver B αr b10 b11)
+ → Type where
+   id : SquareOver B id id id id id
 \end{code}
-A square-over |SquareOver B f βl βt βb βr| relates four path-overs, each
-of which lays over one side of the square |s|; visually, an element of
-this type is the inside of the top square in the following diagram:
+A |SquareOver B f βl βt βb βr| relates four path-overs, each of which
+lays over one side of the square |s| (the boundary of |s| and the points
+in |B| are implicit arguments). Visually, an element of this type is the
+inside of the top square in the following diagram:
 \begin{center}
 \begin{tikzpicture}
   \coordinate (A) at (0,3);
@@ -421,7 +419,7 @@ this type is the inside of the top square in the following diagram:
 To avoid introducing a new inductive family, we could define square-over
 by square induction, saying that a square over |id| is just a
 homogeneous square.  Alternatively, it can be defined as a higher disc
-directly, using a bunch of |transport|s.  
+directly, using several |transport|s.
 
 \subsection{Example: Torus}
 
@@ -441,14 +439,13 @@ T-rec :  {C : Type} (a' : C) (p' q' : Path a a)
          (f' : Square p' q' q' p')
          → T → C
 \end{code}
-
-The full elimination rule is analogous, but the image of each
+The dependent elimination rule is analogous, but the image of each
 constructor lays over the constructor itself:
 \begin{code}
 T-elim : (C : T → Type) (a' : C a) 
          (p' : PathOver C p a' a') (q' : PathOver C q a' a')
          (f' : SquareOver C f p' q' q' p') 
-         → (x : T) → C x
+         (x : T) → C x
 \end{code}
 
 For constrast, writing out the type of |T-elim| using homogeneous paths
@@ -471,7 +468,7 @@ to prove |(x : T) → Path (c2t (t2c x)) x|.  This means that the
 induction formula |C| will itself be a path type, so for the |f'| goal,
 we will need to give a |SquareOver| in a path type.  Just as a path-over
 in a path type is a square, a |SquareOver| in a path type is a
-3-dimensional cube, so we need one more dimension to our library.
+3-dimensional cube, so we need one more dimension.
 
 
 

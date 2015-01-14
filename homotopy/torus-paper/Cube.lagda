@@ -3,6 +3,8 @@
 
 \section{Cubes}
 
+\label{sec:cube}
+
 Just as we had a type of squares dependent on four points and four
 lines, which make up the boundary of a square, we have a type of cubes
 dependent on eight points, twelve lines, and six faces: 
@@ -158,21 +160,13 @@ versa.  For example, a square-over in a path type is equivalent to a
 cube (we will only need logical equivalence):
 
 \begin{code}
-in-SquareOver-= :
+SquareOver-= :
   Cube  (out-PathOver-= q0-) (out-PathOver-= q1-)
         (out-PathOver-= q-0) (ap-square f fa)
         (ap-square g fa) (out-PathOver-= q-1)
-  →  SquareOver (\ x -> Path (f x) (g x)) fa q0- q-0 q-1 q1-
-
-out-SquareOver-= :
-  SquareOver (\ x -> Path (f x) (g x)) fa q0- q-0 q-1 q1-
-  → Cube  (out-PathOver-= q0-) (out-PathOver-= q1-)
-          (out-PathOver-= q-0) (ap-square f fa)
-          (ap-square g fa) (out-PathOver-= q-1)
+  ↔  SquareOver (\ x -> Path (f x) (g x)) fa q0- q-0 q-1 q1-
 \end{code}
-
 Similarly, a path-over in a square type can be given by a cube:
-
 \begin{code}
 in-PathOver-Square : 
   Cube  f1 f2 
@@ -185,17 +179,17 @@ in-PathOver-Square :
 \end{code}
 
 A typical use of cubes is to ``reduce'' squares up to reduction on their
-sides.  For example, just as there is a path between |ap (g o f) p| and
-|ap g (ap f p)|, we would like |ap-square (g o f) s| to be equal to
+boundaries.  For example, just as there is a path between |ap (g o f) p|
+and |ap g (ap f p)|, we would like |ap-square (g o f) s| to be equal to
 |ap-square g (ap-square f s)|.  However, the sides of these two squares
-differ by the corresponding reductions on paths.  Thus, we can phrase
-this reduction as a cube, which equates these two squares along the
-reductions between their sides:
+differ by the reductions on paths.  Thus, we can phrase this reduction
+as a cube, which equates these two squares along the reductions between
+their sides:
 \begin{code}
 ap-o : Square (ap (g o f) p) id id (ap g (ap f p))
 
-ap-square-o :
+ap-square-o : (s : Square l t b r) → 
   Cube  (ap-square (g o f) s) (ap-square g (ap-square f s))
-        (ap-o g f p0-) (ap-o g f p-0) (ap-o g f p-1) (ap-o g f p1-)
+        (ap-o g f l) (ap-o g f t) (ap-o g f b) (ap-o g f r)
 \end{code}
 

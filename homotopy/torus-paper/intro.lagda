@@ -18,11 +18,11 @@ Agda~\citep{norell07thesis} and Coq~\citep{inria06coqmanual} proof
 assistants.  These include calculations of some homotopy groups of
 spheres~\citep{ls13pi1s1,lb13pinsn,uf13hott-book}; constructions of the
 Hopf fibration~\citep{uf13hott-book}, of covering
-spaces~\citep{favonia-types}, and of Eilinberg-MacLane
+spaces~\citep{favonia14covering}, and of Eilinberg-MacLane
 spaces~\citep{lf14emspace}; and proofs of the Freudenthal suspension
 theorem~\citep{uf13hott-book}, the Blakers-Massey theorem, the van
 Kampen theorem~\citep{uf13hott-book}, and the Mayer-Vietoris
-theorem~\citep{cavallo}.  Ideas from synthetic homotopy theory have also
+theorem~\citep{cavallo14mayervietoris}.  Ideas from synthetic homotopy theory have also
 been applied to represent the patch theories that arise in version
 control systems using higher inductive types~\citep{amlh14patch}.
 
@@ -62,6 +62,7 @@ form a cylinder, and then glue the two ends of the cylinder together):
   \coordinate (br) at (1,0);
   \coordinate (ur) at (1,1);
 
+  \node at (0.5,0.5) {|f|};
   \draw[->] (ul) to node[above] {|p|} (ur);
   \draw[->] (bl) to node[below] {|p|} (br);
   \draw[->] (ul) to node[left] {|q|} (bl);
@@ -102,17 +103,19 @@ several additional formalizations or programs: The second author used it
 to formalize a ``three-by-three'' lemma about pushouts that is used in
 the construction of the Hopf fibration.\footnote{URL} The first author
 used it to resolve a question~\citep{amlh14patch} about a patch theory
-represented as a higher inductive
-type.\footnote{See \url{programming/PatchWithHistories3.agda} in \url{github.com/dlicata335/hott-agda}}
-Cavallo used it to simplify the proof of the Mayer-Vietoris
-theorem~\citep{cavallo}.  In all of these cases, the method simplifies
-constructions that were previously difficult or intractable.
+represented as a higher inductive type.\footnote{See
+  \url{programming/PatchWithHistories3.agda} in
+  \url{github.com/dlicata335/hott-agda}} Cavallo used it to simplify the
+proof of the Mayer-Vietoris theorem~\citep{cavallo14mayervietoris}.  In
+all of these cases, the method simplifies constructions that were
+previously difficult or intractable.
 
-Inspired by the cubical sets model of type
-theory~\citep{coquand+13cubical}, the main idea of the approach is to
-work with \emph{cube types} that generalize the path type |Path a b|.
-For example, in this paper, we will consider a type of squares
-|Square l t b r|, dependent on four lines that fit into a square as follows:
+Inspired by heterogeneous equality~\citep{mcbride00thesis} and the
+cubical sets model of type theory~\citep{coquand+13cubical}, the main
+idea of the approach is to work with \emph{cube types} that generalize
+the path type |Path a b|.  For example, in this paper, we will consider
+a type of squares |Square l t b r|, dependent on four lines that fit
+into a square as follows:
 \begin{center}
 \begin{tikzpicture}
   \coordinate (ul) at (0,1);
@@ -132,17 +135,15 @@ For example, in this paper, we will consider a type of squares
 \end{center}
 For any type |A|, the square type is dependent on four points |a00|
 |a01| |a10| |a11| of type |A| and four paths |l : Path a00 a01| and |r :
-Path a10 a11| and |t : Path a00 a1| |b : Path a01 a11|.  We will also
-consider a type of cubes |Cube left right front top bot back| dependent
-on six squares giving its sides (as well as their boundaries).  Another
-ingredient is to work systematically with ``path over a path'' and
-``square over a square'' types, which represent paths and squares in a
-fibration (dependent type).  These cube types can be seen as
-proof-relevant notions of heterogeneous
-equality~\citep{mcbride00thesis}.
+Path a10 a11| and |t : Path a00 a1| and |b : Path a01 a11|.  We will
+also consider a type of cubes |Cube left right front top bot back|
+dependent on six squares giving its sides and on their boundaries.
+Another ingredient is to work systematically with ``path over a path''
+and higher ``cubve over a cubve'' types, which represent paths and
+squares in a fibration (dependent type).
 
 While our approach fits nicely with work in progress on new cubical type
-theories~\citep{us,altenkirchkaposi14cubical,coquand14variations}, the
+theories~\citep{lb14cubes-oxford,altenkirchkaposi14cubical,coquand14variations}, the
 present paper can be conducted entirely by making appropriate
 definitions in Martin-L\"of type theory with univalence and higher
 inductive types---no additional new axioms are needed.  Higher cubes can
@@ -152,7 +153,7 @@ Moreover, the notions of a ``path-over-a-path'' and a
 ``square-over-a-square'' can be reduced to homogeneous paths.  This
 means that our constructions can be interpreted in the known models of
 homotopy type theory with univalence and higher inductive
-types (see \citep{voevodsky+12simpluniv,shulman13inversediag,lumsdaine+13hits})
+types (see \citep{voevodsky+12simpluniv,shulman13inversediag,lumsdaine+13hits}).
 While cubes can be reduced away in this way, for engineering reasons, we
 have found it convenient in Agda to use new inductive families to
 represent cube types; this allows us to make more effective use of
