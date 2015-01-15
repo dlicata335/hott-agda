@@ -184,8 +184,8 @@ ap-square-o : (s : Square l t b r) →
 
 \subsection{Example: Torus reduction rules}
 
-The propositional reduction rules for |T-rec| can be phrased as squares
-and cubes.  
+The propositional reduction rules for torus recursion |T-rec| can be
+phrased as squares and cubes.
 \begin{code}
 βp/rec : Square (ap (T-rec a' p' q' f') p) id id p'
 βq/rec : Square (ap (T-rec a' p' q' f') q) id id q'

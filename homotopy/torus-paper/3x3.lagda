@@ -172,7 +172,7 @@ PathOver (λ y → Path (inl◾∙ (f₁• y)) (inr◾∙ (f₃• y)))
   (push₂• x) (push◾• (inl₂∙ (f₂₁ x))) (push◾∙ (inr₂∙ (f₂₃ x)))
 \end{code}
 %
-Using |out-PathOver-=-eqv| we get a square of type
+Using |PathOver-=-eqv| we get a square of type
 %
 \begin{code}
 Square (push◾• (inl₂∙ (f₂₁ x)))

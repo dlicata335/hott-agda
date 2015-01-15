@@ -4,7 +4,7 @@
 \section{Squares}
 \label{sec:square}
 
-To understand the rule for path-over in a path fibration, it is helpful
+To understand the rule for path-over in a path type, it is helpful
 to generalize from the above example to
 \begin{code}
 PathOver (\ x → Path (f x) (g x)) α β1 β2 
@@ -58,8 +58,7 @@ definition is as path-over in a path type:
 PathOver (\ (x:A,y:A) → Pair x y) (pair= t b) l r
 \end{code}
 Another is as a disc (path-between-paths) between composities |Path (l ·
-b) (t · r)|.\footnote{We write |p · q| for composition of paths in
-  diagramatic order.}  We can also define a new inductive family
+b) (t · r)|.  We can also define a new inductive family
 dependent on four points, which we make implicit arguments, and four
 lines, representing squares:
 \begin{code}
@@ -80,25 +79,30 @@ Square l id id r = Path l r
 \end{code}
 \end{enumerate}
 The second definition again satisfies the inductive family elimination
-rule with a judgemental β rule, so again use the inductive family but
-think of it as a derived notion semantically.
+rule with a judgemental β rule, so in Agda we use the inductive family
+for convenience but think of it as a derived notion semantically.
 
 \subsection{Library}
 
 Next, we develop some operations on squares.  We have the equivalence
-with discs and the equivalence between path-overs and certain squares:
+with discs, and the equivalence between path-overs in a path type and
+certain squares:
 
 \begin{code}
 square-disc-eqv : Square l t b r ≃ Path (l · b) (t · r)
 \end{code}
 
 \begin{code}
-out-PathOver-=-eqv : {A B : Type} {f g : A → B}
+PathOver-=-eqv : {A B : Type} {f g : A → B}
   {a1 a2 : A} {α : Path a1 a2}
   {β1 : Path (f a1) (g a1)} {β2 : Path (f a2) (g a2)}
   → (PathOver (\ x → Path (f x) (g x)) α β1 β2)
   ≃ (Square β1 (ap f α) (ap g α) β2)
 \end{code}
+This equivalence includes map into and out of a path-over in a path
+type, which we will write as |in-PathOver=| and |out-PathOver=|; 
+we use the
+|in-| and |out-| notation analogously for other equivalences.
 
 For a given path, there are horizontal and vertical reflexivity squares,
 with reflexivity paths in the other dimension:
@@ -143,9 +147,9 @@ vrefl-square :  {A : Type} {a00 a01 : A}
 We can apply a function to a square, yielding a square between the
 action of the function on each side:
 \begin{code}
-ap-square : {A B : Type} (f : A → B) {a00 a01 a10 a11 : A} 
-  {l : Path a00 a01} {t : Path a00 a10}
-  {b : Path a01 a11} {r : Path a10 a11}
+ap-square : {A B : Type} (f : A → B) 
+  {a00 a01 a10 a11 : A} {l : Path a00 a01} 
+  {t : Path a00 a10} {b : Path a01 a11} {r : Path a10 a11}
   → Square l t b r → Square (ap f l) (ap f t) (ap f b) (ap f r)
 \end{code}
 %% If we think of the square as a disc |s : Path (l · b) (t · r)|, then
@@ -167,8 +171,8 @@ pair-square :
             (pair-line ba bb) (pair-line ra rb) 
 \end{code}
 
-Because |Square| is a dependent type, we can ``adjust'' the sides of a
-square by paths-between-paths:
+Because |Square| is a dependent type, by path induction we can
+``retype'' the sides of a square by paths-between-paths:
 \begin{code}
 whisker-square : {A : Type} {a00 a01 a10 a11 : A} 
   {l l' : Path a00 a01} {t t' : Path a00 a10}
@@ -200,10 +204,8 @@ original square |s| with these paths:
 \end{tikzpicture}
 \end{center}
 
-
-
 More generally, we can compose squares vertically and horizontally
-(which is like ``adjusting'' one side of a square by another
+(which is like ``retyping'' one side of a square by another
 square):
 \begin{code}
   _·-square-v_ : Square l t b r → Square l' b b' r'
@@ -309,7 +311,7 @@ Another operation we will need is \emph{Kan
   filling}~\citep{kan55cubical}.  For squares, this says that given any
 three sides, we can find a fourth that fits in a square.  For example:
 \begin{code}
-fill-right :  {A : Type} {a00 a01 a10 a11 : A}
+fill-square-right :  {A : Type} {a00 a01 a10 a11 : A}
   (l : Path a00 a01) (t : Path a00 a10) (b : Path a01 a11)
   → Σ[ r : Path a10 a11] Square l t b r
 \end{code}
@@ -360,7 +362,7 @@ Returning to the example from Section~\ref{sec:circleexample}, we need a
 \begin{code}
 PathOver (\ a → Path base a) loop (loop^ x) (loop^ (x + 1))
 \end{code}
-By |out-PathOver-=-eqv|, this is the same as a 
+By |PathOver-=-eqv|, this is the same as a 
 \begin{code}
 Square  (loop^ x) (ap (\ _ → base) loop)
         (ap (\ a → a) loop) (loop^ (x + 1))
@@ -369,7 +371,6 @@ After reducing the |ap|'s using |whisker-square|, we need a
 \begin{code}
 Square (loop^ x) id loop (loop^ (x + 1))
 \end{code}
-
 But |loop^(x+1) ≡ loop^x · loop|, so we need a 
 \begin{code}
 Square (loop^ x) id loop (loop^ x · loop)
@@ -382,23 +383,25 @@ Just as we had a type for a path in a fibration over a path in the base,
 it will be useful to have a type of squares in a fibration over a square
 in the base.  As an inductive family, this is defined as:
 \begin{code}
-data SquareOver {A : Type} (B : A → Type) {a00 : A} 
- {b00 : B a00} : {a01 a10 a11 : A} 
- {αl : Path a00 a01} {αt : Path a00 a10}
- {αb : Path a01 a11} {αr : Path a10 a11}
- (s  : Square αl αt αb αr)
- {b01 : B a01} {b10 : B a10} {b11 : B a11}  
- (βl : PathOver B αl b00 b01)(βt : PathOver B αt b00 b10)
- (βb : PathOver B αb b01 b11)(βr : PathOver B αr b10 b11)
- → Type where
+data SquareOver {A : Type} (B : A → Type) 
+  {a00 : A} {b00 : B a00} : {a01 a10 a11 : A} 
+  {αl : Path a00 a01} {αt : Path a00 a10}
+  {αb : Path a01 a11} {αr : Path a10 a11}
+  (s  : Square αl αt αb αr)
+  {b01 : B a01} {b10 : B a10} {b11 : B a11}  
+  (βl : PathOver B αl b00 b01)
+  (βt : PathOver B αt b00 b10)
+  (βb : PathOver B αb b01 b11)
+  (βr : PathOver B αr b10 b11)
+  → Type where
    id : SquareOver B id id id id id
 \end{code}
 A |SquareOver B f βl βt βb βr| relates four path-overs, each of which
 lays over one side of the square |s| (the boundary of |s| and the points
 in |B| are implicit arguments). Visually, an element of this type is the
-inside of the top square in the following diagram:
+inside of the top square in the following:
 \begin{center}
-\begin{tikzpicture}[scale=0.75]
+\begin{tikzpicture}[scale=0.65]
   \coordinate (A) at (0,3);
   \coordinate (B) at (2,3);
   \coordinate (C) at (3,2);

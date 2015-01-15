@@ -583,13 +583,13 @@ module lib.cubical.Square where
                    → SquareOver B id (hom-to-over p0-) (hom-to-over p-0) (hom-to-over p-1) (hom-to-over p1-)
   square-to-over-id id = id
 
-  fill-right :  {A : Type} {a00 a01 a10 a11 : A}
+  fill-square-right :  {A : Type} {a00 a01 a10 a11 : A}
              (l : a00 == a01) (t : a00 == a10) (b : a01 == a11)
              → Σ \ (r : a10 == a11) -> Square l t b r
-  fill-right id id id = (id , id)
+  fill-square-right id id id = (id , id)
 
   ·-fill : {A : Type} {x y z : A} (p : x == y) (q : y == z)
-            → (p · q) == fst (fill-right p id q)
+            → (p · q) == fst (fill-square-right p id q)
   ·-fill id id = id
 
   -- for legacy reasons

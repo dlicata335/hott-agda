@@ -4,14 +4,13 @@
 \section{Torus ≃ Two Circles}
 \label{sec:torus}
 
-The idea of the correspondence between |T| and |S¹ × S¹| is that the
-first component of the pair corresponds to |p| and the second component
-to |q|.
+The main idea of the correspondence between |T| and |S¹ × S¹| is that a
+|loop| in the first component of the pair corresponds to |p|, and a
+|loop| in the second component to |q|.
 
 \subsection{Torus to circles}
 
-First, we define a function from the torus to |S¹ × S¹| by torus
-recursion: 
+The map from the torus to the circles uses torus recursion:
 \begin{code}
 t2c : T → S¹ × S¹
 t2c = T-rec  (base , base) 
@@ -104,7 +103,7 @@ extensionality is the same as |(x : S¹) → Path (S¹-rec a q x) (S¹-rec a
 q x)|.  Using circle elimination, we need a |p' : Path{T} (S¹-rec a q
 base) (S¹-rec a q base)|, along with a |PathOver (\ x → Path (S¹-rec a q
 x) (S¹-rec a q x)) loop p' p'|.  Because |S¹-rec a q base ≡ a|, we can
-take |p'| to be |p|.  Applying |out-PathOver-=-eqv| to reduce a path-over in a
+take |p'| to be |p|.  Applying |PathOver-=-eqv| to reduce a path-over in a
 path type to a square, we need a square |s| with the type given as the
 first component of |c2t-square-and-cube|.  But |(ap (S¹-rec a q) loop)|
 reduces (propositionally) to |q|, and the square we want is the |f|
@@ -142,14 +141,14 @@ and paths |α : Path{A} a a'| and |β : Path{B} b b'|, there is a square
   \coordinate (br) at (1,0);
   \coordinate (ur) at (1,1);
 
-  \node[circle,draw,inner sep=1.5pt,label=left:{|f a b|}] (base) at (ul) {};
-  \node[circle,draw,inner sep=1.5pt,label=left:{|f a' b|}] (base) at (bl) {};
-  \node[circle,draw,inner sep=1.5pt,label=right:{|f a b'|}] (base) at (ur) {};
-  \node[circle,draw,inner sep=1.pt,label=right:{|f b b'|}] (base) at (br) {};
-  \draw (ul) to node[left] {|ap (λ x → f x b) α|} (bl);
-  \draw (ul) to node[above] {|ap (λ y → f a y) β|} (ur);
-  \draw (bl) to node[below] {|ap (λ y → f a' y) β|} (br);
-  \draw (ur) to node[right] {|ap (λ x → f x b') α|} (br);
+  \node (uln) at (ul) {{|f a b|}};
+  \node (bln) at (bl) {{|f a' b|}};
+  \node (urn) at (ur) {{|f a b'|}};
+  \node (brn) at (br) {{|f b b'|}};
+  \draw[->] (uln) to node[left] {|ap (λ x → f x b) α|} (bln);
+  \draw[->] (uln) to node[above] {|ap (λ y → f a y) β|} (urn);
+  \draw[->] (bln) to node[below] {|ap (λ y → f a' y) β|} (brn);
+  \draw[->] (urn) to node[right] {|ap (λ x → f x b') α|} (brn);
 \end{tikzpicture}
 \end{center}
 defined by the iterated application of |f| to |α| and |β|:
@@ -161,8 +160,7 @@ To see that this type checks, for any |y|, the term |ap (λ x → f x y) α|
 has type |Path (f a y) (f a' y)|, so applying this to |β| gives a
 \begin{code}
 PathOver  (\ y → Path (f a y) (f a' y)) β
-          (ap (λ x → f x b) α)
-          (ap (λ x → f x b) α)
+          (ap (λ x → f x b) α) (ap (λ x → f x b') α)
 \end{code}
 and turning this path-over into a square gives the result.  
 The specific case of |apdo-ap c2t' loop loop| is a square
@@ -180,27 +178,27 @@ The specific case of |apdo-ap c2t' loop loop| is a square
   \draw (ur) to node[right] {|ap (λ x → c2t' x base) loop|} (br);
 \end{tikzpicture}
 \end{center}
-and note that the reduction rules give above equate the sides of this
-square the sides of |f|.
+and note that the reduction rules above equate the sides of this square
+the sides of |f|.
 
-Thus, the desired propositional reduction rules are
+Thus, the desired propositional reduction rules for |c2t'| are
 \begin{code}
 c2t'-β :  Σ[ βl2 : Square (ap (λ y → c2t' base y) loop) id id q ]
           Σ[ βl1 : Square (ap (λ x → c2t' x base) loop) id id p ]  
             Cube (apdo-ap c2t' loop loop) f βl1 βl2 βl2 βl1
 \end{code}
-This says that we want two squares for the reductions on |loop base| and
-|base loop|, and then a cube along these squares for the reduction on
-|loop loop|.  It will be important below that the top and bottom faces
-are the same, and similarly for the front and back.
+This says that we want two squares for ``|c2t' loop base|'' and ``|c2t'
+base loop|'', and then a cube along these squares for the reduction on
+``|c2t' loop loop|''.  It will be important below that this cube's top
+equals its bottom and front equals its back.
 
-We could proceed by defining the |βl2| (as |βsquare| from above, for
-example) and |βl1| and then trying to find an appropriate cube.
-However, there is a simpler way: The only property we need of the |βl1|
-and |βl2| squares is that they exist and fit into the cube above.
-Moreover, it turns out that we can define the cube goal in such a way
-that it determines suitable |βl1| and |βl2|!  In Agda, unification fills
-in |βl2| and |βl1| from the definition of the cube.
+We could proceed by defining |βl2| (as |βsquare| from above, for
+example) and |βl1| and then trying to find an appropriate cube for the
+third component.  However, there is a simpler way: The only property we
+need of the |βl1| and |βl2| squares is that they exist and fit into the
+cube above.  Moreover, it turns out that we can define the cube goal in
+such a way that it determines suitable |βl1| and |βl2|!  In Agda,
+unification fills in |βl2| and |βl1| from the definition of the cube.
 
 To define a cube whose left side is |(apdo-ap c2t' loop loop)| and whose
 right side is |f|, we compose six cubes horizontally, whose middle sides
@@ -222,28 +220,28 @@ are as follows:
 □=  f
 \end{code}
 We think of this as an equation chain between these eight squares, but
-each step is really a cube, rather than a homogeneous path.  In order,
-the justifications for the steps are (0) by definition, (1) un-fusing
-|ap (\ x -> c2t' x y) loop| to |ap (\ f → f y) (ap c2t' loop)|, (2)
-reducing |c2t'| (which is a circle elimination) on |loop|, (3) reducing
-|ap (\ f → f y)| on a function extensionality, (4) reducing |S¹-elimo|
-on the loop, (5) collapsing the two sides of the |PathOver-=|
+proof of each step is really a cube, rather than a homogeneous path.  In
+order, the justifications for the steps are (0) by definition, (1)
+un-fusing |ap (\ x -> c2t' x y) loop| to |ap (\ f → f y) (ap c2t'
+loop)|, (2) reducing |c2t'| (which is a circle recursion) on |loop|,
+(3) reducing |ap (\ f → f y)| on a function extensionality, (4) reducing
+|S¹-elimo| on the loop, (5) collapsing the two sides of the |PathOver-=|
 equivalence, and (6) using |snd c2t-square-and-cube|.  Thus, we do what
 looks like an equational proof that the square |(apdo-ap c2t' loop
 loop)| ``equals'' the square |f|, but each step may also contribute to
 the back-top-bottom-front ``tube'' that connects the boundaries of these
 two squares.  For example, step (6) using |snd c2t-square-and-cube|
-contributes |βsquare| on the top and bottom.  
+contributes |βsquare| on the top and bottom.
 
-The curious reader may find the the Agda proof in the appendix
-(Figure~\ref{fig:ts1s1-complete}). The important point is that the term
-is simply a horizontal composition of cubes, which correspond to steps
-(1) through (6) above.  The sides of the cube are represented by the
-|_|'s, which are filled in by unificiation.  This works because each of
-the cubes used in steps (1) through (6) have the property that their
-front is equal to their back and their top is equal to their bottom, so
-|βl1| and |βl2| can be defined to be the composites of these sides, and
-the overall cube has the required boundary.
+The curious reader may find the the complete Agda proof in the appendix
+(Figure~\ref{fig:ts1s1-full}). The important point is that the term is
+simply a horizontal composition of cubes, which correspond to steps (1)
+through (6) above.  The sides of the cube are represented by the |_|'s,
+which are filled in by unificiation.  This works because each of the
+cubes used in steps (1) through (6) have the property that their front
+is equal to their back and their top is equal to their bottom, so |βl1|
+and |βl2| can be defined to be the composites of these sides, and the
+overall cube has the required boundary.
 
 %% \begin{figure*}
 %% \begin{code}
@@ -281,11 +279,11 @@ f-case : Cube  (ap-square (λ z → c2t (t2c z)) f)
                (ap-square (λ z → z) f)
                p-case q-case q-case p-case
 \end{code}
-That is, we need to check the composite on each of the constructors,
-where the case for |f| is a cube along the cases for |p| and |q|.  
-Once again, we can solve the |f| case and let that determine the |p| and
-|q| cases.  The |f| case is a horizontal composition of cubes whose
-middle faces are as follows:
+This simply says that we need to check the composite on each of the
+constructors, where the case for |f| is a cube along the cases for |p|
+and |q|.  Once again, we can solve the |f| case and let that determine
+the |p| and |q| cases.  The |f| case is a horizontal composition of
+cubes whose middle faces are as follows:
 \begin{code}
     ap-square (λ z → c2t (t2c z)) f
 □=  ap-square c2t (ap-square t2c f)
@@ -318,7 +316,7 @@ apdo-ap-cube-hv : Cube
       (ap-id-snd-square f p) (ap-id-fst-square f q) 
       (ap-id-fst-square f q) (ap-id-snd-square f p)
 \end{code}
-This lemma is the analogue of currying for applying a function to a pair
+This lemma is an analogue of currying for applying a function to a pair
 of paths: |apdo-ap f p q| (which is like ``|f p q|'') is the same as
 square-applying |uncurry f| to the pair of |p| (as a horizontally
 trivial square) and |q| (as a vertically trivial square).  The remaining
@@ -350,10 +348,11 @@ looploop-case :
         (apdo-ap (\ x y → x , y) loop loop)
         loop1-case loop2-case loop2-case loop1-case
 \end{code}
-That is, we need to check that the theorem holds for |loop base| and
-|base loop| and |loop loop|.  Once again, we can solve the |loop loop|
-case and let that determine the others.  The reduction in question is a
-horizontal composite of cubes with the following middle faces
+That is, we need to check that the theorem holds for when the composite
+is applied to |loop base| and |base loop| and |loop loop|.  Once again,
+we can solve the |loop loop| case and let that determine the others.
+The reduction in question is a horizontal composite of cubes with the
+following middle faces
 \begin{code}
     apdo-ap (\ x y → t2c (c2t' x y)) loop loop
 □=  ap-square t2c (apdo-ap c2t' loop loop)

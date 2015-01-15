@@ -22,14 +22,15 @@ This paper provides an investigation of how to manage the reasons why
 equations type check is a setting where these reasons are
 proof-relevant.  While we cannot ignore the reason why an equation type
 checks entirely, we can still keep the evidence ``off to the side'',
-rather than embedding it in the equation itself.  Specifically, we can
+rather than embedding it in the equation itself.  For example, we can
 define a type |HEq A B α a b| where |α : Path{Type} A B| and |a:A| and
 |b:B|.  This heterogeneous equality relates two elements of two
 different types \emph{along a specific equality α between the types}.
 It can be defined as an inductive family with a reflexivity constructor
 |hid : HEq A A id a a|, which relates |a| to itself |a| along the
-identity equivalence |id|.\footnote{This should perhaps go up a universe
-  size level because it is an inductive family indexed by a |Type|.}
+identity equivalence |id|.
+%% \footnote{This should perhaps go up a universe
+%%   size level because it is an inductive family indexed by a |Type|.}
 %% \begin{code}
 %% HEq-elim  : {A : Type} {a : A}
 %%   (C : (B : Type) (α : Path A B) (b : B) → HEq A B α a b → Type)
@@ -71,7 +72,7 @@ The equivalences between these types are all immediate by path induction
 or induction on |HEq|: keeping the evidence that the equation type
 checks ``off to the side'' is equivalent to embedding it in the equation
 on either side, and to the more symmetric fourth option.  Even though it
-can be defined away, we will argue that it is useful to think in terms
+could be defined away, we will argue that it is useful to think in terms
 of such ``off to the side'' abstractions.
 
 %% As an aside, in a type theory with a homogeneous equality type
@@ -100,11 +101,11 @@ A typical example is
 HEq  (Vec Nat (n + m)) (Vec Nat (m + n))
      (ap (Vec Nat) (+-comm n m)) v1 v2
 \end{code}
-where |v1 : Vec Nat (n + m)| and |v2 : Vec Nat (m + n)|.  Both |A| and
-|B| have the form |Vec Nat -|, and the reason why the two types are
-equal is essentially commutativity of addition---but we need to use use
-|ap| (congruence of equality) to apply |Vec Nat| to both sides of the
-commutativity proof.
+where |Vec A k| represents vectors of |A| of length |k|, and |v1 : Vec
+Nat (n + m)| and |v2 : Vec Nat (m + n)|.  Both |A| and |B| have the form
+|Vec Nat -|, and the reason why the two types are equal is essentially
+commutativity of addition---but we need to use use |ap| (congruence of
+equality) to apply |Vec Nat| to both sides of the commutativity proof.
 
 Heterogeneous equalities of this form can be simplified using a
 \emph{factored} hetereogeneous equality type, which separates a context
@@ -132,7 +133,7 @@ Using path-over, the above example is
 \begin{code}
 PathOver (Vec Nat) (+-comm n m) v1 v2
 \end{code}
-The context |C| is |Vec Nat|, which is morally applied to |n+m| to get
+In this example |C| is |Vec Nat|, which is morally applied to |n+m| to get
 the type of |v1|, to |m+n| to get the type of |v2|, and to |+-comm n m|
 to get the proof that the two types are equal.
 
@@ -150,10 +151,9 @@ to get the proof that the two types are equal.
 %% The example becomes a concise
 
 Because types are elements of a universe, |HEq A B α a1 a2| is the
-special case of |PathOver (λ (X : Type) → X) α a1 a2| (though this goes
-up a universe size level).  Conversely, |PathOver| can be expressed in
-terms of heterogeneous equality using |ap| as above.  Indeed, the
-following types are equivalent:
+special case of |PathOver (λ (X : Type) → X) α a1 a2|.  Conversely,
+|PathOver| can be expressed in terms of heterogeneous equality using
+|ap| as above.  Indeed, the following types are equivalent:
 
 \begin{enumerate}
 \item The inductive family |PathOver C {a1}{a2} α c1 c2|
@@ -204,11 +204,11 @@ in the total space that projects down to, or \emph{lays over}, |α|:
 We have experimented with two implementations of path-over in two
 different Agda libraries.  In one library, it is defined as in the fifth
 option above (by path induction into the universe).  In another library,
-it is defined as inductive family, which is useful because allows us to
+it is defined as inductive family, which is convenient because we can
 eliminate on a path-over using Agda's support for pattern matching.
 Moreover, this implementation does not really require extending the
 semantics of type theory with this new type constructor: If we defined
-|PathOver C α c1 c2| as as |Path{C a2} (transport C α c1) c2|, then its
+|PathOver C α c1 c2| as as |Path{C a2} (transport C α c1) c2|, then the
 inductive family elimination rule
 %% \begin{code}
 %% PathOver-elim : {A : Type} (C : A → Type) {a1 : A} {c1 : C a1}
@@ -315,9 +315,9 @@ PathOver-constant-eqv : {A : Type} {C : Type}
   → (PathOver (λ _ → C) α M1 M2) ≃ (Path c1 c2)
 \end{code}
 
-Second, a path-over in a (function) composition can be re-associated,
-moving part of the fibration into the path (when |A| is |(λ X → X)|,
-this is the equivalence between |HEq| and |PathOver| mentioned above).
+A path-over in a (function) composition can be re-associated, moving
+part of the fibration into the path (when |A| is |(λ X → X)|, this is
+the equivalence between |HEq| and |PathOver| mentioned above).
 \begin{code}
 over-o-ap-eqv :  {A B : Type} (C : B → Type)
   {f : A → B} {a1 a2 : A} {α : Path a1 a2}
@@ -332,7 +332,7 @@ o f) α| and |transport C (ap f α)|.
 %% because it is not a fully general instance of the family.  Instead, we
 %% do path induction on |α|, and then use |path-induction-homo|.
 
-Third, we have rules for each type constructor.  For example for
+Finally, we have rules for each type constructor.  For example for
 Π-types, we have
 \begin{code}
 PathOverΠ-eqv : {A : Type} {B : A → Type} 
@@ -378,7 +378,7 @@ induction is used to define a function
 decode : (x : S¹) → Cover x → Path base x
 \end{code}
 where |Cover|, defined by circle induction, is the universal cover
-fibration.  In this case, we apply circle elimination with |C x = Cover
+fibration.  In this case, we apply circle elimination with |C x := Cover
 x → Path base x|.  In the case for |base|, we supply a function |loop^ :
 Int → Path base base| (by definition |Cover base| is |Int|).
 In the case for |loop|, |PathOverΠ-eqv| is used to reduce the goal to
@@ -393,7 +393,7 @@ reassociate, and then reducing |ap fst (pair= loop β)| to |loop|, we need
 to show
 \begin{code}
 (x y  : Cover base) (β : PathOver Cover loop x y) →
-PathOver (\ a → Path base a) loop (loop^ x) (loop^ y)
+  PathOver (\ a → Path base a) loop (loop^ x) (loop^ y)
 \end{code}
 |Cover| is defined so that |PathOver Cover loop x y| is equivalent to
 |Path (x + 1) y|,
