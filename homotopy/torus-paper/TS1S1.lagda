@@ -2,8 +2,7 @@
 %include agda.fmt
 
 \section{Torus ≃ Two Circles}
-
-\label{sec:ts1s1}
+\label{sec:torus}
 
 \subsection{Torus to circles}
 
