@@ -1,0 +1,43 @@
+\section{Related and Future Work}
+
+The various possible definitions of path-over, and their equivalence,
+were discussed during the IAS special year (see \citep[Remark
+  6.3.2]{uf13hott-book}).  The idea to use inductive families to define
+shapes other than lines was explored in a simplicial setting by Coquand
+(e.g. a triangle in a type).  At the time, it was considered an open
+question whether it was helpful to consider shapes other than the
+homogeneous globes that arise by iterating the identity type.  In this
+paper, we have argued that there are benefits to working with cube and
+cube-over types.  Higher cubes and cube-overs arise naturally when
+higher inductive types have two-dimensional (or higher) constructors
+(like the torus), when higher inductive types are nested (a pushout of
+pushouts, like in the three-by-three lemma), and when eliminations on
+higher inductive types are nested (like when mapping out of two
+circles).  Developing lemmas in terms of these abstractions has enabled
+the new formalizations described in this paper.
+
+At present, we have developed cube types in ``offshoots'' of Agda
+homotopy type theory libraries; an interesting direction for future work
+would be to revise the libraries to use cubes throughout, and to revisit
+existing results to see if they can be simplified.  Another direction
+for future work is to define higher cube and cube-over types in a
+dimension-polymorphic way, rather than implementing each dimension in
+isolation, as we have done here.
+
+Our work is carried out in the setting of dependent type theory with
+axioms for univalence and higher inductives, but there have also been
+extensions of dependent type theory based on cubical ideas.  These
+include a type theory with a computational interpretation of
+parametricity~\citep{bernardy12parametricity}, and new cubical type
+theories~\citep{coquand14variations,altenkirchkaposi14cubical,lb14cubes-oxford}
+inspired by the cubical sets model of homotopy type
+theory~\citep{coquand+13cubical}.  Cubical type theories add new
+definitional equalities that the axiomatic formulations do not provide.
+The examples presented here could be translated to cubical type
+theories, to investigate the impact of these new definitional
+equalities.  Additionally, it is an open question whether results in
+these stricter cubical type theories can be translated back to axiomatic
+versions of univalence and higher inductives, by inserting more
+propositional reasoning; the low-dimensional libraries and examples
+presented here provide a bit of empirical evidence in the positive
+direction.

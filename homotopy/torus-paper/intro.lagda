@@ -89,28 +89,26 @@ means to give functions |t2c : T → S¹ × S¹| and |c2t : S¹ × S¹ → T| an
 show that they are mutually inverse (up to paths).  At first glance, it
 seems like it should be simple to define the functions back and forth
 and prove that they are mutually inverse using the recursion and
-induction principles for the circle and the torus, an indeed, it is not
+induction principles for the circle and the torus. And indeed, it is not
 difficult to define the two functions.  However, at the end of the IAS
-year, this problem had not been solved, though Sojakova had given a
-proof sketch, which later appeared as her heroic 25-page proof in the
-exercise solutions for the homotopy type theory
-book~\citep{uf13hott-book}.  The reason for the complexity is that the
-path manipulation required to prove the path-between-path goals gets
-quite involved.
+year, this problem had not been solved, though Sojakova and Lumsdaine
+had each given proof sketches, and Sojakova's later appeared as her
+heroic 25-page proof in the exercise solutions for the homotopy type
+theory book~\citep{uf13hott-book}.  The reason for the complexity is
+that the path manipulation required to prove the path-between-path goals
+gets quite involved.
 
 In this paper, we develop a cubical approach to synthetic homotopy
-theory.  Using this approach, the proof that the torus is the product of
-two circles can be formalized in Agda in around 100 lines of code.  The
-approach has also proved useful for the formalization of a
-``three-by-three'' lemma about pushouts that is used in the construction
-of the Hopf fibration, and in resolving a question~\citep{amlh14patch}
-about a patch theory represented as a higher inductive
-type.\footnote{See \url{programming/PatchWithHistories3.agda} in
-  \url{github.com/dlicata335/hott-agda}} The approach was also used by
+theory.  Using this approach and the libraries we develop, the proof
+that the torus is the product of two circles can be formalized in Agda
+in around 100 lines of code.\footnote{The Agda code is in
+  \url{github.com/dlicata335/hott-agda}} The approach has also proved
+useful for the formalization of a ``three-by-three'' lemma about
+pushouts that is used in the construction of the Hopf fibration,\footnote{The Agda code is in \url{github.com/guillaumebrunerie/}} and
+in resolving a question~\citep{amlh14patch} about a patch theory
+represented as a higher inductive type.  The approach was also used by
 Cavallo to simplify the proof of the Mayer-Vietoris
-theorem~\citep{cavallo14mayervietoris}.  In all of these cases, the
-method simplifies constructions that were previously difficult or
-intractable.
+theorem~\citep{cavallo14mayervietoris}.
 
 Inspired by heterogeneous equality~\citep{mcbride00thesis} and the
 cubical sets model of type theory~\citep{coquand+13cubical}, the main
@@ -140,22 +138,22 @@ into a square:
 %% Path a10 a11| and |t : Path a00 a1| and |b : Path a01 a11|.  
 We will also consider a type of cubes |Cube left right front top bot
 back| dependent on six squares giving its sides and on their boundaries.
-Another key ingredient is to work systematically with ``path over a
-path'' and higher ``cube over a cube'' types, which represent paths and
+Another key ingredient is to work systematically with path-over-a
+path and higher cube-over-a-cube types, which represent paths and
 squares in a fibration (dependent type).
 
 While our approach fits nicely with work in progress on new cubical type
 theories~\citep{lb14cubes-oxford,altenkirchkaposi14cubical,coquand14variations}, the
 present paper can be conducted entirely by making appropriate
-definitions in Martin-L\"of type theory with univalence and higher
-inductive types---no additional new axioms are needed.  Higher cubes can
+definitions in Martin-L\"of type theory with axioms for univalence and higher
+inductive types.  Higher cubes can
 be defined in terms of higher paths, and 
 %% : for example, the type of squares
 %% considered above can be thought of as discs |Path (l · b) (t · r)|.
-``cube-over-a-cube'' types can be reduced to homogeneous paths.  This
-means that our constructions can be interpreted in the known models of
-homotopy type theory with univalence and higher inductive
-types (see \citep{voevodsky+12simpluniv,shulman13inversediag,lumsdaine+13hits}).
+cube-over-a-cube types can be reduced to homogeneous paths.  Thus, our
+constructions can be interpreted in the known models of homotopy type
+theory with univalence and higher inductive types (see
+\citep{voevodsky+12simpluniv,shulman13inversediag,lumsdaine+13hits}).
 While cubes can be reduced away in this way, for engineering reasons, we
 have found it convenient in Agda to use new inductive families to
 represent cube types; this allows us to make more effective use of
