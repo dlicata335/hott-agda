@@ -9,11 +9,9 @@ to generalize from the above example to
 \begin{code}
 PathOver (\ x → Path (f x) (g x)) α β1 β2 
 \end{code}
-where for this to be well-typed, we need |f g : A → B| and |α : Path{A}
-a1 a2| and |β1 : Path (f a1) (g a1)| and |β2 : Path (f a2) (g a2)|.  (In
-general |B| might depend on |A|, but the simply-typed case is a helpful
-to consider.)  The key idea is that this data naturally fits into a
-\emph{square} as follows:
+where |f g : A → B| and |α : Path{A} a1 a2| and |β1 : Path (f a1) (g
+a1)| and |β2 : Path (f a2) (g a2)|.  The key idea is that this data
+naturally fits into a square as follows:
 
 \begin{center}
 \begin{tikzpicture}
@@ -33,20 +31,38 @@ to consider.)  The key idea is that this data naturally fits into a
 \end{tikzpicture}
 \end{center}
 
-Thus, to reduce the path-over, we would like a type of squares.
+\noindent Thus, we need a type of squares.
 
 \subsection{Definition}
 
-There are several equivalent definitions of a type |Square left top
-bottom right|.  One is as path-over in a path type:
+Given points and paths that form a square
+\begin{center}
+\begin{tikzpicture}
+  \coordinate (ul) at (0,1);
+  \coordinate (bl) at (0,0);
+  \coordinate (br) at (1,0);
+  \coordinate (ur) at (1,1);
+
+  \node[circle,draw,inner sep=1.5pt,label=left:{|a00|}] (base) at (ul) {};
+  \node[circle,draw,inner sep=1.5pt,label=left:{|a01|}] (base) at (bl) {};
+  \node[circle,draw,inner sep=1.5pt,label=right:{|a10|}] (base) at (ur) {};
+  \node[circle,draw,inner sep=1.pt,label=right:{|a11|}] (base) at (br) {};
+  \draw (ul) to node[above] {|t|} (ur);
+  \draw (bl) to node[below] {|b|} (br);
+  \draw (ul) to node[left] {|l|} (bl);
+  \draw (ur) to node[right] {|r|} (br);
+\end{tikzpicture}
+\end{center}
+there are several equivalent definitions of a type |Square l t b r|.
+One is as path-over in a path type:
 \begin{code}
-PathOver (\ (x:A,y:A) → Pair x y) (pair= top bottom) left right
+PathOver (\ (x:A,y:A) → Pair x y) (pair= t b) l r
 \end{code}
-Another is as a disc between composities---as a path-between-paths |Path
-(left · bottom) (top · right)|---or, equivalently, any other arragement
-of this equation, such as |Path bot (! left · top · right)|.  We can
-also define a new inductive family (dependent on four points, which we
-make implicit arguments, and four lines) representing squares:
+Another is as a disc (path-between-paths) between composities |Path (l ·
+b) (t · r)|.\footnote{We write |p · q| for composition of paths in
+  diagramatic order.}  We can also define a new inductive family
+dependent on four points, which we make implicit arguments, and four
+lines, representing squares:
 \begin{code}
 data Square {A : Type} {a00 : A} : {a01 a10 a11 : A}
       : Path a00 a01 → Path a00 a10 → 
@@ -56,23 +72,22 @@ data Square {A : Type} {a00 : A} : {a01 a10 a11 : A}
 
 All of these types are equivalent:
 \begin{enumerate}
-\item The inductive family |Square left top bottom right|
-\item |Path (left · bottom) (top · right)|
-\item |PathOver (\ (x:A,y:A) → Path x y) (pair= top bottom) left right|
+\item The inductive family |Square l t b r|
+\item |Path (l · b) (t · r)|
+\item |PathOver (\ (x:A,y:A) → Path x y) (pair= t b) l r|
 \item A definition by path-induction:
 \begin{code}
-Square left id id right = Path left right
+Square l id id r = Path l r
 \end{code}
 \end{enumerate}
-Moreover, for the second definition, the inductive family elimination
-rule and a judgemental β rule are definable, so we can again use the
-inductive family definition but think of it as a derived notion
-semantically.
+The second definition again satisfies the inductive family elimination
+rule with a judgemental β rule, so again use the inductive family but
+think of it as a derived notion semantically.
 
 \subsection{Library}
 
-Next, we develop some operations on squares.  We have the equivalences
-with the other possible definitions:
+Next, we develop some operations on squares.  We have the equivalence
+with discs and the equivalence between path-overs and certain squares:
 
 \begin{code}
 square-disc-eqv : Square l t b r ≃ Path (l · b) (t · r)
@@ -82,17 +97,18 @@ square-disc-eqv : Square l t b r ≃ Path (l · b) (t · r)
 out-PathOver-=-eqv : {A B : Type} {f g : A → B}
   {a1 a2 : A} {α : Path a1 a2}
   {β1 : Path (f a1) (g a1)} {β2 : Path (f a2) (g a2)}
-  → (PathOver (\ x -> Path (f x) (g x)) α β1 β2)
+  → (PathOver (\ x → Path (f x) (g x)) α β1 β2)
   ≃ (Square β1 (ap f α) (ap g α) β2)
 \end{code}
 
 For a given path, there are horizontal and vertical reflexivity squares,
 with reflexivity paths in the other dimension:
 \begin{code}
-hrefl-square :  {A : Type} {a00 a01 : A} {p : Path a00 a01}
-                → Square p id id p
-vrefl-square :  {A : Type} {a00 a01 : A} {p : Path a00 a01}
-                → Square id p p id
+hrefl-square :  {A : Type} {a00 a01 : A} 
+  {p : Path a00 a01} → Square p id id p
+
+vrefl-square :  {A : Type} {a00 a01 : A}
+  {p : Path a00 a01} → Square id p p id
 \end{code}
 
 \begin{center}
@@ -125,8 +141,6 @@ vrefl-square :  {A : Type} {a00 a01 : A} {p : Path a00 a01}
 \end{tikzpicture}
 \end{center}
 
-
-
 We can apply a function to a square, yielding a square between the
 action of the function on each side:
 \begin{code}
@@ -135,9 +149,9 @@ ap-square : {A B : Type} (f : A → B) {a00 a01 a10 a11 : A}
   {b : Path a01 a11} {r : Path a10 a11}
   → Square l t b r → Square (ap f l) (ap f t) (ap f b) (ap f r)
 \end{code}
-If we think of the square as a disc |s : Path (l · b) (t · r)|, then
-|ap-square| is like |ap (ap f) s| (iterated |ap|) along with moving |ap
-f| inside the composities.
+%% If we think of the square as a disc |s : Path (l · b) (t · r)|, then
+%% |ap-square| is like |ap (ap f) s| (iterated |ap|) along with moving |ap
+%% f| inside the composities.
 
 We have rules for introducing and eliminating squares in each type.  For
 example, for |A × B|, we can pair a square in |A| with a square in |B|
@@ -158,7 +172,7 @@ Because |Square| is a dependent type, we can ``adjust'' the sides of a
 square by paths-between-paths:
 \begin{code}
 whisker-square : {A : Type} {a00 a01 a10 a11 : A} 
-  {l l' : Path a00 a01} {t t' : a00 a10}
+  {l l' : Path a00 a01} {t t' : Path a00 a10}
   {b b' : Path a01 a11} {r r' : Path a10 a11}
   (ll : Path l l') (tt : Path t t') (bb : Path b b') (rr : Path r r')
   (s : Square l t b r) → Square l' t' b' r'
@@ -231,8 +245,7 @@ For example, |s1 ·-square-h s2| represents the composite
 %% !-square-v : Square l t b r → Square (! l) b t (! r) 
 %% \end{code}
 
-Symmetry interchanges the axes of a square, switching the horizontal and
-vertical sides:
+Symmetry interchanges the horizontal and vertical sides:
 \begin{code}
 square-symmetry-eqv : Square l t b r ≃ Square t l r b
 \end{code}
@@ -300,7 +313,6 @@ three sides, we can find a fourth that fits in a square.  For example:
 fill-right :  {A : Type} {a00 a01 a10 a11 : A}
   (l : Path a00 a01) (t : Path a00 a10) (b : Path a01 a11)
   → Σ[ r : Path a10 a11] Square l t b r
-fill-right id id id = (id , id)
 \end{code}
 
 \begin{center}
@@ -328,24 +340,24 @@ fill-right id id id = (id , id)
   \draw[dashed] (ur') to node[right] {|r|} (br');
 \end{tikzpicture}
 \end{center}
-The filling is defined by repeated path induction.  Though both the
-groupoid structure (identity, composition, inverses, the groupoid laws)
-and the Kan filling result from path induction, it is instructive to
-construct them directly from each other.  For example, to derive the Kan
-filler, we can define |r| to be |! t · l · b|, and then, as a disc
-between composites, the required square is a |Path (l · b) (t · (! t · l
-· b))| using the groupoid laws.  Conversely, from the Kan filling we
-could define |p · q| as |fst (fill p id q)|, and then |snd (fill p id
-q)| is used to show the groupoid laws.  For historical reasons, in the
-Agda library, we have composition defined directly by path induction,
-rather than as a filler, but we nonetheless have a path
-\begin{code}
-·-fill : Path (p · q) (fst (fill-right p id q))
-\end{code}
+Though both the groupoid structure (identity, composition, inverses, the
+groupoid laws) and the Kan filling result from path induction, it is
+instructive to construct them directly from each other.  For example, to
+derive the Kan filler, we can define |r| to be |! t · l · b|, and then,
+as a disc between composites, the required square is a |Path (l · b) (t
+· (! t · l · b))| using the groupoid laws.  Conversely, from the Kan
+filling we could define |p · q| as |fst (fill p id q)|, and then |snd
+(fill p id q)| is used to show the groupoid laws.  
+%% In the Agda library,
+%% we have composition defined directly by path induction, rather than as a
+%% filler, but we nonetheless have a path
+%% \begin{code}
+%% ·-fill : Path (p · q) (fst (fill-right p id q))
+%% \end{code}
 
 \subsection{Example: Circle induction, continued}
 
-Returning to the example from the previous section, we need a
+Returning to the example from Section~\ref{sec:circleexample}, we need a
 \begin{code}
 PathOver (\ a → Path base a) loop (loop^ x) (loop^ (x + 1))
 \end{code}
@@ -359,12 +371,11 @@ After reducing the |ap|'s using |whisker-square|, we need a
 Square (loop^ x) id loop (loop^ (x + 1))
 \end{code}
 
-The function |loop^| is defined so that |loop^(x+1) ≡ loop^x · loop|, so we need a 
+But |loop^(x+1) ≡ loop^x · loop|, so we need a 
 \begin{code}
 Square (loop^ x) id loop (loop^ x · loop)
 \end{code}
-which is exactly the characterization of composition as a Kan filler
-given above.  
+which is the characterization of composition as a Kan filler.
 
 \subsection{Square over a square}
 
@@ -388,7 +399,7 @@ lays over one side of the square |s| (the boundary of |s| and the points
 in |B| are implicit arguments). Visually, an element of this type is the
 inside of the top square in the following diagram:
 \begin{center}
-\begin{tikzpicture}
+\begin{tikzpicture}[scale=0.75]
   \coordinate (A) at (0,3);
   \coordinate (B) at (2,3);
   \coordinate (C) at (3,2);
@@ -417,9 +428,9 @@ inside of the top square in the following diagram:
 \end{center}
 
 To avoid introducing a new inductive family, we could define square-over
-by square induction, saying that a square over |id| is just a
-homogeneous square.  Alternatively, it can be defined as a higher disc
-directly, using several |transport|s.
+by square induction, saying that a square over |id| is a homogeneous
+square.  Alternatively, it can be defined as a higher disc directly,
+using several |transport|s.
 
 \subsection{Example: Torus}
 
@@ -432,15 +443,14 @@ q : Path a a
 f : Square p q q p
 \end{code}
 
-To give a simply-typed function from the torus into something else, you
-need to give the image of each constructor:
+A simply-typed function from the torus is defined by giving the image of
+each constructor:
 \begin{code}
-T-rec :  {C : Type} (a' : C) (p' q' : Path a a)
-         (f' : Square p' q' q' p')
+T-rec :  {C : Type} (a' : C) (p' q' : Path a a) (f' : Square p' q' q' p')
          → T → C
 \end{code}
 The dependent elimination rule is analogous, but the image of each
-constructor lays over the constructor itself:
+constructor lays over that constructor:
 \begin{code}
 T-elim : (C : T → Type) (a' : C a) 
          (p' : PathOver C p a' a') (q' : PathOver C q a' a')

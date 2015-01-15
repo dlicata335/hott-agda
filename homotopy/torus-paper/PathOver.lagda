@@ -349,6 +349,7 @@ functions are equal (over α) if they take two equal arguments
 function extensionality for homogeneous paths.  
 
 \subsection{Example: Circle Elimination}
+\label{sec:circleexample}
 
 For the circle type |S¹|, with constructors |base : S¹| and |loop :
 Path{S¹} base base|, the elimination rule is
