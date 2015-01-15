@@ -59,6 +59,7 @@ data Cube {A : Type} {a000 : A} :
 %% \end{tikzpicture}
 %% \end{center}
 
+An element of this type represents the inside of a cube 
 \begin{center}
 \begin{tikzpicture}
   \coordinate (A) at (0,3);
@@ -94,13 +95,13 @@ data Cube {A : Type} {a000 : A} :
 \end{tikzpicture}
 \end{center}
 
-The order of the faces in |Cube left right back top bot front| is
-because we think of a cube as an equality between the left and right
-squares, along the ``tube'' given by the |back| and |top| and |bot| and
-|front|.  As usual, we could avoid introducing a new inductive family by
-instead defining a cube using square induction, to say that when the
-back, top, bottom, and front are the identity squares, a cube is a
-three-dimensional path between the left and the right.
+We think of a |Cube left right back top bot front| as an equality
+between the left and right squares, along the ``tube'' given by the
+|back| and |top| and |bot| and |front|.  As usual, we could avoid
+introducing a new inductive family by instead defining a cube using
+square induction, to say that when the back, top, bottom, and front are
+the identity squares, a cube is a three-dimensional path between the
+left and the right.
 
 Many of the lemmas about cubes are analogous to (and dependent on) those
 for squares.  For example, we can compose two cubes horizontally:

@@ -31,8 +31,6 @@ naturally fits into a square as follows:
 \end{tikzpicture}
 \end{center}
 
-\noindent Thus, we need a type of squares.
-
 \subsection{Definition}
 
 Given points and paths that form a square
@@ -53,8 +51,9 @@ Given points and paths that form a square
   \draw (ur) to node[right] {|r|} (br);
 \end{tikzpicture}
 \end{center}
-there are several equivalent definitions of a type |Square l t b r|.
-One is as path-over in a path type:
+we would like to define a type |Square l t b r|, where an element of
+this type represents the inside of such a square.  One possible
+definition is as path-over in a path type:
 \begin{code}
 PathOver (\ (x:A,y:A) → Pair x y) (pair= t b) l r
 \end{code}
