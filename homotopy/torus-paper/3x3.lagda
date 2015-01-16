@@ -45,16 +45,16 @@ As usual, we have definitional reduction rules on points and
 propositional reduction rules on paths.  
 \ignore{
 \begin{code}
-  Pushout-elimo C l r p (inl a) ≡ l a
-  Pushout-elimo C l r p (inr b) ≡ r b
+  Pushout-elimo P l r p (inl a) ≡ l a
+  Pushout-elimo P l r p (inr b) ≡ r b
 
   βpush/elimo : (c : C) →
-   Path (apdo (Pushout-elimo C l r p) (push c)) (p c)
+   Path (apdo (Pushout-elimo P l r p) (push c)) (p c)
 \end{code}}
 %
 
-The problem is now the following. Given nine types |Aᵢⱼ|, twelve maps |fᵢⱼ| and
-four equalities |sᵢⱼ| as follows:
+The problem is now the following. Suppose that we have nine types |Aᵢⱼ|, twelve
+maps |fᵢⱼ| and four equalities |sᵢⱼ| as follows:
 \begin{center}
 \begin{tikzpicture}
   \node (A)              {|A₀₀|};
@@ -87,7 +87,11 @@ four equalities |sᵢⱼ| as follows:
 \end{tikzpicture}
 \end{center}
 %
-we want to compute its “two-dimensional pushout”. There are at least two ways to
+where the double arrows mean that we have for instance
+\begin{code}
+s₁₁ : (x : A₂₂) → Path (f₀₁ (f₁₂ x)) (f₁₀ (f₂₁ x))
+\end{code}
+We want to compute its “two-dimensional pushout”. There are at least two ways to
 do that. We can either first compute the pushout of each of the three lines,
 which fit together in a diagram as follows:
 %
@@ -111,7 +115,7 @@ and then compute the pushout of the resulting diagram, which we will denote by
   \node (C) [right=of B] {|A•₄|};
 
   \draw[->] (B) to node[above] {|f•₁|} (A);
-  \draw[->] (B) to node[above] {|f∙₃|} (C);
+  \draw[->] (B) to node[above] {|f•₃|} (C);
 \end{tikzpicture}
 \end{center}
 %
@@ -159,32 +163,32 @@ from |A₀₂|, |A₄₂|, |A₂₀|, |A₄₀|, and one for the squares coming 
 It is worth noting that something nontrivial happens in the case of the squares
 coming from |A₂₂|. Indeed, the one-dimensional constructor of |A◾•| is
 \begin{code}
-  push◾• : (y : A₂•) → Path (inl◾• (f₁• y)) (inr◾∙ (f₃• y))
+  push◾• : (y : A₂•) → Path (inl◾• (f₁• y)) (inr◾• (f₃• y))
 \end{code}
 %
 and the one-dimensional constructor of |A₂•| is
 \begin{code}
-  push₂∙ : (x : A₂₂) → Path (inl₂∙ (f₂₁ x)) (inr₂∙ (f₂₃ x))
+  push₂• : (x : A₂₂) → Path (inl₂• (f₂₁ x)) (inr₂• (f₂₃ x))
 \end{code}
 %
 hence the square in |A◾•| corresponding to a point |x : A₂₂| is the term
-|apdo push◾∙ (push₂• x)| which is of type
+|apdo push◾• (push₂• x)| which is of type
 \begin{code}
-PathOver  (λ y → Path (inl◾∙ (f₁• y)) (inr◾∙ (f₃• y))) (push₂• x)
-          (push◾• (inl₂∙ (f₂₁ x))) (push◾∙ (inr₂∙ (f₂₃ x)))
+PathOver  (λ y → Path (inl◾• (f₁• y)) (inr◾• (f₃• y))) (push₂• x)
+          (push◾• (inl₂• (f₂₁ x))) (push◾• (inr₂• (f₂₃ x)))
 \end{code}
 %
 Using |PathOver-=-eqv| we get a square of type
 %
 \begin{code}
-Square  (push◾• (inl₂∙ (f₂₁ x)))
-        (ap (λ y → inl◾∙ (f₁• y)) (push₂• x))
-        (ap (λ y → inr◾∙ (f₃• y)) (push₂• x))
-        (push◾∙ (inr₂∙ (f₂₃ x)))
+Square  (push◾• (inl₂• (f₂₁ x)))
+        (ap (λ y → inl◾• (f₁• y)) (push₂• x))
+        (ap (λ y → inr◾• (f₃• y)) (push₂• x))
+        (push◾• (inr₂• (f₂₃ x)))
 \end{code}
 %
 Using |whisker-square|, we can reduce the top and bottom of this square.
-For the top: unfusing the |ap| gives |ap inl◾∙ (ap f₁∙ (push₂• x))|, and
+For the top: unfusing the |ap| gives |ap inl◾• (ap f₁• (push₂• x))|, and
 reducing the pushout recursion on |push|, we can reduce |ap f₁• (push₂•
 x)| to |Kan-right (ap inl₀• (s₁₁ y)) (ap inr₀• (s₁₃ y)) (push₀• (f₁₂
 x))|. Finally, using the fact that Kan operations commute with |ap|, we
@@ -206,7 +210,7 @@ Square  (push◾• (inl₂• (f₂₁ x)))
         (Kan-right  (ap inr◾• (ap inl₄• (s₃₁ x)))
                     (ap inr◾• (ap inr₄• (s₃₃ x)))
                     (ap inr◾• (push₄• (f₃₂ x))))
-        (push◾∙ (inr₂• (f₂₃ x)))
+        (push◾• (inr₂• (f₂₃ x)))
 \end{code}
 %
 which we will shorten to
@@ -237,7 +241,7 @@ Note that the |pᵢⱼ| fit in the following diagram:
 \end{tikzpicture}
 \end{center}
 
-However, when constructing the map |A•◾ → A◾∙| using a double induction on the
+However, when constructing the map |A•◾ → A◾•| using a double induction on the
 pushouts, we can check that what we need is a square in |A◾•| of type
 %
 \begin{code}
@@ -245,22 +249,22 @@ Square p₁₂ (Kan-left p₁₁ p₃₁ p₂₁) (Kan-left p₁₃ p₃₃ p₂
 \end{code}
 %
 % \begin{comment}
-% to : A∙◾ → A◾∙
+% to : A•◾ → A◾•
 % to (inl x) = to-l x
 % to (inr x) = to-r x
 % ap to (push x) = to-p x
 % 
-% to-l : A∙₀ → A◾∙
+% to-l : A•₀ → A◾•
 % to-l (inl x) = inl (inl x)
 % to-l (inr x) = inr (inl x)
 % ap to-l (push x) = push (inl x)
 % 
-% to-r : A∙₄ → A◾∙
+% to-r : A•₄ → A◾•
 % to-r (inl x) = inl (inr x)
 % to-r (inr x) = inr (inr x)
 % ap to-r (push x) = push (inr x)
 % 
-% to-p : (x : A∙₂) → to-l (f∙₁ x) = to-r (f∙₃ x)
+% to-p : (x : A•₂) → to-l (f•₁ x) = to-r (f•₃ x)
 % to-p (inl x) = ap inl (push x)
 % to-p (inr x) = ap inr (push x)
 % ap to-p (push x) =
@@ -271,13 +275,13 @@ Square p₁₂ (Kan-left p₁₁ p₃₁ p₂₁) (Kan-left p₁₃ p₃₃ p₂
 % ap inl (push (f₁₂ x)) =/ ap inr (push (f₃₂ x))
 % 
 % over
-% ap to-l (ap f₁∙ (push x))
+% ap to-l (ap f₁• (push x))
 % == ap to-l (Kan-left (ap inl (s₁₁ x)) (ap inr (s₃₁ x)) (push (f₂₁ x)))
 % == Kan-left (ap inl (ap inl (s₁₁ x))) (ap inr (ap inl (s₃₁ x))) (push (inl (f₂₁ x)))
 % \end{comment}
 %
-Hence to define the map |A•◾ → A◾∙|, we need a map between those two square
-types, and in order to do the complete proof that |A•◾ ≃ A◾∙| we will need
+Hence to define the map |A•◾ → A◾•|, we need a map between those two square
+types, and in order to do the complete proof that |A•◾ ≃ A◾•| we will need
 an equivalence between them.
 
 One way to do it is as follows: we first do a path induction on |p₁₁|, |p₁₃|,
