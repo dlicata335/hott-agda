@@ -55,8 +55,10 @@ we would like to define a type |Square l t b r|, where an element of
 this type represents the inside of such a square.  One possible
 definition is as path-over in a path type:
 \begin{code}
-PathOver (\ (x:A,y:A) → Pair x y) (pair= t b) l r
+PathOver (\ (x:A,y:A) → Pair x y) (pair-line t b) l r
 \end{code}
+where |pair-line| is a non-dependent version of |pair=| for |A × B|,
+which takes two homogeneous paths.  
 Another is as a disc (path-between-paths) between composities |Path (l ·
 b) (t · r)|.  We can also define a new inductive family
 dependent on four points, which we make implicit arguments, and four
@@ -99,7 +101,7 @@ PathOver-=-eqv : {A B : Type} {f g : A → B}
   → (PathOver (\ x → Path (f x) (g x)) α β1 β2)
   ≃ (Square β1 (ap f α) (ap g α) β2)
 \end{code}
-This equivalence includes map into and out of a path-over in a path
+This equivalence includes maps into and out of a path-over in a path
 type, which we will write as |in-PathOver=| and |out-PathOver=|; 
 we use the
 |in-| and |out-| notation analogously for other equivalences.
@@ -159,8 +161,7 @@ ap-square : {A B : Type} (f : A → B)
 We have rules for introducing and eliminating squares in each type.  For
 example, for |A × B|, we can pair a square in |A| with a square in |B|
 to get a square in |A × B|, whose boundary sides are the pairs of the
-sides of the given squares (|pair-line| is the non-dependent version of
-|pair=| from above; it takes two homogeneous paths):
+sides of the given squares::
 \begin{code}
 pair-line  : Path{A} a0 a1 → Path{B} b0 b1
            → Path (a0,a1) (b0,b1)

@@ -10,8 +10,8 @@ McBride~\citep{mcbride00thesis} introduced a \emph{heterogeneous
   equality}, which is an equality type |a:A = b:B| that relates two
 elements |a:A| and |b:B| which may have two judgementally distinct
 types, though the reflexivity constructor applies only when both the two
-types and the two terms are judgementally equal.  McBride's
-heterogeneous equality is used to elide the reasoning why equations type
+types and the two terms are judgementally equal.  
+Heterogeneous equality is used to elide the reasoning why equations type
 check from the equations themselves, which simplifies some
 constructions.  However, McBride's heterogeneous equality is logically
 equivalent to a homogeneous equality type satisfying uniqueness of
@@ -28,7 +28,7 @@ define a type |HEq A B α a b| where |α : Path{Type} A B| and |a:A| and
 different types \emph{along a specific equality α between the types}.
 It can be defined as an inductive family with a reflexivity constructor
 |hid : HEq A A id a a|, which relates |a| to itself |a| along the
-identity equivalence |id|.
+reflexivity path |id|.
 %% \footnote{This should perhaps go up a universe
 %%   size level because it is an inductive family indexed by a |Type|.}
 %% \begin{code}
@@ -101,11 +101,12 @@ A typical example is
 HEq  (Vec Nat (n + m)) (Vec Nat (m + n))
      (ap (Vec Nat) (+-comm n m)) v1 v2
 \end{code}
-where |Vec A k| represents vectors of |A| of length |k|, and |v1 : Vec
-Nat (n + m)| and |v2 : Vec Nat (m + n)|.  Both |A| and |B| have the form
-|Vec Nat -|, and the reason why the two types are equal is essentially
-commutativity of addition---but we need to use use |ap| (congruence of
-equality) to apply |Vec Nat| to both sides of the commutativity proof.
+where |Vec Nat k| represents vectors of length |k|, and |v1 : Vec Nat (n
++ m)| and |v2 : Vec Nat (m + n)|.  In this example, the two types both
+have the form |Vec Nat -|, and the reason why the two types are equal is
+essentially commutativity of addition---but we need to use use |ap|
+(congruence of equality) to apply |Vec Nat| to both sides of the
+commutativity proof.
 
 Heterogeneous equalities of this form can be simplified using a
 \emph{factored} hetereogeneous equality type, which separates a context
@@ -206,10 +207,10 @@ different Agda libraries.  In one library, it is defined as in the fifth
 option above (by path induction into the universe).  In another library,
 it is defined as inductive family, which is convenient because we can
 eliminate on a path-over using Agda's support for pattern matching.
-Moreover, this implementation does not really require extending the
-semantics of type theory with this new type constructor: If we defined
-|PathOver C α c1 c2| as as |Path{C a2} (transport C α c1) c2|, then the
-inductive family elimination rule
+Moreover, the inductive family implementation does not really require
+extending the semantics of type theory with this new type constructor:
+If we defined |PathOver C α c1 c2| as as |Path{C a2} (transport C α c1)
+c2|, then the inductive family elimination rule
 %% \begin{code}
 %% PathOver-elim : {A : Type} (C : A → Type) {a1 : A} {c1 : C a1}
 %%   → (C :  {a2 : A} (α : Path a1 a2) (c2 : C a2) 
@@ -231,7 +232,7 @@ interpreting in a model.
 Next, we give a sample of some of the facts about path-overs that are
 commonly used.  Though we use Agda notation, we sometimes elide
 universal quantifiers, implicitly quantifying variables with their most
-general types. Omited proofs are in the companion code.  We write ≃ for
+general types. Omited proofs are in \url{github.com/dlicata335/hott-agda}.  We write ≃ for
 type equivalence.
 
 %% Reflexivity-over-reflexivity is a constructor, and we can also invert
@@ -259,8 +260,8 @@ type equivalence.
 %%   !o id = id
 %% \end{code}
 
-Applying a dependent function to a homogeneous path gives a path over
-it:
+First, applying a dependent function to a homogeneous path gives a path
+over it:
 \begin{code}
 apdo :  {A : Type} {C : A → Type} (f : (a : A) → C a)
         {a1 a2 : A} (α : Path a1 a2)

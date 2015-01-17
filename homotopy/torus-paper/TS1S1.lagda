@@ -80,8 +80,12 @@ c2t' base loop = q
 c2t' loop base = p
 c2t' loop loop = f
 \end{code}
-
-We define |c2t'| as follows:
+We code matching on two arguments as nested circle eliminations, which
+roughly have the form ``|S¹-elim (S¹-elim a q) (S¹-elim p f)|.''  That
+is, when the first argument is |base|, we get a function that sends
+|base| to |a| and |loop| to |q|; when the first argument is |loop|, we
+get a function that sends |base| to |p| and |loop| to |f|.
+We now make this precise:
 \begin{code}
 c2t-square-and-cube :
     Σ[ s : Square  p (ap (S¹-rec a q) loop)
@@ -94,18 +98,17 @@ c2t' = S¹-rec  (S¹-rec a q)
                (λ≃ (S¹-elimo _ p 
                  (in-PathOver-= (fst c2t-square-and-cube))))
 \end{code}
-The function is defined by nested circle eliminations.  The outer
-elimination is a (simply-typed) circle recursion, so we need a point and
-a loop in |S¹ → T|.  The point is again defined by circle recursion,
-sending |base| to |a| and |loop| to |q|.  The loop must be a |Path{S¹ →
-  T} (S¹-rec a q) (S¹-rec a q)|, which, by (homogeneous) function
-extensionality is the same as |(x : S¹) → Path (S¹-rec a q x) (S¹-rec a
-q x)|.  Using circle elimination, we need a |p' : Path{T} (S¹-rec a q
-base) (S¹-rec a q base)|, along with a |PathOver (\ x → Path (S¹-rec a q
-x) (S¹-rec a q x)) loop p' p'|.  Because |S¹-rec a q base ≡ a|, we can
-take |p'| to be |p|.  Applying |PathOver-=-eqv| to reduce a path-over in a
-path type to a square, we need a square |s| with the type given as the
-first component of |c2t-square-and-cube|.  But |(ap (S¹-rec a q) loop)|
+The match on the first argument is a simply-typed circle recursion, so
+we need a point and a loop in |S¹ → T|.  The point is again defined by
+circle recursion, sending |base| to |a| and |loop| to |q|.  The loop
+must be a |Path{S¹ → T} (S¹-rec a q) (S¹-rec a q)|, which, by
+function extensionality is the same as |(x : S¹) → Path
+(S¹-rec a q x) (S¹-rec a q x)|.  Using circle elimination, we need a
+|Path{T} base base| (because |S¹-rec a q base ≡ a|), which we take to be
+|p|, and then a |PathOver (\ x → Path (S¹-rec a q x) (S¹-rec a q x))
+loop p p|. Applying |PathOver-=-eqv| to reduce a path-over in a path
+type to a square, we need a square |s| with the type given as the first
+component of |c2t-square-and-cube|.  But |(ap (S¹-rec a q) loop)|
 reduces (propositionally) to |q|, and the square we want is the |f|
 constructor for the torus composed with this propositional reduction.
 Writing
@@ -126,10 +129,8 @@ precise version of the next two equations is
 ap (λ x → c2t' x base) loop = p
 ap (λ y → c2t' base y) loop = q
 \end{code}
-We construct a function |S¹ → T| that indicates the desired position,
-and then use |ap| to apply it to the path |loop|. Proving these
-equations will involve reducing circle eliminations on the |loop|
-constructor, so they will only hold propositionally.
+Proving these equations will involve reducing circle eliminations on the
+|loop| constructor, so they will only hold propositionally.
 
 For the final equation, we first need to clarify how to apply |c2t'| to
 the |loop| in both positions.  For any curried function |f : A → B → C|
@@ -178,8 +179,8 @@ The specific case of |apdo-ap c2t' loop loop| is a square
   \draw (ur) to node[right] {|ap (λ x → c2t' x base) loop|} (br);
 \end{tikzpicture}
 \end{center}
-and note that the reduction rules above equate the sides of this square
-the sides of |f|.
+and note that the path reduction rules above equate the sides of this
+square the sides of |f|.
 
 Thus, the desired propositional reduction rules for |c2t'| are
 \begin{code}
@@ -187,8 +188,8 @@ c2t'-β :  Σ[ βl2 : Square (ap (λ y → c2t' base y) loop) id id q ]
           Σ[ βl1 : Square (ap (λ x → c2t' x base) loop) id id p ]  
             Cube (apdo-ap c2t' loop loop) f βl1 βl2 βl2 βl1
 \end{code}
-This says that we want two squares for ``|c2t' loop base|'' and ``|c2t'
-base loop|'', and then a cube along these squares for the reduction on
+This says that we want two squares for ``|c2t' base loop|'' and ``|c2t'
+loop base|'', and then a cube along these squares for the reduction on
 ``|c2t' loop loop|''.  It will be important below that this cube's top
 equals its bottom and front equals its back.
 
@@ -220,11 +221,11 @@ are as follows:
 □=  f
 \end{code}
 We think of this as an equation chain between these eight squares, but
-proof of each step is really a cube, rather than a homogeneous path.  In
-order, the justifications for the steps are (0) by definition, (1)
+the proof of each step is really a cube, rather than a homogeneous path.
+In order, the justifications for the steps are (0) by definition, (1)
 un-fusing |ap (\ x -> c2t' x y) loop| to |ap (\ f → f y) (ap c2t'
-loop)|, (2) reducing |c2t'| (which is a circle recursion) on |loop|,
-(3) reducing |ap (\ f → f y)| on a function extensionality, (4) reducing
+loop)|, (2) reducing |c2t'| (which is a circle recursion) on |loop|, (3)
+reducing |ap (\ f → f y)| on a function extensionality, (4) reducing
 |S¹-elimo| on the loop, (5) collapsing the two sides of the |PathOver-=|
 equivalence, and (6) using |snd c2t-square-and-cube|.  Thus, we do what
 looks like an equational proof that the square |(apdo-ap c2t' loop
