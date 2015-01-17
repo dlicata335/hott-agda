@@ -158,7 +158,10 @@ and of the equalities go by double induction on the pushouts, hence
 there will be essentially nine steps each time: four for the points
 coming from |A₀₀|, |A₄₀|, |A₀₄| and |A₄₄|, four for the lines coming
 from |A₀₂|, |A₄₂|, |A₂₀|, |A₄₀|, and one for the squares coming from
-|A₂₂|.
+|A₂₂|. Indeed, even if the statement of the problem only involves higher
+inductive types with constructors of dimension 0 and 1, we are nesting
+them by considering a pushout of pushouts, hence we will have to deal
+with squares.
 
 It is worth noting that something nontrivial happens in the case of the squares
 coming from |A₂₂|. Indeed, the one-dimensional constructor of |A◾•| is
