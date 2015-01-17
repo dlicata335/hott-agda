@@ -187,7 +187,7 @@ Square  (push◾• (inl₂• (f₂₁ x)))
         (push◾• (inr₂• (f₂₃ x)))
 \end{code}
 %
-Using |whisker-square|, we can reduce the top and bottom of this square.
+Using |whisker-square|, we can reduce the top and bottom.
 For the top: unfusing the |ap| gives |ap inl◾• (ap f₁• (push₂• x))|, and
 reducing the pushout recursion on |push|, we can reduce |ap f₁• (push₂•
 x)| to |Kan-right (ap inl₀• (s₁₁ y)) (ap inr₀• (s₁₃ y)) (push₀• (f₁₂
@@ -290,7 +290,7 @@ then we can apply |square-symmetry-eqv|.
 
 Another way to see it is as a three-dimensional cube:
 \begin{center}
-\begin{tikzpicture}[scale=0.6]
+\begin{tikzpicture}
   \coordinate (A) at (0,3);
   \coordinate (B) at (2,3);
   \coordinate (C) at (3,2);
@@ -311,9 +311,8 @@ Another way to see it is as a three-dimensional cube:
 \end{tikzpicture}
 \end{center}
 %
-We fill the four side faces (those in the same plane as |p₁₁|, |p₁₃|,
-|p₃₁| and |p₃₃|) with Kan filling operations, and the remaining front
-and back faces are exactly the two square types of which we want to
-prove the equivalence.  Thus, it suffices to observe that, by Kan
-filling any four faces that form a tube determine
+If we fill the left, right, top, and bottom, the front
+and back faces are exactly the two square types 
+that we want to prove equivalent.  Thus, it suffices to observe that, by the Kan
+filling operations, any four faces of a cube that form a tube determine
 an equivalence between the other two opposing faces.
