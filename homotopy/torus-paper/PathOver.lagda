@@ -5,7 +5,7 @@
 
 The path type |Path{A} a0 a1| is sometimes called \emph{homogeneous
   equality}, because it relates two elements |a0| and |a1| whose types
-are definitionally/judgementally equaly.
+are definitionally/judgementally equal.
 McBride~\citep{mcbride00thesis} introduced a \emph{heterogeneous
   equality}, which is an equality type |a:A = b:B| that relates two
 elements |a:A| and |b:B| which may have two judgementally distinct
@@ -15,7 +15,7 @@ Heterogeneous equality is used to elide the reasoning why equations type
 check from the equations themselves, which simplifies some
 constructions.  However, McBride's heterogeneous equality is logically
 equivalent to a homogeneous equality type satisfying uniqueness of
-identity proofs~\citep{mcbride00thesis}, which is undesireable in
+identity proofs~\citep{mcbride00thesis}, which is undesirable in
 homotopy type theory, because not all types should be sets.
 
 This paper provides an investigation of how to manage the reasons why
@@ -27,7 +27,7 @@ define a type |HEq A B α a b| where |α : Path{Type} A B| and |a:A| and
 |b:B|.  This heterogeneous equality relates two elements of two
 different types \emph{along a specific equality α between the types}.
 It can be defined as an inductive family with a reflexivity constructor
-|hid : HEq A A id a a|, which relates |a| to itself |a| along the
+|hid : HEq A A id a a|, which relates |a| to itself along the
 reflexivity path |id|.
 %% \footnote{This should perhaps go up a universe
 %%   size level because it is an inductive family indexed by a |Type|.}
@@ -109,7 +109,7 @@ essentially commutativity of addition---but we need to use use |ap|
 commutativity proof.
 
 Heterogeneous equalities of this form can be simplified using a
-\emph{factored} hetereogeneous equality type, which separates a context
+\emph{factored} heterogeneous equality type, which separates a context
 (like |Vec Nat -|) from an equality on the insides of the context.  This
 is called a \emph{path over a path} or \emph{path-over} type (it is
 discussed briefly in \citep{uf13hott-book}), and it can be defined as an
@@ -134,9 +134,9 @@ Using path-over, the above example is
 \begin{code}
 PathOver (Vec Nat) (+-comm n m) v1 v2
 \end{code}
-In this example |C| is |Vec Nat|, which is morally applied to |n+m| to get
-the type of |v1|, to |m+n| to get the type of |v2|, and to |+-comm n m|
-to get the proof that the two types are equal.
+Here |C| is |Vec Nat|, which is applied to |n+m| to get the type of
+|v1|, to |m+n| to get the type of |v2|, and to |+-comm n m| to get the
+proof that the two types are equal.
 
 %% Using implicit arguments (the path α usually provides enough information
 %% to infer its endpoints) and constructor overloading (Agda can infer
@@ -182,10 +182,11 @@ fibrations, so a type |C : A → Type| can be pictured as its total space
 |Σ a:A. C a| projecting down to |A| by first projection.  A path-over |γ
 : PathOver C α c1 c2| represents a path in |Σ C| between |(a1,c1)| and
 |(a2,c2|), such that |ap fst σ| is exactly |α|.  That is, it is a path
-in the total space that projects down to, or \emph{lays over}, |α|:
+in the total space that projects down to, or \emph{lays over}, |α| 
+(path pairing |pair= α γ| will be made precise below):
 
 \begin{center}
-  \begin{tikzpicture}[yscale=.5,xscale=3]
+  \begin{tikzpicture}[yscale=.45,xscale=3]
     \draw (0,0) arc (-90:170:1cm) node[anchor=south east] {|A|} arc (170:270:1cm);
     \draw (0,4) arc (-90:170:1cm) node[anchor=south east] {|Σ C|} arc (170:270:1cm);
     \draw[->] (0,3.8) -- node[auto] {|fst|} (0,2.2);
@@ -198,9 +199,6 @@ in the total space that projects down to, or \emph{lays over}, |α|:
          {|pair= α γ|} (b2);
   \end{tikzpicture}
 \end{center}
-\noindent The path pairing |pair= α γ| will be made precise below.
-
-\subsection{Implementation}
 
 We have experimented with two implementations of path-over in two
 different Agda libraries.  In one library, it is defined as in the fifth
@@ -232,8 +230,7 @@ interpreting in a model.
 Next, we give a sample of some of the facts about path-overs that are
 commonly used.  Though we use Agda notation, we sometimes elide
 universal quantifiers, implicitly quantifying variables with their most
-general types. Omited proofs are in \url{github.com/dlicata335/hott-agda}.  We write ≃ for
-type equivalence.
+general types. Omitted proofs are in \url{github.com/dlicata335/hott-agda}.  
 
 %% Reflexivity-over-reflexivity is a constructor, and we can also invert
 %% and compose path-overs, which lay over the corresponding operation
@@ -283,7 +280,7 @@ In fact, this is an equivalence, with inverse given by |ap fst| and
 |apdo snd|---these three behave like introduction and elimination rules
 for paths in a Σ-type.
 
-We have the equivalence between |PathOver| and a homogeneous equation
+We have the type equivalence (written ≃) between |PathOver| and a homogeneous equation
 using |transport|:
 \begin{code}
 hom-to-over/left-eqv :   Path (transport C α a1) a2
@@ -378,18 +375,18 @@ induction is used to define a function
 \begin{code}
 decode : (x : S¹) → Cover x → Path base x
 \end{code}
-where |Cover|, defined by circle induction, is the universal cover
-fibration.  In this case, we apply circle elimination with |C x := Cover
-x → Path base x|.  In the case for |base|, we supply a function |loop^ :
-Int → Path base base| (by definition |Cover base| is |Int|).
-In the case for |loop|, |PathOverΠ-eqv| is used to reduce the goal to
+where |Cover| is the universal cover fibration.  In this case, we apply
+circle elimination with |C x := Cover x → Path base x|.  In the case for
+|base|, we supply a function |loop^ : Int → Path base base| (by
+definition |Cover base| is |Int|).  In the case for |loop|,
+|PathOverΠ-eqv| is used to reduce the goal to
 \begin{code}
 (x y : Cover base) (β : PathOver Cover loop x y) →
   PathOver  (\ p → Path base (fst p)) (pair= loop β)
             (loop^ x) (loop^ y)
 \end{code}
-Because we are defining a non-dependent function, the fibration in the
-range does not mention |snd p|, so using |over-o-ap-eqv| to
+Because we are defining a non-dependent function, the function's range type
+does not mention |snd p|, so using |over-o-ap-eqv| to
 reassociate, and then reducing |ap fst (pair= loop β)| to |loop|, we need
 to show
 \begin{code}

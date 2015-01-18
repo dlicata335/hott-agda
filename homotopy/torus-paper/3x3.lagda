@@ -53,7 +53,7 @@ propositional reduction rules on paths.
 \end{code}}
 %
 
-The problem is now the following. Suppose that we have nine types |Aᵢⱼ|, twelve
+The problem is now the following. Given nine types |Aᵢⱼ|, twelve
 maps |fᵢⱼ| and four equalities |sᵢⱼ| as follows:
 \begin{center}
 \begin{tikzpicture}
@@ -91,7 +91,7 @@ where the double arrows mean that we have for instance
 \begin{code}
 s₁₁ : (x : A₂₂) → Path (f₀₁ (f₁₂ x)) (f₁₀ (f₂₁ x))
 \end{code}
-We want to compute its “two-dimensional pushout”. There are at least two ways to
+we want to compute its “two-dimensional pushout”. There are at least two ways to
 do that. We can either first compute the pushout of each of the three lines,
 which fit together in a diagram as follows:
 %
@@ -153,15 +153,15 @@ Hence, the complete Agda definition of |f₁•| is the following:
 \end{code}
 
 To prove that |A◾•≃A•◾|, we construct two maps back and forth and prove
-that the two compositions are the identity. The construction of the maps
-and of the equalities go by double induction on the pushouts, hence
-there will be essentially nine steps each time: four for the points
-coming from |A₀₀|, |A₄₀|, |A₀₄| and |A₄₄|, four for the lines coming
-from |A₀₂|, |A₄₂|, |A₂₀|, |A₄₀|, and one for the squares coming from
-|A₂₂|. Indeed, even if the statement of the problem only involves higher
-inductive types with constructors of dimension 0 and 1, we are nesting
-them by considering a pushout of pushouts, hence we will have to deal
-with squares.
+that the two compositions are the identity.  Even though the statement
+of the problem involves only higher inductive types (pushouts) with only
+point and path constructors, we are nesting them by considering a
+pushout of pushouts, so we will have to deal with squares.  The
+construction of the maps and of the equalities go by double induction on
+the pushouts, hence there will be essentially nine steps each time: four
+for the points coming from |A₀₀|, |A₄₀|, |A₀₄| and |A₄₄|, four for the
+lines coming from |A₀₂|, |A₄₂|, |A₂₀|, |A₄₀|, and one for the squares
+coming from |A₂₂|.
 
 It is worth noting that something nontrivial happens in the case of the squares
 coming from |A₂₂|. Indeed, the one-dimensional constructor of |A◾•| is
@@ -192,7 +192,7 @@ Square  (push◾• (inl₂• (f₂₁ x)))
 %
 Using |whisker-square|, we can reduce the top and bottom.
 For the top: unfusing the |ap| gives |ap inl◾• (ap f₁• (push₂• x))|, and
-reducing the pushout recursion on |push|, we can reduce |ap f₁• (push₂•
+reducing the pushout recursion on |push| goes from |ap f₁• (push₂•
 x)| to |Kan-right (ap inl₀• (s₁₁ y)) (ap inr₀• (s₁₃ y)) (push₀• (f₁₂
 x))|. Finally, using the fact that Kan operations commute with |ap|, this is the same as
 %

@@ -59,7 +59,7 @@ PathOver (\ (x:A,y:A) → Pair x y) (pair-line t b) l r
 \end{code}
 where |pair-line| is a non-dependent version of |pair=| for |A × B|,
 which takes two homogeneous paths.  
-Another is as a disc (path-between-paths) between composities |Path (l ·
+Another is as a disc (path-between-paths) between composites |Path (l ·
 b) (t · r)|.  We can also define a new inductive family
 dependent on four points, which we make implicit arguments, and four
 lines, representing squares:
@@ -205,9 +205,7 @@ original square |s| with these paths:
 \end{tikzpicture}
 \end{center}
 
-More generally, we can compose squares vertically and horizontally
-(which is like ``retyping'' one side of a square by another
-square):
+We can compose squares vertically and horizontally:
 \begin{code}
   _·-square-v_ : Square l t b r → Square l' b b' r'
     → Square (l · l') t b' (r · r')
@@ -344,12 +342,12 @@ fill-square-right :  {A : Type} {a00 a01 a10 a11 : A}
 \end{center}
 Though both the groupoid structure (identity, composition, inverses, the
 groupoid laws) and the Kan filling result from path induction, it is
-instructive to construct them directly from each other.  For example, to
-derive the Kan filler, we can define |r| to be |! t · l · b|, and then,
-as a disc between composites, the required square is a |Path (l · b) (t
-· (! t · l · b))| using the groupoid laws.  Conversely, from the Kan
-filling we could define |p · q| as |fst (fill p id q)|, and then |snd
-(fill p id q)| is used to show the groupoid laws.  
+illustrative to construct them directly from each other.  To derive the
+Kan filler, we can define the right side |r| to be |! t · l · b|, and
+then, as a disc between composites, the required square is a |Path (l ·
+b) (t · (! t · l · b))| using the groupoid laws. From the Kan filling we
+can define |p · q| as |fst (fill p id q)|, and then use |snd (fill p id
+q)| to show the groupoid laws.
 %% In the Agda library,
 %% we have composition defined directly by path induction, rather than as a
 %% filler, but we nonetheless have a path
@@ -372,7 +370,7 @@ After reducing the |ap|'s using |whisker-square|, we need a
 \begin{code}
 Square (loop^ x) id loop (loop^ (x + 1))
 \end{code}
-But |loop^(x+1) ≡ loop^x · loop|, so we need a 
+But |loop^(x+1)| is defined to be |loop^x · loop|, so we need a 
 \begin{code}
 Square (loop^ x) id loop (loop^ x · loop)
 \end{code}
@@ -380,9 +378,9 @@ which is the characterization of composition as a Kan filler.
 
 \subsection{Square over a square}
 
-Just as we had a type for a path in a fibration over a path in the base,
-it will be useful to have a type of squares in a fibration over a square
-in the base.  As an inductive family, this is defined as:
+Just as we had a type for a path in a dependent type over a path in the base,
+it will be useful to have a type of squares in a dependent type over a square
+in the base:
 \begin{code}
 data SquareOver {A : Type} (B : A → Type) 
   {a00 : A} {b00 : B a00} : {a01 a10 a11 : A} 
@@ -461,7 +459,7 @@ T-elim : (C : T → Type) (a' : C a)
          (x : T) → C x
 \end{code}
 
-For constrast, writing out the type of |T-elim| using homogeneous paths
+For contrast, writing out the type of |T-elim| using homogeneous paths
 directly gives
 \begin{code}
 T-elim : (C : T → Type) (a' : C a) 
@@ -481,7 +479,7 @@ to prove |(x : T) → Path (c2t (t2c x)) x|.  This means that the
 induction formula |C| will itself be a path type, so for the |f'| goal,
 we will need to give a |SquareOver| in a path type.  Just as a path-over
 in a path type is a square, a |SquareOver| in a path type is a
-3-dimensional cube, so we need one more dimension.
+3-dimensional cube.
 
 
 

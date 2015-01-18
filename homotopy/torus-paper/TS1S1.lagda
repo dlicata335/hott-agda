@@ -102,7 +102,7 @@ The match on the first argument is a simply-typed circle recursion, so
 we need a point and a loop in |S¹ → T|.  The point is again defined by
 circle recursion, sending |base| to |a| and |loop| to |q|.  The loop
 must be a |Path{S¹ → T} (S¹-rec a q) (S¹-rec a q)|, which, by
-function extensionality is the same as |(x : S¹) → Path
+(homogeneous) function extensionality, is equivalent to |(x : S¹) → Path
 (S¹-rec a q x) (S¹-rec a q x)|.  Using circle elimination, we need a
 |Path{T} base base| (because |S¹-rec a q base ≡ a|), which we take to be
 |p|, and then a |PathOver (\ x → Path (S¹-rec a q x) (S¹-rec a q x))
@@ -230,7 +230,7 @@ reducing |ap (\ f → f y)| on a function extensionality, (4) reducing
 equivalence, and (6) using |snd c2t-square-and-cube|.  Thus, we do what
 looks like an equational proof that the square |(apdo-ap c2t' loop
 loop)| ``equals'' the square |f|, but each step may also contribute to
-the back-top-bottom-front ``tube'' that connects the boundaries of these
+the back-top-bottom-front tube that connects the boundaries of these
 two squares.  For example, step (6) using |snd c2t-square-and-cube|
 contributes |βsquare| on the top and bottom.
 
@@ -238,7 +238,7 @@ The curious reader may find the the complete Agda proof in the appendix
 (Figure~\ref{fig:ts1s1-full}). The important point is that the term is
 simply a horizontal composition of cubes, which correspond to steps (1)
 through (6) above.  The sides of the cube are represented by the |_|'s,
-which are filled in by unificiation.  This works because each of the
+which are filled in by unification.  This works because each of the
 cubes used in steps (1) through (6) have the property that their front
 is equal to their back and their top is equal to their bottom, so |βl1|
 and |βl2| can be defined to be the composites of these sides, and the
@@ -270,7 +270,7 @@ definitionally.  After a bit of massaging (using |PathOver-=| to mediate
 between a path-over in a path type and a square; collapsing round-trips
 of the |PathOver-=| equivalence; using |in-SquareOver-=| to create a
 square-over from a cube; using |cube-symmetry-left-to-top| to put the
-``relevant'' faces on the left-right sides), the remaining goals are
+important faces on the left-right sides), the remaining goals are
 \begin{code}
 p-case : Square  (ap (λ z → c2t (t2c z)) p) id 
                  id (ap (λ z → z) p)
@@ -324,7 +324,7 @@ trivial square) and |q| (as a vertically trivial square).  The remaining
 sides equate |ap (uncurry f) (pair-line id q)| with |ap (f a) q| and
 similarly for the second component.  
 
-In step (5), we use a |Cube f (ap-square (\ x → x) s) ...| whose
+In step (5), we use a |Cube s (ap-square (\ x → x) s) ...| whose
 remaining sides are the paths between |ap (\ x → x) p| and |p|.
 
 \subsection{Circles to torus to circles}

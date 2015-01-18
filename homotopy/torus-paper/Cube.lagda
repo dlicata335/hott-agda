@@ -5,9 +5,9 @@
 
 \label{sec:cube}
 
-Just as we had a type of squares dependent on four points and four
-lines, which make up the boundary of a square, we have a type of cubes
-dependent on eight points, twelve lines, and six faces: 
+Just as we had a type of square insides, dependent on the boundary of a
+square, we have a type of cubes insides, dependent on eight points,
+twelve lines, and six faces:
 
 \begin{code}
 data Cube {A : Type} {a000 : A} : 
@@ -95,22 +95,24 @@ An element of this type represents the inside of a cube
 \end{tikzpicture}
 \end{center}
 
-We think of a |Cube left right back top bot front| as an equality
-between the left and right squares, along the ``tube'' given by the
-|back| and |top| and |bot| and |front|.  As usual, we could avoid
+All the points and lines are implicit arguments.  The order of faces is
+different than for squares: we write |Cube left right back top bot
+front| to prioritize the left and right sides, because we will mostly
+use cubes as an equality between the left and right squares (which are
+important), along the ``tube'' given by the |back| and |top| and |bot|
+and |front| (which we care less about).  As usual, we could avoid
 introducing a new inductive family by instead defining a cube using
 square induction, to say that when the back, top, bottom, and front are
-the identity squares, a cube is a three-dimensional path between the
-left and the right.
+the identity squares, a cube is a path between the left and the right.
 
 Many of the lemmas about cubes are analogous to (and dependent on) those
 for squares.  For example, we can compose two cubes horizontally:
 \begin{code}
-  _·-cube-h_ : Cube f--0 f--1 f0-- f-0- f-1- f1--
-    → Cube f--1 f--2 f0--' f-0-' f-1-' f1--'
-    → Cube  f--0 f--2 
-            (f0-- ·-square-h f0--') (f-0- ·-square-h f-0-') 
-            (f-1- ·-square-h f-1-') (f1-- ·-square-h f1--')
+  _·-cube-h_ : Cube lf rt bk tp bt fr
+    → Cube rt rt' bk' tp' bt' fr'
+    → Cube  lf rt' 
+            (bk ·-square-h bk') (tp ·-square-h tp') 
+            (bt ·-square-h bt'') (fr ·-square-h fr')
 \end{code}
 
 We can apply a function to a cube, to get a cube between the action of
@@ -182,9 +184,7 @@ ap-square-o : (s : Square l t b r) →
         (ap-o g f l) (ap-o g f t) (ap-o g f b) (ap-o g f r)
 \end{code}
 
-\subsection{Example: Torus reduction rules}
-
-The propositional reduction rules for torus recursion |T-rec| can be
+Similarly, the propositional reduction rules for torus recursion |T-rec| can be
 phrased as squares and cubes.
 \begin{code}
 βp/rec : Square (ap (T-rec a' p' q' f') p) id id p'
