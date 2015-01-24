@@ -60,7 +60,7 @@ module Torus where
   
   open T public
 
-  module Tη where
+  module UMP where
 
      -- this is a special case of in-PathOver-Square with some reduction.  
      -- but it was too annoying to do the reduction, and too easy to just do by path induction
@@ -77,14 +77,14 @@ module Torus where
               Σ \ (pq : Path a a × Path a a) → 
               Square (fst pq) (snd pq) (snd pq) (fst pq)
    
-     to : ∀ {X} → (T → X) → (T-rec-prem X)
-     to = (λ f₁ → f₁ a , (ap f₁ p , ap f₁ q) , ap-square f₁ f) 
+     apply-to-constructors : ∀ {X} → (T → X) → (T-rec-prem X)
+     apply-to-constructors g = g a , (ap g p , ap g q) , ap-square g f
 
-     from : ∀ {X} → (T-rec-prem X) → (T → X) 
-     from = (λ z → T-rec (fst z) (fst (fst (snd z))) (snd (fst (snd z))) (snd (snd z)))
+     T-recΣ : ∀ {X} → (T-rec-prem X) → (T → X) 
+     T-recΣ = (λ z → T-rec (fst z) (fst (fst (snd z))) (snd (fst (snd z))) (snd (snd z)))
    
-     tf : {X : Type} (g : T → X) → from (to g) == g
-     tf g = λ≃ (T-elim _ id (PathOver=.in-PathOver-= (vertical-degen-square (βp/rec _ _ _ _))) 
+     η : {X : Type} (g : T → X) → T-recΣ (apply-to-constructors g) == g
+     η g = λ≃ (T-elim _ id (PathOver=.in-PathOver-= (vertical-degen-square (βp/rec _ _ _ _))) 
                             (PathOver=.in-PathOver-= (vertical-degen-square (βq/rec _ _ _ _))) 
                             (SquareOver=ND.in-SquareOver-= 
                               (whisker-cube (! (IsEquiv.β (snd PathOver=.out-PathOver-=-eqv) _))
@@ -98,11 +98,14 @@ module Torus where
                                                           (horiz-degen-square-symmetry _)
                                                (cube-symmetry-left-to-top (βf/rec _ _ _ _))))))
 
-     ft : {X : Type} (g : T-rec-prem X) → to (from g) == g
-     ft (a' , (p' , q') , f') = 
+     β : {X : Type} (a'p'q'f' : T-rec-prem X) → apply-to-constructors (T-recΣ a'p'q'f') == a'p'q'f'
+     β (a' , (p' , q') , f') = 
          ap (λ x → a' , x) 
             (pair= (pair×≃ (βp/rec a' p' q' f') (βq/rec a' p' q' f'))
                    (in-PathOver-Square' (βf/rec _ _ _ _))) 
 
-     η : ∀ {X} → Equiv (T → X) (T-rec-prem X)
-     η = improve (hequiv to from tf ft)
+     ump : ∀ {X} → Equiv (T → X) (T-rec-prem X)
+     ump = improve (hequiv apply-to-constructors T-recΣ η β)
+
+     T→ext : ∀ {X} (f g : T → X) → apply-to-constructors f == apply-to-constructors g → f == g
+     T→ext f g p = ! (η f) · ap T-recΣ p · η g
