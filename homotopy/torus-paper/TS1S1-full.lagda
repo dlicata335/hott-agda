@@ -3,9 +3,6 @@
 
 \begin{figure*}[h]
 
-\textbf{Appendix: detailed proof to be consulted at your discresion.
-This page shows the full proof terms for Section~\ref{sec:torus}.}
-
 \ignore{ 
 \begin{code}
 {-# OPTIONS --type-in-type --without-K #-}

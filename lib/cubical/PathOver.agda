@@ -1,7 +1,11 @@
 
 {-# OPTIONS --type-in-type --without-K #-}
 
-open import lib.BasicTypes
+open import lib.First
+open import lib.Prods
+open import lib.Functions
+open import lib.AdjointEquiv
+open import lib.Paths
 
 module lib.cubical.PathOver where
 
@@ -377,6 +381,12 @@ module lib.cubical.PathOver where
   PathOverΠ-NDdomain {A = A} {B = B}{δ = id} {f}{g} = 
     apΠ id (λ≃ (λ x → ua (hom-to-over/left-eqv ∘equiv !equiv (hom-to-over/left-eqv {δ = id})) ∘ ua (!equiv (path-induction-homo-e-eqv (λ y α → PathOver (λ z → B (fst z) (snd z)) (pair= id α) (f x) (g y)))))) ∘ PathOverΠ
 
+  PathOverΠ-NDrange : {Δ : Type} {A : Δ → Type} {B : Type}
+              → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B} {g : (x : A θ2) → B }
+              →  PathOver (\ θ → (x : A θ) → B) δ f g 
+              == ((x : A θ1) (y : A θ2) (α : PathOver A δ x y) → Path (f x) (g y))
+  PathOverΠ-NDrange = apΠ id (λ≃ (λ x → apΠ id (λ≃ (λ y → apΠ id (λ≃ (λ z → ua PathOver-constant-eqv)))))) ∘ PathOverΠ
+
   PathOverΠ-id : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
                  → {θ1 : Δ} (f : (x : A θ1) → B (θ1 , x)) {x : _}
                  → coe (PathOverΠ {A = A} {B = B}{δ = id} {f = f}) id x x id == id
@@ -460,11 +470,11 @@ module lib.cubical.PathOver where
   
 
 {-
-  PathOverΣ-eqv : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
-                  → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
-                  → Equiv (PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)
-                           ((Σ \ (α : PathOver A δ (fst p) (fst q)) → PathOver B (pair= δ α) (snd p) (snd q)))
-  PathOverΣ-eqv = ?
+  postulate
+    PathOverΣ-eqv : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+                    → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
+                    → Equiv (PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)
+                             ((Σ \ (α : PathOver A δ (fst p) (fst q)) → PathOver B (pair= δ α) (snd p) (snd q)))
 
   pair=o : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
          → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}

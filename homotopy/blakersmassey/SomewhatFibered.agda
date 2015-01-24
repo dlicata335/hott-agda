@@ -1,6 +1,6 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
-open import lib.Prelude hiding (Z ; ntype)
+open import lib.Prelude hiding (Z)
 open FatPushoutFib
 open ConnectedMap
 open Truncation
@@ -202,11 +202,11 @@ module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type
                          (λ x2 α → Trunc i+j (precodes-l x1 y1 p1 x2 α)) 
                          (λ x2 y2 p2 α → Trunc i+j (precodes-m (x1 , y1 , p1 , x2 , y2 , p2 , α)))
                          (λ y2 α → Trunc i+j (precodes-r x1 y1 p1 y2 α))
-                         (precodes-glue-l x1 y1 p1)
+                         {! (precodes-glue-l x1 y1 p1) !}
                          {!!}
 
   center :  (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) (α : Path (inm x1 y1 p1) w) → (Codes x1 y1 p1 w α)
-  center x1 y1 p1 .(inm x1 y1 p1) id = {!!}
+  center x1 y1 p1 .(inm x1 y1 p1) id = [ {!!} , {!!} ]
 
   Codes-contr : (x1 : X) (y1 : Y) (p1 : P x1 y1) (w : W) (α : Path (inm x1 y1 p1) w) → Contractible (Codes x1 y1 p1 w α)
   Codes-contr x1 y1 p1 w α = center x1 y1 p1 w α , {!the big diagram chase goes here!}
@@ -214,7 +214,7 @@ module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type
   cπ1 : ConnectedMap i {Σ \ x -> Σ \ y → P x y}{X} fst
   cπ1 = λ x → {!cf x!} -- and contract with J
 
-  glue-map-total : (Σ \ x → Σ \ y → P x y) → Σ \ x → Σ \ y → Path{W} (inl x) (inr y)
+  glue-map-total : Z → Σ \ x → Σ \ y → Path{W} (inl x) (inr y)
   glue-map-total (x , y , p) = (x , y , glue-map x y p)
   
   glue-map-connected''' : (x1 : X) (y1 : Y) (p1 : P x1 y1) 
@@ -240,9 +240,8 @@ module homotopy.blakersmassey.SomewhatFibered (X Y : Type) (P : X → Y → Type
                                   ((y' : _) (p' : _) →
                                    Contractible (Trunc i+j (HFiber glue-map-total (x' , y' , p'))))
                                   ,
-                                  raise-HProp
-                                  (Πlevel (λ _ → Πlevel (λ _ → Contractible-is-HProp _))))
+                                  raise-HProp (Πlevel (λ _ → Πlevel (λ _ → Contractible-is-HProp _))))
                                (λ p₁ → glue-map-connected' (fst p₁) (fst (snd p₁)) (snd (snd p₁))) x y α
 
   theorem : ConnectedMap i+j glue-map-total
-  theorem (x , y , p) = {!ntype (glue-map-connected x y p)!} -- 
+  theorem (x , y , p) = ntype (glue-map-connected x y p) 

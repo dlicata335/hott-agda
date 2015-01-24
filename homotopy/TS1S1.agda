@@ -87,3 +87,7 @@ module homotopy.TS1S1 where
 
     red = (! (IsEquiv.β (snd out-PathOver-=-eqv) (square-symmetry loop2-case) ∘ 
           ap out-PathOver-= (S¹.βloop/elimo _ id (in-PathOver-= (square-symmetry loop2-case)))))
+
+
+  T≃S¹×S¹ : Equiv T (S¹ × S¹)
+  T≃S¹×S¹ = improve (hequiv t2c c2t t2c2t (\ p → c2t2c (fst p) (snd p)))

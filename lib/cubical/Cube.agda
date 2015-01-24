@@ -253,7 +253,6 @@ module lib.cubical.Cube where
     → Cube f--1 f--0 (!-square-h f0--) (!-square-h f-0-) (!-square-h f-1-) (!-square-h f1--)
   !-cube-h id = id
 
-
   module SquareOverPathFrom where
     SquareOver-='' : {A : Type} 
       {a000 a010 a100 a110 a001 a011 a101 a111 : A}
@@ -356,6 +355,17 @@ module lib.cubical.Cube where
       → Path (whisker-square id (square-to-disc' f-0-) (square-to-disc' f-1-) id
                 ((!-square-h f0-- ·-square-h f--0) ·-square-h f1--)) f--1
     cube-to-path id = id
+
+    cube-to-path/degen-tube : {A : Type} {a000 : A} {a010 a100 a110 : A}
+                    {p0-0 : a000 == a010}
+                    {p-00 : a000 == a100}
+                    {p-10 : a010 == a110}
+                    {p1-0 : a100 == a110}
+                    {f--0 f--1 : Square p0-0 p-00 p-10 p1-0}
+                  → Cube f--0 f--1 hrefl-square hrefl-square hrefl-square hrefl-square 
+                  → f--0 == f--1
+    cube-to-path/degen-tube {p0-0 = id} {p-00 = id} {p-10 = id} {p1-0} c = ! (·-square-h-unit-r _) · cube-to-path c
+
 {-
   module CubeSquare where
     cube-to-square : {A : Type} {a000 : A}  

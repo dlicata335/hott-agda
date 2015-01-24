@@ -140,7 +140,7 @@ module lib.cubical.Square where
 
   horiz-degen-square : {A : Type} {a a' : A} {p q : a == a'} (r : p == q)
                      → Square p id id q
-  horiz-degen-square {p = id}{q = .id} id = id
+  horiz-degen-square id = hrefl-square
   -- disc-to-square {p0- = p} {id} {id} {q}
 
   horiz-degen-square-to-path : {A : Type} {a a' : A} {p q : a == a'} 
@@ -451,10 +451,16 @@ module lib.cubical.Square where
   connection2 : {A : Type} {a1 a2 a3 : A} {p : a1 == a2} {q : a2 == a3} → Square p p q q
   connection2 {p = id} {q = id} = id
 
+
   ·-square : {A : Type} {a0 a1 a2 : A} {p : a0 == a1} {q : a1 == a2} 
            → Square p id q (q ∘ p)
   ·-square {p = id} = connection
 
+  whisker-square : {A : Type} {a00 : A} 
+                   {a01 a10 a11 : A} → {p p' : a00 == a01} -> {q q' : a00 == a10} -> {r r' : a01 == a11} -> {s s' : a10 == a11}
+                   → p == p' → q == q' → r == r' -> s == s'
+                   → Square p q r s → Square p' q' r' s'
+  whisker-square id id id id s = s
 
   ap-square : {A B : Type} (g : A → B) → 
               {a00 a01 a10 a11 : A} 
@@ -521,6 +527,14 @@ module lib.cubical.Square where
                          → square-symmetry (vrefl-square{p = p}) == hrefl-square
   vrefl-square-symmetry {p = id} = id
 
+  vertical-degen-square-symmetry : {A : Type} {a a' : A} {p q : a == a'} (r : p == q)
+                         → square-symmetry (vertical-degen-square r) == horiz-degen-square r
+  vertical-degen-square-symmetry {p = id} id = id
+
+  horiz-degen-square-symmetry : {A : Type} {a a' : A} {p q : a == a'} (r : p == q)
+                         → square-symmetry (horiz-degen-square r) == vertical-degen-square r
+  horiz-degen-square-symmetry {p = id} id = id
+
   pair-hrefl-vrefl-symmetry : {A : Type} {a00 a01 : A} (p : a00 == a01)
                          {B : Type} {b00 b01 : A} (q : b00 == b01)
                          → square-symmetry (pair-square (hrefl-square{p = p}) (vrefl-square{p = q}))
@@ -532,6 +546,24 @@ module lib.cubical.Square where
                          → square-symmetry (pair-square (vrefl-square{p = p}) (hrefl-square{p = q}))
                          == pair-square hrefl-square vrefl-square
   pair-vrefl-hrefl-symmetry id id = id
+
+  ·-square-h-unit-r' :  {A : Type}
+              {a00 a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              (f   : Square p0- p-0 p-1 p1-)
+              → f ·-square-h hrefl-square == whisker-square id (! (∘-unit-l p-0)) (! (∘-unit-l p-1)) id f 
+  ·-square-h-unit-r' id = id
+
+  ·-square-h-unit-r :  {A : Type}
+              {a00 a11 : A} 
+              {p0- : a00 == a11}
+              {p1- : a00 == a11}
+              (f   : Square p0- id id p1-)
+              → f ·-square-h hrefl-square == f
+  ·-square-h-unit-r f = ·-square-h-unit-r' f
 
   square-symmetry-symmetry : {A : Type} {a00 a01 a10 a11 : A} 
               {l : a00 == a01}
@@ -567,12 +599,6 @@ module lib.cubical.Square where
   sides-same-square : {A : Type} {a : A} (p : a == a) → Square p p p p 
   sides-same-square p = disc-to-square {p0- = p} {p} {p} {p} id
 
-  whisker-square : {A : Type} {a00 : A} 
-                   {a01 a10 a11 : A} → {p p' : a00 == a01} -> {q q' : a00 == a10} -> {r r' : a01 == a11} -> {s s' : a10 == a11}
-                   → p == p' → q == q' → r == r' -> s == s'
-                   → Square p q r s → Square p' q' r' s'
-  whisker-square id id id id id = id
-
   square-to-over-id : {A : Type} {a00 : A} {B : A → Type}
                       {b00 b01 b10 b11 : B a00} 
                       {p0- : b00 == b01}
@@ -597,6 +623,11 @@ module lib.cubical.Square where
            → Square p id q (q ∘ p)
   ∘-square {p = id} {q} = connection
 
+  HSet-UIP-Square : {A : Type} → HSet A → {a00 : A} {a01 a10 a11 : A} {l : a00 == a01} {t : a00 == a10} {b : a01 == a11} {r : a10 == a11}
+                  → Square l t b r
+  HSet-UIP-Square hA = disc-to-square (HSet-UIP hA _ _ _ _)
+
+  
 
 {-
   out-SquareΣ : {A : Type} {B : A → Type}

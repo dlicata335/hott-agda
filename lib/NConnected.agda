@@ -240,7 +240,7 @@ module lib.NConnected where
     unfiberwise-to-total-connected : (n : TLevel) → ∀ {A} {B1 B2 : A → Type} → (f : (x : A) → B1 x → B2 x) → 
                                  ConnectedMap n (fiberwise-to-total f) → ((x : A) → ConnectedMap n (f x))
     unfiberwise-to-total-connected n f c x y = transport (λ A → NType -2 (Trunc n A)) rearrange-and-path-ind (c (x , y)) where
-      postulate rearrange-and-path-ind : _
+      postulate rearrange-and-path-ind : _ -- working on Blakers Massey
 
   open ConnectedMap
 

@@ -92,17 +92,17 @@ and prove that they are mutually inverse using the recursion and
 induction principles for the circle and the torus. And indeed, it is not
 difficult to define the two functions.  However, at the end of the IAS
 year, this problem had not been solved, though Sojakova and Lumsdaine
-had each given proof sketches, and Sojakova's later appeared as her
-heroic 25-page proof in the exercise solutions for the homotopy type
-theory book~\citep{uf13hott-book}.  The reason for the complexity is
-that the path manipulation required to prove the path-between-path goals
-gets quite involved.
+had each given proof sketches, and Sojakova's later appeared as a
+25-page proof in the exercise solutions for the homotopy type theory
+book~\citep{uf13hott-book}.  The reason for the complexity is that the
+path manipulation required to prove the path-between-path goals gets
+quite involved.
 
 In this paper, we develop a cubical approach to synthetic homotopy
 theory.  Using this approach and the libraries we develop, the proof
 that the torus is the product of two circles can be formalized in Agda
 in around 100 lines of code.\footnote{The Agda code is in
-github.com/dlicata335/hott-agda} The approach has also proved
+github.com/dlicata335/hott-agda.  See lib/cubical/ and homotopy/TS1S1.agda} The approach has also proved
 useful for the formalization of a ``three-by-three'' lemma about
 pushouts that is used in the construction of the Hopf fibration,\footnote{The Agda code will be in github.com/HoTT/HoTT-Agda} and
 in resolving a question~\citep{amlh14patch} about a patch theory
@@ -142,7 +142,7 @@ Another key ingredient is to work systematically with path-over-a path
 and higher cube-over-a-cube types to represent cubes in a dependent type.
 
 While our approach fits nicely with work in progress on new cubical type
-theories~\citep{lb14cubes-oxford,altenkirchkaposi14cubical,coquand14variations}, the
+theories~\citep{lb14cubes-oxford,altenkirchkaposi14cubical,coquand14variations,polonsky14internalization}, the
 present paper can be conducted entirely by making appropriate
 definitions in Martin-L\"of type theory with axioms for univalence and higher
 inductive types.  Higher cubes can

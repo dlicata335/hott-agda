@@ -13,6 +13,7 @@ open import lib.Universe
 open import lib.Truncations
 open import lib.WEq
 open Truncation
+open import lib.cubical.PathOver
 
 module lib.PushoutFatFib where
 
@@ -60,8 +61,8 @@ module lib.PushoutFatFib where
                     (b1 : (x : X) → C (inl x))
                     (b2 : (x : X) (y : Y) (p : P x y) → C (inm x y p))
                     (b3 : (y : Y) → C (inr y))
-                    (gluel' : (x : X) (y : Y) (p : P x y) → transport C (gluel x y p) (b2 x y p) ≃ (b1 x))
-                    (gluer' : (x : X) (y : Y) (p : P x y) → transport C (gluer x y p) (b2 x y p) ≃ b3 y)
+                    (gluel' : (x : X) (y : Y) (p : P x y) → PathOver C (gluel x y p) (b2 x y p) (b1 x))
+                    (gluer' : (x : X) (y : Y) (p : P x y) → PathOver C (gluer x y p) (b2 x y p) (b3 y))
                   → (z : Pushout P) → C z
       Pushout-elim _ b1 _ _ _ _ (inl' x) = b1 x
       Pushout-elim _ _ b2 _ _ _ (inm' x y p) = b2 x y p
