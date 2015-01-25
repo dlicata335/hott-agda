@@ -627,6 +627,11 @@ module lib.cubical.Square where
                   → Square l t b r
   HSet-UIP-Square hA = disc-to-square (HSet-UIP hA _ _ _ _)
 
+  out-square-Type : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
+                → (Square {Type} l t b r)
+                → ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
+  out-square-Type id x = id
+
   
 
 {-

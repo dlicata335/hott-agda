@@ -1,9 +1,37 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude
+open import lib.cubical.Cubical
 
-module homotopy.TS1S1 where
+module homotopy.scraps.TS1S1-universal where
 
+  module _ {A B : Type}
+           (f : B → A)
+           (e : (X : Type) → (A → X) == (B → X))
+           (pc : {X : Type} (g : A → X) → coe (e _) g == g o f)
+           where
+
+    finv : A → B
+    finv = coe (! (e B)) (λ x → x)
+
+    f-as-coe : f == (coe (e A) (\ x -> x))
+    f-as-coe = ! (pc (λ x → x))
+
+    comp2 : finv o f == (\ x -> x)
+    comp2 = ! (pc finv) · IsEquiv.β (snd (coe-equiv (e B))) (λ x → x)
+
+    pc' : {X : Type} (g : B → X) → coe (! (e _)) g == g o finv
+    pc' g = ap (coe (! (e _))) STS · IsEquiv.α (snd (coe-equiv (e _))) _ where
+      STS : g == coe (e _) (g o finv)
+      STS = λ≃ (λ x → ! (ap g (ap≃ comp2))) · ! (pc (g o finv))
+
+    comp1 : f o finv == (\ x -> x)
+    comp1 = ! (pc' f) · ap (coe (! (e A))) f-as-coe · IsEquiv.α (snd (coe-equiv (e _))) (λ x → x)
+
+    iseq : IsEquiv f
+    iseq = snd (improve (hequiv f finv (λ x → ap≃ comp2) (λ _ → ap≃ comp1)))
+
+{-
   open S¹ using (S¹ ; S¹-rec ; S¹-elim)
   module T = Torus
   open T using (T ; T-rec ; T-elim)
@@ -81,3 +109,4 @@ module homotopy.TS1S1 where
 
           fact2 : IsEquiv{S¹ × S¹}{S¹ × S¹} (\ x -> x)
           fact2 = snd id-equiv
+-}

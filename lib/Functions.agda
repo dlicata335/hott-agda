@@ -237,3 +237,5 @@ module lib.Functions where
   precomp-equiv-is-equiv : ∀ {A B C} → (e : Equiv B C) → IsEquiv {C → A} {B → A} (\ f -> (f o (fst e)))
   precomp-equiv-is-equiv {A}{B}{C} e = transport IsEquiv (λ≃ (λ f → λ≃ (λ x → ap (λ x₁ → f x₁) (ap≃ (type≃β e) {x} ∘ ap (λ z → coe z x) (!-invol (ua e))) ∘ ap≃ (transport-→-pre (! (ua e)) f))) ∘
                                                             ! (transport-ap-assoc (λ x → x → A) (! (ua e)))) (snd (coe-equiv (ap (λ x → x → A) (! (ua e)))))
+
+
