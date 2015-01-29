@@ -326,18 +326,15 @@ module lib.cubical.Square where
                         (Square pa (ap f p) (ap g p) pa')
     out-PathOver-=-eqv = improve (hequiv out-PathOver-= in-PathOver-= out-in in-out) 
 
-{-
   module PathOver=D where
 
+    postulate
       in-PathOver-= : {A : Type} {B : A → Type} {f g : (x : A) → B x}
                 {a a' : A} {p : a == a'}
                 {pa : f a == g a}
                 {pa' : f a' == g a'}
                → SquareOver B (vrefl-square {p = p}) (hom-to-over/left id pa) (apdo f p) (apdo g p) (hom-to-over/left id pa')
-               -- Square pa (ap f p) (ap g p) pa'
                → PathOver (\ x -> f x == g x) p pa pa'
-      in-PathOver-= = ?
--}
       
   extend-triangle : {A : Type} {a00 a01 a11 : A}
               {p0- : a00 == a01}

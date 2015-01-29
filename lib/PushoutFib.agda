@@ -3,6 +3,7 @@
 -- fibrant pushout
 
 open import lib.First
+open import lib.cubical.PathOver
 
 module lib.PushoutFib where
 
@@ -23,52 +24,50 @@ module lib.PushoutFib where
       inr = inr'
 
       postulate {- HoTT Axiom -}
-        cross : ∀ {A B P} → {a : A} → {b : B} → (p : P a b) → 
+        glue : ∀ {A B P} → {a : A} → {b : B} → (p : P a b) → 
                         Path{Pushout A B P} (inl a) (inr b)
 
       Pushout-rec : {A B C : Type}
                     {P : A → B → Type}
                     (f : (a : A) → C)
                     (g : (b : B) → C)
-                    (cross' : (a : A) → (b : B) → (p : P a b) → Path (f a) (g b)) →
+                    (glue' : (a : A) → (b : B) → (p : P a b) → Path (f a) (g b)) →
                     Pushout A B P → C
       Pushout-rec f _ _ (inl' a) = f a
       Pushout-rec _ g _ (inr' b) = g b
 
       postulate {- HoTT Axiom -}
-        Pushout-rec/βcross : {A B C : Type}
+        Pushout-rec/βglue : {A B C : Type}
                              {P : A → B → Type}
                              {C : Type}
                              (f : (a : A) → C)
                              (g : (b : B) → C)
-                             (cross' : (a : A) → (b : B) → (p : P a b) →
+                             (glue' : (a : A) → (b : B) → (p : P a b) →
                                       Path (f a) (g b)) →
                             (a : A) → (b : B) → (p : P a b) → 
-                            Path (ap (Pushout-rec f g cross') (cross p))
-                                 (cross' a b p)
-      -- FIXME path β
+                            Path (ap (Pushout-rec f g glue') (glue p))
+                                 (glue' a b p)
 
       Pushout-elim : {A B : Type}
                      {P : A → B → Type}
                      (C : Pushout A B P → Type)
                      (f : (a : A) → C (inl a))
                      (g : (b : B) → C (inr b))
-                     (cross' : (a : A) → (b : B) → (p : P a b) → 
-                           Path (transport C (cross p) (f a)) (g b)) →
+                     (glue' : (a : A) → (b : B) → (p : P a b) → PathOver C (glue p)(f a) (g b)) →
                      (x : Pushout A B P) → C x
       Pushout-elim _ f g H' (inl' a) = f a
       Pushout-elim _ f g H' (inr' b) = g b
 
       postulate {- HoTT Axiom -}
-        Pushout-elim/βcross : {A B C : Type}
+        Pushout-elim/βglue : {A B C : Type}
                               {P : A → B → Type}
                               (C : Pushout A B P → Type)
                               (f : (a : A) → C (inl a))
                               (g : (b : B) → C (inr b))
-                              (cross' : (a : A) → (b : B) → (p : P a b) →
-                                      Path (transport C (cross p) (f a)) (g b)) →
+                              (glue' : (a : A) → (b : B) → (p : P a b) →
+                                      PathOver C (glue p) (f a) (g b)) →
                             (a : A) → (b : B) → (p : P a b) → 
-                            Path (apd (Pushout-elim C f g cross') (cross p))
-                                 (cross' a b p)
+                            Path (apdo (Pushout-elim C f g glue') (glue p))
+                                 (glue' a b p)
 
     open P public
