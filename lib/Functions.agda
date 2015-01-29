@@ -182,6 +182,8 @@ module lib.Functions where
                     ≃ ap2 f α β
   ap-uncurry f id id = id
 
+  uncurryd : ∀ {A : Set} {B : A → Type} {C : (x : A) → B x → Set} -> ((a : A) (b : B a) -> C a b) -> (p : (Σ B)) -> C (fst p) (snd p)
+  uncurryd f = \ x -> f (fst x) (snd x)
 
   ∘Π : ∀ {A} {B : A → Type} {f g h : (x : A) → B x} (β : g ≃ h) (α : f ≃ g) 
       → β ∘ α ≃ λ≃ (\x -> ap≃ β {x} ∘ ap≃ α {x})
@@ -219,9 +221,9 @@ module lib.Functions where
   ΠΣcommute A B C = ua (ΠΣcommuteEquiv A B C) 
 
   apΠ : {A A' : Type} {B : A → Type} {B' : A' → Type}
-      (a : A ≃ A')
-      (b : (\ (x : A) → B x) ≃ (\ (x : A) → B' (coe a x)))
-    → ((x : A) → B x) ≃ ((x' : A') → B' x')
+      (a : A == A')
+      (b : (\ (x : A) → B x) == (\ (x : A) → B' (coe a x)))
+    → ((x : A) → B x) == ((x' : A') → B' x')
   apΠ id id = id
 
   apΠ' : {A A' : Type} {B : A → Type} {B' : A' → Type}
