@@ -59,7 +59,7 @@ module lib.PushoutFib where
       Pushout-elim _ f g H' (inr' b) = g b
 
       postulate {- HoTT Axiom -}
-        Pushout-elim/βglue : {A B C : Type}
+        Pushout-elim/βglue : {A B : Type}
                               {P : A → B → Type}
                               (C : Pushout A B P → Type)
                               (f : (a : A) → C (inl a))

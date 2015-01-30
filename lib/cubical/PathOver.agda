@@ -408,6 +408,12 @@ module lib.cubical.PathOver where
                  → coe (PathOverΠ {A = A} {B = B}{δ = id} {f = f}) id x x id == id
   PathOverΠ-id f {x = x} = ap≃ (ap≃ (ap≃ (ap≃ (type≃β PathOverΠ-eqv) {id}) {x}) {x}) {id}
 
+  postulate -- working on Blakers-Massey
+    in-PathOverΠ/1l : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
+                    → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
+                    → ((x : A θ1) → PathOver B (pair= δ (PathOver-transport-right A δ)) (f x) (g (transport A δ x)))
+                    →  PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g 
+
   PathOverType : {Δ : Type} {A B : Type}
               → {θ1 θ2 : Δ} {δ : θ1 == θ2}
               → PathOver (\ θ → Type) δ A B == Equiv A B 

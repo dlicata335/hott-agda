@@ -138,6 +138,18 @@ module lib.cubical.Square where
               → Equiv (Square p0- p-0 p-1 p1-) (p-1 ∘ p0- == p1- ∘ p-0) 
   square-disc-eqv = (improve (hequiv square-to-disc disc-to-square square-disc-square disc-square-disc))
 
+  -- could define lots of these; this particular one came up
+  square-to-disc-rearrange : {A : Type}
+                {a00 a01 a10 a11 : A} 
+                {p0- : a00 == a01}
+                {p-0 : a00 == a10}
+                {p-1 : a11 == a01}
+                {p1- : a11 == a10}
+                (f   : Square p0- p-0 (! p-1) (! p1-))
+                → p-1 == p0- ∘ ! p-0 ∘ p1-
+  square-to-disc-rearrange {p0- = p0- } {p-0 = id} {p-1 = id} {p1- = id} f = ∘-unit-l p0- ∘ ! (square-to-disc f)
+  
+
   horiz-degen-square : {A : Type} {a a' : A} {p q : a == a'} (r : p == q)
                      → Square p id id q
   horiz-degen-square id = hrefl-square
@@ -333,7 +345,7 @@ module lib.cubical.Square where
                 {a a' : A} {p : a == a'}
                 {pa : f a == g a}
                 {pa' : f a' == g a'}
-               → SquareOver B (vrefl-square {p = p}) (hom-to-over/left id pa) (apdo f p) (apdo g p) (hom-to-over/left id pa')
+               → SquareOver B (vrefl-square {p = p}) (hom-to-over pa) (apdo f p) (apdo g p) (hom-to-over pa')
                → PathOver (\ x -> f x == g x) p pa pa'
       
   extend-triangle : {A : Type} {a00 a01 a11 : A}
@@ -445,10 +457,18 @@ module lib.cubical.Square where
   connection : ∀ {A} {a b : A} {p : a == b} → Square id id p p 
   connection {p = id} = id
 
+  connOver : {A : Type} {a a' : A} {p : a == a'} → PathOver (\ x -> a == x) p id p
+  connOver = (PathOverPathFrom.in-PathOver-= connection)
+
   connection2 : {A : Type} {a1 a2 a3 : A} {p : a1 == a2} {q : a2 == a3} → Square p p q q
   connection2 {p = id} {q = id} = id
 
+  inverses-square : {A : Type} {a00 a01 a10 : A} (p : a00 == a01) (q : a00 == a10) → Square p q (! p) (! q)
+  inverses-square id id = id
 
+  inverses-connection-coh : {A : Type} {a00 a01 : A} → (p : a00 == a01) → inverses-square p p == connection2
+  inverses-connection-coh id = id
+  
   ·-square : {A : Type} {a0 a1 a2 : A} {p : a0 == a1} {q : a1 == a2} 
            → Square p id q (q ∘ p)
   ·-square {p = id} = connection
@@ -629,7 +649,22 @@ module lib.cubical.Square where
                 → ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
   out-square-Type id x = id
 
-  
+  postulate --working on Blakers Massey
+    SquareOver-ap-El : {A : Type} {B : A → Type}
+              {a00 : A} {b00 : B a00} 
+              {a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              {f   : Square p0- p-0 p-1 p1- }
+              {b01 : B a01} {b10 : B a10} {b11 : B a11}  
+              {q0- : PathOver B p0- b00 b01}
+              {q-0 : PathOver B p-0 b00 b10}
+              {q-1 : PathOver B p-1 b01 b11}
+              {q1- : PathOver B p1- b10 b11}
+              → SquareOver (λ X₁ → X₁) (ap-square B f) (over-o-ap (λ X₁ → X₁) q0-) (over-o-ap (λ X₁ → X₁) q-0) (over-o-ap (λ X₁ → X₁) q-1) (over-o-ap (λ X₁ → X₁) q1-)
+              → SquareOver B f q0- q-0 q-1 q1-
 
 {-
   out-SquareΣ : {A : Type} {B : A → Type}
@@ -731,12 +766,9 @@ module lib.cubical.Square where
                   → ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
                   → (Square {Type} l t b r)
   in-square-Type = ?
+-}
 
-  out-square-Type : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
-                → (Square {Type} l t b r)
-                → ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
-  out-square-Type id x = id
-
+{-
   square-Type-eqv : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D}
                 → Equiv (Square {Type} l t b r)
                         ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
@@ -754,23 +786,25 @@ module lib.cubical.Square where
                                       id
                                       (over-to-hom/left (ro ∘o to)))
   out-squareover-El id = id
-
-  in-squareover-El : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} (s : (Square {Type} l t b r))
-                          {b1 : A}
-                          (b2 : B) 
-                          (lo : PathOver (\ X -> X) l b1 b2)
-                          (b3 : C)
-                          (to : PathOver (\ X -> X) t b1 b3)
-                          (b4 : D)
-                          (bo : PathOver (\ X -> X) b b2 b4)
-                          (ro : PathOver (\ X -> X) r b3 b4)
-                       → (Square (over-to-hom/left (bo ∘o lo)) 
-                                  (out-square-Type s b1) 
-                                  id
-                                  (over-to-hom/left (ro ∘o to)))
-                       → (SquareOver (\ X -> X) s lo to bo ro)
-  in-squareover-El id = path-induction-homo-e _ (path-induction-homo-e _ (path-induction-homo-e _ {!!})) 
-
+-}
+  postulate --working on blakers-massey
+    in-squareover-El : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} {s : (Square {Type} l t b r)}
+                            {b1 : A}
+                            {b2 : B}
+                            {lo : PathOver (\ X -> X) l b1 b2}
+                            {b3 : C}
+                            {to : PathOver (\ X -> X) t b1 b3}
+                            {b4 : D}
+                            {bo : PathOver (\ X -> X) b b2 b4}
+                            {ro : PathOver (\ X -> X) r b3 b4}
+                         → (Square (over-to-hom/left (bo ∘o lo)) 
+                                    (out-square-Type s b1) 
+                                    id
+                                    (over-to-hom/left (ro ∘o to)))
+                         → (SquareOver (\ X -> X) s lo to bo ro)
+  -- in-squareover-El id = path-induction-homo-e _ (path-induction-homo-e _ (path-induction-homo-e _ {!!})) 
+  
+{-
   squareover-El-eqv : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} {s : (Square {Type} l t b r)}
                           {b1 : A} {b2 : B} {b3 : C} {b4 : D}
                           {lo : PathOver (\ X -> X) l b1 b2}
