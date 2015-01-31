@@ -114,5 +114,7 @@ module lib.AdjointEquiv where
 
  oute : {A B : Type} → Equiv A B → A → B
  oute (f , _ ) = f
-
  
+ grab-point-in-range : ∀ {A B} (f : A → B) → (B → IsEquiv f) → IsEquiv f
+ grab-point-in-range f p = coe (IsWeq≃IsEquiv f) (λ b → coe (! (IsWeq≃IsEquiv f)) (p b) b)
+

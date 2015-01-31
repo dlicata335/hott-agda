@@ -9,7 +9,9 @@ open import lib.cubical.Cubical
 module homotopy.blakersmassey.Experiment2 (X Y : Type) (P : X → Y → Type)
                                           (i' j' : _)
                                           (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
-                                          (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where
+                                          (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) 
+                                          (-1<=i' : -1 <=tl i') 
+                                          (-1<=j' : -1 <=tl j') where
 
   ap-uncurryd-NDrange : {A : Type} {B : A → Type} {C : Type}
                 (f : (x : A) → B x → C) {a0 a1 : A} {b0 : B a0} {b1 : B a1} (α : a0 == a1) (β : PathOver B α b0 b1)
@@ -25,6 +27,16 @@ module homotopy.blakersmassey.Experiment2 (X Y : Type) (P : X → Y → Type)
   i+j = plus2 i' j'
 
   W = PushoutFib.Pushout _ _ P
+
+  contract-zig-right : ∀ {x0 y0} (p0 : P x0 y0) 
+                       (C : ∀ {x} → (pxy0 : P x y0) → NTypes j') 
+                    →  fst (C p0) → {x : X} (p : P x y0) → fst (C p)
+  contract-zig-right {x0}{y0} p0 C c0 p = ConnectedFib.everywhere j' {Σ (λ x → P x y0)} {_ , p0} (cg y0) (λ ppxy0 → C (snd ppxy0)) c0 (_ , p)
+
+  contract-zig-left : ∀ {x0 y0} (p0 : P x0 y0) 
+                       (C : ∀ {y} → (px0y : P x0 y) → NTypes i') 
+                    →  fst (C p0) → {y : Y} (p : P x0 y) → fst (C p)
+  contract-zig-left {x0}{y0} p0 C c0 p = ConnectedFib.everywhere i' {Σ (λ y → P x0 y)} {_ , p0} (cf x0) (λ ppxy0 → C (snd ppxy0)) c0 (_ , p)
 
   abstract
     composeP : ∀ {x x' y y'} → (pxy : P x y) (pxy' : P x y') (px'y' : P x' y') 
@@ -54,87 +66,82 @@ module homotopy.blakersmassey.Experiment2 (X Y : Type) (P : X → Y → Type)
     composePcoh : ∀ {x y' } → (pxy' : P x y') → Square (composePβ1 pxy' pxy') id (ap (λ z → [ pxy' , z ]) (! (inverses-connection-coh (glue pxy')))) (composePβ2 pxy' pxy')
     composePcoh pxy' = disc-to-square (! (ConnectedProduct.wedge-elim-coh _ _ _ _ _ _ _))
 
-  {-
-    -- the other diagonal
-    composeP2 : ∀ {x x' y y'} → (pxy : P x y) (px'y : P x' y) (px'y' : P x' y') 
-             → Trunc (i+j) (Σ \ (pxy' : P x y') → Square {W} (glue pxy) (glue pxy') (! (glue px'y)) (! (glue px'y')))
-    composeP2 {x}{x'}{y}{y'} pxy px'y px'y' = 
-      Trunc-func (λ ps → fst ps , whisker-square (!-invol (glue pxy)) (!-invol (glue (fst ps))) id id (!-square-h (!-square-v (snd ps)))) (composeP px'y' px'y pxy)
-    ConnectedProduct.wedge-elim {i'} {j'} {_} {Σ (P x')}
-                                              {Σ (λ x₁ → P x₁ y)} (cf x') (cg y)
-                                              (λ ppx'y' ppxy →
-                                                 Trunc i+j
-                                                 (Σ (λ (pxy' : P (fst ppxy) (fst ppx'y')) → Square (glue (snd ppxy)) (glue pxy') (! (glue px'y)) (! (glue (snd ppx'y')))))
-                                                 , Trunc-level)
-                                              (Inr id) {_ , px'y} {_ , px'y}
-                                              (λ ppx2y → [ snd ppx2y , connection2 ])
-                                              (λ ppx'y2 → [ snd ppx'y2 , inverses-square _ _ ])
-                                              (ap (λ z → [ px'y , z ]) (! (inverses-connection-coh (glue px'y))))
-                                              (_ , px'y') (_ , pxy)
-  -}
-
   gluel' : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x : X} → P x y0 → Path {W} (inl x0) (inl x)
   gluel' p0 pxy0 = ! (glue pxy0) ∘ glue p0
 
   module Codes-glue where
 
-    Codes-glue-1' : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x : X} {y   : Y} (pxy : P x y)
+    map' : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x : X} {y   : Y} (pxy : P x y)
                     {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (s : Square αx id (glue pxy) αy)
                    → (HFiber (gluel' p0) αx) → Trunc i+j (HFiber (glue) αy)
-    Codes-glue-1' p0 pxy s (pxy0 , q) = Trunc-rec Trunc-level 
-                                                  (λ c → [ fst c , square-to-disc s ∘ ap (λ z → glue pxy ∘ z) q ∘ square-to-disc-rearrange (snd c) ]) 
-                                                  (composeP pxy pxy0 p0 )
+    map' p0 pxy s (pxy0 , q) = 
+      Trunc-rec Trunc-level 
+                (λ c → [ fst c , square-to-disc s ∘ ap (λ z → glue pxy ∘ z) q ∘ square-to-disc-rearrange (snd c) ]) 
+                (composeP pxy pxy0 p0)
 
-    Codes-glue-1 :  {x0 : X} {y0 : Y} (p0 : P x0 y0) {x   : X} {y   : Y} (pxy : P x y)
+    map : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x   : X} {y   : Y} (pxy : P x y)
                    {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (s : Square αx id (glue pxy) αy)
                    → Trunc i+j (HFiber (gluel' p0 {x}) αx) → Trunc i+j (HFiber glue αy)
-    Codes-glue-1 p0 pxy s = Trunc-rec Trunc-level (Codes-glue-1' p0 pxy s)
+    map p0 pxy s = Trunc-rec Trunc-level (map' p0 pxy s)
 
-    Codes-glue-2' :  {x0 : X} {y0 : Y} (p0 : P x0 y0) {x   : X} {y   : Y} (pxy : P x y)
-                     {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)}
-                    (s : Square αx id (glue pxy) αy)
-                   → (HFiber glue αy) → Trunc i+j (HFiber (gluel' p0 {x}) αx)
-    Codes-glue-2' p0 pxy s (pxy0 , q) = Trunc-rec Trunc-level 
-                                        (λ c → [ fst c , square-to-disc (!-square-h s) ∘ ap (λ z → ! (glue pxy) ∘ z) q ∘ square-to-disc (snd c) ]) 
-                                        (composeP p0 pxy0 pxy )
+    is-equiv-diag : ∀ {x y} (pxy : P x y) (αx : Path (inl x) (inl x))
+                               → IsEquiv (map pxy pxy {αx} {glue pxy ∘ αx} (disc-to-square id))
+    is-equiv-diag pxy αx = {!!} where
+      map-diag : {! map pxy pxy {αx} {glue pxy ∘ αx} (disc-to-square id) !} == 
+                 Trunc-rec Trunc-level {!\ {( → !}
+      map-diag = {!!}
 
-    Codes-glue-2 :  {x0 : X} {y0 : Y} (p0 : P x0 y0) {x   : X} {y   : Y} (pxy : P x y)
-                    {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (s : Square αx id (glue pxy) αy)
-                   → Trunc i+j (HFiber glue αy) → Trunc i+j (HFiber (gluel' p0 {x}) αx)
-    Codes-glue-2 p0 pxy s = Trunc-rec Trunc-level (Codes-glue-2' p0 pxy s)
 
-{-
-    -- peel off truncation, replace square with disc
-    Codes-glue-1'2 :  {x0 : X} {y0 : Y} (p0 : P x0 y0) {x   : X} {y   : Y} (pxy : P x y)
-                      {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (s : (glue pxy ∘ αx) == αy)
-                      (hfx : HFiber (gluel' p0 {x}) αx) → (Codes-glue-2 p0 pxy (disc-to-square s) (Codes-glue-1' p0 pxy (disc-to-square s) hfx)) == [ hfx ]
-    Codes-glue-1'2 {x0}{y0} p0 {x}{y} pxy id (pxy0 , id) = ConnectedProduct.wedge-elim (cf x) (cg y0)
-                                                             (λ ppxy pp0 →
-                                                                Codes-glue-2 (snd pp0) (snd ppxy) (disc-to-square id)
-                                                                (Codes-glue-1' (snd pp0) (snd ppxy) (disc-to-square id)
-                                                                 (pxy0 , id))
-                                                                == [ pxy0 , id ]
-                                                                , path-preserves-level Trunc-level)
-                                                             (Inr id) {_ , pxy0} {_ , pxy0} {!!} {!!} {!!} (_ , pxy) (_ , p0) where
-                   case1 : (b : Σ (λ x₁ → P x₁ y0)) →
-                           Codes-glue-2 (snd b) pxy0 (disc-to-square id) (Codes-glue-1' (snd b) pxy0 (disc-to-square {!!}) (pxy0 , id))
-                           == [ pxy0 , id ]
-                   case1 (x' , px'y0) = Codes-glue-2 px'y0 pxy0 (disc-to-square id) (Codes-glue-1' px'y0 pxy0 (disc-to-square id) (pxy0 , id))
-                                          ≃〈 id 〉 
-                                        Codes-glue-2 px'y0 pxy0 (disc-to-square id) (Trunc-rec Trunc-level (λ c → [ fst c , _ ])
-                                                                (composeP pxy0 pxy0 px'y0 )) ≃〈 ap (Codes-glue-2 px'y0 pxy0 (disc-to-square id) o Trunc-rec Trunc-level (λ c → [ fst c , _ ])) {!!} 〉 
-                                        Codes-glue-2 px'y0 pxy0 (disc-to-square id) [ px'y0 , {!!} ] ≃〈 {!!} 〉 
-                                        ([ pxy0 , id ] ∎)
--}
-    Codes-glue-eqv : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x : X} {y   : Y} (pxy : P x y)
+
+    is-equiv-zig-right : ∀ {x y} → (pxy : P x y) {x' : _} (px'y : P x' y) (αx : Path (inl x) (inl x'))
+                                  → IsEquiv (map pxy px'y {αx} {glue px'y ∘ αx} (disc-to-square id))
+    is-equiv-zig-right {x}{y} pxy = 
+      contract-zig-right pxy (\ {x' : _} (px'y : P x' y) → 
+                              ((αx : Path (inl x) (inl x')) → IsEquiv (map pxy px'y {αx} {glue px'y ∘ αx} (disc-to-square id))) , Πlevel (λ _ → raise-level -1<=j' (IsEquiv-HProp _)))
+                             (is-equiv-diag pxy)
+
+    is-equiv-zig-left : ∀ {x y} → (pxy : P x y) {y' : _} (pxy' : P x y') (αx : Path (inl x) (inl x))
+                                  → IsEquiv (map pxy pxy' {αx} {glue pxy' ∘ αx} (disc-to-square id))
+    is-equiv-zig-left {x}{y} pxy = 
+      contract-zig-left pxy (\ {y' : _} (pxy' : P x y') → 
+                              ((αx : Path (inl x) (inl x)) → IsEquiv (map pxy pxy' {αx} {glue pxy' ∘ αx} (disc-to-square id))) , Πlevel (λ _ → raise-level -1<=i' (IsEquiv-HProp _)))
+                             (is-equiv-diag pxy)
+
+    -- path induction on the disc
+    -- grab a point in the range and peel the truncation off it, to link pxy to p0, 
+    -- then use wedge-elim on the zig
+    is-equiv' : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x   : X} {y   : Y} (pxy : P x y)
+                {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (d : glue pxy ∘ αx == αy)
+              → IsEquiv (map p0 pxy {αx = αx}{αy = αy} (disc-to-square d))
+    is-equiv' {x0}{y0} p0 {x}{y} pxy {αx} id = 
+      grab-point-in-range _
+           (Trunc-rec (raise-level { -1 }{i+j} (-1<=plus2{i'}{j'} (Inl -1<=i')) (IsEquiv-HProp _))
+             (λ hf → ConnectedProduct.wedge-elim {i'} {j'} {_} {Σ (P x0)} {Σ (λ x₁ → P x₁ y)} (cf x0) (cg y)
+                          (λ pp0 ppxy → ((αx  : Path (inl x0) (inl (fst ppxy))) → 
+                                         IsEquiv (map{x0}{fst pp0} (snd pp0) {fst ppxy} {y} (snd ppxy) {αx = αx} {αy = glue (snd ppxy) ∘ αx} (disc-to-square id))) ,
+                                         raise-level (-1<=plus2 (Inl -1<=i')) (Πlevel (λ _ → IsEquiv-HProp _)))
+                          (Inr id) 
+                          {_ , fst hf} {_ , fst hf}
+                          (λ ppx'y αx → is-equiv-zig-right (fst hf) (snd ppx'y) αx)
+                          (λ ppxy' αx → is-equiv-zig-left (snd ppxy') (fst hf) αx)
+                          (HProp-unique (Πlevel (λ _ → IsEquiv-HProp _)) _ _) 
+                          (y0 , p0) (x , pxy) αx)) 
+
+    -- replace the square with a disc
+    is-equiv : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x   : X} {y   : Y} (pxy : P x y)
+                            {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (s : Square αx id (glue pxy) αy)
+                            → IsEquiv (map p0 pxy s)
+    is-equiv p0 pxy s = transport (λ Z → IsEquiv (map p0 pxy Z)) (IsEquiv.α (snd square-disc-eqv) _)
+                                  (is-equiv' p0 pxy (square-to-disc s))
+
+    eqv : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x : X} {y   : Y} (pxy : P x y)
                      {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (s : Square αx id (glue pxy) αy)
                      → Equiv (Trunc i+j (HFiber (gluel' p0 {x}) αx)) (Trunc i+j (HFiber glue αy))
-    Codes-glue-eqv p0 pxy s = improve (hequiv (Codes-glue-1 p0 pxy s) {!!} {!!} {!!})
+    eqv p0 pxy s = (map p0 pxy s , is-equiv p0 pxy s)
 
 
-
+{-
   module Codes (x0 : X) (y0 : Y) (p0 : P x0 y0) where
-    open Codes-glue 
 
     gluel : {x : X} → P x y0 → inl x0 == inl x
     gluel = gluel' p0
@@ -204,3 +211,4 @@ module homotopy.blakersmassey.Experiment2 (X Y : Type) (P : X → Y → Type)
   theorem : ConnectedMap i+j glue-map-total
   theorem = fiberwise-to-total-connected i+j (λ _ → glue) (λ xy → glue-connected (fst xy) (snd xy))
 
+-}

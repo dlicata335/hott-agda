@@ -117,7 +117,11 @@ module lib.NType where
   plus2-monotone-2 -2 m m' lt = lt
   plus2-monotone-2 (S y) m m' lt = ltSCong (plus2-monotone-2 y m m' lt)
 
-
+  -1<=plus2 : ∀ {m n} → Either (-1 <=tl m) (-1 <=tl n) → -1 <=tl (plus2 m n)
+  -1<=plus2 { -2} { -2} (Inl x) = x
+  -1<=plus2 { -2} { -2} (Inr x) = x
+  -1<=plus2 { -2} {S n} e = -1<= (-2< _)
+  -1<=plus2 {S m} {n} e = -1<= (-2< _)
 
 
   -- other stuff about ntypes
