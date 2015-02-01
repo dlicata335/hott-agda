@@ -6,7 +6,7 @@ open ConnectedMap
 open Truncation
 open import lib.cubical.Cubical
 
-module homotopy.blakersmassey.Experiment2 (X Y : Type) (P : X → Y → Type)
+module homotopy.blakersmassey.Experiment4 (X Y : Type) (P : X → Y → Type)
                                           (i' j' : _)
                                           (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
                                           (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) 
@@ -28,44 +28,53 @@ module homotopy.blakersmassey.Experiment2 (X Y : Type) (P : X → Y → Type)
 
   W = PushoutFib.Pushout _ _ P
 
-  contract-zig-right : ∀ {x0 y0} (p0 : P x0 y0) 
-                       (C : ∀ {x} → (pxy0 : P x y0) → NTypes j') 
-                    →  fst (C p0) → {x : X} (p : P x y0) → fst (C p)
-  contract-zig-right {x0}{y0} p0 C c0 p = ConnectedFib.everywhere j' {Σ (λ x → P x y0)} {_ , p0} (cg y0) (λ ppxy0 → C (snd ppxy0)) c0 (_ , p)
-
-  contract-zig-left : ∀ {x0 y0} (p0 : P x0 y0) 
-                       (C : ∀ {y} → (px0y : P x0 y) → NTypes i') 
-                    →  fst (C p0) → {y : Y} (p : P x0 y) → fst (C p)
-  contract-zig-left {x0}{y0} p0 C c0 p = ConnectedFib.everywhere i' {Σ (λ y → P x0 y)} {_ , p0} (cf x0) (λ ppxy0 → C (snd ppxy0)) c0 (_ , p)
+  wedge-zig : ∀ {x y'} (pxy' : P x y') 
+             → ∀ (C : ∀ { x' y } → (pxy : P x y) (px'y' : P x' y') → Type)
+                (nC : ∀ {x' y} → (pxy : P x y) (px'y' : P x' y') → NType i+j (C pxy px'y'))
+            → (l : ∀ {x'} → (px'y' : P x' y') → C pxy' px'y')
+            → (r : ∀ {y} → (pxy : P x y) → C pxy pxy')
+            → (e : l pxy' == r pxy' )
+            → ∀ {x' y} → (pxy : P x y) (px'y' : P x' y') → C pxy px'y'
+  wedge-zig {x}{y'} pxy' C nC l r e {x'}{y} pxy  px'y' = ConnectedProduct.wedge-elim (cf x) (cg y')
+                                                           (λ ppxy ppx'y' →
+                                                              C (snd ppxy) (snd ppx'y') , nC (snd ppxy) (snd ppx'y'))
+                                                           (Inr id) (λ z → l (snd z)) (λ z → r (snd z)) e (_ , pxy) (_ , px'y')
 
   abstract
-    composeP : ∀ {x x' y y'} → (pxy : P x y) (pxy' : P x y') (px'y' : P x' y') 
-               → Trunc (i+j) (Σ \ (px'y : P x' y) → Square {W} (glue pxy) (glue pxy') (! (glue px'y)) (! (glue px'y'))) 
+    composeP : ∀ {x x' y y'} → (pxy : P x y) (pxy' : P x y') (px'y' : P x' y') → Trunc (i+j) (P x' y)
     composeP {x}{x'}{y}{y'} pxy pxy' px'y' = 
-      ConnectedProduct.wedge-elim {i'} {j'} {_} {Σ (P x)}
-        {Σ (λ x₁ → P x₁ y')} (cf x) (cg y')
-        (λ ppxy ppx'y' →
-           Trunc i+j
-           (Σ
-            (λ (px'y : P (fst ppx'y') (fst ppxy)) →
-               Square {W} (glue (snd ppxy)) (glue pxy') (! (glue px'y))
-               (! (glue (snd ppx'y')))))
-           , Trunc-level)
-        (Inr id) {_ , pxy'} {_ , pxy'} 
-        (λ ppx''y' → [ snd ppx''y' , connection2 ])
-        (λ ppxy'' → [ snd ppxy'' , inverses-square (glue (snd ppxy'')) (glue pxy') ]) 
-        (ap (λ z → [ pxy' , z ]) (! (inverses-connection-coh (glue pxy'))))
-        (_ , pxy) (_ , px'y')
+      wedge-zig pxy' _ (λ _ _ → Trunc-level) [_] [_] id pxy px'y'
   
-    composePβ1 : ∀ {x x' y' } → (pxy' : P x y') (px'y' : P x' y') → composeP pxy' pxy' px'y' == [ px'y' , connection2 ]
+    composePβ1 : ∀ {x x' y' } → (pxy' : P x y') (px'y' : P x' y') → composeP pxy' pxy' px'y' == [ px'y' ]
     composePβ1 pxy' px'y' = ap≃ (ConnectedProduct.wedge-elim-βa _ _ _ _ _ _ _)
   
-    composePβ2 : ∀ {x y y' } → (pxy : P x y) (pxy' : P x y') → composeP pxy pxy' pxy' == [ pxy , (inverses-square _ _) ]
+    composePβ2 : ∀ {x y y' } → (pxy : P x y) (pxy' : P x y') → composeP pxy pxy' pxy' == [ pxy  ]
     composePβ2 pxy' px'y' = ap≃ (ConnectedProduct.wedge-elim-βb _ _ _ _ _ _ _)
   
-    composePcoh : ∀ {x y' } → (pxy' : P x y') → Square (composePβ1 pxy' pxy') id (ap (λ z → [ pxy' , z ]) (! (inverses-connection-coh (glue pxy')))) (composePβ2 pxy' pxy')
-    composePcoh pxy' = disc-to-square (! (ConnectedProduct.wedge-elim-coh _ _ _ _ _ _ _))
+    composePcoh : ∀ {x y' } → (pxy' : P x y') → (composePβ1 pxy' pxy') == (composePβ2 pxy' pxy')
+    composePcoh pxy' = ! (ConnectedProduct.wedge-elim-coh _ _ _ _ _ _ _) ∘ ! (∘-unit-l (composePβ1 pxy' pxy'))
 
+    composePcomp : ∀ {x x' y y'} → (pxy : P x y) (pxy' : P x y') (px'y' : P x' y') → 
+                    (Trunc-rec Trunc-level (λ px'y → composeP px'y' px'y pxy) (composeP pxy pxy' px'y')) == [ pxy' ]
+    composePcomp pxy pxy' px'y' = wedge-zig pxy' (\ pxy px'y' → (Trunc-rec Trunc-level (λ px'y → composeP px'y' px'y pxy) (composeP pxy pxy' px'y')) == [ pxy' ])
+                                                  (λ _ _ → path-preserves-level Trunc-level) 
+                                                  (λ px'y' → composePβ1 px'y' pxy' ∘ ap (Trunc-rec Trunc-level (λ px'y → composeP px'y' px'y pxy')) (composePβ1 pxy' px'y'))
+                                                  (λ pxy → composePβ2 pxy' pxy ∘ ap (Trunc-rec Trunc-level (λ px'y → composeP pxy' px'y pxy)) (composePβ2 pxy pxy'))
+                                                  (ap (λ Z → Z ∘ ap (Trunc-rec Trunc-level (λ px'y → composeP pxy' px'y pxy')) Z) (composePcoh pxy'))
+                                                  pxy px'y'
+
+    composeP-equiv : ∀ {x x' y y'} → (pxy : P x y) (px'y' : P x' y') 
+                   → IsEquiv {Trunc i+j (P x y')} {Trunc i+j (P x' y)} (Trunc-rec Trunc-level (λ pxy' → composeP pxy pxy' px'y'))
+    composeP-equiv pxy px'y' = snd
+                                 (improve
+                                  (hequiv (Trunc-rec Trunc-level (λ pxy' → composeP pxy pxy' px'y'))
+                                          (Trunc-rec Trunc-level (λ px'y → composeP px'y' px'y pxy))
+                                          (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
+                                                      (λ pxy' → composePcomp pxy pxy' px'y'))
+                                          (Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
+                                             (λ pxy' → composePcomp px'y' pxy' pxy))))
+
+{-
   gluel' : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x : X} → P x y0 → Path {W} (inl x0) (inl x)
   gluel' p0 pxy0 = ! (glue pxy0) ∘ glue p0
 
@@ -199,3 +208,4 @@ module homotopy.blakersmassey.Experiment2 (X Y : Type) (P : X → Y → Type)
   theorem : ConnectedMap i+j glue-map-total
   theorem = fiberwise-to-total-connected i+j (λ _ → glue) (λ xy → glue-connected (fst xy) (snd xy))
 
+-}
