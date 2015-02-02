@@ -18,6 +18,7 @@ import homotopy.pi2s2.Pi2S2
 -- freudenthal 
 
 import homotopy.Freudenthal
+import homotopy.FreudenthalConnected
 
 
 -- homotopy groups of n-spheres with susp definiton

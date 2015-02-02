@@ -42,7 +42,7 @@ module lib.First where
 
  _·_  : {A : Type} {M N P : A} 
       → Path M N → Path N P → Path M P
- id · β = β
+ α · β = β ∘ α
 
  infixr 10 _∘_ 
  infixr 10 _·_ 

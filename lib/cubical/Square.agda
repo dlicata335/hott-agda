@@ -373,6 +373,7 @@ module lib.cubical.Square where
   ·-square-vertical id s = s
   
   _·-square-v_ = ·-square-vertical
+  infixr 10 _·-square-v_
 
   -- FIXME: how do you get this from a Kan filling?
   ·-square-vertical/degen-bot : {A : Type}
@@ -414,6 +415,7 @@ module lib.cubical.Square where
   ·-square-horiz id s = s
 
   _·-square-h_ = ·-square-horiz
+  infixr 10 _·-square-h_
 
   !-square-h : {A : Type}
               {a00 a01 a10 a11 : A} 
