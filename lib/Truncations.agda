@@ -204,3 +204,10 @@ module lib.Truncations where
     
     path : Trunc n A ≃ A
     path = ua eqv
+
+   -- one of the monad laws
+   Trunc-rec-cconv : (n : TLevel) {A B C : Type} (nC : NType n C)
+                     (f : A → Trunc n B) (g : B → C)
+                     (x : Trunc n A) → Trunc-rec nC g (Trunc-rec Trunc-level f x) ==  Trunc-rec nC (Trunc-rec nC g o f) x
+   Trunc-rec-cconv n nC f g = Trunc-elim _ (λ _ → path-preserves-level nC) (λ _ → id)
+                    

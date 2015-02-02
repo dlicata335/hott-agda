@@ -194,6 +194,7 @@ module lib.cubical.Square where
                                                 (λ x → Path (horiz-degen-square (horiz-degen-square-to-path x)) x)
                                                 id s) (λ y → path-induction (\ _ y → Path (horiz-degen-square-to-path (horiz-degen-square y)) y) id y))
 
+
   square-·-topright-right' : {A : Type}
               {a00 a01 a10 a11 : A} 
               {p0- : a00 == a01}
