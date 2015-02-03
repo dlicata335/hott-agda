@@ -47,7 +47,7 @@ import homotopy.TS1S1
 
 -- Blakers-Massey 
 
-import homotopy.blakersmassey.NotFibered
+import homotopy.blakersmassey.ThinFibered
 
 
 module homotopy.Theorems where

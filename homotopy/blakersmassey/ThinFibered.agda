@@ -6,7 +6,7 @@ open ConnectedMap
 open Truncation
 open import lib.cubical.Cubical
 
-module homotopy.blakersmassey.NotFibered (X Y : Type) (P : X → Y → Type)
+module homotopy.blakersmassey.ThinFibered (X Y : Type) (P : X → Y → Type)
                                           (i' j' : TLevel)
                                           (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
                                           (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) 
