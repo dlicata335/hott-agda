@@ -144,9 +144,9 @@ module lib.PushoutFat where
                                            (!
                                             (transport-∘ (λ z → fst (ext (fst (i z))) (snd (i z)) ≃ br z)
                                              (gluer _) (gluel _)))) where
-        postulate
+        postulate -- needed for ooTopos Blakers-Massey?
           br-glue-adj : (transport (λ z → fst (P (i z))) (gluer <> ∘ gluel <>)) ≃ (\ x -> x)
-          --br-glue-adj = {!!}
+          -- br-glue-adj = {!!}
 
         br-glue : br (inr b0) ≃ br (inl a0)
         br-glue = ap≃ br-glue-adj ∘ ! (apd br (gluer <> ∘ gluel <>))
@@ -160,7 +160,7 @@ module lib.PushoutFat where
         ext-a0 = (ConnectedFib.β m {_}{a0} cA 
                      (\ a -> (Extensions.Extensions-ntype cB b0 (λ b → (P (a , b))) (br (inl a))))
                      _)
-        postulate
+        postulate -- needed for ooTopos Blakers-Massey?
           ext-a0-coh : (transport (λ z → fst (ext (fst (i z))) (snd (i z)) ≃ br z)
                        (gluer <> ∘ gluel <>) (snd (ext a0)))
                        ≃ (ap≃ (fst≃ ext-a0) {b0})

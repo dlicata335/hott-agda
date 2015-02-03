@@ -339,15 +339,16 @@ module lib.cubical.Square where
                         (Square pa (ap f p) (ap g p) pa')
     out-PathOver-=-eqv = improve (hequiv out-PathOver-= in-PathOver-= out-in in-out) 
 
+{-
   module PathOver=D where
 
-    postulate
       in-PathOver-= : {A : Type} {B : A → Type} {f g : (x : A) → B x}
                 {a a' : A} {p : a == a'}
                 {pa : f a == g a}
                 {pa' : f a' == g a'}
                → SquareOver B (vrefl-square {p = p}) (hom-to-over pa) (apdo f p) (apdo g p) (hom-to-over pa')
                → PathOver (\ x -> f x == g x) p pa pa'
+-}
       
   extend-triangle : {A : Type} {a00 a01 a11 : A}
               {p0- : a00 == a01}
@@ -652,7 +653,33 @@ module lib.cubical.Square where
                 → ((x : A) → coe (b ∘ l) x == coe (r ∘ t) x)
   out-square-Type id x = id
 
-  postulate --working on Blakers Massey
+
+  -- special case of degenerating line to a square between functions, and then applying that square to the argument
+  -- also like apdo-ap, but where the dimensions aren't independent (so a diagonal of a higher apdo-ap?)
+  {-
+  apply-equals-to-square/lr' : ∀ {A B} {f0 f1 : A → B} (F : f0 == f1) 
+                         → {a00 a01 a10 a11 : A} 
+                            {p0- : a00 == a01}
+                            {p-0 : a00 == a10}
+                            {p-1 : a01 == a11}
+                            {p1- : a10 == a11}
+                            (s   : Square p0- p-0 p-1 p1-)
+                         → Square (ap f0 p0-) (ap≃₁→ F p-0) (ap≃₁→ F p-1) (ap f1 p1-)
+  apply-equals-to-square/lr' {A}{B} F s = whisker-square {!!} {!!} {!!} {!!}
+                                            (ap-square (λ (fx : (A → B) × A) → fst fx (snd fx))
+                                             (pair-square (vrefl-square {p = F}) s))
+  -}
+  apply-line-to-square/tb : ∀ {A B} {f0 f1 : A → B} (F : f0 == f1) 
+                         → {a00 a01 a10 a11 : A} 
+                            {p0- : a00 == a01}
+                            {p-0 : a00 == a10}
+                            {p-1 : a01 == a11}
+                            {p1- : a10 == a11}
+                            (s   : Square p0- p-0 p-1 p1-)
+                         → Square (ap f0 p0-) (ap (\ fx → (fst fx) (snd fx)) (pair×≃ F p-0)) (ap (\ fx → (fst fx) (snd fx)) (pair×≃ F p-1)) (ap f1 p1-)
+  apply-line-to-square/tb id id = id
+
+  {-
     SquareOver-ap-El : {A : Type} {B : A → Type}
               {a00 : A} {b00 : B a00} 
               {a01 a10 a11 : A} 
@@ -668,7 +695,7 @@ module lib.cubical.Square where
               {q1- : PathOver B p1- b10 b11}
               → SquareOver (λ X₁ → X₁) (ap-square B f) (over-o-ap (λ X₁ → X₁) q0-) (over-o-ap (λ X₁ → X₁) q-0) (over-o-ap (λ X₁ → X₁) q-1) (over-o-ap (λ X₁ → X₁) q1-)
               → SquareOver B f q0- q-0 q-1 q1-
-
+  -}
 {-
   out-SquareΣ : {A : Type} {B : A → Type}
                   {p00 p01 p10 p11 : Σ B}
@@ -790,7 +817,7 @@ module lib.cubical.Square where
                                       (over-to-hom/left (ro ∘o to)))
   out-squareover-El id = id
 -}
-  postulate --working on blakers-massey
+{-
     in-squareover-El : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} {s : (Square {Type} l t b r)}
                             {b1 : A}
                             {b2 : B}
@@ -806,7 +833,7 @@ module lib.cubical.Square where
                                     (over-to-hom/left (ro ∘o to)))
                          → (SquareOver (\ X -> X) s lo to bo ro)
   -- in-squareover-El id = path-induction-homo-e _ (path-induction-homo-e _ (path-induction-homo-e _ {!!})) 
-  
+-}  
 {-
   squareover-El-eqv : ∀ {A B C D} {l : A == B} {t : A == C} {b : B == D} {r : C == D} {s : (Square {Type} l t b r)}
                           {b1 : A} {b2 : B} {b3 : C} {b4 : D}

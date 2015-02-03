@@ -7,22 +7,10 @@ open Truncation
 open import lib.cubical.Cubical
 
 module homotopy.blakersmassey.Experiment5 (X Y : Type) (P : X → Y → Type)
-                                          (i' j' : _)
+                                          (i' j' : TLevel)
                                           (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
                                           (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) 
-                                          (-1<=i' : -1 <=tl i') 
-                                          (-1<=j' : -1 <=tl j') where
-
-  ∘-unit-l-eqv-2 : ∀ {A} {a a' : A} {p q : a == a'} → Equiv (id ∘ p == id ∘ q) (p == q)
-  ∘-unit-l-eqv-2 {p = id} {q} = improve (hequiv (λ p → ∘-unit-l q ∘ p) (λ p → ! (∘-unit-l q) ∘ p) {!!} {!!})
-
-  move-!-right-eqv : ∀ {A} {a a' : A} {p : a == a'} {q : a' == a} → Equiv (! p == q) (p == ! q)
-  move-!-right-eqv {p = id} {q} = improve (hequiv (λ p → ap ! p) (λ p → !-invol q ∘ ap ! p) {!!} {!!})
-
-  ap-uncurryd-NDrange : {A : Type} {B : A → Type} {C : Type}
-                (f : (x : A) → B x → C) {a0 a1 : A} {b0 : B a0} {b1 : B a1} (α : a0 == a1) (β : PathOver B α b0 b1)
-                → ap (uncurryd f) (pair= α β) == coe PathOverΠ-NDrange (apdo f α) _ _ β 
-  ap-uncurryd-NDrange _ .id id = {!!}
+                                          where 
 
   i : TLevel
   i = S i'
@@ -33,7 +21,6 @@ module homotopy.blakersmassey.Experiment5 (X Y : Type) (P : X → Y → Type)
   i+j = plus2 i' j'
 
   W = PushoutFib.Pushout _ _ P
-
 
   wedge-zig : ∀ {x y'} (pxy' : P x y') 
              → ∀ (C : ∀ { x' y } → (pxy : P x y) (px'y' : P x' y') → Type)
@@ -69,17 +56,13 @@ module homotopy.blakersmassey.Experiment5 (X Y : Type) (P : X → Y → Type)
       Square (composePβ1 pxy' pxy') id (ap (λ z → [ pxy' , z ]) (! (inverses-connection-coh (glue pxy')))) (composePβ2 pxy' pxy')
     composePcoh pxy' = disc-to-square (! (ConnectedProduct.wedge-elim-coh _ _ _ _ _ _ _))
 
-    composePcoh' : ∀ {x y' } → (pxy' : P x y') (p : (composeP pxy' pxy' pxy') == (composeP pxy' pxy' pxy')) → 
-      Square (composePβ1 pxy' pxy') p ({!!} ∘ ap (λ z → [ pxy' , z ]) (! (inverses-connection-coh (glue pxy')))) (composePβ2 pxy' pxy')
-    composePcoh' pxy' = {!!}
-
-
   
   composePtwice-body-2 : ∀ {x x' y y'} (pxy : P x y) (pxy' : P x y') (px'y' : P x' y') 
                         (px'y : P x' y) (s : Square {W} (glue pxy') (glue pxy) (! (glue px'y')) (! (glue px'y)))
                      → (Σ \ (pxy'2 : P x y') → Square (glue px'y) (glue px'y') (! (glue pxy)) (! (glue pxy'2)))
                      → Trunc i+j (Σ \ (pxy'2 : P x y') → Path {Path{W} (inl x) (inr y')} (glue pxy'2) (glue pxy'))
   composePtwice-body-2 pxy pxy' px'y' px'y s (pxy'2 , s2) = 
+      -- combine the two squares into a path from the new copy to the original
       [ pxy'2 , ! (horiz-degen-square-to-path (whisker-square id (!-inv-l (glue pxy)) (!-inv-r (glue px'y')) (!-invol (glue pxy'2)) (s ·-square-h !-square-v s2))) ]
 
   composePtwice-body-1 : ∀ {x x' y y'} (pxy : P x y) (pxy' : P x y') (px'y' : P x' y') → 
@@ -89,40 +72,67 @@ module homotopy.blakersmassey.Experiment5 (X Y : Type) (P : X → Y → Type)
 
   composePtwice : ∀ {x x' y y'} (pxy : P x y) (pxy' : P x y') (px'y' : P x' y') → 
                    Path {Trunc i+j (Σ \ (pxy'2 : P x y') → Path {Path{W} (inl x) (inr y')} (glue pxy'2) (glue pxy'))}
-                         (Trunc-rec Trunc-level (composePtwice-body-1 pxy pxy' px'y') (composeP pxy pxy' px'y'))
-                         [ pxy' , id ]
+                        (Trunc-rec Trunc-level (composePtwice-body-1 pxy pxy' px'y') (composeP pxy pxy' px'y'))
+                        [ pxy' , id ]
   composePtwice {x}{_}{_}{y'} pxy pxy' px'y' = 
       wedge-zig pxy' (\ {x'}{y} (pxy : P x y) (px'y' : P x' y') → Path (Trunc-rec Trunc-level (composePtwice-body-1 pxy pxy' px'y') (composeP pxy pxy' px'y')) [ pxy' , id ])
         (λ _ _ → path-preserves-level Trunc-level)
         (λ {x'} px'y' → (coh1 px'y' ∘
                           ap (Trunc-rec Trunc-level (composePtwice-body-2 pxy' pxy' px'y' px'y' connection2)) (composePβ1 px'y' pxy')) ∘
                           ap (Trunc-rec Trunc-level (composePtwice-body-1 pxy' pxy' px'y')) (composePβ1 pxy' px'y'))
-        (λ {y} pxy →
-             (coh2 pxy 
-              ∘ ap (Trunc-rec Trunc-level (composePtwice-body-2 pxy pxy' pxy' pxy (inverses-square (glue pxy') (glue pxy)))) (composePβ2 pxy' pxy)) 
-              ∘ ap (Trunc-rec Trunc-level (composePtwice-body-1 pxy pxy' pxy')) (composePβ2 pxy pxy'))
+        (λ {y} pxy → (coh2 pxy ∘ 
+                       ap (Trunc-rec Trunc-level (composePtwice-body-2 pxy pxy' pxy' pxy (inverses-square (glue pxy') (glue pxy)))) (composePβ2 pxy' pxy)) ∘
+                       ap (Trunc-rec Trunc-level (composePtwice-body-1 pxy pxy' pxy')) (composePβ2 pxy pxy'))
         (horiz-degen-square-to-path (ap-square (Trunc-rec Trunc-level (composePtwice-body-1 pxy' pxy' pxy')) (composePcoh pxy') ·-square-v
-                                     whisker-square id (ap-o (Trunc-rec Trunc-level (composePtwice-body-1 pxy' pxy' pxy')) (λ z → [ pxy' , z ]) (! (inverses-connection-coh (glue pxy')))) id id sq2 ·-square-v
+                                     sq2 ·-square-v
                                      coh12))
         pxy px'y' 
-      where coh1 : ∀ {x'} (px'y' : P x' y') -> (composePtwice-body-2 pxy' pxy' px'y' px'y' connection2 (pxy' , connection2)) == [ pxy' , id ]
-            coh1 px'y' = ap (λ h → [ pxy' , h ]) {!!}
-
-            coh2 : ∀ {y} (pxy : P x y) -> (composePtwice-body-2 pxy pxy' pxy' pxy (inverses-square (glue pxy') (glue pxy)) (pxy' , inverses-square (glue pxy) (glue pxy'))) == [ pxy' , id ]
-            coh2 pxy = ap (λ h → [ pxy' , h ]) {!!}
-            
-            coh12 : Square (coh1 pxy') (ap (λ Z → composePtwice-body-2 pxy' pxy' pxy' pxy' Z (pxy' , Z)) (! (inverses-connection-coh (glue pxy')))) id (coh2 pxy')
-            coh12 = {!!}
-
+      where 
+            -- second uses of composePβ are equal; need to turn connection2 into inverses-square in the function being app'ed as well
             sq2 : Square (ap (Trunc-rec Trunc-level (composePtwice-body-2 pxy' pxy' pxy' pxy' connection2)) (composePβ1 pxy' pxy'))
-                         (ap (\ s → Trunc-rec Trunc-level (composePtwice-body-2 pxy' pxy' pxy' pxy' s) (composeP pxy' pxy' pxy'))
-                             (! (inverses-connection-coh (glue pxy'))))
+                         (ap (Trunc-rec Trunc-level (composePtwice-body-1 pxy' pxy' pxy')) (ap (λ z → [ pxy' , z ]) (! (inverses-connection-coh (glue pxy')))))
                          (ap (λ s → composePtwice-body-2 pxy' pxy' pxy' pxy' s (pxy' , s))
                              (! (inverses-connection-coh (glue pxy'))))
                          (ap (Trunc-rec Trunc-level (composePtwice-body-2 pxy' pxy' pxy' pxy' (inverses-square (glue pxy') (glue pxy'))))
                              (composePβ2 pxy' pxy'))
-            sq2 = {!composePcoh pxy'!}
-{-
+            sq2 = whisker-square id ((ap-o (Trunc-rec Trunc-level (composePtwice-body-1 pxy' pxy' pxy')) (λ z → [ pxy' , z ]) (! (inverses-connection-coh (glue pxy'))) ∘ 
+                                      ! (ap-o (λ x₁ → x₁ (composeP pxy' pxy' pxy')) (λ s → Trunc-rec Trunc-level (composePtwice-body-2 pxy' pxy' pxy' pxy' s)) (! (inverses-connection-coh (glue pxy')))) ∘
+                                      ! (ap-o (λ fx → fst fx (snd fx)) (λ x₁ → x₁ , composeP pxy' pxy' pxy') (ap (λ s → Trunc-rec Trunc-level (composePtwice-body-2 pxy' pxy' pxy' pxy' s)) (! (inverses-connection-coh (glue pxy')))))) ∘
+                                         ap (ap (λ fx → fst fx (snd fx))) (pair×≃-id2 (ap (λ s → Trunc-rec Trunc-level (composePtwice-body-2 pxy' pxy' pxy' pxy' s)) (! (inverses-connection-coh (glue pxy'))))))
+                                    ((ap-pair×≃-diag (λ a'b → composePtwice-body-2 pxy' pxy' pxy' pxy' (fst a'b) (pxy' , snd a'b)) (! (inverses-connection-coh (glue pxy'))) ∘
+                                     ap-pair×≃-ap-2 (λ a'b → Trunc-rec Trunc-level (composePtwice-body-2 pxy' pxy' pxy' pxy' (fst a'b)) (snd a'b)) (λ z → [ pxy' , z ]) (! (inverses-connection-coh (glue pxy'))) (! (inverses-connection-coh (glue pxy')))) ∘
+                                     ap-pair×≃-ap-1 (λ fx → fst fx (snd fx)) (λ s → Trunc-rec Trunc-level (composePtwice-body-2 pxy' pxy' pxy' pxy' s)) (! (inverses-connection-coh (glue pxy'))) (ap (λ z → [ pxy' , z ]) (! (inverses-connection-coh (glue pxy'))))) 
+                                    id
+                    (apply-line-to-square/tb
+                     (ap (λ s → Trunc-rec Trunc-level (composePtwice-body-2 pxy' pxy' pxy' pxy' s)) (! (inverses-connection-coh (glue pxy'))))
+                     (composePcoh pxy'))
+
+            -- final coherence step for left
+            coh1' : {A : Type} {x x' y' : A} (pxy' : x == y') (px'y' : x' == y')
+                  → (! (horiz-degen-square-to-path (whisker-square id (!-inv-l pxy') (!-inv-r px'y') (!-invol pxy') (connection2 {p = pxy'}{q = ! px'y'} ·-square-h !-square-v connection2)))) == id
+            coh1' id id = id
+  
+            coh1 : ∀ {x'} (px'y' : P x' y') -> (composePtwice-body-2 pxy' pxy' px'y' px'y' connection2 (pxy' , connection2)) == [ pxy' , id ]
+            coh1 px'y' = ap (λ h → [ pxy' , h ]) (coh1' (glue pxy') (glue px'y'))
+
+            -- final coherence step for right
+            coh2' : {A : Type} {x y y' : A} (pxy : x == y) (pxy' : x == y')
+                  → (! (horiz-degen-square-to-path (whisker-square id (!-inv-l pxy) (!-inv-r pxy') (!-invol pxy') (inverses-square pxy' pxy ·-square-h !-square-v (inverses-square pxy pxy'))))) == id
+            coh2' id id = id
+
+            coh2 : ∀ {y} (pxy : P x y) -> (composePtwice-body-2 pxy pxy' pxy' pxy (inverses-square (glue pxy') (glue pxy)) (pxy' , inverses-square (glue pxy) (glue pxy'))) == [ pxy' , id ]
+            coh2 pxy = ap (λ h → [ pxy' , h ]) (coh2' (glue pxy) (glue pxy'))
+            
+            -- above two are equal
+            coh12' : {A : Type} {x y : A} (pxy' : x == y) 
+                   → Square (coh1' pxy' pxy') (ap (λ Z → ! (horiz-degen-square-to-path (whisker-square id (!-inv-l pxy') (!-inv-r pxy') (!-invol pxy') (Z ·-square-h !-square-v Z)))) (! (inverses-connection-coh pxy'))) id (coh2' pxy' pxy')
+            coh12' id = id
+
+            coh12 : Square (coh1 pxy') (ap (λ Z → composePtwice-body-2 pxy' pxy' pxy' pxy' Z (pxy' , Z)) (! (inverses-connection-coh (glue pxy')))) id (coh2 pxy')
+            coh12 = whisker-square id (! (ap-o (λ h → [ pxy' , h ]) (λ Z → ! (horiz-degen-square-to-path (whisker-square id (!-inv-l (glue pxy')) (!-inv-r (glue pxy')) (!-invol (glue pxy')) (Z ·-square-h !-square-v Z)))) (! (inverses-connection-coh (glue pxy')))))
+                                   id id
+                                   (ap-square (λ h → [ pxy' , h ]) (coh12' (glue pxy')))
+
   gluel' : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x : X} → P x y0 → Path {W} (inl x0) (inl x)
   gluel' p0 pxy0 = ! (glue pxy0) ∘ glue p0
 
@@ -133,8 +143,10 @@ module homotopy.blakersmassey.Experiment5 (X Y : Type) (P : X → Y → Type)
         → (HFiber (gluel' p0) αx) → Trunc i+j (HFiber (glue) αy)
     map' p0 pxy s (pxy0 , q) = 
       Trunc-rec Trunc-level 
-                (λ c → [ fst c , square-to-disc s ∘ ap (λ z → glue pxy ∘ z) q ∘ square-to-disc-rearrange (square-symmetry (snd c)) ]) 
-                (composeP pxy pxy0 p0)
+        (λ c → [ fst c , 
+                 -- massage the composite square into the required form, composing with s and q
+                 square-to-disc s ∘ ap (λ z → glue pxy ∘ z) q ∘ square-to-disc-rearrange (square-symmetry (snd c)) ]) 
+        (composeP pxy pxy0 p0)
 
     map : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x   : X} {y   : Y} (pxy : P x y)
               {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (s : Square αx id (glue pxy) αy)
@@ -147,7 +159,8 @@ module homotopy.blakersmassey.Experiment5 (X Y : Type) (P : X → Y → Type)
              → (HFiber glue αy) → Trunc i+j (HFiber (gluel' p0 {x}) αx) 
     backmap' p0 pxy s (px0y , q) = 
       Trunc-rec Trunc-level 
-                (λ c → [ fst c , square-to-disc (!-square-h s) ∘ ap (λ Z → ! (glue pxy) ∘ Z) q ∘ square-to-disc (square-symmetry (snd c)) ]) 
+                (λ c → [ fst c , 
+                         square-to-disc (!-square-h s) ∘ ap (λ Z → ! (glue pxy) ∘ Z) q ∘ square-to-disc (square-symmetry (snd c)) ]) 
                 (composeP p0 px0y pxy)
 
     backmap : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x   : X} {y   : Y} (pxy : P x y)
@@ -155,17 +168,18 @@ module homotopy.blakersmassey.Experiment5 (X Y : Type) (P : X → Y → Type)
             → Trunc i+j (HFiber glue αy) → Trunc i+j (HFiber (gluel' p0 {x}) αx) 
     backmap p0 pxy s = Trunc-rec Trunc-level (backmap' p0 pxy s)
 
+
     composite1' : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x   : X} {y   : Y} (pxy : P x y)
                   {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (s : Square αx id (glue pxy) αy)
                   (hf : HFiber glue αy)
                → map p0 pxy s (backmap' p0 pxy s hf) == [ hf ]
     composite1' p0 pxy s (px0y , id) = 
-      map p0 pxy s (backmap' p0 pxy s (px0y , id)) ≃〈 id 〉
       map p0 pxy s (Trunc-rec Trunc-level (λ c → [ fst c , _ ]) (composeP p0 px0y pxy)) ≃〈 Trunc-rec-cconv i+j Trunc-level (λ c → [ fst c , _ ]) (map' p0 pxy s) (composeP p0 px0y pxy) 〉
-      Trunc-rec Trunc-level (\ c → Trunc-rec Trunc-level (\ c' → [ fst c' , _ ]) (composeP pxy (fst c) p0))
-                           (composeP p0 px0y pxy) ≃〈 ap (λ F → Trunc-rec Trunc-level F (composeP p0 px0y pxy)) (λ≃ (λ c → ap (λ G → Trunc-rec Trunc-level G (composeP pxy (fst c) p0)) (λ≃ (λ c' → ap (λ Z → [ fst c' , Z ]) 
-                                                        (coh s (snd c) (snd c')))))) 〉 
+      -- commuting convert
+      Trunc-rec Trunc-level (\ c → Trunc-rec Trunc-level (\ c' → [ fst c' , _ ]) (composeP pxy (fst c) p0)) (composeP p0 px0y pxy) ≃〈 ap (λ F → Trunc-rec Trunc-level F (composeP p0 px0y pxy)) (λ≃ (λ c → ap (λ G → Trunc-rec Trunc-level G (composeP pxy (fst c) p0)) (λ≃ (λ c' → ap (λ Z → [ fst c' , Z ]) (coh s (snd c) (snd c')))))) 〉 
+      -- use a coherence on the big path term elided with the _ 
       Trunc-rec Trunc-level (\ c → Trunc-rec Trunc-level (\ c' → [ fst c' , _ ]) (composeP pxy (fst c) p0)) (composeP p0 px0y pxy) ≃〈 composePtwice p0 px0y pxy 〉 
+      -- use composePtwice
       [ px0y , id ] ∎ where
            coh1 : ∀ {A} {x0 : A} {p0 : x0 == x0} {αx : Path x0 x0} (x₁ : p0 == id) (x : αx == p0) → Id _ _ 
            coh1 id id = id
@@ -179,15 +193,43 @@ module homotopy.blakersmassey.Experiment5 (X Y : Type) (P : X → Y → Type)
                                             (elim-along-equiv _ (!equiv (∘-unit-l-eqv-2 {p = αx} {q = p0})) 
                                               (λ x → elim-along-equiv _ (!equiv square-disc-eqv) (elim-along-equiv _ (!equiv move-!-right-eqv) (λ x₁ → coh1 {_} {_} {p0} {αx} x₁ x)))))
 
+    
+    composite2' : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x   : X} {y   : Y} (pxy : P x y)
+                  {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (s : Square αx id (glue pxy) αy)
+                  → (hf : HFiber (gluel' p0 {x}) αx)
+                  → backmap p0 pxy s (map' p0 pxy s hf) == [ hf ]
+    composite2' p0 pxy {αy = αy} s (pxy0 , id) = 
+      -- 4. commuting-convert like above
+      backmap p0 pxy s (map' p0 pxy s (pxy0 , id)) ≃〈 Trunc-rec-cconv i+j Trunc-level (λ c → [ fst c , _ ]) (backmap' p0 pxy s) (composeP pxy pxy0 p0)  〉
+      -- 3. coherence
+      Trunc-rec Trunc-level (\ c → Trunc-rec Trunc-level (λ c' → [ fst c' , _ ]) (composeP p0 (fst c) pxy)) (composeP pxy pxy0 p0) ≃〈 ap (λ Z → Trunc-rec Trunc-level Z (composeP pxy pxy0 p0)) (λ≃ (λ c → ap (λ Z' → Trunc-rec Trunc-level Z' (composeP p0 (fst c) pxy)) (λ≃ (λ c' → ap (λ Z'' → [ fst c' , Z'' ]) (coh (glue p0) (glue pxy) (glue pxy0) s (glue (fst c)) (snd c) (glue (fst c')) (snd c')))))) 〉 
+      -- 2. do some commuting conversions to walk the ! - ∘ glue p0 inside
+      Trunc-rec Trunc-level (\ c → Trunc-rec Trunc-level (λ c' → [ fst c' , _ ]) (composeP p0 (fst c) pxy)) (composeP pxy pxy0 p0) ≃〈 !(ap (\ Z → Trunc-rec Trunc-level Z (composeP pxy pxy0 p0)) (λ≃ \ c → Trunc-rec-cconv i+j Trunc-level (composePtwice-body-2 pxy pxy0 p0 (fst c) (snd c)) (λ z → [ fst z , ap (λ x₁ → ! x₁ ∘ glue p0) (snd z) ]) (composeP p0 (fst c) pxy))) 〉 
+      Trunc-rec Trunc-level (\ c → Trunc-rec Trunc-level (λ z → [ fst z , ap (λ x₁ → ! x₁ ∘ glue p0) (snd z) ]) (Trunc-rec Trunc-level (composePtwice-body-2 pxy pxy0 p0 (fst c) (snd c)) (composeP p0 (fst c) pxy))) (composeP pxy pxy0 p0) ≃〈 ! (Trunc-rec-cconv i+j Trunc-level (composePtwice-body-1 pxy pxy0 p0) (λ z → [ fst z , ap (λ x₁ → ! x₁ ∘ glue p0) (snd z) ]) (composeP pxy pxy0 p0)) 〉 
+      -- 1. need to tack on the ! - ∘ glue p0 to be in the hfiber of gluel instead of glue [ not necessary above because of how composePtwice is phrased ]
+      Trunc-func (λ z → fst z , ap (λ x₁ → ! x₁ ∘ glue p0) (snd z)) (Trunc-rec Trunc-level (composePtwice-body-1 pxy pxy0 p0) (composeP pxy pxy0 p0)) ≃〈 ap (Trunc-func (λ z → fst z , ap (λ x₁ → ! x₁ ∘ glue p0) (snd z))) (composePtwice pxy pxy0 p0) 〉 
+      [ pxy0 , id ] ∎ where
+        coh' : ∀ {A} {x0 : A} (fstc  : x0 == x0) (sndc  : id == fstc) (fstc' : x0 == x0) (sndc' : ! (id ∘ fstc) == fstc') → Path _ _
+        coh' .id id ._ id = id
+
+        coh : ∀ {A} {x0 y0 x y : A} (p0 : x0 == y0) (pxy : x == y) (pxy0 : x == y0) {αy  : Path x0 y}
+                (s    : Square (! pxy0 ∘ p0) id pxy αy)
+                (fstc    : x0 == y) (sndc : Square pxy0 pxy (! p0) (! fstc))
+                (fstc'   : x == y0) (sndc' : Square (fstc) p0 (! pxy) (! fstc')) →
+              Path (square-to-disc (!-square-h s) ∘ ap (_∘_ (! pxy))
+                    (square-to-disc s ∘ id ∘ square-to-disc-rearrange (square-symmetry (sndc))) ∘ square-to-disc (square-symmetry (sndc')))
+                   (ap (λ x₁ → ! x₁ ∘ p0) (! (horiz-degen-square-to-path (whisker-square id (!-inv-l pxy) (!-inv-r p0) (!-invol (fstc')) (sndc ·-square-h !-square-v (sndc'))))))
+        coh {_}{x0} id id id = horiz-degen-square-induction1 (λ {αy₁} s₁ → (fstc : x0 == x0) (sndc : Square id id id (! fstc)) (fstc' : x0 == x0) (sndc' : Square fstc id id (! fstc')) → Path (square-to-disc (!-square-h s₁) ∘ ap (_∘_ id) (square-to-disc s₁ ∘ id ∘ square-to-disc-rearrange (square-symmetry sndc)) ∘ square-to-disc (square-symmetry sndc')) (ap (λ x₁ → ! x₁) (! (horiz-degen-square-to-path (whisker-square id id id (!-invol fstc') (sndc ·-square-h !-square-v sndc'))))))
+                                 (λ fstc → elim-along-equiv _ (!equiv square-disc-eqv) (elim-along-equiv _ (move-!-right-eqv) (λ sndc → λ fstc' → elim-along-equiv _ (!equiv square-disc-eqv) (elim-along-equiv _ move-!-right-eqv (λ sndc' → coh' fstc sndc fstc' sndc')))))
+
     eqv : {x0 : X} {y0 : Y} (p0 : P x0 y0) {x : X} {y   : Y} (pxy : P x y)
           {αx  : Path (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (s : Square αx id (glue pxy) αy)
         → Equiv (Trunc i+j (HFiber (gluel' p0 {x}) αx)) (Trunc i+j (HFiber glue αy))
     eqv p0 pxy s = improve (hequiv (map p0 pxy s)
                                    (backmap p0 pxy s)
-                                   {!!} 
+                                   (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (composite2' p0 pxy s)) 
                                    (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (composite1' p0 pxy s)))
--}
-{-
+
   module Codes (x0 : X) (y0 : Y) (p0 : P x0 y0) where
 
     gluel : {x : X} → P x y0 → inl x0 == inl x
@@ -258,5 +300,3 @@ module homotopy.blakersmassey.Experiment5 (X Y : Type) (P : X → Y → Type)
   theorem : ConnectedMap i+j glue-map-total
   theorem = fiberwise-to-total-connected i+j (λ _ → glue) (λ xy → glue-connected (fst xy) (snd xy))
 
-
--}

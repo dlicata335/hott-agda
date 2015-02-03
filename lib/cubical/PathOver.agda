@@ -408,11 +408,18 @@ module lib.cubical.PathOver where
                  → coe (PathOverΠ {A = A} {B = B}{δ = id} {f = f}) id x x id == id
   PathOverΠ-id f {x = x} = ap≃ (ap≃ (ap≃ (ap≃ (type≃β PathOverΠ-eqv) {id}) {x}) {x}) {id}
 
-  postulate -- working on Blakers-Massey
+  postulate -- needed for Blakers-Massey type-theoretic
+     ap-uncurryd-NDrange : {A : Type} {B : A → Type} {C : Type}
+                   (f : (x : A) → B x → C) {a0 a1 : A} {b0 : B a0} {b1 : B a1} (α : a0 == a1) (β : PathOver B α b0 b1)
+                   → ap (uncurryd f) (pair= α β) == coe PathOverΠ-NDrange (apdo f α) _ _ β 
+     -- ap-uncurryd-NDrange _ .id id = {!!}
+
+{-
     in-PathOverΠ/1l : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
                     → {θ1 θ2 : Δ} {δ : θ1 == θ2} {f : (x : A θ1) → B (θ1 , x)} {g : (x : A θ2) → B (θ2 , x)}
                     → ((x : A θ1) → PathOver B (pair= δ (PathOver-transport-right A δ)) (f x) (g (transport A δ x)))
                     →  PathOver (\ θ → (x : A θ) → B (θ , x)) δ f g 
+-}
 
   PathOverType : {Δ : Type} {A B : Type}
               → {θ1 θ2 : Δ} {δ : θ1 == θ2}
@@ -492,7 +499,6 @@ module lib.cubical.PathOver where
   
 
 {-
-  postulate
     PathOverΣ-eqv : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
                     → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
                     → Equiv (PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)

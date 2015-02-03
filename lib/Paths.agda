@@ -179,6 +179,18 @@ module lib.Paths where
  pre∘-equiv : ∀ {A} {a b c : A} → (a ≃ b) -> Equiv (b ≃ c) (a ≃ c)
  pre∘-equiv α = (improve (hequiv (λ β → β ∘ α) (λ β' → β' ∘ ! α) (λ β → !-inv-r-back β α ∘ ! (∘-assoc β α (! α))) (λ β → !-inv-l-back β α ∘ ! (∘-assoc β (! α) α))))
 
+ ∘-unit-l-eqv-2 : ∀ {A} {a a' : A} {p q : a == a'} → Equiv (id ∘ p == id ∘ q) (p == q)
+ ∘-unit-l-eqv-2 {p = id} {q} = improve (hequiv (λ p → ∘-unit-l q ∘ p) (λ p → ! (∘-unit-l q) ∘ p) (λ p → !-inv-l-front (∘-unit-l q) p) (λ p → !-inv-r-front (∘-unit-l q) p))
+
+ move-!-right-eqv : ∀ {A} {a a' : A} {p : a == a'} {q : a' == a} → Equiv (! p == q) (p == ! q)
+ move-!-right-eqv {p = p} {q} = improve (hequiv (λ r → ap ! r ∘ ! (!-invol p)) (λ r → !-invol q ∘ ap ! r) comp1 comp2) where
+    comp1 : ∀ {A} {a a' : A} {p : a == a'} {q : a' == a} (x : Id (! p) q) → Path (!-invol q ∘ ap ! (ap ! x ∘ ! (!-invol p))) x
+    comp1 {p = id} id = id
+
+    comp2 : ∀ {A} {a a' : A} {p : a == a'} {q : a' == a} (y : Id p (! q)) → Path (ap ! (!-invol q ∘ ap ! y) ∘ ! (!-invol p)) y
+    comp2 {q = id} id = id
+
+
  -- transport stuff
 
 

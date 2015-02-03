@@ -35,6 +35,10 @@ module lib.Functions where
   ap≃₁→ : {A B : Type} {f g : A → B} {x y : A} → f ≃ g → x ≃ y → f x ≃ g y
   ap≃₁→ α β = ap2 (\ f x -> f x) α β
 
+  ap≃₁→-id2 : {A B : Type} {f g : A → B} {x : A} → (F : f ≃ g) → 
+               Path {f x == g x} (ap≃₁→ F id) (ap≃ F)
+  ap≃₁→-id2 id = id
+
   module ΠPath where
     eqv : {A : Type} {B : A → Type} {f g : (x : A) → B x} 
         → Equiv ((x : A) → Path (f x) (g x)) (Path f g)

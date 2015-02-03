@@ -22,7 +22,7 @@ module lib.Stream where
   head (unfold f x) = fst (f x)
   tail (unfold f x) = unfold f (snd (f x))
 
-  postulate
+  postulate {-# HoTT Axiom #-}
       unfoldη : {A : Type} {X : Type} (f : X → A × X) (s : X → Stream A)
              → ((x : X) → head (s x) == fst (f x))
              → ((x : X) → tail (s x) == s (snd (f x)))

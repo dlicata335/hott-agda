@@ -134,12 +134,10 @@ module lib.Prods where
      ap (fst≃ o coe ΣPath.path) (ap≃ (Σ-with-Contractibleβ1 (λ p' → use-level {n = -2} (use-level {n = S -2} (hp x) _ _))))) ∘
      ap fst≃ (ap≃ (transport-∘ (λ x' → x') ΣPath.path (Σ-with-Contractible (λ p' → use-level {n = -2} (use-level {n = S -2} (hp x) _ _)))))
 
-  postulate
+  postulate --needed for K(G,n)
     ΣSubsetPathβ! : {A : Type} {B : A → Type} {p q : Σ B} 
                   → (hp : (x : A) → HProp (B x)) (p' : Path{Σ B} p q)
                   → (coe (! (ΣSubsetPath {p = p} {q = q} hp)) p') ≃ fst≃ p'
-
-
 
   module Σassoc where
 
@@ -321,6 +319,21 @@ module lib.Prods where
                ap (λ x → y , f (x)) α ≃
                pair×≃ (ap (λ _ → y) α) (ap (λ x → f (x)) α)
   ap-×-snd _ _ id = id
+
+  pair×≃-id1 : {A B : Type} {a : A} {b b' : B} -> (p : b == b') -> pair×≃ id p == ap (\ x -> a , x) p
+  pair×≃-id1 id = id 
+
+  pair×≃-id2 : {A B : Type} {a a' : A} {b : B} -> (p : a == a') -> pair×≃ p id == ap (\ x -> x , b) p
+  pair×≃-id2 id = id 
+
+  ap-pair×≃-ap-1 : {A A' B C : Type} (f : A × B → C) (g : A' → A) {a a' : A'} {b b' : B} -> (p : a == a') (q : b == b') -> ap f (pair×≃ (ap g p) q) == ap (λ a'b → f (g (fst a'b) , snd a'b)) (pair×≃ p q)
+  ap-pair×≃-ap-1 f g id id = id
+
+  ap-pair×≃-ap-2 : {A B' B C : Type} (f : A × B → C) (g : B' → B) {a a' : A} {b b' : B'} -> (p : a == a') (q : b == b') -> ap f (pair×≃ p (ap g q)) == ap (λ a'b → f ((fst a'b) , g (snd a'b))) (pair×≃ p q)
+  ap-pair×≃-ap-2 f g id id = id
+
+  ap-pair×≃-diag : {A C : Type} (f : A × A → C) {a a' : A} (p : a == a') -> ap f (pair×≃ p p) == ap (λ z → f (z , z)) p
+  ap-pair×≃-diag f id = id
 
   hfiber-fst : ∀ {A} {B : A → Type} (a : A) → B a == Σ \ (p : Σ B) → fst p == a
   hfiber-fst {B = B} a = ua (improve (hequiv (λ b → (a , b) , id) (λ p₁ → transport B (snd p₁) (snd (fst p₁))) (λ _ → id) (λ {((a1 , b) , p) → path-induction-l (λ a2 p₁ → (b₁ : B a2) → Id ((a , transport B p₁ b₁) , id) ((a2 , b₁) , p₁)) (λ _ → id) p b})))

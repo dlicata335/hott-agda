@@ -95,7 +95,6 @@ module lib.PushoutFatFib where
                                            (!
                                             (transport-∘ (λ z → fst (ext (fst (i z))) (snd (i z)) ≃ br z)
                                              (gluer _) (gluel _)))) where
-        postulate
           br-glue-adj : (transport (λ z → fst (P (i z))) (gluer <> ∘ gluel <>)) ≃ (\ x -> x)
           --br-glue-adj = {!!}
 
@@ -111,7 +110,6 @@ module lib.PushoutFatFib where
         ext-a0 = (ConnectedFib.β m {_}{a0} cA 
                      (\ a -> (Extensions.Extensions-ntype cB b0 (λ b → (P (a , b))) (br (inl a))))
                      _)
-        postulate
           ext-a0-coh : (transport (λ z → fst (ext (fst (i z))) (snd (i z)) ≃ br z)
                        (gluer <> ∘ gluel <>) (snd (ext a0)))
                        ≃ (ap≃ (fst≃ ext-a0) {b0})

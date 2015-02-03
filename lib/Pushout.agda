@@ -83,5 +83,5 @@ module lib.Pushout where
 
       i = wedge-to-prod {A}{B}{a0}{b0}
 
-      postulate 
+      postulate -- ooTopos Blakers-Massey?
         i-connected : ConnectedMap.ConnectedMap (plus2 m n) i

@@ -44,5 +44,8 @@ import homotopy.Whitehead
 
 import homotopy.TS1S1
 
+
+-- Blakers-Massey 
+
 module homotopy.Theorems where
 

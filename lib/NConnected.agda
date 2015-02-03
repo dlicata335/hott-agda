@@ -182,7 +182,7 @@ module lib.NConnected where
                                        (λ hfy → transport (fst o P) (snd hfy) (forA (fst hfy)))
                                        (fst (use-level (cf y)))
 
-    postulate -- working on Blakers-Massey
+    postulate -- needed for ooTopos Blakers-Massey ?
       extendβ : (n : TLevel) → ∀ {A B} (f : A → B) →
                 (cf : ConnectedMap n f) →
                 (P : B → NTypes n)
@@ -236,11 +236,11 @@ module lib.NConnected where
                                                                                   (ConnectedMap-has-UMP n (f (fst y)) (c (fst y))
                                                                                    (λ z → P (fst y , z)) (λ b1 → b (fst y , b1)))
                                                                                   (snd y))) 
-
+{-
     unfiberwise-to-total-connected : (n : TLevel) → ∀ {A} {B1 B2 : A → Type} → (f : (x : A) → B1 x → B2 x) → 
                                  ConnectedMap n (fiberwise-to-total f) → ((x : A) → ConnectedMap n (f x))
     unfiberwise-to-total-connected n f c x y = transport (λ A → NType -2 (Trunc n A)) rearrange-and-path-ind (c (x , y)) where
-      postulate rearrange-and-path-ind : _ -- working on Blakers Massey
+-}
 
   open ConnectedMap
 
