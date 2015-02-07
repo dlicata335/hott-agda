@@ -218,6 +218,7 @@ module lib.Truncations where
     path : Trunc n A ≃ A
     path = ua eqv
 
+   -- lemma that might help clean up Blakers-Massey... 
    truncated-HFiber-equiv : {i : TLevel} {A B C : Type} 
      (f : A → C) (g : B → C) 
      (l' : (a : A) → Trunc i (HFiber g (f a)))
