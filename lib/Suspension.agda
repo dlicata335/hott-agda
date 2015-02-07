@@ -82,7 +82,7 @@ module lib.Suspension where
                                                        (fst (use-level nA))))) where 
             mers-eq : ∀ n {A} → Connected n A → (x x' : A) → Path{Path {Trunc (S n) (Susp A)} [ No ] [ So ]} (ap [_] (mer x)) (ap [_] (mer x'))
             mers-eq -2 nA x x' = HProp-unique (path-preserves-level (Trunc-level {S -2})) _ _
-            mers-eq (S n) nA x x' = ConnectedFib.everywhere n {a0 = x} nA
+            mers-eq (S n) nA x x' = Connected.everywhere n {a0 = x} nA
                                       (λ x0 → ap [_] (mer x) ≃ ap [_] (mer x0) , use-level (use-level (Trunc-level {S (S n)}) _ _) _ _) id x'
 
 

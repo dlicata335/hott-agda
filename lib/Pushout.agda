@@ -7,6 +7,7 @@
 open import lib.First
 open import lib.NConnected
 open import lib.Prods
+open import lib.Sums
 open import lib.Functions
 open import lib.Paths 
 open import lib.NType
@@ -15,6 +16,7 @@ open import lib.Truncations
 open import lib.WEq
 open Truncation
 open import lib.cubical.PathOver
+open import lib.cubical.Square
 
 module lib.Pushout where
 
@@ -47,20 +49,13 @@ module lib.Pushout where
       Pushout-rec b1 _ _ (inl' x) = b1 x
       Pushout-rec _ b3 _ (inr' y) = b3 y
 
-{-
-      TODO: β rules
       postulate {- HoTT Axiom -}
-        Pushout-rec/βcross : {A B C : Type}
-                             {P : A → B → Type}
-                             {C : Type}
-                             (f : (a : A) → C)
-                             (g : (b : B) → C)
-                             (cross' : (a : A) → (b : B) → (p : P a b) →
-                                      Path (f a) (g b)) →
-                            (a : A) → (b : B) → (p : P a b) → 
-                            Path (ap (Pushout-rec f g cross') (cross p))
-                                 (cross' a b p)
--}
+        βrec/glue : {ZZ X Y C : Type}
+                    {f : ZZ → X} {g : ZZ → Y}
+                    (b1 : X → C)
+                    (b2 : Y → C)
+                    (glue' : (z : ZZ) → Path (b1 (f z)) (b2 (g z))) →
+                    (z : ZZ) → Path (ap (Pushout-rec b1 b2 glue') (glue z)) (glue' z)
 
       Pushout-elim : {ZZ X Y : Type} 
                     {f : ZZ → X} {g : ZZ → Y}
@@ -84,5 +79,12 @@ module lib.Pushout where
 
       i = wedge-to-prod {A}{B}{a0}{b0}
 
-      postulate -- ooTopos Blakers-Massey?
-        connected : ConnectedMap.ConnectedMap (plus2 m n) i
+      connected : ConnectedMap (plus2 m n) i
+      connected = ConnectedMap.from-UMP (plus2 m n) i 
+        (λ P b → (λ y → ConnectedProduct.wedge-elim cA cB (λ x y₁ → P (x , y₁)) (Inr id) {a0} {b0} 
+                    (λ y → b (inr y)) (λ x → b (inl x)) 
+                    (! (over-to-hom (changeover _ (βrec/glue _ _ _ _) (over-o-ap (fst o P) (apdo b (glue _)))))) (fst y) (snd y)) ,
+                 Pushout-elim _ (λ x → ap≃ (ConnectedProduct.wedge-elim-βb cA cB _ (Inr id) _ _ _))
+                                (λ x → ap≃ (ConnectedProduct.wedge-elim-βa cA cB _ (Inr id) _ _ _)) 
+                                (λ _ → PathOver=D.in-PathOver-= (FIXME))) where 
+        postulate FIXME : {A : Type} → A

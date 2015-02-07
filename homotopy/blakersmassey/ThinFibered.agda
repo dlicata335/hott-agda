@@ -2,16 +2,15 @@
 
 open import lib.Prelude hiding (Z)
 open PushoutFib
-open ConnectedMap
 open Truncation
 open import lib.cubical.Cubical
 
 module homotopy.blakersmassey.ThinFibered where
 
-module Connected (X Y : Type) (P : X → Y → Type)
-                 (i' j' : TLevel)
-                 (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
-                 (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where 
+module UsingConnected (X Y : Type) (P : X → Y → Type)
+                      (i' j' : TLevel)
+                      (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
+                      (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where 
 
   i : TLevel
   i = S i'
@@ -315,16 +314,18 @@ module Connected (X Y : Type) (P : X → Y → Type)
   glue-map-total ((x , y) , p) = ((x , y) , glue p)
 
   theorem : ConnectedMap i+j glue-map-total
-  theorem = fiberwise-to-total-connected i+j (λ _ → glue) (λ xy → glue-connected (fst xy) (snd xy))
+  theorem = ConnectedMap.fiberwise-to-total-connected i+j (λ _ → glue) (λ xy → glue-connected (fst xy) (snd xy))
 
-module Connective (X Y : Type) (P : X → Y → Type)
-                  (i-2 j-2 : TLevel) 
-                  (ci : ConnectiveMap {S (S i-2)}{Σ \ x → Σ \ y → P x y}{X} (-1<= (-2< _)) fst)
-                  (cj : ConnectiveMap {S (S j-2)}{Σ \ x → Σ \ y → P x y}{Y} (-1<= (-2< _)) (\ p → fst (snd p))) where
+module UsingConnective (X Y : Type) (P : X → Y → Type)
+                       (i-2 j-2 : TLevel) 
+                       (ci : ConnectedMap.ConnectiveMap {S (S i-2)}{Σ \ x → Σ \ y → P x y}{X} (-1<= (-2< _)) fst)
+                       (cj : ConnectedMap.ConnectiveMap {S (S j-2)}{Σ \ x → Σ \ y → P x y}{Y} (-1<= (-2< _)) (\ p → fst (snd p))) where
 
   -- indexing from http://ncatlab.org/nlab/show/Blakers-Massey+theorem
 
-  module C = Connected X Y P i-2 j-2 (coe (! ConnectedFibers≃ConnectedFst) ci) (coe (! ConnectedFibers≃ConnectedFst) (precompose-equiv fst ΣcommFirstTwo.eqv cj)) 
+  module C = UsingConnected X Y P i-2 j-2 
+             (coe (! ConnectedMap.connected-fibers≃connected-first) ci)
+             (coe (! ConnectedMap.connected-fibers≃connected-first) (ConnectedMap.connected-if-precompose-equiv-connected fst ΣcommFirstTwo.eqv cj)) 
 
   i : TLevel
   i = S (S i-2)
@@ -344,6 +345,6 @@ module Connective (X Y : Type) (P : X → Y → Type)
   translated : ConnectedMap i+j-2 C.glue-map-total
   translated = C.theorem
 
-  theorem : ConnectiveMap {i+j-1} -1<=i+j-1 C.glue-map-total
+  theorem : ConnectedMap.ConnectiveMap {i+j-1} -1<=i+j-1 C.glue-map-total
   theorem = translated
 

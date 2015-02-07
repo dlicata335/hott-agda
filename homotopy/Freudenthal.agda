@@ -37,20 +37,20 @@ module homotopy.Freudenthal where
 
     abstract
       Codes-mer : X → (Trunc k X) → (Trunc k X)
-      Codes-mer = wedge-rec nX (connected-Trunc _ _ _ nX) Trunc-level k< {base} {[ base ]} (λ x' → x') (λ x → [ x ]) id
+      Codes-mer = wedge-rec nX (Connected.Trunc-connected _ _ _ nX) Trunc-level k< {base} {[ base ]} (λ x' → x') (λ x → [ x ]) id
   
       Codes-mer-βa : (\ b -> Codes-mer base b) ≃ (\ x -> x)
-      Codes-mer-βa = wedge-rec-βa nX (connected-Trunc _ _ _ nX) Trunc-level k< (λ x → x) (λ x → [ x ]) id
+      Codes-mer-βa = wedge-rec-βa nX (Connected.Trunc-connected _ _ _ nX) Trunc-level k< (λ x → x) (λ x → [ x ]) id
   
       Codes-mer-βb : (\ a -> Codes-mer a [ base ]) ≃ (\ x -> [ x ])
-      Codes-mer-βb = wedge-rec-βb nX (connected-Trunc _ _ _ nX) Trunc-level k< (λ x → x) (λ x → [ x ]) id
+      Codes-mer-βb = wedge-rec-βb nX (Connected.Trunc-connected _ _ _ nX) Trunc-level k< (λ x → x) (λ x → [ x ]) id
 
 
       Codes-mer-coh : ap≃ Codes-mer-βb {base} ≃ ap≃ Codes-mer-βa {[ base ]} 
-      Codes-mer-coh = ∘-unit-l (ap≃ Codes-mer-βa) ∘ wedge-rec-coh nX (connected-Trunc _ _ _ nX) Trunc-level k< (λ x → x) (λ x → [ x ]) id
+      Codes-mer-coh = ∘-unit-l (ap≃ Codes-mer-βa) ∘ wedge-rec-coh nX (Connected.Trunc-connected _ _ _ nX) Trunc-level k< (λ x → x) (λ x → [ x ]) id
 
       Codes-mer-isequiv : (x : X) -> IsEquiv (Codes-mer x)
-      Codes-mer-isequiv = ConnectedFib.everywhere n' {a0 = base} 
+      Codes-mer-isequiv = Connected.everywhere n' {a0 = base} 
                                                    nX
                                                    (λ x' → IsEquiv (Codes-mer x') ,
                                                     raise-level (-1<= -2<n') (IsEquiv-HProp (Codes-mer x'))) -- need n' is S - for this
@@ -58,7 +58,7 @@ module homotopy.Freudenthal where
   
       Codes-mer-inv-base : IsEquiv.g (Codes-mer-isequiv base) ≃ (\ x -> x)
       Codes-mer-inv-base = transport-IsEquiv-g (! Codes-mer-βa) (snd id-equiv) ∘ ap IsEquiv.g
-                             (ConnectedFib.β n' nX
+                             (Connected.β n' nX
                               (λ x' →
                                  IsEquiv (Codes-mer x') ,
                                  raise-level (-1<= -2<n') (IsEquiv-HProp (Codes-mer x')))

@@ -20,20 +20,22 @@ module lib.NConnected where
   Connected : TLevel -> Type -> Type
   Connected n A = NType -2 (Trunc n A)
 
-  abstract
-    lower-Connected : ∀ {k1 k2} {A} → k1 <=tl k2 → Connected k2 A -> Connected k1 A
-    lower-Connected {k1}{k2} lt = lower-Trunc-preserves-level k2 k1 { -2} lt
+  ConnectedMap : (n : TLevel) → ∀ {A B} → (f : A → B) → Type
+  ConnectedMap n {A}{B} f = (y : B) → Connected n (HFiber f y)
 
-    connected-Trunc : ∀ n k A -> Connected n A -> Connected n (Trunc k A)
-    connected-Trunc n k A cA = transport (NType -2) (! (FuseTrunc.path _ _ _)) (lower-Connected (mintl<=1 n k) cA)
+  module Connected where 
 
-    Connected-Path : ∀ {k} {A} → Connected (S k) A → { x y : A} → Connected k (Path x y)
-    Connected-Path {k = k} cA = transport (NType -2) (! (TruncPath.path k)) (path-preserves-level cA)
+   lower : ∀ {k1 k2} {A} → k1 <=tl k2 → Connected k2 A -> Connected k1 A
+   lower {k1}{k2} lt = lower-Trunc-preserves-level k2 k1 { -2} lt
 
-    Connected-level : ∀ {k A} → HProp (Connected k A)
-    Connected-level = NType-is-HProp _
+   Trunc-connected : ∀ n k A -> Connected n A -> Connected n (Trunc k A)
+   Trunc-connected n k A cA = transport (NType -2) (! (FuseTrunc.path _ _ _)) (lower (mintl<=1 n k) cA)
 
-  module ConnectedFib where 
+   Path-connected : ∀ {k} {A} → Connected (S k) A → { x y : A} → Connected k (Path x y)
+   Path-connected {k = k} cA = transport (NType -2) (! (TruncPath.path k)) (path-preserves-level cA)
+
+   level : ∀ {k A} → HProp (Connected k A)
+   level = NType-is-HProp _
 
    somewhere : (n : TLevel) {A : Type} {a : A}
              -> Connected (S n) A 
@@ -100,14 +102,11 @@ module lib.NConnected where
 -}
 
   module ConnectedMap where
-    ConnectedMapUMP : (n : TLevel) → ∀ {A B} → (f : A → B) → Type
-    ConnectedMapUMP n {A}{B} f =  (P : B → NTypes n)
+    UMP : (n : TLevel) → ∀ {A B} → (f : A → B) → Type
+    UMP n {A}{B} f =  (P : B → NTypes n)
                                -> (b : (x : A) → fst (P (f x)))
                                → Σ \(extend : ((y : B) → fst (P y))) -> 
                                     (x : A) → extend (f x) ≃ b x 
-
-    ConnectedMap : (n : TLevel) → ∀ {A B} → (f : A → B) → Type
-    ConnectedMap n {A}{B} f = (y : B) → Connected n (HFiber f y)
 
     extend : (n : TLevel) {A : Type} {B : Type} (f : A → B)
              -> ConnectedMap n f 
@@ -118,21 +117,20 @@ module lib.NConnected where
                                        (λ hfy → transport (fst o P) (snd hfy) (forA (fst hfy)))
                                        (fst (use-level (cf y)))
 
-    postulate -- needed for ooTopos Blakers-Massey ?
-      extendβ : (n : TLevel) → ∀ {A B} (f : A → B) →
-                (cf : ConnectedMap n f) →
-                (P : B → NTypes n)
+    extendβ : (n : TLevel) → ∀ {A B} (f : A → B) →
+              (cf : ConnectedMap n f) →
+              (P : B → NTypes n)
             -> (b : (x : A) → fst (P (f x)))
-             →  (x : A) → extend n f cf P b (f x) ≃ b x 
---    extendβ n f cF P b x = {!!}
+            →  (x : A) → extend n f cf P b (f x) ≃ b x 
+    extendβ n f cF P b x = ap (Trunc-rec (snd (P _)) (λ hfy → transport (fst o P) (snd hfy) (b (fst hfy)))) (snd (use-level (cF (f x))) [ x , id ])
 
-    ConnectedMap-has-UMP : (n : TLevel) {A B : Type} (f : A → B) →
-               ConnectedMap n f → ConnectedMapUMP n f 
-    ConnectedMap-has-UMP n f cf P b = (extend n f cf P b , extendβ n f cf P b)
+    has-UMP : (n : TLevel) {A B : Type} (f : A → B) →
+               ConnectedMap n f → UMP n f 
+    has-UMP n f cf P b = (extend n f cf P b , extendβ n f cf P b)
 
-    ConnectedMap-from-UMP : (n : TLevel) {A B : Type} (f : A → B) →
-                            ConnectedMapUMP n f → ConnectedMap n f 
-    ConnectedMap-from-UMP n f ext b = 
+    from-UMP : (n : TLevel) {A B : Type} (f : A → B) →
+                            UMP n f → ConnectedMap n f 
+    from-UMP n f ext b = 
       let elm = (ext (λ b' → Trunc n (HFiber f b') , Trunc-level) (λ a → [ a , id ]))
        in ntype ((fst elm b) , 
                   Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
@@ -144,9 +142,8 @@ module lib.NConnected where
                                                   ∘ ! (apd (fst elm) p))})))
                                     b))
 
-    ConnectedMap-Equiv : (n : TLevel) → ∀ {A B} → (f : A → B) → ConnectedMap n f 
-                     → Equiv (Trunc n A) (Trunc n B)
-    ConnectedMap-Equiv n f cf = 
+    trunc-equiv : (n : TLevel) → ∀ {A B} → (f : A → B) → ConnectedMap n f → Equiv (Trunc n A) (Trunc n B)
+    trunc-equiv n f cf = 
       improve (hequiv (Trunc-func f) 
                       (Trunc-rec Trunc-level (λ y → Trunc-func fst (fst (use-level (cf y)))))
                       (Trunc-elim _ (λ _ → path-preserves-level Trunc-level)
@@ -163,13 +160,13 @@ module lib.NConnected where
 
     fiberwise-to-total-connected : (n : TLevel) → ∀ {A} {B1 B2 : A → Type} → (f : (x : A) → B1 x → B2 x) → 
                                  ((x : A) → ConnectedMap n (f x)) → ConnectedMap n (fiberwise-to-total f)
-    fiberwise-to-total-connected n {_}{B1} f c = ConnectedMap-from-UMP n (fiberwise-to-total f) 
+    fiberwise-to-total-connected n {_}{B1} f c = from-UMP n (fiberwise-to-total f) 
                                                                          (λ P b → (λ y → fst
-                                                                                           (ConnectedMap-has-UMP n (f (fst y)) (c (fst y))
+                                                                                           (has-UMP n (f (fst y)) (c (fst y))
                                                                                             (λ z → P (fst y , z)) (λ b1 → b (fst y , b1)))
                                                                                            (snd y)) , 
                                                                          (λ y → snd
-                                                                                  (ConnectedMap-has-UMP n (f (fst y)) (c (fst y))
+                                                                                  (has-UMP n (f (fst y)) (c (fst y))
                                                                                    (λ z → P (fst y , z)) (λ b1 → b (fst y , b1)))
                                                                                   (snd y))) 
 {-
@@ -177,12 +174,12 @@ module lib.NConnected where
                                  ConnectedMap n (fiberwise-to-total f) → ((x : A) → ConnectedMap n (f x))
     unfiberwise-to-total-connected n f c x y = transport (λ A → NType -2 (Trunc n A)) rearrange-and-path-ind (c (x , y)) where
 -}
-    ConnectedMap-level : ∀ {n A B} (f : A → B) → HProp (ConnectedMap n f)
-    ConnectedMap-level f = Πlevel (\ _ -> Connected-level)
+    level : ∀ {n A B} (f : A → B) → HProp (ConnectedMap n f)
+    level f = Πlevel (\ _ -> Connected.level)
 
     postulate -- used for Blakers Massey translation to Lurie indexing, ooTopos
       -- need HFiber fst y == B(y)
-      ConnectedFibers≃ConnectedFst : ∀ {n A} {B : A → Type} → ((x : A) → Connected n (B x)) == ConnectedMap n (\ (p : Σ B) -> fst p)
+      connected-fibers≃connected-first : ∀ {n A} {B : A → Type} → ((x : A) → Connected n (B x)) == ConnectedMap n (\ (p : Σ B) -> fst p)
       -- ConnectedFibers≃ConnectedFst = ua (improve (hequiv (λ cf → {!!}) (λ cm x → {!cm x!}) {!!} {!!}))
 
       connected-if-precompose-equiv-connected : ∀ {n A A' B} (f : A → B) (e : Equiv A' A) → ConnectedMap n (f o fst e) → ConnectedMap n f
@@ -191,31 +188,31 @@ module lib.NConnected where
       postcompose-equiv-connected : ∀ {n A B B'} (f : A → B) (e : Equiv B B') → ConnectedMap n f → ConnectedMap n (fst e o f)
       precompose-equiv-connected : ∀ {n A A' B} (f : A → B) (e : Equiv A' A) → ConnectedMap n f → ConnectedMap n (f o fst e)
 
-    ConnectedType≃ConnectedMap-to-point : ∀ {n A} → (Connected n A) == (ConnectedMap n (\ (_ : A) → <>))
-    ConnectedType≃ConnectedMap-to-point = ua (improve (hequiv (λ x y → transport (λ A → NType -2 (Trunc _ A)) (! (ua HFiber-of-map-to-point)) x)
+    connected-type≃connected-map-to-point : ∀ {n A} → (Connected n A) == (ConnectedMap n (\ (_ : A) → <>))
+    connected-type≃connected-map-to-point = ua (improve (hequiv (λ x y → transport (λ A → NType -2 (Trunc _ A)) (! (ua HFiber-of-map-to-point)) x)
                                              (λ x → transport (λ A → NType -2 (Trunc _ A)) (ua HFiber-of-map-to-point) (x <>))
-                                             (λ _ → HProp-unique (Connected-level) _ _) (λ _ → HProp-unique (ConnectedMap-level _) _ _)))
+                                             (λ _ → HProp-unique (Connected.level) _ _) (λ _ → HProp-unique (level _) _ _)))
 
     ConnectiveMap : ∀ {n A B} → -1 <=tl n → (A → B) → Type
     ConnectiveMap le f = ConnectedMap (fst (sub1 _ le)) f
 
-    ConnectedType≃ConnectedMap-from-point : ∀ {n A} (a : A) → Connected (S n) A == ConnectedMap n {Unit} (\ _ -> a)
-    ConnectedType≃ConnectedMap-from-point {n} a = ua (improve (hequiv (λ cA → ConnectedMap-from-UMP n (λ v → a) 
-                                                                              (λ P b → ConnectedFib.everywhere n {a0 = a} cA P (b <>) , (λ _ → ConnectedFib.β n cA P (b <>))))
+    connected-type≃connected-map-from-point : ∀ {n A} (a : A) → Connected (S n) A == ConnectedMap n {Unit} (\ _ -> a)
+    connected-type≃connected-map-from-point {n} a = ua (improve (hequiv (λ cA → from-UMP n (λ v → a) 
+                                                                              (λ P b → Connected.everywhere n {a0 = a} cA P (b <>) , (λ _ → Connected.β n cA P (b <>))))
                                                                       (λ cf → ntype ([ a ] , Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (λ x → fst
                                                                                                                                                             (use-level
                                                                                                                                                              (transport (NType -2) (TruncPath.path n)
                                                                                                                                                               (transport (λ X → NType -2 (Trunc n X))
                                                                                                                                                                (ua HFiber-of-map-from-point) (cf x))))))
                                                                       ) 
-                                                                      (λ _ → HProp-unique Connected-level _ _)
-                                                                      (λ _ → HProp-unique (ConnectedMap-level _) _ _)))
+                                                                      (λ _ → HProp-unique Connected.level _ _)
+                                                                      (λ _ → HProp-unique (level _) _ _)))
 
-    ConnectedMap-fiber-top-equiv : ∀ {i A A' B} (f : A → A') (g : A → B) (h : A' → B)
+    fiber-top-equiv : ∀ {i A A' B} (f : A → A') (g : A → B) (h : A' → B)
                                  → h o f == g
                                  → ConnectedMap i f 
                                  → {b : B} → Equiv (Trunc i (HFiber g b)) (Trunc i (HFiber h b))  
-    ConnectedMap-fiber-top-equiv f g h tri cf = 
+    fiber-top-equiv f g h tri cf = 
       improve (hequiv (Trunc-rec Trunc-level (λ hg → [ f (fst hg) , snd hg ∘ ap≃ tri ]))
                       (Trunc-rec Trunc-level (λ hh → Trunc-rec Trunc-level (λ hf → [ fst hf , snd hh ∘ ap h (snd hf) ∘ ! (ap≃ tri) ]) 
                                              (fst (use-level (cf (fst hh))))))
@@ -246,20 +243,18 @@ module lib.NConnected where
                              (λ x → ap [_] (pair= (snd x) (PathOver=.in-PathOver-= (whisker-square id id (! (ap-constant _ (snd x))) id connection2))))
                              (fst (use-level (cf a')))
 
-  open ConnectedMap
-
 
   module Extensions where
 
     Extensions : (A : Type) (a0 : A) (C : A -> Type) (c0 : C a0) -> Type
     Extensions A a0 C c0 = Σ (λ (f : (a : A) → (C a)) → f a0 ≃ c0)
     
-    Extensions-Path : {A : Type} {a0 : A} (C : A -> Type) (c0 : C a0) 
+    path : {A : Type} {a0 : A} (C : A -> Type) (c0 : C a0) 
                     (e1 e2 : Extensions A a0 C c0)
                     -> Path{(Extensions A a0 C c0)} e1 e2
                      ≃ Extensions A a0 (\ a -> Path{(C a)} (fst e1 a) (fst e2 a)) 
                                        (! (snd e2) ∘ snd e1)
-    Extensions-Path {A}{a0}C c0 (f1 , α1) (f2 , α2) = 
+    path {A}{a0}C c0 (f1 , α1) (f2 , α2) = 
       Path (f1 , α1) (f2 , α2)  ≃〈 ! ΣPath.path 〉 
       Σ (λ α → Path (transport (λ f → f a0 ≃ c0) α α1) α2) ≃〈 apΣ' (!equiv ΠPath.eqv) (λ _ → id) 〉 
       Σ (λ (h : (x : A) → Path (f1 x) (f2 x)) →
@@ -270,53 +265,50 @@ module lib.NConnected where
       Extensions A a0 (λ a → Path (f1 a) (f2 a)) (! α2 ∘ α1) ∎
 
     abstract
-      Extensions-level : ∀ {m n} {A : Type} (cA : Connected (S m) A)
+      level : ∀ {m n} {A : Type} (cA : Connected (S m) A)
                            (a0 : A) (C : A -> NTypes (plus2 n m)) (c0 : fst (C a0))
                        -> NType n (Extensions A a0 (fst o C) c0)
-      Extensions-level {m}{ -2} cA a0 C c0 = 
-       ntype ((ConnectedFib.everywhere m cA C c0 , ConnectedFib.β m cA C c0) ,
-              (λ {(f , α) → pair≃ (λ≃ (ConnectedFib.everywhere m {_} {a0} cA 
-                                       (λ a → Path (ConnectedFib.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a)))
-                                       (! α ∘ ConnectedFib.β m cA C c0)))
+      level {m}{ -2} cA a0 C c0 = 
+       ntype ((Connected.everywhere m cA C c0 , Connected.β m cA C c0) ,
+              (λ {(f , α) → pair≃ (λ≃ (Connected.everywhere m {_} {a0} cA 
+                                       (λ a → Path (Connected.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a)))
+                                       (! α ∘ Connected.β m cA C c0)))
                             (transport (λ f' → f' a0 ≃ c0)
                                (λ≃
-                                (ConnectedFib.everywhere m cA
+                                (Connected.everywhere m cA
                                  (λ a →
-                                    Path (ConnectedFib.everywhere m cA C c0 a) (f a) ,
+                                    Path (Connected.everywhere m cA C c0 a) (f a) ,
                                     path-preserves-level (snd (C a)))
-                                 (! α ∘ ConnectedFib.β m cA C c0)))
-                               (ConnectedFib.β m cA C c0) ≃〈 transport-Path-pre' (λ f' → f' a0) (λ≃ (ConnectedFib.everywhere m cA (λ a → Path (ConnectedFib.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a))) (! α ∘ ConnectedFib.β m cA C c0))) (ConnectedFib.β m cA C c0) 〉
-                             (ConnectedFib.β m cA C c0) ∘ 
+                                 (! α ∘ Connected.β m cA C c0)))
+                               (Connected.β m cA C c0) ≃〈 transport-Path-pre' (λ f' → f' a0) (λ≃ (Connected.everywhere m cA (λ a → Path (Connected.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a))) (! α ∘ Connected.β m cA C c0))) (Connected.β m cA C c0) 〉
+                             (Connected.β m cA C c0) ∘ 
                              ! (ap≃ (λ≃
-                                (ConnectedFib.everywhere m cA
+                                (Connected.everywhere m cA
                                  (λ a →
-                                    Path (ConnectedFib.everywhere m cA C c0 a) (f a) ,
+                                    Path (Connected.everywhere m cA C c0 a) (f a) ,
                                     path-preserves-level (snd (C a)))
-                                 (! α ∘ ConnectedFib.β m cA C c0))) {a0}) ≃〈 ap (λ x → ConnectedFib.β m cA C c0 ∘ ! x) (Π≃β (ConnectedFib.everywhere m cA (λ a → Path (ConnectedFib.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a))) (! α ∘ ConnectedFib.β m cA C c0))) 〉 
-                             (ConnectedFib.β m cA C c0) ∘ 
-                             ! ((ConnectedFib.everywhere m cA
+                                 (! α ∘ Connected.β m cA C c0))) {a0}) ≃〈 ap (λ x → Connected.β m cA C c0 ∘ ! x) (Π≃β (Connected.everywhere m cA (λ a → Path (Connected.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a))) (! α ∘ Connected.β m cA C c0))) 〉 
+                             (Connected.β m cA C c0) ∘ 
+                             ! ((Connected.everywhere m cA
                                  (λ a →
-                                    Path (ConnectedFib.everywhere m cA C c0 a) (f a) ,
+                                    Path (Connected.everywhere m cA C c0 a) (f a) ,
                                     path-preserves-level (snd (C a)))
-                                 (! α ∘ ConnectedFib.β m cA C c0)) a0) ≃〈 ap (λ x → ConnectedFib.β m cA C c0 ∘ ! x) (ConnectedFib.β m cA (λ a → Path (ConnectedFib.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a))) (! α ∘ ConnectedFib.β m cA C c0)) 〉 
-                             (ConnectedFib.β m cA C c0) ∘ 
-                             ! (! α ∘ ConnectedFib.β m cA C c0) ≃〈 ap (_∘_ (ConnectedFib.β m cA C c0)) (!-∘ (! α) (ConnectedFib.β m cA C c0)) 〉 
-                             (ConnectedFib.β m cA C c0) ∘ ! (ConnectedFib.β m cA C c0) ∘ ! (! α) ≃〈 !-inv-r-front (ConnectedFib.β m cA C c0) (! (! α)) 〉 
+                                 (! α ∘ Connected.β m cA C c0)) a0) ≃〈 ap (λ x → Connected.β m cA C c0 ∘ ! x) (Connected.β m cA (λ a → Path (Connected.everywhere m cA C c0 a) (f a) , path-preserves-level (snd (C a))) (! α ∘ Connected.β m cA C c0)) 〉 
+                             (Connected.β m cA C c0) ∘ 
+                             ! (! α ∘ Connected.β m cA C c0) ≃〈 ap (_∘_ (Connected.β m cA C c0)) (!-∘ (! α) (Connected.β m cA C c0)) 〉 
+                             (Connected.β m cA C c0) ∘ ! (Connected.β m cA C c0) ∘ ! (! α) ≃〈 !-inv-r-front (Connected.β m cA C c0) (! (! α)) 〉 
                              ! (! α) ≃〈 !-invol α 〉 
                              α ∎)}))
-      Extensions-level {m}{S n} cA a0 C c0 =
+      level {m}{S n} cA a0 C c0 =
         ntype (λ e1 e2 → transport (NType n) 
-               (! (Extensions-Path (fst o C) c0 e1 e2))
-               (Extensions-level {_} {n} cA a0 (\ a -> (Path (fst e1 a) (fst e2 a), use-level (snd (C a)) _ _)) 
+               (! (path (fst o C) c0 e1 e2))
+               (level {_} {n} cA a0 (\ a -> (Path (fst e1 a) (fst e2 a), use-level (snd (C a)) _ _)) 
                                                (! (snd e2) ∘ snd e1)))
 
     Extensions-ntype : ∀ {m n} {A : Type} (cA : Connected (S m) A)
                        (a0 : A) (C : A -> NTypes (plus2 n m)) (c0 : fst (C a0))
                      → NTypes n 
-    Extensions-ntype {_}{_} {A} cA a0 C c0 = ((Extensions A a0 (fst o C) c0) , Extensions-level cA a0 C c0)
-
-  open Extensions
-
+    Extensions-ntype {_}{_} {A} cA a0 C c0 = ((Extensions A a0 (fst o C) c0) , level cA a0 C c0)
 
   module ConnectedProduct where
 
@@ -329,11 +321,11 @@ module lib.NConnected where
                    -> (fa0 : (b' : B) -> fst (C a0 b'))
                    -> (fb0 : (a' : A) -> fst (C a' b0))
                    -> fa0 b0 ≃ fb0 a0 
-                   -> (a : A) -> Extensions B b0 (\ b -> fst (C a b)) (fb0 a)
+                   -> (a : A) -> Extensions.Extensions B b0 (\ b -> fst (C a b)) (fb0 a)
        wedge-elim'{m}{n}{A}{B} cA cB C {a0}{b0} fa0 fb0 agree a = 
-           (ConnectedFib.everywhere m {_} {a0} cA
-            (λ a' → Extensions _ b0 (\ b -> fst (C a' b)) (fb0 a') , 
-                    Extensions-level {n} {m} cB b0 (C a') (fb0 a')) 
+           (Connected.everywhere m {_} {a0} cA
+            (λ a' → Extensions.Extensions _ b0 (\ b -> fst (C a' b)) (fb0 a') , 
+                    Extensions.level {n} {m} cB b0 (C a') (fb0 a')) 
             (fa0 , agree)
             a)
 
@@ -361,10 +353,10 @@ module lib.NConnected where
         let C = (λ a b → fst (C a b) , raise-level app (snd (C a b))) 
         in 
           fst≃
-          (ConnectedFib.β m cA
+          (Connected.β m cA
            (λ a' →
-              Extensions _ _ (fst o C a') (fb0 a') ,
-              Extensions-level {n} {m} cB b0 (C a') (fb0 a'))
+              Extensions.Extensions _ _ (fst o C a') (fb0 a') ,
+              Extensions.level {n} {m} cB b0 (C a') (fb0 a'))
            (fa0 , agree))
          
        wedge-elim-βb : ∀{m}{n}{p} {A B : Type}
@@ -390,14 +382,14 @@ module lib.NConnected where
         in 
          ap≃ (wedge-elim-βb cA cB C app fa0 fb0 agree) {a0} ≃〈 Π≃β (\ a -> snd (wedge-elim' cA cB (λ a b → fst (C a b) , raise-level app (snd (C a b))) fa0 fb0 agree a)) 〉
          snd (wedge-elim' cA cB (λ a b → fst (C a b) , raise-level app (snd (C a b))) fa0 fb0 agree a0) ≃〈 id 〉
-         snd (ConnectedFib.everywhere _ {_} {a0} cA
-               (λ a' → Extensions _ b0 (λ b → fst (C' a' b)) (fb0 a') ,
-                       Extensions-level cB b0 (C' a') (fb0 a'))
+         snd (Connected.everywhere _ {_} {a0} cA
+               (λ a' → Extensions.Extensions _ b0 (λ b → fst (C' a' b)) (fb0 a') ,
+                       Extensions.level cB b0 (C' a') (fb0 a'))
                (fa0 , agree) a0) ≃〈 snd≃⁻
-                                       (ConnectedFib.β _ cA
+                                       (Connected.β _ cA
                                         (λ a' →
-                                           Extensions _ _ (fst o C' a') (fb0 a') ,
-                                           Extensions-level cB b0 (C' a') (fb0 a'))
+                                           Extensions.Extensions _ _ (fst o C' a') (fb0 a') ,
+                                           Extensions.level cB b0 (C' a') (fb0 a'))
                                         (fa0 , agree)) 〉 
          transport (λ f → f b0 ≃ fb0 a0)
            (! (wedge-elim-βa cA cB C app fa0 fb0 agree))
@@ -463,11 +455,11 @@ module lib.NConnected where
                    -> (fa0 : (b' : B a0) -> fst (C a0 b'))
                    -> (fb0 : (a' : A) -> fst (C a' (b0 a')))
                    -> fa0 (b0 a0) ≃ fb0 a0 
-                   -> (a : A) -> Extensions (B a) (b0 a) (\ b -> fst (C a b)) (fb0 a)
+                   -> (a : A) -> Extensions.Extensions (B a) (b0 a) (\ b -> fst (C a b)) (fb0 a)
        wedge-elim'{m}{n}{A}{B} cA cB C {a0}{b0} fa0 fb0 agree a = 
-           (ConnectedFib.everywhere m {_} {a0} cA
-            (λ a' → Extensions _ (b0 a') (\ b -> fst (C a' b)) (fb0 a') , 
-                    Extensions-level {n} {m} (cB a') (b0 a') (C a') (fb0 a')) 
+           (Connected.everywhere m {_} {a0} cA
+            (λ a' → Extensions.Extensions _ (b0 a') (\ b -> fst (C a' b)) (fb0 a') , 
+                    Extensions.level {n} {m} (cB a') (b0 a') (C a') (fb0 a')) 
             (fa0 , agree)
             a)
 
@@ -498,10 +490,10 @@ module lib.NConnected where
         let C = (λ a b → fst (C a b) , raise-level app (snd (C a b))) 
         in 
           fst≃
-          (ConnectedFib.β m cA
+          (Connected.β m cA
            (λ a' →
-              Extensions _ _ (fst o C a') (fb0 a') ,
-              Extensions-level {n} {m} (cB a') (b0 a') (C a') (fb0 a'))
+              Extensions.Extensions _ _ (fst o C a') (fb0 a') ,
+              Extensions.level {n} {m} (cB a') (b0 a') (C a') (fb0 a'))
            (fa0 , agree))
 
        wedge-elim-βb : ∀ {m n p} {A : Type} {B : A → Type}
@@ -533,14 +525,14 @@ module lib.NConnected where
         in 
          ap≃ (wedge-elim-βb cA cB C app fa0 fb0 agree) {a0} ≃〈 Π≃β (\ a -> snd (wedge-elim' cA cB (λ a b → fst (C a b) , raise-level app (snd (C a b))) fa0 fb0 agree a)) 〉
          snd (wedge-elim' cA cB (λ a b → fst (C a b) , raise-level app (snd (C a b))) fa0 fb0 agree a0) ≃〈 id 〉
-         snd (ConnectedFib.everywhere _ {_} {a0} cA
-               (λ a' → Extensions _ (b0 a') (λ b → fst (C' a' b)) (fb0 a') ,
-                       Extensions-level (cB a') (b0 a') (C' a') (fb0 a'))
+         snd (Connected.everywhere _ {_} {a0} cA
+               (λ a' → Extensions.Extensions _ (b0 a') (λ b → fst (C' a' b)) (fb0 a') ,
+                       Extensions.level (cB a') (b0 a') (C' a') (fb0 a'))
                (fa0 , agree) a0) ≃〈 snd≃⁻
-                                       (ConnectedFib.β _ cA
+                                       (Connected.β _ cA
                                         (λ a' →
-                                           Extensions _ _ (fst o C' a') (fb0 a') ,
-                                           Extensions-level (cB a') (b0 a') (C' a') (fb0 a'))
+                                           Extensions.Extensions _ _ (fst o C' a') (fb0 a') ,
+                                           Extensions.level (cB a') (b0 a') (C' a') (fb0 a'))
                                         (fa0 , agree)) 〉 
          transport (λ f → f (b0 a0) ≃ fb0 a0)
            (! (wedge-elim-βa cA cB C app fa0 fb0 agree))

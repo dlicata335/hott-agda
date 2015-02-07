@@ -28,7 +28,7 @@ module homotopy.KGn where
       KG n = Trunc (tlp n) (FS.Susp'^ n)
 
       KG-Connected : ∀ (i : Nat) → Connected (tl i) (KG (i +1np))
-      KG-Connected n = connected-Trunc _ _ _ (FS.Susp'^-Connected n)
+      KG-Connected n = Connected.Trunc-connected _ _ _ (FS.Susp'^-Connected n)
   
       KG-Connected'' : (n : Positive) → Connected (tlp n) (KG (n +1))
       KG-Connected'' n = coe (ap (NType -2) (ap2 Trunc (tl-pos2nat-tlp n) (ap KG (pos2nat-+1np n)))) (KG-Connected (pos2nat n))

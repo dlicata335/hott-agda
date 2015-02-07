@@ -2,7 +2,6 @@
 
 open import lib.Prelude hiding (Z)
 open FatPushoutFib
-open ConnectedMap
 open Truncation
 open import lib.cubical.Cubical
 
@@ -34,8 +33,8 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
   glue p = gluer p ∘ ! (gluel p)
 
   Z×WZ = Σ \ (z1 : Z) → Σ \ (z2 : Z) → Path {W} (inm (snd z1)) (inm (snd z2))
-  -- 〈Z×Z〉×〈XY〉Z = Σ \ (z1 : Z) → Σ \ (z2 : Z) → P (fst (fst z1)) (snd (fst z2))
   〈Z×Z〉×〈YX〉Z = Σ \ (z1 : Z) → Σ \ (z2 : Z) → P (fst (fst z2)) (snd (fst z1))
+  〈Z×Z〉×〈XY〉Z = Σ \ (z1 : Z) → Σ \ (z2 : Z) → P (fst (fst z1)) (snd (fst z2))
 
   module Wedge = Pushout
 
@@ -70,15 +69,24 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     reassoc-l : 〈Z×Z〉×〈YX〉Z → Σ \(z : Z) → (-×XZ (snd z)) × (-×YZ (snd z))
     reassoc-l (((x , y) , pxy) , ((x' , y') , px'y') , px'y) = ((x' , y) , px'y) , ((y' , px'y') , (x , pxy))
 
-    reassoc-r : (Σ \(z : Z) → (-×XZ (snd z)) × (-×YZ (snd z))) → 〈Z×Z〉×〈YX〉Z
-    reassoc-r (((x' , y) , px'y) , ((y' , px'y') , (x , pxy))) = (_ , pxy) , (_ , px'y') , px'y
+    reassoc-l' : (Σ \(z : Z) → (-×XZ (snd z)) × (-×YZ (snd z))) → 〈Z×Z〉×〈YX〉Z
+    reassoc-l' (((x' , y) , px'y) , ((y' , px'y') , (x , pxy))) = (_ , pxy) , (_ , px'y') , px'y
 
-    reassoc-eqv : Equiv 〈Z×Z〉×〈YX〉Z (Σ \(z : Z) → (-×XZ (snd z)) × (-×YZ (snd z)))
-    reassoc-eqv = improve (hequiv reassoc-l reassoc-r (λ _ → id) (λ _ → id))
+    reassoc-l-eqv : Equiv 〈Z×Z〉×〈YX〉Z (Σ \(z : Z) → (-×XZ (snd z)) × (-×YZ (snd z)))
+    reassoc-l-eqv = improve (hequiv reassoc-l reassoc-l' (λ _ → id) (λ _ → id))
+
+    reassoc-r : 〈Z×Z〉×〈XY〉Z → Σ \(z : Z) → (-×XZ (snd z)) × (-×YZ (snd z))
+    reassoc-r (((x , y) , pxy) , ((x' , y') , px'y') , pxy') = ((x , y') , pxy') , ((y , pxy) , (x' , px'y'))
+
+    reassoc-r' : (Σ \(z : Z) → (-×XZ (snd z)) × (-×YZ (snd z))) → 〈Z×Z〉×〈XY〉Z
+    reassoc-r' (((x' , y) , px'y) , ((y' , px'y') , (x , pxy))) = (_ , px'y') , (_ , pxy) , px'y
+
+    reassoc-r-eqv : Equiv 〈Z×Z〉×〈XY〉Z (Σ \(z : Z) → (-×XZ (snd z)) × (-×YZ (snd z)))
+    reassoc-r-eqv = improve (hequiv reassoc-r reassoc-r' (λ _ → id) (λ _ → id))
 
     switchr : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → (Σ \ (z : Z) → Z×X-∨-×YZ (snd z))
-    switchr (z , w) = Wedge.Pushout-rec (λ z' → z , Wedge.inl z')
-                                        (λ z' → (_ , snd z') , Wedge.inr (_ , snd z))
+    switchr (z , w) = Wedge.Pushout-rec (λ xp → z , Wedge.inl xp)
+                                        (λ yp → (_ , snd yp) , Wedge.inr (_ , snd z))
                                         (λ _ → ap (λ Z₁ → ((fst (fst z) , snd (fst z)) , snd z) , Z₁) (Wedge.glue _)) 
                                         w
 
@@ -88,6 +96,18 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     switchr-equiv : Equiv (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) (Σ \ (z : Z) → Z×X-∨-×YZ (snd z))
     switchr-equiv = improve (hequiv switchr switchr (\ p → switchr-twice (fst p) (snd p)) (\ p → switchr-twice (fst p) (snd p)))
 
+    switchl : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → (Σ \ (z : Z) → Z×X-∨-×YZ (snd z))
+    switchl (z , w) = Wedge.Pushout-rec (λ xp → (_ , snd xp) , Wedge.inl (_ , snd z))
+                                        (λ yp → z , Wedge.inr yp)
+                                        (λ _ → ap (λ Z₁ → ((fst (fst z) , snd (fst z)) , snd z) , Z₁) (Wedge.glue _)) 
+                                        w
+
+    switchl-twice : ∀ z w → switchl (switchl (z , w)) == (z , w)
+    switchl-twice z = Wedge.Pushout-elim _ (λ _ → id) (λ _ → id) (λ _ → {!!})
+
+    switchl-equiv : Equiv (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) (Σ \ (z : Z) → Z×X-∨-×YZ (snd z))
+    switchl-equiv = improve (hequiv switchl switchl (\ p → switchl-twice (fst p) (snd p)) (\ p → switchl-twice (fst p) (snd p)))
+
     gluem-total : Σ (λ z → Z×X-∨-×YZ (snd z)) → Z×WZ
     gluem-total = fiberwise-to-total (\ (z : Z) → gluem (snd z))
 
@@ -95,10 +115,22 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     glueml-total = (fiberwise-to-total (\ (ppp0 : Z) → (fiberwise-to-total (\ (ppxy : Z) → glueml (snd ppp0) (snd ppxy)))))
 
     m-to-ml : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → 〈Z×Z〉×〈YX〉Z
-    m-to-ml = reassoc-r o fiberwise-to-total (λ z1 → wtp (snd z1)) o switchr
+    m-to-ml = reassoc-l' o fiberwise-to-total (λ z1 → wtp (snd z1)) o switchr
 
     m-to-ml-triangle : ∀ z (w : Z×X-∨-×YZ (snd z)) → (glueml-total o m-to-ml) (z , w) == gluem-total (z , w)
     m-to-ml-triangle z = Wedge.Pushout-elim (λ w → (glueml-total o m-to-ml) (z , w) == gluem-total (z , w))
+                                            (λ yp → ap (λ Q → z , ((fst (fst z) , fst yp) , snd yp) , Q) {!!})
+                                            (λ xp → ap (λ Q → z , ((fst xp , snd (fst z)) , snd xp) , Q) {!!})
+                                            {!!}
+
+    gluemr-total : 〈Z×Z〉×〈XY〉Z → Z×WZ
+    gluemr-total = (fiberwise-to-total (\ (ppp0 : Z) → (fiberwise-to-total (\ (ppxy : Z) → gluemr (snd ppp0) (snd ppxy)))))
+
+    m-to-mr : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → 〈Z×Z〉×〈XY〉Z
+    m-to-mr = reassoc-r' o fiberwise-to-total (λ z1 → wtp (snd z1)) o switchl
+
+    m-to-mr-triangle : ∀ z (w : Z×X-∨-×YZ (snd z)) → (gluemr-total o m-to-mr) (z , w) == gluem-total (z , w)
+    m-to-mr-triangle z = Wedge.Pushout-elim (λ w → (gluemr-total o m-to-mr) (z , w) == gluem-total (z , w))
                                             (λ yp → ap (λ Q → z , ((fst (fst z) , fst yp) , snd yp) , Q) {!!})
                                             (λ xp → ap (λ Q → z , ((fst xp , snd (fst z)) , snd xp) , Q) {!!})
                                             {!!}
@@ -120,10 +152,10 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
               
       step2 : Equiv (Trunc i+j (HFiber gluem-total ((_ , p0) , (_ , pxy) , α)))
                     (Trunc i+j (HFiber glueml-total ((_ , p0) , (_ , pxy) , α)))
-      step2 = ConnectedMap-fiber-top-equiv (m-to-ml) _ _ (λ≃ (\ q → m-to-ml-triangle (fst q) (snd q))) 
-        (precompose-equiv-connected _ switchr-equiv
-          (postcompose-equiv-connected _ (!equiv reassoc-eqv) 
-            (fiberwise-to-total-connected i+j (λ _ → Wedge.wedge-to-prod)
+      step2 = ConnectedMap.fiber-top-equiv (m-to-ml) _ _ (λ≃ (\ q → m-to-ml-triangle (fst q) (snd q))) 
+        (ConnectedMap.precompose-equiv-connected _ switchr-equiv
+          (ConnectedMap.postcompose-equiv-connected _ (!equiv reassoc-l-eqv) 
+            (ConnectedMap.fiberwise-to-total-connected i+j (λ _ → Wedge.wedge-to-prod)
               (λ z → Wedge.WedgeToProd.connected (_ , snd z) (_ , snd z) (cf _) (cg _))))) 
 
       step1 : Equiv (HFiber (gluem p0) ((_ , pxy) , α)) 
@@ -134,12 +166,31 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
                     (HFiber glueml-total ((_ , p0) , (_ , pxy) , α))
       step3 = (HFiber-fiberwise-to-total-eqv _) ∘equiv (HFiber-fiberwise-to-total-eqv _)
 
+    glue-r-mr : ∀ {x y} (pxy : P x y) {αm : Path (inm p0) (inm pxy)} {αr : Path (inm p0) (inr y)} (s : ((gluer pxy) ∘ αm) == αr)
+              → Equiv (Trunc i+j (HFiber (gluer0 p0) αr)) (Trunc i+j (HFiber (gluemr p0 pxy) αm))
+    glue-r-mr pxy id = apTrunc' (HFiber-at-equiv (post∘-equiv (gluer pxy)) (gluer0 p0))
+
+    glue-mr-m : ∀ {x y} (pxy : P x y) {αm : Path (inm p0) (inm pxy)} 
+              → Equiv (Trunc i+j (HFiber (gluem p0) ((_ , pxy) , αm))) (Trunc i+j (HFiber (gluemr p0 pxy) αm))
+    glue-mr-m {x}{y} pxy {α} = apTrunc' (!equiv ((HFiber-fiberwise-to-total-eqv _) ∘equiv (HFiber-fiberwise-to-total-eqv _))) ∘equiv 
+                               step2 ∘equiv
+                               apTrunc' (HFiber-fiberwise-to-total-eqv _) where
+              
+      step2 : Equiv (Trunc i+j (HFiber gluem-total ((_ , p0) , (_ , pxy) , α)))
+                    (Trunc i+j (HFiber gluemr-total ((_ , p0) , (_ , pxy) , α)))
+      step2 = ConnectedMap.fiber-top-equiv (m-to-mr) _ _ (λ≃ (\ q → m-to-mr-triangle (fst q) (snd q))) 
+        (ConnectedMap.precompose-equiv-connected _ switchl-equiv
+          (ConnectedMap.postcompose-equiv-connected _ (!equiv reassoc-r-eqv) 
+            (ConnectedMap.fiberwise-to-total-connected i+j (λ _ → Wedge.wedge-to-prod)
+              (λ z → Wedge.WedgeToProd.connected (_ , snd z) (_ , snd z) (cf _) (cg _))))) 
+
+
     CodesFor : (w : W) (p : Path{W} (inm p0) w) → Type 
     CodesFor = Pushout-elim _ (λ x α → Trunc i+j (HFiber (gluel0 p0) α)) 
                               (λ x y p α → Trunc i+j (HFiber (gluem p0) ( (_ , p) , α)))
                               (λ y α → Trunc i+j (HFiber (gluer0 p0) α))
                               (λ x y pxy → coe (! PathOverΠ-NDrange) (λ αm αl d → ua (!equiv (glue-l-ml pxy (square-to-disc (PathOverPathFrom.out-PathOver-= d))) ∘equiv glue-ml-m pxy)))
-                              {!!} -- (λ αx αy s → ua (Codes-glue.eqv p0 pxy (PathOverPathFrom.out-PathOver-= s))))
+                              (λ x y pxy → coe (! PathOverΠ-NDrange) (λ αm αl d → ua (!equiv (glue-r-mr pxy (square-to-disc (PathOverPathFrom.out-PathOver-= d))) ∘equiv glue-mr-m pxy)))
 
     CodesFor' : (Σ \ (w : W) → Path{W} (inm p0) w) → Type 
     CodesFor' = uncurryd CodesFor
@@ -161,8 +212,8 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     encode : (w : W) (p : inm p0 == w) → (CodesFor w p)
     encode x p = transport CodesFor' (pair= p connOver) forid
 
-    redm : {y : Y} (px0y : P x0 y) → Path (encode (inr y) (glue px0y ∘ gluel p0)) [ px0y , id ]
-    redm px0y = {!!}
+    redr : {y : Y} (px0y : P x0 y) → Path (encode (inr y) (glue px0y ∘ gluel p0)) [ px0y , id ]
+    redr px0y = {!\ z → fst (glue-ml-m z)!}
 {-
     redr px0y = transport CodesFor' (pair= (glue px0y) connOver) forid ≃〈 ap≃ (transport-CodesFor'-glue px0y connOver) 〉 
                 Codes-glue.map p0 px0y (PathOverPathFrom.out-PathOver-= connOver) [ p0 , !-inv-l (glue p0) ]  ≃〈 id 〉 
@@ -178,14 +229,12 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
          coh id id = id
 -}
 
-    encode-decode-inm : (y : Y) (p : inm p0 == inr y) (c : HFiber (gluer0 p0) p) → Path (encode (inr y) p) [ c ]
-    encode-decode-inm y ._ (px0y , id) = redm px0y
+    encode-decode-inr : (y : Y) (p : inm p0 == inr y) (c : HFiber (gluer0 p0) p) → Path (encode (inr y) p) [ c ]
+    encode-decode-inr y ._ (px0y , id) = redr px0y
 
     contr-r : (y : Y) (p : Path{W} (inm p0) (inr y)) → Contractible (CodesFor (inr y) p)
-    contr-r y p = encode (inr y) p , Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (encode-decode-inm y p)
+    contr-r y p = encode (inr y) p , Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (encode-decode-inr y p)
 
-    -- move the problem to one of the inm --> inr paths, instead of the whole inl --> inr path,
-    -- (otherwise we could do codes on (inl x0) == -, but doing codes on (inm p0) == - is more symmetric)
     gluer0-connected : (y : Y) → ConnectedMap i+j (gluer0 p0 {y})
     gluer0-connected y = λ α → ntype (contr-r y α)
 
@@ -194,10 +243,12 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
       coh : {A : Type} {a b c : A} (α : a == b) (β : c == a) → α == ((α ∘ β) ∘ ! β)
       coh id id = id
 
-    -- if f is connnected then e o f is connected for an equivalence e,
-    -- and use glue-as-gluer0
+    -- move the problem to one of the inm --> inr paths, instead of the whole inl --> inr path,
+    -- (otherwise we could do codes on (inl x0) == -, but doing codes on (inm p0) == - is more symmetric)
     glue-connected' : (y : Y) → ConnectedMap i+j (glue{x = x0} {y})
-    glue-connected' y  = transport (\ Z → ConnectedMap i+j Z) (! (glue-as-gluer0 y)) (postcompose-equiv-connected (gluer0 p0) (pre∘-equiv (! (gluel p0))) (gluer0-connected y))
+    glue-connected' y  = transport (\ Z → ConnectedMap i+j Z) (! (glue-as-gluer0 y))
+                                   (ConnectedMap.postcompose-equiv-connected (gluer0 p0) (pre∘-equiv (! (gluel p0))) 
+                                                                             (gluer0-connected y))
 
   -- make y0,p0 : P x0 y0 using connectivity 
   -- Z -> X is (S _)-connected, so to make an hprop for X, we can do it for Z
@@ -209,5 +260,5 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
   glue-map-total ((x , y) , p) = ((x , y) , glue p)
 
   theorem : ConnectedMap i+j glue-map-total
-  theorem = fiberwise-to-total-connected i+j (λ _ → glue) (λ xy → glue-connected (fst xy) (snd xy))
+  theorem = ConnectedMap.fiberwise-to-total-connected i+j (λ _ → glue) (λ xy → glue-connected (fst xy) (snd xy))
 
