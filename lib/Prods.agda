@@ -170,6 +170,10 @@ module lib.Prods where
     path = ua eqv
 
 
+  module ΣcommFirstTwo {A : Type} {B : Type} {C : A → B → Type} where
+    eqv : Equiv (Σ \ x → Σ \ y → C x y) (Σ \ y → Σ \ x → C x y)
+    eqv = improve (hequiv (λ p → fst (snd p) , fst p , snd (snd p)) (λ p → fst (snd p) , fst p , snd (snd p)) (λ _ → id) (λ _ → id))
+
   Σlevel : ∀ {n} {A : Type} {B : A → Type}
            → NType n A
            → ((x : A) → NType n (B x))
@@ -335,9 +339,6 @@ module lib.Prods where
   ap-pair×≃-diag : {A C : Type} (f : A × A → C) {a a' : A} (p : a == a') -> ap f (pair×≃ p p) == ap (λ z → f (z , z)) p
   ap-pair×≃-diag f id = id
 
-  hfiber-fst : ∀ {A} {B : A → Type} (a : A) → B a == Σ \ (p : Σ B) → fst p == a
-  hfiber-fst {B = B} a = ua (improve (hequiv (λ b → (a , b) , id) (λ p₁ → transport B (snd p₁) (snd (fst p₁))) (λ _ → id) (λ {((a1 , b) , p) → path-induction-l (λ a2 p₁ → (b₁ : B a2) → Id ((a , transport B p₁ b₁) , id) ((a2 , b₁) , p₁)) (λ _ → id) p b})))
-
   fiberwise-to-total : {A : Type} {B B' : A → Type} → (f : (a : A) → B a → B' a) → Σ B → Σ B'
   fiberwise-to-total f (a , b) = (a , f a b)
 
@@ -351,3 +352,8 @@ module lib.Prods where
              (Σ \ (f : (x : A) → B x) → (x : A) → C x (f x))
   AC = improve (hequiv (λ f → (λ x → fst (f x)) , (λ x → snd (f x))) (λ g x → fst g x , snd g x) (λ f → id) (λ y → id))
 
+  swap×fn : ∀ {A B} → (A × B) → (B × A)
+  swap×fn (x , y) = (y , x)
+    
+  swap× : ∀ {A B} → Equiv (A × B) (B × A)
+  swap× = equiv swap×fn swap×fn (λ _ → id) (λ _ → id) (λ _ → id)

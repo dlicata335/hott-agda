@@ -1,0 +1,26 @@
+{-
+  -- the middle map in the paper (at least from my agda notes); 
+  -- seems to be the same as the fiberwise to total of the over Z version
+  map : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → Z×WZ
+  map (z11 , w) = Wedge.Pushout-rec 
+                     (λ z21 → z11 , (_ , snd z21) , ! (gluel (snd z21)) ∘ gluel (snd z11))
+                     (λ z12 → z11 , (_ , snd z12) , ! (gluer (snd z12)) ∘ gluer (snd z11))
+                     ((λ _ → {!!}))
+                     w
+
+  check : ∀ z w → (fiberwise-to-total (\ (z : Z) → gluem (snd z))) (z , w) == map (z , w)
+  check z = Wedge.Pushout-elim _ (λ _ → id) (λ _ → id) {!!}
+-}
+
+{-
+    pushout-to-pullback : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → 〈Z×Z〉×〈YX〉Z -- swap second and third from other file
+    pushout-to-pullback (z11 , w) = Wedge.Pushout-rec (λ z12 → z11 , (_ , snd z12)  , snd z11)
+                                                    (λ z21 → z11 , (_ , snd z21) , snd z21) 
+                                                    (λ _ → id) w
+
+  thm : ∀ z11 w → pushout-to-pullback (z11 , w) == (reassoc-r o fiberwise-to-total (λ z1 → wtp (snd z1)) o switchr ) (z11 , w)
+  thm z = Wedge.Pushout-elim _ (λ z' → id) (λ _ → id) (λ _ → {!!}) 
+ 
+
+
+-}

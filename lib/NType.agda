@@ -82,6 +82,9 @@ module lib.NType where
   <=trans (Inr x) (Inl y) = Inl (transport (λ x' → x' <tl _) (! x) y)
   <=trans (Inr x) (Inr y) = Inr (y ∘ x)
 
+  ¬-1<=-2 : -1 <=tl -2 -> Void
+  ¬-1<=-2 (Inl x) = nothing<-2 x
+  ¬-1<=-2 (Inr ())
 
   -- min for tlevels
   mintl : TLevel -> TLevel -> TLevel 
@@ -122,6 +125,13 @@ module lib.NType where
   -1<=plus2 { -2} { -2} (Inr x) = x
   -1<=plus2 { -2} {S n} e = -1<= (-2< _)
   -1<=plus2 {S m} {n} e = -1<= (-2< _)
+
+
+  -- bounded subtraction
+  sub1 : (x : TLevel) → -1 <=tl x → Σ \ (x-1 : TLevel) → S x-1 == x
+  sub1 -2 eq = Sums.abort (¬-1<=-2 eq)
+  sub1 (S x-1) eq = x-1 , id
+
 
 
   -- other stuff about ntypes

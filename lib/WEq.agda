@@ -7,9 +7,6 @@ open import lib.Prods
 
 module lib.WEq where
 
-  HFiber : {A B : Type} -> (A -> B) -> B -> Type
-  HFiber f y = Σ \x -> Path (f x) y
-  
   IsWEq : {A B : Type} -> (f : A -> B) -> Type
   IsWEq {A}{B} f = (y : B) -> Contractible (HFiber f y)
   
@@ -18,11 +15,6 @@ module lib.WEq where
 
   IsWEq-HProp : {A B : Type} (f : A → B) → HProp (IsWEq f)
   IsWEq-HProp f = unique-HProp (λ w w' → λ≃ (λ y → HProp-unique (Contractible-is-HProp _) _ _))
-
-  transport-HFiber-arg : {A B : Type} -> (f : A -> B) -> {b1 b2 : B}
-                             (β : b1 ≃ b2)
-                           -> transport (HFiber f) β ≃ \ p → (fst p , β ∘ snd p)
-  transport-HFiber-arg f id = λ≃ \ p -> pair≃ id (! (∘-unit-l (snd p)))
 
 
 {-

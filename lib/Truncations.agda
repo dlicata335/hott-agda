@@ -10,6 +10,7 @@ open import lib.Nat
 open import lib.NType
 open import lib.Universe
 open import lib.AdjointEquiv
+open import lib.HFiber
 
 module lib.Truncations where
 
@@ -78,8 +79,20 @@ module lib.Truncations where
    Trunc-func : {n : TLevel} {A B : Type} -> (A -> B) -> (Trunc n A -> Trunc n B)
    Trunc-func f = Trunc-rec Trunc-level ([_] o f)
 
+   -- one of the monad laws
+   Trunc-rec-cconv : (n : TLevel) {A B C : Type} (nC : NType n C)
+                     (f : A → Trunc n B) (g : B → C)
+                     (x : Trunc n A) → Trunc-rec nC g (Trunc-rec Trunc-level f x) ==  Trunc-rec nC (Trunc-rec nC g o f) x
+   Trunc-rec-cconv n nC f g = Trunc-elim _ (λ _ → path-preserves-level nC) (λ _ → id)
+                    
    Trunc-reflective : ∀ k {A} -> NType k A → Trunc k A ≃ A
    Trunc-reflective k tA = ua (improve (hequiv (Trunc-rec tA (λ x → x)) [_] (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (λ _ → id)) (λ _ → id)))
+
+   -- version that computes
+   apTrunc' : {n : TLevel} {A B : Type} → Equiv A B → Equiv (Trunc n A) (Trunc n B)
+   apTrunc' e = improve (hequiv (Trunc-func (fst e)) (Trunc-func (IsEquiv.g (snd e)))
+                                (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (λ x → ap [_] (IsEquiv.α (snd e) x)))
+                                (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (λ x → ap [_] (IsEquiv.β (snd e) x))))
 
    module TruncPath (n : _) {A : _} {x : A} where
 
@@ -205,9 +218,44 @@ module lib.Truncations where
     path : Trunc n A ≃ A
     path = ua eqv
 
-   -- one of the monad laws
-   Trunc-rec-cconv : (n : TLevel) {A B C : Type} (nC : NType n C)
-                     (f : A → Trunc n B) (g : B → C)
-                     (x : Trunc n A) → Trunc-rec nC g (Trunc-rec Trunc-level f x) ==  Trunc-rec nC (Trunc-rec nC g o f) x
-   Trunc-rec-cconv n nC f g = Trunc-elim _ (λ _ → path-preserves-level nC) (λ _ → id)
-                    
+   truncated-HFiber-equiv : {i : TLevel} {A B C : Type} 
+     (f : A → C) (g : B → C) 
+     (l' : (a : A) → Trunc i (HFiber g (f a)))
+     (r' : (b : B) → Trunc i (HFiber f (g b)))
+     (rl' : (a : A) → Path{Trunc i (HFiber f (f a))}
+               (Trunc-rec Trunc-level (λ p → Trunc-func (λ p' → fst p' , snd p ∘ snd p') (r' (fst p))) (l' a) )
+               [ a , id ])
+     (lr' : (b : B) → Path{Trunc i (HFiber g (g b))}
+               (Trunc-rec Trunc-level (λ p → Trunc-func (λ p' → fst p' , snd p ∘ snd p') (l' (fst p))) (r' b) )
+               [ b , id ])
+    → {c : C} → Equiv (Trunc i (HFiber f c)) (Trunc i (HFiber g c))
+   truncated-HFiber-equiv {i} {A}{B}{C} f g l' r' rl' lr' {c} = 
+     improve (hequiv (Trunc-rec Trunc-level l) 
+                     (Trunc-rec Trunc-level r) 
+                     (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) rl)
+                     (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) lr)) where
+     -- FIXME abstrct duplication
+
+     l : {c : C} → HFiber f c → Trunc i (HFiber g c)
+     l (a , q) = Trunc-func (λ p → fst p , q ∘ snd p) (l' a) -- write out the transport by hand so it reduces
+
+     r : {c : C} → HFiber g c → Trunc i (HFiber f c)
+     r (b , q) = Trunc-func (λ p → fst p , q ∘ snd p) (r' b)
+
+     rl : {c : C} → (hf : HFiber f c) → (Trunc-rec Trunc-level r (l hf)) == [ hf ]
+     rl (a , id) = Trunc-rec Trunc-level r (l (a , id)) ≃〈 id 〉 
+                   Trunc-rec Trunc-level r (Trunc-func (λ p → fst p , id ∘ snd p) (l' a)) ≃〈 ap (λ X → Trunc-rec Trunc-level r (Trunc-func X (l' a))) (λ≃ (λ p → ap (λ Z₁ → fst p , Z₁) (∘-unit-l (snd p)))) 〉 
+                   Trunc-rec Trunc-level r (Trunc-func (λ p → fst p , snd p) (l' a)) ≃〈 id 〉 
+                   Trunc-rec Trunc-level r (Trunc-rec Trunc-level (λ p → [ fst p , snd p ]) (l' a)) ≃〈 Trunc-rec-cconv i Trunc-level (λ p → [ fst p , snd p ]) r  (l' a) 〉 
+                   Trunc-rec Trunc-level (\ p → r (fst p , snd p)) (l' a) ≃〈 rl' a 〉 
+                   _ ∎
+
+     lr : {c : C} → (hf : HFiber g c) → (Trunc-rec Trunc-level l (r hf)) == [ hf ]
+     lr (b , id) = Trunc-rec Trunc-level l (r (b , id)) ≃〈 id 〉 
+                   Trunc-rec Trunc-level l (Trunc-func (λ p → fst p , id ∘ snd p) (r' b)) ≃〈 ap (λ X → Trunc-rec Trunc-level l (Trunc-func X (r' b))) (λ≃ (λ p → ap (λ Z₁ → fst p , Z₁) (∘-unit-l (snd p)))) 〉 
+                   Trunc-rec Trunc-level l (Trunc-func (λ p → fst p , snd p) (r' b)) ≃〈 id 〉 
+                   Trunc-rec Trunc-level l (Trunc-rec Trunc-level (λ p → [ fst p , snd p ]) (r' b)) ≃〈 Trunc-rec-cconv i Trunc-level (λ p → [ fst p , snd p ]) l  (r' b) 〉 
+                   Trunc-rec Trunc-level (\ p → l (fst p , snd p)) (r' b) ≃〈 lr' b 〉 
+                   _ ∎
+
+   

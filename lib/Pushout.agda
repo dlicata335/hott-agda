@@ -14,6 +14,7 @@ open import lib.Universe
 open import lib.Truncations
 open import lib.WEq
 open Truncation
+open import lib.cubical.PathOver
 
 module lib.Pushout where
 
@@ -66,7 +67,7 @@ module lib.Pushout where
                     (C : Pushout f g -> Type)
                     (b1 : (x : X) → C (inl x))
                     (b3 : (y : Y) → C (inr y))
-                    (glue' : (z : ZZ) → transport C (glue z) (b1 (f z)) ≃ b3 (g z))
+                    (glue' : (z : ZZ) → PathOver C (glue z) (b1 (f z)) (b3 (g z)))
                   → (p : Pushout f g) → C p
       Pushout-elim _ b1 _ _ (inl' x) = b1 x
       Pushout-elim _ _ b3 _ (inr' y) = b3 y
@@ -84,4 +85,4 @@ module lib.Pushout where
       i = wedge-to-prod {A}{B}{a0}{b0}
 
       postulate -- ooTopos Blakers-Massey?
-        i-connected : ConnectedMap.ConnectedMap (plus2 m n) i
+        connected : ConnectedMap.ConnectedMap (plus2 m n) i

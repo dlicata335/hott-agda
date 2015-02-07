@@ -11,6 +11,7 @@ module lib.BasicTypes where
   open import lib.Functions public
 
   open import lib.NType public
+  open import lib.HFiber public
   open import lib.WEq public
   open import lib.AdjointEquiv public
 

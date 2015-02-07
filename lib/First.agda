@@ -226,6 +226,8 @@ module lib.First where
 
  syntax Σe A (\ x  -> B) = Σ[ x ∶ A ] B
 
+ HFiber : {A B : Type} -> (A -> B) -> B -> Type
+ HFiber f y = Σ \x -> Path (f x) y
 
  -- ----------------------------------------------------------------------
  -- equivalences

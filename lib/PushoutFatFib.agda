@@ -23,7 +23,7 @@ module lib.PushoutFatFib where
       private
         data Pushout' {X Y : Type} (P : X → Y → Type) : Type where
           inl' : X → Pushout' P 
-          inm' : (x : X) (y : Y) → P x y → Pushout' P
+          inm' : {x : X} {y : Y} → P x y → Pushout' P
           inr' : Y → Pushout' P
 
       Pushout : {X Y : Type} (P : X → Y → Type) → Type 
@@ -35,12 +35,12 @@ module lib.PushoutFatFib where
       inr : ∀ {X Y}{P : X → Y → Type} → Y → Pushout P
       inr = inr'
 
-      inm : ∀ {X Y}{P : X → Y → Type} → (x : X) (y : Y) → P x y → Pushout P
+      inm : ∀ {X Y}{P : X → Y → Type} → {x : X} {y : Y} → P x y → Pushout P
       inm = inm'
 
       postulate {- HoTT Axiom -}
-        gluel : ∀ {X Y} {P : X → Y → Type} (x : X) (y : Y) → (p : P x y) → Path{Pushout P} (inm x y p) (inl x)
-        gluer : ∀ {X Y} {P : X → Y → Type} (x : X) (y : Y) → (p : P x y) → Path{Pushout P} (inm x y p) (inr y)
+        gluel : ∀ {X Y} {P : X → Y → Type} {x : X} {y : Y} → (p : P x y) → Path{Pushout P} (inm p) (inl x)
+        gluer : ∀ {X Y} {P : X → Y → Type} {x : X} {y : Y} → (p : P x y) → Path{Pushout P} (inm p) (inr y)
 
       Pushout-rec : {X Y : Type} {P : X → Y → Type} {C : Type}
                     (b1 : X → C)
@@ -50,7 +50,7 @@ module lib.PushoutFatFib where
                     (gluer' : (x : X) (y : Y) (p : P x y) → (b2 x y p) ≃ b3 y)
                   → Pushout P → C
       Pushout-rec b1 _ _ _ _ (inl' x) = b1 x
-      Pushout-rec _ b2 _ _ _ (inm' x y p) = b2 x y p
+      Pushout-rec _ b2 _ _ _ (inm' {x = x} {y} p) = b2 x y p
       Pushout-rec _ _ b3 _ _ (inr' y) = b3 y
 
 {-
@@ -59,13 +59,13 @@ module lib.PushoutFatFib where
 
       Pushout-elim : {X Y : Type} {P : X → Y → Type} (C : Pushout P → Type)
                     (b1 : (x : X) → C (inl x))
-                    (b2 : (x : X) (y : Y) (p : P x y) → C (inm x y p))
+                    (b2 : (x : X) (y : Y) (p : P x y) → C (inm p))
                     (b3 : (y : Y) → C (inr y))
-                    (gluel' : (x : X) (y : Y) (p : P x y) → PathOver C (gluel x y p) (b2 x y p) (b1 x))
-                    (gluer' : (x : X) (y : Y) (p : P x y) → PathOver C (gluer x y p) (b2 x y p) (b3 y))
+                    (gluel' : (x : X) (y : Y) (p : P x y) → PathOver C (gluel p) (b2 x y p) (b1 x))
+                    (gluer' : (x : X) (y : Y) (p : P x y) → PathOver C (gluer p) (b2 x y p) (b3 y))
                   → (z : Pushout P) → C z
       Pushout-elim _ b1 _ _ _ _ (inl' x) = b1 x
-      Pushout-elim _ _ b2 _ _ _ (inm' x y p) = b2 x y p
+      Pushout-elim _ _ b2 _ _ _ (inm' {x = x}{y} p) = b2 x y p
       Pushout-elim _ _ _ b3 _ _ (inr' y) = b3 y
 
     open P public

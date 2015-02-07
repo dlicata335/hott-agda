@@ -1,7 +1,12 @@
 
 {-# OPTIONS --type-in-type --without-K #-}
 
-open import lib.BasicTypes
+open import lib.First
+open import lib.Prods
+open import lib.Functions
+open import lib.AdjointEquiv
+open import lib.Paths
+
 open import lib.cubical.PathOver
 
 module lib.cubical.Square where

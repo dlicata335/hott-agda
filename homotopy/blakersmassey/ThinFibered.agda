@@ -6,11 +6,12 @@ open ConnectedMap
 open Truncation
 open import lib.cubical.Cubical
 
-module homotopy.blakersmassey.ThinFibered (X Y : Type) (P : X → Y → Type)
-                                          (i' j' : TLevel)
-                                          (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
-                                          (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) 
-                                          where 
+module homotopy.blakersmassey.ThinFibered where
+
+module Connected (X Y : Type) (P : X → Y → Type)
+                 (i' j' : TLevel)
+                 (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
+                 (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where 
 
   i : TLevel
   i = S i'
@@ -257,6 +258,9 @@ module homotopy.blakersmassey.ThinFibered (X Y : Type) (P : X → Y → Type)
     forid : CodesFor (inl x0) id
     forid = [ p0 , !-inv-l (glue p0) ]
 
+    encode : (w : W) (p : inl x0 == w) → (CodesFor w p)
+    encode x p = transport CodesFor' (pair= p connOver) forid
+
     redr : {y : Y} (px0y : P x0 y) → transport CodesFor' (pair= (glue px0y) connOver) forid == [ px0y , id ]
     redr px0y = transport CodesFor' (pair= (glue px0y) connOver) forid ≃〈 ap≃ (transport-CodesFor'-glue px0y connOver) 〉 
                 Codes-glue.map p0 px0y (PathOverPathFrom.out-PathOver-= connOver) [ p0 , !-inv-l (glue p0) ]  ≃〈 id 〉 
@@ -271,18 +275,32 @@ module homotopy.blakersmassey.ThinFibered (X Y : Type) (P : X → Y → Type)
                   square-to-disc-rearrange (square-symmetry (inverses-square α α')) == id
          coh id id = id
 
-    encode : (w : W) (p : inl x0 == w) → (CodesFor w p)
-    encode x p = transport CodesFor' (pair= p connOver) forid
-  
     encode-decode-inr : (y : Y) (p : inl x0 == inr y) (c : HFiber glue p) → Path (encode (inr y) p) [ c ]
     encode-decode-inr y ._ (px0y , id) = (redr px0y)
 
-    -- Trick: only do it for inr y! 
-    -- This means you don't need to do the inl case, or show the two cases are the same, which is the big savings.
-    -- This is similar to how you usually only need to do encode-after-decode for the point of interest.  
-    -- However, we don't got a "polymorphic" result about Paths to an arbitrary w; is that ever helpful?  
     contr-r : (y : Y) (p : Path{W} (inl x0) (inr y)) → Contractible (CodesFor (inr y) p)
     contr-r y p = encode (inr y) p , Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (encode-decode-inr y p)
+
+
+    -- optional material; not used below
+
+    redl : {x : X} (pxy0 : P x y0) → transport CodesFor' (pair= (! (glue pxy0) ∘ glue p0) connOver) forid == [ pxy0 , id ]
+    redl pxy0 = {!!}
+
+    encode-decode-inl : (x : X) (p : inl x0 == inl x) (c : HFiber gluel p) → Path (encode (inl x) p) [ c ]
+    encode-decode-inl x ._ (pxy0 , id) = redl pxy0
+
+    -- much easier to do the pushout-elim at the outside, rather than trying to prove 
+    --   encode-decode : (w : W) (p : inl x0 == w) (c : CodesFor w p) → Path (encode w p) c
+    -- because if you do that then you need to give a coherence between the inl case and the inr case, 
+    -- but here its in an hprop
+    contr : (w : W) (p : Path {W} (inl x0) w) → Contractible (CodesFor w p)
+    contr = Pushout-elim _ (λ x p → encode (inl x) p , Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (encode-decode-inl x p)) 
+                           contr-r 
+                           (λ _ _ _ → hom-to-over/left _ (HProp-unique (Πlevel (λ _ → Contractible-is-HProp _)) _ _))
+
+    -- end optional material
+
   
   glue-connected' : ((x : X) (y : Y) (α : Path{W} (inl x) (inr y))
               → Contractible (Trunc i+j (HFiber (glue{a = x}{y}) α)))
@@ -292,11 +310,40 @@ module homotopy.blakersmassey.ThinFibered (X Y : Type) (P : X → Y → Type)
   
   glue-connected : (x : X) (y : Y) → ConnectedMap i+j (glue{X}{Y}{P}{a = x}{y})
   glue-connected x y α = ntype (glue-connected' x y α)
-
   
   glue-map-total : (Σ \ xy → P (fst xy) (snd xy)) → Σ \ xy → Path{W} (inl (fst xy)) (inr (snd xy))
   glue-map-total ((x , y) , p) = ((x , y) , glue p)
 
   theorem : ConnectedMap i+j glue-map-total
   theorem = fiberwise-to-total-connected i+j (λ _ → glue) (λ xy → glue-connected (fst xy) (snd xy))
+
+module Connective (X Y : Type) (P : X → Y → Type)
+                  (i-2 j-2 : TLevel) 
+                  (ci : ConnectiveMap {S (S i-2)}{Σ \ x → Σ \ y → P x y}{X} (-1<= (-2< _)) fst)
+                  (cj : ConnectiveMap {S (S j-2)}{Σ \ x → Σ \ y → P x y}{Y} (-1<= (-2< _)) (\ p → fst (snd p))) where
+
+  -- indexing from http://ncatlab.org/nlab/show/Blakers-Massey+theorem
+
+  module C = Connected X Y P i-2 j-2 (coe (! ConnectedFibers≃ConnectedFst) ci) (coe (! ConnectedFibers≃ConnectedFst) (precompose-equiv fst ΣcommFirstTwo.eqv cj)) 
+
+  i : TLevel
+  i = S (S i-2)
+
+  j : TLevel
+  j = S (S j-2)
+
+  i+j-1 : TLevel 
+  i+j-1 = S (plus2 i-2 j-2)
+  
+  -1<=i+j-1 : -1 <=tl i+j-1 
+  -1<=i+j-1 = -1<= (-2< _)
+
+  i+j-2 : TLevel
+  i+j-2 = plus2 i-2 j-2
+
+  translated : ConnectedMap i+j-2 C.glue-map-total
+  translated = C.theorem
+
+  theorem : ConnectiveMap {i+j-1} -1<=i+j-1 C.glue-map-total
+  theorem = translated
 
