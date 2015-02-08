@@ -9,5 +9,9 @@
 *.synctex.gz
 *.agdai
 TAGS
-
+*.mp
+*.ptb
+*.top
+*.tui
+*.lao
 .DS_Store
