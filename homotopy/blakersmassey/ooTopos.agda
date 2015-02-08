@@ -119,23 +119,28 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     m-to-ml : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → 〈Z×Z〉×〈YX〉Z
     m-to-ml = reassoc-l' o (fiberwise-to-total (λ z1 → wtp (snd z1)) o switchr)
 
+        
+    red-gluem-total-glue : ∀ {z} → (ap (λ z₁ → gluem-total (z , z₁)) (Wedge.glue <>)) == ap (λ h → z , z , h) (square-to-disc (inverses-square (gluel (snd z)) (gluer (snd z))))
+    red-gluem-total-glue {z} = ! (ap-o (λ h → z , h) (λ h → z , h) (square-to-disc (inverses-square (gluel (snd z)) (gluer (snd z))))) ∘ 
+                               ap (ap (λ h → z , h)) (Wedge.βglue/rec _ _ (λ _ → ap (λ h → z , h) (square-to-disc (inverses-square (gluel (snd z)) (gluer (snd z))))) <>) ∘ 
+                               ap-o (λ h → z , h) (gluem (snd z)) (Wedge.glue <>)
+
     m-to-ml-triangle : ∀ z (w : Z×X-∨-×YZ (snd z)) → (glueml-total o m-to-ml) (z , w) == gluem-total (z , w)
     m-to-ml-triangle z = Wedge.Pushout-elim (λ w → (glueml-total o m-to-ml) (z , w) == gluem-total (z , w))
                                             (λ yp → ap (λ Q → z , ((fst (fst z) , fst yp) , snd yp) , Q) (coh1 (gluel (snd yp)) (gluel (snd z)) (gluer (snd z))))
                                             (λ xp → ap (λ Q → z , ((fst xp , snd (fst z)) , snd xp) , Q) (coh2 (gluel (snd xp)) (gluer (snd xp)) (gluer (snd z))))
-                                            (λ _ → PathOver=.in-PathOver-= (whisker-square id (! red1) (! red2) id (ap-square (λ h → z , z , h) (coh12 (gluel (snd z)) (gluer (snd z)))))) where
+                                            (λ _ → PathOver=.in-PathOver-= (whisker-square id (! red) (! red-gluem-total-glue) id (ap-square (λ h → z , z , h) (coh12 (gluel (snd z)) (gluer (snd z)))))) where
       coh1 : ∀ {A} {a0 a1 a2 a3 : A} (lyp : a0 == a1) (lz : a2 == a1) (rz : a2 == a3) → (! lyp ∘ ! (rz ∘ ! (lz)) ∘ rz) == (! lyp ∘ lz)
       coh1 id id id = id
 
       coh2 : ∀ {A} {a0 a1 a2 a3 : A} (lxp : a0 == a1) (rxp : a0 == a2) (rz : a3 == a2) → (! lxp ∘ ! (rxp ∘ ! (lxp)) ∘ rz) == (! rxp ∘ rz)
       coh2 id id id = id
 
-      coh12 : ∀ {A} {a0 a1 a2 : A} (lz : a0 == a1) (rz : a0 == a2) 
-            → Square (coh1 lz lz rz) id (square-to-disc (inverses-square lz rz)) (coh2 lz rz rz)
+      coh12 : ∀ {A} {a0 a1 a2 : A} (lz : a0 == a1) (rz : a0 == a2) → Square (coh1 lz lz rz) id (square-to-disc (inverses-square lz rz)) (coh2 lz rz rz)
       coh12 id id = id
 
-      red1 : (ap (λ z₁ → (glueml-total o m-to-ml) (z , z₁)) (Wedge.glue <>)) == ap (\ h → z , z , h) id
-      red1 = ap (ap glueml-total) red1' ∘ ap-o glueml-total (λ h → m-to-ml (z , h)) (Wedge.glue <>) where
+      red : (ap (λ z₁ → (glueml-total o m-to-ml) (z , z₁)) (Wedge.glue <>)) == ap (\ h → z , z , h) id
+      red = ap (ap glueml-total) red1' ∘ ap-o glueml-total (λ h → m-to-ml (z , h)) (Wedge.glue <>) where
         red1'' : ap (λ h → (fiberwise-to-total (λ z1 → wtp (snd z1)) o switchr) (z , h)) (Wedge.glue <>)  == id
         red1'' =  ap (ap (λ x → z , x)) (Wedge.βglue/rec _ _ _ _) ∘ ap-o (λ x → z , x) (wtp (snd z)) (Wedge.glue <>) ∘ 
                   ! (ap-o (fiberwise-to-total (λ z1 → wtp (snd z1))) (λ h → z , h) (Wedge.glue <>)) ∘
@@ -144,11 +149,6 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
 
         red1' : ap (\ h → m-to-ml (z , h)) (Wedge.glue <>) == id
         red1' = ap (ap reassoc-l') red1'' ∘ ap-o reassoc-l' (λ h → (fiberwise-to-total (λ z1 → wtp (snd z1)) o switchr) (z , h)) (Wedge.glue <>)
-        
-      red2 : (ap (λ z₁ → gluem-total (z , z₁)) (Wedge.glue <>)) == ap (λ h → z , z , h) (square-to-disc (inverses-square (gluel (snd z)) (gluer (snd z))))
-      red2 = ! (ap-o (λ h → z , h) (λ h → z , h) (square-to-disc (inverses-square (gluel (snd z)) (gluer (snd z))))) ∘ 
-             ap (ap (λ h → z , h)) (Wedge.βglue/rec _ _ (λ _ → ap (λ h → z , h) (square-to-disc (inverses-square (gluel (snd z)) (gluer (snd z))))) <>) ∘ 
-             ap-o (λ h → z , h) (gluem (snd z)) (Wedge.glue <>)
 
     gluemr-total : 〈Z×Z〉×〈XY〉Z → Z×WZ
     gluemr-total = (fiberwise-to-total (\ (ppp0 : Z) → (fiberwise-to-total (\ (ppxy : Z) → gluemr (snd ppp0) (snd ppxy)))))
@@ -160,12 +160,28 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     m-to-mr-triangle z = Wedge.Pushout-elim (λ w → (gluemr-total o m-to-mr) (z , w) == gluem-total (z , w))
                                             (λ yp → ap (λ Q → z , ((fst (fst z) , fst yp) , snd yp) , Q) (coh1 (gluer (snd yp)) (gluel (snd yp)) (gluel (snd z))))
                                             (λ xp → ap (λ Q → z , ((fst xp , snd (fst z)) , snd xp) , Q) (coh2 (gluer (snd xp)) (gluer (snd z)) (gluel (snd z))))
-                                            {!!} where
+                                            (λ _ → PathOver=.in-PathOver-= (whisker-square id (! red)
+                                                                                           (! red-gluem-total-glue) id
+                                                                                           (ap-square (λ h → z , z , h) (coh12 (gluel (snd z)) (gluer (snd z)))))) where
       coh1 : ∀ {A} {a0 a1 a2 a3 : A} (ryp : a0 == a1) (lyp : a0 == a2) (lz : a3 == a2) → (! ryp ∘ (ryp ∘ ! (lyp)) ∘ lz) == (! lyp ∘ lz)
       coh1 id id id = id
 
       coh2 : ∀ {A} {a0 a1 a2 a3 : A} (rxp : a0 == a1) (rz : a2 == a1) (lz : a2 == a3) → (! rxp ∘ (rz ∘ ! (lz)) ∘ lz) == (! rxp ∘ rz)
       coh2 id id id = id
+
+      coh12 : ∀ {A} {a0 a1 a2 : A} (lz : a0 == a1) (rz : a0 == a2) → Square (coh1 rz lz lz) id (square-to-disc (inverses-square lz rz)) (coh2 rz rz lz)
+      coh12 id id = id
+
+      red : (ap (λ z₁ → (gluemr-total o m-to-mr) (z , z₁)) (Wedge.glue <>)) == ap (\ h → z , z , h) id
+      red = ap (ap gluemr-total) red1' ∘ ap-o gluemr-total (λ h → m-to-mr (z , h)) (Wedge.glue <>) where
+        red1'' : ap (λ h → (fiberwise-to-total (λ z1 → wtp (snd z1)) o switchl) (z , h)) (Wedge.glue <>)  == id
+        red1'' =  ap (ap (λ x → z , x)) (Wedge.βglue/rec _ _ _ _) ∘ ap-o (λ x → z , x) (wtp (snd z)) (Wedge.glue <>) ∘ 
+                  ! (ap-o (fiberwise-to-total (λ z1 → wtp (snd z1))) (λ h → z , h) (Wedge.glue <>)) ∘
+                  ap (ap (fiberwise-to-total (λ z1 → wtp (snd z1))))(Wedge.βglue/rec _ _ _ _) ∘ 
+                  ap-o (fiberwise-to-total (λ z1 → wtp (snd z1))) (λ h → switchl (z , h)) (Wedge.glue <>)
+
+        red1' : ap (\ h → m-to-mr (z , h)) (Wedge.glue <>) == id
+        red1' = ap (ap reassoc-r') red1'' ∘ ap-o reassoc-r' (λ h → (fiberwise-to-total (λ z1 → wtp (snd z1)) o switchl) (z , h)) (Wedge.glue <>)
 
 
 
