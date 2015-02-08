@@ -1,11 +1,13 @@
 -- wrapper to type check everything that's done
 
+-- encode-decode method examples
 
 import homotopy.Pi1Either
-
+import homotopy.EncodeDecode
 
 -- homotopy groups of spheres
 
+import homotopy.Circles
 import homotopy.Pi1S1
 import homotopy.Hopf
 import homotopy.PiKSNLess
@@ -23,6 +25,7 @@ import homotopy.FreudenthalConnected
 
 -- homotopy groups of n-spheres with susp definiton
 
+import homotopy.HStructure
 import homotopy.Pi2HSusp
 import homotopy.PiLessOfConnected
 import homotopy.FreudenthalIteratedSuspension1

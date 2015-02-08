@@ -281,6 +281,7 @@ module UsingConnected (X Y : Type) (P : X → Y → Type)
     contr-r y p = encode (inr y) p , Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (encode-decode-inr y p)
 
 
+    {-
     -- optional material; not used below
 
     redl : {x : X} (pxy0 : P x y0) → transport CodesFor' (pair= (! (glue pxy0) ∘ glue p0) connOver) forid == [ pxy0 , id ]
@@ -299,7 +300,7 @@ module UsingConnected (X Y : Type) (P : X → Y → Type)
                            (λ _ _ _ → hom-to-over/left _ (HProp-unique (Πlevel (λ _ → Contractible-is-HProp _)) _ _))
 
     -- end optional material
-
+    -}
   
   glue-connected' : ((x : X) (y : Y) (α : Path{W} (inl x) (inr y))
               → Contractible (Trunc i+j (HFiber (glue{a = x}{y}) α)))
@@ -325,7 +326,7 @@ module UsingConnective (X Y : Type) (P : X → Y → Type)
 
   module C = UsingConnected X Y P i-2 j-2 
              (coe (! ConnectedMap.connected-fibers≃connected-first) ci)
-             (coe (! ConnectedMap.connected-fibers≃connected-first) (ConnectedMap.connected-if-precompose-equiv-connected fst ΣcommFirstTwo.eqv cj)) 
+             (coe (! ConnectedMap.connected-fibers≃connected-first) (ConnectedMap.connected-if-precompose-equiv-connected ΣcommFirstTwo.eqv cj)) 
 
   i : TLevel
   i = S (S i-2)

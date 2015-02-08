@@ -107,14 +107,14 @@ module homotopy.FreudenthalConnected where
       abstract
         Codes-mer-is-equiv : (x1 : X) (p : Path No So)
                             → IsEquiv (Codes-mer x1 p)
-        Codes-mer-is-equiv = ConnectedFib.everywhere -1 {a0 = x0}
-                                                     (lower-Connected (<=SCong (-1<= -2<n')) nX)
+        Codes-mer-is-equiv = Connected.everywhere -1 {a0 = x0}
+                                                     (Connected.lower (<=SCong (-1<= -2<n')) nX)
                                                      (λ x1 → ((p : Path No So) → IsEquiv (Codes-mer x1 p)) , Πlevel (λ _ → IsEquiv-HProp _))
                                                      Codes-mer-is-equiv0
 
         Codes-mer-is-equiv-β0 : Codes-mer-is-equiv x0 ≃ Codes-mer-is-equiv0
-        Codes-mer-is-equiv-β0 = ConnectedFib.β -1 {a0 = x0}
-                                               (lower-Connected (<=SCong (-1<= -2<n')) nX)
+        Codes-mer-is-equiv-β0 = Connected.β -1 {a0 = x0}
+                                               (Connected.lower (<=SCong (-1<= -2<n')) nX)
                                                (λ x1 → ((p : Path No So) → IsEquiv (Codes-mer x1 p)) , Πlevel (λ _ → IsEquiv-HProp _))
                                                Codes-mer-is-equiv0
 
@@ -296,7 +296,7 @@ module homotopy.FreudenthalConnected where
                     -> (pair≃ (! α) β) ≃ ! (pair≃ α (coe (move-transport-left-!≃ B α) (! β)))
                coh2 id id = id
     
-    thm : ConnectedMap.ConnectedMap 2n {X}{(Path {(Susp X)} No No)} loop
+    thm : ConnectedMap 2n {X}{(Path {(Susp X)} No No)} loop
     thm α = ntype (encode α , encode-decode α)
 
  
