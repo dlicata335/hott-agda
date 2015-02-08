@@ -10,14 +10,6 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
                                       (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
                                       (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where 
 
-  -- trivial by equiv induction, but easier if it computes
-  HFiber-at-equiv : ∀ {A B B'} (e : Equiv B B') (f : A → B') {b : B}
-                  → Equiv (HFiber f (fst e b)) (HFiber (IsEquiv.g (snd e) o f) b)
-  HFiber-at-equiv e f {b} = improve (hequiv (λ p → (fst p) , {!snd p!}) {!!} {!!} {!!})
-
-  post∘-equiv : ∀ {A} {a1 a2 a3 : A} (p : a2 == a3) → Equiv (a1 == a2) (a1 == a3)
-  post∘-equiv p = improve (hequiv (λ x → p ∘ x) (λ x → ! p ∘ x) {!!} {!!})
-
   i : TLevel
   i = S i'
 
@@ -91,7 +83,7 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
                                         w
 
     switchr-twice : ∀ z w → switchr (switchr (z , w)) == (z , w)
-    switchr-twice z = Wedge.Pushout-elim _ (λ _ → id) (λ _ → id) (λ _ → {!!})
+    switchr-twice z = Wedge.Pushout-elim _ (λ _ → id) (λ _ → id) (λ _ → PathOver=.in-PathOver-= {!!})
 
     switchr-equiv : Equiv (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) (Σ \ (z : Z) → Z×X-∨-×YZ (snd z))
     switchr-equiv = improve (hequiv switchr switchr (\ p → switchr-twice (fst p) (snd p)) (\ p → switchr-twice (fst p) (snd p)))
@@ -119,9 +111,14 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
 
     m-to-ml-triangle : ∀ z (w : Z×X-∨-×YZ (snd z)) → (glueml-total o m-to-ml) (z , w) == gluem-total (z , w)
     m-to-ml-triangle z = Wedge.Pushout-elim (λ w → (glueml-total o m-to-ml) (z , w) == gluem-total (z , w))
-                                            (λ yp → ap (λ Q → z , ((fst (fst z) , fst yp) , snd yp) , Q) {!!})
-                                            (λ xp → ap (λ Q → z , ((fst xp , snd (fst z)) , snd xp) , Q) {!!})
-                                            {!!}
+                                            (λ yp → ap (λ Q → z , ((fst (fst z) , fst yp) , snd yp) , Q) (coh1 (gluel (snd yp)) (gluel (snd z)) (gluer (snd z))))
+                                            (λ xp → ap (λ Q → z , ((fst xp , snd (fst z)) , snd xp) , Q) (coh2 (gluel (snd xp)) (gluer (snd xp)) (gluer (snd z))))
+                                            (λ _ → PathOver=.in-PathOver-= {!seems annoying!}) where
+      coh1 : ∀ {A} {a0 a1 a2 a3 : A} (lyp : a0 == a1) (lz : a2 == a1) (rz : a2 == a3) → (! lyp ∘ ! (rz ∘ ! (lz)) ∘ rz) == (! lyp ∘ lz)
+      coh1 id id id = id
+
+      coh2 : ∀ {A} {a0 a1 a2 a3 : A} (lxp : a0 == a1) (rxp : a0 == a2) (rz : a3 == a2) → (! lxp ∘ ! (rxp ∘ ! (lxp)) ∘ rz) == (! rxp ∘ rz)
+      coh2 id id id = id
 
     gluemr-total : 〈Z×Z〉×〈XY〉Z → Z×WZ
     gluemr-total = (fiberwise-to-total (\ (ppp0 : Z) → (fiberwise-to-total (\ (ppxy : Z) → gluemr (snd ppp0) (snd ppxy)))))

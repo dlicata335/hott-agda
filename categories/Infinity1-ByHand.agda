@@ -4,16 +4,17 @@ open import lib.Prelude
 
 module categories.Infinity1-ByHand where
   
-  postulate 
+  postulate {- HoTT Axiom -}
+  -- well not really HoTT, but it's a reasonable axiom
     parametricity : {A B : Type} (f : (X : Type) → (B → X) → (A → X)) 
                   → (X : _) (k : B → X) → f X k == \ a -> k (f B (\ x -> x) a)
 
     parametricity-comp : {A B : Type} (f : (X : Type) → (B → X) → (A → X)) 
                        → parametricity f B (\ x -> x) == id 
 
-  -- postulate Π≃β2 : {A : Type} {B : A → Type} {C : (a : A) → B a → Type}
-  --                (f : (x : A) → (b : B a) → C a b)
-  --                → ap f  
+  -- Π≃β2 : {A : Type} {B : A → Type} {C : (a : A) → B a → Type}
+  --        (f : (x : A) → (b : B a) → C a b)
+  --        → ap f  
 
   data Glob (A B : Type) : Type
   T : {A B : Type} → Glob A B -> Type

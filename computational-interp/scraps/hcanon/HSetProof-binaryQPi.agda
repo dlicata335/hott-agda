@@ -83,7 +83,7 @@ module computational-interp.hcanon.HSetProof3 where
              → Q Γ* A* rθ rN rO β
              → Q Γ* A* rθ rM rO (β ∘ α)
 
-  postulate -- PERF
+  postulate -- PERF 
     transportR : ∀ {Γ A θ M M'} (Γ* : Ctx Γ) (A* : Ty Γ* A) (rθ : RC Γ* θ) → M == M' → 
                R Γ* A* rθ M → R Γ* A* rθ M'
     transportQ : ∀ {Γ A} (Γ* : Ctx Γ) (A* : Ty Γ* A) → {θ : Γ} → (rθ : RC Γ* θ) 

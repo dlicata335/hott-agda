@@ -131,9 +131,8 @@ module lib.PushoutFat where
                                            (!
                                             (transport-∘ (λ z → fst (ext (fst (i z))) (snd (i z)) ≃ br z)
                                              (gluer _) (gluel _)))) where
-        postulate -- needed for ooTopos Blakers-Massey?
-          br-glue-adj : (transport (λ z → fst (P (i z))) (gluer <> ∘ gluel <>)) ≃ (\ x -> x)
-          -- br-glue-adj = {!!}
+        br-glue-adj : (transport (λ z → fst (P (i z))) (gluer <> ∘ gluel <>)) ≃ (\ x -> x)
+        -- br-glue-adj = {!!}
 
         br-glue : br (inr b0) ≃ br (inl a0)
         br-glue = ap≃ br-glue-adj ∘ ! (apd br (gluer <> ∘ gluel <>))

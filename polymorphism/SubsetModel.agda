@@ -127,12 +127,6 @@ module polymorphism.SubsetModel where
   U : ∀ {Γ} -> Ty Γ
   U = ty (λ _ → Type) (λ _ _ A → A → Type)
 
-  test : Tm (U{1c})
-  test = tm (λ _ → t) {!!} where
-    postulate
-      t : TOb (U{1c}) <>
-
-
   El : ∀ {Γ} -> Tm (U{Γ}) -> Ty Γ
   El (tm A0 A1) = ty A0 A1
 

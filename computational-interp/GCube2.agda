@@ -1,7 +1,7 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
 open import lib.Prelude
-open import lib.PathOver
+open import lib.cubical.PathOver
 
 module computational-interp.GCube2 where
 
@@ -35,8 +35,8 @@ module computational-interp.GCube2 where
 
     d n (B , _) = B
 
-    postulate 
-      InsideS : (n : Nat) → (c1 : Cube n) → (c2 : Cube n) → BoundaryPath n (d n c1) (d n c2) → Type
+    InsideS : (n : Nat) → (c1 : Cube n) → (c2 : Cube n) → BoundaryPath n (d n c1) (d n c2) → Type
+    InsideS = {!!}
 
     Inside Z <> = A
     Inside (S n) (c1 , c2 , p) = InsideS n c1 c2 p

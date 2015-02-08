@@ -21,7 +21,8 @@ module programming.Sequence where
   listOps = record { length = ListM.length; nth = ListM.nth; tabulate = ListM.tabulate; reduce = listreduce; map = ListM.map }
 
   module PSeq where
-    postulate 
+    postulate {-# HoTT Axiom #-}
+    -- well not really HoTT, but it's for demo purposes
       Seq : Type -> Type
       ops : Collection Seq
 

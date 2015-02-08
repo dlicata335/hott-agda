@@ -23,7 +23,8 @@ module Stream2 where
   head (map f s) = f (head s)
   tail (map f s) = map f (tail s)
 
-  postulate 
+  postulate {-# HoTT Axiom #-}
+  -- well not really HoTT...
     map-id : {A : Type} → map {A} (\ x -> x) == (\ s -> s)
     map-o  : {A B C : Type} (g : B → C) (f : A → B) (s : Stream A) → map g (map f s) == map (g o f) s
 
@@ -88,11 +89,11 @@ module Stream2 where
   Bisim-tails : {A : Type} {xs ys : Stream A} → Bisim xs ys → Bisim (tail xs) (tail ys)
   Bisim-tails (ps , (id , id)) = (tail ps , id , id)
 
-  postulate
-    Bisim-unfold : {A : Type} (X : Stream A → Stream A → Type)
+  Bisim-unfold : {A : Type} (X : Stream A → Stream A → Type)
                → (∀ xs ys → X xs ys → ((head xs) == (head ys)) × X (tail xs) (tail ys))
                → ∀ (xs ys : Stream A) → X xs ys → Bisim xs ys
-  
+  Bisim-unfold = {!!}
+
   unfoldη : {A : Type} {X : Type} (f : X → A × X) (s : X → Stream A)
              → ((x : X) → head (s x) == fst (f x))
              → ((x : X) → tail (s x) == s (snd (f x)))

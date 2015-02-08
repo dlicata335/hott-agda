@@ -1,10 +1,11 @@
 {-# OPTIONS --type-in-type --no-termination-check #-}
 
 open import lib.Prelude 
+open import lib.cubical.PathOver
 open BoolM 
 import lib.PrimTrustMe
 
-module computational-interp.hcanon.HSetLang where
+module computational-interp.hcanon.HSetLang-PathOver where
 
   -- RULE: no transport at MetaTypes!
   MetaType = Type
@@ -48,8 +49,10 @@ module computational-interp.hcanon.HSetLang where
     prop : ∀ {Γ} {Γ* : Ctx Γ} → Ty Γ* (\ _ -> Type)  -- really small hprops?
     proof : ∀ {Γ} {Γ* : Ctx Γ} (M : Tm Γ* prop) → Ty Γ* (\ θ → (interp M θ))
     Π : ∀ {Γ A B} {Γ* : Ctx Γ} (A* : Ty Γ* A) (B* : Ty (Γ* , A*) B) → Ty Γ* (\ θ → (x : A θ) → (B (θ , x)))
-    id : ∀ {Γ A} {Γ* : Ctx Γ} (A* : Ty Γ* A) (M N : Tm Γ* A*) → Ty Γ* (\ θ → interp M θ == interp N θ)
     subst : ∀ {Γ Γ' A} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} (A* : Ty Γ'* A) (θ'* : Subst Γ* Γ'*) → Ty Γ* (λ θ → A (interps θ'* θ))
+    pathOver : ∀ {Γ Δ A} {Γ* : Ctx Γ} {Δ* : Ctx Δ} (A* : Ty Δ* A) {θ1* θ2* : Subst Γ* Δ*} (δ* : PathSubst θ1* θ2*)
+             → (M* : Tm Γ* (subst A* θ1*)) (N* : Tm Γ* (subst A* θ2*)) 
+             → Ty Γ* (\ θ → PathOver A (interpps δ* θ) (interp M* θ) (interp N* θ))
     w : ∀ {Γ A B} {Γ* : Ctx Γ} → (A* : Ty Γ* A) (B* : Ty Γ* B) → Ty (Γ* , A*) (\ θ → B (fst θ))
     subst1 : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} (B* : Ty (Γ* , A*) B)
                (M : Tm Γ* A*) → Ty Γ* (\ θ → B (θ , interp M θ))
@@ -65,7 +68,18 @@ module computational-interp.hcanon.HSetLang where
 
 --  unlam : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → Tm (Γ* , A*) B*
 
+  data PathSubst where
+    ·   : ∀ {Γ} {Γ* : Ctx Γ} → PathSubst{Γ* = Γ*} · ·
+    _,_ : ∀ {Γ Γ' A} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} {A* : Ty Γ'* A}
+        → {θ1* θ2* : Subst Γ* Γ'*}
+        → {M1* : Tm Γ* (subst A* θ1*)} {M2* : Tm Γ* (subst A* θ2*)}
+        → (δ : PathSubst θ1* θ2*)
+        → Tm Γ* (pathOver A* δ M1* M2*)
+        → PathSubst{Γ* = Γ*}{Γ'* = Γ'* , A*} (θ1* , M1*) (θ2* , M2*)
+    refls : ∀ {Γ Γ'} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} {θ* : Subst Γ* Γ'*} → PathSubst θ* θ* -- FIXME: constructor or no?
+
   data Tm where
+    deq : ∀ {Γ A} {Γ* : Ctx Γ} {A* A'* : Ty Γ* A} → Tm Γ* A* → Tm Γ* A'* -- any two ways of saying the same thing are equal
     v    : ∀ {Γ A} {Γ* : Ctx Γ} {A* : Ty Γ* A} → Tm (Γ* , A*) (w A* A*)
     w    : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty Γ* B} → Tm Γ* B* → Tm (Γ* , A*) (w A* B*)
     true : ∀ {Γ} {Γ* : Ctx Γ} → Tm Γ* bool
@@ -90,28 +104,21 @@ module computational-interp.hcanon.HSetLang where
           → (x : Tm Γ* bool) → Tm Γ* (subst1 C* x)
     lam  : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm (Γ* , A*) B* → Tm Γ* (Π A* B*)
     app  : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → (M* : Tm Γ* A*) → Tm Γ* (subst1 B* M*)
-    unlam : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → Tm (Γ* , A*) B*
-    refl : ∀ {Γ A} {Γ* : Ctx Γ} {A* : Ty Γ* A} (M : Tm Γ* A*) → Tm Γ* (id A* M M) 
+    --  unlam : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} → Tm Γ* (Π A* B*) → Tm (Γ* , A*) B*
+    refl : ∀ {Γ Δ A} {Γ* : Ctx Γ} {Δ* : Ctx Δ} {A* : Ty Δ* A} {θ* : Subst Γ* Δ*} (M : Tm Γ* (subst A* θ*))
+         → Tm Γ* (pathOver A* refls M M) 
     tr   : ∀ {Γ Γ' C} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} 
-         (C* : Ty Γ'* C) {θ1 θ2 : Subst Γ* Γ'*} (α : PathSubst θ1 θ2) → Tm Γ* (subst C* θ1) →  Tm Γ* (subst C* θ2)
+           (C* : Ty Γ'* C) {θ1 θ2 : Subst Γ* Γ'*} (δ : PathSubst θ1 θ2) → Tm Γ* (subst C* θ1) →  Tm Γ* (subst C* θ2)
+    -- FIXME what other elims do we need?
     uap  : ∀ {Γ} {Γ* : Ctx Γ} {P : Tm Γ* prop} {Q : Tm Γ* prop} 
            (f : Tm (Γ* , proof P) (w (proof P) (proof Q)))
            (g : Tm (Γ* , proof Q) (w (proof Q) (proof P)))
-           → Tm Γ* (id prop P Q)
-    deq : ∀ {Γ A} {Γ* : Ctx Γ} {A* A'* : Ty Γ* A} → Tm Γ* A* → Tm Γ* A'* -- any two ways of saying the same thing are equal
-    lam=  : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} 
-           (f g : Tm Γ* (Π A* B*))
-           (α : Tm (Γ* , A*) (id B* (unlam f) (unlam g)))
-           → Tm Γ* (id _ f g)
-
-  data PathSubst where
-    ·   : ∀ {Γ} {Γ* : Ctx Γ} → PathSubst{Γ* = Γ*} · ·
-    _,_ : ∀ {Γ Γ' A} {Γ* : Ctx Γ} {Γ'* : Ctx Γ'} {A* : Ty Γ'* A}
-        → {θ1* θ2* : Subst Γ* Γ'*}
-        → {M1* : Tm Γ* (subst A* θ1*)} {M2* : Tm Γ* (subst A* θ2*)}
-        → (δ : PathSubst θ1* θ2*)
-        → Tm Γ* (id (subst A* θ2*) (tr A* δ M1*) M2*)
-        → PathSubst{Γ* = Γ*}{Γ'* = Γ'* , A*} (θ1* , M1*) (θ2* , M2*)
+           → Tm Γ* (pathOver prop · (deq P) (deq Q)) -- FIXME is empty context enough?
+    -- FIXME how to state funext?
+    -- lam=  : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} 
+    --        (f g : Tm Γ* (Π A* B*))
+    --        (α : Tm (Γ* , A*) (id B* (unlam f) (unlam g)))
+    --        → Tm Γ* (id _ f g)
 
   interp-if : ∀ {Γ C} {Γ* : Ctx Γ} (C*  : Ty (Γ* , bool) C) (M : Tm Γ* bool) (M1  : Tm Γ* (subst1 C* true)) (M2  : Tm Γ* (subst1 C* false)) (θ : Γ) → C (θ , interp M θ)
   interp-<> : ∀ {Γ} {Γ* : Ctx Γ} {θ : Γ} → (interp {Γ* = Γ*} unit θ)
@@ -123,11 +130,15 @@ module computational-interp.hcanon.HSetLang where
   interp-uap-eqv : ∀ {Γ} {Γ* : Ctx Γ} {P : Tm Γ* prop} {Q : Tm Γ* prop} 
            (f : Tm (Γ* , proof P) (w (proof P) (proof Q)))
            (g : Tm (Γ* , proof Q) (w (proof Q) (proof P)))
-           (θ : _) → Equiv (interp P θ) (interp Q θ)
-  interp-lam= : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} 
-           (f g : Tm Γ* (Π A* B*))
-           (α : Tm (Γ* , A*) (id B* (unlam f) (unlam g))) (θ : Γ)
-           → interp f θ == interp g θ
+           (θ : _) → Equiv (interp (deq P) θ) (interp (deq Q) θ)
+  -- interp-lam= : ∀ {Γ A B} {Γ* : Ctx Γ} {A* : Ty Γ* A} {B* : Ty (Γ* , A*) B} 
+  --          (f g : Tm Γ* (Π A* B*))
+  --          (α : Tm (Γ* , A*) (id B* (unlam f) (unlam g))) (θ : Γ)
+  --          → interp f θ == interp g θ
+
+  interpps · θ = id
+  interpps (δ , α) θ = pair= (interpps δ θ) (interp α θ)
+  interpps refls θ = id
 
   interp v θ = snd θ
   interp (w M) θ = interp M (fst θ)
@@ -146,15 +157,12 @@ module computational-interp.hcanon.HSetLang where
   interp (if{Γ}{_}{C}{C*} M1 M2 M) θ = interp-if C* M M1 M2 θ
   interp (lam M) θ = λ x → interp M (θ , x)
   interp (app M N) θ = (interp M θ) (interp N θ)
-  interp (unlam M) θ = interp M (fst θ) (snd θ)
+  -- interp (unlam M) θ = interp M (fst θ) (snd θ)
   interp (refl M) θ = id
   interp (tr{Γ}{A}{C} C* δ N) θ = transport C (interpps δ θ) (interp N θ) 
-  interp (uap f g) θ = ua (interp-uap-eqv f g θ) 
   interp (deq M) θ = interp M θ
-  interp (lam= f g α) θ = interp-lam= f g α θ
-
-  interpps · θ = id
-  interpps (δ , α) θ = pair≃ (interpps δ θ) (interp α θ)
+  interp (uap f g) θ = coe (! PathOverType) (interp-uap-eqv f g θ)
+  -- interp (lam= f g α) θ = interp-lam= f g α θ
 
   -- unlam{Γ}{A}{B}{Γ*}{A*}{B*} f = deq (app wf' v) -- deq (app {A* = w A* A*}{B* = {!w (w A* A*) B*!}} (deq (w{A* = A*} f)) v)
   --   where wf : Tm (Γ* , A*) (w A* (Π A* B*))
@@ -175,8 +183,8 @@ module computational-interp.hcanon.HSetLang where
   -- interp-plam M θ = λ x → interp M (θ , x)
   -- interp-papp M N θ = interp M θ (interp N θ)
   interp-uap-eqv f g θ = (improve (hequiv (λ x → interp f (θ , x)) (λ y → interp g (θ , y)) FIXME1 FIXME2))  where
-    postulate FIXME1 : _
-              FIXME2 : _
+    postulate FIXME1 : _ 
+              FIXME2 : _ 
     -- one option would be to observe that all props are hprops, but what goes wrong if we don't?
-  interp-lam= f g α θ = λ≃ (λ x → interp α (θ , x))
+  -- interp-lam= f g α θ = λ≃ (λ x → interp α (θ , x))
 

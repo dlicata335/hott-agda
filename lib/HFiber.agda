@@ -7,6 +7,7 @@ open import lib.Sums
 open import lib.Prods
 open import lib.Paths
 open import lib.NType
+open import lib.AdjointEquiv
 open import lib.cubical.PathOver
 
 module lib.HFiber where
@@ -29,6 +30,33 @@ module lib.HFiber where
 
   hfiber-fst : ∀ {A} {B : A → Type} (a : A) → (B a) == (HFiber {Σ B} fst a)
   hfiber-fst {B = B} a = ua (hfiber-fst-eqv a)
+
+  HFiber-at-equiv : ∀ {A B B'} (e : Equiv B B') (f : A → B') {b : B}
+                  → Equiv (HFiber f (fst e b)) (HFiber (IsEquiv.g (snd e) o f) b)
+  HFiber-at-equiv e f {b} = 
+    improve (hequiv (λ p → (fst p) , IsEquiv.α (snd e) b ∘ ap (IsEquiv.g (snd e)) (snd p))
+                    (λ p → (fst p) , (ap (fst e) (snd p) ∘ ! (IsEquiv.β (snd e) (f (fst p)))))
+                    (λ hf → ap (λ Z₁ → fst hf , Z₁)
+                          (ap (fst e) (IsEquiv.α (snd e) b ∘ ap (IsEquiv.g (snd e)) (snd hf)) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 ap (λ Z₁ → Z₁ ∘ ! (IsEquiv.β (snd e) (f (fst hf)))) (ap-∘ (fst e) (IsEquiv.α (snd e) b) (ap (IsEquiv.g (snd e)) (snd hf))) 〉 
+                           (ap (fst e) (IsEquiv.α (snd e) b) ∘ ap (fst e) (ap (IsEquiv.g (snd e)) (snd hf))) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 ! (∘-assoc (ap (fst e) (IsEquiv.α (snd e) b)) (ap (fst e) (ap (IsEquiv.g (snd e)) (snd hf))) (! (IsEquiv.β (snd e) (f (fst hf))))) 〉 
+                           ap (fst e) (IsEquiv.α (snd e) b) ∘ ap (fst e) (ap (IsEquiv.g (snd e)) (snd hf)) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 ap (λ Z₁ → Z₁ ∘ ap (fst e) (ap (IsEquiv.g (snd e)) (snd hf)) ∘ ! (IsEquiv.β (snd e) (f (fst hf)))) (! (IsEquiv.γ (snd e) b)) 〉 
+                           IsEquiv.β (snd e) (fst e b) ∘ ap (fst e) (ap (IsEquiv.g (snd e)) (snd hf)) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 ap (λ Z₁ → IsEquiv.β (snd e) (fst e b) ∘ Z₁ ∘ ! (IsEquiv.β (snd e) (f (fst hf)))) (! (ap-o (fst e) (IsEquiv.g (snd e)) (snd hf)))  〉
+                           IsEquiv.β (snd e) (fst e b) ∘ ap (fst e o IsEquiv.g (snd e)) (snd hf) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 ap (λ Z₁ → IsEquiv.β (snd e) (fst e b) ∘ Z₁ ∘ ! (IsEquiv.β (snd e) (f (fst hf)))) (ap-by-id (λ x → ! (IsEquiv.β (snd e) x)) (snd hf))  〉
+                           IsEquiv.β (snd e) (fst e b) ∘ (! (IsEquiv.β (snd e) (fst e b)) ∘ snd hf ∘ ! (! (IsEquiv.β (snd e) (f (fst hf))))) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 assoc-131->right (IsEquiv.β (snd e) (fst e b)) (! (IsEquiv.β (snd e) (fst e b))) (snd hf) (! (! (IsEquiv.β (snd e) (f (fst hf))))) (! (IsEquiv.β (snd e) (f (fst hf))))  〉
+                           IsEquiv.β (snd e) (fst e b) ∘ ! (IsEquiv.β (snd e) (fst e b)) ∘ snd hf ∘ ! (! (IsEquiv.β (snd e) (f (fst hf)))) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 !-inv-r-front (IsEquiv.β (snd e) (fst e b)) (snd hf ∘ ! (! (IsEquiv.β (snd e) (f (fst hf)))) ∘ ! (IsEquiv.β (snd e) (f (fst hf))))  〉
+                           snd hf ∘ ! (! (IsEquiv.β (snd e) (f (fst hf)))) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 !-inv-l-back (snd hf) (! (IsEquiv.β (snd e) (f (fst hf)))) 〉 
+                           snd hf ∎))
+                    (\ hc → ap (λ Z₁ → fst hc , Z₁) 
+                               (IsEquiv.α (snd e) b ∘ ap (IsEquiv.g (snd e)) (ap (fst e) (snd hc) ∘ ! (IsEquiv.β (snd e) (f (fst hc)))) ≃〈 ap (λ Z₁ → IsEquiv.α (snd e) b ∘ Z₁) (ap-∘ (IsEquiv.g (snd e)) (ap (fst e) (snd hc)) (! (IsEquiv.β (snd e) (f (fst hc))))) 〉 
+                                IsEquiv.α (snd e) b ∘ ap (IsEquiv.g (snd e)) (ap (fst e) (snd hc)) ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc)))) ≃〈 ap (λ Z₁ → IsEquiv.α (snd e) b ∘ Z₁ ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc))))) (! (ap-o (IsEquiv.g (snd e)) (fst e) (snd hc))) 〉 
+                                IsEquiv.α (snd e) b ∘ ap (IsEquiv.g (snd e) o (fst e)) (snd hc) ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc)))) ≃〈 ap (λ Z₁ → IsEquiv.α (snd e) b ∘ Z₁ ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc))))) (ap-by-id (λ x → ! (IsEquiv.α (snd e) x)) (snd hc)) 〉 
+                                IsEquiv.α (snd e) b ∘ (! (IsEquiv.α (snd e) b) ∘ snd hc ∘ ! (! (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc)))))) ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc))))  ≃〈 assoc-131->right (IsEquiv.α (snd e) b) (! (IsEquiv.α (snd e) b)) (snd hc) (! (! (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc)))))) (ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc))))) 〉 
+                                IsEquiv.α (snd e) b ∘ ! (IsEquiv.α (snd e) b) ∘ snd hc ∘ ! (! (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))))) ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc)))) ≃〈 !-inv-r-front (IsEquiv.α (snd e) b) (snd hc ∘ ! (! (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))))) ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc))))) 〉 
+                                snd hc ∘ ! (! (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))))) ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc)))) ≃〈 ap (λ Z₁ → snd hc ∘ ! (! (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))))) ∘ Z₁) (ap-! (IsEquiv.g (snd e)) (IsEquiv.β (snd e) (f (fst hc)))) 〉 
+                                snd hc ∘ ! (! (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))))) ∘ ! (ap (IsEquiv.g (snd e)) (IsEquiv.β (snd e) (f (fst hc)))) ≃〈 ap (λ Z₁ → snd hc ∘ Z₁ ∘ ! (ap (IsEquiv.g (snd e)) (IsEquiv.β (snd e) (f (fst hc))))) (!-invol (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))))) 〉 
+                                snd hc ∘ (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc)))) ∘ ! (ap (IsEquiv.g (snd e)) (IsEquiv.β (snd e) (f (fst hc)))) ≃〈  ap (λ Z₁ → snd hc ∘ IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))) ∘ ! Z₁) (! (IsEquiv.γ (snd (!equiv e)) _)) 〉 
+                                snd hc ∘ IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))) ∘ ! (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc)))) ≃〈 !-inv-r-back (snd hc) (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc)))) 〉 
+                                snd hc ∎)))
 
   HFiber-fiberwise-to-total-eqv : {A : Type} {B C : A → Type} (f : (x : A) → B x → C x)
                                 → {a : A} {c : C a} → Equiv (HFiber (f a) c) (HFiber (fiberwise-to-total f) (a , c))

@@ -4,7 +4,8 @@ open import lib.Prelude
 
 module categories.Infinity1-2 where
   
-  postulate 
+  postulate {- HoTT Axiom -}
+  -- well not really HoTT, but it's a reasonable axiom
     parametricity : {A B : Type} (f : (X : Type) → (B → X) → (A → X)) 
                   → (X : _) (k : B → X) → f X k == \ a -> k (f B (\ x -> x) a)
 

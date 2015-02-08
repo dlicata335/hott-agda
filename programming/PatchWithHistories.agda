@@ -29,7 +29,7 @@ module programming.PatchWithHistories where
     MS-ind C c0 c1 c2 []ms' = c0
     MS-ind C c0 c1 c2 (x ::ms' xs) = c1 x xs (MS-ind C c0 c1 c2 xs)
 
-    postulate 
+    postulate  {- HoTT Axiom -}
       MS-ind/βEx : (C : MS → Type) 
                  → (c0 : C []ms)
                  → (c1 : (x : _) (xs : _) → C xs → C (x ::ms xs))

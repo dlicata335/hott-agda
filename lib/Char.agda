@@ -32,7 +32,9 @@ module lib.Char where
 
   equals : (c d : Char) → Either (c == d) (c == d → Void)
   equals c d with equal c d
-  ... | True = Inl FIXME where
-    postulate FIXME : {A : Set} → A
-  ... | False = Inr (\ _ -> FIXME) where
-    postulate FIXME : {A : Set} → A
+  ... | True = Inl CharEq where
+    postulate {- Agda Primitive, not really we can't use primTrustMe without using universe levels -}
+      CharEq : c == d 
+  ... | False = Inr (\ _ -> CharsNeq) where
+    postulate {- Agda Primitive, not really, but how are you supposed to do this? -}
+      CharsNeq : Void

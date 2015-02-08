@@ -90,7 +90,9 @@ module categories.Infinity1Diag where
 
   -- end mutual
 
-  postulate EQ : {A : Type} {M N : A} → M ≃ N
+  EQ : {A : Type} {M N : A} → M ≃ N
+  EQ = {!!}
+  
 
 
   interp-diag : Diag → Type

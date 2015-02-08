@@ -101,7 +101,7 @@ module computational-interp.hcanon.HSetProof-PathOver where
             (eq : δ == δ')
             (rα : QOver rδ A* rM1 rM2 α)
             → QOver rδ' A* rM1 rM2 (changeover A eq α)
-  postulate 
+  postulate --in-progress
     fund-transport : ∀ {Γ' C θ1 θ2 δ N} (Γ'* : Ctx Γ') (C* : Ty Γ'* C) 
               (rθ1 : RC Γ'* θ1) (rθ2 : RC Γ'* θ2) 
               (rδ : QC Γ'* rθ1 rθ2 δ) 

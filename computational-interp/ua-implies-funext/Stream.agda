@@ -17,7 +17,8 @@ module Stream where
   head (map f s) = f (head s)
   tail (map f s) = map f (tail s)
 
-  postulate 
+  postulate {- HoTT Axiom -}
+  -- well not really HoTT, but an axiom
     map-id : {A : Type} → map {A} (\ x -> x) == (\ s -> s)
     map-o  : {A B C : Type} (g : B → C) (f : A → B) → map g o map f == map (g o f)
 

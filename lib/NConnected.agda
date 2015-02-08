@@ -68,6 +68,10 @@ module lib.NConnected where
                ap (λ f → f [ a0 ]) (λ≃ (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) cA x [ a0 ])) ≃〈 Π≃β (λ x → out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) cA x ([ a0 ])) {[ a0 ]} 〉
                (out-of-contractible (Trunc-rec (NTypes-level n) (λ x' → P x')) cA [ a0 ] [ a0 ]) ≃〈 out-of-contractible-id (Trunc-rec (NTypes-level n) (λ x' → P x')) cA [ a0 ] 〉
                id ∎ 
+
+   contractible-implies-connected : ∀ {n} {A : Type} → Contractible A → Connected n A
+   contractible-implies-connected cA = ntype ([ fst cA ] , (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (λ x → ap [_] (snd cA x))))
+
 {-
   -- didn't end up needing these.  
   
@@ -169,24 +173,44 @@ module lib.NConnected where
                                                                                   (has-UMP n (f (fst y)) (c (fst y))
                                                                                    (λ z → P (fst y , z)) (λ b1 → b (fst y , b1)))
                                                                                   (snd y))) 
-{-
-    unfiberwise-to-total-connected : (n : TLevel) → ∀ {A} {B1 B2 : A → Type} → (f : (x : A) → B1 x → B2 x) → 
-                                 ConnectedMap n (fiberwise-to-total f) → ((x : A) → ConnectedMap n (f x))
-    unfiberwise-to-total-connected n f c x y = transport (λ A → NType -2 (Trunc n A)) rearrange-and-path-ind (c (x , y)) where
--}
+
     level : ∀ {n A B} (f : A → B) → HProp (ConnectedMap n f)
     level f = Πlevel (\ _ -> Connected.level)
 
-    postulate -- used for Blakers Massey translation to Lurie indexing, ooTopos
-      -- need HFiber fst y == B(y)
-      connected-fibers≃connected-first : ∀ {n A} {B : A → Type} → ((x : A) → Connected n (B x)) == ConnectedMap n (\ (p : Σ B) -> fst p)
-      -- ConnectedFibers≃ConnectedFst = ua (improve (hequiv (λ cf → {!!}) (λ cm x → {!cm x!}) {!!} {!!}))
+    -- FIXME: IsWeq to IsEquiv doesn't compute very well... 
+    equiv-connected : ∀ {n} {A B : Type} (e : Equiv A B) → ConnectedMap n (fst e)
+    equiv-connected e = λ b → Connected.contractible-implies-connected (coe (! (IsWeq≃IsEquiv (fst e))) (snd e) b)
 
-      connected-if-precompose-equiv-connected : ∀ {n A A' B} (f : A → B) (e : Equiv A' A) → ConnectedMap n (f o fst e) → ConnectedMap n f
-      -- connected-if-postcompose-equiv-connected : ∀ {n A B B'} (f : A → B) (e : Equiv B B') → ConnectedMap n (fst e o f) → ConnectedMap n f
+    compose : ∀ {n} {A B C : Type} {g : B → C} {f : A → B} → ConnectedMap n g → ConnectedMap n f → ConnectedMap n (g o f)
+    compose {g = g} {f} cg cf = λ c → ntype ((Trunc-rec Trunc-level 
+                                        (λ hg → Trunc-rec Trunc-level (λ hf → [ fst hf , snd hg ∘ ap g (snd hf) ])
+                                                 (fst (use-level (cf (fst hg)))))
+                                        (fst (use-level (cg c)))) , 
+                                      Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
+                                        (λ hgf → ( ap (Trunc-rec Trunc-level (λ hf → [ fst hf , snd hgf ∘ ap g (snd hf) ])) (snd (use-level (cf (f (fst hgf)))) [ fst hgf , id ])) ∘
+                                                   ap (Trunc-rec Trunc-level (λ hg → Trunc-rec Trunc-level (λ hf → [ fst hf , snd hg ∘ ap g (snd hf) ]) (fst (use-level (cf (fst hg))))))
+                                                      (snd (use-level (cg c)) [ f (fst hgf) , snd hgf ])))
 
-      postcompose-equiv-connected : ∀ {n A B B'} (f : A → B) (e : Equiv B B') → ConnectedMap n f → ConnectedMap n (fst e o f)
-      precompose-equiv-connected : ∀ {n A A' B} (f : A → B) (e : Equiv A' A) → ConnectedMap n f → ConnectedMap n (f o fst e)
+    -- need HFiber fst y == B(y)
+    connected-fibers≃connected-first : ∀ {n A} {B : A → Type} → ((x : A) → Connected n (B x)) == ConnectedMap n (\ (p : Σ B) -> fst p)
+    connected-fibers≃connected-first = ua (improve (hequiv 
+                                             (λ cB → λ a → transport (λ X → NType -2 (Trunc _ X)) (hfiber-fst a) (cB a))
+                                             (λ cB → λ a → transport (λ X → NType -2 (Trunc _ X)) (!  (hfiber-fst a)) (cB a))
+                                             (λ _ → HProp-unique (Πlevel (λ _ → Connected.level)) _ _)
+                                             (λ _ → HProp-unique (level _) _ _)))
+
+    postcompose-equiv-connected : ∀ {n A B B'} {f : A → B} (e : Equiv B B') → ConnectedMap n f → ConnectedMap n (fst e o f)
+    postcompose-equiv-connected e cf = compose (equiv-connected e) cf
+
+    precompose-equiv-connected : ∀ {n A A' B} {f : A → B} (e : Equiv A' A) → ConnectedMap n f → ConnectedMap n (f o fst e)
+    precompose-equiv-connected e cf = compose cf (equiv-connected e)
+
+    -- FIXME might want a version that reduces
+    connected-if-precompose-equiv-connected : ∀ {n A A' B} {f : A → B} (e : Equiv A' A) → ConnectedMap n (f o fst e) → ConnectedMap n f
+    connected-if-precompose-equiv-connected {f = f} e ccomp = 
+      transport (ConnectedMap _) (λ≃ (λ x → ap f (IsEquiv.β (snd e) x))) (precompose-equiv-connected (!equiv e) ccomp)
+
+    -- connected-if-postcompose-equiv-connected : ∀ {n A B B'} (f : A → B) (e : Equiv B B') → ConnectedMap n (fst e o f) → ConnectedMap n f
 
     connected-type≃connected-map-to-point : ∀ {n A} → (Connected n A) == (ConnectedMap n (\ (_ : A) → <>))
     connected-type≃connected-map-to-point = ua (improve (hequiv (λ x y → transport (λ A → NType -2 (Trunc _ A)) (! (ua HFiber-of-map-to-point)) x)
@@ -243,6 +267,10 @@ module lib.NConnected where
                              (λ x → ap [_] (pair= (snd x) (PathOver=.in-PathOver-= (whisker-square id id (! (ap-constant _ (snd x))) id connection2))))
                              (fst (use-level (cf a')))
 
+  {- -- should be a special case of the above if we ever want it.  ended up not using it.
+    unfiberwise-to-total-connected : (n : TLevel) → ∀ {A} {B1 B2 : A → Type} → (f : (x : A) → B1 x → B2 x) → 
+                                 ConnectedMap n (fiberwise-to-total f) → ((x : A) → ConnectedMap n (f x))
+  -}
 
   module Extensions where
 

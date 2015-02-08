@@ -87,6 +87,11 @@ module lib.Paths where
               → Path (a56 ∘ (a45 ∘ a34 ∘ a23) ∘ a12) ((a56 ∘ a45) ∘ a34 ∘ (a23 ∘ a12))
  assoc-131->212 id id id id id = id
 
+ assoc-131->right : ∀ {A} {M1 M2 M3 M4 M5 M6 : A}
+                (a56 : Path M5 M6) (a45 : Path M4 M5) (a34 : Path M3 M4) (a23 : Path M2 M3) (a12 : Path M1 M2)
+              → Path (a56 ∘ (a45 ∘ a34 ∘ a23) ∘ a12) (a56 ∘ a45 ∘ a34 ∘ a23 ∘ a12)
+ assoc-131->right id id id id id = id
+
  !-∘3 : ∀ {A} {M1 M2 M3 M4 : A} (a34 : Path M3 M4) (a23 : Path M2 M3) (a12 : Path M1 M2)
      → ! (a34 ∘ a23 ∘ a12) ≃ (! a12 ∘ ! a23 ∘ ! a34)
  !-∘3 id id id = id
@@ -178,6 +183,9 @@ module lib.Paths where
 
  pre∘-equiv : ∀ {A} {a b c : A} → (a ≃ b) -> Equiv (b ≃ c) (a ≃ c)
  pre∘-equiv α = (improve (hequiv (λ β → β ∘ α) (λ β' → β' ∘ ! α) (λ β → !-inv-r-back β α ∘ ! (∘-assoc β α (! α))) (λ β → !-inv-l-back β α ∘ ! (∘-assoc β (! α) α))))
+
+ post∘-equiv : ∀ {A} {a1 a2 a3 : A} (p : a2 == a3) → Equiv (a1 == a2) (a1 == a3)
+ post∘-equiv p = improve (hequiv (λ x → p ∘ x) (λ x → ! p ∘ x) (!-inv-l-front p) (λ y → !-inv-r-front p y))
 
  ∘-unit-l-eqv-2 : ∀ {A} {a a' : A} {p q : a == a'} → Equiv (id ∘ p == id ∘ q) (p == q)
  ∘-unit-l-eqv-2 {p = id} {q} = improve (hequiv (λ p → ∘-unit-l q ∘ p) (λ p → ! (∘-unit-l q) ∘ p) (λ p → !-inv-l-front (∘-unit-l q) p) (λ p → !-inv-r-front (∘-unit-l q) p))
