@@ -353,7 +353,6 @@ module lib.cubical.Square where
                 {pa' : f a' == g a'}
                → SquareOver B (vrefl-square {p = p}) (hom-to-over pa) (apdo f p) (apdo g p) (hom-to-over pa')
                → PathOver (\ x -> f x == g x) p pa pa'
-
       
   extend-triangle : {A : Type} {a00 a01 a11 : A}
               {p0- : a00 == a01}

@@ -31,11 +31,22 @@ module lib.cubical.PathOver where
   data PathOver {Δ : Type} (A : Δ → Type) : {θ1 θ2 : Δ} (δ : θ1 == θ2) (M1 : A θ1) (M2 : A θ2) → Type where
     id : ∀ {θ1} {M1 : A θ1} → PathOver A id M1 M1
 
+  changeover= : {Δ : Type} (A : Δ → Type) {θ1 θ2 : Δ} {δ δ' : θ1 == θ2} (_ : δ == δ') {M1 : A θ1} {M2 : A θ2} → 
+               PathOver A δ M1 M2
+              == PathOver A δ' M1 M2
+  changeover= A id = id
+
+  changeover : {Δ : Type} (A : Δ → Type) {θ1 θ2 : Δ} {δ δ' : θ1 == θ2} (_ : δ == δ') {M1 : A θ1} {M2 : A θ2} → 
+               PathOver A δ M1 M2
+             → PathOver A δ' M1 M2
+  changeover A α = coe (changeover= A α)
+
+
   _∘o_ : {Δ : Type} {A : Δ → Type} {θ1 θ2 θ3 : Δ} {δ2 : θ2 == θ3} {δ1 : θ1 == θ2} {M1 : A θ1} {M2 : A θ2} {M3 : A θ3}
        → PathOver A δ2 M2 M3 
        → PathOver A δ1 M1 M2
        → PathOver A (δ2 ∘ δ1) M1 M3
-  id ∘o id = id
+  p ∘o id = p
 
   infixr 10 _∘o_
 
@@ -43,6 +54,12 @@ module lib.cubical.PathOver where
        → PathOver A δ M1 M2 
        → PathOver A (! δ) M2 M1
   !o id = id
+
+  ∘o-unit-l : {Δ : Type} {A : Δ → Type} {θ1 θ2 : Δ} {δ1 : θ1 == θ2} {M1 : A θ1} {M2 : A θ2} 
+            → (p : PathOver A δ1 M1 M2)
+            → (id ∘o p) == changeover A (! (∘-unit-l δ1)) p
+  ∘o-unit-l id = id
+
 
   apdo : {Δ : Type} {A : Δ → Type} (f : (θ : _) → A θ) {θ1 θ2 : Δ} (δ : θ1 == θ2) → PathOver A δ (f θ1) (f θ2)
   apdo f id = id
@@ -68,16 +85,6 @@ module lib.cubical.PathOver where
 
   ido-constant : {Δ : Type} {A : Type} {θ1 θ2 : Δ} {M : A} (δ : θ1 == θ2) → PathOver (\ _ -> A) δ M M
   ido-constant id = id
-
-  changeover= : {Δ : Type} (A : Δ → Type) {θ1 θ2 : Δ} {δ δ' : θ1 == θ2} (_ : δ == δ') {M1 : A θ1} {M2 : A θ2} → 
-               PathOver A δ M1 M2
-              == PathOver A δ' M1 M2
-  changeover= A id = id
-
-  changeover : {Δ : Type} (A : Δ → Type) {θ1 θ2 : Δ} {δ δ' : θ1 == θ2} (_ : δ == δ') {M1 : A θ1} {M2 : A θ2} → 
-               PathOver A δ M1 M2
-             → PathOver A δ' M1 M2
-  changeover A α = coe (changeover= A α)
 
   -- funny way of saying functoriality
   PathOver-transport-∘ : {Δ : Type} (A : Δ → Type) {θ1 θ2 θ3 : Δ} (δ1 : θ1 == θ2) (δ2 : θ2 == θ3) {M1 : A θ1}
@@ -531,3 +538,10 @@ module lib.cubical.PathOver where
     → PathOver B p b0 b1
     → PathOver C p (f b0) (f b1)
   ap-nt-over f id = id
+
+  transport-Path-do : {Γ : Type} {A : Γ -> Type} (f g : (x : Γ) -> A x) {M N : Γ} (p : Path M N)
+            -> (p' : f M ≃ g M) 
+            -> Path (transport (λ x → Path (f x) (g x)) p p')
+                    (over-to-hom (changeover A (!-inv-r p ∘ ap (λ x → p ∘ x) (∘-unit-l (! p))) (apdo g p ∘o hom-to-over p' ∘o !o (apdo f p))))
+  transport-Path-do _ _ id p' = ! (ap over-to-hom/left (∘o-unit-l (hom-to-over p'))) ∘ ! (hom-to-over-to-hom/left id p')
+ 

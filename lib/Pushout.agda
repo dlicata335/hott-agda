@@ -50,7 +50,7 @@ module lib.Pushout where
       Pushout-rec _ b3 _ (inr' y) = b3 y
 
       postulate {- HoTT Axiom -}
-        βrec/glue : {ZZ X Y C : Type}
+        βglue/rec : {ZZ X Y C : Type}
                     {f : ZZ → X} {g : ZZ → Y}
                     (b1 : X → C)
                     (b2 : Y → C)
@@ -82,9 +82,63 @@ module lib.Pushout where
       connected : ConnectedMap (plus2 m n) i
       connected = ConnectedMap.from-UMP (plus2 m n) i 
         (λ P b → (λ y → ConnectedProduct.wedge-elim cA cB (λ x y₁ → P (x , y₁)) (Inr id) {a0} {b0} 
-                    (λ y → b (inr y)) (λ x → b (inl x)) 
-                    (! (over-to-hom (changeover _ (βrec/glue _ _ _ _) (over-o-ap (fst o P) (apdo b (glue _)))))) (fst y) (snd y)) ,
+                    (λ y → b (inr y))
+                    (λ x → b (inl x)) 
+                    (! (over-to-hom (changeover _ (βglue/rec _ _ _ _) (over-o-ap (fst o P) (apdo b (glue _))))))
+                    (fst y)
+                    (snd y)) ,
                  Pushout-elim _ (λ x → ap≃ (ConnectedProduct.wedge-elim-βb cA cB _ (Inr id) _ _ _))
                                 (λ x → ap≃ (ConnectedProduct.wedge-elim-βa cA cB _ (Inr id) _ _ _)) 
-                                (λ _ → PathOver=D.in-PathOver-= (FIXME))) where 
-        postulate FIXME : {A : Type} → A
+                                WedgeConnect ) where
+                                postulate WedgeConnect : ∀ {A : Type} → A
+{-
+                                (λ <> → hom-to-over/left _ 
+                                  (_ ≃〈 transport-Path-do _ _ (glue <>) _ 〉 
+                                   over-to-hom
+                                     (changeover (λ v → fst (P (i v)))
+                                      (!-inv-r (glue <>) ∘ ap (_∘_ (glue <>)) (∘-unit-l (! (glue <>))))
+                                      (apdo (λ v → b v) (glue <>) ∘o
+                                       hom-to-over
+                                       (ap≃
+                                        (ConnectedProduct.wedge-elim-βb cA cB
+                                         (λ z z₁ → fst (P (z , z₁)) , snd (P (z , z₁))) (Inr id)
+                                         (λ y → b (inr y)) (λ x → b (inl x))
+                                         (!
+                                          (over-to-hom
+                                           (changeover ((λ r → fst r) o P)
+                                            (βglue/rec (λ a → a , b0) (λ b₁ → a0 , b₁) (λ z → id) <>)
+                                            (over-o-ap ((λ r → fst r) o P) (apdo b (glue <>))))))))
+                                       ∘o
+                                       !o
+                                       (apdo
+                                        (λ v →
+                                           ConnectedProduct.wedge-elim cA cB (λ x y₁ → P (x , y₁)) (Inr id)
+                                           (λ y → b (inr y)) (λ x → b (inl x))
+                                           (!
+                                            (over-to-hom
+                                             (changeover ((λ r → fst r) o P)
+                                              (βglue/rec (λ a → a , b0) (λ b₁ → a0 , b₁) (λ z → id) <>)
+                                              (over-o-ap ((λ r → fst r) o P) (apdo b (glue <>))))))
+                                           (fst (i v)) (snd (i v)))
+                                        (glue <>)))) ≃〈 ap
+                                                           (λ Z₁ →
+                                                              over-to-hom
+                                                              (changeover (λ v → fst (P (i v)))
+                                                               (!-inv-r (glue <>) ∘ ap (_∘_ (glue <>)) (∘-unit-l (! (glue <>))))
+                                                               (apdo (λ v → b v) (glue <>) ∘o
+                                                                hom-to-over
+                                                                (ap≃
+                                                                 (ConnectedProduct.wedge-elim-βb cA cB
+                                                                  (λ z z₁ → fst (P (z , z₁)) , snd (P (z , z₁))) (Inr id)
+                                                                  (λ y → b (inr y)) (λ x → b (inl x))
+                                                                  (!
+                                                                   (over-to-hom
+                                                                    (changeover ((λ r → fst r) o P)
+                                                                     (βglue/rec (λ a → a , b0) (λ b₁ → a0 , b₁) (λ z → id) <>)
+                                                                     (over-o-ap ((λ r → fst r) o P) (apdo b (glue <>))))))))
+                                                                ∘o !o Z₁)))
+                                                           {!!} 〉 
+                                   {!!} ≃〈 {!!} 〉 
+                                   _ ∎
+                                   )))
+-}
