@@ -1,6 +1,10 @@
 {-# OPTIONS --type-in-type --without-K #-}
 
-open import lib.BasicTypes
+open import lib.First
+open import lib.Prods
+open import lib.Functions
+open import lib.AdjointEquiv
+open import lib.Paths
 open import lib.cubical.PathOver
 open import lib.cubical.Square
 
@@ -818,3 +822,35 @@ module lib.cubical.Cube where
                         (horiz-degen-square (ap-bifunctor-pair= f _ lb)) (horiz-degen-square (ap-bifunctor-pair= f _ tb)) (horiz-degen-square (ap-bifunctor-pair= f _ bb)) (horiz-degen-square (ap-bifunctor-pair= f _ rb))
   ap-bifunctor-square f .id id = {!!}
 -}
+
+  move-squareover-along-cube : {A : Type} {B : A → Type} {a000 a010 a100 a110 a001 a011 a101 a111 : A}
+    {p0-0 : a000 == a010}
+    {p-00 : a000 == a100}
+    {p-10 : a010 == a110}
+    {p1-0 : a100 == a110}
+    {f--0 : Square p0-0 p-00 p-10 p1-0} -- left
+
+    {p0-1 : a001 == a011}
+    {p-01 : a001 == a101}
+    {p-11 : a011 == a111}
+    {p1-1 : a101 == a111}
+    {f--1 : Square p0-1 p-01 p-11 p1-1} -- right
+
+    {p00- : a000 == a001}
+    {p01- : a010 == a011}
+    {p10- : a100 == a101}
+    {p11- : a110 == a111}
+    {f0-- : Square p0-0 p00- p01- p0-1} -- back
+    {f-0- : Square p-00 p00- p10- p-01} -- top
+    {f-1- : Square p-10 p01- p11- p-11} -- bot
+    {f1-- : Square p1-0 p10- p11- p1-1} -- front
+    → Cube f--0 f--1 f0-- f-0- f-1- f1-- → 
+    {b00 : B a000} {b01 : B a010} {b10 : B a100} {b11 : B a110}  
+    {q0- : PathOver B p0-0 b00 b01}
+    {q-0 : PathOver B p-00 b00 b10}
+    {q-1 : PathOver B p-10 b01 b11}
+    {q1- : PathOver B p1-0 b10 b11} 
+    → SquareOver B f--0 q0- q-0 q-1 q1- 
+    → SquareOver B f--1 (move-pathover-along-square f0-- q0-) (move-pathover-along-square f-0- q-0) (move-pathover-along-square f-1- q-1) (move-pathover-along-square f1-- q1-)
+  move-squareover-along-cube id s = s
+

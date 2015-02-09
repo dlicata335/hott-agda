@@ -505,19 +505,21 @@ module lib.cubical.PathOver where
   ap-bifunctor-pair= f .id id = id
   
 
-{-
+  {-
     PathOverΣ-eqv : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
                     → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
                     → Equiv (PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)
                              ((Σ \ (α : PathOver A δ (fst p) (fst q)) → PathOver B (pair= δ α) (snd p) (snd q)))
+  -}
 
   pair=o : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
          → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
          → (α : PathOver A δ (fst p) (fst q)) 
          → PathOver B (pair= δ α) (snd p) (snd q)
          → (PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)
-  pair=o α β = (IsEquiv.g (snd PathOverΣ-eqv) (α , β))
+  pair=o {B = B} {p = p1 , p2} {.p1 , q2} id β = path-induction-homo (λ q3 _ → PathOver (λ θ → Σ (λ x → B (θ , x))) id (p1 , p2) (p1 , q3)) id β
 
+{-
   fst=o : {Δ : Type} {A : Δ → Type} {B : Σ A → Type}
          → {θ1 θ2 : Δ} {δ : θ1 == θ2} {p : Σ \ (x : A θ1) → B (θ1 , x)} {q : Σ \ (x : A θ2) → B (θ2 , x)}
          → (PathOver (\ θ → Σ \ (x : A θ) → B (θ , x)) δ p q)
@@ -544,4 +546,14 @@ module lib.cubical.PathOver where
             -> Path (transport (λ x → Path (f x) (g x)) p p')
                     (over-to-hom (changeover A (!-inv-r p ∘ ap (λ x → p ∘ x) (∘-unit-l (! p))) (apdo g p ∘o hom-to-over p' ∘o !o (apdo f p))))
   transport-Path-do _ _ id p' = ! (ap over-to-hom/left (∘o-unit-l (hom-to-over p'))) ∘ ! (hom-to-over-to-hom/left id p')
- 
+
+  apdo-o : {Γ Δ : Type} {A : Δ → Type} (f : (θ : _) → A θ) (h : Γ → Δ) → {θ1 θ2 : Γ} (δ : θ1 == θ2) 
+       → apdo (\ x → f(h x)) δ == over-ap-o _ (apdo f (ap h δ))
+  apdo-o f h id = id
+
+  Σ=β2-ND : {A B : Type} {p q : A × B} 
+            (α : Path (fst p) (fst q)) 
+            (β : Path (snd p) (snd q))
+            -> Path (ap snd (pair= α (in-PathOver-constant β))) β
+  Σ=β2-ND {p = x , y} {q = .x , .y} id id = id
+

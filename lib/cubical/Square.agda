@@ -69,7 +69,6 @@ module lib.cubical.Square where
     coh id = id
 -}
 
-
   data SquareOver {A : Type} (B : A → Type) {a00 : A} {b00 : B a00} : 
               {a01 a10 a11 : A} 
               {p0- : a00 == a01}
@@ -153,6 +152,16 @@ module lib.cubical.Square where
                 (f   : Square p0- p-0 (! p-1) (! p1-))
                 → p-1 == p0- ∘ ! p-0 ∘ p1-
   square-to-disc-rearrange {p0- = p0- } {p-0 = id} {p-1 = id} {p1- = id} f = ∘-unit-l p0- ∘ ! (square-to-disc f)
+
+  square-to-disc-top : {A : Type}
+                {a00 a01 a10 a11 : A} 
+                {p0- : a00 == a01}
+                {p-0 : a00 == a10}
+                {p-1 : a01 == a11}
+                {p1- : a10 == a11}
+                (f   : Square p0- p-0 p-1 p1-)
+                → p-0 == ! p1- ∘ p-1 ∘ p0-
+  square-to-disc-top id = id
   
 
   horiz-degen-square : {A : Type} {a a' : A} {p q : a == a'} (r : p == q)
@@ -344,15 +353,16 @@ module lib.cubical.Square where
                         (Square pa (ap f p) (ap g p) pa')
     out-PathOver-=-eqv = improve (hequiv out-PathOver-= in-PathOver-= out-in in-out) 
 
+{-
   module PathOver=D where
 
-    postulate -- used in wedge connectivity
       in-PathOver-= : {A : Type} {B : A → Type} {f g : (x : A) → B x}
                 {a a' : A} {p : a == a'}
                 {pa : f a == g a}
                 {pa' : f a' == g a'}
                → SquareOver B (vrefl-square {p = p}) (hom-to-over pa) (apdo f p) (apdo g p) (hom-to-over pa')
                → PathOver (\ x -> f x == g x) p pa pa'
+-}
       
   extend-triangle : {A : Type} {a00 a01 a11 : A}
               {p0- : a00 == a01}
@@ -885,3 +895,58 @@ module lib.cubical.Square where
   SquareOver-constant-eqv = (out-SquareOver-constant , ?) 
 -}
 
+
+  move-pathover-along-square : {A : Type} {B : A → Type} {a000 a010 a100 a110 : A}
+    {p0-0 : a000 == a010}
+    {p-00 : a000 == a100}
+    {p-10 : a010 == a110}
+    {p1-0 : a100 == a110} {b00 : B a000} {b01 : B a010}
+    (f--0 : Square p0-0 p-00 p-10 p1-0)
+    → (PathOver B p0-0 b00 b01)
+    → PathOver B p1-0 (transport B p-00 b00) (transport B p-10 b01)
+  move-pathover-along-square id p = p
+
+  hom-square-to-over : {A' : Type} {a00' : A'} {A : A' → Type} 
+              {a00 a01 a10 a11 : A a00'} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              → Square p0- p-0 p-1 p1- 
+              → SquareOver A id (hom-to-over p0-) (hom-to-over p-0) (hom-to-over p-1) (hom-to-over p1-)
+  hom-square-to-over id = id
+
+  whisker-squareover : {A : Type} {B : A → Type} {a00 : A} {b00 : B a00} 
+              {a01 a10 a11 : A} 
+              {p0- : a00 == a01}
+              {p-0 : a00 == a10}
+              {p-1 : a01 == a11}
+              {p1- : a10 == a11}
+              {f   : Square p0- p-0 p-1 p1- }
+              {b01 : B a01} {b10 : B a10} {b11 : B a11}  
+              {q0- q0-' : PathOver B p0- b00 b01} → (q0- == q0-') → 
+              {q-0 q-0' : PathOver B p-0 b00 b10} → (q-0 == q-0') → 
+              {q-1 q-1' : PathOver B p-1 b01 b11} → (q-1 == q-1') → 
+              {q1- q1-' : PathOver B p1- b10 b11} → (q1- == q1-') → 
+              SquareOver B f q0- q-0 q-1 q1- → 
+              SquareOver B f q0-' q-0' q-1' q1-'
+  whisker-squareover id id id id s = s
+
+  {-
+    squareover-ap-o : {A' A : Type} {g : A' → A} {B : A → Type} {a00 : A'} {b00 : B (g a00)} 
+                {a01 a10 a11 : A'} 
+                {p0- : a00 == a01}
+                {p-0 : a00 == a10}
+                {p-1 : a01 == a11}
+                {p1- : a10 == a11}
+                {f   : Square p0- p-0 p-1 p1- }
+                {b01 : B (g a01)} {b10 : B (g a10)} {b11 : B (g a11)}  
+                {q0-  : PathOver B (ap g p0-) b00 b01} 
+                {q-0  : PathOver B (ap g p-0) b00 b10} 
+                {q-1  : PathOver B (ap g p-1) b01 b11} 
+                {q1- : PathOver B (ap g p1-) b10 b11} 
+                → SquareOver B (ap-square g f) q0- q-0 q-1 q1- 
+                → SquareOver (B o g) f (over-ap-o _ q0-) (over-ap-o _ q-0) (over-ap-o _ q-1) (over-ap-o _ q1-)
+  --squareover-ap-o {f = id} s = {!!}
+  -}
+  
