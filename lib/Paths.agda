@@ -306,6 +306,12 @@ module lib.Paths where
             -> Path {A} x1 x2 ≃ Path {B} y1 y2
  apPath≃ id id id = id
 
+ move-path-along-equiv/general-conclusion : ∀ {A B} {y1 y2 : B} 
+                       -> (e : Equiv A B) 
+                       -> Path {A} (IsEquiv.g (snd e) y1) (IsEquiv.g (snd e) y2)
+                       → Path {B} y1 y2
+ move-path-along-equiv/general-conclusion e p = IsEquiv.β (snd e) _ ∘ ap (fst e) p ∘ ! (IsEquiv.β (snd e) _)
+
  transport-com-for-ap-of-transport : 
      {Γ : Type} {θ1 θ2 : Γ} (δ : θ1 ≃ θ2)
      (A : Γ -> Type) (C : (γ : Γ) -> A γ -> Type)

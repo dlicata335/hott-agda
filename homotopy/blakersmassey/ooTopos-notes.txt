@@ -1,6 +1,7 @@
-{-
-  -- the middle map in the paper (at least from my agda notes); 
-  -- seems to be the same as the fiberwise to total of the over Z version
+
+  -- the middle map  Z×YZ +Z Z×XZ  → Z×WZ
+  -- is the same as the fiberwise-to-total of the over Z version:
+
   map : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → Z×WZ
   map (z11 , w) = Wedge.Pushout-rec 
                      (λ z21 → z11 , (_ , snd z21) , ! (gluel (snd z21)) ∘ gluel (snd z11))
@@ -10,17 +11,28 @@
 
   check : ∀ z w → (fiberwise-to-total (\ (z : Z) → gluem (snd z))) (z , w) == map (z , w)
   check z = Wedge.Pushout-elim _ (λ _ → id) (λ _ → id) {!!}
--}
 
-{-
-    pushout-to-pullback : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → 〈Z×Z〉×〈YX〉Z -- swap second and third from other file
-    pushout-to-pullback (z11 , w) = Wedge.Pushout-rec (λ z12 → z11 , (_ , snd z12)  , snd z11)
+
+  -- the paper defines this map, which is the same as the top m-to-ml
+  -- map that we use
+  -- Is "Moreover, these squares are (i + j − 1)-cartesian, by Lemma
+  -- 1.1.4 applied tothepointedobjectsZ →Z×XZ →π1 Z andZ →Z×Y Z →π1 Z
+  -- inX/Z." using composition with equivalences or something else?
+
+  pushout-to-pullback : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → 〈Z×Z〉×〈YX〉Z -- swap second and third from other file
+  pushout-to-pullback (z11 , w) = Wedge.Pushout-rec (λ z12 → z11 , (_ , snd z12)  , snd z11)
                                                     (λ z21 → z11 , (_ , snd z21) , snd z21) 
-                                                    (λ _ → id) w
+                                                    (λ _ → id)
+                                                    w
 
   thm : ∀ z11 w → pushout-to-pullback (z11 , w) == (reassoc-r o fiberwise-to-total (λ z1 → wtp (snd z1)) o switchr ) (z11 , w)
   thm z = Wedge.Pushout-elim _ (λ z' → id) (λ _ → id) (λ _ → {!!}) 
  
 
-
--}
+  -- as long as Z×YZ is flipped around, the map across the top is a retraction of the pushout inclusions,
+  -- but I don't seem to be using this fact.
+  project : 〈Z×Z〉×〈XY〉Z → Σ \(z : Z) → -×YZ (snd z)
+  project ((_ , pxy) , (_ , px'y') , pxy') = (_ , pxy') , _ , px'y'
+    
+  retraction : ∀ (zyz : Σ \(z : Z) → -×YZ (snd z)) → (project o m-to-mr) (fst zyz , Wedge.inr (_ , (snd (snd zyz)))) == zyz
+  retraction = (λ _ → id)
