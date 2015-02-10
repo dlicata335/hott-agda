@@ -439,3 +439,4 @@ module lib.Paths where
      -> Path (jayfrompm2 (\ _ _ _ -> B) P f) (f N)
    fire-jay-const2 {A}{B} P f = jay (λ x y p → Path (jayfrompm2 (λ _ _ _ → B) p f) (f y)) P (\ _ -> id)
 
+ 

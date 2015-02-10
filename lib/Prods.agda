@@ -357,3 +357,7 @@ module lib.Prods where
     
   swap× : ∀ {A B} → Equiv (A × B) (B × A)
   swap× = equiv swap×fn swap×fn (λ _ → id) (λ _ → id) (λ _ → id)
+
+
+  singleton-contractible : ∀ {A} {a : A} → NType -2 (Σ \ b → a == b)
+  singleton-contractible = ntype ((_ , id) , (λ y → path-induction (λ b p → Path (_ , id) (b , p)) id (snd y)))

@@ -253,3 +253,6 @@ module homotopy.blakersmassey.ooTopos0 (X Y : Type) (P : X → Y → Type)
 
     CodesFor' : (Σ \ (w : W) → Path{W} (inm p0) w) → Type 
     CodesFor' = uncurryd CodesFor
+
+    Codes-level : (w : W) (p : Path (inm p0) w) → NType i+j (CodesFor w p)
+    Codes-level ._ id  = Trunc-level

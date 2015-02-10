@@ -12,6 +12,9 @@ module lib.AdjointEquiv where
  id-equiv : ∀ {A} -> Equiv A A
  id-equiv = ( (\ x -> x) , isequiv (λ x → x) (\ _ -> id) (\ _ -> id) (\ _ -> id))
 
+ snde : ∀ {A B} → Equiv A B → B → A
+ snde e = IsEquiv.g (snd e)
+
  -- NOTE: because this just flips the first four, IsEquiv.γ (!equiv e) works as a name for the other ("sixth") triangle equality for e
  !equiv : ∀ {A B} → Equiv A B → Equiv B A
  !equiv (f , isequiv g α β γ) = 
