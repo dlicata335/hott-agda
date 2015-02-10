@@ -27,7 +27,9 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     in-[〈Z×Z〉×〈XY〉Z] : ∀ (zs : 〈Z×Z〉×〈XY〉Z) → [〈Z×Z〉×〈XY〉Z] (snd (fst zs)) (snd (fst (snd zs))) (gluemr-uncurry zs)
     in-[〈Z×Z〉×〈XY〉Z] (_ , _ , p) = [ p , id ] 
     
-    codes-contracted-equiv : ∀ {x0 y0} (p0 : P x0 y0) → Equiv (CodesFor p0 (inm p0) id) ([〈Z×Z〉×〈XY〉Z] p0 p0 (gluemr p0 p0 p0))
+    abstract 
+      codes-contracted-equiv : ∀ {x0 y0} (p0 : P x0 y0) → Equiv (CodesFor p0 (inm p0) id) ([〈Z×Z〉×〈XY〉Z] p0 p0 (gluemr p0 p0 p0))
+      codes-contracted-equiv p0 = glue-mr-m p0 p0 {gluemr p0 p0 p0} ∘equiv coe-equiv (ap (CodesFor p0 (inm p0)) (! (m-to-mr-triangle-coh1 (gluer p0) (gluel p0) (gluel p0)) ∘ ! (!-inv-l (gluel p0)))) 
 
     section : ∀ {x0 y0} (p0 : P x0 y0) (w : W) (p : inm p0 == w) → (CodesFor p0 w p)
     section p0 ._ id = (IsEquiv.g (snd (codes-contracted-equiv p0))) (in-[〈Z×Z〉×〈XY〉Z] ((_ , p0) , (_ , p0) , p0))
@@ -86,6 +88,9 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
                                      (mr-to-Codes (snd (fst zs)) (snd (fst zs)) (gluemr-uncurry (π111 zs)) (make-mr (π111 zs)))
     commute111 zs = {!!}
 
+    retraction' : ∀ (zs : 〈Z×Z〉×〈XY〉Z) (c : [〈Z×Z〉×〈XY〉Z] (snd (fst zs)) (snd (fst (snd zs))) (gluemr-uncurry zs))
+                → in-[〈Z×Z〉×〈XY〉Z] zs == c
+    retraction' = {!!}
 
 
   module OverZ {x0 : X} {y0 : Y} (p0 : P x0 y0) where
@@ -93,10 +98,7 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     open Section 
     open Retraction
 
-    retraction' : ∀ (zs : 〈Z×Z〉×〈XY〉Z) (c : [〈Z×Z〉×〈XY〉Z] (snd (fst zs)) (snd (fst (snd zs))) (gluemr-uncurry zs))
-        → in-[〈Z×Z〉×〈XY〉Z] zs == c
-    retraction' = {!!}
-
+    -- "C is a retract of [〈Z×Z〉×〈XY〉Z] by the inclusion" reduces the goal to retraction'
     retraction : (w : W) (p : Path{W} (inm p0) w) (c : CodesFor w p) → Path (section p0 w p) c
     retraction ._ id = elim-along-equiv _ (!equiv (codes-contracted-equiv p0)) (λ c → ap (IsEquiv.g (snd (codes-contracted-equiv p0))) (retraction' ((_ , p0) , (_ , p0) , p0) c))
 

@@ -129,14 +129,14 @@ module homotopy.blakersmassey.ooTopos0 (X Y : Type) (P : X → Y → Type)
                                ap (ap (λ h → z , h)) (Wedge.βglue/rec _ _ (λ _ → ap (λ h → z , h) (square-to-disc (inverses-square (gluel (snd z)) (gluer (snd z))))) <>) ∘ 
                                ap-o (λ h → z , h) (gluem (snd z)) (Wedge.glue <>)
 
-    m-to-ml-triangle-coh1 : ∀ {A} {a0 a1 a2 a3 : A} (lyp : a0 == a1) (lz : a2 == a1) (rz : a2 == a3) → (! lyp ∘ ! (rz ∘ ! (lz)) ∘ rz) == (! lyp ∘ lz)
-    m-to-ml-triangle-coh1 id id id = id
-
     m-to-ml-triangle : ∀ z (w : Z×X-∨-×YZ (snd z)) → (glueml-total o m-to-ml) (z , w) == gluem-total (z , w)
     m-to-ml-triangle z = Wedge.Pushout-elim (λ w → (glueml-total o m-to-ml) (z , w) == gluem-total (z , w))
                                             (λ yp → ap (λ Q → z , ((fst (fst z) , fst yp) , snd yp) , Q) (m-to-ml-triangle-coh1 (gluel (snd yp)) (gluel (snd z)) (gluer (snd z))))
                                             (λ xp → ap (λ Q → z , ((fst xp , snd (fst z)) , snd xp) , Q) (coh2 (gluel (snd xp)) (gluer (snd xp)) (gluer (snd z))))
                                             (λ _ → PathOver=.in-PathOver-= (whisker-square id (! red) (! red-gluem-total-glue) id (ap-square (λ h → z , z , h) (coh12 (gluel (snd z)) (gluer (snd z)))))) where
+
+      m-to-ml-triangle-coh1 : ∀ {A} {a0 a1 a2 a3 : A} (lyp : a0 == a1) (lz : a2 == a1) (rz : a2 == a3) → (! lyp ∘ ! (rz ∘ ! (lz)) ∘ rz) == (! lyp ∘ lz)
+      m-to-ml-triangle-coh1 id id id = id
 
       coh2 : ∀ {A} {a0 a1 a2 a3 : A} (lxp : a0 == a1) (rxp : a0 == a2) (rz : a3 == a2) → (! lxp ∘ ! (rxp ∘ ! (lxp)) ∘ rz) == (! rxp ∘ rz)
       coh2 id id id = id
@@ -161,20 +161,20 @@ module homotopy.blakersmassey.ooTopos0 (X Y : Type) (P : X → Y → Type)
     m-to-mr : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → 〈Z×Z〉×〈XY〉Z
     m-to-mr = reassoc-r' o fiberwise-to-total (λ z1 → wtp (snd z1)) o switchl
 
+    m-to-mr-triangle-coh1 : ∀ {A} {a0 a1 a2 a3 : A} (ryp : a0 == a1) (lyp : a0 == a2) (lz : a3 == a2) → (! ryp ∘ (ryp ∘ ! (lyp)) ∘ lz) == (! lyp ∘ lz)
+    m-to-mr-triangle-coh1 id id id = id
+
     m-to-mr-triangle : ∀ z (w : Z×X-∨-×YZ (snd z)) → (gluemr-total o m-to-mr) (z , w) == gluem-total (z , w)
     m-to-mr-triangle z = Wedge.Pushout-elim (λ w → (gluemr-total o m-to-mr) (z , w) == gluem-total (z , w))
-                                            (λ yp → ap (λ Q → z , ((fst (fst z) , fst yp) , snd yp) , Q) (coh1 (gluer (snd yp)) (gluel (snd yp)) (gluel (snd z))))
+                                            (λ yp → ap (λ Q → z , ((fst (fst z) , fst yp) , snd yp) , Q) (m-to-mr-triangle-coh1 (gluer (snd yp)) (gluel (snd yp)) (gluel (snd z))))
                                             (λ xp → ap (λ Q → z , ((fst xp , snd (fst z)) , snd xp) , Q) (coh2 (gluer (snd xp)) (gluer (snd z)) (gluel (snd z))))
                                             (λ _ → PathOver=.in-PathOver-= (whisker-square id (! red)
                                                                                            (! red-gluem-total-glue) id
                                                                                            (ap-square (λ h → z , z , h) (coh12 (gluel (snd z)) (gluer (snd z)))))) where
-      coh1 : ∀ {A} {a0 a1 a2 a3 : A} (ryp : a0 == a1) (lyp : a0 == a2) (lz : a3 == a2) → (! ryp ∘ (ryp ∘ ! (lyp)) ∘ lz) == (! lyp ∘ lz)
-      coh1 id id id = id
-
       coh2 : ∀ {A} {a0 a1 a2 a3 : A} (rxp : a0 == a1) (rz : a2 == a1) (lz : a2 == a3) → (! rxp ∘ (rz ∘ ! (lz)) ∘ lz) == (! rxp ∘ rz)
       coh2 id id id = id
 
-      coh12 : ∀ {A} {a0 a1 a2 : A} (lz : a0 == a1) (rz : a0 == a2) → Square (coh1 rz lz lz) id (square-to-disc (inverses-square lz rz)) (coh2 rz rz lz)
+      coh12 : ∀ {A} {a0 a1 a2 : A} (lz : a0 == a1) (rz : a0 == a2) → Square (m-to-mr-triangle-coh1 rz lz lz) id (square-to-disc (inverses-square lz rz)) (coh2 rz rz lz)
       coh12 id id = id
 
       red : (ap (λ z₁ → (gluemr-total o m-to-mr) (z , z₁)) (Wedge.glue <>)) == ap (\ h → z , z , h) id
