@@ -28,7 +28,6 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
 
     〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z] : ∀ (zs : 〈-×Z〉×〈XY〉Z) → [〈-×Z〉×〈XY〉Z] (snd (fst zs)) (gluemr-uncurry zs)
     〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z] (_ , p) = [ p , id ] 
-    
 
     Codes-diag-path-equiv : Equiv (CodesFor (inm p0) (gluemr p0 p0 p0)) (CodesFor (inm p0) id) 
     Codes-diag-path-equiv = apTrunc' (HFiber-result-equiv (ap (λ x → (_ , p0) , x) ((!-inv-l (gluel p0)) ∘ (m-to-mr-triangle-coh1 (gluer p0) (gluel p0) (gluel p0)))))
@@ -106,7 +105,7 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     CodesT = Σ \ (ww : Σ \ (w : W) → inm p0 == w) → CodesFor (fst ww) (snd ww)
 
     m-to-Codes : ∀ {x' y'} (px'y' : P x' y') (α : Path (inm p0) (inm px'y'))
-                → (Trunc i+j (HFiber (gluem {!!}) ((_ , px'y') , α)) )
+                → (Trunc i+j (HFiber (gluem p0) ((_ , px'y') , α)) )
                 → CodesT
     m-to-Codes {x'} px'y' α in-m = (inm px'y' , α) , in-m
 
@@ -116,18 +115,25 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z]t : 〈-×Z〉×〈XY〉Z → [〈-×Z〉×〈XY〉Z]t
     〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z]t (z , px0y) = (z , (gluemr p0 (snd z) px0y)) , 〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z] (z , px0y)
 
+    〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z]t-connected : ConnectedMap i+j 〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z]t
+    〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z]t-connected = {!  !}
+    
     diagram-chase : ∀ (zs : 〈-×Z〉×〈XY〉Z) 
                   →  m-to-Codes _ _ (snde (glue-mr-m p0) (〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z] ((_ , p0) , p0)))
                   == m-to-Codes _ _ (snde (glue-mr-m (snd (fst zs))) (〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z] zs))
     diagram-chase zs = {!!}
 
+    -- Step R.3: 
+    -- first, use connectedness along 〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z]t
+    -- then do the diagram chase
+    -- note that the fst component must be the identity because singleton is contractible
     abstract
     -- Σ Codes is i+j-truncated, so can extend along foo
       retraction3 : (c' :  [〈-×Z〉×〈XY〉Z] p0 (gluemr p0 p0 p0)) → 
                     Path
                       (m-to-Codes p0 (gluemr-uncurry ((_ , p0) , p0)) (snde (glue-mr-m p0) (〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z] (((x0 , y0) , p0) , p0))))
                       (m-to-Codes p0 (gluemr-uncurry ((_ , p0) , p0)) (snde (glue-mr-m p0) c'))
-      retraction3 c' = ConnectedMap.extend i+j 〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z]t {!!}
+      retraction3 c' = ConnectedMap.extend i+j 〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z]t 〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z]t-connected
                     (λ t → Path{Σe (Σ (_==_ (inm p0))) (λ ww → CodesFor (fst ww) (snd ww))}
                                 (m-to-Codes _ _ (snde (glue-mr-m p0) (〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z] ( ((x0 , y0) , p0) , p0))))
                                 (m-to-Codes _ _ (snde (glue-mr-m _) (snd t)))
@@ -138,19 +144,22 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
       retraction3-fst : (c' :  [〈-×Z〉×〈XY〉Z] p0 (gluemr p0 p0 p0)) → Path (ap fst (retraction3 c')) id
       retraction3-fst c' = HSet-UIP (raise-level { -2} {tl 0} (Inl (-2< _)) (raise-level (-2<= _) singleton-contractible)) _ _ _ _
 
-    -- first, use connectedness along foo
-    -- use retraction', whose fst component must be the identity because singleton is contractible
+    -- Step R.2: massage R.3, extracting the path we want from the Σ type
     retraction2 : (c' : [〈-×Z〉×〈XY〉Z] p0 (gluemr-uncurry (((x0 , y0) , p0) , p0)))  
                            →    snde (glue-mr-m p0) (〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z] (((x0 , y0) , p0) , p0))
                              == snde (glue-mr-m p0) c'
     retraction2 c' = over-to-hom (changeover CodesFor' (retraction3-fst c') (over-o-ap CodesFor' {fst} (apdo snd (retraction3 c')))) where
     
-    -- s (p (ν c')) == (ν c')
+    -- Step R.1: s (p (ν c')) == (ν c')
+    -- peel off an annoying thing
     retraction1 : (c' :  [〈-×Z〉×〈XY〉Z] p0 (gluemr p0 p0 p0)) →
                  (fst [〈-×Z〉×〈XY〉Z]≃C0 (〈-×Z〉×〈XY〉Z→[〈-×Z〉×〈XY〉Z] (((x0 , y0) , p0) , p0))) ==
                  (fst [〈-×Z〉×〈XY〉Z]≃C0 c')
     retraction1 = λ c' → ap (fst Codes-diag-path-equiv) (retraction2 c') where
 
+    -- Step R: by path induction and moving equivalences around, it suffices to show retraction1
+    -- (this is the "C is a retract of blah" step... rather than using a retraction,
+    --  we know what fiber we're in, and the retraction is an equivalence on that fiber)
     retraction : (w : W) (p : Path{W} (inm p0) w) (c : CodesFor w p) → Path (section w p) c
     retraction ._ id = elim-along-equiv (λ c → Path (section (inm p0) id) c) [〈-×Z〉×〈XY〉Z]≃C0 retraction1
 
