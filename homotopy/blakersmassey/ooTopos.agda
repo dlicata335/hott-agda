@@ -24,15 +24,20 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     gluemr-uncurry : (zs : 〈Z×Z〉×〈XY〉Z) → Path {W} (inm (snd (fst zs))) (inm (snd (fst (snd zs))))
     gluemr-uncurry (z1 , z2 , p) = gluemr (snd z1) (snd z2) p
 
-    in-[〈Z×Z〉×〈XY〉Z] : ∀ (zs : 〈Z×Z〉×〈XY〉Z) → [〈Z×Z〉×〈XY〉Z] (snd (fst zs)) (snd (fst (snd zs))) (gluemr-uncurry zs)
-    in-[〈Z×Z〉×〈XY〉Z] (_ , _ , p) = [ p , id ] 
+    〈Z×Z〉×〈XY〉Z→[〈Z×Z〉×〈XY〉Z] : ∀ (zs : 〈Z×Z〉×〈XY〉Z) → [〈Z×Z〉×〈XY〉Z] (snd (fst zs)) (snd (fst (snd zs))) (gluemr-uncurry zs)
+    〈Z×Z〉×〈XY〉Z→[〈Z×Z〉×〈XY〉Z] (_ , _ , p) = [ p , id ] 
     
-    abstract 
-      codes-contracted-equiv : ∀ {x0 y0} (p0 : P x0 y0) → Equiv (CodesFor p0 (inm p0) id) ([〈Z×Z〉×〈XY〉Z] p0 p0 (gluemr p0 p0 p0))
-      codes-contracted-equiv p0 = glue-mr-m p0 p0 {gluemr p0 p0 p0} ∘equiv coe-equiv (ap (CodesFor p0 (inm p0)) (! (m-to-mr-triangle-coh1 (gluer p0) (gluel p0) (gluel p0)) ∘ ! (!-inv-l (gluel p0)))) 
+    fix-path-equiv : ∀ {x0 y0} (p0 : P x0 y0) → Equiv (CodesFor p0 (inm p0) id) (CodesFor p0 (inm p0) _)
+    fix-path-equiv p0 = apTrunc' (HFiber-result-equiv (ap (λ x → (_ , p0) , x) (! (m-to-mr-triangle-coh1 (gluer p0) (gluel p0) (gluel p0)) ∘ ! (!-inv-l (gluel p0)))))
+
+    C≃[〈Z×Z〉×〈XY〉Z] : ∀ {x0 y0} (p0 : P x0 y0) → Equiv (CodesFor p0 (inm p0) id) ([〈Z×Z〉×〈XY〉Z] p0 p0 (gluemr p0 p0 p0))
+    C≃[〈Z×Z〉×〈XY〉Z] p0 = glue-mr-m p0 p0 {gluemr p0 p0 p0} ∘equiv fix-path-equiv p0
+
+    [〈Z×Z〉×〈XY〉Z]→C : ∀ {x0 y0} (p0 : P x0 y0) → ([〈Z×Z〉×〈XY〉Z] p0 p0 (gluemr p0 p0 p0)) → (CodesFor p0 (inm p0) id) 
+    [〈Z×Z〉×〈XY〉Z]→C p0 = IsEquiv.g (snd (C≃[〈Z×Z〉×〈XY〉Z] p0))
 
     section : ∀ {x0 y0} (p0 : P x0 y0) (w : W) (p : inm p0 == w) → (CodesFor p0 w p)
-    section p0 ._ id = (IsEquiv.g (snd (codes-contracted-equiv p0))) (in-[〈Z×Z〉×〈XY〉Z] ((_ , p0) , (_ , p0) , p0))
+    section p0 ._ id = ([〈Z×Z〉×〈XY〉Z]→C p0) (〈Z×Z〉×〈XY〉Z→[〈Z×Z〉×〈XY〉Z] ((_ , p0) , (_ , p0) , p0))
 
 
   module Retraction where    
@@ -88,10 +93,13 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
                                      (mr-to-Codes (snd (fst zs)) (snd (fst zs)) (gluemr-uncurry (π111 zs)) (make-mr (π111 zs)))
     commute111 zs = {!!}
 
+    commute111' : (zs : 〈Z×Z〉×〈XY〉Z) → 〈Z×Z〉×〈XY〉Z→[〈Z×Z〉×〈XY〉Z] (π111 zs) == {!in-[〈Z×Z〉×〈XY〉Z] zs!}
+    commute111' zs = {!!}
+    
     retraction' : ∀ (zs : 〈Z×Z〉×〈XY〉Z) (c : [〈Z×Z〉×〈XY〉Z] (snd (fst zs)) (snd (fst (snd zs))) (gluemr-uncurry zs))
-                → in-[〈Z×Z〉×〈XY〉Z] zs == c
-    retraction' = {!!}
-
+                →  IsEquiv.g (snd (glue-mr-m (snd (fst zs)) (snd (fst (snd zs))))) (〈Z×Z〉×〈XY〉Z→[〈Z×Z〉×〈XY〉Z] zs) 
+                == IsEquiv.g (snd (glue-mr-m (snd (fst zs)) (snd (fst (snd zs))))) c
+    retraction' zs = {!!}
 
   module OverZ {x0 : X} {y0 : Y} (p0 : P x0 y0) where
     open Codes p0
@@ -100,7 +108,7 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
 
     -- "C is a retract of [〈Z×Z〉×〈XY〉Z] by the inclusion" reduces the goal to retraction'
     retraction : (w : W) (p : Path{W} (inm p0) w) (c : CodesFor w p) → Path (section p0 w p) c
-    retraction ._ id = elim-along-equiv _ (!equiv (codes-contracted-equiv p0)) (λ c → ap (IsEquiv.g (snd (codes-contracted-equiv p0))) (retraction' ((_ , p0) , (_ , p0) , p0) c))
+    retraction ._ id = elim-along-equiv _ (!equiv (C≃[〈Z×Z〉×〈XY〉Z] p0)) (λ c → ap (IsEquiv.g (snd (fix-path-equiv p0))) (retraction' ((_ , p0) , (_ , p0) , p0) c))
 
     contr : (w : W) (p : Path{W} (inm p0) w) → Contractible (CodesFor w p)
     contr w p = section p0 w p , retraction w p

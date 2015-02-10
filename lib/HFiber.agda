@@ -79,4 +79,7 @@ module lib.HFiber where
     comp2 : ∀ {ac} (y : HFiber (fiberwise-to-total f) ac) → Path (mapl (mapr y)) y
     comp2 (p , id) = id
 
-  
+  -- want it to compute
+  HFiber-result-equiv : {A B : Type} {f : A → B} {b b' : B} → (p : b == b') 
+                      → Equiv (HFiber f b) (HFiber f b') 
+  HFiber-result-equiv p = improve (hequiv (λ h → fst h , p ∘ snd h) (λ h → fst h , ! p ∘ snd h) (λ x → ap (λ z → fst x , z) (!-inv-l-front p (snd x))) (λ x → ap (λ z → fst x , z) (!-inv-r-front p (snd x))))
