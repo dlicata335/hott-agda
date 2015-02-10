@@ -12,87 +12,100 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
                                       (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where 
   open homotopy.blakersmassey.ooTopos0 X Y P i' j' cf cg
 
-  module OverZ {x0 : X} {y0 : Y} (p0 : P x0 y0) where
-    open OverZ0 p0
-    
+  open CodesGlueMaps 
+
+  module Section where
     open CodesGlueMaps
+    open Codes 
 
-    -- construct the section
+    [〈Z×Z〉×〈XY〉Z] : ∀ {x y} (pxy : P x y) {x' y'} (px'y' : P x' y') (α : Path (inm pxy) (inm px'y')) → Type
+    [〈Z×Z〉×〈XY〉Z] pxy {x'}{y'} px'y' α = Trunc i+j (HFiber (gluemr pxy px'y') α)
 
-    -- first construct the section for Z 
-    -- FIXME: not sure why we're going in via Z×XZ×YZ; could do the symmetric one, or just write it directly as
-    -- [ Wedge.inr (_ , p0) , ap (λ p → ((x0 , y0) , p0) , p) (!-inv-l (gluer p0)) ]
-    sectionZ' : Trunc i+j (HFiber (gluemr p0 p0) id) 
-    sectionZ' = [ p0 , coh (gluer p0) (gluel p0) ] where
-      coh : ∀ {A} {a0 a1 a2 : A} (r : a0 == a1) (l : a0 == a2) → (! r ∘ (r ∘ ! l) ∘ l) == id
-      coh id id = id
+    gluemr-uncurry : (zs : 〈Z×Z〉×〈XY〉Z) → Path {W} (inm (snd (fst zs))) (inm (snd (fst (snd zs))))
+    gluemr-uncurry (z1 , z2 , p) = gluemr (snd z1) (snd z2) p
 
-    sectionZ : CodesFor (inm p0) id
-    sectionZ = IsEquiv.g (snd (glue-mr-m p0)) sectionZ'
+    in-[〈Z×Z〉×〈XY〉Z] : ∀ (zs : 〈Z×Z〉×〈XY〉Z) → [〈Z×Z〉×〈XY〉Z] (snd (fst zs)) (snd (fst (snd zs))) (gluemr-uncurry zs)
+    in-[〈Z×Z〉×〈XY〉Z] (_ , _ , p) = [ p , id ] 
+    
+    codes-contracted-equiv : ∀ {x0 y0} (p0 : P x0 y0) → Equiv (CodesFor p0 (inm p0) id) ([〈Z×Z〉×〈XY〉Z] p0 p0 (gluemr p0 p0 p0))
 
-    -- use of path induction is hiding in a silent use of Z = Z ×W W
-    encode : (w : W) (p : inm p0 == w) → (CodesFor w p)
-    encode x p = transport CodesFor' (pair= p connOver) sectionZ
+    section : ∀ {x0 y0} (p0 : P x0 y0) (w : W) (p : inm p0 == w) → (CodesFor p0 w p)
+    section p0 ._ id = (IsEquiv.g (snd (codes-contracted-equiv p0))) (in-[〈Z×Z〉×〈XY〉Z] ((_ , p0) , (_ , p0) , p0))
 
-{-
-    transport-CodesFor'-glue : ∀ {x y} (pxy : P x y) {αx  : Path{W} (inl x0) (inl x)} {αy  : Path (inl x0) (inr y)} (s : PathOver (Path (inl x0)) (glue pxy) αx αy)
-                               → transport CodesFor' (pair= (glue pxy) s) == Codes-glue.map p0 pxy (PathOverPathFrom.out-PathOver-= s) 
-    transport-CodesFor'-glue pxy s = transport CodesFor' (pair= (glue pxy) s) ≃〈 transport-ap-assoc CodesFor' (pair= (glue pxy) s) 〉 
-                                     coe (ap CodesFor' (pair= (glue pxy) s)) ≃〈 ap coe (ap-uncurryd-NDrange CodesFor _ _) 〉 
-                                     coe (coe PathOverΠ-NDrange (apdo CodesFor (glue pxy)) _ _ s) ≃〈 ap (λ Z → coe (coe PathOverΠ-NDrange Z _ _ s)) (Pushout-elim/βglue _ _ _ (λ x y pxy₁ → coe (! PathOverΠ-NDrange) (λ αx αy s₁ → ua (Codes-glue.eqv p0 pxy₁ (PathOverPathFrom.out-PathOver-= s₁)))) _ _ _) 〉 
-                                     coe (coe PathOverΠ-NDrange (coe (! PathOverΠ-NDrange)
-                                           (λ αx αy s → ua (Codes-glue.eqv p0 pxy (PathOverPathFrom.out-PathOver-= s)))) _ _ s) ≃〈 ap (λ z → coe (z _ _ s)) (IsEquiv.β (snd (coe-equiv PathOverΠ-NDrange)) _) 〉 
-                                     coe (ua (Codes-glue.eqv p0 pxy (PathOverPathFrom.out-PathOver-= s))) ≃〈 type≃β (Codes-glue.eqv p0 pxy (PathOverPathFrom.out-PathOver-= s)) 〉 
-                                     Codes-glue.map p0 pxy (PathOverPathFrom.out-PathOver-= s) ∎
--}
-{-
-    redrm : {y : Y} (px0y : P x0 y) → Path{Trunc i+j (HFiber (gluemr p0 px0y) (! (gluel px0y) ∘ gluel p0) )} 
-      (IsEquiv.g
-       (snd
-        (!equiv
-         (glue-r-mr px0y
-          (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)))))
-       (encode (inr y) (glue px0y ∘ gluel p0)))
-      (IsEquiv.g
-       (snd
-        (!equiv
-         (glue-r-mr px0y
-          (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)))))
-       [ px0y , id ])
-    redrm px0y = ! red1 ∘ {!!} where
-      red1 : (IsEquiv.g (snd (!equiv (glue-r-mr px0y (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0))))) [ px0y , id ]) == [ px0y , {!!} ]
-      red1 = {![ ? ] ≃〈 ? 〉 _ ∎ !}
--}
 
-    redr : {y : Y} (px0y : P x0 y) → Path{Trunc i+j (HFiber (gluer0 p0) (glue px0y ∘ gluel p0))} (encode (inr y) (glue px0y ∘ gluel p0)) [ px0y , id ]
-    redr {y} px0y = {!!}
-      -- move-path-along-equiv/general-conclusion
-      --             (!equiv (glue-r-mr px0y {αm = ! (gluel px0y) ∘ gluel p0} {αr = glue px0y ∘ gluel p0} (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)))) (redrm {y} px0y)
-{-
-    redr px0y = transport CodesFor' (pair= (glue px0y) connOver) forid ≃〈 ap≃ (transport-CodesFor'-glue px0y connOver) 〉 
-                Codes-glue.map p0 px0y (PathOverPathFrom.out-PathOver-= connOver) [ p0 , !-inv-l (glue p0) ]  ≃〈 id 〉 
-                Trunc-rec Trunc-level (λ c → [ fst c , square-to-disc (PathOverPathFrom.out-PathOver-= connOver) ∘
-                                                         ap (_∘_ (glue px0y)) (!-inv-l (glue p0)) ∘
-                                                         square-to-disc-rearrange (square-symmetry (snd c)) ]) (composeP px0y p0 p0 ) ≃〈 ap (Trunc-rec Trunc-level (λ c → [ fst c , _ ])) (composePβ2 _ _) 〉 
-                [ px0y , square-to-disc (PathOverPathFrom.out-PathOver-= connOver) ∘ ap (_∘_ (glue px0y)) (!-inv-l (glue p0)) ∘ square-to-disc-rearrange (square-symmetry (inverses-square (glue p0) (glue px0y))) ] ≃〈 ap (λ z → [ px0y , z ]) (coh (glue p0) (glue px0y)) 〉 
-                [ px0y , id ] ∎ where
-         coh : ∀ {A : Type} {a0 a1 a1' : A} (α : a0 == a1) (α' : a0 == a1')
-               → square-to-disc (PathOverPathFrom.out-PathOver-= connOver) ∘ 
-                  ap (_∘_ α') (!-inv-l α) ∘ 
-                  square-to-disc-rearrange (square-symmetry (inverses-square α α')) == id
-         coh id id = id
--}
+  module Retraction where    
 
-    -- really only need it for inr
-    encode-decode-inr : (y : Y) (p : inm p0 == inr y) (c : HFiber (gluer0 p0) p) → Path (encode (inr y) p) [ c ]
-    encode-decode-inr y ._ (px0y , id) = redr px0y
+    open Codes
+    open Section
 
-    contr-r : (y : Y) (p : Path{W} (inm p0) (inr y)) → Contractible (CodesFor (inr y) p)
-    contr-r y p = encode (inr y) p , Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (encode-decode-inr y p)
+    CodesT = Σ \ (zww : Σ \ (z : Z) → Σ \ (w : W) → inm (snd z) == w) → CodesFor (snd (fst zww)) (fst (snd zww)) (snd (snd zww))
+
+    glueml-uncurry : (zs : 〈Z×Z〉×〈YX〉Z) → Path {W} (inm (snd (fst zs))) (inm (snd (fst (snd zs))))
+    glueml-uncurry (z1 , z2 , p) = glueml (snd z1) (snd z2) p
+
+    -- [Z×Z×YXZ] → C
+    ml-to-Codes : ∀ {x y} (pxy : P x y) {x' y'} (px'y' : P x' y') (α : Path (inm pxy) (inm px'y'))
+                → (Trunc i+j (HFiber (glueml pxy px'y') α)) 
+                → CodesT
+    ml-to-Codes {x}{y} pxy {x'} px'y' α in-ml = ((_ , pxy) , (inl x') , (gluel px'y' ∘ α)) , IsEquiv.g (snd (glue-l-ml pxy px'y' {αm = α} id)) in-ml 
+
+    -- [Z×Z×XYZ] → C
+    mr-to-Codes : ∀ {x y} (pxy : P x y) {x' y'} (px'y' : P x' y') (α : Path (inm pxy) (inm px'y'))
+                → (Trunc i+j (HFiber (gluemr pxy px'y') α)) 
+                → CodesT
+    mr-to-Codes {x}{y} pxy {x'}{y'} px'y' α in-mr = ((_ , pxy) , (inr y') , (gluer px'y' ∘ α)) , IsEquiv.g (snd (glue-r-mr pxy px'y' {αm = α} id)) in-mr
+
+    -- like Z×YZ×XZ → [Z×XZ×YZ] (could compose with reassoc... but glueml is naturally dependent on the pair)
+    make-ml : (zs : 〈Z×Z〉×〈YX〉Z) → Trunc i+j (HFiber (\ p → glueml-uncurry (fst zs , fst (snd zs) , p)) (glueml-uncurry zs))
+    make-ml (_ , _ , p) = [ p , id ]
+
+    -- like Z×XZ×YZ → [Z×XZ×YZ] (could compose with reassoc...)
+    make-mr : (zs : 〈Z×Z〉×〈XY〉Z) → Trunc i+j (HFiber (\ p → gluemr-uncurry (fst zs , fst (snd zs) , p)) (gluemr-uncurry zs))
+    make-mr (_ , _ , p) = [ p , id ]
+
+    π111 : 〈Z×Z〉×〈XY〉Z → 〈Z×Z〉×〈XY〉Z
+    π111 (z , _) = (z , z , (snd z))
+
+    π112 : 〈Z×Z〉×〈XY〉Z → 〈Z×Z〉×〈YX〉Z
+    π112 (z , _ , p) = (z , (_ , p) , snd z)
+
+    π112' : 〈Z×Z〉×〈YX〉Z → 〈Z×Z〉×〈XY〉Z
+    π112' (z , _ , p) = (z , (_ , p) , snd z)
+
+    factor : π111 == π112' o π112
+    factor = id
+
+    test : ∀ zs → snd (fst zs) == snd (fst (π111 zs))
+    test zs = id
+
+    commute112 : (zs : 〈Z×Z〉×〈XY〉Z) → (mr-to-Codes (snd (fst zs)) (snd (fst (snd zs))) (gluemr-uncurry zs) (make-mr zs)) 
+                                  == ml-to-Codes _ _ _ (make-ml (π112 zs))
+    commute112 zs = {!!}
+
+    commute111 : (zs : 〈Z×Z〉×〈XY〉Z) → (mr-to-Codes (snd (fst zs)) (snd (fst (snd zs))) (gluemr-uncurry zs) (make-mr zs)) ==
+                                     (mr-to-Codes (snd (fst zs)) (snd (fst zs)) (gluemr-uncurry (π111 zs)) (make-mr (π111 zs)))
+    commute111 zs = {!!}
+
+
+
+  module OverZ {x0 : X} {y0 : Y} (p0 : P x0 y0) where
+    open Codes p0
+    open Section 
+    open Retraction
+
+    retraction' : ∀ (zs : 〈Z×Z〉×〈XY〉Z) (c : [〈Z×Z〉×〈XY〉Z] (snd (fst zs)) (snd (fst (snd zs))) (gluemr-uncurry zs))
+        → in-[〈Z×Z〉×〈XY〉Z] zs == c
+    retraction' = {!!}
+
+    retraction : (w : W) (p : Path{W} (inm p0) w) (c : CodesFor w p) → Path (section p0 w p) c
+    retraction ._ id = elim-along-equiv _ (!equiv (codes-contracted-equiv p0)) (λ c → ap (IsEquiv.g (snd (codes-contracted-equiv p0))) (retraction' ((_ , p0) , (_ , p0) , p0) c))
+
+    contr : (w : W) (p : Path{W} (inm p0) w) → Contractible (CodesFor w p)
+    contr w p = section p0 w p , retraction w p
 
     -- this is the same goal as the end of Step 1.2.1.1
     gluer0-connected : (y : Y) → ConnectedMap i+j (gluer0 p0 {y})
-    gluer0-connected y = λ α → ntype (contr-r y α)
+    gluer0-connected y = λ α → ntype (contr (inr y) α)
 
     -- it's a slightly different way of getting here:
     -- both use cf, and showing that Z×XZ is the pullback in that diagram

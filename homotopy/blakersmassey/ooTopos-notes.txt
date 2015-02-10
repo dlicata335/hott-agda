@@ -36,3 +36,23 @@
     
   retraction : ∀ (zyz : Σ \(z : Z) → -×YZ (snd z)) → (project o m-to-mr) (fst zyz , Wedge.inr (_ , (snd (snd zyz)))) == zyz
   retraction = (λ _ → id)
+
+
+{-
+    -- really only need contractibility for inr
+    encode-decode-inr : (y : Y) (p : inm p0 == inr y) (c : HFiber (gluer0 p0) p) → Path (encode (inr y) p) [ c ]
+    encode-decode-inr y ._ (px0y , id) = redr px0y
+
+    contr-r : (y : Y) (p : Path{W} (inm p0) (inr y)) → Contractible (CodesFor (inr y) p)
+    contr-r y p = encode (inr y) p , Trunc-elim _ (λ _ → path-preserves-level Trunc-level) (encode-decode-inr y p)
+-}
+
+
+{- direct definition of section
+    sectionZcoh : Path {Σ \ (z : Z) → Path{W} (inm p0) (inm (snd z))} (((x0 , y0) , p0) , ! (gluel p0) ∘ gluel p0) (((x0 , y0) , p0) , id)
+    sectionZcoh = ap (λ p → ((x0 , y0) , p0) , p) (!-inv-l (gluel p0))
+
+    sectionZ : CodesFor (inm p0) id
+    sectionZ = [ Wedge.inl (_ , p0) ,  sectionZcoh ]
+-}
+
