@@ -60,7 +60,6 @@ module lib.cubical.PathOver where
             → (id ∘o p) == changeover A (! (∘-unit-l δ1)) p
   ∘o-unit-l id = id
 
-
   apdo : {Δ : Type} {A : Δ → Type} (f : (θ : _) → A θ) {θ1 θ2 : Δ} (δ : θ1 == θ2) → PathOver A δ (f θ1) (f θ2)
   apdo f id = id
 
@@ -557,3 +556,9 @@ module lib.cubical.PathOver where
             -> Path (ap snd (pair= α (in-PathOver-constant β))) β
   Σ=β2-ND {p = x , y} {q = .x , .y} id id = id
                  
+
+
+  !o-invol/start-over-! : {Δ : Type} {A : Δ → Type} {θ1 θ2 : Δ} {δ1 : θ1 == θ2} {M1 : A θ1} {M2 : A θ2} 
+           (p : PathOver A (! δ1) M2 M1) 
+           → p == !o (changeover A (!-invol δ1) (!o p))
+  !o-invol/start-over-! {δ1 = id} = path-induction-homo (λ M2 p → p == !o (!o p)) id

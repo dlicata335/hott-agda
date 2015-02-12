@@ -54,11 +54,16 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
                                        coe (ua (glue-m-r pxy s)) ≃〈 type≃β (glue-m-r pxy s) 〉 
                                        fst (glue-m-r pxy s) ∎)
 
+    -- follows from the above if we move the transport to the other side
     transport-CodesFor'-!gluel : ∀ {x y} (pxy : P x y) {αl : _} {αm : _} (s : PathOver (λ v → Path (inm p0) v) (! (gluel pxy)) αl αm) {a : _ }
                               → transport CodesFor' (pair= (! (gluel pxy)) s) a == snde (glue-m-l pxy (changeover _ (!-invol (gluel pxy)) (!o s))) a
-    transport-CodesFor'-!gluel pxy s = {!!}
-
-{-
+    transport-CodesFor'-!gluel pxy s {a} = transport CodesFor' (pair= (! (gluel pxy)) s) a ≃〈 ap (\ s → transport CodesFor' (pair= (! (gluel pxy)) s) a) (!o-invol/start-over-! s) 〉 
+                                           transport CodesFor' (pair= (! (gluel pxy)) (!o (changeover _ (!-invol (gluel pxy)) (!o s)))) a ≃〈 ap (λ p → transport CodesFor' p a) (! (!Σ (gluel pxy) (changeover _ (!-invol (gluel pxy)) (!o s)))) 〉 
+                                           transport CodesFor' (! (pair= (gluel pxy) (changeover _ (!-invol (gluel pxy)) (!o s)))) a 
+                                           ≃〈 coe (! (move-transport-right-!≃ CodesFor' (pair= (gluel pxy) (changeover _ (!-invol (gluel pxy)) (!o s))))) 
+                                                  (! (IsEquiv.β (snd (glue-m-l pxy (changeover (Path (inm p0)) (!-invol (gluel pxy)) (!o s)))) _ ∘
+                                                    transport-CodesFor'-gluel pxy (changeover (Path (inm p0)) (!-invol (gluel pxy)) (!o s)) {snde (glue-m-l pxy (changeover (Path (inm p0)) (!-invol (gluel pxy)) (!o s))) a})) 〉 
+                                           _ ∎
 
     retraction-r : (y : Y) (p : Path{W} (inm p0) (inr y)) (c : CodesFor (inr y) p) → Path (section (inr y) p) c
     retraction-r y p = Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
@@ -110,14 +115,28 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
         step1b : {A : Type} {a0 a1 a2 : A} (l : a0 == a1) (r : a0 == a2) → Path (! (! (square-to-disc (PathOverPathFrom.out-PathOver-= (PathOverPathFrom.in-PathOver-= connection)))) ∘ ap (_∘_ (l)) (!-inv-l (l) ∘ m-to-ml-triangle-coh1 (l) (l) (r)) ∘ ! (!-inv-r-front (l) (! (r ∘ ! (l)) ∘ r) ∘ ap (_∘_ (l)) (!-inv-l-front (l) (! (l) ∘ ! (r ∘ ! (l)) ∘ r)) ∘ ap (λ x → l ∘ ! (l) ∘ x) (! (!-inv-r-front (l) (! (r ∘ ! (l)) ∘ r))))) (step1coh (r) (l)) 
         step1b id id = id
 
-
-      step3start : ∀ {y} (px0y : P x0 y) → Trunc i+j (HFiber gluem _)
-      step3start px0y = [ Wedge.inl (_ , px0y) , id ]
-
-      step3 : ∀ {y} (px0y : P x0 y) → transport CodesFor' (pair= (gluer px0y) (PathOverPathFrom.in-PathOver-= ∘-square)) (step3start px0y) == [ px0y , ! (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)) ] 
-      step3 px0y = transport CodesFor' (pair= (gluer px0y) (PathOverPathFrom.in-PathOver-= ∘-square)) (step3start px0y) ≃〈 transport-CodesFor'-gluer px0y {αr = gluer px0y ∘ ! (gluel px0y) ∘ gluel p0} {αm = ! (gluel px0y) ∘ gluel p0} (PathOverPathFrom.in-PathOver-= ∘-square) {s = step3start px0y} 〉 
-                   fst (glue-m-r px0y (PathOverPathFrom.in-PathOver-= ∘-square)) (step3start px0y)  ≃〈 ap (\ h → snde (glue-r-mr px0y h) (fst (glue-m-mr px0y) (step3start px0y))) (square-to-disc-∘-square (! (gluel px0y) ∘ gluel p0) (gluer px0y) ∘ ap square-to-disc (IsEquiv.β (snd PathOverPathFrom.PathOver-=-eqv) ∘-square)) 〉 
-                   snde (glue-r-mr px0y id) (fst (glue-m-mr px0y) (step3start px0y))  ≃〈 ap (snde (glue-r-mr px0y id)) step3a  〉 
+      -- reduce the transport, then move things to the other side, and then do something like step 1.
+      -- ENH should be able to avoid the duplication with step 1, but I couldn't figure out the common superstatement of which they are both instances;
+      -- would need to generalize the path stuff
+      step2 : ∀ {y} (px0y : P x0 y) → transport CodesFor' (pair= (! (gluel px0y)) (PathOverPathFrom.in-PathOver-= ∘-square)) [ p0 , step1coh (gluer p0) (gluel p0) ]  == [ Wedge.inl (_ , px0y) , id ]
+      step2 px0y = ! (fst (equiv-adjunction (glue-m-l px0y (changeover (Path (inm p0)) (!-invol (gluel px0y)) (!o (PathOverPathFrom.in-PathOver-= ∘-square)))) {a = [ Wedge.inl (_ , px0y) , id ]} {b = [ p0 , step1coh (gluer p0) (gluel p0) ]}) transposed)
+                   ∘ transport-CodesFor'-!gluel px0y (PathOverPathFrom.in-PathOver-= ∘-square) {a = [ p0 , step1coh (gluer p0) (gluel p0) ]} where
+            transposed : fst (glue-m-l px0y (changeover (Path (inm p0)) (!-invol (gluel px0y)) (!o (PathOverPathFrom.in-PathOver-= ∘-square)))) [ Wedge.inl (_ , px0y) , id ] == [ p0 , step1coh (gluer p0) (gluel p0) ]
+            transposed = ap (λ x → [ p0 , x ]) (step2b (gluel px0y) (gluel p0) (gluer p0)) ∘
+                         ap (snde (glue-l-ml px0y (square-to-disc (PathOverPathFrom.out-PathOver-= (changeover (Path (inm p0)) (!-invol (gluel px0y)) (!o (PathOverPathFrom.in-PathOver-= ∘-square))))))) step2a  where
+              --reduce and then transpose and reduce
+              step2a : fst (glue-m-ml px0y) [ Wedge.inl (_ , px0y) , id ] == [ p0 , m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0) ]
+              step2a = ap [_] (! (fst (equiv-adjunction (glue-ml-ml-total px0y)) 
+                          (ap (λ h → ((_ , p0) , (_ , px0y) , p0) , h)
+                            (! (∘-unit-l (ap (λ Q → (_ , p0) , (_ , px0y) , Q) (m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0))))
+                             ∘ ! (ap-o (λ Z₁ → ((x0 , y0) , p0) , Z₁) (λ Z₁ → (_ , px0y) , Z₁) (m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0)))))))
+              step2b : {A : Type} {a0 a1 a2 a3 : A} (lx0y : a0 == a1) (l0 : a2 == a1) (r0 : a2 == a3) → Path (! (! (square-to-disc (PathOverPathFrom.out-PathOver-= (transport (λ x → x) (changeover= (Path _) (!-invol (lx0y))) (!o (PathOverPathFrom.in-PathOver-=' ∘-square)))))) ∘ ap (_∘_ (lx0y)) (m-to-ml-triangle-coh1 (lx0y) (l0) (r0)) ∘ ! (!-inv-r-front (lx0y) (! (r0 ∘ ! (l0)) ∘ r0) ∘ ap (_∘_ (lx0y)) (!-inv-l-front (lx0y) (! (lx0y) ∘ ! (r0 ∘ ! (l0)) ∘ r0)) ∘ ap (λ x → lx0y ∘ ! (lx0y) ∘ x) (! (!-inv-r-front (lx0y) (! (r0 ∘ ! (l0)) ∘ r0))))) (step1coh (r0) (l0))
+              step2b id id id = id
+            
+      step3 : ∀ {y} (px0y : P x0 y) → transport CodesFor' (pair= (gluer px0y) (PathOverPathFrom.in-PathOver-= ∘-square)) ([ Wedge.inl (_ , px0y) , id ]) == [ px0y , ! (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)) ] 
+      step3 px0y = transport CodesFor' (pair= (gluer px0y) (PathOverPathFrom.in-PathOver-= ∘-square)) ([ Wedge.inl (_ , px0y) , id ]) ≃〈 transport-CodesFor'-gluer px0y {αr = gluer px0y ∘ ! (gluel px0y) ∘ gluel p0} {αm = ! (gluel px0y) ∘ gluel p0} (PathOverPathFrom.in-PathOver-= ∘-square)  〉 
+                   fst (glue-m-r px0y (PathOverPathFrom.in-PathOver-= ∘-square)) ([ Wedge.inl (_ , px0y) , id ])  ≃〈 ap (\ h → snde (glue-r-mr px0y h) (fst (glue-m-mr px0y) ([ Wedge.inl (_ , px0y) , id ]))) (square-to-disc-∘-square (! (gluel px0y) ∘ gluel p0) (gluer px0y) ∘ ap square-to-disc (IsEquiv.β (snd PathOverPathFrom.PathOver-=-eqv) ∘-square)) 〉 
+                   snde (glue-r-mr px0y id) (fst (glue-m-mr px0y) ([ Wedge.inl (_ , px0y) , id ]))  ≃〈 ap (snde (glue-r-mr px0y id)) step3a  〉 
                    snde (glue-r-mr px0y id) [ px0y , m-to-mr-triangle-coh1 (gluer px0y) (gluel px0y) (gluel p0) ]  ≃〈 ap (λ z → [ px0y , z ]) (step3b (gluer px0y) (gluel px0y) (gluel p0)) 〉 
                    [ px0y , ! (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)) ]  ∎ where
 
@@ -129,52 +148,6 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
 
         step3b : ∀ {A} {a0 a1 a2 a3 : A} (rx0y : a0 == a1) (lx0y : a0 == a2) (lp0 : a3 == a2) → Id (id ∘ ap (_∘_ rx0y) (m-to-mr-triangle-coh1 rx0y lx0y lp0) ∘ ! (!-inv-r-front rx0y ((rx0y ∘ ! lx0y) ∘ lp0) ∘ ap (_∘_ rx0y) (!-inv-l-front rx0y (! rx0y ∘ (rx0y ∘ ! lx0y) ∘ lp0)) ∘ ap (λ x → rx0y ∘ ! rx0y ∘ x) (! (!-inv-r-front rx0y ((rx0y ∘ ! lx0y) ∘ lp0))))) (! (∘-assoc rx0y (! lx0y) lp0))
         step3b id id id = id 
-
-{-
- -- the first two steps of glue-m-ml reduce well definitionally
-                 -- then transpose the problem and then reduce
-                 ap [_] (! (fst (equiv-adjunction (glue-ml-ml-total p0)) transposed)) where
-            transposed : Path
-                           (((_ , p0) , (_ , p0) , p0) ,
-                            ap (λ Z₁ → (_ , p0) , Z₁) (ap (λ Z₁ → (_ , p0) , Z₁) (!-inv-l (gluel p0) ∘ m-to-ml-triangle-coh1 (gluel p0) (gluel p0) (gluer p0))))
-                           (((_ , p0) , (_ , p0) , p0) ,
-                              ap (λ Z₁ → (_ , p0) , Z₁) (ap (λ Z₁ → (_ , p0) , Z₁) (!-inv-l (gluel p0))) ∘
-                             ap (λ Q → (_ , p0) , (_ , p0) , Q) (m-to-ml-triangle-coh1 (gluel p0) (gluel p0) (gluer p0)))
-            transposed = ap (λ Z₁ → ((_ , p0) , (_ , p0) , p0) , Z₁) 
-                         (  ap (λ x → x ∘ ap (λ Q → (_ , p0) , (_ , p0) , Q) (m-to-ml-triangle-coh1 (gluel p0) (gluel p0) (gluer p0))) (ap-o (λ Z₁ → (_ , p0) , Z₁) (λ Z₁ → (_ , p0) , Z₁) (!-inv-l (gluel p0)))
-                          ∘ ap-∘ (λ x → (_ , p0) , (_ , p0) , x) (!-inv-l (gluel p0)) (m-to-ml-triangle-coh1 (gluel p0) (gluel p0) (gluer p0))
-                          ∘ ! (ap-o (λ Z₁ → (_ , p0) , Z₁) (λ Z₁ → (_ , p0) , Z₁) (!-inv-l (gluel p0) ∘ m-to-ml-triangle-coh1 (gluel p0) (gluel p0) (gluer p0))))
-
-        step3b : {A : Type} {a0 a1 a2 : A} (l : a0 == a1) (r : a0 == a2) → Path (! (! (square-to-disc (PathOverPathFrom.out-PathOver-= (PathOverPathFrom.in-PathOver-= connection)))) ∘ ap (_∘_ (l)) (!-inv-l (l) ∘ m-to-ml-triangle-coh1 (l) (l) (r)) ∘ ! (!-inv-r-front (l) (! (r ∘ ! (l)) ∘ r) ∘ ap (_∘_ (l)) (!-inv-l-front (l) (! (l) ∘ ! (r ∘ ! (l)) ∘ r)) ∘ ap (λ x → l ∘ ! (l) ∘ x) (! (!-inv-r-front (l) (! (r ∘ ! (l)) ∘ r))))) (step3coh (r) (l)) 
-        step3b id id = id
--}
-
-      step2 : ∀ {y} (px0y : P x0 y) → transport CodesFor' (pair= (! (gluel px0y)) (PathOverPathFrom.in-PathOver-= ∘-square)) [ p0 , step1coh (gluer p0) (gluel p0) ]  == [ Wedge.inl (_ , px0y) , id ]
-      step2 px0y = {!!}
-{-
-transport CodesFor' (pair= (! (gluel px0y)) (PathOverPathFrom.in-PathOver-= ∘-square)) [ p0 , ! section-coh-path ] ≃〈 {!!} 〉
-                   snde (glue-m-l px0y {αm = ! (gluel px0y) ∘ gluel p0} {αl = gluel p0} (PathOverPathFrom.in-PathOver-= sq)) [ p0 , ! section-coh-path ] ≃〈 ap (λ H → snde (glue-m-ml px0y) (fst (glue-l-ml px0y {αm = ! (gluel px0y) ∘ gluel p0} {αl = gluel p0} (square-to-disc H)) [ p0 , ! section-coh-path ])) (IsEquiv.β (snd PathOverPathFrom.PathOver-=-eqv) sq) 〉 -- once you reduce the transport and massage this is what you should get
-                   snde (glue-m-ml px0y) (fst (glue-l-ml px0y {αm = ! (gluel px0y) ∘ gluel p0} {αl = (gluel p0)} (square-to-disc sq)) [ p0 , ! section-coh-path ]) ≃〈 (ap (snde (glue-m-ml px0y)) step2a) 〉  
-                   snde (glue-m-ml px0y) [ p0 , m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0) ] ≃〈 ! (fst (equiv-adjunction (glue-m-ml px0y)) step2b) 〉 --switch sides!
-                   [ Wedge.inl (_ , px0y) , id ] ∎ where
-
-            sq : Square (! (gluel px0y) ∘ gluel p0) id (gluel px0y) (gluel p0)
-            sq = {!!} 
-  
-            step2a : (fst (glue-l-ml px0y {αm = ! (gluel px0y) ∘ gluel p0} {αl = (gluel p0)} (square-to-disc sq)) [ p0 , ! section-coh-path ]) == [ p0 , m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0) ]
-            step2a = ap (λ x → [ p0 , x ]) {!coh!}
-
-            step2b : fst (glue-m-ml px0y) [ Wedge.inl (_ , px0y) , id ] ==  [ p0 , m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0) ]
-            step2b = fst (glue-m-ml px0y) [ Wedge.inl (_ , px0y) , id ] ≃〈 id 〉
-                     fst (apTrunc' (!equiv (glue-ml-ml-total px0y)) ∘equiv (glue-m-ml-total px0y) ∘equiv apTrunc' (glue-m-m-total px0y)) [ Wedge.inl (_ , px0y) , id ] ≃〈 id 〉
-                     fst (apTrunc' (!equiv (glue-ml-ml-total px0y)) ∘equiv (glue-m-ml-total px0y)) [ fst (glue-m-m-total px0y) (Wedge.inl (_ , px0y) , id) ] ≃〈 id 〉
-                     Trunc-func (snde (glue-ml-ml-total px0y)) (fst (glue-m-ml-total px0y) [ (_ , Wedge.inl (_ , px0y)) , id ]) ≃〈 id 〉 
-                     Trunc-func (snde (glue-ml-ml-total px0y)) [ m-to-ml (_ , Wedge.inl (_ , px0y)) , id ∘ ap (λ Q → (_ , p0) , (_ , px0y) , Q) (m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0)) ] ≃〈 id 〉 
-                     Trunc-func (snde (glue-ml-ml-total px0y)) [ ((_ , p0) , (_ , px0y) , p0) , id ∘ ap (λ Q → (_ , p0) , (_ , px0y) , Q) (m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0)) ] ≃〈 id 〉                       
-                     [ (fst (!equiv (glue-ml-ml-total px0y))) (((_ , p0) , (_ , px0y) , p0) , id ∘ ap (λ Q → (_ , p0) , (_ , px0y) , Q) (m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0))) ] ≃〈 ap (λ H → [ fst (!equiv (glue-ml-ml-total px0y)) (((_ , p0) , (_ , px0y) , p0) , H)]) (∘-unit-l (ap (λ Q → (_ , p0) , (_ , px0y) , Q) (m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0)))) 〉                       
-                     [ (fst (!equiv (glue-ml-ml-total px0y))) (((_ , p0) , (_ , px0y) , p0) , ap (λ Q → (_ , p0) , (_ , px0y) , Q) (m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0))) ] ≃〈 ap [_] (! (fst (equiv-adjunction (glue-ml-ml-total px0y)) (ap (λ h → ((_ , p0) , (_ , px0y) , p0) , h) (! (ap-o (λ Z₁ → (_ , p0) , Z₁) (λ Z₁ → (_ , px0y) , Z₁) (m-to-ml-triangle-coh1 (gluel px0y) (gluel p0) (gluer p0))))))) 〉 --switch sides!
-                     _ ∎
--}
 
       step4 : ∀ {y} (px0y : P x0 y) → 
           transport CodesFor' (ap (\ x → _ , x) (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)))
@@ -231,4 +204,4 @@ transport CodesFor' (pair= (! (gluel px0y)) (PathOverPathFrom.in-PathOver-= ∘-
   theorem = ConnectedMap.fiberwise-to-total-connected i+j (λ _ → glue) (λ xy → glue-connected (fst xy) (snd xy))
 
 
--}
+
