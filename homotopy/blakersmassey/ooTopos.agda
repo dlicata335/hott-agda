@@ -189,12 +189,12 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
                                                                              (gluer0-connected y))
 
   -- Step B: make y0,p0 : P x0 y0 using connectivity 
-  -- Z -> X is (S _)-connected, so to make an hprop for X, we can do it for Z
+  -- Z -> X is (S _)-connected, so to make an hprop for X, we can do it for the X part of a Z
   glue-connected : (x0 : X) (y : Y) → ConnectedMap i+j (glue{x = x0}{y})
   glue-connected x0 y = Trunc-rec (raise-HProp (Πlevel (\ _ → (NType-is-HProp _)))) (λ yp0 → OverZ.glue-connected' (snd yp0) y)
                                   (fst (use-level (cf x0)))
 
-  -- Working backwards, Step A: work in the slice
+  -- Working backwards, Step A: work in the slice over X × Y
 
   glue-map-total : (Σ \ xy → P (fst xy) (snd xy)) → Σ \ xy → Path{W} (inl (fst xy)) (inr (snd xy))
   glue-map-total ((x , y) , p) = ((x , y) , glue p)

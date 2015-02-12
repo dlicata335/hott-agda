@@ -414,7 +414,7 @@ module lib.cubical.PathOver where
                  → coe (PathOverΠ {A = A} {B = B}{δ = id} {f = f}) id x x id == id
   PathOverΠ-id f {x = x} = ap≃ (ap≃ (ap≃ (ap≃ (type≃β PathOverΠ-eqv) {id}) {x}) {x}) {id}
 
-  postulate -- needed for Blakers-Massey type-theoretic
+  postulate -- needed for Blakers-Massey 
      ap-uncurryd-NDrange : {A : Type} {B : A → Type} {C : Type}
                    (f : (x : A) → B x → C) {a0 a1 : A} {b0 : B a0} {b1 : B a1} (α : a0 == a1) (β : PathOver B α b0 b1)
                    → ap (uncurryd f) (pair= α β) == coe PathOverΠ-NDrange (apdo f α) _ _ β 
@@ -556,7 +556,6 @@ module lib.cubical.PathOver where
             -> Path (ap snd (pair= α (in-PathOver-constant β))) β
   Σ=β2-ND {p = x , y} {q = .x , .y} id id = id
                  
-
 
   !o-invol/start-over-! : {Δ : Type} {A : Δ → Type} {θ1 θ2 : Δ} {δ1 : θ1 == θ2} {M1 : A θ1} {M2 : A θ2} 
            (p : PathOver A (! δ1) M2 M1) 
