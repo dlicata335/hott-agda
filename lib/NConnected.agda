@@ -233,39 +233,43 @@ module lib.NConnected where
                                                                       (λ _ → HProp-unique (level _) _ _)))
 
     fiber-top-equiv : ∀ {i A A' B} (f : A → A') (g : A → B) (h : A' → B)
-                                 → h o f == g
+                                 → ((x : A) → (h o f) x == g x)
                                  → ConnectedMap i f 
                                  → {b : B} → Equiv (Trunc i (HFiber g b)) (Trunc i (HFiber h b))  
-    fiber-top-equiv f g h tri cf = 
-      improve (hequiv (Trunc-rec Trunc-level (λ hg → [ f (fst hg) , snd hg ∘ ap≃ tri ]))
-                      (Trunc-rec Trunc-level (λ hh → Trunc-rec Trunc-level (λ hf → [ fst hf , snd hh ∘ ap h (snd hf) ∘ ! (ap≃ tri) ]) 
-                                             (fst (use-level (cf (fst hh))))))
-                      (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
-                                    (λ hg → path-induction (λ b sndhg → Path (Trunc-rec Trunc-level (λ hf → [ fst hf , (sndhg ∘ ap≃ tri) ∘ ap h (snd hf) ∘ ! (ap≃ tri) ]) (fst (use-level (cf (f (fst hg)))))) [ fst hg , sndhg ]) 
-                                              (ap (λ z → [ fst hg , z ]) (coh1 (ap≃ tri)) ∘
-                                               ap (Trunc-rec Trunc-level (λ hf → [ fst hf , (id ∘ ap≃ tri) ∘ ap h (snd hf) ∘ ! (ap≃ tri) ])) (snd (use-level (cf (f (fst hg)))) [ fst hg , id ])) 
-                                              (snd hg)))
-                      -- weird that this side never uses snd (cf ...)
-                      (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
-                                    (λ hf → path-induction
-                                              (λ b sndhf → Path (Trunc-rec Trunc-level (λ hg → [ f (fst hg) , snd hg ∘ ap≃ tri ]) (Trunc-rec Trunc-level (λ hf₁ → [ fst hf₁ , sndhf ∘ ap h (snd hf₁) ∘ ! (ap≃ tri) ]) (fst (use-level (cf (fst hf)))))) [ fst hf , sndhf ])
-                                              ( _ ≃〈 Trunc-rec-cconv _ Trunc-level (λ hf₁ → [ fst hf₁ , id ∘ ap h (snd hf₁) ∘ ! (ap≃ tri) ]) (λ hg → [ f (fst hg) , snd hg ∘ ap≃ tri ]) (fst (use-level (cf (fst hf)))) 〉 
-                                                Trunc-rec Trunc-level (\ hf₁ → [ f (fst hf₁) , (id ∘ ap h (snd hf₁) ∘ ! (ap≃ tri)) ∘ ap≃ tri ]) (fst (use-level (cf (fst hf)))) ≃〈 ap (λ Z₁ → Trunc-rec Trunc-level Z₁ (fst (use-level (cf (fst hf))))) (λ≃ (λ x → ap (λ Z₁ → [ f (fst x) , Z₁ ]) (coh2 {α = ap≃ tri} {β = ap h (snd x)}))) 〉 
-                                                Trunc-rec Trunc-level (\ hf₁ → [ f (fst hf₁) , ap h (snd hf₁) ]) (fst (use-level (cf (fst hf)))) ≃〈 lemma {a' = fst hf} 〉 
-                                                [ fst hf , id ] ∎)
-                                              (snd hf)))) where 
-              coh1 : {A : Type} {a a' : A} (α : a == a') → ((id ∘ α) ∘ id ∘ ! α) == id
-              coh1 id = id
+    fiber-top-equiv {i} f g h tri cf {b} = 
+      improve (hequiv map1 map2 comp1 comp2) where
+       map1 : (Trunc i (HFiber g b)) → (Trunc i (HFiber h b))  
+       map1 = (Trunc-rec Trunc-level (λ hg → [ f (fst hg) , snd hg ∘ tri _ ]))
 
-              coh2 : {A : Type} {a a' a'' : A} {α : a == a'} {β : a == a''} → (id ∘ β ∘ ! α) ∘ α == β
-              coh2 {α = id} {β = id} = id
+       map2 : (Trunc i (HFiber h b)) → (Trunc i (HFiber g b)) 
+       map2 = (Trunc-rec Trunc-level (λ hh → Trunc-rec Trunc-level (λ hf → [ fst hf , snd hh ∘ ap h (snd hf) ∘ ! (tri _) ]) (fst (use-level (cf (fst hh))))))
+       abstract
+          coh1 : {A : Type} {a a' : A} (α : a == a') → ((id ∘ α) ∘ id ∘ ! α) == id
+          coh1 id = id
 
-              lemma : ∀ {a' : _} → (Trunc-rec Trunc-level (λ hf₁ → [ f (fst hf₁) , ap h (snd hf₁) ]) (fst (use-level (cf a')))) == [ a' , id ]
-              lemma {a'} = Trunc-elim
+          coh2 : {A : Type} {a a' a'' : A} {α : a == a'} {β : a == a''} → (id ∘ β ∘ ! α) ∘ α == β
+          coh2 {α = id} {β = id} = id
+
+          lemma : ∀ {a' : _} → Path {Trunc _ (HFiber h (h a'))} (Trunc-rec Trunc-level (λ hf₁ → [ f (fst hf₁) , ap h (snd hf₁) ]) (fst (use-level (cf a')))) [ a' , id ]
+          lemma {a'} = Trunc-elim
                              (λ Z₁ → Trunc-rec Trunc-level (λ hf₁ → [ f (fst hf₁) , ap h (snd hf₁) ]) Z₁ == [ a' , id ])
                              (λ _ → path-preserves-level Trunc-level)
                              (λ x → ap [_] (pair= (snd x) (PathOver=.in-PathOver-= (whisker-square id id (! (ap-constant _ (snd x))) id connection2))))
                              (fst (use-level (cf a')))
+
+          comp1 : (x : _) → Path (map2 (map1 x)) x
+          comp1 = (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
+                                    (λ hg → path-induction (λ b sndhg → Path (Trunc-rec Trunc-level (λ hf → [ fst hf , (sndhg ∘ tri _) ∘ ap h (snd hf) ∘ ! (tri _) ]) (fst (use-level (cf (f (fst hg)))))) [ fst hg , sndhg ]) 
+                                              (ap (λ z → [ fst hg , z ]) (coh1 (tri _)) ∘
+                                               ap (Trunc-rec Trunc-level (λ hf → [ fst hf , (id ∘ tri _) ∘ ap h (snd hf) ∘ ! (tri _) ])) (snd (use-level (cf (f (fst hg)))) [ fst hg , id ])) 
+                                              (snd hg)))
+          comp2 : (y : _) → Path (map1 (map2 y)) y
+          comp2 =  -- weird that this side never uses snd (cf ...)
+                   (Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
+                                    (λ hf → path-induction
+                                              (λ b sndhf → Path (Trunc-rec Trunc-level (λ hg → [ f (fst hg) , snd hg ∘ tri _ ]) (Trunc-rec Trunc-level (λ hf₁ → [ fst hf₁ , sndhf ∘ ap h (snd hf₁) ∘ ! (tri _) ]) (fst (use-level (cf (fst hf)))))) [ fst hf , sndhf ])
+                                              ( lemma {a' = fst hf} ∘ ap (λ Z₁ → Trunc-rec Trunc-level Z₁ (fst (use-level (cf (fst hf))))) (λ≃ (λ x → ap (λ Z₁ → [ f (fst x) , Z₁ ]) (coh2 {α = tri _} {β = ap h (snd x)}))) ∘ Trunc-rec-cconv _ Trunc-level (λ hf₁ → [ fst hf₁ , id ∘ ap h (snd hf₁) ∘ ! (tri _) ]) (λ hg → [ f (fst hg) , snd hg ∘ tri _ ]) (fst (use-level (cf (fst hf)))))
+                                              (snd hf)))
 
   {- -- should be a special case of the above if we ever want it.  ended up not using it.
     unfiberwise-to-total-connected : (n : TLevel) → ∀ {A} {B1 B2 : A → Type} → (f : (x : A) → B1 x → B2 x) → 

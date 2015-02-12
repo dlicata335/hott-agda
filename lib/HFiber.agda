@@ -31,12 +31,20 @@ module lib.HFiber where
   hfiber-fst : ∀ {A} {B : A → Type} (a : A) → (B a) == (HFiber {Σ B} fst a)
   hfiber-fst {B = B} a = ua (hfiber-fst-eqv a)
 
+  in-HFiber : ∀ {A B} {f : A → B} (a : A) → HFiber f (f a)
+  in-HFiber a = a , id
+
+  -- FIXME rewrite using equiv-adjunction ?
   HFiber-at-equiv : ∀ {A B B'} (e : Equiv B B') (f : A → B') {b : B}
                   → Equiv (HFiber f (fst e b)) (HFiber (IsEquiv.g (snd e) o f) b)
   HFiber-at-equiv e f {b} = 
     improve (hequiv (λ p → (fst p) , IsEquiv.α (snd e) b ∘ ap (IsEquiv.g (snd e)) (snd p))
                     (λ p → (fst p) , (ap (fst e) (snd p) ∘ ! (IsEquiv.β (snd e) (f (fst p)))))
-                    (λ hf → ap (λ Z₁ → fst hf , Z₁)
+                    comp1
+                    comp2) where
+     abstract
+       comp1 : (x : _) → Path (fst x , ap (fst e) (IsEquiv.α (snd e) b ∘ ap (IsEquiv.g (snd e)) (snd x)) ∘ ! (IsEquiv.β (snd e) (f (fst x)))) x
+       comp1 = (λ hf → ap (λ Z₁ → fst hf , Z₁)
                           (ap (fst e) (IsEquiv.α (snd e) b ∘ ap (IsEquiv.g (snd e)) (snd hf)) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 ap (λ Z₁ → Z₁ ∘ ! (IsEquiv.β (snd e) (f (fst hf)))) (ap-∘ (fst e) (IsEquiv.α (snd e) b) (ap (IsEquiv.g (snd e)) (snd hf))) 〉 
                            (ap (fst e) (IsEquiv.α (snd e) b) ∘ ap (fst e) (ap (IsEquiv.g (snd e)) (snd hf))) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 ! (∘-assoc (ap (fst e) (IsEquiv.α (snd e) b)) (ap (fst e) (ap (IsEquiv.g (snd e)) (snd hf))) (! (IsEquiv.β (snd e) (f (fst hf))))) 〉 
                            ap (fst e) (IsEquiv.α (snd e) b) ∘ ap (fst e) (ap (IsEquiv.g (snd e)) (snd hf)) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 ap (λ Z₁ → Z₁ ∘ ap (fst e) (ap (IsEquiv.g (snd e)) (snd hf)) ∘ ! (IsEquiv.β (snd e) (f (fst hf)))) (! (IsEquiv.γ (snd e) b)) 〉 
@@ -46,7 +54,7 @@ module lib.HFiber where
                            IsEquiv.β (snd e) (fst e b) ∘ ! (IsEquiv.β (snd e) (fst e b)) ∘ snd hf ∘ ! (! (IsEquiv.β (snd e) (f (fst hf)))) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 !-inv-r-front (IsEquiv.β (snd e) (fst e b)) (snd hf ∘ ! (! (IsEquiv.β (snd e) (f (fst hf)))) ∘ ! (IsEquiv.β (snd e) (f (fst hf))))  〉
                            snd hf ∘ ! (! (IsEquiv.β (snd e) (f (fst hf)))) ∘ ! (IsEquiv.β (snd e) (f (fst hf))) ≃〈 !-inv-l-back (snd hf) (! (IsEquiv.β (snd e) (f (fst hf)))) 〉 
                            snd hf ∎))
-                    (\ hc → ap (λ Z₁ → fst hc , Z₁) 
+       comp2 = (\ hc → ap (λ Z₁ → fst hc , Z₁) 
                                (IsEquiv.α (snd e) b ∘ ap (IsEquiv.g (snd e)) (ap (fst e) (snd hc) ∘ ! (IsEquiv.β (snd e) (f (fst hc)))) ≃〈 ap (λ Z₁ → IsEquiv.α (snd e) b ∘ Z₁) (ap-∘ (IsEquiv.g (snd e)) (ap (fst e) (snd hc)) (! (IsEquiv.β (snd e) (f (fst hc))))) 〉 
                                 IsEquiv.α (snd e) b ∘ ap (IsEquiv.g (snd e)) (ap (fst e) (snd hc)) ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc)))) ≃〈 ap (λ Z₁ → IsEquiv.α (snd e) b ∘ Z₁ ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc))))) (! (ap-o (IsEquiv.g (snd e)) (fst e) (snd hc))) 〉 
                                 IsEquiv.α (snd e) b ∘ ap (IsEquiv.g (snd e) o (fst e)) (snd hc) ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc)))) ≃〈 ap (λ Z₁ → IsEquiv.α (snd e) b ∘ Z₁ ∘ ap (IsEquiv.g (snd e)) (! (IsEquiv.β (snd e) (f (fst hc))))) (ap-by-id (λ x → ! (IsEquiv.α (snd e) x)) (snd hc)) 〉 
@@ -56,28 +64,42 @@ module lib.HFiber where
                                 snd hc ∘ ! (! (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))))) ∘ ! (ap (IsEquiv.g (snd e)) (IsEquiv.β (snd e) (f (fst hc)))) ≃〈 ap (λ Z₁ → snd hc ∘ Z₁ ∘ ! (ap (IsEquiv.g (snd e)) (IsEquiv.β (snd e) (f (fst hc))))) (!-invol (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))))) 〉 
                                 snd hc ∘ (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc)))) ∘ ! (ap (IsEquiv.g (snd e)) (IsEquiv.β (snd e) (f (fst hc)))) ≃〈  ap (λ Z₁ → snd hc ∘ IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))) ∘ ! Z₁) (! (IsEquiv.γ (snd (!equiv e)) _)) 〉 
                                 snd hc ∘ IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc))) ∘ ! (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc)))) ≃〈 !-inv-r-back (snd hc) (IsEquiv.α (snd e) (IsEquiv.g (snd e) (f (fst hc)))) 〉 
-                                snd hc ∎)))
+                                snd hc ∎))
 
   HFiber-fiberwise-to-total-eqv : {A : Type} {B C : A → Type} (f : (x : A) → B x → C x)
-                                → {a : A} {c : C a} → Equiv (HFiber (f a) c) (HFiber (fiberwise-to-total f) (a , c))
+                                  → {a : A} {c : C a} → Equiv (HFiber (f a) c) (HFiber (fiberwise-to-total f) (a , c))
   HFiber-fiberwise-to-total-eqv {A}{B}{C} f {a}{c} = 
-    improve (hequiv mapl
-                    mapr
-                    (λ x → path-induction (λ c' sndx → Path (mapr (mapl (fst x , sndx))) (fst x , sndx)) 
-                           id 
-                           (snd x))
-                    (λ y → comp2 y)) where
-    mapl : ∀ {a} {c : C a} → (HFiber (f a) c) → (HFiber (fiberwise-to-total f) (a , c))
-    mapl {a}{c} = (λ p → (a , fst p) , pair= id (hom-to-over (snd p)))
+      improve (hequiv mapl
+                      mapr
+                      comp1
+                      comp2) where
+      mapl : ∀ {a} {c : C a} → (HFiber (f a) c) → (HFiber (fiberwise-to-total f) (a , c))
+      mapl {a}{c} = (λ p → (a , fst p) , ap (λ Z₁ → a , Z₁) (snd p))
 
-    mapr : ∀ {a} {c : C a} →  (HFiber (fiberwise-to-total f) (a , c)) → (HFiber (f a) c)
-    mapr = (λ p → transport B (ap fst (snd p)) (snd (fst p)) ,
-                   (over-to-hom/left (over-o-ap C (apdo snd (snd p))) ∘
-                   ap (λ Z₁ → transport C Z₁ (f (fst (fst p)) (snd (fst p)))) (Σ=β1 (ap (λ r → fst r) (snd p)) (PathOver-transport-right (λ z → B z) (ap (λ r → fst r) (snd p))))) ∘ 
-                   ! (over-to-hom/left (over-o-ap C (out-PathOverΠ (apdo f (ap fst (snd p))) (snd (fst p)) _ (PathOver-transport-right _ _)))))
-    
-    comp2 : ∀ {ac} (y : HFiber (fiberwise-to-total f) ac) → Path (mapl (mapr y)) y
-    comp2 (p , id) = id
+      abstract 
+        mapr : ∀ {a} {c : C a} →  (HFiber (fiberwise-to-total f) (a , c)) → (HFiber (f a) c)
+        mapr = (λ p → transport B (ap fst (snd p)) (snd (fst p)) ,
+                       (over-to-hom/left (over-o-ap C (apdo snd (snd p))) ∘
+                       ap (λ Z₁ → transport C Z₁ (f (fst (fst p)) (snd (fst p)))) (Σ=β1 (ap (λ r → fst r) (snd p)) (PathOver-transport-right (λ z → B z) (ap (λ r → fst r) (snd p))))) ∘ 
+                       ! (over-to-hom/left (over-o-ap C (out-PathOverΠ (apdo f (ap fst (snd p))) (snd (fst p)) _ (PathOver-transport-right _ _)))))
+        
+        comp1 : (x : HFiber (f a) c) → Path (mapr (mapl x)) x
+        comp1 = (λ x → path-induction (λ c' sndx → Path (mapr (mapl (fst x , sndx))) (fst x , sndx)) id (snd x))
+
+        comp2 : ∀ {ac} (y : HFiber (fiberwise-to-total f) ac) → Path (mapl (mapr y)) y
+        comp2 (p , id) = id
+
+{-
+  fst-HFiber-fiberwise-to-total-eqv-on-in : {A : Type} {B C : A → Type} (f : (x : A) → B x → C x) {a : A} {b : B a}
+                                           → fst (HFiber-fiberwise-to-total-eqv f) (in-HFiber b)
+                                              == in-HFiber (a , b)
+  fst-HFiber-fiberwise-to-total-eqv-on-in f = id
+
+  snde-HFiber-fiberwise-to-total-eqv-on-in : {A : Type} {B C : A → Type} (f : (x : A) → B x → C x) {a : A} {b : B a}
+                                           → snde (HFiber-fiberwise-to-total-eqv f) (in-HFiber (a , b))
+                                              == in-HFiber b
+  snde-HFiber-fiberwise-to-total-eqv-on-in f = id
+-}
 
   -- want it to compute
   HFiber-result-equiv : {A B : Type} {f : A → B} {b b' : B} → (p : b == b') 

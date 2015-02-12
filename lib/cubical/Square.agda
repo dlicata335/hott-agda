@@ -658,6 +658,11 @@ module lib.cubical.Square where
            → Square p id q (q ∘ p)
   ∘-square {p = id} {q} = connection
 
+  -- (r ∘ q) ∘ p is r ∘ (q ∘ p) 
+  ∘-assoc-l-square : {A : Type} {x y z w : A} (p : x == y) (q : y == z) ( r : z == w)
+           → Square (q ∘ p) id r ((r ∘ q) ∘ p)
+  ∘-assoc-l-square id id r = connection
+
   HSet-UIP-Square : {A : Type} → HSet A → {a00 : A} {a01 a10 a11 : A} {l : a00 == a01} {t : a00 == a10} {b : a01 == a11} {r : a10 == a11}
                   → Square l t b r
   HSet-UIP-Square hA = disc-to-square (HSet-UIP hA _ _ _ _)

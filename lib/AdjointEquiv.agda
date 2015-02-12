@@ -122,3 +122,20 @@ module lib.AdjointEquiv where
  grab-point-in-range : ∀ {A B} (f : A → B) → (B → IsEquiv f) → IsEquiv f
  grab-point-in-range f p = coe (IsWeq≃IsEquiv f) (λ b → coe (! (IsWeq≃IsEquiv f)) (p b) b)
 
+ equiv-adjunction : ∀ {A B} (e : Equiv A B) {a : A} {b : B} → Equiv (fst e a == b) (a == snde e b)
+ equiv-adjunction e {a}{b} = 
+    improve (hequiv (λ p → ap (IsEquiv.g (snd e)) p ∘ ! (IsEquiv.α (snd e) a))
+                    (λ p → IsEquiv.β (snd e) b ∘ ap (fst e) p) 
+                    -- ENH could write these out more explcitly if we need them
+                    (path-induction
+                       (λ b₁ x → Path (IsEquiv.β (snd e) b₁ ∘ ap (fst e) (ap (IsEquiv.g (snd e)) x ∘ ! (IsEquiv.α (snd e) a))) x)
+                       (coe (! (cancels-inverse-is≃ (IsEquiv.β (snd e) (fst e a)) (ap (fst e) (IsEquiv.α (snd e) a)))) (IsEquiv.γ (snd e) a)
+                        ∘ ap (λ x → IsEquiv.β (snd e) (fst e a) ∘ x) (ap-! (fst e) (IsEquiv.α (snd e) a) ∘ ap (ap (fst e)) (∘-unit-l (! (IsEquiv.α (snd e) a))))))
+                    (path-induction-l
+                       (λ a₁ y → Path (ap (IsEquiv.g (snd e)) (IsEquiv.β (snd e) b ∘ ap (fst e) y) ∘ ! (IsEquiv.α (snd e) a₁)) y)
+                       (coe
+                          (!
+                           (cancels-inverse-is≃
+                            (ap (fst (!equiv e)) (IsEquiv.α (snd (!equiv e)) b))
+                            (IsEquiv.β (snd (!equiv e)) (fst (!equiv e) b))))
+                          (! (IsEquiv.γ (snd (!equiv e)) b)))))
