@@ -4,20 +4,21 @@ open import lib.Prelude hiding (Z)
 open FatPushoutFib
 open Truncation
 open import lib.cubical.Cubical
-import homotopy.blakersmassey.ooTopos0
+import homotopy.blakersmassey.ooToposCodes
 
 module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
                                        (i' j' : TLevel)
                                        (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
                                        (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where 
-  open homotopy.blakersmassey.ooTopos0 X Y P i' j' cf cg
+  open homotopy.blakersmassey.ooToposCodes X Y P i' j' cf cg
 
   open CodesGlueMaps 
 
-  module Section {x0 y0} (p0 : P x0 y0) where
-    open CodesGlueMaps
+  module OverZ {x0 : X} {y0 : Y} (p0 : P x0 y0) where
     open Codes p0
     open OverZMaps p0
+
+    -- make a section
 
     sectioncoh : Path { -×WZ}  (((x0 , y0) , p0) , ! (gluel p0) ∘ gluel p0) (((x0 , y0) , p0) , id)
     sectioncoh = (ap (\ Z → ((x0 , y0) , p0) , Z) (!-inv-l (gluel p0)))
@@ -28,10 +29,8 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     section : (w : W) (p : inm p0 == w) → (CodesFor w p)
     section y p = transport CodesFor' (pair= p connOver) sectionZ
 
-  module OverZ {x0 : X} {y0 : Y} (p0 : P x0 y0) where
-    open Codes p0
-    open Section p0
-    open OverZMaps p0
+
+    -- show that it is also a retraction
 
     transport-CodesFor'-gluel : ∀ {x y} (pxy : P x y) {αl : _} {αm : _} (s : PathOver (λ v → Path (inm p0) v) (gluel pxy) αm αl) {a : _ }
                               → transport CodesFor' (pair= (gluel pxy) s) a == fst (glue-m-l pxy s) a
@@ -202,6 +201,4 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
 
   theorem : ConnectedMap i+j glue-map-total
   theorem = ConnectedMap.fiberwise-to-total-connected i+j (λ _ → glue) (λ xy → glue-connected (fst xy) (snd xy))
-
-
 

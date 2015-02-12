@@ -7,10 +7,10 @@ open FatPushoutFib
 open Truncation
 open import lib.cubical.Cubical
 
-module homotopy.blakersmassey.ooTopos0 (X Y : Type) (P : X → Y → Type)
-                                       (i' j' : TLevel)
-                                       (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
-                                       (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where 
+module homotopy.blakersmassey.ooToposCodes (X Y : Type) (P : X → Y → Type)
+                                           (i' j' : TLevel)
+                                           (cf : (x : X) → Connected (S i') (Σ \ y → P x y))
+                                           (cg : (y : Y) → Connected (S j') (Σ \ x → P x y)) where 
 
   i : TLevel
   i = S i'
