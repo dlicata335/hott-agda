@@ -658,6 +658,9 @@ module lib.cubical.Square where
            → Square p id q (q ∘ p)
   ∘-square {p = id} {q} = connection
 
+  square-to-disc-∘-square : {A : Type} {x y z : A} (p : x == y) (q : y == z) → Path {q ∘ p == q ∘ p} (square-to-disc (∘-square{p = p}{q})) id
+  square-to-disc-∘-square id id = id 
+
   -- (r ∘ q) ∘ p is r ∘ (q ∘ p) 
   ∘-assoc-l-square : {A : Type} {x y z w : A} (p : x == y) (q : y == z) ( r : z == w)
            → Square (q ∘ p) id r ((r ∘ q) ∘ p)

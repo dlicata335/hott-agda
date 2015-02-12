@@ -68,4 +68,25 @@ module lib.PushoutFatFib where
       Pushout-elim _ _ b2 _ _ _ (inm' {x = x}{y} p) = b2 x y p
       Pushout-elim _ _ _ b3 _ _ (inr' y) = b3 y
 
+      postulate {- HoTT Axiom -}
+        Pushout-elim/βgluel : {X Y : Type} {P : X → Y → Type} (C : Pushout P → Type)
+                              (b1 : (x : X) → C (inl x))
+                              (b2 : (x : X) (y : Y) (p : P x y) → C (inm p))
+                              (b3 : (y : Y) → C (inr y))
+                              (gluel' : (x : X) (y : Y) (p : P x y) → PathOver C (gluel p) (b2 x y p) (b1 x))
+                              (gluer' : (x : X) (y : Y) (p : P x y) → PathOver C (gluer p) (b2 x y p) (b3 y))
+                              (x : X) → (y : Y) → (p : P x y) → 
+                              Path (apdo (Pushout-elim C b1 b2 b3 gluel' gluer') (gluel p))
+                                   (gluel' x y p)
+
+        Pushout-elim/βgluer : {X Y : Type} {P : X → Y → Type} (C : Pushout P → Type)
+                              (b1 : (x : X) → C (inl x))
+                              (b2 : (x : X) (y : Y) (p : P x y) → C (inm p))
+                              (b3 : (y : Y) → C (inr y))
+                              (gluel' : (x : X) (y : Y) (p : P x y) → PathOver C (gluel p) (b2 x y p) (b1 x))
+                              (gluer' : (x : X) (y : Y) (p : P x y) → PathOver C (gluer p) (b2 x y p) (b3 y))
+                              (x : X) → (y : Y) → (p : P x y) → 
+                              Path (apdo (Pushout-elim C b1 b2 b3 gluel' gluer') (gluer p))
+                                   (gluer' x y p)
+
     open P public

@@ -33,13 +33,32 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
     open Section p0
     open OverZMaps p0
 
-    transport-CodesFor'-gluel : ∀ {y} (px0y : P x0 y) {αl : _} {αm : _} (p : PathOver (λ v → Path (inm p0) v) (gluel px0y) αm αl) {s : _ }
-                              → transport CodesFor' (pair= (gluel px0y) p) s == fst (glue-m-l px0y p) s
-    transport-CodesFor'-gluel = {!!}
+    transport-CodesFor'-gluel : ∀ {x y} (pxy : P x y) {αl : _} {αm : _} (s : PathOver (λ v → Path (inm p0) v) (gluel pxy) αm αl) {a : _ }
+                              → transport CodesFor' (pair= (gluel pxy) s) a == fst (glue-m-l pxy s) a
+    transport-CodesFor'-gluel pxy s = ap≃(
+                                       transport CodesFor' (pair= (gluel pxy) s) ≃〈 transport-ap-assoc CodesFor' (pair= (gluel pxy) s) 〉 
+                                       coe (ap CodesFor' (pair= (gluel pxy) s)) ≃〈 ap coe (ap-uncurryd-NDrange CodesFor _ _) 〉 
+                                       coe (coe PathOverΠ-NDrange (apdo CodesFor (gluel pxy)) _ _ s) ≃〈 ap (λ Z → coe (coe PathOverΠ-NDrange Z _ _ s)) (Pushout-elim/βgluel _ _ _ _ (λ x y pxy₁ → coe (! PathOverΠ-NDrange) (λ αm αl d → ua (glue-m-l pxy₁ d))) (λ x y pxy₁ → coe (! PathOverΠ-NDrange) (λ αm αl d → ua (glue-m-r pxy₁ d))) _ _ _) 〉 
+                                       coe (coe PathOverΠ-NDrange (coe (! PathOverΠ-NDrange)
+                                             (λ αx αy s → ua (glue-m-l pxy s))) _ _ s) ≃〈 ap (λ z → coe (z _ _ s)) (IsEquiv.β (snd (coe-equiv PathOverΠ-NDrange)) _) 〉 
+                                       coe (ua (glue-m-l pxy s)) ≃〈 type≃β (glue-m-l pxy s) 〉 
+                                       fst (glue-m-l pxy s) ∎)
 
-    transport-CodesFor'-!gluel : ∀ {y} (px0y : P x0 y) {αl : _} {αm : _} (p : PathOver (λ v → Path (inm p0) v) (! (gluel px0y)) αl αm) {s : _ }
-                              → transport CodesFor' (pair= (! (gluel px0y)) p) s == snde (glue-m-l px0y (changeover _ (!-invol (gluel px0y)) (!o p))) s
-    transport-CodesFor'-!gluel = {!!}
+    transport-CodesFor'-gluer : ∀ {x y} (pxy : P x y) {αr : _} {αm : _} (s : PathOver (λ v → Path (inm p0) v) (gluer pxy) αm αr) {a : _ }
+                              → transport CodesFor' (pair= (gluer pxy) s) a == fst (glue-m-r pxy s) a 
+    transport-CodesFor'-gluer pxy s = ap≃(   transport CodesFor' (pair= (gluer pxy) s) ≃〈 transport-ap-assoc CodesFor' (pair= (gluer pxy) s) 〉 
+                                       coe (ap CodesFor' (pair= (gluer pxy) s)) ≃〈 ap coe (ap-uncurryd-NDrange CodesFor _ _) 〉 
+                                       coe (coe PathOverΠ-NDrange (apdo CodesFor (gluer pxy)) _ _ s) ≃〈 ap (λ Z → coe (coe PathOverΠ-NDrange Z _ _ s)) (Pushout-elim/βgluer _ _ _ _ (λ x y pxy → coe (! PathOverΠ-NDrange) (λ αm αl d → ua (glue-m-l pxy d ))) (λ x y pxy → coe (! PathOverΠ-NDrange) (λ αm αl d → ua (glue-m-r pxy d ))) _ _ _) 〉 
+                                       coe (coe PathOverΠ-NDrange (coe (! PathOverΠ-NDrange)
+                                             (λ αx αy s → ua (glue-m-r pxy s))) _ _ s) ≃〈 ap (λ z → coe (z _ _ s)) (IsEquiv.β (snd (coe-equiv PathOverΠ-NDrange)) _) 〉 
+                                       coe (ua (glue-m-r pxy s)) ≃〈 type≃β (glue-m-r pxy s) 〉 
+                                       fst (glue-m-r pxy s) ∎)
+
+    transport-CodesFor'-!gluel : ∀ {x y} (pxy : P x y) {αl : _} {αm : _} (s : PathOver (λ v → Path (inm p0) v) (! (gluel pxy)) αl αm) {a : _ }
+                              → transport CodesFor' (pair= (! (gluel pxy)) s) a == snde (glue-m-l pxy (changeover _ (!-invol (gluel pxy)) (!o s))) a
+    transport-CodesFor'-!gluel pxy s = {!!}
+
+{-
 
     retraction-r : (y : Y) (p : Path{W} (inm p0) (inr y)) (c : CodesFor (inr y) p) → Path (section (inr y) p) c
     retraction-r y p = Trunc-elim _ (λ _ → path-preserves-level Trunc-level) 
@@ -91,18 +110,28 @@ module homotopy.blakersmassey.ooTopos (X Y : Type) (P : X → Y → Type)
         step1b : {A : Type} {a0 a1 a2 : A} (l : a0 == a1) (r : a0 == a2) → Path (! (! (square-to-disc (PathOverPathFrom.out-PathOver-= (PathOverPathFrom.in-PathOver-= connection)))) ∘ ap (_∘_ (l)) (!-inv-l (l) ∘ m-to-ml-triangle-coh1 (l) (l) (r)) ∘ ! (!-inv-r-front (l) (! (r ∘ ! (l)) ∘ r) ∘ ap (_∘_ (l)) (!-inv-l-front (l) (! (l) ∘ ! (r ∘ ! (l)) ∘ r)) ∘ ap (λ x → l ∘ ! (l) ∘ x) (! (!-inv-r-front (l) (! (r ∘ ! (l)) ∘ r))))) (step1coh (r) (l)) 
         step1b id id = id
 
-      step3 : ∀ {y} (px0y : P x0 y) → transport CodesFor' (pair= (gluer px0y) (PathOverPathFrom.in-PathOver-= ∘-square)) [ Wedge.inl (_ , px0y) , id ] == [ px0y , ! (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)) ] 
-      step3 = {!!}
+
+      step3start : ∀ {y} (px0y : P x0 y) → Trunc i+j (HFiber gluem _)
+      step3start px0y = [ Wedge.inl (_ , px0y) , id ]
+
+      step3 : ∀ {y} (px0y : P x0 y) → transport CodesFor' (pair= (gluer px0y) (PathOverPathFrom.in-PathOver-= ∘-square)) (step3start px0y) == [ px0y , ! (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)) ] 
+      step3 px0y = transport CodesFor' (pair= (gluer px0y) (PathOverPathFrom.in-PathOver-= ∘-square)) (step3start px0y) ≃〈 transport-CodesFor'-gluer px0y {αr = gluer px0y ∘ ! (gluel px0y) ∘ gluel p0} {αm = ! (gluel px0y) ∘ gluel p0} (PathOverPathFrom.in-PathOver-= ∘-square) {s = step3start px0y} 〉 
+                   fst (glue-m-r px0y (PathOverPathFrom.in-PathOver-= ∘-square)) (step3start px0y)  ≃〈 ap (\ h → snde (glue-r-mr px0y h) (fst (glue-m-mr px0y) (step3start px0y))) (square-to-disc-∘-square (! (gluel px0y) ∘ gluel p0) (gluer px0y) ∘ ap square-to-disc (IsEquiv.β (snd PathOverPathFrom.PathOver-=-eqv) ∘-square)) 〉 
+                   snde (glue-r-mr px0y id) (fst (glue-m-mr px0y) (step3start px0y))  ≃〈 ap (snde (glue-r-mr px0y id)) step3a  〉 
+                   snde (glue-r-mr px0y id) [ px0y , m-to-mr-triangle-coh1 (gluer px0y) (gluel px0y) (gluel p0) ]  ≃〈 ap (λ z → [ px0y , z ]) (step3b (gluer px0y) (gluel px0y) (gluel p0)) 〉 
+                   [ px0y , ! (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)) ]  ∎ where
+
+        step3a : fst (glue-m-mr px0y) [ Wedge.inl (_ , px0y) , id ]  == [ px0y , m-to-mr-triangle-coh1 (gluer px0y) (gluel px0y) (gluel p0) ] 
+        step3a = ap [_] (! (fst (equiv-adjunction (glue-mr-mr-total px0y)) transposed)) where
+          transposed = ap (λ h → ((_ , p0) , (_ , px0y) , px0y) , h) 
+                          (! (∘-unit-l (ap (λ Q → (_ , p0) , (_ , px0y) , Q) (m-to-mr-triangle-coh1 (gluer px0y) (gluel px0y) (gluel p0))))
+                           ∘ ! (ap-o (λ Z₁ → ((x0 , y0) , p0) , Z₁) (λ Z₁ → (_ , px0y) , Z₁) (m-to-mr-triangle-coh1 (gluer px0y) (gluel px0y) (gluel p0))))
+
+        step3b : ∀ {A} {a0 a1 a2 a3 : A} (rx0y : a0 == a1) (lx0y : a0 == a2) (lp0 : a3 == a2) → Id (id ∘ ap (_∘_ rx0y) (m-to-mr-triangle-coh1 rx0y lx0y lp0) ∘ ! (!-inv-r-front rx0y ((rx0y ∘ ! lx0y) ∘ lp0) ∘ ap (_∘_ rx0y) (!-inv-l-front rx0y (! rx0y ∘ (rx0y ∘ ! lx0y) ∘ lp0)) ∘ ap (λ x → rx0y ∘ ! rx0y ∘ x) (! (!-inv-r-front rx0y ((rx0y ∘ ! lx0y) ∘ lp0))))) (! (∘-assoc rx0y (! lx0y) lp0))
+        step3b id id id = id 
+
 {-
-            _ ≃〈 transport-CodesFor'-gluel p0 connOver 〉 
-              fst (glue-m-l p0 connOver) sectionZ  ≃〈 id 〉 
-              snde (glue-l-ml p0 (square-to-disc (PathOverPathFrom.out-PathOver-= connOver))) (fst (glue-m-ml p0) sectionZ)  ≃〈 ap (snde (glue-l-ml p0 (square-to-disc (PathOverPathFrom.out-PathOver-= connOver)))) step3a 〉 
-              snde (glue-l-ml p0 (square-to-disc (PathOverPathFrom.out-PathOver-= connOver))) [ p0 , !-inv-l (gluel p0) ∘ m-to-ml-triangle-coh1 (gluel p0) (gluel p0) (gluer p0) ] ≃〈 ap (λ x → [ p0 , x ]) (step3b (gluel p0) (gluer p0)) 〉 
-              [ p0 , _ ] ∎ where
--}
-{-
-        step3a : fst (glue-m-ml p0) sectionZ == [ p0 , !-inv-l (gluel p0) ∘ m-to-ml-triangle-coh1 (gluel p0) (gluel p0) (gluer p0) ]
-        step3a = -- the first two steps of glue-m-ml reduce well definitionally
+ -- the first two steps of glue-m-ml reduce well definitionally
                  -- then transpose the problem and then reduce
                  ap [_] (! (fst (equiv-adjunction (glue-ml-ml-total p0)) transposed)) where
             transposed : Path
@@ -152,7 +181,7 @@ transport CodesFor' (pair= (! (gluel px0y)) (PathOverPathFrom.in-PathOver-= ∘-
                               [ px0y , ! (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)) ] == [ px0y , id ]
       step4 px0y = (ap [_] (ap (λ x → px0y , x) (!-inv-r (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0))) 
                                 ∘ ap≃ (transport-HFiber-arg gluer0 (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0)))) ∘
-                  ap≃ (transport-Trunc (λ x → HFiber gluer0 x) (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0))) {_}) ∘
+                   ap≃ (transport-Trunc (λ x → HFiber gluer0 x) (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0))) {_}) ∘
                    ! (ap≃ (transport-ap-assoc' CodesFor' (λ x → _ , x) (∘-assoc (gluer px0y) (! (gluel px0y)) (gluel p0))))
 
     -- so we need a section and a retraction
@@ -202,3 +231,4 @@ transport CodesFor' (pair= (! (gluel px0y)) (PathOverPathFrom.in-PathOver-= ∘-
   theorem = ConnectedMap.fiberwise-to-total-connected i+j (λ _ → glue) (λ xy → glue-connected (fst xy) (snd xy))
 
 
+-}
