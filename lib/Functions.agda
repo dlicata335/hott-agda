@@ -245,3 +245,12 @@ module lib.Functions where
                                                             ! (transport-ap-assoc (λ x → x → A) (! (ua e)))) (snd (coe-equiv (ap (λ x → x → A) (! (ua e)))))
 
 
+
+  -- could do this with ∘ and ap instead
+  chase4 : ∀ {A B C D E : Type} {a b c d e} {i : D → E} {h : C → D} {g : B → C} {f : A → B}
+           → i d == e
+           → h c == d
+           → g b == c
+           → f a == b
+           → i (h (g (f a))) == e
+  chase4 id id id id = id

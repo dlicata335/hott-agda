@@ -100,16 +100,21 @@ module homotopy.blakersmassey.ooToposSR2 (X Y : Type) (P : X → Y → Type)
                      _ ∎
       
 
-    retraction : (w : W) (p : Path{W} (inm p0) w) (c : CodesFor w p) → Path (section w p) c
-    retraction ._ id = {!!}
-
     -- so we need a section and a retraction
-    contr : (w : W) (p : Path{W} (inm p0) w) → Contractible (CodesFor w p)
-    contr w p = section w p , retraction w p
+    contr-r : (y : Y) (p : Path{W} (inm p0) (inr y)) → Contractible (CodesFor (inr y) p)
+    contr-r y p = section (inr y) p , retraction-r y p
+
+    module Unused where
+      -- note: it's not used below but he fact that codes is contractible in general follows
+      -- from doing it for inr
+      contr : (w : W) (p : Path{W} (inm p0) w) → Contractible (CodesFor w p)
+      contr w p = transport (\ (wp : (Σ \ (w : W) → Path (inm p0) w)) → Contractible (CodesFor (fst wp) (snd wp))) 
+                            (HProp-unique (raise-level (-2<= -1) singleton-contractible) (inr y0 , gluer p0) (w , p))
+                            (contr-r y0 (gluer p0))
 
     -- Step D: what we want is a special case of codes being contractible
     gluer0-connected : (y : Y) → ConnectedMap i+j (gluer0 {y})
-    gluer0-connected y = λ α → ntype (contr (inr y) α)
+    gluer0-connected y = λ α → ntype (contr-r y α)
 
     -- Step C: it suffices to show that gluer0 is connected
     -- slightly different way of getting here than in the ooTopos proof:

@@ -209,6 +209,11 @@ module lib.Paths where
  transport-∘3 : {A : Type} (C : A → Type) {M N P Q : A} (γ : Path P Q) (β : Path N P) (α : Path M N)
               → Path (transport C (γ ∘ β ∘ α)) (transport C γ o transport C β o transport C α)
  transport-∘3 _ id id id = id
+
+
+ transport-∘4 : {A : Type} (C : A → Type) {M N P Q R : A} (δ : Q == R) (γ : Path P Q) (β : Path N P) (α : Path M N)
+              → Path (transport C (δ ∘ γ ∘ β ∘ α)) (transport C δ o transport C γ o transport C β o transport C α)
+ transport-∘4 _ id id id id = id
  
  transport-ap-assoc : {A : Type} (C : A → Type) {M N : A} (α : Path M N) → Path (transport C α) (transport (\ x → x) (ap C α))
  transport-ap-assoc C id = id 

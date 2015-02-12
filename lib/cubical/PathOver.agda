@@ -556,4 +556,4 @@ module lib.cubical.PathOver where
             (β : Path (snd p) (snd q))
             -> Path (ap snd (pair= α (in-PathOver-constant β))) β
   Σ=β2-ND {p = x , y} {q = .x , .y} id id = id
-
+                 
