@@ -59,39 +59,6 @@ module homotopy.blakersmassey.ooToposCodes (X Y : Type) (P : X → Y → Type)
     wtp = Pushout.wedge-to-prod
 
 
-    -- these will be used later for making the section/retraction
-
-    -- like Z ×X Z ×Y Z but with the first component fixed and the second and third flipped
-    Z×0YZ = Σ \ (z2 : Z) → P x0 (snd (fst z2))
-
-    [Z×0YZ] : ∀ {x' y'} (px'y' : P x' y') (α : Path (inm p0) (inm px'y')) → Type
-    [Z×0YZ] {x'}{y'} px'y' α = Trunc i+j (HFiber (gluemr px'y') α)
-
-    gluemr-uncurry : (zs : Z×0YZ) → Path {W} (inm p0) (inm (snd (fst zs)))
-    gluemr-uncurry (z2 , p) = gluemr (snd z2) p
-
-    Z×0YZ→[Z×0YZ] : ∀ (zs : Z×0YZ) → [Z×0YZ] (snd (fst zs)) (gluemr-uncurry zs)
-    Z×0YZ→[Z×0YZ] (_ , p) = [ p , id ] 
-
-    Z×X0Z = Σ \ (z2 : Z) → P (fst (fst z2)) y0
-
-    [Z×X0Z] : ∀ {x' y'} (px'y' : P x' y') (α : Path (inm p0) (inm px'y')) → Type
-    [Z×X0Z] {x'}{y'} px'y' α = Trunc i+j (HFiber (glueml px'y') α)
-
-    glueml-uncurry : (zs : Z×X0Z) → Path {W} (inm p0) (inm (snd (fst zs)))
-    glueml-uncurry (z2 , p) = glueml (snd z2) p
-
-    Z×X0Z→[Z×X0Z] : ∀ (zs : Z×X0Z) → [Z×X0Z] (snd (fst zs)) (glueml-uncurry zs)
-    Z×X0Z→[Z×X0Z] (_ , p) = [ p , id ] 
-
-    [Z×X-∨-xYZ] : ∀ {x' y'} (px'y' : P x' y') (α : Path (inm p0) (inm px'y')) → Type
-    [Z×X-∨-xYZ] {x'}{y'} px'y' α = Trunc i+j (HFiber gluem ((_ , px'y'), α))
-    
-    Z×X-∨-xYZ→[Z×X-∨-xYZ] : (zs : Z×X-∨-×YZ) → [Z×X-∨-xYZ] (snd (fst (gluem zs))) (snd (gluem zs))
-    Z×X-∨-xYZ→[Z×X-∨-xYZ] zs = [ zs , id ]
-
-
-
   module CodesGlueMaps where
     open OverZMaps
 
