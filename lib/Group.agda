@@ -4,6 +4,8 @@
 open import lib.First
 open import lib.NType
 open import lib.Universe
+open import lib.Int
+open Int
 
 module lib.Group where
 

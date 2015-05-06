@@ -70,6 +70,9 @@ module lib.Pushout where
 
     open P public
 
+    oops : {ZZ X Y : Type} (f : ZZ → X) (g : ZZ → Y) → (x x' : X) → Path {Pushout f g} (inl x) (inl x') → x == x'
+    oops f g x .x id = id
+
     Wedge : {A B : Type} (a0 : A) (b0 : B) → Type
     Wedge {A}{B} a0 b0 = Pushout {Unit}{A}{B} (\ _ -> a0) (\ _ -> b0)
 

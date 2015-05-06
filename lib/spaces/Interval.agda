@@ -124,8 +124,8 @@ module lib.spaces.Interval where
 
   {- now these no longer pass
 
-  bad1 : (p : Path IntervalFn.zero IntervalFn.one) -> Void
-  bad1 ()
+  bad3 : (p : Path IntervalFn.zero IntervalFn.one) -> Void
+  bad3 ()
 
   bad2 : (p : Path IntervalFn.one IntervalFn.one) -> Id p id
   bad2 id = {!p!}

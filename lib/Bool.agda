@@ -18,6 +18,10 @@ module lib.Bool where
       if _ / True then b1 else b2 = b1
       if _ / False then b1 else b2 = b2
 
+      Bool-elim : (p : Bool -> Type) -> p True -> p False -> (b : Bool) → p b
+      Bool-elim p x y True = x
+      Bool-elim p x y False = y 
+
       aborttf : ∀ {A : Type} 
               -> True ≃ False -> A
       aborttf{A} α = transport
