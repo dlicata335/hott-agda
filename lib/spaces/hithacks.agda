@@ -8,18 +8,28 @@ module hithacks where
   data _==_ {l : Level} {A : Set l} (a : A) : A → Set l where
     id : a == a
 
-  {-# BUILTIN EQUALITY _==_ #-}
-  {-# BUILTIN REFL id #-}
-  primitive 
-    primTrustMe : {l : Level} {A : Set l} {x y : A} -> x == y
+  ap :  {A B : Set} {M N : A}
+       (f : A → B) → M == N → (f M) == (f N)
+  ap f id = id
 
-
-  data Phantom {A : Set} (a : A) : Set where
-    phantom : Phantom a
+  ! : {A : Set} {M N : A} → M == N → N == M 
+  ! id = id
 
   transport :  {B : Set} (E : B → Set) 
               {b1 b2 : B} → b1 == b2 → (E b1 → E b2)
   transport C id = λ x → x
+
+  {-# BUILTIN EQUALITY _==_ #-}
+  {-# BUILTIN REFL id #-}
+
+  primitive 
+    primTrustMe : {l : Level} {A : Set l} {x y : A} -> x == y
+
+  funext-unit : {A : Set}{f g : Unit -> A} → f <> == g <> -> f == g
+  funext-unit _ = primTrustMe 
+
+  data Phantom {A : Set} (a : A) : Set where
+    phantom : Phantom a
 
   {- 
     HIT I with
@@ -50,11 +60,14 @@ module hithacks where
     postulate 
       seg : (a : A) → zero a == one
 
+    ext : (i : I) (x : #I) → #out i <> == x → #in (\ _ -> x) == i
+    ext (#in i') x p = ap #in (! (funext-unit {f = i'} {g = λ _ → x} p))
+
     I-elim : (C : I -> Set) (zero' : (a : A) -> C (zero a)) (one' : C one) (seg' : (a : A) -> transport C (seg a) (zero' a) == one') -> (x : I) -> C x
-    I-elim C zero' one' seg' x = I-elim-aux phantom (#out x <>) where
-      I-elim-aux : Phantom seg' → #I -> C x
-      I-elim-aux phantom (#zero a) = transport C primTrustMe (zero' a) 
-      I-elim-aux phantom #one = transport C primTrustMe one'
+    I-elim C zero' one' seg' x = I-elim-aux phantom (#out x <>) id where
+      I-elim-aux : Phantom seg' → (i : #I) -> #out x <> == i →  C x
+      I-elim-aux phantom (#zero a) p = transport C (ext x (#zero a) p) (zero' a) 
+      I-elim-aux phantom #one p = transport C (ext x #one p) one'
 
   open Private 
 
@@ -92,4 +105,5 @@ irrel : (A : Set)
          (seg' seg'' : (a : A) -> transport C (seg a) (zero' a) == one')
          → I-elim C zero' one' seg' == I-elim C zero' one' seg''
 irrel _ _ _ _ _ _ = {!id!}
+
 
