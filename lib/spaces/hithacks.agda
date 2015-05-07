@@ -35,21 +35,24 @@ module hithacks where
         #zero : A → #I
         #one : #I
     
-    I : Set
-    I = Unit -> #I
+    data I : Set where
+       #in : (Unit -> #I) -> I
+
+    #out : I -> (Unit -> #I)
+    #out (#in i) = i
     
     zero : A → I
-    zero a = (\ _ -> #zero a)
+    zero a = #in (\ _ -> #zero a)
     
     one : I
-    one = (\ _ -> #one)
+    one = #in (\ _ -> #one)
 
     postulate 
       seg : (a : A) → zero a == one
-    
+
     I-elim : (C : I -> Set) (zero' : (a : A) -> C (zero a)) (one' : C one) (seg' : (a : A) -> transport C (seg a) (zero' a) == one') -> (x : I) -> C x
-    I-elim C zero' one' seg' i = I-elim-aux phantom (i <>) where
-      I-elim-aux : Phantom seg' → #I -> C i
+    I-elim C zero' one' seg' x = I-elim-aux phantom (#out x <>) where
+      I-elim-aux : Phantom seg' → #I -> C x
       I-elim-aux phantom (#zero a) = transport C primTrustMe (zero' a) 
       I-elim-aux phantom #one = transport C primTrustMe one'
 
@@ -79,7 +82,7 @@ disjoint x p = {!p!}
 
 -- cannot replace p with id
 injective : {A : Set} {x y : A} → zero x == zero y → x == y
-injective p = {!!}
+injective p = {!p!}
 
 -- cannot compelte goal with id
 irrel : (A : Set)
