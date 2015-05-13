@@ -26,7 +26,10 @@ module hithacks where
     primTrustMe : {l : Level} {A : Set l} {x y : A} -> x == y
 
   funext-unit : {A : Set}{f g : Unit -> A} → f <> == g <> -> f == g
-  funext-unit _ = primTrustMe 
+  funext-unit p = primTrustMe
+
+  η-unit→ : {A : Set}{f g : Unit -> A} → (\ _ -> f <>) == f
+  η-unit→ = id
 
   data Phantom {A : Set} (a : A) : Set where
     phantom : Phantom a
@@ -45,11 +48,14 @@ module hithacks where
         #zero : A → #I
         #one : #I
     
-    data I : Set where
-       #in : (Unit -> #I) -> I
+      data ##I : Set where
+        #in : (Unit -> #I) -> ##I
 
-    #out : I -> (Unit -> #I)
-    #out (#in i) = i
+      #out : ##I -> (Unit -> #I)
+      #out (#in i) = i
+
+    I : Set
+    I = ##I
     
     zero : A → I
     zero a = #in (\ _ -> #zero a)
@@ -61,7 +67,7 @@ module hithacks where
       seg : (a : A) → zero a == one
 
     ext : (i : I) (x : #I) → #out i <> == x → #in (\ _ -> x) == i
-    ext (#in i') x p = ap #in (! (funext-unit {f = i'} {g = λ _ → x} p))
+    ext (#in i') x p = ap #in (! (funext-unit {f = i'} {g = λ _ → x} p)) 
 
     I-elim : (C : I -> Set) (zero' : (a : A) -> C (zero a)) (one' : C one) (seg' : (a : A) -> transport C (seg a) (zero' a) == one') -> (x : I) -> C x
     I-elim C zero' one' seg' x = I-elim-aux phantom (#out x <>) id where
