@@ -2,6 +2,7 @@
 
 open import lib.BasicTypes 
 open import lib.cubical.Cubical
+import lib.PrimTrustMe
 
 module lib.spaces.Circle where
 
@@ -9,44 +10,42 @@ module S¹ where
   private
     module S where
       private
-        data S¹' : Type where
-          Base : S¹'
+        data ##S¹ : Type where
+          #base : ##S¹
 
-        data S¹'' : Type where
-          mkS¹'' : S¹' → (Unit -> Unit) → S¹''
+        data #S¹ : Type where
+          #in : (Unit -> ##S¹) → #S¹
+
+        #out : #S¹ -> ##S¹
+        #out (#in f) = f <>
+
+        ext : (x : #S¹) (y : ##S¹) → #out x == y → #in (\ _ -> y) == x
+        ext (#in f) y p = lib.PrimTrustMe.transport/PId (λ x → #in (λ _ → y) == x) (lib.PrimTrustMe.ap/PId #in (lib.PrimTrustMe.funext/primtrustme {f = λ _ → y} {g = f} (λ _ → transport (λ z → lib.PrimTrustMe.PId y z) (! p) lib.PrimTrustMe.Refl))) id 
     
       S¹ : Type
-      S¹ = S¹''
+      S¹ = #S¹
     
       base : S¹
-      base = mkS¹'' Base _
+      base = #in(\ _ -> #base)
     
       postulate {- HoTT Axiom -}
         loop : Path base base
     
-      S¹-rec' : {C : Type} 
-             -> (c : C)
-             -> (α : c ≃ c) (_ : Phantom α)
-             -> S¹ -> C
-      S¹-rec' a _ (Phantom.phantom <>⁺) (mkS¹'' Base _) = a
-
       S¹-rec : {C : Type} 
              -> (c : C)
              -> (α : c ≃ c)
              -> S¹ -> C
-      S¹-rec a α = S¹-rec' a α (Phantom.phantom <>⁺)
-    
-      S¹-elim' :  (C : S¹ -> Type)
-              -> (c : C base) 
-                 (α : Path (transport C loop c) c) (_ : Phantom α)
-              -> (x : S¹) -> C x
-      S¹-elim' _ x _ (Phantom.phantom <>⁺) (mkS¹'' Base _) = x
+      S¹-rec {C} a α x = S¹-rec' Phantom.phantom (#out x) where
+        S¹-rec' : (_ : Phantom α) -> ##S¹ -> C
+        S¹-rec' (Phantom.phantom) #base = a
 
       S¹-elim :  (C : S¹ -> Type)
               -> (c : C base) 
                  (α : Path (transport C loop c) c)
               -> (x : S¹) -> C x
-      S¹-elim C c α = S¹-elim' C c α (Phantom.phantom <>⁺)
+      S¹-elim C c α x = S¹-elim' (Phantom.phantom) (#out x) id where
+        S¹-elim' : (_ : Phantom α) -> (x' : ##S¹) -> x' == #out x -> C x
+        S¹-elim' (Phantom.phantom) #base p = transport C (ext _ _ (! p)) c
   
       S¹-induction :  (C : S¹ -> Type)
               -> (c : C base) 
@@ -67,32 +66,18 @@ module S¹ where
   open S public
 
   {-
-  without the Unit->Unit trick, you can prove
+  without the Unit->A trick, you can prove
 
   uip-base : (p : Path base base) -> Path p id
   uip-base id = id
-
-  but now you get
-   /Users/drl/work/cmu/rsh/progind/code/hott-me/lib/spaces/Circle.agda:57,7-9
-   The indices
-     .lib.spaces.Circle.S¹.S.S¹''.mkS¹''
-     .lib.spaces.Circle.S¹.S.S¹'.Base (λ _ → <>)
-   are not constructors (or literals) applied to variables (note that
-   parameters count as constructor arguments)
-   when checking that the pattern id has type Path base base
   -}
-  
+
   {- 
   without the Phantom trick, you can prove
 
   path-irrel : {C : Type} {c : C} {p q : c ≃ c} → S¹-rec c p ≃ S¹-rec c q
   path-irrel = id
-  
-  but now we get
-  /Users/drl/work/cmu/rsh/progind/code/hott-me/lib/spaces/Circle.agda:88,16-18
-  .p != .q of type Id .c .c
-  when checking that the expression id has type
-  Id (S¹-rec .c .p) (S¹-rec .c .q)
+
   -}
 
 

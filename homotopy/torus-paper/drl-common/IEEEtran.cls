@@ -1,5 +1,5 @@
 %%
-%% IEEEtran.cls 2012/12/27 version V1.8
+%% IEEEtran.cls 2014/09/17 version V1.8a
 %% 
 %% This is the IEEEtran LaTeX class for authors of the Institute of 
 %% Electrical and Electronics Engineers (IEEE) Transactions journals and
@@ -18,19 +18,19 @@
 %% Contributors:
 %% Gerry Murray (1993), Silvano Balemi (1993),
 %% Jon Dixon (1996), Peter N"uchter (1996),
-%% Juergen von Hagen (2000), and Michael Shell (2001-2012)
+%% Juergen von Hagen (2000), and Michael Shell (2001-2014)
 %% 
 %% 
 %% Copyright (c) 1993-2000 by Gerry Murray, Silvano Balemi, 
 %%                         Jon Dixon, Peter N"uchter,
 %%                         Juergen von Hagen
 %%                         and
-%% Copyright (c) 2001-2012 by Michael Shell
+%% Copyright (c) 2001-2014 by Michael Shell
 %%
-%% Current maintainer (V1.3 to V1.8): Michael Shell
-%%                                    See:
-%%                                    http://www.michaelshell.org/
-%%                                    for current contact information.
+%% Current maintainer (V1.3 to V1.8a): Michael Shell
+%%                                     See:
+%%                                     http://www.michaelshell.org/
+%%                                     for current contact information.
 %%
 %% Special thanks to Peter Wilson (CUA) and Donald Arseneau
 %% for allowing the inclusion of the \@ifmtarg command 
@@ -60,7 +60,8 @@
 %% ** renaming them and changing author support contact information. **
 %%
 %% File list of work: IEEEtran.cls, IEEEtran_HOWTO.pdf, bare_adv.tex,
-%%                    bare_conf.tex, bare_jrnl.tex, bare_jrnl_compsoc.tex
+%%                    bare_conf.tex, bare_jrnl.tex, bare_conf_compsoc.tex,
+%%                    bare_jrnl_compsoc.tex
 %% 
 %% Major changes to the user interface should be indicated by an 
 %% increase in the version numbers. If a version is a beta, it will 
@@ -109,22 +110,33 @@
 %    also want to select onecolumn.
 %    The default is final.
 %
-% letterpaper, a4paper
-%    determines paper size: 8.5in X 11in or 210mm X 297mm. CHANGING THE PAPER
-%    SIZE WILL NOT ALTER THE TYPESETTING OF THE DOCUMENT - ONLY THE MARGINS
-%    WILL BE AFFECTED. In particular, documents using the a4paper option will
+% letterpaper, a4paper, cspaper
+%    determines paper size: 8.5in X 11in, 210mm X 297mm or 7.875in X 10.75in.
+%    Changing the paper size in the standard journal and conference modes
+%    will not alter the typesetting of the document - only the margins will
+%    be affected. In particular, documents using the a4paper option will
 %    have reduced side margins (A4 is narrower than US letter) and a longer
 %    bottom margin (A4 is longer than US letter). For both cases, the top
-%    margins will be the same and the text will be horizontally centered. 
-%    For final submission to IEEE, authors should use US letter (8.5 X 11in)
-%    paper. Note that authors should ensure that all post-processing 
-%    (ps, pdf, etc.) uses the same paper specificiation as the .tex document.
-%    Problems here are by far the number one reason for incorrect margins.
-%    IEEEtran will automatically set the default paper size under pdflatex 
-%    (without requiring a change to pdftex.cfg), so this issue is more
-%    important to dvips users. Fix config.ps, config.pdf, or ~/.dvipsrc for
-%    dvips, or use the dvips -t papersize option instead as needed. See the
-%    testflow documentation
+%    margins will be the same and the text will be horizontally centered.
+%    For the compsoc conference and draft modes, it is the margins that will
+%    remain constant, and thus the text area size will vary, with changes in
+%    the paper size.
+%    The cspaper option is the special ``trim'' paper size (7.875in x 10.75in)
+%    used in the actual publication of Computer Society journals. Under
+%    compsoc journal mode, this option does not alter the typesetting of the
+%    document. Authors should invoke the cspaper option only if requested to
+%    do so by the editors of the specific journal they are submitting to.
+%    For final submission to the IEEE, authors should generally use US letter 
+%    (8.5 X 11in) paper unless otherwise instructed. Note that authors should
+%    ensure that all post-processing (ps, pdf, etc.) uses the same paper
+%    specificiation as the .tex document. Problems here are by far the number
+%    one reason for incorrect margins. IEEEtran will automatically set the
+%    default paper size under pdflatex (without requiring any change to
+%    pdftex.cfg), so this issue is more important to dvips users. Fix
+%    config.ps, config.pdf, or ~/.dvipsrc for dvips, or use the
+%    dvips -t papersize option instead as needed. For the cspaper option,
+%    the corresponding dvips paper name is "ieeecs".
+%    See the testflow documentation
 %    http://www.ctan.org/tex-archive/macros/latex/contrib/IEEEtran/testflow
 %    for more details on dvips paper size configuration.
 %    The default is letterpaper.
@@ -190,7 +202,7 @@
 
 
 
-\ProvidesClass{IEEEtran}[2012/12/27 V1.8 by Michael Shell]
+\ProvidesClass{IEEEtran}[2014/09/17 V1.8a by Michael Shell]
 \typeout{-- See the "IEEEtran_HOWTO" manual for usage information.}
 \typeout{-- http://www.michaelshell.org/tex/ieeetran/}
 \NeedsTeXFormat{LaTeX2e}
@@ -204,6 +216,11 @@
 % (no need to enumerate "a" minor changes here)
 \def\IEEEtransversionmajor{1}
 \def\IEEEtransversionminor{8}
+
+
+% hook to allow easy changeover to IEEEtran.cls/tools.sty error reporting
+\def\@IEEEclspkgerror{\ClassError{IEEEtran}}
+
 
 % These do nothing, but provide them like in article.cls
 \newif\if@restonecol
@@ -247,16 +264,19 @@
 
 % V1.6b internal flag to show if using a4paper
 \newif\if@IEEEusingAfourpaper       \@IEEEusingAfourpaperfalse
-
+% V1.6b internal flag to show if using cspaper
+\newif\if@IEEEusingcspaper          \@IEEEusingcspaperfalse
 
 
 % IEEEtran class scratch pad registers
 % dimen
 \newdimen\@IEEEtrantmpdimenA
 \newdimen\@IEEEtrantmpdimenB
+\newdimen\@IEEEtrantmpdimenC
 % count
 \newcount\@IEEEtrantmpcountA
 \newcount\@IEEEtrantmpcountB
+\newcount\@IEEEtrantmpcountC
 % token list
 \newtoks\@IEEEtrantmptoksA
 
@@ -272,20 +292,31 @@
 
 
 
-\DeclareOption{letterpaper}{\setlength{\paperheight}{11in}%
-                            \setlength{\paperwidth}{8.5in}%
+\DeclareOption{letterpaper}{\setlength{\paperwidth}{8.5in}%
+                            \setlength{\paperheight}{11in}%
                             \@IEEEusingAfourpaperfalse
+                            \@IEEEusingcspaperfalse
                             \def\CLASSOPTIONpaper{letter}%
                             \def\CLASSINFOpaperwidth{8.5in}%
                             \def\CLASSINFOpaperheight{11in}}
 
 
-\DeclareOption{a4paper}{\setlength{\paperheight}{297mm}%
-                        \setlength{\paperwidth}{210mm}%
+\DeclareOption{a4paper}{\setlength{\paperwidth}{210mm}%
+                        \setlength{\paperheight}{297mm}%
                         \@IEEEusingAfourpapertrue
+                        \@IEEEusingcspaperfalse
                         \def\CLASSOPTIONpaper{a4}%
                         \def\CLASSINFOpaperwidth{210mm}%
                         \def\CLASSINFOpaperheight{297mm}}
+
+% special paper option for compsoc journals
+\DeclareOption{cspaper}{\setlength{\paperwidth}{7.875in}%
+                        \setlength{\paperheight}{10.75in}%
+                        \@IEEEusingcspapertrue
+                        \@IEEEusingAfourpaperfalse
+                        \def\CLASSOPTIONpaper{ieeecs}%
+                        \def\CLASSINFOpaperwidth{7.875in}%
+                        \def\CLASSINFOpaperheight{10.75in}}
 
 \DeclareOption{oneside}{\@twosidefalse\@mparswitchfalse
                         \CLASSOPTIONonesidetrue\CLASSOPTIONtwosidefalse}
@@ -339,6 +370,65 @@
 \ExecuteOptions{letterpaper,10pt,twocolumn,oneside,final,journal}
 % overrride these defaults per user requests
 \ProcessOptions
+
+
+
+%% -- Command Argument Scanning Support Functions --
+% 
+% usage: \@IEEEextracttoken*{}
+% \@IEEEextracttoken fully expands its argument (which it then stores in
+% \@IEEEextracttokenarg) via \edef and then the meaning of the first
+% nonbrace (but including the empty group) token found is assigned via \let
+% to \@IEEEextractedtoken as well as stored in the macro
+% \@IEEEextractedtokenmacro. Tokens that would otherwise be discarded during
+% the acquisition of the first are stored in \@IEEEextractedtokensdiscarded,
+% however their original relative brace nesting depths are not guaranteed to
+% be preserved.
+% If the argument is empty, or if a first nonbrace token does not exist (or
+% is an empty group), \@IEEEextractedtoken will be \relax and
+% \@IEEEextractedtokenmacro and \@IEEEextractedtokensdiscarded will be empty.
+%
+% For example:
+% \@IEEEextracttoken{{{ab}{cd}}{{ef}g}}
+% results in:
+%
+% \@IEEEextracttokenarg          ==> a macro containing {{ab}{cd}}{{ef}g}
+% \@IEEEextractedtoken           ==> the letter a
+% \@IEEEextractedtokenmacro      ==> a macro containing a
+% \@IEEEextractedtokensdiscarded ==> a macro containing bcd{ef}g
+%
+% the *-star form, \@IEEEextracttoken*, does not expand its argument
+% contents during processing.
+\def\@IEEEextracttoken{\@ifstar{\let\@IEEEextracttokendef=\def\@@IEEEextracttoken}{\let\@IEEEextracttokendef=\edef\@@IEEEextracttoken}}
+
+\def\@@IEEEextracttoken#1{\@IEEEextracttokendef\@IEEEextracttokenarg{#1}\relax
+\def\@IEEEextractedtokensdiscarded{}\relax % initialize to empty
+% if the macro is unchanged after being acquired as a single undelimited argument
+% with anything after it being stripped off as a delimited argument
+% we know we have one token without any enclosing braces. loop until this is true.
+\let\@IEEEextracttokencurgroup\@IEEEextracttokenarg
+\loop
+  % trap case of an empty argument as this would cause a problem with
+  % \@@@IEEEextracttoken's first (nondelimited) argument acquisition
+  \ifx\@IEEEextracttokencurgroup\@empty
+    \def\@IEEEextractedtokenmacro{}\relax
+  \else
+    \expandafter\@@@IEEEextracttoken\@IEEEextracttokencurgroup\@IEEEgeneralsequenceDELIMITER\relax
+  \fi
+  \ifx\@IEEEextractedtokenmacro\@IEEEextracttokencurgroup
+  \else
+    \let\@IEEEextracttokencurgroup=\@IEEEextractedtokenmacro
+\repeat
+% we can safely do a \let= here because there should be at most one token
+% the relax is needed to handle the case of no token found
+\expandafter\let\expandafter\@IEEEextractedtoken\@IEEEextractedtokenmacro\relax}
+
+\def\@@@IEEEextracttoken#1#2\@IEEEgeneralsequenceDELIMITER{\def\@IEEEextractedtokenmacro{#1}\relax
+\def\@@IEEEextractedtokensdiscarded{#2}\expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter
+\@IEEEextractedtokensdiscarded\expandafter\expandafter\expandafter
+{\expandafter\@@IEEEextractedtokensdiscarded\@IEEEextractedtokensdiscarded}}
+%%
+%% -- End of Command Argument Scanning Support Functions --
 
 
 
@@ -465,15 +555,31 @@
 \newdimen\@IEEEnormalsizeunitybaselineskip
 \@IEEEnormalsizeunitybaselineskip\baselineskip
 
+
+
+%% ******* WARNING! *******
+%%
+%% Authors should not alter font sizes, baselineskip ("leading"),
+%% margins or other spacing values in an attempt to squeeze more
+%% material on each page.
+%%
+%% The IEEE's own typesetting software will restore the correct
+%% values when re-typesetting/proofing the submitted document,
+%% possibly resulting in unexpected article over length charges.
+%%
+%% ******* WARNING! *******
+
+
+% 9pt option defaults
 \ifx\CLASSOPTIONpt\@IEEEptsizenine
 \typeout{-- This is a 9 point document.}
-\def\normalsize{\@setfontsize{\normalsize}{9}{11.0476pt}}%
-\setlength{\@IEEEnormalsizeunitybaselineskip}{11.0476pt}%
+\def\normalsize{\@setfontsize{\normalsize}{9}{11.0476pt}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{11.0476pt}
 \normalsize
-\abovedisplayskip 1.5ex plus3pt minus1pt%
-\belowdisplayskip \abovedisplayskip%
-\abovedisplayshortskip 0pt plus3pt%
-\belowdisplayshortskip 1.5ex plus3pt minus1pt
+\abovedisplayskip 1.5ex plus 3pt minus 1pt
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 3pt
+\belowdisplayshortskip 1.5ex plus 3pt minus 1pt
 \def\small{\@setfontsize{\small}{8.5}{10pt}}
 \def\footnotesize{\@setfontsize{\footnotesize}{8}{9pt}}
 \def\scriptsize{\@setfontsize{\scriptsize}{7}{8pt}}
@@ -486,18 +592,17 @@
 \def\huge{\@setfontsize{\huge}{17}{20pt}}
 \def\Huge{\@setfontsize{\Huge}{20}{24pt}}
 \fi
-
-
-% Check if we have selected 10 points
+%
+% 10pt option defaults
 \ifx\CLASSOPTIONpt\@IEEEptsizeten
 \typeout{-- This is a 10 point document.}
-\def\normalsize{\@setfontsize{\normalsize}{10}{12.00pt}}%
-\setlength{\@IEEEnormalsizeunitybaselineskip}{12pt}%
+\def\normalsize{\@setfontsize{\normalsize}{10}{12.00pt}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{12pt}
 \normalsize
-\abovedisplayskip 1.5ex plus4pt minus2pt%
-\belowdisplayskip \abovedisplayskip%
-\abovedisplayshortskip 0pt plus4pt%
-\belowdisplayshortskip 1.5ex plus4pt minus2pt
+\abovedisplayskip 1.5ex plus 4pt minus 2pt
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 4pt
+\belowdisplayshortskip 1.5ex plus 4pt minus 2pt
 \def\small{\@setfontsize{\small}{9}{10pt}}
 \def\footnotesize{\@setfontsize{\footnotesize}{8}{9pt}}
 \def\scriptsize{\@setfontsize{\scriptsize}{7}{8pt}}
@@ -510,18 +615,17 @@
 \def\huge{\@setfontsize{\huge}{20}{24pt}}
 \def\Huge{\@setfontsize{\Huge}{24}{28pt}}
 \fi
-
-
-% Check if we have selected 11 points
+%
+% 11pt option defaults
 \ifx\CLASSOPTIONpt\@IEEEptsizeeleven
 \typeout{-- This is an 11 point document.}
-\def\normalsize{\@setfontsize{\normalsize}{11}{13.3846pt}}%
-\setlength{\@IEEEnormalsizeunitybaselineskip}{13.3846pt}%
+\def\normalsize{\@setfontsize{\normalsize}{11}{13.3846pt}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{13.3846pt}
 \normalsize
-\abovedisplayskip 1.5ex plus5pt minus3pt%
-\belowdisplayskip \abovedisplayskip%
-\abovedisplayshortskip 0pt plus5pt%
-\belowdisplayshortskip 1.5ex plus5pt minus3pt
+\abovedisplayskip 1.5ex plus 5pt minus 3pt
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 5pt
+\belowdisplayshortskip 1.5ex plus 5pt minus 3pt
 \def\small{\@setfontsize{\small}{10}{12pt}}
 \def\footnotesize{\@setfontsize{\footnotesize}{9}{10.5pt}}
 \def\scriptsize{\@setfontsize{\scriptsize}{8}{9pt}}
@@ -534,18 +638,17 @@
 \def\huge{\@setfontsize{\huge}{20}{24pt}}
 \def\Huge{\@setfontsize{\Huge}{24}{28pt}}
 \fi
-
-
-% Check if we have selected 12 points
+%
+% 12pt option defaults
 \ifx\CLASSOPTIONpt\@IEEEptsizetwelve
 \typeout{-- This is a 12 point document.}
-\def\normalsize{\@setfontsize{\normalsize}{12}{13.92pt}}%
-\setlength{\@IEEEnormalsizeunitybaselineskip}{13.92pt}%
+\def\normalsize{\@setfontsize{\normalsize}{12}{13.92pt}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{13.92pt}
 \normalsize
-\abovedisplayskip 1.5ex plus6pt minus4pt%
-\belowdisplayskip \abovedisplayskip%
-\abovedisplayshortskip 0pt plus6pt%
-\belowdisplayshortskip 1.5ex plus6pt minus4pt
+\abovedisplayskip 1.5ex plus 6pt minus 4pt
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 6pt
+\belowdisplayshortskip 1.5ex plus 6pt minus 4pt
 \def\small{\@setfontsize{\small}{10}{12pt}}
 \def\footnotesize{\@setfontsize{\footnotesize}{9}{10.5pt}}
 \def\scriptsize{\@setfontsize{\scriptsize}{8}{9pt}}
@@ -560,11 +663,206 @@
 \fi
 
 
+
+% V1.8a compsoc font sizes
+% compsoc font sizes use bp "Postscript" point units (1/72in) 
+% rather than the traditional pt (1/72.27)
+\ifCLASSOPTIONcompsoc
+% -- compsoc defaults --
+% ** will override some of these values later **
+% 9pt
+\ifx\CLASSOPTIONpt\@IEEEptsizenine
+\def\normalsize{\@setfontsize{\normalsize}{9bp}{11bp}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{11bp}
+\normalsize
+\abovedisplayskip 1.5ex plus 3bp minus 1bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0bp plus 3bp
+\belowdisplayshortskip 1.5ex plus 3bp minus 1bp
+\def\small{\@setfontsize{\small}{8.5bp}{10bp}}
+\def\footnotesize{\@setfontsize{\footnotesize}{8bp}{9bp}}
+\def\scriptsize{\@setfontsize{\scriptsize}{7bp}{8bp}}
+\def\tiny{\@setfontsize{\tiny}{5bp}{6bp}}
+% sublargesize is the same as large - 10bp
+\def\sublargesize{\@setfontsize{\sublargesize}{10bp}{12bp}}
+\def\large{\@setfontsize{\large}{10bp}{12bp}}
+\def\Large{\@setfontsize{\Large}{12bp}{14bp}}
+\def\LARGE{\@setfontsize{\LARGE}{14bp}{17bp}}
+\def\huge{\@setfontsize{\huge}{17bp}{20bp}}
+\def\Huge{\@setfontsize{\Huge}{20bp}{24bp}}
+\fi
+%
+% 10pt
+\ifx\CLASSOPTIONpt\@IEEEptsizeten
+\def\normalsize{\@setfontsize{\normalsize}{10bp}{12bp}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{12bp}
+\normalsize
+\abovedisplayskip 1.5ex plus 4bp minus 2bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 4bp
+\belowdisplayshortskip 1.5ex plus 4bp minus 2bp
+\def\small{\@setfontsize{\small}{9bp}{10bp}}
+\def\footnotesize{\@setfontsize{\footnotesize}{8bp}{9bp}}
+\def\scriptsize{\@setfontsize{\scriptsize}{7bp}{8bp}}
+\def\tiny{\@setfontsize{\tiny}{5bp}{6bp}}
+% sublargesize is a tad smaller than large - 11bp
+\def\sublargesize{\@setfontsize{\sublargesize}{11bp}{13.5bp}}
+\def\large{\@setfontsize{\large}{12bp}{14bp}}
+\def\Large{\@setfontsize{\Large}{14bp}{17bp}}
+\def\LARGE{\@setfontsize{\LARGE}{17bp}{20bp}}
+\def\huge{\@setfontsize{\huge}{20bp}{24bp}}
+\def\Huge{\@setfontsize{\Huge}{24bp}{28bp}}
+\fi
+%
+% 11pt
+\ifx\CLASSOPTIONpt\@IEEEptsizeeleven
+\def\normalsize{\@setfontsize{\normalsize}{11bp}{13.5bp}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{13.5bp}
+\normalsize
+\abovedisplayskip 1.5ex plus 5bp minus 3bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 5bp
+\belowdisplayshortskip 1.5ex plus 5bp minus 3bp
+\def\small{\@setfontsize{\small}{10bp}{12bp}}
+\def\footnotesize{\@setfontsize{\footnotesize}{9bp}{10.5bp}}
+\def\scriptsize{\@setfontsize{\scriptsize}{8bp}{9bp}}
+\def\tiny{\@setfontsize{\tiny}{6bp}{7bp}}
+% sublargesize is the same as large - 12bp
+\def\sublargesize{\@setfontsize{\sublargesize}{12bp}{14bp}}
+\def\large{\@setfontsize{\large}{12bp}{14bp}}
+\def\Large{\@setfontsize{\Large}{14bp}{17bp}}
+\def\LARGE{\@setfontsize{\LARGE}{17bp}{20bp}}
+\def\huge{\@setfontsize{\huge}{20bp}{24bp}}
+\def\Huge{\@setfontsize{\Huge}{24bp}{28bp}}
+\fi
+%
+% 12pt
+\ifx\CLASSOPTIONpt\@IEEEptsizetwelve
+\def\normalsize{\@setfontsize{\normalsize}{12bp}{14bp}}%
+\setlength{\@IEEEnormalsizeunitybaselineskip}{14bp}%
+\normalsize
+\abovedisplayskip 1.5ex plus 6bp minus 4bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 6bp
+\belowdisplayshortskip 1.5ex plus 6bp minus 4bp
+\def\small{\@setfontsize{\small}{10bp}{12bp}}
+\def\footnotesize{\@setfontsize{\footnotesize}{9bp}{10.5bp}}
+\def\scriptsize{\@setfontsize{\scriptsize}{8bp}{9bp}}
+\def\tiny{\@setfontsize{\tiny}{6bp}{7bp}}
+% sublargesize is the same as large - 14bp
+\def\sublargesize{\@setfontsize{\sublargesize}{14bp}{17bp}}
+\def\large{\@setfontsize{\large}{14bp}{17bp}}
+\def\Large{\@setfontsize{\Large}{17bp}{20bp}}
+\def\LARGE{\@setfontsize{\LARGE}{20bp}{24bp}}
+\def\huge{\@setfontsize{\huge}{22bp}{26bp}}
+\def\Huge{\@setfontsize{\Huge}{24bp}{28bp}}
+\fi
+%
+% -- override defaults: compsoc journals use special normalsizes --
+\ifCLASSOPTIONconference
+% 
+% compsoc conferences
+% 9pt
+\ifx\CLASSOPTIONpt\@IEEEptsizenine
+\def\normalsize{\@setfontsize{\normalsize}{9bp}{10.8bp}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{10.8bp}
+\normalsize
+\abovedisplayskip 1.5ex plus 3bp minus 1bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0bp plus 3bp
+\belowdisplayshortskip 1.5ex plus 3bp minus 1bp
+\fi
+% 10pt
+\ifx\CLASSOPTIONpt\@IEEEptsizeten
+\def\normalsize{\@setfontsize{\normalsize}{10bp}{11.2bp}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{11.2bp}
+\normalsize
+\abovedisplayskip 1.5ex plus 4bp minus 2bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 4bp
+\belowdisplayshortskip 1.5ex plus 4bp minus 2bp
+\fi
+% 11pt
+\ifx\CLASSOPTIONpt\@IEEEptsizeeleven
+\def\normalsize{\@setfontsize{\normalsize}{11bp}{13.2bp}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{13.2bp}
+\normalsize
+\abovedisplayskip 1.5ex plus 5bp minus 3bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 5bp
+\belowdisplayshortskip 1.5ex plus 5bp minus 3bp
+\fi
+% 12pt
+\ifx\CLASSOPTIONpt\@IEEEptsizetwelve
+\def\normalsize{\@setfontsize{\normalsize}{12bp}{14.4bp}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{14.4bp}
+\normalsize
+\abovedisplayskip 1.5ex plus 6bp minus 4bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 6bp
+\belowdisplayshortskip 1.5ex plus 6bp minus 4bp
+\fi
+% 
+% compsoc nonconferences
+\else
+% 9pt
+\ifx\CLASSOPTIONpt\@IEEEptsizenine
+\def\normalsize{\@setfontsize{\normalsize}{9bp}{10.8bp}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{10.8bp}
+\normalsize
+\abovedisplayskip 1.5ex plus 3bp minus 1bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0bp plus 3bp
+\belowdisplayshortskip 1.5ex plus 3bp minus 1bp
+\fi
+% 10pt
+\ifx\CLASSOPTIONpt\@IEEEptsizeten
+% the official spec is 9.5bp with 11.4bp leading for 10pt,
+% but measurements of proofs suggest upto 11.723bp leading
+% here we'll use 11.54bp which gives 61 lines per column
+% with the standard compsoc margins
+\def\normalsize{\@setfontsize{\normalsize}{9.5bp}{11.54bp}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{11.54bp}
+\normalsize
+\abovedisplayskip 1.5ex plus 4bp minus 2bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 4bp
+\belowdisplayshortskip 1.5ex plus 4bp minus 2bp
+\fi
+% 11pt
+\ifx\CLASSOPTIONpt\@IEEEptsizeeleven
+\def\normalsize{\@setfontsize{\normalsize}{11bp}{13.2bp}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{13.2bp}
+\normalsize
+\abovedisplayskip 1.5ex plus 5bp minus 3bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 5bp
+\belowdisplayshortskip 1.5ex plus 5bp minus 3bp
+\fi
+% 12pt
+\ifx\CLASSOPTIONpt\@IEEEptsizetwelve
+\def\normalsize{\@setfontsize{\normalsize}{12bp}{14.4bp}}
+\setlength{\@IEEEnormalsizeunitybaselineskip}{14.4bp}
+\normalsize
+\abovedisplayskip 1.5ex plus 6bp minus 4bp
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip 0pt plus 6bp
+\belowdisplayshortskip 1.5ex plus 6bp minus 4bp
+\fi
+\fi\fi
+
+
+
+
 % V1.6 The Computer Modern Fonts will issue a substitution warning for
-% 24pt titles (24.88pt is used instead) increase the substitution
-% tolerance to turn off this warning
-\def\fontsubfuzz{.9pt}
-% However, the default (and correct) Times font will scale exactly as needed.
+% 24pt titles (24.88pt is used instead, but the default and correct
+% Times font will scale exactly as needed) increase the substitution
+% tolerance to turn off this warning.
+% 
+% V1.8a, the compsoc bp font sizes can also cause bogus font substitution
+% warnings with footnote or scriptsize math and the $\bullet$ itemized
+% list of \IEEEcompsocitemizethanks. So, increase this to 1.5pt or more.
+\def\fontsubfuzz{1.7bp}
 
 
 % warn the user in case they forget to use the 9pt option with
@@ -611,7 +909,7 @@
            \baselinestretch\space via \string\CLASSINPUT.}
 \fi
 
-\normalsize % make \baselinestretch take affect
+\small\normalsize % make \baselinestretch take affect
 
 
 
@@ -667,6 +965,21 @@
 \def\@IEEEinterspaceratioB{0.375}
 \def\@IEEEinterspaceMINratioB{0.23}
 \def\@IEEEinterspaceMAXratioB{0.55}
+
+
+% compsoc nonconference papers use Palatino,
+% tweak settings to better match the proofs
+\ifCLASSOPTIONcompsoc
+\ifCLASSOPTIONconference\else
+% for medium (normal weight)
+\def\@IEEEinterspaceratioM{0.28}
+\def\@IEEEinterspaceMINratioM{0.21}
+\def\@IEEEinterspaceMAXratioM{0.47}
+% for bold
+\def\@IEEEinterspaceratioB{0.305}
+\def\@IEEEinterspaceMINratioB{0.21}
+\def\@IEEEinterspaceMAXratioB{0.52}
+\fi\fi
 
 
 % command to revise the interword spacing for the current font under TeX:
@@ -731,7 +1044,569 @@
 
 
 
-% V1.6 
+
+
+% -- V1.8a page setup commands --
+
+% The default sample text for calculating margins
+% Note that IEEE publications use \scriptsize for headers and footers.
+\def\IEEEdefaultsampletext{\normalfont\normalsize gT}
+\def\IEEEdefaultheadersampletext{\normalfont\scriptsize T}% IEEE headers default to uppercase
+\def\IEEEdefaultfootersampletext{\normalfont\scriptsize gT}
+
+
+
+% usage: \IEEEsettextwidth{inner margin}{outer margin}
+% Sets \textwidth to allow the specified inner and outer margins
+% for the current \paperwidth.
+\def\IEEEsettextwidth#1#2{\@IEEEtrantmpdimenA\paperwidth
+\@IEEEtrantmpdimenB#1\relax
+\advance\@IEEEtrantmpdimenA by -\@IEEEtrantmpdimenB
+\@IEEEtrantmpdimenB#2\relax
+\advance\@IEEEtrantmpdimenA by -\@IEEEtrantmpdimenB
+\textwidth\@IEEEtrantmpdimenA}
+
+
+
+% usage: \IEEEsetsidemargin{mode: i, o, c, a}{margin/offset}
+% Sets \oddsidemargin and \evensidemargin to yield the specified margin
+% of the given mode.
+% The available modes are:
+% i = inner margin
+% o = outer margin
+% c = centered, with the given offset
+% a = adjust the margins using the given offset
+% For the offsets, positive values increase the inner margin.
+% \textwidth should be set properly for the given margins before calling this
+% function.
+\def\IEEEsetsidemargin#1#2{\@IEEEtrantmpdimenA #2\relax
+\@IEEEextracttoken{#1}\relax
+% check for mode errors
+\ifx\@IEEEextractedtokenmacro\@empty
+  \@IEEEclspkgerror{Empty mode type in \string\IEEEsetsidemargin\space (line \the\inputlineno).\MessageBreak
+  Defaulting to `i'}{Valid modes for \string\IEEEsetsidemargin\space are: i, o, c and a.}\relax
+  \let\@IEEEextractedtoken=i\relax
+  \def\@IEEEextractedtokenmacro{i}\relax
+\else
+  \ifx\@IEEEextractedtokensdiscarded\@empty\else
+    \typeout{** WARNING: \string\IEEEsetsidemargin\space mode specifiers after the first in `\@IEEEextracttokenarg' ignored (line \the\inputlineno).}\relax
+  \fi
+\fi
+% handle each mode
+\if\@IEEEextractedtoken a\relax
+  \advance\oddsidemargin by \@IEEEtrantmpdimenA\relax
+\else
+\if\@IEEEextractedtoken c\relax
+  \oddsidemargin\paperwidth
+  \advance\oddsidemargin by -\textwidth
+  \divide\oddsidemargin by 2\relax
+  \advance\oddsidemargin by -1in\relax
+  \advance\oddsidemargin by \@IEEEtrantmpdimenA\relax
+\else
+\if\@IEEEextractedtoken o\relax
+  \oddsidemargin\paperwidth
+  \advance\oddsidemargin by -\textwidth
+  \advance\oddsidemargin by -\@IEEEtrantmpdimenA
+  \advance\oddsidemargin by -1in\relax
+\else
+  \if\@IEEEextractedtoken i\relax
+  \else
+    \@IEEEclspkgerror{Unknown mode type `\@IEEEextractedtokenmacro' in \string\IEEEsetsidemargin\space (line \the\inputlineno).\MessageBreak
+    Defaulting to `i'}%
+    {Valid modes for \string\IEEEsetsidemargin\space are: i, o, c  and a.}%
+  \fi
+  \oddsidemargin\@IEEEtrantmpdimenA
+  \advance\oddsidemargin by -1in\relax
+\fi\fi\fi
+% odd and even side margins both mean "inner" for single sided pages
+\evensidemargin\oddsidemargin
+% but are mirrors of each other when twosided is in effect
+\if@twoside
+  \evensidemargin\paperwidth
+  \advance\evensidemargin by -\textwidth
+  \advance\evensidemargin by -\oddsidemargin
+  % have to compensate for both the builtin 1in LaTex offset
+  % and the fact we already subtracted this offset from \oddsidemargin
+  \advance\evensidemargin -2in\relax
+\fi}
+
+
+
+% usage: \IEEEsettextheight[sample text]{top text margin}{bottom text margin}
+% Sets \textheight based on the specified top margin and bottom margin.
+% Takes into consideration \paperheight, \topskip, and (by default) the
+% the actual height and depth of the \IEEEdefaultsampletext text. 
+\def\IEEEsettextheight{\@ifnextchar [{\@IEEEsettextheight}{\@IEEEsettextheight[\IEEEdefaultsampletext]}}
+\def\@IEEEsettextheight[#1]#2#3{\textheight\paperheight\relax
+  \@IEEEtrantmpdimenA #2\relax
+  \advance \textheight by -\@IEEEtrantmpdimenA% subtract top margin
+  \@IEEEtrantmpdimenA #3\relax
+  \advance \textheight by -\@IEEEtrantmpdimenA% subtract bottom margin
+  \advance \textheight by \topskip% add \topskip
+  % subtract off everything above the top, and below the bottom, baselines
+  \settoheight{\@IEEEtrantmpdimenA}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance \textheight by -\@IEEEtrantmpdimenA
+  \settodepth{\@IEEEtrantmpdimenA}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance \textheight by -\@IEEEtrantmpdimenA}
+
+
+
+\newdimen\IEEEquantizedlength
+\IEEEquantizedlength 0sp\relax
+\newdimen\IEEEquantizedlengthdiff
+\IEEEquantizedlengthdiff 0sp\relax
+\def\IEEEquantizedlengthint{0}
+
+% usage: \IEEEquantizelength{mode: d, c, i}{base unit}{length}
+% Sets the length \IEEEquantizedlength to be an integer multiple of the given
+% (nonzero) base unit such that \IEEEquantizedlength approximates the given
+% length.
+% \IEEEquantizedlengthdiff is a length equal to the difference between the
+% \IEEEquantizedlength and the given length.
+% \IEEEquantizedlengthint is a macro containing the integer number of base units
+% in \IEEEquantizedlength.
+% i.e., \IEEEquantizedlength =  \IEEEquantizedlengthint * base unit
+% The mode determines how \IEEEquantizedlength is quantized:
+% d = always decrease (always round down \IEEEquantizeint)
+% c = use the closest match
+% i = always increase (always round up \IEEEquantizeint)
+% In anycase, if the given length is already quantized,
+% \IEEEquantizedlengthdiff will be set to zero.
+\def\IEEEquantizelength#1#2#3{\begingroup
+% work in isolation so as not to externally disturb the \@IEEEtrantmp
+% variables
+% load the argument values indirectly via \IEEEquantizedlengthdiff
+% in case the user refers to our \@IEEEtrantmpdimenX, \IEEEquantizedlength,
+% etc. in the arguments. we also will work with these as counters,
+% i.e., in sp units
+% A has the base unit
+\IEEEquantizedlengthdiff #2\relax\relax\relax\relax
+\@IEEEtrantmpcountA\IEEEquantizedlengthdiff
+% B has the input length
+\IEEEquantizedlengthdiff #3\relax\relax\relax\relax
+\@IEEEtrantmpcountB\IEEEquantizedlengthdiff
+\@IEEEtrantmpdimenA\the\@IEEEtrantmpcountA sp\relax
+\@IEEEtrantmpdimenB\the\@IEEEtrantmpcountB sp\relax
+% \@IEEEtrantmpcountC will have the quantized int
+% \IEEEquantizedlength will have the quantized length
+% \@IEEEtrantmpdimenC will have the quantized diff
+% initialize them to zero as this is what will be
+% exported if an error occurs
+\@IEEEtrantmpcountC 0\relax
+\IEEEquantizedlength 0sp\relax
+\@IEEEtrantmpdimenC 0sp\relax
+% extract mode
+\@IEEEextracttoken{#1}\relax
+% check for mode errors
+\ifx\@IEEEextractedtokenmacro\@empty
+  \@IEEEclspkgerror{Empty mode type in \string\IEEEquantizelength\space (line \the\inputlineno).\MessageBreak
+  Defaulting to `d'}{Valid modes for \string\IEEEquantizelength\space are: d, c and i.}\relax
+  \let\@IEEEextractedtoken=d\relax
+  \def\@IEEEextractedtokenmacro{d}\relax
+\else
+  \ifx\@IEEEextractedtokensdiscarded\@empty\else
+    \typeout{** WARNING: \string\IEEEquantizelength\space mode specifiers after the first in `\@IEEEextracttokenarg' ignored (line \the\inputlineno).}\relax
+  \fi
+\fi
+% check for base unit is zero error
+\ifnum\@IEEEtrantmpcountA=0\relax
+\@IEEEclspkgerror{Base unit is zero in \string\IEEEquantizelength\space (line \the\inputlineno).\MessageBreak
+  \string\IEEEquantizedlength\space and \string\IEEEquantizedlengthdiff\space are set to zero}{Division by zero is not allowed.}\relax
+\else% base unit is nonzero
+  % \@IEEEtrantmpcountC carries the number of integer units
+  % in the quantized length (integer length \ base)
+  \@IEEEtrantmpcountC\@IEEEtrantmpcountB\relax
+  \divide\@IEEEtrantmpcountC by \@IEEEtrantmpcountA\relax
+  % \IEEEquantizedlength has the (rounded down) quantized length
+  % = base * int
+  \IEEEquantizedlength\@IEEEtrantmpdimenA\relax
+  \multiply\IEEEquantizedlength by \@IEEEtrantmpcountC\relax
+  % \@IEEEtrantmpdimenC has the difference
+  % = quantized length - length
+  \@IEEEtrantmpdimenC\IEEEquantizedlength\relax
+  \advance\@IEEEtrantmpdimenC by -\@IEEEtrantmpdimenB\relax
+  % trap special case of length being already quantized
+  % to avoid a roundup under i option
+  \ifdim\@IEEEtrantmpdimenC=0sp\relax
+  \else % length not is already quantized
+    % set dimenA to carry the upper quantized (absolute value) difference:
+    % quantizedlength + base - length
+    \advance\@IEEEtrantmpdimenA by \IEEEquantizedlength\relax
+    \advance\@IEEEtrantmpdimenA by -\@IEEEtrantmpdimenB\relax
+    % set dimenB to carry the lower quantized (absolute value) difference:
+    % length - quantizedlength
+    \advance\@IEEEtrantmpdimenB by -\IEEEquantizedlength\relax
+    % handle each mode
+    \if\@IEEEextractedtoken c\relax
+      % compare upper and lower amounts, select upper if lower > upper
+      \ifdim\@IEEEtrantmpdimenB>\@IEEEtrantmpdimenA\relax
+        % use upper
+        \advance\IEEEquantizedlength by \the\@IEEEtrantmpcountA sp\relax
+        \advance\@IEEEtrantmpcountC by 1\relax
+        \@IEEEtrantmpdimenC\@IEEEtrantmpdimenA
+      \else% <=. uselower
+        % no need to do anything for lower, use output values already setup
+      \fi
+    \else% not mode c
+    \if\@IEEEextractedtoken i\relax
+      % always round up under i mode
+      \advance\IEEEquantizedlength by \the\@IEEEtrantmpcountA sp\relax
+      \advance\@IEEEtrantmpcountC by 1\relax
+      \@IEEEtrantmpdimenC\@IEEEtrantmpdimenA
+    \else
+      \if\@IEEEextractedtoken d\relax
+      \else
+        \@IEEEclspkgerror{Unknown mode type `\@IEEEextractedtokenmacro' in \string\IEEEquantizelength\space (line \the\inputlineno).\MessageBreak
+        Defaulting to `d'}%
+        {Valid modes for \string\IEEEquantizelength\space are: d, c, and i.}\relax
+      \fi % if d
+      % no need to do anything for d, use output values already setup
+    \fi\fi % if i, c
+  \fi % if length is already quantized
+\fi% if base unit is zero
+% globally assign the results to macros we use here to escape the enclosing
+% group without needing to call \global on any of the \@IEEEtrantmp variables.
+% \@IEEEtrantmpcountC has the quantized int
+% \IEEEquantizedlength has the quantized length
+% \@IEEEtrantmpdimenC has the quantized diff
+\xdef\@IEEEquantizedlengthintmacro{\the\@IEEEtrantmpcountC}\relax
+\@IEEEtrantmpcountC\IEEEquantizedlength\relax
+\xdef\@IEEEquantizedlengthmacro{\the\@IEEEtrantmpcountC}\relax
+\@IEEEtrantmpcountC\@IEEEtrantmpdimenC\relax
+\xdef\@IEEEquantizedlengthdiffmacro{\the\@IEEEtrantmpcountC}\relax
+\endgroup
+% locally assign the outputs here from the macros
+\expandafter\IEEEquantizedlength\@IEEEquantizedlengthmacro sp\relax
+\expandafter\IEEEquantizedlengthdiff\@IEEEquantizedlengthdiffmacro sp\relax
+\edef\IEEEquantizedlengthint{\@IEEEquantizedlengthintmacro}\relax}
+
+
+
+\newdimen\IEEEquantizedtextheightdiff
+\IEEEquantizedtextheightdiff 0sp\relax
+
+% usage: \IEEEquantizetextheight[base unit]{mode: d, c, i}
+% Sets \textheight to be an integer multiple of the current \baselineskip
+% (or the optionally specified base unit) plus the first (\topskip) line.
+% \IEEEquantizedtextheightdiff is a length equal to the difference between
+% the new quantized and original \textheight.
+% \IEEEquantizedtextheightlpc is a macro containing the integer number of
+% lines per column under the quantized \textheight. i.e.,
+% \textheight = \IEEEquantizedtextheightlpc * \baselineskip + \topskip
+% The mode determines how \textheight is quantized:
+% d = always decrease (always round down the number of lines per column)
+% c = use the closest match
+% i = always increase (always round up the number of lines per column)
+% In anycase, if \textheight is already quantized, it will remain unchanged,
+% and \IEEEquantizedtextheightdiff will be set to zero.
+% Depends on: \IEEEquantizelength
+\def\IEEEquantizetextheight{\@ifnextchar [{\@IEEEquantizetextheight}{\@IEEEquantizetextheight[\baselineskip]}}
+\def\@IEEEquantizetextheight[#1]#2{\begingroup
+% use our \IEEEquantizedtextheightdiff as a scratch pad
+% we need to subtract off \topskip before quantization
+\IEEEquantizedtextheightdiff\textheight
+\advance\IEEEquantizedtextheightdiff by -\topskip\relax
+\IEEEquantizelength{#2}{#1}{\IEEEquantizedtextheightdiff}
+% add back \topskip line
+\advance\IEEEquantizedlength by \topskip
+\@IEEEtrantmpcountC\IEEEquantizedlengthint\relax
+\advance\@IEEEtrantmpcountC by 1\relax
+% globally assign the results to macros we use here to escape the enclosing
+% group without needing to call \global on any of the \@IEEEtrantmp variables.
+\xdef\@IEEEquantizedtextheightlpcmacro{\the\@IEEEtrantmpcountC}\relax
+\@IEEEtrantmpcountC\IEEEquantizedlength\relax
+\xdef\@IEEEquantizedtextheightmacro{\the\@IEEEtrantmpcountC}\relax
+\@IEEEtrantmpcountC\IEEEquantizedlengthdiff\relax
+\xdef\@IEEEquantizedtextheightdiffmacro{\the\@IEEEtrantmpcountC}\relax
+\endgroup
+% locally assign the outputs here from the macros
+\textheight\@IEEEquantizedtextheightmacro sp\relax
+\IEEEquantizedtextheightdiff\@IEEEquantizedtextheightdiffmacro sp\relax
+\edef\IEEEquantizedtextheightlpc{\@IEEEquantizedtextheightlpcmacro}}
+
+
+
+% usage: \IEEEsettopmargin[sample text]{mode: t, b, c, a, q}{margin/offset}
+% Sets \topmargin based on the specified vertical margin.
+% Takes into consideration the base 1in offset, \headheight, \headsep,
+% \topskip, and (by default) the the actual height (or, for the bottom, depth)
+% of the \IEEEdefaultsampletext text.
+% The available modes are:
+% t = top margin
+% b = bottom margin
+% c = vertically centered, with the given offset
+% a = adjust the vertical margins using the given offset
+% q = adjust the margins using \IEEEquantizedtextheightdiff and the given offset
+% For the offsets, positive values increase the top margin.
+% \headheight, \headsep, \topskip and \textheight should be set properly for the
+% given margins before calling this function.
+\def\IEEEsettopmargin{\@ifnextchar [{\@IEEEsettopmargin}{\@IEEEsettopmargin[\IEEEdefaultsampletext]}}
+\def\@IEEEsettopmargin[#1]#2#3{\@IEEEtrantmpdimenA #3\relax
+\@IEEEextracttoken{#2}\relax
+% check for mode errors
+\ifx\@IEEEextractedtokenmacro\@empty
+  \@IEEEclspkgerror{Empty mode type in \string\IEEEsettopmargin\space (line \the\inputlineno).\MessageBreak
+  Defaulting to `t'}{Valid modes for \string\IEEEsettopmargin\space are: t, b, c, a and q.}\relax
+  \let\@IEEEextractedtoken=t\relax
+  \def\@IEEEextractedtokenmacro{t}\relax
+\else
+  \ifx\@IEEEextractedtokensdiscarded\@empty\else
+    \typeout{** WARNING: \string\IEEEsettopmargin\space mode specifiers after the first in `\@IEEEextracttokenarg' ignored (line \the\inputlineno).}\relax
+  \fi
+\fi
+% handle each mode
+\if\@IEEEextractedtoken a\relax
+  \advance\topmargin by \@IEEEtrantmpdimenA\relax
+\else
+\if\@IEEEextractedtoken q\relax
+  % we need to adjust by half the \IEEEquantizedtextheightdiff value
+  \@IEEEtrantmpdimenB\IEEEquantizedtextheightdiff\relax
+  \divide\@IEEEtrantmpdimenB by 2\relax
+  % a positive \IEEEquantizedtextheightdiff means we need to reduce \topmargin
+  % because \textheight has been lenghtened
+  \advance\topmargin by -\@IEEEtrantmpdimenB\relax
+  \advance\topmargin by \@IEEEtrantmpdimenA\relax
+\else
+\if\@IEEEextractedtoken c\relax
+  \topmargin\paperheight
+  \advance\topmargin by -\textheight
+  % \textheight includes \topskip, but we should not count topskip whitespace here, backout
+  \advance \topmargin by \topskip
+  \settoheight{\@IEEEtrantmpdimenB}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\topmargin by -\@IEEEtrantmpdimenB\relax
+  \settodepth{\@IEEEtrantmpdimenB}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\topmargin by -\@IEEEtrantmpdimenB\relax
+  \divide\topmargin by 2\relax
+  \advance\topmargin by \@IEEEtrantmpdimenA\relax
+\else
+\if\@IEEEextractedtoken b\relax
+  \topmargin\paperheight
+  \advance\topmargin by -\textheight
+  % \textheight includes \topskip, but we should not count topskip whitespace here, backout
+  \advance \topmargin by \topskip
+  \settodepth{\@IEEEtrantmpdimenB}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\topmargin by -\@IEEEtrantmpdimenB\relax
+  \advance\topmargin by -\@IEEEtrantmpdimenA\relax
+\else
+  \if\@IEEEextractedtoken t\relax
+  \else
+    \@IEEEclspkgerror{Unknown mode type `\@IEEEextractedtokenmacro' in \string\IEEEsettopmargin\space (line \the\inputlineno).\MessageBreak
+    Defaulting to `t'}%
+    {Valid modes for \string\IEEEsettopmargin\space are: t, b, c, a and q.}\relax
+  \fi
+  \topmargin\@IEEEtrantmpdimenA\relax
+  \settoheight{\@IEEEtrantmpdimenB}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\topmargin by \@IEEEtrantmpdimenB\relax
+\fi\fi % if t, b, c
+% convert desired top margin into actual \topmargin
+% this is not done for the q or a modes because they are only adjustments
+\advance \topmargin by -\topskip
+\advance \topmargin by -1in
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+\fi\fi % if q, a
+}
+
+
+
+% usage: \IEEEsetheadermargin[header sample][text sample]{mode: t, b, c, a}{margin/offset}
+% Differentially adjusts \topmargin and \headsep (such that their sum is unchanged)
+% based on the specified header margin.
+% Takes into consideration the base 1in offset, \headheight, \topskip, and (by default)
+% the actual height (or depth) of the \IEEEdefaultheadersampletext and
+% \IEEEdefaultsampletext text.
+% The available modes are:
+% t = top margin (top of the header text to the top of the page)
+% b = bottom margin (bottom of the header text to the top of the main text)
+% c = vertically centered between the main text and the top of the page,
+%     with the given offset
+% a = adjust the vertical position using the given offset
+% For the offsets, positive values move the header downward.
+% \headheight, \headsep, \topskip and \topmargin should be set properly before
+% calling this function.
+\def\IEEEsetheadermargin{\@ifnextchar [{\@IEEEsetheadermargin}{\@IEEEsetheadermargin[\IEEEdefaultheadersampletext]}}
+\def\@IEEEsetheadermargin[#1]{\@ifnextchar [{\@@IEEEsetheadermargin[#1]}{\@@IEEEsetheadermargin[#1][\IEEEdefaultsampletext]}}
+\def\@@IEEEsetheadermargin[#1][#2]#3#4{\@IEEEtrantmpdimenA #4\relax
+\@IEEEextracttoken{#3}\relax
+% check for mode errors
+\ifx\@IEEEextractedtokenmacro\@empty
+  \@IEEEclspkgerror{Empty mode type in \string\IEEEsetheadermargin\space (line \the\inputlineno).\MessageBreak
+  Defaulting to `t'}{Valid modes for \string\IEEEsetheadermargin\space are: t, b, c, and a.}\relax
+  \let\@IEEEextractedtoken=t\relax
+  \def\@IEEEextractedtokenmacro{t}\relax
+\else
+  \ifx\@IEEEextractedtokensdiscarded\@empty\else
+    \typeout{** WARNING: \string\IEEEsetheadermargin\space mode specifiers after the first in `\@IEEEextracttokenarg' ignored (line \the\inputlineno).}\relax
+  \fi
+\fi
+% handle each mode
+\if\@IEEEextractedtoken a\relax
+  % No need to do anything here and can pass through the adjustment
+  % value as is. The end adjustment of \topmargin and \headsep will
+  % do all that is needed
+\else
+\if\@IEEEextractedtoken c\relax
+  % get the bottom margin
+  \@IEEEtrantmpdimenB\headsep\relax
+  \settodepth{\@IEEEtrantmpdimenC}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenB by -\@IEEEtrantmpdimenC
+  \advance\@IEEEtrantmpdimenB by \topskip
+  \settoheight{\@IEEEtrantmpdimenC}{\begingroup #2\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenB by -\@IEEEtrantmpdimenC
+  % at this point \@IEEEtrantmpdimenB has the actual header bottom margin
+  % subtract from it the top header margin
+  \advance\@IEEEtrantmpdimenB -1in\relax % take into consideration the system 1in offset of the top margin
+  \advance\@IEEEtrantmpdimenB by -\topmargin
+  \advance\@IEEEtrantmpdimenB by -\headheight
+  \settoheight{\@IEEEtrantmpdimenC}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenB by \@IEEEtrantmpdimenC
+  % at this point \@IEEEtrantmpdimenB has the difference between the bottom and top margins
+  % we need to adjust by half this amount to center the header
+  \divide\@IEEEtrantmpdimenB by 2\relax
+  % and add to offset
+  \advance\@IEEEtrantmpdimenA by \@IEEEtrantmpdimenB
+\else
+\if\@IEEEextractedtoken b\relax
+  \@IEEEtrantmpdimenB\headsep\relax
+  \settodepth{\@IEEEtrantmpdimenC}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenB by -\@IEEEtrantmpdimenC
+  \advance\@IEEEtrantmpdimenB by \topskip
+  \settoheight{\@IEEEtrantmpdimenC}{\begingroup #2\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenB by -\@IEEEtrantmpdimenC
+  % at this point \@IEEEtrantmpdimenB has the actual header bottom margin
+  % get the difference between the actual and the desired
+  \advance\@IEEEtrantmpdimenB by -\@IEEEtrantmpdimenA
+  \@IEEEtrantmpdimenA\@IEEEtrantmpdimenB
+\else
+  \if\@IEEEextractedtoken t\relax
+  \else
+    \@IEEEclspkgerror{Unknown mode type `\@IEEEextractedtokenmacro' in \string\IEEEsetheadermargin\space (line \the\inputlineno).\MessageBreak
+    Defaulting to `t'}%
+    {Valid modes for \string\IEEEsetheadermargin\space are: t, b, c and a.}\relax
+  \fi
+  \@IEEEtrantmpdimenB 1in\relax % take into consideration the system 1in offset of the top margin
+  \advance\@IEEEtrantmpdimenB by \topmargin
+  \advance\@IEEEtrantmpdimenB by \headheight
+  \settoheight{\@IEEEtrantmpdimenC}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenB by -\@IEEEtrantmpdimenC
+  % at this point \@IEEEtrantmpdimenB has the actual header top margin
+  % get the difference between the desired and the actual
+  \advance\@IEEEtrantmpdimenA by -\@IEEEtrantmpdimenB
+\fi\fi % if t, b, c
+\fi % if a
+% advance \topmargin by the needed amount and reduce \headsep by the same
+% so as not to disturb the location of the main text
+\advance\topmargin by \@IEEEtrantmpdimenA\relax
+\advance\headsep by -\@IEEEtrantmpdimenA\relax
+}
+
+
+
+% usage: \IEEEsetfootermargin[footer sample][text sample]{mode: t, b, c, a}{margin/offset}
+% Adjusts \footskip based on the specified footer margin.
+% Takes into consideration the base 1in offset, \paperheight, \headheight,
+% \headsep, \textheight and (by default) the actual height (or depth) of the
+% \IEEEdefaultfootersampletext and \IEEEdefaultsampletext text.
+% The available modes are:
+% t = top margin (top of the footer text to the bottom of the main text)
+% b = bottom margin (bottom of the footer text to the bottom of page)
+% c = vertically centered between the main text and the bottom of the page,
+%     with the given offset
+% a = adjust the vertical position using the given offset
+% For the offsets, positive values move the footer downward.
+% \headheight, \headsep, \topskip, \topmargin, and \textheight should be set
+% properly before calling this function.
+\def\IEEEsetfootermargin{\@ifnextchar [{\@IEEEsetfootermargin}{\@IEEEsetfootermargin[\IEEEdefaultfootersampletext]}}
+\def\@IEEEsetfootermargin[#1]{\@ifnextchar [{\@@IEEEsetfootermargin[#1]}{\@@IEEEsetfootermargin[#1][\IEEEdefaultsampletext]}}
+\def\@@IEEEsetfootermargin[#1][#2]#3#4{\@IEEEtrantmpdimenA #4\relax
+\@IEEEextracttoken{#3}\relax
+% check for mode errors
+\ifx\@IEEEextractedtokenmacro\@empty
+  \@IEEEclspkgerror{Empty mode type in \string\IEEEsetfootermargin\space (line \the\inputlineno).\MessageBreak
+  Defaulting to `t'}{Valid modes for \string\IEEEsetfootermargin\space are: t, b, c, and a.}\relax
+  \let\@IEEEextractedtoken=t\relax
+  \def\@IEEEextractedtokenmacro{t}\relax
+\else
+  \ifx\@IEEEextractedtokensdiscarded\@empty\else
+    \typeout{** WARNING: \string\IEEEsetfootermargin\space mode specifiers after the first in `\@IEEEextracttokenarg' ignored (line \the\inputlineno).}\relax
+  \fi
+\fi
+% handle each mode
+\if\@IEEEextractedtoken a\relax
+  % No need to do anything here and can pass through the adjustment
+  % value as is. The end adjustment of \footskip will do all that
+  % is needed
+\else
+\if\@IEEEextractedtoken c\relax
+  % calculate the bottom margin
+  \@IEEEtrantmpdimenB 1in\relax % system 1in offset
+  \advance\@IEEEtrantmpdimenB\topmargin\relax
+  \advance\@IEEEtrantmpdimenB\headheight\relax
+  \advance\@IEEEtrantmpdimenB\headsep\relax
+  \advance\@IEEEtrantmpdimenB\textheight\relax
+  \advance\@IEEEtrantmpdimenB\footskip\relax
+  \settodepth{\@IEEEtrantmpdimenC}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenC by \@IEEEtrantmpdimenB
+  \@IEEEtrantmpdimenB\paperheight
+  \advance\@IEEEtrantmpdimenB by -\@IEEEtrantmpdimenC
+  % at this point \@IEEEtrantmpdimenB has the actual footer bottom margin
+  % now subtract off the footer top margin
+  \advance\@IEEEtrantmpdimenB -\footskip\relax
+  \settodepth{\@IEEEtrantmpdimenC}{\begingroup #2\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenB by \@IEEEtrantmpdimenC
+  \settoheight{\@IEEEtrantmpdimenC}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenB by \@IEEEtrantmpdimenC
+  % at this point \@IEEEtrantmpdimenB has the difference between the bottom
+  % and top footer margins
+  % our adjustment must be half this value to center the footer
+  \divide\@IEEEtrantmpdimenB by 2\relax
+  % add to the offset
+  \advance\@IEEEtrantmpdimenA by \@IEEEtrantmpdimenB
+\else
+\if\@IEEEextractedtoken b\relax
+  % calculate the bottom margin
+  \@IEEEtrantmpdimenB 1in\relax % system 1in offset
+  \advance\@IEEEtrantmpdimenB\topmargin\relax
+  \advance\@IEEEtrantmpdimenB\headheight\relax
+  \advance\@IEEEtrantmpdimenB\headsep\relax
+  \advance\@IEEEtrantmpdimenB\textheight\relax
+  \advance\@IEEEtrantmpdimenB\footskip\relax
+  \settodepth{\@IEEEtrantmpdimenC}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenC by \@IEEEtrantmpdimenB
+  \@IEEEtrantmpdimenB\paperheight
+  \advance\@IEEEtrantmpdimenB by -\@IEEEtrantmpdimenC
+  % at this point \@IEEEtrantmpdimenB has the actual footer bottom margin
+  % get the difference between the actual and the desired
+  \advance\@IEEEtrantmpdimenB by -\@IEEEtrantmpdimenA
+  \@IEEEtrantmpdimenA\@IEEEtrantmpdimenB
+\else
+  \if\@IEEEextractedtoken t\relax
+  \else
+    \@IEEEclspkgerror{Unknown mode type `\@IEEEextractedtokenmacro' in \string\IEEEsetfootermargin\space (line \the\inputlineno).\MessageBreak
+    Defaulting to `t'}%
+    {Valid modes for \string\IEEEsetfootermargin\space are: t, b, c and a.}\relax
+  \fi
+  \@IEEEtrantmpdimenB\footskip\relax
+  \settodepth{\@IEEEtrantmpdimenC}{\begingroup #2\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenB by -\@IEEEtrantmpdimenC
+  \settoheight{\@IEEEtrantmpdimenC}{\begingroup #1\relax\relax\relax\endgroup}\relax
+  \advance\@IEEEtrantmpdimenB by -\@IEEEtrantmpdimenC
+  % at this point \@IEEEtrantmpdimenB has the actual footer top margin
+  % get the difference between the desired and the actual
+  \advance\@IEEEtrantmpdimenA by -\@IEEEtrantmpdimenB
+\fi\fi % if t, b, c
+\fi % if a
+% advance \footskip by the needed amount
+\advance\footskip by \@IEEEtrantmpdimenA\relax
+}
+
+% -- End V1.8a page setup commands --
+
+
+
+
+
+% V1.6
 % LaTeX is a little to quick to use hyphenations
 % So, we increase the penalty for their use and raise
 % the badness level that triggers an underfull hbox
@@ -740,6 +1615,9 @@
 % of the box" than that under V1.5 and prior.
 % TeX default is 50
 \hyphenpenalty=750
+\ifCLASSOPTIONcompsoc
+\hyphenpenalty 500
+\fi
 % If we didn't adjust the interword spacing, 2200 might be better.
 % The TeX default is 1000
 \hbadness=1350
@@ -749,6 +1627,11 @@
 % V1.7 increase this a tad to discourage equation breaks
 \binoppenalty=1000 % default 700
 \relpenalty=800     % default 500
+
+% v1.8a increase these to discourage widows and orphans
+\clubpenalty=1000          % default 150
+\widowpenalty=1000         % default 150
+\displaywidowpenalty=1000 % default  50
 
 
 % margin note stuff
@@ -772,113 +1655,115 @@
 \parskip 0ex plus 0.2ex minus 0.1ex
 
 \parindent    1.0em
+\ifCLASSOPTIONcompsoc
+  \parindent    1.5em
+\fi
 
-\topmargin    -49.0pt
 \headheight   12pt
-\headsep      0.25in
-
+\headsep      18pt
 % use the normal font baselineskip
 % so that \topskip is unaffected by changes in \baselinestretch
 \topskip=\@IEEEnormalsizeunitybaselineskip
+
+
 % V1.8 \maxdepth defaults to 4pt, but should be font size dependent
 \maxdepth=0.5\@IEEEnormalsizeunitybaselineskip
 \textheight       58pc  % 9.63in, 696pt
-% Tweak textheight to a perfect integer number of lines/page.
-% The normal baselineskip for each document point size is used 
-% to determine these values.
-\ifx\CLASSOPTIONpt\@IEEEptsizenine\textheight=63\@IEEEnormalsizeunitybaselineskip\fi      % 63 lines/page
-\ifx\CLASSOPTIONpt\@IEEEptsizeten\textheight=58\@IEEEnormalsizeunitybaselineskip\fi       % 58 lines/page
-\ifx\CLASSOPTIONpt\@IEEEptsizeeleven\textheight=52\@IEEEnormalsizeunitybaselineskip\fi    % 52 lines/page
-\ifx\CLASSOPTIONpt\@IEEEptsizetwelve\textheight=50\@IEEEnormalsizeunitybaselineskip\fi    % 50 lines/page
+
+% set the default top margin to 58pt
+% which results in a \topmargin of -49.59pt for 10pt documents
+\IEEEsettopmargin{t}{58pt}
+% tweak textheight to a perfect integer number of lines/column.
+% standard is: 9pt/63 lpc; 10pt/58 lpc; 11pt/52 lpc; 12pt/50 lpc
+\IEEEquantizetextheight{c}
+% tweak top margin so that the error is shared equally at the top and bottom
+\IEEEsettopmargin{q}{0sp}
 
 
 \columnsep         1pc
 \textwidth        43pc   % 2 x 21pc + 1pc = 43pc
- 
 
-% the default side margins are equal
-\if@IEEEusingAfourpaper 
-\oddsidemargin        14.32mm
-\evensidemargin       14.32mm
-\else
-\oddsidemargin        0.680in
-\evensidemargin       0.680in
-\fi
-% compensate for LaTeX's 1in offset
-\addtolength{\oddsidemargin}{-1in}
-\addtolength{\evensidemargin}{-1in}
+% set the default side margins to center the text
+\IEEEsetsidemargin{c}{0pt}
 
 
-
-% adjust margins for conference mode
+% adjust margins for default conference mode
 \ifCLASSOPTIONconference
- \topmargin        -0.25in
- % we retain the reserved, but unused space for headers
- \addtolength{\topmargin}{-\headheight}
- \addtolength{\topmargin}{-\headsep}
  \textheight        9.25in % The standard for conferences (668.4975pt)
- % Tweak textheight to a perfect integer number of lines/page.
- \ifx\CLASSOPTIONpt\@IEEEptsizenine\textheight=61\@IEEEnormalsizeunitybaselineskip\fi      % 61 lines/page
- \ifx\CLASSOPTIONpt\@IEEEptsizeten\textheight=56\@IEEEnormalsizeunitybaselineskip\fi       % 56 lines/page
- \ifx\CLASSOPTIONpt\@IEEEptsizeeleven\textheight=50\@IEEEnormalsizeunitybaselineskip\fi    % 50 lines/page
- \ifx\CLASSOPTIONpt\@IEEEptsizetwelve\textheight=48\@IEEEnormalsizeunitybaselineskip\fi    % 48 lines/page
+ \IEEEsettopmargin{t}{0.75in}
+ % tweak textheight to a perfect integer number of lines/page.
+ % standard is: 9pt/61 lpc; 10pt/56 lpc; 11pt/50 lpc; 12pt/48 lpc
+ \IEEEquantizetextheight{c}
+ % tweak top margin so that the error is shared equally at the top and bottom
+ \IEEEsettopmargin{q}{0sp}
 \fi
 
+
+% compsoc text sizes, margins and spacings
+\ifCLASSOPTIONcompsoc
+ \columnsep         12bp
+ % CS specs for \textwdith are 6.875in
+ % \textwidth         6.875in
+ % however, measurements from proofs show they are using 3.5in columns
+ \textwidth         7in
+ \advance\textwidth by \columnsep
+ % set the side margins to center the text
+ \IEEEsetsidemargin{c}{0pt}
+ % top/bottom margins to center
+ % could just set \textheight to 9.75in for all the different paper sizes
+ % and then quantize, but we'll do it the long way here to allow for easy
+ % future per-paper size adjustments
+ \IEEEsettextheight{0.625in}{0.625in}% 11in - 2 * 0.625in = 9.75in is the standard text height for compsoc journals
+ \IEEEsettopmargin{t}{0.625in}
+ \if@IEEEusingcspaper
+   \IEEEsettextheight{0.5in}{0.5in}% 10.75in - 2 * 0.5in = 9.75in
+   \IEEEsettopmargin{t}{0.5in}
+ \fi
+ \if@IEEEusingAfourpaper
+   \IEEEsettextheight{24.675mm}{24.675mm}% 297mm - 2 * 24.675mm = 247.650mm (9.75in)
+   \IEEEsettopmargin{t}{24.675mm}
+ \fi
+ % tweak textheight to a perfect integer number of lines/page.
+ % standard is: 9pt/65 lpc; 10pt/61 lpc; 11pt/53 lpc; 12pt/49 lpc
+ \IEEEquantizetextheight{c}
+ % tweak top margin so that the error is shared equally at the top and bottom
+ \IEEEsettopmargin{q}{0sp}
 
 % compsoc conference
-\ifCLASSOPTIONcompsoc
-\ifCLASSOPTIONconference
- % compsoc conference use a larger value for columnsep
- \columnsep 0.375in
- % compsoc conferences want 1in top margin, 1.125in bottom margin
- \topmargin        0in
- \addtolength{\topmargin}{-6pt}% we tweak this a tad to better comply with top of line stuff
- % we retain the reserved, but unused space for headers
- \addtolength{\topmargin}{-\headheight}
- \addtolength{\topmargin}{-\headsep}
- \textheight        8.875in % (641.39625pt)
- % Tweak textheight to a perfect integer number of lines/page.
- \ifx\CLASSOPTIONpt\@IEEEptsizenine\textheight=58\@IEEEnormalsizeunitybaselineskip\fi      % 58 lines/page
- \ifx\CLASSOPTIONpt\@IEEEptsizeten\textheight=53\@IEEEnormalsizeunitybaselineskip\fi       % 53 lines/page
- \ifx\CLASSOPTIONpt\@IEEEptsizeeleven\textheight=48\@IEEEnormalsizeunitybaselineskip\fi    % 48 lines/page
- \ifx\CLASSOPTIONpt\@IEEEptsizetwelve\textheight=46\@IEEEnormalsizeunitybaselineskip\fi    % 46 lines/page 
- \textwidth 6.5in
- % the default side margins are equal
- \if@IEEEusingAfourpaper 
-  \oddsidemargin        22.45mm
-  \evensidemargin       22.45mm
- \else
-  \oddsidemargin        1in
-  \evensidemargin       1in
+ \ifCLASSOPTIONconference
+  % compsoc conference use a larger value for columnsep
+  \columnsep 0.25in
+  \IEEEsettextwidth{0.75in}{0.75in}
+  % set the side margins to center the text (0.75in for letterpaper)
+  \IEEEsetsidemargin{c}{0pt}
+  % compsoc conferences want 1in top and bottom margin
+  \IEEEsettextheight{1in}{1in}
+  \IEEEsettopmargin{t}{1in}
+  % tweak textheight to a perfect integer number of lines/page.
+  % standard is: 9pt/58 lpc; 10pt/53 lpc; 11pt/48 lpc; 12pt/46 lpc
+  \IEEEquantizetextheight{c}
+  % tweak top margin so that the error is shared equally at the top and bottom
+  \IEEEsettopmargin{q}{0sp}
  \fi
- % compensate for LaTeX's 1in offset
- \addtolength{\oddsidemargin}{-1in}
- \addtolength{\evensidemargin}{-1in}
-\fi\fi
+\fi
 
 
 
 % draft mode settings override that of all other modes
 % provides a nice 1in margin all around the paper and extra
 % space between the lines for editor's comments
-\ifCLASSOPTIONdraftcls 
-  % want 1in from top of paper to text
-  \setlength{\topmargin}{-\headsep}%
-  \addtolength{\topmargin}{-\headheight}%
+\ifCLASSOPTIONdraftcls
   % we want 1in side margins regardless of paper type
-  \oddsidemargin      0in
-  \evensidemargin     0in
-  % set the text width
-  \setlength{\textwidth}{\paperwidth}%
-  \addtolength{\textwidth}{-2.0in}%
-  \setlength{\textheight}{\paperheight}%
-  \addtolength{\textheight}{-2.0in}%
+  \IEEEsettextwidth{1in}{1in}
+  \IEEEsetsidemargin{c}{0pt}
+  % want 1in top and bottom margins
+  \IEEEsettextheight{1in}{1in}
+  \IEEEsettopmargin{t}{1in}
   % digitize textheight to be an integer number of lines.
-  % this may cause the bottom margin to be off a tad
-  \addtolength{\textheight}{-1\topskip}%
-  \divide\textheight  by \baselineskip%
-  \multiply\textheight  by \baselineskip%
-  \addtolength{\textheight}{\topskip}%
+  % this may cause the top and bottom margins to be off a tad
+  \IEEEquantizetextheight{c}
+  % tweak top margin so that the error is shared equally at the top and bottom
+  \IEEEsettopmargin{q}{0sp}
 \fi
 
 
@@ -898,17 +1783,8 @@
   \ifx\CLASSINPUTinnersidemargin\@IEEEundefined
     \edef\CLASSINPUTinnersidemargin{\CLASSINPUToutersidemargin}
   \fi
-  \setlength{\oddsidemargin}{\CLASSINPUTinnersidemargin}
-  \ifCLASSOPTIONtwoside
-    \setlength{\evensidemargin}{\CLASSINPUToutersidemargin}
-  \else
-    \setlength{\evensidemargin}{\CLASSINPUTinnersidemargin}
-  \fi
-  \addtolength{\oddsidemargin}{-1in}
-  \addtolength{\evensidemargin}{-1in}
-  \setlength{\textwidth}{\paperwidth}
-  \addtolength{\textwidth}{-\CLASSINPUTinnersidemargin}
-  \addtolength{\textwidth}{-\CLASSINPUToutersidemargin}
+  \IEEEsettextwidth{\CLASSINPUTinnersidemargin}{\CLASSINPUToutersidemargin}
+  \IEEEsetsidemargin{i}{\CLASSINPUTinnersidemargin}
   \typeout{** ATTENTION: Overriding inner side margin to \CLASSINPUTinnersidemargin\space and 
            outer side margin to \CLASSINPUToutersidemargin\space via \string\CLASSINPUT.}
 \fi
@@ -930,25 +1806,53 @@
   \ifx\CLASSINPUTtoptextmargin\@IEEEundefined
     \edef\CLASSINPUTtoptextmargin{\CLASSINPUTbottomtextmargin}
   \fi
-  \setlength{\topmargin}{\CLASSINPUTtoptextmargin}
-  \addtolength{\topmargin}{-1in}
-  \addtolength{\topmargin}{-\headheight}
-  \addtolength{\topmargin}{-\headsep}
-  \setlength{\textheight}{\paperheight}
-  \addtolength{\textheight}{-\CLASSINPUTtoptextmargin}
-  \addtolength{\textheight}{-\CLASSINPUTbottomtextmargin}
-  % in the default format we use the normal baselineskip as topskip
-  % we only need 0.7 of this to clear typical top text and we need
-  % an extra 0.3 spacing at the bottom for descenders. This will
-  % correct for both.
-  \addtolength{\topmargin}{-0.3\@IEEEnormalsizeunitybaselineskip}
+  \IEEEsettextheight{\CLASSINPUTtoptextmargin}{\CLASSINPUTbottomtextmargin}
+  \IEEEsettopmargin{t}{\CLASSINPUTtoptextmargin}
   \typeout{** ATTENTION: Overriding top text margin to \CLASSINPUTtoptextmargin\space and 
            bottom text margin to \CLASSINPUTbottomtextmargin\space via \string\CLASSINPUT.}
 \fi
 
 
 
+% default to center header and footer text in the margins
+\IEEEsetheadermargin{c}{0pt}
+\IEEEsetfootermargin{c}{0pt}
 
+% adjust header and footer positions for compsoc journals
+\ifCLASSOPTIONcompsoc
+  \ifCLASSOPTIONjournal
+    \IEEEsetheadermargin{b}{\@IEEEnormalsizeunitybaselineskip}
+    \IEEEsetfootermargin{t}{\@IEEEnormalsizeunitybaselineskip}
+  \fi
+\fi
+
+
+% V1.8a display lines per column info message on user's console
+\def\IEEEdisplayinfolinespercolumn{\@IEEEtrantmpdimenA=\textheight
+% topskip represents only one line even if > baselineskip
+\advance\@IEEEtrantmpdimenA by -1\topskip
+\@IEEEtrantmpcountA=\@IEEEtrantmpdimenA
+\@IEEEtrantmpcountB=\@IEEEtrantmpdimenA
+\divide\@IEEEtrantmpcountB by \baselineskip
+% need to add one line to include topskip (first) line
+\advance\@IEEEtrantmpcountB by 1
+% save lines per column value as text
+\edef\@IEEEnumlinespercolumninfotxt{\the\@IEEEtrantmpcountB}
+% backout topskip advance to allow direct \@IEEEtrantmpcountA comparison
+\advance\@IEEEtrantmpcountB by -1
+% restore value as text height (without topskip) rather than just as number of lines
+\multiply\@IEEEtrantmpcountB by \baselineskip
+% is the column height an integer number of lines per column?
+\ifnum\@IEEEtrantmpcountA=\@IEEEtrantmpcountB
+\edef\@IEEEnumlinespercolumnexactinfotxt{exact}
+\else
+\@IEEEtrantmpdimenA\@IEEEtrantmpcountA sp\relax
+\advance\@IEEEtrantmpdimenA by -\@IEEEtrantmpcountB sp\relax
+\edef\@IEEEnumlinespercolumnexactinfotxt{approximate, difference = \the\@IEEEtrantmpdimenA}
+\fi
+\typeout{-- Lines per column: \@IEEEnumlinespercolumninfotxt\space (\@IEEEnumlinespercolumnexactinfotxt).}}
+% delay execution till start of document to allow for user changes
+\AtBeginDocument{\IEEEdisplayinfolinespercolumn}
 
 
 
@@ -1131,6 +2035,9 @@
 % This controls the default spacing between the end of the IED
 % list labels and the list text, when normal text is used for
 % the labels.
+% compsoc uses a larger value here, but we'll set that later
+% in the class so that this code block area can be extracted
+% as-is for IEEEtrantools.sty
 \newdimen\IEEEiednormlabelsep
 \IEEEiednormlabelsep 0.6em
 
@@ -1144,6 +2051,9 @@
 % This controls the extra vertical separation put above and
 % below each IED list. IEEE usually puts a little extra spacing
 % around each list. However, this spacing is barely noticeable.
+% compsoc uses a larger value here, but we'll set that later
+% in the class so that this code block area can be extracted
+% as-is for IEEEtrantools.sty
 \newskip\IEEEiedtopsep
 \IEEEiedtopsep 2pt plus 1pt minus 1pt
 
@@ -1460,6 +2370,14 @@
 \makebox[\labelwidth][r]{\normalfont #1}\fi\fi}
 
 
+% compsoc uses a larger value for the normal labelsep
+% and also extra spacing above and below each list
+\ifCLASSOPTIONcompsoc
+  \IEEEiednormlabelsep 1.2em
+  \IEEEiedtopsep 6pt plus 3pt minus 3pt
+\fi
+
+
 % VERSE and QUOTE
 % V1.7 define environments with newenvironment
 \newenvironment{verse}{\let\\=\@centercr
@@ -1476,7 +2394,6 @@
 % \titlepage
 % provided only for backward compatibility. \maketitle is the correct
 % way to create the title page. 
-\newif\if@restonecol
 \def\titlepage{\@restonecolfalse\if@twocolumn\@restonecoltrue\onecolumn
     \else \newpage \fi \thispagestyle{empty}\c@page\z@}
 \def\endtitlepage{\if@restonecol\twocolumn \else \newpage \fi}
@@ -1638,7 +2555,7 @@
 \def\indexname{Index}
 \def\figurename{Fig.}
 \def\tablename{TABLE}
-\@IEEEcompsocconfonly{\def\figurename{Figure}\def\tablename{Table}}
+\@IEEEcompsocconfonly{\def\figurename{Figure}}
 \def\partname{Part}
 \def\appendixname{Appendix}
 \def\abstractname{Abstract}
@@ -1685,7 +2602,7 @@
 \floatsep 0.85\baselineskip plus  0.2\baselineskip minus  0.2\baselineskip
 \textfloatsep 1.55\baselineskip plus  0.2\baselineskip minus  0.4\baselineskip
 \@fptop 0pt plus 1fil
-\@fpsep 0.75\baselineskip plus 2fil 
+\@fpsep 0.75\baselineskip plus 2fil
 \@fpbot 0pt plus 1fil
 \def\topfraction{0.9}
 \def\bottomfraction{0.4}
@@ -1727,6 +2644,10 @@
 % but only \abovecaptionskip is used above figure captions and *below* table
 % captions
 \setlength\abovecaptionskip{0.5\baselineskip}
+% compsoc journals are a little more generous
+\ifCLASSOPTIONcompsoc\ifCLASSOPTIONjournal
+  \setlength\abovecaptionskip{0.75\baselineskip}
+\fi\fi
 \setlength\belowcaptionskip{0pt}
 % V1.6 create hooks in case the caption spacing ever needs to be
 % overridden by a user
@@ -1762,19 +2683,19 @@
 % test if is a for a figure or table
 \ifx\@captype\@IEEEtablestring%
 % if a table, do table caption
-\normalsize\bgroup\par\centering\@IEEEtabletopskipstrut{\normalfont\sffamily\normalsize {#1.}\nobreakspace #2}\par\addvspace{0.5\baselineskip}\egroup%
+\footnotesize\bgroup\par\centering\@IEEEtabletopskipstrut{\normalfont\footnotesize {#1.}\nobreakspace\scshape #2}\par\addvspace{0.5\baselineskip}\egroup%
 \@IEEEtablecaptionsepspace
 % if not a table, format it as a figure
 \else
 \@IEEEfigurecaptionsepspace
-\setbox\@tempboxa\hbox{\normalfont\sffamily\normalsize {#1.}\nobreakspace #2}%
+\setbox\@tempboxa\hbox{\normalfont\footnotesize {#1.}\nobreakspace #2}%
 \ifdim \wd\@tempboxa >\hsize%
 % if caption is longer than a line, let it wrap around
-\setbox\@tempboxa\hbox{\normalfont\sffamily\normalsize {#1.}\nobreakspace}%
-\parbox[t]{\hsize}{\normalfont\sffamily\normalsize \noindent\unhbox\@tempboxa#2}%
+\setbox\@tempboxa\hbox{\normalfont\footnotesize {#1.}\nobreakspace}%
+\parbox[t]{\hsize}{\normalfont\footnotesize \noindent\unhbox\@tempboxa#2}%
 % if caption is shorter than a line, center
 \else%
-\hbox to\hsize{\normalfont\sffamily\normalsize\hfil\box\@tempboxa\hfil}%
+\hbox to\hsize{\normalfont\footnotesize\hfil\box\@tempboxa\hfil}%
 \fi\fi}
 %
 \else% nonconference compsoc
@@ -1782,19 +2703,19 @@
 % test if is a for a figure or table
 \ifx\@captype\@IEEEtablestring%
 % if a table, do table caption
-\normalsize\bgroup\par\centering\@IEEEtabletopskipstrut{\normalfont\sffamily\normalsize #1}\\{\normalfont\sffamily\normalsize #2}\par\addvspace{0.5\baselineskip}\egroup%
+\footnotesize\bgroup\par\centering\@IEEEtabletopskipstrut{\normalfont\sffamily\footnotesize #1}\\{\normalfont\sffamily\footnotesize #2}\par\addvspace{0.5\baselineskip}\egroup%
 \@IEEEtablecaptionsepspace
 % if not a table, format it as a figure
 \else
 \@IEEEfigurecaptionsepspace
-\setbox\@tempboxa\hbox{\normalfont\sffamily\normalsize {#1.}\nobreakspace #2}%
+\setbox\@tempboxa\hbox{\normalfont\sffamily\footnotesize {#1.}\nobreakspace #2}%
 \ifdim \wd\@tempboxa >\hsize%
 % if caption is longer than a line, let it wrap around
-\setbox\@tempboxa\hbox{\normalfont\sffamily\normalsize {#1.}\nobreakspace}%
-\parbox[t]{\hsize}{\normalfont\sffamily\normalsize \noindent\unhbox\@tempboxa#2}%
+\setbox\@tempboxa\hbox{\normalfont\sffamily\footnotesize {#1.}\nobreakspace}%
+\parbox[t]{\hsize}{\normalfont\sffamily\footnotesize \noindent\unhbox\@tempboxa#2}%
 % if caption is shorter than a line, left justify
 \else%
-\hbox to\hsize{\normalfont\sffamily\normalsize\box\@tempboxa\hfil}%
+\hbox to\hsize{\normalfont\sffamily\footnotesize\box\@tempboxa\hfil}%
 \fi\fi}
 \fi
 %
@@ -1872,6 +2793,174 @@
 
 
 
+%% -- Command Argument Scanning Support Functions --
+%% V1.8a 
+
+% usage: \@IEEEstripouterbraces*{}
+% \@IEEEstripouterbraces fully expands its argument (which it then stores
+% in \@IEEEstripouterbracesarg) via \edef, then removes any outer enclosing
+% braces, and finally stores the result in the macro
+% \@IEEEstrippedouterbraces.
+%
+% For example:
+% \@IEEEstripouterbraces{{{{ab}c}}}
+% results in:
+%
+% \@IEEEstripouterbracesarg ==> a macro containing {{{ab}c}}
+% \@IEEEstrippedouterbraces ==> a macro containing {ab}c
+%
+% the *-star form,\@IEEEstripouterbraces*, does not expand the argument
+% contents during processing
+\def\@IEEEstripouterbraces{\@ifstar{\let\@IEEEstripouterbracesdef=\def\@@IEEEstripouterbraces}{\let\@IEEEstripouterbracesdef=\edef\@@IEEEstripouterbraces}}
+
+\def\@@IEEEstripouterbraces#1{\@IEEEstripouterbracesdef\@IEEEstripouterbracesarg{#1}\relax
+% If the macro is unchanged after being acquired as a single delimited
+% argument, we know we have one sequence of tokens without any enclosing
+% braces. Loop until this is true.
+\loop
+  \expandafter\@@@IEEEstripouterbraces\@IEEEstripouterbracesarg\@IEEEgeneralsequenceDELIMITER
+\ifx\@IEEEstrippedouterbraces\@IEEEstripouterbracesarg
+\else
+  \let\@IEEEstripouterbracesarg\@IEEEstrippedouterbraces
+\repeat}
+
+\def\@@@IEEEstripouterbraces#1\@IEEEgeneralsequenceDELIMITER{\def\@IEEEstrippedouterbraces{#1}}
+
+
+
+% usage: \@IEEEextractgroup*{}
+% \@IEEEextractgroup fully expands its argument (which it then stores in
+% \@IEEEextractgrouparg) via \edef and then assigns the first "brace group"
+% of tokens to the macro \@IEEEextractedgroup.
+% The remaining groups, if any, are stored in the macro
+% \@IEEEextractedgroupremain. If the argument does not contain the requisite
+% groups, the respective macros will be defined to be empty.
+% There is an asymmetry in that \@IEEEextractedgroup is stripped of its first
+% outer grouping while \@IEEEextractedgroupremain retains even the outer
+% grouping (if present) that originally identified it as a group.
+%
+% For example:
+% \@IEEEextractgroup{{{ab}}{c{de}}}
+% results in:
+%
+% \@IEEEextractgrouparg       ==> a macro containing {{ab}}{c{de}}
+% \@IEEEextractedgroup        ==> a macro containing {ab}
+% \@IEEEextractedgroupremain  ==> a macro containing {c{de}}
+%
+% The *-star form, \@IEEEextractgroup*, does not expand its argument
+% contents during processing.
+\def\@IEEEextractgroup{\@ifstar{\let\@IEEEextractgroupdef=\def\@@IEEEextractgroup}{\let\@IEEEextractgroupdef=\edef\@@IEEEextractgroup}}
+
+\def\@@IEEEextractgroup#1{\@IEEEextractgroupdef\@IEEEextractgrouparg{#1}\relax
+% trap the case of an empty extracted group as this would cause problems with
+% \@IEEEextractgroupremain's argument acquisition
+\ifx\@IEEEextractgrouparg\@empty
+  \def\@IEEEextractedgroup{}\relax
+  \def\@IEEEextractedgroupremain{}\relax
+\else
+  % We have to use some dirty tricks here. We want to insert {} around
+  % whatever remains after the first group so that TeX's argument scanner
+  % will preserve any originally enclosing braces as well as provide an
+  % empty argument to acquire even if there isn't a second group.
+  % In this first of two dirty tricks, we put a } at the end of the structure
+  % we are going to extract from. The \ifnum0=`{\fi keeps TeX happy to allow
+  % what would otherwise be an unbalanced macro definition for
+  % \@@IEEEextractgroup to be acceptable to it.
+  \ifnum0=`{\fi\expandafter\@IEEEextractgroupremain\@IEEEextractgrouparg}\relax
+\fi}
+
+% In the second part of the dirty tricks, we insert a leading { right after
+% the first group is acquired, but before the remainder is. Again, the
+% \ifnum0=`}\fi keeps TeX happy during definition time, but will disappear
+% during run time.
+\def\@IEEEextractgroupremain#1{\def\@IEEEextractedgroup{#1}\expandafter\@@IEEEextractgroupremain\expandafter{\ifnum0=`}\fi}
+
+\def\@@IEEEextractgroupremain#1{\def\@IEEEextractedgroupremain{#1}}
+
+
+
+% \@IEEEextracttoken relocated at top because margin setting commands rely on it
+
+
+
+% usage: \@IEEEextracttokengroups*{}
+% \@IEEEextracttokengroups fully expands its argument (which it then stores
+% in \@IEEEextracttokengroupsarg) and then assigns the first "brace group" of
+% tokens (with the outermost braces removed) to the macro
+% \@IEEEextractedfirstgroup.
+% The meaning of the first nonbrace (but including the empty group) token
+% within this first group is assigned via \let to \@IEEEextractedfirsttoken
+% as well as stored in the macro \@IEEEextractedfirsttokenmacro. If a first
+% nonbrace token does not exist (or is an empty group), these will be \relax
+% and empty, respectively.  Tokens that would otherwise be discarded during
+% the acquisition of the first token in the first group are stored in
+% \@IEEEextractedfirsttokensdiscarded, however their original relative brace
+% nesting depths are not guaranteed to be preserved.
+% The first group within this first group is stored in the macro
+% \@IEEEextractedfirstfirstgroup.
+% Likewise for the next group after the first: \@IEEEextractednextgroup,
+% \@IEEEextractednextfirstgroup, \@IEEEextractednextgroupfirsttoken,
+% \@IEEEextractednextgroupfirsttokenmacro, and 
+% \@IEEEextractednextfirsttokensdiscarded.
+% All tokens/groups after the first group, including any enclosing braces,
+% are stored in the macro \@IEEEextractedafterfirstgroupremain which will
+% be empty if none exist.
+%
+% For example:
+% \@IEEEextracttokengroups{{{ab}{cd}}{{ef}g}}
+% will result in:
+%
+% \@IEEEextracttokengroupsarg             ==> a macro containing {{ab}{cd}}{{ef}g}
+% \@IEEEextractedfirstgroup               ==> a macro containing {ab}{cd}
+% \@IEEEextractedafterfirstgroupremain    ==> a macro containing {{ef}g}
+% \@IEEEextractedfirsttoken               ==> the letter a
+% \@IEEEextractedfirsttokenmacro          ==> a macro containing a
+% \@IEEEextractedfirsttokensdiscarded     ==> a macro containing bcd
+% \@IEEEextractedfirstfirstgroup          ==> a macro containing ab
+% \@IEEEextractednextgroup                ==> a macro containing {ef}g
+% \@IEEEextractednextfirsttoken           ==> the letter e
+% \@IEEEextractednextfirsttokenmacro      ==> a macro containing e
+% \@IEEEextractednextfirsttokensdiscarded ==> a macro containing fg
+% \@IEEEextractednextfirstgroup           ==> a macro containing ef
+%
+% If given an empty argument, \@IEEEextractedfirsttoken and
+% \@IEEEextractednextfirsttoken will be set to \relax
+% and all the macros will be empty.
+% the *-star form, \@IEEEextracttokengroups*, does not expand its argument
+% contents during processing.
+%
+% Depends on: \@IEEEextractgroup, \@IEEEextracttoken
+\def\@IEEEextracttokengroups{\@ifstar{\let\@IEEEextracttokengroupsdef=\def\@@IEEEextracttokengroups}{\let\@IEEEextracttokengroupsdef=\edef\@@IEEEextracttokengroups}}
+\def\@@IEEEextracttokengroups#1{\@IEEEextracttokengroupsdef\@IEEEextracttokengroupsarg{#1}\relax
+% begin extraction, these functions are safe with empty arguments
+% first group
+\expandafter\@IEEEextractgroup\expandafter*\expandafter{\@IEEEextracttokengroupsarg}\relax
+\let\@IEEEextractedfirstgroup\@IEEEextractedgroup
+\let\@IEEEextractedafterfirstgroupremain\@IEEEextractedgroupremain
+\expandafter\@IEEEextracttoken\expandafter*\expandafter{\@IEEEextractedfirstgroup}\relax
+\let\@IEEEextractedfirsttoken\@IEEEextractedtoken
+\let\@IEEEextractedfirsttokenmacro\@IEEEextractedtokenmacro
+\let\@IEEEextractedfirsttokensdiscarded\@IEEEextractedtokensdiscarded
+% first first group
+\expandafter\@IEEEextractgroup\expandafter*\expandafter{\@IEEEextractedfirstgroup}\relax
+\let\@IEEEextractedfirstfirstgroup\@IEEEextractedgroup
+% next group
+\expandafter\@IEEEextractgroup\expandafter*\expandafter{\@IEEEextractedafterfirstgroupremain}\relax
+\let\@IEEEextractednextgroup\@IEEEextractedgroup
+\expandafter\@IEEEextracttoken\expandafter*\expandafter{\@IEEEextractednextgroup}\relax
+\let\@IEEEextractednextfirsttoken\@IEEEextractedtoken
+\let\@IEEEextractednextfirsttokenmacro\@IEEEextractedtokenmacro
+\let\@IEEEextractednextfirsttokensdiscarded\@IEEEextractedtokensdiscarded
+% next first group
+\expandafter\@IEEEextractgroup\expandafter*\expandafter{\@IEEEextractednextgroup}\relax
+\let\@IEEEextractednextfirstgroup\@IEEEextractedgroup}
+
+
+%% -- End of Command Argument Scanning Support Functions --
+
+
+
+
 %%
 %% START OF IEEEeqnarray DEFINITIONS
 %%
@@ -1881,9 +2970,6 @@
 %% Roland Winkler and Mark Wooding.
 %% I don't make the claim that my work here is even near their calibre. ;)
 
-
-% hook to allow easy changeover to IEEEtran.cls/tools.sty error reporting
-\def\@IEEEclspkgerror{\ClassError{IEEEtran}}
 
 \newif\if@IEEEeqnarrayboxnojot% flag to indicate if the environment was called as the star form
 \@IEEEeqnarrayboxnojotfalse
@@ -2533,7 +3619,7 @@ Using a default centering column instead}%
    #1\relax% allow user to override defaults
    \let\\\@IEEEeqnarraycr% replace newline with one that can put in eqn. numbers
    \global\@IEEEeqncolcnt\z@% col. count = 0 for first line
-   \@IEEEbuildpreamble #2\end\relax% build the preamble and put it into \@IEEEtrantmptoksA 
+   \@IEEEbuildpreamble{#2}\relax% build the preamble and put it into \@IEEEtrantmptoksA 
    % put in the column for the equation number
    \ifnum\@IEEEeqnnumcols>0\relax\@IEEEappendtoksA{&}\fi% col separator for those after the first
    \toks0={##}%
@@ -2728,7 +3814,7 @@ $$\@ignoretrue}
    \IEEEeqnarrayboxdecl\relax% allow a way for the user to make global overrides
    #1\relax% allow user to override defaults
    \let\\\@IEEEeqnarrayboxcr% replace newline with one that allows optional spacing
-   \@IEEEbuildpreamble #4\end\relax% build the preamble and put it into \@IEEEtrantmptoksA
+   \@IEEEbuildpreamble{#4}\relax% build the preamble and put it into \@IEEEtrantmptoksA
    % add an isolation column to the preamble to stop \\'s {} from getting into the last col
    \ifnum\@IEEEeqnnumcols>0\relax\@IEEEappendtoksA{&}\fi% col separator for those after the first
    \toks0={##}%
@@ -2739,16 +3825,15 @@ $$\@ignoretrue}
    % begin the alignment
    \everycr{}%
    % use only the very first token to determine the positioning
-   % this stops some problems when the user uses more than one letter,
-   % but is probably not worth the effort
-   % \noindent is used as a delimiter
-   \def\@IEEEgrabfirstoken##1##2\noindent{\let\@IEEEgrabbedfirstoken=##1}%
-   \@IEEEgrabfirstoken#2\relax\relax\noindent
-   % \@IEEEgrabbedfirstoken has the first token, the rest are discarded
+   \@IEEEextracttoken{#2}\relax
+   \ifx\@IEEEextractedtokensdiscarded\@empty\else
+     \typeout{** WARNING: IEEEeqnarraybox position specifiers after the first in `\@IEEEextracttokenarg' ignored (line \the\inputlineno).}\relax
+   \fi
+   % \@IEEEextractedtoken has the first token, the rest are ignored
    % if we need to put things into and hbox and go into math mode, do so now
    \if@IEEEeqnarrayboxHBOXSW \leavevmode \hbox \bgroup $\fi%
    % use the appropriate vbox type
-   \if\@IEEEgrabbedfirstoken t\relax\vtop\else\if\@IEEEgrabbedfirstoken c\relax%
+   \if\@IEEEextractedtoken t\relax\vtop\else\if\@IEEEextractedtoken c\relax%
    \vcenter\else\vbox\fi\fi\bgroup%
    \@IEEEeqnarrayISinnertrue% commands are now within the lines
    \ifx#3\relax\halign\else\halign to #3\relax\fi%
@@ -2796,8 +3881,10 @@ $$\@ignoretrue}
 
 
 
-% starts the halign preamble build
-\def\@IEEEbuildpreamble{\@IEEEtrantmptoksA={}% clear token register
+% usage: \@IEEEbuildpreamble{column specifiers}
+% starts the halign preamble build 
+% the assembled preamble is put in \@IEEEtrantmptoksA
+\def\@IEEEbuildpreamble#1{\@IEEEtrantmptoksA={}% clear token register
 \let\@IEEEBPcurtype=u%current column type is not yet known
 \let\@IEEEBPprevtype=s%the previous column type was the start
 \let\@IEEEBPnexttype=u%next column type is not yet known
@@ -2813,17 +3900,19 @@ $$\@ignoretrue}
 % record the default end glues
 \edef\@IEEEBPstartglue{\@IEEEeqnarraycolSEPdefaultstart}%
 \edef\@IEEEBPendglue{\@IEEEeqnarraycolSEPdefaultend}%
+\edef\@IEEEedefMACRO{#1}\relax% fully expand the preamble to support macro containers
 % now parse the user's column specifications
-\@@IEEEbuildpreamble}
+% \ignorespaces is used as a delimiter, need at least one trailing \relax because
+% \@@IEEEbuildpreamble looks into the future 
+\expandafter\@@IEEEbuildpreamble\@IEEEedefMACRO\ignorespaces\relax\relax}
 
 
+% usage: \@@IEEEbuildpreamble{current column}{next column}
 % parses and builds the halign preamble
 \def\@@IEEEbuildpreamble#1#2{\let\@@nextIEEEbuildpreamble=\@@IEEEbuildpreamble%
 % use only the very first token to check the end
-% \noindent is used as a delimiter as \end can be present here
-\def\@IEEEgrabfirstoken##1##2\noindent{\let\@IEEEgrabbedfirstoken=##1}%
-\@IEEEgrabfirstoken#1\relax\relax\noindent
-\ifx\@IEEEgrabbedfirstoken\end\let\@@nextIEEEbuildpreamble=\@@IEEEfinishpreamble\else%
+\@IEEEextracttokengroups{#1}\relax
+\ifx\@IEEEextractedfirsttoken\ignorespaces\let\@@nextIEEEbuildpreamble=\@@IEEEfinishpreamble\else%
 % identify current and next token type
 \@IEEEgetcoltype{#1}{\@IEEEBPcurtype}{1}% current, error on invalid
 \@IEEEgetcoltype{#2}{\@IEEEBPnexttype}{0}% next, no error on invalid next
@@ -2843,8 +3932,10 @@ $$\@ignoretrue}
 \fi\@@nextIEEEbuildpreamble{#2}}
 
 
+% usage: \@@IEEEfinishpreamble{discarded}
 % executed just after preamble build is completed
 % warn about zero cols, and if prevtype type = u, put in end tabskip glue
+% argument is not used
 \def\@@IEEEfinishpreamble#1{\ifnum\@IEEEeqnnumcols<1\relax
 \@IEEEclspkgerror{No column specifiers declared for IEEEeqnarray}%
 {At least one column type must be declared for each IEEEeqnarray.}%
@@ -2853,42 +3944,44 @@ $$\@ignoretrue}
 \if\@IEEEBPprevtype u\@IEEEappendtoksA{\tabskip=\@IEEEBPendglue}\fi}
 
 
-% Identify and return the column specifier's type code
-\def\@IEEEgetcoltype#1#2#3{%
-% use only the very first token to determine the type
-% \noindent is used as a delimiter as \end can be present here
-\def\@IEEEgrabfirstoken##1##2\noindent{\let\@IEEEgrabbedfirstoken=##1}%
-\@IEEEgrabfirstoken#1\relax\relax\noindent
-% \@IEEEgrabfirstoken has the first token, the rest are discarded
+% usage: \@IEEEgetcoltype{col specifier}{\output}{error more}
+% Identify and return the column specifier's type code in the given
+% \output macro:
 % n = number
 % g = glue (any other char in catagory 12)
 % c = letter
-% e = \end
+% e = \ignorespaces (end of sequence)
 % u = undefined
-% third argument: 0 = no error message, 1 = error on invalid char
+% error mode: 0 = no error message, 1 = error on invalid char
+\def\@IEEEgetcoltype#1#2#3{%
+% use only the very first token to determine the type
+\@IEEEextracttoken{#1}\relax
+% \@IEEEextractedtoken has the first token, the rest are discarded
 \let#2=u\relax% assume invalid until know otherwise
-\ifx\@IEEEgrabbedfirstoken\end\let#2=e\else
-\ifcat\@IEEEgrabbedfirstoken\relax\else% screen out control sequences
-\if0\@IEEEgrabbedfirstoken\let#2=n\else
-\if1\@IEEEgrabbedfirstoken\let#2=n\else
-\if2\@IEEEgrabbedfirstoken\let#2=n\else
-\if3\@IEEEgrabbedfirstoken\let#2=n\else
-\if4\@IEEEgrabbedfirstoken\let#2=n\else
-\if5\@IEEEgrabbedfirstoken\let#2=n\else
-\if6\@IEEEgrabbedfirstoken\let#2=n\else
-\if7\@IEEEgrabbedfirstoken\let#2=n\else
-\if8\@IEEEgrabbedfirstoken\let#2=n\else
-\if9\@IEEEgrabbedfirstoken\let#2=n\else
-\ifcat,\@IEEEgrabbedfirstoken\let#2=g\relax
-\else\ifcat a\@IEEEgrabbedfirstoken\let#2=c\relax\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi
+\ifx\@IEEEextractedtoken\ignorespaces\let#2=e\else
+\ifcat\@IEEEextractedtoken\relax\else% screen out control sequences
+\if0\@IEEEextractedtoken\let#2=n\else
+\if1\@IEEEextractedtoken\let#2=n\else
+\if2\@IEEEextractedtoken\let#2=n\else
+\if3\@IEEEextractedtoken\let#2=n\else
+\if4\@IEEEextractedtoken\let#2=n\else
+\if5\@IEEEextractedtoken\let#2=n\else
+\if6\@IEEEextractedtoken\let#2=n\else
+\if7\@IEEEextractedtoken\let#2=n\else
+\if8\@IEEEextractedtoken\let#2=n\else
+\if9\@IEEEextractedtoken\let#2=n\else
+\ifcat,\@IEEEextractedtoken\let#2=g\relax
+\else\ifcat a\@IEEEextractedtoken\let#2=c\relax\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi
 \if#2u\relax
 \if0\noexpand#3\relax\else\@IEEEclspkgerror{Invalid character in column specifications}%
 {Only letters, numerals and certain other symbols are allowed \MessageBreak
 as IEEEeqnarray column specifiers.}\fi\fi}
 
 
-% identify the current letter referenced column
-% if invalid, use a default column
+% usage: \@IEEEgetcurcol{col specifier}
+% verify the letter referenced column exists
+% and return its name in \@IEEEBPcurcolname
+% if column specifier is invalid, use the default column @IEEEdefault
 \def\@IEEEgetcurcol#1{\expandafter\ifx\csname @IEEEeqnarraycolDEF#1\endcsname\@IEEEeqnarraycolisdefined%
 \def\@IEEEBPcurcolname{#1}\else% invalid column name
 \@IEEEclspkgerror{Invalid column type "#1" in column specifications.\MessageBreak
@@ -2897,7 +3990,9 @@ Using a default centering column instead}%
 \def\@IEEEBPcurcolname{@IEEEdefault}\fi}
 
 
-% identify and return the predefined (punctuation) glue value
+% usage: \@IEEEgetcurglue{glue specifier}{\output}
+% identify the predefined (punctuation) glue value
+% and return it in the given output macro
 \def\@IEEEgetcurglue#1#2{%
 % ! = \! (neg small)  -0.16667em (-3/18 em)
 % , = \, (small)       0.16667em ( 3/18 em)
@@ -2915,10 +4010,10 @@ Using a default centering column instead}%
 % value for 1em.
 % 
 % use only the very first token to determine the type
-% this prevents errant tokens from getting in the main text
-% \noindent is used as a delimiter here
-\def\@IEEEgrabfirstoken##1##2\noindent{\let\@IEEEgrabbedfirstoken=##1}%
-\@IEEEgrabfirstoken#1\relax\relax\noindent
+\@IEEEextracttoken{#1}\relax
+\ifx\@IEEEextractedtokensdiscarded\@empty\else
+  \typeout{** WARNING: IEEEeqnarray predefined inter-column glue type specifiers after the first in `\@IEEEextracttokenarg' ignored (line \the\inputlineno).}\relax
+\fi
 % get the math font 1em value
 % LaTeX2e's NFSS2 does not preload the fonts, but \IEEEeqnarray needs
 % to gain access to the math (\textfont2) font's spacing parameters.
@@ -2931,18 +4026,18 @@ Using a default centering column instead}%
 \@IEEEtrantmpdimenA=\fontdimen6\textfont2\relax%
 % identify the glue value based on the first token
 % we discard anything after the first
-\if!\@IEEEgrabbedfirstoken\@IEEEtrantmpdimenA=-0.16667\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
-\if,\@IEEEgrabbedfirstoken\@IEEEtrantmpdimenA=0.16667\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
-\if:\@IEEEgrabbedfirstoken\@IEEEtrantmpdimenA=0.22222\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
-\if;\@IEEEgrabbedfirstoken\@IEEEtrantmpdimenA=0.27778\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
-\if'\@IEEEgrabbedfirstoken\@IEEEtrantmpdimenA=1\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
-\if"\@IEEEgrabbedfirstoken\@IEEEtrantmpdimenA=2\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
-\if.\@IEEEgrabbedfirstoken\@IEEEtrantmpdimenA=0.5\arraycolsep\edef#2{\the\@IEEEtrantmpdimenA}\else
-\if/\@IEEEgrabbedfirstoken\edef#2{\the\arraycolsep}\else
-\if?\@IEEEgrabbedfirstoken\@IEEEtrantmpdimenA=2\arraycolsep\edef#2{\the\@IEEEtrantmpdimenA}\else
-\if *\@IEEEgrabbedfirstoken\edef#2{0pt plus 1fil minus 0pt}\else
-\if+\@IEEEgrabbedfirstoken\edef#2{\@IEEEeqnarraycolSEPcenter}\else
-\if-\@IEEEgrabbedfirstoken\edef#2{\@IEEEeqnarraycolSEPzero}\else
+\if!\@IEEEextractedtoken\@IEEEtrantmpdimenA=-0.16667\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
+\if,\@IEEEextractedtoken\@IEEEtrantmpdimenA=0.16667\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
+\if:\@IEEEextractedtoken\@IEEEtrantmpdimenA=0.22222\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
+\if;\@IEEEextractedtoken\@IEEEtrantmpdimenA=0.27778\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
+\if'\@IEEEextractedtoken\@IEEEtrantmpdimenA=1\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
+\if"\@IEEEextractedtoken\@IEEEtrantmpdimenA=2\@IEEEtrantmpdimenA\edef#2{\the\@IEEEtrantmpdimenA}\else
+\if.\@IEEEextractedtoken\@IEEEtrantmpdimenA=0.5\arraycolsep\edef#2{\the\@IEEEtrantmpdimenA}\else
+\if/\@IEEEextractedtoken\edef#2{\the\arraycolsep}\else
+\if?\@IEEEextractedtoken\@IEEEtrantmpdimenA=2\arraycolsep\edef#2{\the\@IEEEtrantmpdimenA}\else
+\if *\@IEEEextractedtoken\edef#2{0pt plus 1fil minus 0pt}\else
+\if+\@IEEEextractedtoken\edef#2{\@IEEEeqnarraycolSEPcenter}\else
+\if-\@IEEEextractedtoken\edef#2{\@IEEEeqnarraycolSEPzero}\else
 \edef#2{\@IEEEeqnarraycolSEPzero}%
 \@IEEEclspkgerror{Invalid predefined inter-column glue type "#1" in\MessageBreak
 column specifications. Using a default value of\MessageBreak
@@ -2951,7 +4046,7 @@ column specifications. Using a default value of\MessageBreak
 IEEEeqnarray column specifications.}\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi}
 
 
-
+% usage: \@IEEEprocessNcol{digit}
 % process a numerical digit from the column specification
 % and look up the corresponding user defined glue value
 % can transform current type from n to g or a as the user defined glue is acquired
@@ -3159,11 +4254,11 @@ between column types.}%
       % do not repeat pubid if using peer review option
       \ifCLASSOPTIONpeerreview
       \else
-         \footskip 0pt%
          \ifCLASSOPTIONcompsoc
-           \def\@oddfoot{\hss\normalfont\scriptsize\raisebox{-1.5\@IEEEnormalsizeunitybaselineskip}[0ex][0ex]{\@IEEEpubid}\hss}%
-           \def\@evenfoot{\hss\normalfont\scriptsize\raisebox{-1.5\@IEEEnormalsizeunitybaselineskip}[0ex][0ex]{\@IEEEpubid}\hss}%
+           \def\@oddfoot{\hss\normalfont\scriptsize\raisebox{0ex}[0ex][0ex]{\@IEEEpubid}\hss}%
+           \def\@evenfoot{\hss\normalfont\scriptsize\raisebox{0ex}[0ex][0ex]{\@IEEEpubid}\hss}%
          \else
+           \footskip 0pt%
            \def\@oddfoot{\hss\normalfont\footnotesize\raisebox{1.5ex}[1.5ex]{\@IEEEpubid}\hss}%
            \def\@evenfoot{\hss\normalfont\footnotesize\raisebox{1.5ex}[1.5ex]{\@IEEEpubid}\hss}%
          \fi
@@ -3184,11 +4279,11 @@ between column types.}%
 \else
    % non-draft mode footers
    \if@IEEEusingpubid
-      \footskip 0pt%
       \ifCLASSOPTIONcompsoc
-        \def\@oddfoot{\hss\normalfont\scriptsize\raisebox{-1.5\@IEEEnormalsizeunitybaselineskip}[0ex][0ex]{\@IEEEpubid}\hss}%
-        \def\@evenfoot{\hss\normalfont\scriptsize\raisebox{-1.5\@IEEEnormalsizeunitybaselineskip}[0ex][0ex]{\@IEEEpubid}\hss}%
+        \def\@oddfoot{\hss\normalfont\scriptsize\raisebox{0ex}[0ex][0ex]{\@IEEEpubid}\hss}%
+        \def\@evenfoot{\hss\normalfont\scriptsize\raisebox{0ex}[0ex][0ex]{\@IEEEpubid}\hss}%
       \else
+        \footskip 0pt%
         \def\@oddfoot{\hss\normalfont\footnotesize\raisebox{1.5ex}[1.5ex]{\@IEEEpubid}\hss}%
         \def\@evenfoot{\hss\normalfont\footnotesize\raisebox{1.5ex}[1.5ex]{\@IEEEpubid}\hss}%
       \fi
@@ -3296,19 +4391,19 @@ between column types.}%
 
 \def\@biblabel#1{[#1]}
 
-% compsoc journals left align the reference numbers
-\@IEEEcompsocnotconfonly{\def\@biblabel#1{[#1]\hfill}}
+% compsoc journals and conferences left align the reference numbers
+\@IEEEcompsoconly{\def\@biblabel#1{[#1]\hfill}}
 
 % controls bib item spacing
 \def\IEEEbibitemsep{0pt plus .5pt}
 
-\@IEEEcompsocconfonly{\def\IEEEbibitemsep{1\baselineskip plus 0.25\baselineskip minus 0.25\baselineskip}}
+\@IEEEcompsocconfonly{\def\IEEEbibitemsep{0.5\baselineskip plus 0.25\baselineskip minus 0.25\baselineskip}}
 
 
 \def\thebibliography#1{\section*{\refname}%
     \addcontentsline{toc}{section}{\refname}%
     % V1.6 add some rubber space here and provide a command trigger
-    \footnotesize\@IEEEcompsocconfonly{\small}\vskip 0.3\baselineskip plus 0.1\baselineskip minus 0.1\baselineskip%
+    \footnotesize\vskip 0.3\baselineskip plus 0.1\baselineskip minus 0.1\baselineskip%
     \list{\@biblabel{\@arabic\c@enumiv}}%
     {\settowidth\labelwidth{\@biblabel{#1}}%
     \leftmargin\labelwidth
@@ -3368,8 +4463,8 @@ between column types.}%
 % FONT CONTROLS AND SPACINGS FOR CONFERENCE MODE AUTHOR NAME AND AFFILIATION BLOCKS
 % 
 % The default font styles for the author name and affiliation blocks (confmode)
-\def\@IEEEauthorblockNstyle{\normalfont\@IEEEcompsocnotconfonly{\sffamily}\sublargesize\@IEEEcompsocconfonly{\large}}
-\def\@IEEEauthorblockAstyle{\normalfont\@IEEEcompsocnotconfonly{\sffamily}\@IEEEcompsocconfonly{\itshape}\normalsize\@IEEEcompsocconfonly{\large}}
+\def\@IEEEauthorblockNstyle{\normalfont\@IEEEcompsocnotconfonly{\sffamily}\sublargesize}
+\def\@IEEEauthorblockAstyle{\normalfont\@IEEEcompsocnotconfonly{\sffamily}\@IEEEcompsocconfonly{\itshape}\normalsize}
 % The default if the user does not use an author block
 \def\@IEEEauthordefaulttextstyle{\normalfont\@IEEEcompsocnotconfonly{\sffamily}\sublargesize}
 
@@ -3564,6 +4659,8 @@ between column types.}%
 \hbox{}\thispagestyle{#1}\newpage\if@twocolumn\hbox{}\thispagestyle{#1}\newpage\fi\fi\fi}
 
 
+
+
 % user command to invoke the title page
 \def\maketitle{\par%
   \begingroup%
@@ -3584,7 +4681,7 @@ between column types.}%
         \ifCLASSOPTIONtechnote%
            \newpage\global\@topnum\z@ \@maketitle\@IEEEstatictitlevskip\@IEEEaftertitletext%
         \else
-           \twocolumn[\@maketitle\@IEEEdynamictitlevspace\@IEEEaftertitletext]%
+           \twocolumn[{\IEEEquantizevspace{\@maketitle}[\IEEEquantizedisabletitlecmds]{0pt}[-\topskip]{\baselineskip}{\@IEEENORMtitlevspace}{\@IEEEMINtitlevspace}\@IEEEaftertitletext}]%
         \fi
      \else
         \newpage\global\@topnum\z@ \@maketitle\@IEEEstatictitlevskip\@IEEEaftertitletext%
@@ -3603,12 +4700,12 @@ between column types.}%
   \let\thanks\relax}
 
 
-
 % V1.8 parbox to format \@IEEEtitleabstractindextext
 \long\def\@IEEEtitleabstractindextextbox#1{\parbox{1\textwidth}{#1}}
 % V1.8 compsoc is partial width
 \ifCLASSOPTIONcompsoc
-\long\def\@IEEEtitleabstractindextextbox#1{\parbox{0.915\textwidth}{#1}}
+% comparison with proofs suggests it's in the range of 92.1-92.3%
+\long\def\@IEEEtitleabstractindextextbox#1{\parbox{0.922\textwidth}{\@IEEEcompsocnotconfonly{\rightskip\@flushglue\leftskip\z@skip}#1}}
 \fi
 
 % formats the Title, authors names, affiliations and special paper notice
@@ -3616,14 +4713,13 @@ between column types.}%
 % spaces to enter the definition - use % at the end of each line
 \def\@maketitle{\newpage
 \bgroup\par\addvspace{0.5\baselineskip}\centering%
-\ifCLASSOPTIONtechnote% technotes
-   {\bfseries\large\@IEEEcompsoconly{\sffamily}\@title\par}\vskip 1.3em{\lineskip .5em\@IEEEcompsoconly{\sffamily}\@author
-   \@IEEEspecialpapernotice\par{\@IEEEcompsoconly{\vskip 1.5em\relax
-   \@IEEEtitleabstractindextextbox{\@IEEEtitleabstractindextext}\par
-   \hfill\@IEEEcompsocdiamondline\hfill\hbox{}\par}}}\relax
+\ifCLASSOPTIONtechnote% technotes, V1.8a abstract and index terms are not treated differently for compsoc technotes
+   {\bfseries\large\@IEEEcompsoconly{\Large\sffamily}\@title\par}\vskip 1.3em{\lineskip .5em\@IEEEcompsoconly{\large\sffamily}\@author
+   \@IEEEspecialpapernotice\par}\relax
 \else% not a technote
    \vskip0.2em{\Huge\ifCLASSOPTIONtransmag\bfseries\LARGE\fi\@IEEEcompsoconly{\sffamily}\@IEEEcompsocconfonly{\normalfont\normalsize\vskip 2\@IEEEnormalsizeunitybaselineskip
-   \bfseries\Large}\@title\par}\vskip1.0em\par%
+   \bfseries\Large}\@IEEEcompsocnotconfonly{\vskip 0.75\@IEEEnormalsizeunitybaselineskip}\@title\par}\relax
+   \@IEEEcompsocnotconfonly{\vskip 0.5\@IEEEnormalsizeunitybaselineskip}\vskip1.0em\par%
    % V1.6 handle \author differently if in conference mode
    \ifCLASSOPTIONconference%
       {\@IEEEspecialpapernotice\mbox{}\vskip\@IEEEauthorblockconfadjspace%
@@ -3634,8 +4730,8 @@ between column types.}%
          {\@IEEEcompsoconly{\sffamily}\@IEEEspecialpapernotice\mbox{}\vskip\@IEEEauthorblockconfadjspace%
           \mbox{}\hfill\begin{@IEEEauthorhalign}\@author\end{@IEEEauthorhalign}\hfill\mbox{}\par
           {\@IEEEcompsoconly{\vskip 1.5em\relax
-           \@IEEEtitleabstractindextextbox{\@IEEEtitleabstractindextext}\par\hfill
-           \@IEEEcompsocdiamondline\hfill\hbox{}\par}}}\relax
+           \@IEEEtitleabstractindextextbox{\@IEEEtitleabstractindextext}\par\noindent\hfill
+           \IEEEcompsocdiamondline\hfill\hbox{}\par}}}\relax
       \else% journal, peerreview or transmag
          \ifCLASSOPTIONtransmag
             % transmag also handles author names just like conference mode
@@ -3647,19 +4743,44 @@ between column types.}%
          \else% journal or peerreview
            {\lineskip.5em\@IEEEcompsoconly{\sffamily}\sublargesize\@author\@IEEEspecialpapernotice\par
            {\@IEEEcompsoconly{\vskip 1.5em\relax
-            \@IEEEtitleabstractindextextbox{\@IEEEtitleabstractindextext}\par\hfill
-            \@IEEEcompsocdiamondline\hfill\hbox{}\par}}}\relax
+            \@IEEEtitleabstractindextextbox{\@IEEEtitleabstractindextext}\par\noindent\hfill
+            \IEEEcompsocdiamondline\hfill\hbox{}\par}}}\relax
          \fi
       \fi
    \fi
 \fi\par\addvspace{0.5\baselineskip}\egroup}
 
 
-
 % V1.7 Computer Society "diamond line" which follows index terms for nonconference papers
-\def\@IEEEcompsocdiamondline{\vrule depth 0pt height 0.5pt width 4cm\hspace{7.5pt}%
-\raisebox{-3.5pt}{\fontfamily{pzd}\fontencoding{U}\fontseries{m}\fontshape{n}\fontsize{11}{12}\selectfont\char70}%
-\hspace{7.5pt}\vrule depth 0pt height 0.5pt width 4cm\relax}
+% V1.8a full width diamond line for single column use
+\def\@IEEEcompsocdiamondlinei{\vrule depth 0pt height 0.5pt width 4cm\nobreak\hspace{7.5pt}\nobreak
+\raisebox{-3.5pt}{\fontfamily{pzd}\fontencoding{U}\fontseries{m}\fontshape{n}\fontsize{11}{12}\selectfont\char70}\nobreak
+\hspace{7.5pt}\nobreak\vrule depth 0pt height 0.5pt width 4cm\relax}
+% V1.8a narrower width diamond line for double column use
+\def\@IEEEcompsocdiamondlineii{\vrule depth 0pt height 0.5pt width 2.5cm\nobreak\hspace{7.5pt}\nobreak
+\raisebox{-3.5pt}{\fontfamily{pzd}\fontencoding{U}\fontseries{m}\fontshape{n}\fontsize{11}{12}\selectfont\char70}\nobreak
+\hspace{7.5pt}\nobreak\vrule depth 0pt height 0.5pt width 2.5cm\relax}
+% V1.8a bare core without rules to base a last resort on for very narrow linewidths
+\def\@IEEEcompsocdiamondlineiii{\mbox{}\nobreak\hspace{7.5pt}\nobreak
+\raisebox{-3.5pt}{\fontfamily{pzd}\fontencoding{U}\fontseries{m}\fontshape{n}\fontsize{11}{12}\selectfont\char70}\nobreak
+\hspace{7.5pt}\nobreak\mbox{}\relax}
+
+% V1.8a allow \IEEEcompsocdiamondline to adjust for different linewidths.
+% Use \@IEEEcompsocdiamondlinei if its width is less than 0.66\linewidth (0.487 nominal for single column)
+% if not, fall back to \@IEEEcompsocdiamondlineii if its width is less than 0.75\linewidth (0.659 nominal for double column)
+% if all else fails, try to make a custom diamondline based on the abnormally narrow linewidth
+\def\IEEEcompsocdiamondline{\settowidth{\@IEEEtrantmpdimenA}{\@IEEEcompsocdiamondlinei}\relax
+\ifdim\@IEEEtrantmpdimenA<0.66\linewidth\relax\@IEEEcompsocdiamondlinei\relax
+\else
+\settowidth{\@IEEEtrantmpdimenA}{\@IEEEcompsocdiamondlineii}\relax
+\ifdim\@IEEEtrantmpdimenA<0.75\linewidth\relax\@IEEEcompsocdiamondlineii\relax
+\else
+\settowidth{\@IEEEtrantmpdimenA}{\@IEEEcompsocdiamondlineiii}\relax
+\@IEEEtrantmpdimenB=\linewidth\relax
+\addtolength{\@IEEEtrantmpdimenB}{-1\@IEEEtrantmpdimenA}\relax
+\vrule depth 0pt height 0.5pt width 0.33\@IEEEtrantmpdimenB\@IEEEcompsocdiamondlineiii\vrule depth 0pt height 0.5pt width 0.33\@IEEEtrantmpdimenB\relax
+\fi\fi}
+
 
 % V1.7 standard LateX2e \thanks, but with \itshape under compsoc. Also make it a \long\def
 % We also need to trigger the one-shot footnote rule
@@ -3672,6 +4793,7 @@ between column types.}%
         \protect\@IEEEtriggeroneshotfootnoterule\relax}\ignorespaces#1}}}
 \let\@thanks\@empty
 
+
 % V1.7 allow \author to contain \par's. This is needed to allow \thanks to contain \par.
 \long\def\author#1{\gdef\@author{#1}}
 
@@ -3679,7 +4801,7 @@ between column types.}%
 % in addition to setting up IEEEitemize, we need to remove a baselineskip space above and
 % below it because \list's \pars introduce blank lines because of the footnote struts.
 \def\@IEEEsetupcompsocitemizelist{\def\labelitemi{$\bullet$}%
-\setlength{\IEEElabelindent}{0pt}\setlength{\parskip}{0pt}%
+\setlength{\IEEElabelindent}{0pt}\setlength{\labelsep}{1.2em}\setlength{\parskip}{0pt}%
 \setlength{\partopsep}{0pt}\setlength{\topsep}{0.5\baselineskip}\vspace{-1\baselineskip}\relax}
 
 
@@ -3688,7 +4810,7 @@ between column types.}%
 
 \ifCLASSOPTIONcompsoc
 % V1.7 compsoc bullet item \thanks
-% also, we need to redefine this to destroy the argument in \@IEEEdynamictitlevspace
+% also, we need to redefine this to destroy the argument in \IEEEquantizevspace
 \long\def\IEEEcompsocitemizethanks#1{\relax\@IEEEbreakcompsocthanksitemfalse\footnotemark
     \protected@xdef\@thanks{\@thanks
         \protect\footnotetext[\the\c@footnote]{\itshape\protect\@IEEEtriggeroneshotfootnoterule
@@ -3711,7 +4833,7 @@ between column types.}%
 \ifCLASSOPTIONpeerreview
 \def\IEEEpeerreviewmaketitle{\@IEEEcleardoublepage{empty}%
 \ifCLASSOPTIONtwocolumn
-\twocolumn[\@IEEEpeerreviewmaketitle\@IEEEdynamictitlevspace]
+\twocolumn[{\IEEEquantizevspace{\@IEEEpeerreviewmaketitle}[\IEEEquantizedisabletitlecmds]{0pt}[-\topskip]{\baselineskip}{\@IEEENORMtitlevspace}{\@IEEEMINtitlevspace}}]
 \else
 \newpage\@IEEEpeerreviewmaketitle\@IEEEstatictitlevskip
 \fi
@@ -3752,95 +4874,253 @@ between column types.}%
 \fi}}
 
 
-% V1.6
-% This is a dynamically determined rigid spacer between the title/authors 
-% and the main text. This is used only for single column titles over two 
-% column text (most common)
-% This is bit tricky because we have to ensure that the textheight of the
-% main text is an integer multiple of \baselineskip
-% otherwise underfull vbox problems may develop in the second column of the
-% text on the titlepage
-% The possible use of \IEEEpubid must also be taken into account.
-\def\@IEEEdynamictitlevspace{{%
-    % we run within a group so that all the macros can be forgotten when we are done
-    \long\def\thanks##1{\relax}%don't allow \thanks to run when we evaluate the vbox height
-    \long\def\IEEEcompsocitemizethanks##1{\relax}%don't allow \IEEEcompsocitemizethanks to run when we evaluate the vbox height
-    \normalfont\normalsize% we declare more descriptive variable names
-    \let\@IEEEmaintextheight=\@IEEEtrantmpdimenA%height of the main text columns
-    \let\@IEEEINTmaintextheight=\@IEEEtrantmpdimenB%height of the main text columns with integer # lines
-    % set the nominal and minimum values for the title spacer
-    % the dynamic algorithm will not allow the spacer size to
-    % become less than \@IEEEMINtitlevspace - instead it will be
-    % lengthened
-    % default to journal values
-    \def\@IEEENORMtitlevspace{2.5\baselineskip}%
-    \def\@IEEEMINtitlevspace{2\baselineskip}%
-    % conferences and technotes need tighter spacing
-    \ifCLASSOPTIONconference%conference
-     \def\@IEEENORMtitlevspace{1\baselineskip}%
-     \def\@IEEEMINtitlevspace{0.75\baselineskip}%
-    \fi
-    \ifCLASSOPTIONtechnote%technote
-      \def\@IEEENORMtitlevspace{1\baselineskip}%
-      \def\@IEEEMINtitlevspace{0.75\baselineskip}%
-    \fi%
-    % get the height that the title will take up
-    \ifCLASSOPTIONpeerreview
-       \settoheight{\@IEEEmaintextheight}{\vbox{\hsize\textwidth \@IEEEpeerreviewmaketitle}}%
-    \else
-       \settoheight{\@IEEEmaintextheight}{\vbox{\hsize\textwidth \@maketitle}}%
-    \fi
-    \@IEEEmaintextheight=-\@IEEEmaintextheight% title takes away from maintext, so reverse sign
-    % add the height of the page textheight
-    \advance\@IEEEmaintextheight by \textheight%
-    % correct for title pages using pubid
-    \ifCLASSOPTIONpeerreview\else
-       % peerreview papers use the pubid on the cover page only.
-       % And the cover page uses a static spacer.
-       \if@IEEEusingpubid\advance\@IEEEmaintextheight by -\@IEEEpubidpullup\fi
-    \fi%
-    % subtract off the nominal value of the title bottom spacer
-    \advance\@IEEEmaintextheight by -\@IEEENORMtitlevspace%
-    % \topskip takes away some too
-    \advance\@IEEEmaintextheight by -\topskip%
-    % calculate the column height of the main text for lines
-    % now we calculate the main text height as if holding
-    % an integer number of \normalsize lines after the first
-    % and discard any excess fractional remainder
-    % we subtracted the first line, because the first line
-    % is placed \topskip into the maintext, not \baselineskip like the
-    % rest of the lines.
-    \@IEEEINTmaintextheight=\@IEEEmaintextheight%
-    \divide\@IEEEINTmaintextheight  by \baselineskip%
-    \multiply\@IEEEINTmaintextheight  by \baselineskip%
-    % now we calculate how much the title spacer height will
-    % have to be reduced from nominal (\@IEEEREDUCEmaintextheight is always
-    % a positive value) so that the maintext area will contain an integer
-    % number of normal size lines
-    % we change variable names here (to avoid confusion) as we no longer
-    % need \@IEEEINTmaintextheight and can reuse its dimen register
-    \let\@IEEEREDUCEmaintextheight=\@IEEEINTmaintextheight%
-    \advance\@IEEEREDUCEmaintextheight by -\@IEEEmaintextheight%
-    \advance\@IEEEREDUCEmaintextheight by \baselineskip%
-    % this is the calculated height of the spacer
-    % we change variable names here (to avoid confusion) as we no longer
-    % need \@IEEEmaintextheight and can reuse its dimen register
-    \let\@IEEECOMPENSATElen=\@IEEEmaintextheight%
-    \@IEEECOMPENSATElen=\@IEEENORMtitlevspace% set the nominal value
-    % we go with the reduced length if it is smaller than an increase
-    \ifdim\@IEEEREDUCEmaintextheight < 0.5\baselineskip\relax%
-     \advance\@IEEECOMPENSATElen by -\@IEEEREDUCEmaintextheight%
-     % if the resulting spacer is too small back out and go with an increase instead
-     \ifdim\@IEEECOMPENSATElen<\@IEEEMINtitlevspace\relax%
-      \advance\@IEEECOMPENSATElen by \baselineskip%
-     \fi%
-    \else%
-     % go with an increase because it is closer to the nominal than a decrease
-     \advance\@IEEECOMPENSATElen by -\@IEEEREDUCEmaintextheight%
-     \advance\@IEEECOMPENSATElen by \baselineskip%
-    \fi%
-    % set the calculated rigid spacer
-    \vspace{\@IEEECOMPENSATElen}}}
+% set the nominal and minimum values for the quantized title spacer
+% the quantization algorithm will not allow the spacer size to
+% become less than \@IEEEMINtitlevspace - instead it will be lengthened
+% default to journal values
+\def\@IEEENORMtitlevspace{2.5\baselineskip}
+\def\@IEEEMINtitlevspace{2\baselineskip}
+% conferences and technotes need tighter spacing
+\ifCLASSOPTIONconference% conference
+  \def\@IEEENORMtitlevspace{1\baselineskip}
+  \def\@IEEEMINtitlevspace{0.75\baselineskip}
+\fi
+\ifCLASSOPTIONtechnote% technote
+  \def\@IEEENORMtitlevspace{1\baselineskip}
+  \def\@IEEEMINtitlevspace{0.75\baselineskip}
+\fi
+
+
+% V1.8a
+\def\IEEEquantizevspace{\begingroup\@ifstar{\@IEEEquantizevspacestarformtrue\@IEEEquantizevspace}{\@IEEEquantizevspacestarformfalse\@IEEEquantizevspace}}
+% \IEEEquantizevspace[output dimen register]{object}[object decl]
+%                    {top baselineskip}
+%                    [offset][prevdepth][lineskip limit][lineskip]
+%                    {unit height}{nominal vspace}{minimum vspace}
+%
+% Calculates and creates the vspace needed to make the combined height with
+% the given object an integer multiple of the given unit height. This command
+% is more general than the older \@IEEEdynamictitlevspace it replaces.
+%
+% The star form has no effect at present, but is reserved for future use.
+%
+% If the optional argument [output dimen register] is given, the calculated
+% vspace height is stored in the given output dimen (or skip) register
+% and no other action is taken, otherwise the object followed by a vspace*
+% of the appropriate height is evaluated/output.
+%
+% The optional object decl (declarations) is code that is evaluated just
+% before the object's height is evaluated. Its intented purpose is to allow
+% for the alteration or disabling of code within the object during internal
+% height evaluation (e.g., \long\def\thanks#1{\relax} ).
+% This special code is not invoked if/when the object is rendered at the end.
+%
+% The nominal vspace is the target value of the added vspace and the minimum
+% vspace is the lower allowed limit. The vspacer will be the value that achieves
+% integral overall height, in terms of the given unit height, that is closest
+% to the nominal vspace and that is not less than the specified minimum vspace.
+%
+% The line spacing algorithm of TeX is somewhat involved and requires special
+% care with regard to the first line of a vertical list (which is indicated
+% when \prevdepth is -1000pt or less). top baselineskip specifies the
+% baselineskip or topskip used prior to the object. If the height of the
+% first line of the object is greater than the given top baselineskip, then
+% the top baselineskip is subtracted from the height of the first line and
+% that difference is considered along with the rest of the object height
+% (because the object will be shifted down by an amount = 
+% top line height - top baselineskip). Otherwise, the height of the first line
+% of the object is ignored as far as the calculations are concerned.
+% This algorithm is adequate for objects that appear at the top of a page
+% (e.g., titles) where \topskip spacing is used.
+%
+% However, as explained on page 78 of the TeXbook, interline spacing is more
+% complex when \baselineskip is being used (indicated by \prevdepth > 
+% -1000pt). The four optional parameters offset, prevdepth, lineskip limit and
+% lineskip are assumed to be equal to be 0pt, \prevdepth, \lineskiplimit and
+% \lineskip, respectively, if they are omitted.
+%
+% The prevdepth is the depth of the line before the object, the lineskip limit
+% specifies how close the top of the object can come to the bottom of the
+% previous line before \baselineskip is ignored and \lineskip is inserted
+% between the object and the line above it. Lineskip does not come into
+% play unless the first line of the object is high enough to "get too close"
+% (as specified by lineskiplimit) to the line before it. The the prevdepth,
+% lineskip limit, and lineskip optional parameters are not needed for the
+% first object/line on a page (i.e., prevdepth <= -1000pt) where the simplier
+% \topskip spacing rules are in effect.
+%
+% Offset is a manual adjustment that is added to the height calculations of
+% object irrespective of the value of \prevdepth. It is useful when the top
+% baselineskip will result in a noninteger unit height object placement even
+% if the object itself has integral height. e.g., a footnotesize baselineskip
+% is used before the object, thus an offset of, say -3pt, can be given as a
+% correction.
+
+% Common combinations of these parameters include:
+%
+% top baselineskip:   (and default values for offset, prevdepth, etc.)
+% \topskip            % for objects that appear at the top of a page
+% \maxdimen           % always ignore the height of the top line
+% 0pt                 % always consider any positive height of the top line
+%
+% for objects to appear inline in normal text:
+% top baselineskip = \baselineskip
+%
+% set prevdepth = -1000pt and top baselineskip = 0pt to consider the
+% overall height of the object without any other external skip
+% consideration
+
+\newif\if@IEEEquantizevspacestarform       % flag to indicate star form
+\newif\if@IEEEquantizevspaceuseoutdimenreg % flag to indicate output dimen register is to be used
+% Use our own private registers because the object could contain a
+% structure that uses the existing tmp scratch pad registers
+\newdimen\@IEEEquantizeheightA
+\newdimen\@IEEEquantizeheightB
+\newdimen\@IEEEquantizeheightC
+\newdimen\@IEEEquantizeprevdepth % need to save this early as can change
+\newcount\@IEEEquantizemultiple
+\newbox\@IEEEquantizeboxA
+
+
+\def\@IEEEquantizevspace{\@ifnextchar [{\@IEEEquantizevspaceuseoutdimenregtrue\@@IEEEquantizevspace}{\@IEEEquantizevspaceuseoutdimenregfalse\@@IEEEquantizevspace[]}}
+
+
+\long\def\@@IEEEquantizevspace[#1]#2{\relax
+% acquire and store
+% #1 optional output dimen register
+% #2 object
+\edef\@IEEEquantizeoutdimenreg{#1}\relax
+% allow for object specifications that contain parameters
+\@IEEEtrantmptoksA={#2}\relax
+\long\edef\@IEEEquantizeobject{\the\@IEEEtrantmptoksA}\relax
+\@ifnextchar [{\@@@IEEEquantizevspace}{\@@@IEEEquantizevspace[\relax]}}
+
+\long\def\@@@IEEEquantizevspace[#1]#2{\relax
+% acquire and store
+% [#1] optional object decl, is \relax if not given by user
+% #2 top baselineskip
+% allow for object decl specifications that have parameters
+\@IEEEtrantmptoksA={#1}\relax
+\long\edef\@IEEEquantizeobjectdecl{\the\@IEEEtrantmptoksA}\relax
+\edef\@IEEEquantizetopbaselineskip{#2}\ivIEEEquantizevspace}
+
+% acquire optional argument set and store
+% [offset][prevdepth][lineskip limit][lineskip]
+\def\ivIEEEquantizevspace{\@ifnextchar [{\@vIEEEquantizevspace}{\@vIEEEquantizevspace[0pt]}}
+\def\@vIEEEquantizevspace[#1]{\edef\@IEEEquantizeoffset{#1}\@ifnextchar [{\@viIEEEquantizevspace}{\@viIEEEquantizevspace[\prevdepth]}}
+\def\@viIEEEquantizevspace[#1]{\@IEEEquantizeprevdepth=#1\relax\@ifnextchar [{\@viiIEEEquantizevspace}{\@viiIEEEquantizevspace[\lineskiplimit]}}
+\def\@viiIEEEquantizevspace[#1]{\edef\@IEEEquantizelineskiplimit{#1}\@ifnextchar [{\@viiiIEEEquantizevspace}{\@viiiIEEEquantizevspace[\lineskip]}}
+\def\@viiiIEEEquantizevspace[#1]{\edef\@IEEEquantizelineskip{#1}\@ixIEEEquantizevspace}
+
+% main routine
+\def\@ixIEEEquantizevspace#1#2#3{\relax
+\edef\@IEEEquantizeunitheight{#1}\relax
+\edef\@IEEEquantizenomvspace{#2}\relax
+\edef\@IEEEquantizeminvspace{#3}\relax
+% \@IEEEquantizeoutdimenreg
+% \@IEEEquantizeobject
+% \@IEEEquantizeobjectdecl
+% \@IEEEquantizetopbaselineskip
+% \@IEEEquantizeoffset
+% \@IEEEquantizeprevdepth
+% \@IEEEquantizelineskiplimit
+% \@IEEEquantizelineskip
+% \@IEEEquantizeunitheight
+% \@IEEEquantizenomvspace
+% \@IEEEquantizeminvspace
+% get overall height of object
+\setbox\@IEEEquantizeboxA\vbox{\begingroup\@IEEEquantizeobjectdecl\@IEEEquantizeobject\relax\endgroup}\relax
+\@IEEEquantizeheightA\ht\@IEEEquantizeboxA\relax
+% get height of first line of object
+\setbox\@IEEEquantizeboxA\vtop{\begingroup\@IEEEquantizeobjectdecl\@IEEEquantizeobject\relax\endgroup}\relax
+\@IEEEquantizeheightB\ht\@IEEEquantizeboxA\relax
+\ifdim\@IEEEquantizeprevdepth>-1000pt\relax % prevdepth > -1000pf means full baselineskip\lineskip rules in effect
+% lineskip spacing rule takes effect if height of top line > baselineskip - prevdepth - lineskiplimit, 
+% otherwise the baselineskip rule is in effect and the height of the first line does not matter at all.
+\@IEEEquantizeheightC=\@IEEEquantizetopbaselineskip\relax
+\advance\@IEEEquantizeheightC-\@IEEEquantizeprevdepth\relax
+\advance\@IEEEquantizeheightC-\@IEEEquantizelineskiplimit\relax % this works even though \@IEEEquantizelineskiplimit is a macro because TeX allows --10pt notation
+\ifdim\@IEEEquantizeheightB>\@IEEEquantizeheightC\relax
+% lineskip spacing rule is in effect i.e., the object is going to be shifted down relative to the
+% baselineskip set position by its top line height (already a part of the total height) + prevdepth + lineskip - baselineskip
+\advance\@IEEEquantizeheightA\@IEEEquantizeprevdepth\relax
+\advance\@IEEEquantizeheightA\@IEEEquantizelineskip\relax
+\advance\@IEEEquantizeheightA-\@IEEEquantizetopbaselineskip\relax
+\else
+% height of first line <= \@IEEEquantizetopbaselineskip - \@IEEEquantizeprevdepth - \@IEEEquantizelineskiplimit
+% standard baselineskip rules are in effect, so don't consider height of first line
+\advance\@IEEEquantizeheightA-\@IEEEquantizeheightB\relax
+\fi
+%
+\else % prevdepth <= -1000pt, simplier \topskip type rules in effect
+\ifdim\@IEEEquantizeheightB>\@IEEEquantizetopbaselineskip
+% height of top line (already included in the total height) in excess of
+% baselineskip is the amount it will be downshifted
+\advance\@IEEEquantizeheightA-\@IEEEquantizetopbaselineskip\relax
+\else
+% height of first line is irrelevant, remove it
+\advance\@IEEEquantizeheightA-\@IEEEquantizeheightB\relax
+\fi
+\fi % prevdepth <= -1000pt
+%
+% adjust height for any manual offset
+\advance\@IEEEquantizeheightA\@IEEEquantizeoffset\relax
+% add in nominal spacer
+\advance\@IEEEquantizeheightA\@IEEEquantizenomvspace\relax
+% check for nonzero unitheight
+\@IEEEquantizeheightB=\@IEEEquantizeunitheight\relax
+\ifnum\@IEEEquantizeheightB=0\relax
+\@IEEEclspkgerror{IEEEquantizevspace unit height cannot be zero. Assuming 10pt.}%
+{Division by zero is not allowed.}
+\@IEEEquantizeheightB=10pt\relax
+\fi
+% get integer number of lines
+\@IEEEquantizemultiple=\@IEEEquantizeheightA\relax
+\divide\@IEEEquantizemultiple\@IEEEquantizeheightB\relax
+% set A to contain the excess height over the \@IEEEquantizemultiple of lines
+% A = height - multiple*unitheight
+\@IEEEquantizeheightC\@IEEEquantizeheightB\relax
+\multiply\@IEEEquantizeheightC\@IEEEquantizemultiple\relax
+\advance\@IEEEquantizeheightA-\@IEEEquantizeheightC\relax
+% set B to contain the height short of \@IEEEquantizemultiple+1 of lines
+% B = unitheight - A
+\advance\@IEEEquantizeheightB-\@IEEEquantizeheightA\relax
+% choose A or B based on which is closer
+\@IEEEquantizeheightC\@IEEEquantizenomvspace\relax
+\ifdim\@IEEEquantizeheightA<\@IEEEquantizeheightB\relax
+% C = nomvspace - A, go with lower
+\advance\@IEEEquantizeheightC-\@IEEEquantizeheightA\relax
+\else
+% C = nomvspace + B, go with upper
+\advance\@IEEEquantizeheightC\@IEEEquantizeheightB\relax
+\fi
+% if violate lower bound, use next integer bound
+\ifdim\@IEEEquantizeheightC<\@IEEEquantizeminvspace\relax
+% A + B = unitheight
+\advance\@IEEEquantizeheightC\@IEEEquantizeheightA\relax
+\advance\@IEEEquantizeheightC\@IEEEquantizeheightB\relax
+\fi
+% export object and spacer outside of group
+\global\let\@IEEEquantizeobjectout\@IEEEquantizeobject\relax
+\global\@IEEEquantizeheightC\@IEEEquantizeheightC\relax
+\endgroup
+\if@IEEEquantizevspaceuseoutdimenreg
+\@IEEEquantizeoutdimenreg=\@IEEEquantizeheightC\relax
+\else
+\@IEEEquantizeobjectout\relax
+\vskip\@IEEEquantizeheightC\relax
+\fi}
+
+
+% user command to disable all global assignments, possible use within object decl
+\def\IEEEquantizedisableglobal{\let\global\relax
+\let\gdef\def
+\let\xdef\edef}
+% user command to allow for the disabling of \thanks and other commands, possible use within object decl
+\def\IEEEquantizedisabletitlecmds{\long\def\thanks##1{\relax}\relax
+\long\def\IEEEcompsocitemizethanks##1{\relax}\def\newpage{\relax}}
+
+
 
 
 
@@ -3857,6 +5137,7 @@ between column types.}%
 % in the dynamic sizer.
 \let\@IEEEtitleabstractindextext=\relax
 \long\def\IEEEtitleabstractindextext#1{\def\@IEEEtitleabstractindextext{#1}}
+
 % V1.7 provide a way for users to get the \@IEEEtitleabstractindextext if
 % not in compsoc or transmag journal mode - this way abstract and keywords
 % can still be placed in their conventional position if not in those modes.
@@ -3864,11 +5145,17 @@ between column types.}%
 % display for all conference formats
 \ifCLASSOPTIONconference\@IEEEtitleabstractindextext\relax
 \else% non-conferences
-  \ifCLASSOPTIONcompsoc% display if not compsoc and not transmag
-  \else
-    \ifCLASSOPTIONtransmag
-    \else% not compsoc journal nor transmag journal
-       \@IEEEtitleabstractindextext\relax
+  % V1.8a display for all technotes
+  \ifCLASSOPTIONtechnote\@IEEEtitleabstractindextext\relax
+  % V1.8a add diamond line after abstract and index terms for compsoc technotes
+  \@IEEEcompsoconly{\noindent\hfill\IEEEcompsocdiamondline\hfill\hbox{}\par}\relax
+  \else % non-conferences and non-technotes
+    \ifCLASSOPTIONcompsoc% display if not compsoc and not transmag
+    \else
+      \ifCLASSOPTIONtransmag
+      \else% not compsoc journal nor transmag journal
+         \@IEEEtitleabstractindextext\relax
+      \fi
     \fi
   \fi
 \fi}
@@ -3892,9 +5179,7 @@ between column types.}%
 
 % compsoc journals use \footnotesize, compsoc conferences use normalsize
 \@IEEEcompsoconly{\def\@IEEEabskeysecsize{\footnotesize}}
-\@IEEEcompsocconfonly{\def\@IEEEabskeysecsize{\normalsize}}
-
-
+\@IEEEcompsocconfonly{\def\@IEEEabskeysecsize{\small}}
 
 
 % V1.6 have abstract and keywords strip leading spaces, pars and newlines
@@ -3923,14 +5208,19 @@ between column types.}%
 % V1.7 compsoc keywords index terms
 \ifCLASSOPTIONcompsoc
   \ifCLASSOPTIONconference% compsoc conference
-\def\abstract{\normalfont
-      \bgroup\par\addvspace{0.5\baselineskip}\centering\@IEEEabskeysecsize\textbf{\large\abstractname}\par\addvspace{0.5\baselineskip}\egroup\vskip 0.5\baselineskip plus 0.1\baselineskip minus 0.1\baselineskip
-      \if@twocolumn\else\quotation\fi\itshape\@IEEEabskeysecsize%
-      \par\@IEEEgobbleleadPARNLSP}
-\def\IEEEkeywords{\normalfont\vskip 1.5\baselineskip plus 0.25\baselineskip minus 0.25\baselineskip
-      \bgroup\par\addvspace{0.5\baselineskip}\centering\@IEEEabskeysecsize\textbf{\large\IEEEkeywordsname}\par\addvspace{0.5\baselineskip}\egroup\vskip 0.5\baselineskip plus 0.1\baselineskip minus 0.1\baselineskip
-      \if@twocolumn\else\quotation\fi\itshape\@IEEEabskeysecsize%
-      \par\@IEEEgobbleleadPARNLSP}
+\def\abstract{\normalfont\@IEEEtweakunitybaselinestretch{1.15}\bfseries
+    \if@twocolumn
+      \@IEEEabskeysecsize\noindent\textit{\abstractname}---\relax
+    \else
+      \bgroup\par\addvspace{0.5\baselineskip}\centering\vspace{-1.78ex}\@IEEEabskeysecsize\textbf{\abstractname}\par\addvspace{0.5\baselineskip}\egroup\quotation\@IEEEabskeysecsize%
+    \fi\@IEEEgobbleleadPARNLSP}
+\def\IEEEkeywords{\normalfont\@IEEEtweakunitybaselinestretch{1.15}\bfseries
+    \if@twocolumn
+      \@IEEEabskeysecsize\vskip 0.5\baselineskip plus 0.25\baselineskip minus 0.25\baselineskip\noindent
+      \textit{\IEEEkeywordsname}---\relax
+    \else
+      \bgroup\par\addvspace{0.5\baselineskip}\centering\@IEEEabskeysecsize\textbf{\IEEEkeywordsname}\par\addvspace{0.5\baselineskip}\egroup\quotation\@IEEEabskeysecsize%
+    \fi\@IEEEgobbleleadPARNLSP}
   \else% compsoc not conference
 \def\abstract{\normalfont\@IEEEtweakunitybaselinestretch{1.15}\sffamily
     \if@twocolumn
@@ -4119,8 +5409,8 @@ between column types.}%
 {0ex}{\normalfont\normalsize}}%
 \else% compsoc journals
 % use negative top separation as compsoc journals do not indent paragraphs after section titles
-\def\section{\@startsection{section}{1}{\z@}{-3ex plus -2ex minus -1.5ex}%
-{0.7ex plus 1ex minus 0ex}{\normalfont\large\sffamily\bfseries\scshape}}%
+\def\section{\@startsection{section}{1}{\z@}{-3.5ex plus -2ex minus -1.5ex}%
+{0.7ex plus 1ex minus 0ex}{\normalfont\sublargesize\sffamily\bfseries\scshape}}%
 % Note that subsection and smaller may not be correct for the Computer Society,
 % I have to look up an example.
 \def\subsection{\@startsection{subsection}{2}{\z@}{-3.5ex plus -1.5ex minus -1.5ex}%
@@ -4138,6 +5428,16 @@ between column types.}%
 \def\subsubsection{\@startsection{subsubsection}{3}{1.25\parindent}{0.1ex plus 0.1ex minus 0.1ex}%
 {0.1ex}{\normalfont\normalsize\itshape}}%
 \fi
+
+
+% V1.8a provide for a raised line Introduction section for use with Computer
+% Society papers. We have to remove any spacing glue after the section
+% heading and then remove the blank line for the new paragraph after it.
+% LaTeX's section handler alters \everypar and we need to propogate those
+% changes outside of the \parbox lest there be spacing problems at the top
+% of the next section.
+\def\IEEEraisesectionheading#1{\noindent\raisebox{1.5\baselineskip}[0pt][0pt]{\parbox[b]{\columnwidth}{#1\unskip\global\everypar=\everypar}}\vspace{-1\baselineskip}\vspace{-\parskip}\par}
+
 
 
 %% ENVIRONMENTS
@@ -4171,6 +5471,27 @@ between column types.}%
 %\itemindent is set to \z@ by list, so define new temporary variable
 \newdimen\@IEEEtmpitemindent
 
+\ifCLASSOPTIONcompsoc
+% V1.8a compsoc uses bold theorem titles, a period instead of a colon, vertical spacing, and hanging indentation
+% V1.8 allow long theorem names to break across lines.
+% Thanks to Miquel Payaro for reporting this.
+\def\@begintheorem#1#2{\@IEEEtmpitemindent\itemindent\relax
+    \topsep 0.2\@IEEEnormalsizeunitybaselineskip plus 0.26\@IEEEnormalsizeunitybaselineskip minus 0.05\@IEEEnormalsizeunitybaselineskip
+    \rmfamily\trivlist\hangindent\parindent%
+    \item[]\textit{\bfseries\noindent #1\ #2.} \itemindent\@IEEEtmpitemindent\relax}
+\def\@opargbegintheorem#1#2#3{\@IEEEtmpitemindent\itemindent\relax
+\topsep 0.2\@IEEEnormalsizeunitybaselineskip plus 0.26\@IEEEnormalsizeunitybaselineskip minus 0.05\@IEEEnormalsizeunitybaselineskip
+\rmfamily\trivlist\hangindent\parindent%
+% V1.6 IEEE is back to using () around theorem names which are also in italics
+% Thanks to Christian Peel for reporting this.
+    \item[]\textit{\bfseries\noindent #1\ #2\ (#3).} \itemindent\@IEEEtmpitemindent\relax}
+% V1.7 remove bogus \unskip that caused equations in theorems to collide with
+% lines below.
+\def\@endtheorem{\endtrivlist\vskip 0.25\@IEEEnormalsizeunitybaselineskip plus 0.26\@IEEEnormalsizeunitybaselineskip minus 0.05\@IEEEnormalsizeunitybaselineskip}
+\else
+%
+% noncompsoc
+% 
 % V1.8 allow long theorem names to break across lines.
 % Thanks to Miquel Payaro for reporting this.
 \def\@begintheorem#1#2{\@IEEEtmpitemindent\itemindent\relax\topsep 0pt\rmfamily\trivlist%
@@ -4182,6 +5503,9 @@ between column types.}%
 % V1.7 remove bogus \unskip that caused equations in theorems to collide with
 % lines below.
 \def\@endtheorem{\endtrivlist}
+\fi
+
+
 
 % V1.6
 % display command for the section the theorem is in - so that \thesection
@@ -4884,21 +6208,22 @@ Use \@IEEEbackslash #2 instead.}}
 
 
 % provide some legacy IEEEtran commands
-\def\authorblockA{\@IEEElegacywarn{authorblockA}{IEEEauthorblockA}\IEEEauthorblockA}
-\def\authorblockN{\@IEEElegacywarn{authorblockN}{IEEEauthorblockN}\IEEEauthorblockN}
-\def\authorrefmark{\@IEEElegacywarn{authorrefmark}{IEEEauthorrefmark}\IEEEauthorrefmark}
-\def\PARstart{\@IEEElegacywarn{PARstart}{IEEEPARstart}\IEEEPARstart}
-\def\pubid{\@IEEElegacywarn{pubid}{IEEEpubid}\IEEEpubid}
-\def\pubidadjcol{\@IEEElegacywarn{pubidadjcol}{IEEEpubidadjcol}\IEEEpubidadjcol}
-\def\specialpapernotice{\@IEEElegacywarn{specialpapernotice}{IEEEspecialpapernotice}\IEEEspecialpapernotice}
 \def\IEEEcompsoctitleabstractindextext{\@IEEElegacywarn{IEEEcompsoctitleabstractindextext}{IEEEtitleabstractindextext}\IEEEtitleabstractindextext}
 \def\IEEEdisplaynotcompsoctitleabstractindextext{\@IEEElegacywarn{IEEEdisplaynotcompsoctitleabstractindextext}{IEEEdisplaynontitleabstractindextext}\IEEEdisplaynontitleabstractindextext}
 % provide some legacy IEEEtran environments
-\def\keywords{\@IEEElegacywarn{keywords}{IEEEkeywords}\IEEEkeywords}
-\def\endkeywords{\endIEEEkeywords}
 
 
-
+% V1.8a no more support for these legacy commands
+%\def\authorblockA{\@IEEElegacywarn{authorblockA}{IEEEauthorblockA}\IEEEauthorblockA}
+%\def\authorblockN{\@IEEElegacywarn{authorblockN}{IEEEauthorblockN}\IEEEauthorblockN}
+%\def\authorrefmark{\@IEEElegacywarn{authorrefmark}{IEEEauthorrefmark}\IEEEauthorrefmark}
+%\def\PARstart{\@IEEElegacywarn{PARstart}{IEEEPARstart}\IEEEPARstart}
+%\def\pubid{\@IEEElegacywarn{pubid}{IEEEpubid}\IEEEpubid}
+%\def\pubidadjcol{\@IEEElegacywarn{pubidadjcol}{IEEEpubidadjcol}\IEEEpubidadjcol}
+%\def\specialpapernotice{\@IEEElegacywarn{specialpapernotice}{IEEEspecialpapernotice}\IEEEspecialpapernotice}
+% and environments
+%\def\keywords{\@IEEElegacywarn{keywords}{IEEEkeywords}\IEEEkeywords}
+%\def\endkeywords{\endIEEEkeywords}
 % V1.8 no more support for legacy IED list commands
 %\let\labelindent\IEEElabelindent
 %\def\calcleftmargin{\@IEEElegacywarn{calcleftmargin}{IEEEcalcleftmargin}\IEEEcalcleftmargin}

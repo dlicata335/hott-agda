@@ -1,7 +1,7 @@
 
 %include agda.fmt
 
-\section{Torus ≃ Two Circles}
+\section{Torus ≃ Product of Two Circles}
 \label{sec:torus}
 
 The main idea of the correspondence between |T| and |S¹ × S¹| is that a

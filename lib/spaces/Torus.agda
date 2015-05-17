@@ -2,6 +2,7 @@
 
 open import lib.BasicTypes 
 open import lib.cubical.Cubical
+import lib.PrimTrustMe
 
 module lib.spaces.Torus where
 
@@ -9,14 +10,23 @@ module Torus where
   private
     module T where
      private
-       data T' : Set where
-         a' : T'
+        data ##T : Type where
+          #a : ##T
+
+        data #T : Type where
+          #in : (Unit -> ##T) → #T
+
+        #out : #T -> ##T
+        #out (#in f) = f <>
+
+        ext : (x : #T) (y : ##T) → #out x == y → #in (\ _ -> y) == x
+        ext (#in f) y p = lib.PrimTrustMe.transport/PId (λ x → #in (λ _ → y) == x) (lib.PrimTrustMe.ap/PId #in (lib.PrimTrustMe.funext/primtrustme {f = λ _ → y} {g = f} (λ _ → transport (λ z → lib.PrimTrustMe.PId y z) (! p) lib.PrimTrustMe.Refl))) id 
      
      T : Set
-     T = T'
+     T = #T
   
      a : T
-     a = a'
+     a = #in (\ _ -> #a)
   
      postulate {- HoTT Axiom -}
        p : a ≃ a
@@ -24,11 +34,13 @@ module Torus where
        f : Square p q q p
   
      T-rec :  {C : Set}
-           -> (a : C)
-           -> (p q : a ≃ a)
-           -> (f' : Square p q q p)
+           -> (a' : C)
+           -> (p' q' : a' ≃ a')
+           -> (f' : Square p' q' q' p')
            -> T -> C
-     T-rec a'' _ _ _ a' = a''
+     T-rec {C} a' p' q' f' x = T-rec' phantom phantom phantom (#out x) id where
+        T-rec' : (_ : Phantom p') (_ : Phantom q') (_ : Phantom f') -> (x' : ##T) -> x' == #out x -> C
+        T-rec' phantom phantom phantom #a p = a'
   
      T-elim : (C : T -> Set)
               (a' : C a) 
@@ -36,7 +48,10 @@ module Torus where
               (q' : PathOver C q a' a')
               (f' : SquareOver C f p' q' q' p') 
            -> (x : T) -> C x
-     T-elim _ a'' _ _ _ a' = a''
+     T-elim C a' p' q' f' x = T-elim' phantom phantom phantom (#out x) id where
+        T-elim' : (_ : Phantom p') (_ : Phantom q') (_ : Phantom f') -> (x' : ##T) -> x' == #out x -> C x
+        T-elim' phantom phantom phantom #a p = transport C (ext _ _ (! p)) a'
+
   
      postulate {- HoTT Axiom -}
        βp/rec : {C : Set}
@@ -59,6 +74,7 @@ module Torus where
          -> Cube (ap-square (T-rec a' p' q' f') f) f' (horiz-degen-square (βp/rec a' p' q' f')) (horiz-degen-square (βq/rec a' p' q' f')) (horiz-degen-square (βq/rec a' p' q' f')) (horiz-degen-square (βp/rec a' p' q' f'))
   
   open T public
+
 
   module UMP where
 

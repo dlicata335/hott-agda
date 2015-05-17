@@ -17,10 +17,8 @@ module lib.Prods where
 
   -- gadget for defeating unused argument check in Agda 2.3.2.1 and later
   -- a version of Unit⁺ that's indexed by an arbitrary thing.  
-  record Phantom {A : Type}(a : A) : Type where
-    constructor phantom
-    field 
-      match : Unit⁺
+  data Phantom {A : Type}(a : A) : Type where
+      phantom : Phantom a
   
   _×_ : Type -> Type -> Type
   a × b = Σ (\ (_ : a) -> b)
