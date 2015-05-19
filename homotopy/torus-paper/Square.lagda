@@ -55,7 +55,7 @@ we would like to define a type |Square l t b r|, where an element of
 this type represents the inside of such a square.  One possible
 definition is as path-over in a path type:
 \begin{code}
-PathOver (\ (x:A,y:A) → Pair x y) (pair-line t b) l r
+PathOver (\ (x:A,y:A) → Path x y) (pair-line t b) l r
 \end{code}
 where |pair-line| is a non-dependent version of |pair=| for |A × B|,
 which takes two homogeneous paths.  
@@ -161,7 +161,7 @@ ap-square : {A B : Type} (f : A → B)
 We have rules for introducing and eliminating squares in each type.  For
 example, for |A × B|, we can pair a square in |A| with a square in |B|
 to get a square in |A × B|, whose boundary sides are the pairs of the
-sides of the given squares::
+sides of the given squares:
 \begin{code}
 pair-line  : Path{A} a0 a1 → Path{B} b0 b1
            → Path (a0,a1) (b0,b1)
@@ -470,8 +470,8 @@ T-elim : (C : T → Type) (a' : C a)
               ((transport-· C q p) · (ap (transport C p) q') · p')) 
   → (x : T) → C x
 \end{code}
-and, in the absence of the square-over abstraction, this proved
-difficult to apply.
+and, in the absence of the square-over abstraction, this was 
+difficult to use in proofs.  
 
 When we prove that the torus is equivalent to the product of two
 circles, we will define functions |c2t| and |t2c|, and then use |T-elim|

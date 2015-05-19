@@ -49,8 +49,8 @@ module Torus where
               (f' : SquareOver C f p' q' q' p') 
            -> (x : T) -> C x
      T-elim C a' p' q' f' x = T-elim' phantom phantom phantom (#out x) id where
-        T-elim' : (_ : Phantom p') (_ : Phantom q') (_ : Phantom f') -> (x' : ##T) -> x' == #out x -> C x
-        T-elim' phantom phantom phantom #a p = transport C (ext _ _ (! p)) a'
+        T-elim' : (_ : Phantom p') (_ : Phantom q') (_ : Phantom f') -> (x' : ##T) -> #out x == x' -> C x
+        T-elim' phantom phantom phantom #a p = transport C (ext _ _ p) a'
 
   
      postulate {- HoTT Axiom -}

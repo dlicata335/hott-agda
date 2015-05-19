@@ -3,14 +3,14 @@
 \section{Heterogeneous equality}
 \label{sec:heq}
 
-The path type |Path{A} a0 a1| is sometimes called \emph{homogeneous
-  equality}, because it relates two elements |a0| and |a1| whose types
-are definitionally/judgementally equal.
-McBride~\citep{mcbride00thesis} introduced a \emph{heterogeneous
-  equality}, which is an equality type |a:A = b:B| that relates two
-elements |a:A| and |b:B| which may have two judgementally distinct
-types, though the reflexivity constructor applies only when both the two
-types and the two terms are judgementally equal.  
+The path type |Path{A} a0 a1| (an inductive family with one constructor
+|id : Path a0 a0|) is sometimes called \emph{homogeneous equality},
+because it relates two elements |a0| and |a1| whose types are
+definitionally/judgementally equal.  McBride~\citep{mcbride00thesis}
+introduced a \emph{heterogeneous equality}, which is an equality type
+|a:A = b:B| that relates two elements |a:A| and |b:B| which may have two
+judgementally distinct types, though the reflexivity constructor applies
+only when both the two types and the two terms are judgementally equal.
 Heterogeneous equality is used to elide the reasoning why equations type
 check from the equations themselves, which simplifies some
 constructions.  However, McBride's heterogeneous equality is logically
@@ -19,16 +19,15 @@ identity proofs~\citep{mcbride00thesis}, which is undesirable in
 homotopy type theory, because not all types should be sets.
 
 This paper provides an investigation of how to manage the reasons why
-equations type check is a setting where these reasons are
+equations type check in a setting where these reasons are
 proof-relevant.  While we cannot ignore the reason why an equation type
 checks entirely, we can still keep the evidence ``off to the side'',
 rather than embedding it in the equation itself.  For example, we can
 define a type |HEq A B α a b| where |α : Path{Type} A B| and |a:A| and
-|b:B|.  This heterogeneous equality relates two elements of two
+|b:B|, as an inductive family with one reflexivity constructor |hid : HEq
+A A id a a|, which relates |a| to itself along the reflexivity path
+|id|.    This heterogeneous equality relates two elements of two
 different types \emph{along a specific equality α between the types}.
-It can be defined as an inductive family with a reflexivity constructor
-|hid : HEq A A id a a|, which relates |a| to itself along the
-reflexivity path |id|.
 %% \footnote{This should perhaps go up a universe
 %%   size level because it is an inductive family indexed by a |Type|.}
 %% \begin{code}
@@ -61,19 +60,15 @@ coerces along a homogeneous equality, the following types are equivalent
 
 \item Define heterogeneous equality by path induction into the universe:
   when the type equality α is |id|, a heterogeneous equality is a
-  homogeneous equality.
-
-\begin{code}
-HEq' A .A id a b = Path{A} a b
-\end{code}
+  homogeneous equality: |HEq' A A id a b = Path{A} a b|
 \end{enumerate}
 
 The equivalences between these types are all immediate by path induction
 or induction on |HEq|: keeping the evidence that the equation type
 checks ``off to the side'' is equivalent to embedding it in the equation
-on either side, and to the more symmetric fourth option.  Even though it
-could be defined away, we will argue that it is useful to think in terms
-of such ``off to the side'' abstractions.
+on either side, and to the more symmetric fourth option.  We will argue
+that, even though it could be defined away, it is useful to think in
+terms of such ``off to the side'' abstractions.
 
 %% As an aside, in a type theory with a homogeneous equality type
 %% satisfying uniqueness of identity proofs and function extensionality,
@@ -169,8 +164,7 @@ PathOver C id c1 c2 = Path c1 c2
 The equivalences are all simple to construct using path induction or
 |HEq|-induction or path-over induction.  The final three options are
 analogous to the final three ways to render heterogeneous equality
-described above, though they are a bit more direct, using |transport C
-α| instead of |coe (ap C α)|.  
+described above, though using |transport C α| instead of the equivalent |coe (ap C α)|.
 %% The third, for example, says that a path
 %% in |C| over α is the same as using the function |transport C α| to move
 %% one endpoint into the same fiber as the other, and giving a homogeneous
@@ -179,16 +173,17 @@ described above, though they are a bit more direct, using |transport C
 While we have motivated |PathOver| as a factored heterogeneous equality,
 there is also a geometric intuition.  Dependent types correspond to
 fibrations, so a type |C : A → Type| can be pictured as its total space
-|Σ a:A. C a| projecting down to |A| by first projection.  A path-over |γ
-: PathOver C α c1 c2| represents a path in |Σ C| between |(a1,c1)| and
-|(a2,c2|), such that |ap fst σ| is exactly |α|.  That is, it is a path
-in the total space that projects down to, or \emph{lays over}, |α| 
-(path pairing |pair= α γ| will be made precise below):
+|Σ a:A. C a| projecting down to |A| by first
+projection.  A path-over |γ : PathOver C α c1 c2| represents a path |σ|
+in |Σ a:A. C a| between |(a1,c1)| and |(a2,c2|), such that |ap fst σ| is
+exactly |α|.  That is, it is a path in the total space that projects
+down to, or \emph{lies over}, |α| (path pairing |pair= α γ| will be made
+precise below):
 
 \begin{center}
   \begin{tikzpicture}[yscale=.45,xscale=3]
     \draw (0,0) arc (-90:170:1cm) node[anchor=south east] {|A|} arc (170:270:1cm);
-    \draw (0,4) arc (-90:170:1cm) node[anchor=south east] {|Σ C|} arc (170:270:1cm);
+    \draw (0,4) arc (-90:170:1cm) node[anchor=south east] {|Σ a:A.C a|} arc (170:270:1cm);
     \draw[->] (0,3.8) -- node[auto] {|fst|} (0,2.2);
     \node[circle,fill,inner sep=1pt,label=left:{|a1|}] (a1) at (-.5,1) {};
     \node[circle,fill,inner sep=1pt,label=right:{|a1|}] (a2) at (.5,1) {};
@@ -207,7 +202,7 @@ it is defined as inductive family, which is convenient because we can
 eliminate on a path-over using Agda's support for pattern matching.
 Moreover, the inductive family implementation does not really require
 extending the semantics of type theory with this new type constructor:
-If we defined |PathOver C α c1 c2| as as |Path{C a2} (transport C α c1)
+If we defined |PathOver C α c1 c2| as |Path{C a2} (transport C α c1)
 c2|, then the inductive family elimination rule
 %% \begin{code}
 %% PathOver-elim : {A : Type} (C : A → Type) {a1 : A} {c1 : C a1}
@@ -227,10 +222,10 @@ interpreting in a model.
 
 \subsection{Library}
 
-Next, we give a sample of some of the facts about path-overs that are
+Next, we give a tour of some of the facts about path-overs that are
 commonly used.  Though we use Agda notation, we sometimes elide
 universal quantifiers, implicitly quantifying variables with their most
-general types. Omitted proofs are in \url{github.com/dlicata335/hott-agda}.  
+general types. 
 
 %% Reflexivity-over-reflexivity is a constructor, and we can also invert
 %% and compose path-overs, which lay over the corresponding operation
@@ -283,7 +278,7 @@ for paths in a Σ-type.
 We have the type equivalence (written ≃) between |PathOver| and a homogeneous equation
 using |transport|:
 \begin{code}
-hom-to-over/left-eqv :   Path (transport C α a1) a2
+hom-to-over/left-eqv :   Path (transport C α c1) c2
                          ≃ PathOver C α c1 c2
 \end{code}
 In the special case where |α| is |id|, this gives that paths over

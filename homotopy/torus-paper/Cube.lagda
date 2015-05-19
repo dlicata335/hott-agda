@@ -98,12 +98,12 @@ An element of this type represents the inside of a cube
 All the points and lines are implicit arguments.  The order of faces is
 different than for squares: we write |Cube left right back top bot
 front| to prioritize the left and right sides, because we will mostly
-use cubes as an equality between the left and right squares (which are
-important), along the ``tube'' given by the |back| and |top| and |bot|
-and |front| (which we care less about).  As usual, we could avoid
-introducing a new inductive family by instead defining a cube using
-square induction, to say that when the back, top, bottom, and front are
-the identity squares, a cube is a path between the left and the right.
+use cubes as an equality between the left and right squares, along the
+``tube'' given by the |back| and |top| and |bot| and |front|.  As usual,
+we could avoid introducing a new inductive family by instead defining a
+cube using square induction, to say that when the back, top, bottom, and
+front are the identity squares, a cube is a path between the left and
+the right.
 
 Many of the lemmas about cubes are analogous to (and dependent on) those
 for squares.  For example, we can compose two cubes horizontally:

@@ -105,7 +105,8 @@
 % author names and affiliations
 % use a multiple column layout for up to three different
 % affiliations
-\author{\IEEEauthorblockN{Daniel R. Licata}
+\author{\IEEEauthorblockN{Daniel R. Licata
+}
 \IEEEauthorblockA{Wesleyan University\\
 \url{dlicata@wesleyan.edu}}
 \and
@@ -113,15 +114,18 @@
 \IEEEauthorblockA{Université de Nice Sophia Antipolis \\
 \url{guillaume.brunerie@gmail.com}}
 
-%% \thanks{This material is based in part upon work supported by the
-%%   National Science Foundation under grants CCF-1116703 and DMS-1128155
-%%   and a Mathematical Sciences Postdoctoral Research Fellowship, by the
-%%   Institute for Advanced Study's Oswald Veblen fund, and by the
-%%   CMU-Microsoft Center for Computational Thinking.  Any opinions,
-%%   findings, and conclusions or recommendations expressed in this
-%%   material are those of the author(s) and do not necessarily reflect the
-%%   views of the National Science Foundation or any other sponsoring entity.
-%% }
+\thanks{
+This material is based on research sponsored by The United States Air
+Force Research Laboratory under agreement number FA9550-15-1-0053. The
+U.S. Government is authorized to reproduce and distribute reprints for
+Governmental purposes notwithstanding any copyright notation thereon.
+The views and conclusions contained herein are those of the authors and
+should not be interpreted as necessarily representing the official
+policies or endorsements, either expressed or implied, of the United
+States Air Force Research Laboratory, the U.S. Government, or Carnegie
+Mellon University.
+}
+
 }
 
 \maketitle
@@ -131,7 +135,7 @@ Homotopy theory can be developed synthetically in homotopy type theory,
 using types to describe spaces, the identity type to describe paths in a
 space, and iterated identity types to describe higher-dimensional paths.
 While some aspects of homotopy theory have been developed synthetically
-and formalized in proof assistants, some seemingly straightforward
+and formalized in proof assistants, some seemingly easy
 examples have proved difficult because the required manipulations of
 paths becomes complicated.  In this paper, we describe a cubical
 approach to developing homotopy theory within type theory.  The identity
@@ -163,7 +167,8 @@ for the formalization of some previously difficult examples.
 to prove the torus-circles equivalence with the first author in summer
 2012.  We thank the participants of the IAS year on univalent
 foundations and the Paris trimester on semantics of proofs and certified
-mathematics for many helpful discussions.
+mathematics for many helpful discussions.  We thank the anonymous
+reviewers for helpful feedback.  
 
 \setlength{\bibsep}{-1pt} %% dirty trick: make this negative
 { \small

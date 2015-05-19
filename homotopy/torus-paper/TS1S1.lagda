@@ -6,7 +6,7 @@
 
 The main idea of the correspondence between |T| and |S¹ × S¹| is that a
 |loop| in the first component of the pair corresponds to |p|, and a
-|loop| in the second component to |q|.
+|loop| in the second component to |q|.  
 
 \subsection{Torus to circles}
 
@@ -104,7 +104,7 @@ circle recursion, sending |base| to |a| and |loop| to |q|.  The loop
 must be a |Path{S¹ → T} (S¹-rec a q) (S¹-rec a q)|, which, by
 (homogeneous) function extensionality, is equivalent to |(x : S¹) → Path
 (S¹-rec a q x) (S¹-rec a q x)|.  Using circle elimination, we need a
-|Path{T} base base| (because |S¹-rec a q base ≡ a|), which we take to be
+|Path{T} a a| (because |S¹-rec a q base ≡ a|), which we take to be
 |p|, and then a |PathOver (\ x → Path (S¹-rec a q x) (S¹-rec a q x))
 loop p p|. Applying |PathOver-=-eqv| to reduce a path-over in a path
 type to a square, we need a square |s| with the type given as the first
@@ -221,28 +221,28 @@ are as follows:
 □=  f
 \end{code}
 We think of this as an equation chain between these eight squares, but
-the proof of each step is really a cube, rather than a homogeneous path.
-In order, the justifications for the steps are (0) by definition, (1)
-un-fusing |ap (\ x -> c2t' x y) loop| to |ap (\ f → f y) (ap c2t'
-loop)|, (2) reducing |c2t'| (which is a circle recursion) on |loop|, (3)
-reducing |ap (\ f → f y)| on a function extensionality, (4) reducing
-|S¹-elimo| on the loop, (5) collapsing the two sides of the |PathOver-=|
-equivalence, and (6) using |snd c2t-square-and-cube|.  Thus, we do what
-looks like an equational proof that the square |(apdo-ap c2t' loop
-loop)| ``equals'' the square |f|, but each step may also contribute to
-the back-top-bottom-front tube that connects the boundaries of these
-two squares.  For example, step (6) using |snd c2t-square-and-cube|
-contributes |βsquare| on the top and bottom.
+the proof of each step is really a cube, rather than a homogeneous path
+(we write |□=| to emphasize this). In order, the justifications for the
+steps are (0) by definition, (1) un-fusing |ap (\ x -> c2t' x y) loop|
+to |ap (\ f → f y) (ap c2t' loop)|, (2) reducing |c2t'| (which is a
+circle recursion) on |loop|, (3) reducing |ap (\ f → f y)| on a function
+extensionality, (4) reducing |S¹-elimo| on the loop, (5) collapsing the
+two sides of the |PathOver-=| equivalence, and (6) using |snd
+c2t-square-and-cube|.  Thus, we do what looks like an equational proof
+that the square |(apdo-ap c2t' loop loop)| ``equals'' the square |f|,
+but each step may also contribute to the back-top-bottom-front tube that
+connects the boundaries of these two squares.  For example, step (6)
+using |snd c2t-square-and-cube| contributes |βsquare| on the top and
+bottom.  Because each of the cubes used in steps (1) through (6) has the
+property that its front is equal to its back and its top is equal to its
+bottom, |βl1| and |βl2| can be defined to be the composites of these
+sides, and the overall cube has the required boundary.
 
-The curious reader may find the the complete Agda proof in the appendix
-(Figure~\ref{fig:ts1s1-full}). The important point is that the term is
-simply a horizontal composition of cubes, which correspond to steps (1)
-through (6) above.  The sides of the cube are represented by the |_|'s,
-which are filled in by unification.  This works because each of the
-cubes used in steps (1) through (6) have the property that their front
-is equal to their back and their top is equal to their bottom, so |βl1|
-and |βl2| can be defined to be the composites of these sides, and the
-overall cube has the required boundary.
+%% The important point is that the term is
+%% simply a horizontal composition of cubes, which correspond to steps (1)
+%% through (6) above.  The sides of the cube are represented by the |_|'s,
+%% which are filled in by unification.  
+
 
 %% \begin{figure*}
 %% \begin{code}

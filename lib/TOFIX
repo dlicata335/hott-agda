@@ -1,0 +1,16 @@
+update implementation with new hit hacks:
+
+Pushout.agda:      postulate {- HoTT Axiom -}
+PushoutFat.agda:      postulate {- HoTT Axiom -}
+PushoutFatFib.agda:      postulate {- HoTT Axiom -}
+Suspension.agda:      postulate {- HoTT Axiom -} 
+spaces/1Sphere2.agda:    postulate {- HoTT Axiom -}
+spaces/2Sphere1.agda:    postulate {- HoTT Axiom -}
+spaces/2Sphere2.agda:    postulate {- HoTT Axiom -}
+spaces/2SphereCube.agda:    postulate {- HoTT Axiom -}
+spaces/2SphereCube.agda:    postulate {- HoTT Axiom -}
+spaces/3Sphere1.agda:     postulate {- HoTT Axiom -}
+spaces/3Sphere2.agda:     postulate {- HoTT Axiom -}
+spaces/3SphereCube.agda:    postulate {- HoTT Axiom -}
+spaces/Interval.agda:      postulate {- HoTT Axiom -} 
+spaces/NSphere1.agda:    postulate {- HoTT Axiom -} 

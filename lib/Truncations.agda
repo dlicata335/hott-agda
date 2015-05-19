@@ -11,6 +11,7 @@ open import lib.NType
 open import lib.Universe
 open import lib.AdjointEquiv
 open import lib.HFiber
+import lib.PrimTrustMe
 
 module lib.Truncations where
 
@@ -18,17 +19,23 @@ module lib.Truncations where
 
    module T where
     private
-      data Trunc' (n : TLevel) (A : Type) : Type where
-        trunc' : A -> Trunc' n A
+       data ##Trunc (n : TLevel) (A : Type) : Type where
+          #trunc : A -> ##Trunc n A
 
-      data Trunc'' (n : TLevel) (A : Type) : Type where
-        mkTrunc'' : Trunc' n A → (Unit -> Unit) → Trunc'' n A
+       data #Trunc  (n : TLevel) (A : Type) : Type where
+          #in : (Unit -> ##Trunc n A) → #Trunc n A
+
+       #out : ∀{n A} → #Trunc n A -> ##Trunc n A
+       #out (#in f) = f <>
+
+       ext : ∀ {n A} → (x : #Trunc n A) (y : ##Trunc n A) → #out x == y → #in (\ _ -> y) == x
+       ext (#in f) y p = lib.PrimTrustMe.transport/PId (λ x → #in (λ _ → y) == x) (lib.PrimTrustMe.ap/PId #in (lib.PrimTrustMe.funext/primtrustme {f = λ _ → y} {g = f} (λ _ → transport (λ z → lib.PrimTrustMe.PId y z) (! p) lib.PrimTrustMe.Refl))) id 
 
     Trunc : (n : TLevel) (A : Type) → Type
-    Trunc = Trunc'' 
+    Trunc = #Trunc
 
     [_] : {n : TLevel} {A : Type} → A -> Trunc n A
-    [ x ] = mkTrunc'' (trunc' x) _
+    [ x ] = #in (\ _ -> (#trunc x))
 
     postulate {- HoTT Axiom -}
       Trunc-level : {n : TLevel} {A : Type} → NType n (Trunc n A)
@@ -36,13 +43,18 @@ module lib.Truncations where
     Trunc-rec : {A C : Type} {n : TLevel} (tC : NType n C)
           -> (A → C)
           → (Trunc n A) → C
-    Trunc-rec _ f (mkTrunc'' (trunc' x) _) = f x
+    Trunc-rec {A}{C}{n} Clevel f x = Trunc-rec' phantom (#out x) id where
+      Trunc-rec' : Phantom Clevel → (y : ##Trunc n A) → #out x == y → C 
+      Trunc-rec' phantom (#trunc y') _ = f y'
 
     Trunc-elim : {A : Type} {n : TLevel} (C : Trunc n A → Type)
                 (tC : (x : Trunc n A) → NType n (C x))
           -> ((x : A) → C [ x ])
           → (x : (Trunc n A)) → C x
-    Trunc-elim _ _ f (mkTrunc'' (trunc' x) _) = f x
+    Trunc-elim {A}{n} C Clevel f x = Trunc-elim' phantom (#out x) id where
+      Trunc-elim' : Phantom Clevel → (y : ##Trunc n A) → #out x == y → C x
+      Trunc-elim' phantom (#trunc y') p = transport C (ext _ _ p) (f y')
+
    open T public
 
    τ₋₁ = Trunc -1
