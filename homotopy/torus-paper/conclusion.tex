@@ -31,10 +31,15 @@ include a type theory with a computational interpretation of
 parametricity~\citep{bernardy12parametricity}, and new cubical type
 theories~\citep{coquand14variations,altenkirchkaposi14cubical,lb14cubes-oxford,polonsky14internalization}
 inspired by the cubical sets model of homotopy type
-theory~\citep{coquand+13cubical}.  The examples presented here could be
-translated to cubical type theories, to compare them against working
-axiomatically.  Additionally, it is an open question whether results in
-these stricter cubical type theories can be translated back to the
-axiomatic type theory; the low-dimensional libraries and examples
-presented here provide a bit of empirical evidence in the positive
-direction.
+theory~\citep{coquand+13cubical}.  We have begun to translate the
+examples discussed here to cubical type theory, to compare these new
+type theories against working axiomatically.  With Cohen, Coquand,
+Huber, and M\"ortberg, using their
+implementation,\footnote{\texttt{https://github.com/simhu/cubical/tree/connections}}
+we have coded a special case of the 3x3 lemma that is used in
+$\pi_4(S^3)$, and found that the amount of memory needed to type check
+is greatly reduced, because new definitional equalities keep the proof
+terms smaller.  To construct models of these new cubical type theories,
+it would be convenient to translate back to axiomatic homotopy type
+theory; the low-dimensional libraries and examples presented here
+provide some empirical evidence that this might be possible.

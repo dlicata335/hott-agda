@@ -1,0 +1,59 @@
+First, we thank all of our reviewers for their careful feedback; we very
+much appreciate their time and attention, and their comments will be
+very helpful for revising the presentation of the paper.
+
+A few responses to the reviews:
+
+Review 1: We apologize for not making the big-picture conceptual
+contributions clear enough.  We want to use Martin-Lof intensional type
+theory (MLTT), extended with the univalence axiom and rules for higher
+inductive types, as a "logic of homotopy theory", to express and
+formalize mathematical results in this domain.  Higher inductive types
+are a new invention, and the rules for them are a topic of active
+research.  The choice of rules must be informed by theoretical
+considerations such as having the right semantics, and also by practical
+ones: can we express the proofs of the theorems we want to prove in the
+logic in a convenient way?  The main conceptual contribution of the
+paper is to to identify some abstractions (squares, squareovers, cubes)
+that have not been used inside MLTT before, and to give new rules for
+some higher inductive types using them, which are equivalent to the old
+rules but more useful for at least some examples.  We think this is an
+important advance in our understanding of how to formulate higher
+inductive types.
+
+Review 3: The reviewer comments on the fact that we implement
+low-dimensional cubes explicitly, rather than giving a
+dimension-polymorphic definition.  For working axiomatically in MLTT
+(which has certain advantages: being able to use current proof
+assistants, and to use existing semantics to interpret results in
+models), it is not clear that general n-cubes are necessary, because the
+"level" of cube that we need depends not on the dimension of the space,
+but on the level of the path constructors in the higher inductive types,
+and on the nesting of higher inductives in the theorem in question.  For
+example, a corollary of the 3x3 lemma is a result about the fourth
+homotopy group of a space, which contains information about the
+"hypercubes" in that space.  But we have not yet defined a notion of
+hypercube!  The key difference from working directly in cubical sets is
+that we can talk about cubes in a type that is itself
+higher-dimensional.
+
+That said, we agree with the reviewer that general n-cubes are very
+interesting, especially for computational purposes.  In our opinion, the
+best approach to n-cubes is to include them as primitive notions in a
+new cubical type theory.  Since there are several proposals for cubical
+type theory by us and others, we also think it is scientifically useful
+to have some worked examples in MLTT, like the ones in this paper, to
+inform the design of these new type theories, and as benchmarks to
+evaluate them against.  
+
+Review 4: We apologize for not including commit identifiers and proof
+assistant versions; we would definitely include these in the final copy.
+We have checked the 3x3 lemma on a machine with 250GB of memory; it
+takes several hours.  The time and memory usage is a result of working
+axiomatically in Agda, where many things that are morally computation
+steps are instead witnessed by propositional equalities, which makes the
+proof terms very large.  We have done a portion of the proof in the
+"cubical" implementation by Coquand, Huber, et al., and (despite this
+being a very unoptimized prototype implementation) the time and memory
+issues go away.  So we think this engineering issue can be resolved.
+

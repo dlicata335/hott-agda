@@ -1,0 +1,328 @@
+First, we would like to thank the reviewers for their careful feedback,
+which will help us improve our paper.  A few responses to the questions
+raised by the reviewers:
+
+Accessibility of the presentation: We agree with reviewer 1 that
+informal type theory would be a valuable way to make these ideas more
+accessible to a broader audience.  Given the page limitations, we had to
+pick between formal and informal styles, and chose to use Agda to
+emphasize that an outcome of the work is an improved ability to
+formalize certain mathematical results.  We agree with reviewer 3 that
+certain sections of the paper require some background in HoTT, but we
+think this is fair, given that much of the necessary background has been
+published in LICS'13 (and to a lesser extent LICS'14).  
+
+The conceptual/theoretical contributions: Reviewers 1 and 3 comment on
+whether there are conceptual/theoretic contributions, or whether the
+paper is a only programming/technical exercise.  We apologize for not
+making the conceptual contributions clearer, but we think of them as
+follows: One application of homotopy type theory is using Martin-Lof
+intensional type theory, extended with the univalence axiom and rules
+for higher inductive types, as a "logic of homotopy theory", to express
+and formalize mathematical results in this domain.  Higher inductive
+types are a new concept, and what exactly the rules for them should be
+is an area of active research.  The choice of rules must be informed not
+only by theoretical considerations (having the right semantics), but
+also by practical ones: can we prove the theorems we want to prove about
+them?  The main conceptual contribution of the paper is to to identify
+some new abstractions (pathover, square, squareover, cube) and to give
+more useful rules for higher inductives using them.  The fact that these
+abstractions can be implemented in terms of pure MLTT, and that then the
+new rules for higher inductives can be implemented in terms of the old
+rules (which is true, but we did not have space to discuss in the
+paper), is helpful because it justifies the new rules.  But formulating
+the new rules and showing that, at least for some examples, they
+simplify proofs that we want to do, is an important conceptual
+contribution to our understanding of higher inductive types.
+
+Reviewer 3 comments on the fact that we implement low-dimensional cubes
+by hand, rather than giving a dimension-polymorphic definition.  We
+agree that the general case is interesting, and in fact we have done
+other work on this very topic.  In our opinion, the best approach to
+n-cubes is to include them as primitive notions in a new type theory,
+but there are advantages (such as being able to use current proof
+assistants, and reusing existing semantics to interpret results in
+models) to staying within MLTT+univalence+HITs, as we do in this paper.
+Moreover, for working axiomatically in MLTT, it is not clear that
+n-cubes are necessary, because the "level" of cube that we need depends
+not on the dimension of the space, but on the level of the path
+constructors and nesting of higher inductives.  For example,
+even though we only define 2-dimensional cubes in the paper, a corollary
+of the 3x3 lemma is a result about the fourth homotopy group of the
+3-dimensional sphere.  We have not yet encountered a result where
+3-dimensional hypercubes would be useful.
+
+Review 4: We thank the reviewers for checking the
+formalizations!  We apologize for not including commit identifiers and
+proof assistants in the submission; we will include these in the final
+version.  We have checked the 3x3 lemma on a machine with 250GB of
+memory; it takes several hours.  The significant memory usage is
+really an artifact of trying to do homotopy type theory in Agda, as
+opposed to using a proof assistant that provides native support for
+higher inductive types.  In Agda, many things that are morally
+computation steps are instead witnessed by propositional equalities,
+which makes the proof terms very large.  We have done a portion of the
+proof in the "cubical" implementation by Coquand, Huber et al., and
+(despite this being a very unoptimizied prototype implementation) the
+time and memory issues go away.  It is also possible that there might be
+an optimized proof within Agda; the 3x3 proof was implemented before
+some ideas that were developed doing the torus proof, which might help,
+but we have not yet tried to rewrite it.  
+
+
+----------------------- REVIEW 1 ---------------------
+PAPER: 179
+TITLE: A Cubical Approach to Synthetic Homotopy Theory
+AUTHORS: Daniel R. Licata and Guillaume Brunerie
+
+OVERALL EVALUATION: 1 (weak accept)
+REVIEWER'S CONFIDENCE: 4 (high)
+
+----------- REVIEW -----------
+
+It has turned out recently that cubes might be more appropriate for
+developing (synthetic) homotopy theory than simplices. Accordingly, in
+this paper type formers for square and cube types are introduced based
+on a type former PathOver introduced in section II.  All these are just
+extensions of homotopy type theory with univalence and HITs (higher
+inductive types). So the whole thing is nothing but a (large)
+programming exercise. There is some pragmatic interest to it but I think
+the paper is not very accessible to non-specialist. Moreover, the type
+theory is not fully fixed (a general problem of current expositions of
+HoTT including the book). So for the mathematically inclined reader it
+is built on shaky grounds. Moreover, I'd prefer to see things written
+out in informal type theory than in pseudo Agda.  As I have said there
+is some interest in the programming exercise but I don't see any
+conceptual innovations beyond that. And it is very difficult to read for
+people not familiar with Agda.
+
+I am not saying that this is the fault of the authors but a consequence
+of the decision to use computer systems for exposing mathematical
+results. Maybe in the future there will be special journals or rather
+web sites providing such commented code. But they will have a restricted
+readership with very special focus. For a conference with a wider scope
+like LiCS I find such contributions problematic which explains my low
+marks.
+
+Minor remarks
+--------------
+
+in l.10 of the 2nd column of page 2 "is" should be "in"
+
+also in 2nd column of p.2 the dot between the two A's (in the displayed formula of 4) is mysterious to me)
+
+the whole discussion of "heterogeneous" equality in section II is
+understandable only for readers with a very special knowledge; the
+reference to the HoTT book is only of moderate help since it doesn't
+provide sufficient discussion of "heterogeneous equality". Moreover,
+neither HEq nor HEq' are properly defined. This applies also to
+McBride's heterogeneous equality.
+
+----------------------- REVIEW 2 ---------------------
+PAPER: 179
+TITLE: A Cubical Approach to Synthetic Homotopy Theory
+AUTHORS: Daniel R. Licata and Guillaume Brunerie
+
+OVERALL EVALUATION: 3 (strong accept)
+REVIEWER'S CONFIDENCE: 5 (expert)
+
+----------- REVIEW -----------
+
+In this paper the authors show how to use ideas from cubical sets in
+homotopy type theory to deal with hitherto intractable problems, namely
+the (rather embarrassing) problem of showing that the torus is the
+product of two circles, and the so called 3 by 3 lemma about pushouts,
+which is needed for the calculation of higher homotopy groups of
+spheres.
+
+The paper is well written and technically non-trivial. What I think is
+most important here is the realization that many forms of identity types
+are useful, not just the original one. I expect to see other kinds of
+identity types (not just cubical) to show up in the future, and there
+will eventually have to be a general theory of "generalized" identity
+types. The present paper is an excellent case study that will make such
+a theory possible.
+
+I thank the authors for not including a pointless "mostly self-contained
+introduction to HoTT".
+
+The current infrastructure for scientific publication is not able to
+incorporate the fact that the results of the paper have been
+formalized. It is *insufficient* to include only the PDF paper into the
+proceedings. This is a concern for the editors and the PC chair,
+however.
+
+Technical remarks:
+
+A better title for section VI would be "Torus ~ Product of Two Circles" because "Two circles" might mean a coproduct of two circles.
+
+Appendix: is this for humans or machines?
+
+----------------------- REVIEW 3 ---------------------
+PAPER: 179
+TITLE: A Cubical Approach to Synthetic Homotopy Theory
+AUTHORS: Daniel R. Licata and Guillaume Brunerie
+
+OVERALL EVALUATION: 1 (weak accept)
+REVIEWER'S CONFIDENCE: 5 (expert)
+
+----------- REVIEW -----------
+Summary of the paper:
+
+This paper presents a new approach to the formalization of homotopy theory
+inside type theory, based on cubical sets. Since the advent of homotopy type 
+theory, it is believed that the notion of equality (a.k.a identity type) 
+in type theory corresponds to the notion of path in homotopy theory. 
+Nevertheless, because of technical issues involving transport of equality, 
+many examples of formalization of basic homotopical results appear to be
+more difficult than expected. Somehow, using the identity type corresponds to 
+a globular approach to paths. This paper proposes a new approach, based on 
+cubical sets, and advocates that it is more amenable to formalisation of 
+homotopy theory. In the first part of the paper, a notion of heterogenous 
+equality is introduced, then squares and cubes. While all those notions 
+can be implemented using traditional homogeneous equality, the insight of 
+the paper is that the management of higher paths is more convenient with 
+cubes, because of a more structured way to describe transport along paths. 
+Then, the rest of the paper is devoted to two proofs of basic facts in homotopy 
+theory that have been shown to be really hard to formalize using homogeneous 
+equality.
+
+Overall Evaluation:
+
+This is a very interesting paper as it provides certainly a much better
+way of formalizing homotopy theory than using the identity type “naively”. 
+It is in the continuity of the work of Thierry Coquand on providing a 
+computational content to the univalence axiom using cubical sets. 
+This line of work is very promising and very important for the HoTT community. 
+Although the paper is in Agda, it is quite readable for someone that is just 
+(very) confortable with ML type theory.
+
+Nevertheless, I’m a bit reserved about its acceptation at the LICS conference 
+for the two following reasons:
+
+1. This paper is more a “technical” contribution than a theoretical ones.
+  It explains how to describe low dimensional cubical equalities in Agda
+  and use them in two proofs, described in Section 6 and 7. Those two 
+  sections, also technically interesting, constitute 1/3 of the paper 
+  and are completely out of reach for non HoTT experts. 
+
+2. Squares and Cubes are implemented by hand, no insight is given 
+  on how to do a dimension-polymorphic presentation, which is the real 
+  challenge in formalizing cubical equality in type theory. This issue
+  is indeed briefly mentioned as future work, but I really think
+  this is the real scientific challenge of the cubical setting. 
+  Therefore, I regret that the question is not discusses further, if 
+  not solved. 
+
+Minor comments:
+
+p3: the definition of hom-to-over/left-eqv is wrong a_i -> c_i
+p4: in the definition of PathOver (λ (x:A, y:A) 􏰰 Pair x y) (pair-line t b) l r
+   Pair x y -> Path x y
+p5, second column: there is a “::”
+
+----------------------- REVIEW 4 ---------------------
+PAPER: 179
+TITLE: A Cubical Approach to Synthetic Homotopy Theory
+AUTHORS: Daniel R. Licata and Guillaume Brunerie
+
+OVERALL EVALUATION: 3 (strong accept)
+REVIEWER'S CONFIDENCE: 5 (expert)
+
+----------- REVIEW ----------- 
+
+This paper represents a major advance in Homotopy Type Theory (HoTT)
+through the systematic use of cubical methods in an extended system of
+type theory, which however is still reducible to the usual, standard
+system.  Cubical methods were introduced in the recent (as of yet
+unpublished) work of Bezem, Coquand, and Huber, cited as [5], and
+represent a breakthroguh in the “constructivization” of some aspects of
+HoTT that have previously been difficult to capture, such as Voevodsky’s
+univalece axiom.  In the present work, the emphasis is on higher
+inductive types (HITs) and related constructions, as well as the
+systematic use of cubes and related techniques to simplify and
+constructivize proofs involving standard types.
+
+The basic tool is the use “heterogeneous equality” and the “path-over”
+device (and their higher-dimensional generalizations) to eliminate the
+need for tranports in some cases and to simplify proofs, often with
+dramatic results.  There result possible new definitional equalities,
+which could provide more term reductions involving paths, thus making it
+possible to extended the normalization algorithm to terms involving
+(higher) paths.
+
+The constructions and results are all formalized in Agda (see below),
+and after explaining the basic ideas, the authors give a thorough
+description of the corresponding library of code.  This development
+includes many sample applications; they also include an extended exmaple
+based on the circle.
+
+They then move on to higher dimensions, including the squares-over
+construction, which are essentially (2-dimensional) cubes indexed over
+their boundaries, in the same way that path-over is a 1-diminsional cube
+indexed over its boundary.  Vertical and horizontal compositions are
+defined for squares, as are the important Kan filling operations.  One
+can clearly recognize the beginnings of the algebra of cubical sets
+familiar to the topologist from the classic work of R. Brown and his
+collaborators.
+
+The step to the higher-dimensional cases is briefly indicated, making it
+clear how the procedure should generalize.
+
+As a demonstration of the efficacy of the new approach, a short, direct
+proof is then given of the classical fact that the two-dimensional torus
+T^2 is equivalent to the product of two circiles: T^2 = S^1 x S^1.  This
+fact was one of the open problems stated at the IAS special year, and
+was only recently proved by Kristina Sojakova in a — as the authors
+correctly say — “heroic” 24-page proof, which, if anything, made it
+clear that something is missing from the basic formalism of homotopy
+type theory.  The clarity and brevity of the new cubical proof makes a
+strong case that the current, cubical approach is a large step in the
+right direction.
+
+The other aplication given is the topologist’s 3x3 lemma.  This basic
+fact from homotopy theory, which is a simple exercise from the point of
+view of categorical algebra, had previously resisted formalization in
+HoTT, and was the crucual missing step in the formalization of
+Brunerie’s construction of the Hopf fibration, used in his tour-de-force
+calculation of \pi_4(S^3). Here again, the disparity between the
+difficulty of capturing the reasoning of the 3 x 3 lemma and that of
+some other more sophisticated arguments indicated that “something was
+missing”.  And again, the present treatment provides compelling evidence
+of significant progress.
+
+A few typos:
+
+p. 3, c. 1, l. -4: change \sigma to \gamma
+p. 3, c. 1, l. -2: change lays to lies
+p. 3, c. 2, l. 9: delete one “an”
+
+
+Agda code: The Agda code was checked by a subreviewer, who provided the
+following report:
+
+Using Agda 2.4.2.2, the proof of the equivalence between the torus and a
+product of circles contained the file
+homotopy/torus-paper/TS1S1-full.lagda in commit 851d4f9… of the
+repository at https://github.com/dlicata335/hott-agda checked
+successfully in about 5 minutes. I attempted to check the proof of the
+3x3 lemma (and by extension, the associativity of join) in the files in
+homotopy/3x3/ in commit 04df333… of the repository at
+https://github.com/HoTT/HoTT-Agda – the “FromTo” part was finally
+checked after more than one hour of CPU time and 13 GB of peak memory
+usage (and a lot more real time because of the heavy swapping involved
+on the 4 GB machine). I had to terminate the process thereafter, and
+thus could not finish the proof of the 3x3 lemma.
+
+First, the authors should clearly and unambigously state which files
+should be considered part of the paper and give an exact commit
+identifier if they are in a repository. They should also state which
+version of the proof assistant they have been using. The reviewer had to
+guess these in this case.
+
+Secondly, the authors are invited to comment on the massive memory usage
+for checking the 3x3 lemma. This appears to block further progress on
+formal proofs involving iterated HITs in Agda. As it is, the proof of
+the 3x3 lemma is not feasible to check. Does this represent a problem
+with the particular approach, a bug in Agda, or the lack of real support
+for HITs generally?
