@@ -1,26 +1,28 @@
 
-{-# OPTIONS --type-in-type --without-K #-}
-
-open import lib.Prelude
+{-# OPTIONS --type-in-type #-}
 
 module metatheory.CohesiveTT1 where
 
-module TT (Mode : Type) 
-          (_≤_ : Mode -> Mode -> Type)
+module TT (Mode : Set) 
+          (_≤_ : Mode -> Mode -> Set)
           (1m : {m : Mode} → m ≤ m)
-          (CanFoc : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z → Type)
-          (CanInv : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z → Type)
+          (_·m_ : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z)
+          (CanFoc : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z → Set)
+          (CanInv : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z → Set)
+          (ci1 : ∀ {x y} {α : x ≤ y} → CanInv 1m α α)
+          (ci1' : ∀ {x y} {α : x ≤ y} → CanInv α 1m α)
+          (cf1 : ∀ {x y} {α : x ≤ y} → CanFoc 1m α α)
+          (cf1' : ∀ {x y} {α : x ≤ y} → CanFoc α 1m α)
           -- category 
           where
 
-    data Tp : Mode → Type where
+    data Tp : Mode → Set where
       ⊤ : ∀ {m} → Tp m 
       F : ∀ {p q} (α : p ≤ q) → Tp q → Tp p
       U : ∀ {p q} (α : p ≤ q) → Tp p → Tp q 
 
-    data _[_]⊢_ : {p q : Mode} → Tp q → p ≤ q → Tp p -> Type where
-      ⊤R : ∀ {p r} {α : p ≤ r} (C : Tp r) → C [ α ]⊢ ⊤
-      hyp : ∀ {p} {A : Tp p} → A [ 1m ]⊢ A
+    data _[_]⊢_ : {p q : Mode} → Tp q → p ≤ q → Tp p -> Set where
+      ⊤R : ∀ {p r} {α : p ≤ r} {C : Tp r} → C [ α ]⊢ ⊤
       FL : ∀ {p q r} {α : p ≤ q} {β : r ≤ p} {A : Tp q} {C : Tp r}
          → (γ : r ≤ q) → CanInv β α γ
          → A [ γ ]⊢ C
@@ -38,9 +40,28 @@ module TT (Mode : Type)
          → C [ γ ]⊢ A
          → C [ β ]⊢ U α A
 
-    hyp' : ∀ {p} {A : Tp p} {α : p ≤ p} → α == 1m → A [ α ]⊢ A
-    hyp' id = hyp 
+    eta : ∀ {p} (A : Tp p) → A [ 1m ]⊢ A
+    eta ⊤ = ⊤R
+    eta (F α A) = FL α ci1 (FR 1m cf1' (eta A))
+    eta (U α A) = UR α ci1' (UL 1m cf1 (eta A))
+      
+    hyp : ∀ {p} {A : Tp p} → A [ 1m ]⊢ A
+    hyp = eta _
 
+    cut : ∀ {p q r} {α : p ≤ q} {β : q ≤ r} {A : Tp r} {B : Tp q} {C : Tp p}
+        → A [ β ]⊢ B
+        → B [ α ]⊢ C
+        → A [ α ·m β ]⊢ C
+    -- principal 
+    cut (FR γ c D) (FL γ₁ c₁ E) = {!cut D E!}
+    cut (UR γ c D) (UL γ₁ c₁ E) = {!cut D E!}
+    -- right commutative
+    cut _ ⊤R = ⊤R
+    cut {α = α} {β = β} D (FR {α = α'} γ c E) = FR (γ ·m β) {!congruence c!} (cut D E)
+    cut {α = α} {β = β} D (UR {α = α'} γ c E) = UR (γ ·m β) {!congruence c!} (cut D E)
+    -- left commutative
+    cut {α = α} {β = β} (FL {α = α'} γ c D) E = FL (α ·m γ) {!congruence c!} (cut D E)
+    cut {α = α} {β = β} (UL {α = α'} γ c D) E = UL (α ·m γ) {!congruence c!} (cut D E)
 
     -- FIXME generalize
     cut1 : ∀ {p q} {α : q ≤ p} {A : Tp p} {B : Tp q} {C : Tp q}
@@ -57,27 +78,28 @@ module TT (Mode : Type)
     
 module TripleAdjunction where
 
-  data Mode : Type where
+  data Mode : Set where
     c : Mode
     s : Mode
 
   -- FIXME: make a HIT
-  data _≤_ : Mode → Mode → Type where
+  data _≤_ : Mode → Mode → Set where
     1m : {m : Mode} → m ≤ m
     ∇m : s ≤ c 
     Δm : c ≤ s
+    _·m_ : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z
     
-  data CanFoc : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z → Type where
+  data CanFoc : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z → Set where
     cf1 : ∀ {x y} {α : x ≤ y} → CanFoc 1m α α
     cf1' : ∀ {x y} {α : x ≤ y} → CanFoc α 1m α
     cf3 : CanFoc ∇m Δm 1m
 
-  data CanInv : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z → Type where
+  data CanInv : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z → Set where
     ci1' : ∀ {x y} {α : x ≤ y} → CanInv α 1m α
     ci1 : ∀ {x y} {α : x ≤ y} → CanInv 1m α α
     ci2 : CanInv Δm ∇m 1m
 
-  module TTI = TT Mode _≤_ 1m CanFoc CanInv
+  module TTI = TT Mode _≤_ 1m _·m_ CanFoc CanInv ci1 ci1' cf1 cf1'
   open TTI
 
   -- two possible definitions of Γ are (logically) equivalent
@@ -126,7 +148,7 @@ module TripleAdjunction where
   comult {α = α} = FL α ci1 (FR 1m cf1' (UR α ci1' (FR 1m cf1' hyp)))
 
   -- need α "inverse"
-  badcounit : {p q : Mode} {A : Tp q} {α : p ≤ q} → U α (F α A) [ 1m ]⊢ A
+  badcounit : {p q : Mode} {A : Tp q} {α : p ≤ q} → ◯ α A [ 1m ]⊢ A
   badcounit = UL {!!} {!!} (FL 1m {!!} hyp)
 
   -- need α "inverse" on the other side
@@ -135,6 +157,12 @@ module TripleAdjunction where
 
   ♭ = □ Δm
   ♯ = ◯ ∇m
+
+  badunit' : {A : Tp c}→ A [ 1m ]⊢ ♭ A
+  badunit' = FR ∇m {!NO!} (UR 1m ci2 hyp)
+
+  badcounit' : {A : Tp c} → ♯ A [ 1m ]⊢ A
+  badcounit' = UL Δm {!NO!} (FL 1m ci2 hyp)
 
   UFadjunction1 : ∀ {p q} {A B} {α : p ≤ q} → F α A [ 1m ]⊢ B → A [ 1m ]⊢ U α B
   UFadjunction1 {α = α} start = UR α ci1' (cut1 (FR 1m cf1' hyp) start)
