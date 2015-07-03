@@ -1,6 +1,8 @@
 
 {-# OPTIONS --type-in-type #-}
 
+open import lib.Prelude
+
 module metatheory.CohesiveTT1 where
 
 module TT (Mode : Set) 
@@ -13,15 +15,20 @@ module TT (Mode : Set)
           (ci1' : ∀ {x y} {α : x ≤ y} → CanInv α 1m α)
           (cf1 : ∀ {x y} {α : x ≤ y} → CanFoc 1m α α)
           (cf1' : ∀ {x y} {α : x ≤ y} → CanFoc α 1m α)
+          (CanCut : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z → Set)
+          (cc1 : ∀ {x} {α : x ≤ x} → CanCut 1m 1m α → α == 1m)
+          (cc2 : {x y z : Mode} → {α : x ≤ y} → {β : y ≤ z} → CanCut α β (α ·m β))
           -- category 
           where
 
     data Tp : Mode → Set where
       ⊤ : ∀ {m} → Tp m 
+      P : ∀ {m} → Tp m
       F : ∀ {p q} (α : p ≤ q) → Tp q → Tp p
       U : ∀ {p q} (α : p ≤ q) → Tp p → Tp q 
 
     data _[_]⊢_ : {p q : Mode} → Tp q → p ≤ q → Tp p -> Set where
+      hypp : ∀ {p} → P [ 1m{p} ]⊢ P
       ⊤R : ∀ {p r} {α : p ≤ r} {C : Tp r} → C [ α ]⊢ ⊤
       FL : ∀ {p q r} {α : p ≤ q} {β : r ≤ p} {A : Tp q} {C : Tp r}
          → (γ : r ≤ q) → CanInv β α γ
@@ -41,6 +48,7 @@ module TT (Mode : Set)
          → C [ β ]⊢ U α A
 
     eta : ∀ {p} (A : Tp p) → A [ 1m ]⊢ A
+    eta P = hypp
     eta ⊤ = ⊤R
     eta (F α A) = FL α ci1 (FR 1m cf1' (eta A))
     eta (U α A) = UR α ci1' (UL 1m cf1 (eta A))
@@ -48,6 +56,7 @@ module TT (Mode : Set)
     hyp : ∀ {p} {A : Tp p} → A [ 1m ]⊢ A
     hyp = eta _
 
+{-
     cut : ∀ {p q r} {α : p ≤ q} {β : q ≤ r} {A : Tp r} {B : Tp q} {C : Tp p}
         → A [ β ]⊢ B
         → B [ α ]⊢ C
@@ -62,6 +71,23 @@ module TT (Mode : Set)
     -- left commutative
     cut {α = α} {β = β} (FL {α = α'} γ c D) E = FL (α ·m γ) {!congruence c!} (cut D E)
     cut {α = α} {β = β} (UL {α = α'} γ c D) E = UL (α ·m γ) {!congruence c!} (cut D E)
+-}
+
+    cut : ∀ {p q r} {α : p ≤ q} {β : q ≤ r} {A : Tp r} {B : Tp q} {C : Tp p}
+        → A [ β ]⊢ B
+        → B [ α ]⊢ C
+        → (δ : p ≤ r) → CanCut α β δ → A [ δ ]⊢ C
+    -- principal 
+    cut hypp hypp δ cc = transport (λ x → P [ x ]⊢ P) (! (cc1 cc)) hyp
+    cut (FR γ c D) (FL γ₁ c₁ E) δ cc = cut D E δ {!!}
+    cut (UR γ c D) (UL γ₁ c₁ E) δ cc = cut D E δ {!!}
+    -- right commutative
+    cut _ ⊤R δ cc = ⊤R
+    cut {α = α} {β = β} D (FR {α = α'} γ c E) δ cc = FR (γ ·m β) {! c!} (cut D E (γ ·m β) cc2)
+    cut {α = α} {β = β} D (UR {α = α'} γ c E) δ cc = UR (γ ·m β) {! c!} (cut D E (γ ·m β) cc2)
+    -- left commutative
+    cut {α = α} {β = β} (FL {α = α'} γ c D) E δ cc = FL (α ·m γ) {! c!} (cut D E (α ·m γ) cc2)
+    cut {α = α} {β = β} (UL {α = α'} γ c D) E δ cc = UL (α ·m γ) {! c!} (cut D E (α ·m γ) cc2)
 
     -- FIXME generalize
     cut1 : ∀ {p q} {α : q ≤ p} {A : Tp p} {B : Tp q} {C : Tp q}
@@ -75,14 +101,13 @@ module TT (Mode : Set)
           → B [ α ]⊢ C
           → A [ α ]⊢ C
     cut1' = {!!}
-    
+
 module TripleAdjunction where
 
   data Mode : Set where
     c : Mode
     s : Mode
 
-  -- FIXME: make a HIT
   data _≤_ : Mode → Mode → Set where
     1m : {m : Mode} → m ≤ m
     ∇m : s ≤ c 
@@ -99,7 +124,13 @@ module TripleAdjunction where
     ci1 : ∀ {x y} {α : x ≤ y} → CanInv 1m α α
     ci2 : CanInv Δm ∇m 1m
 
-  module TTI = TT Mode _≤_ 1m _·m_ CanFoc CanInv ci1 ci1' cf1 cf1'
+  data CanCut : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z → Set where
+    cc2 : {x y z : Mode} → {α : x ≤ y} → {β : y ≤ z} → CanCut α β (α ·m β)
+
+  cc1 : ∀ {x} {α : x ≤ x} → CanCut 1m 1m α → α == 1m
+  cc1 = {!!}
+
+  module TTI = TT Mode _≤_ 1m _·m_ CanFoc CanInv ci1 ci1' cf1 cf1' CanCut cc1 cc2
   open TTI
 
   -- two possible definitions of Γ are (logically) equivalent
@@ -181,3 +212,6 @@ module TripleAdjunction where
   adjunction2 : ∀ {A B} → A [ 1m ]⊢ ♯ B → ♭ A [ 1m ]⊢ B 
   adjunction2 {A}{B} start = UFadjunction2 (cut1 Γeqv1 (cut1 (UFadjunction2 start) Γeqv2))
 
+  loop1 : ∀ {p} {A : Tp p} {α : p ≤ p} → A [ 1m ]⊢ F α A
+  loop1 {α = α} = FR 1m {!!} hyp -- need CanFoc α 1m 1m
+                  -- FR α {!!} {!!} -- need  CanFoc α α 1m
