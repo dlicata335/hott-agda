@@ -19,14 +19,13 @@ module metatheory.CohesiveTT4 where
             (!·1-unit-r : ∀ {x y : Mode} {α : x ≤ y} → α ⇒ (α ·1 1m))
             (·1-assoc  : ∀ {x y z w : Mode} {α : x ≤ y} {β : y ≤ z} {γ : z ≤ w} → ((α ·1 β) ·1 γ) ⇒ (α ·1 (β ·1 γ)))
             (!·1-assoc  : ∀ {x y z w : Mode} {α : x ≤ y} {β : y ≤ z} {γ : z ≤ w} →  (α ·1 (β ·1 γ)) ⇒ ((α ·1 β) ·1 γ))
-            (whiskerr : ∀ {p q r} → {α β : p ≤ q} → {γ : q ≤ r} → α ⇒ β → (α ·1 γ) ⇒ (β ·1 γ) )
-            (whiskerl : ∀ {p q r} → {α β : p ≤ q} → {γ : r ≤ p} → α ⇒ β → (γ ·1 α) ⇒ (γ ·1 β) )
             where
 
     data Tp : Mode → Type where
       P : ∀ {m} → Tp m
       F : ∀ {p q} (α : p ≤ q) → Tp q → Tp p
       U : ∀ {p q} (α : p ≤ q) → Tp p → Tp q 
+      _⊕_ : ∀ {p} (A B : Tp p) → Tp p
 
     data _[_]⊢_ : {p q : Mode} → Tp q → p ≤ q → Tp p -> Type where
       hypp : ∀ {p} {α : p ≤ p} → α ⇒ 1m → P [ α ]⊢ P 
@@ -44,22 +43,29 @@ module metatheory.CohesiveTT4 where
       UR : ∀ {p q r} {α : q ≤ p} {β : p ≤ r} {A : Tp q} {C : Tp r}
          → C [ α ·1 β ]⊢ A
          → C [ β ]⊢ U α A
+      Inl : ∀ {p q} {α : p ≤ q} {C : Tp q} {A B : Tp p} → C [ α ]⊢ A → C [ α ]⊢ (A ⊕ B)
+      Inr : ∀ {p q} {α : p ≤ q} {C : Tp q} {A B : Tp p} → C [ α ]⊢ B → C [ α ]⊢ (A ⊕ B)
+      Case : ∀ {p q} {α : p ≤ q} {C : Tp p} {A B : Tp q} → A [ α ]⊢ C → B [ α ]⊢ C → (A ⊕ B) [ α ]⊢ C
 
     transport⊢ : {p q : Mode} → {A : Tp q} → {α β : p ≤ q} {B : Tp p} 
                → β ⇒ α
                → A [ α ]⊢ B 
                → A [ β ]⊢ B 
     transport⊢ e (hypp e') = hypp (e ·2 e')
-    transport⊢ e (FL D) = FL (transport⊢ (whiskerr e) D)
+    transport⊢ e (FL D) = FL (transport⊢ (e ·1cong 1⇒) D)
     transport⊢ e (FR γ e' D) = FR γ (e ·2 e') D
     transport⊢ e (UL γ e' D) = UL γ (e ·2 e') D
-    transport⊢ e (UR D) = UR (transport⊢ (whiskerl e) D)
+    transport⊢ e (UR D) = UR (transport⊢ (1⇒ ·1cong e) D)
+    transport⊢ e (Inl D) = Inl (transport⊢ e D)
+    transport⊢ e (Inr D) = Inr (transport⊢ e D)
+    transport⊢ e (Case D1 D2) = Case (transport⊢ e D1) (transport⊢ e D2)
 
     -- seems to only work for 1m
     eta : ∀ {p} (A : Tp p) → A [ 1m ]⊢ A
     eta P = hypp 1⇒
     eta (F α A) = FL (FR 1m (·1-unit-l ·2 !·1-unit-r) (eta A)) 
     eta (U α A) = UR (UL 1m (·1-unit-r ·2 !·1-unit-l) (eta A))
+    eta (A ⊕ B) = Case (Inl (eta A)) (Inr (eta B))
 
     cut : ∀ {p q r} {α : p ≤ q} {β : q ≤ r} {A : Tp r} {B : Tp q} {C : Tp p}
         → A [ β ]⊢ B
@@ -70,13 +76,18 @@ module metatheory.CohesiveTT4 where
     -- principal 
     cut {α = α} {β = β} (FR γ e D) (FL {α = α1} E) = transport⊢ ((1⇒ ·1cong e) ·2 !·1-assoc) (cut D E)
     cut {α = α} {β = β} (UR {α = α1} D) (UL γ₁ e E) = transport⊢ ((e ·1cong 1⇒) ·2 ·1-assoc) (cut D E)
+    cut {α = α} {β = β} (Inl D) (Case E1 E2) = cut D E1
+    cut {α = α} {β = β} (Inr D) (Case E1 E2) = cut D E2
     -- right commutative
     cut {α = α} {β = β} D (FR {α = α'} γ e E) = FR (γ ·1 β) ((e ·1cong 1⇒) ·2 ·1-assoc) (cut D E)
     cut {α = α} {β = β} D (UR {α = α1} E) = UR (transport⊢ !·1-assoc (cut D E))
+    cut {α = α} {β = β} D (Inl E) = Inl (cut D E)
+    cut {α = α} {β = β} D (Inr E) = Inr (cut D E)
     -- left commutative
     cut {α = α} {β = β} (FL {α = α1} D) E = FL (transport⊢ ·1-assoc (cut D E))
     cut {α = α} {β = β} (UL {α = α'} γ e D) E = UL (α ·1 γ) ((1⇒ ·1cong e) ·2 !·1-assoc) (cut D E)
-
+    cut {α = α} {β = β} (Case D1 D2) E = Case (cut D1 E) (cut D2 E)
+    
     hyp : ∀ {p} {A : Tp p} → A [ 1m ]⊢ A
     hyp = eta _ 
 
@@ -132,6 +143,12 @@ module metatheory.CohesiveTT4 where
             → U (α ·1 β) A [ 1m ]⊢ U β (U α A)
     Ufunc·2 {α = α} {β = β} = UR (UR (UL 1m ((1⇒ ·1cong ·1-unit-r) ·2 !·1-unit-l) hyp)) 
 
+    -- functors are actually functors
+    Ffunc : ∀ {p q : Mode} {α : p ≤ q} {A B} → A [ 1m ]⊢ B → F α A [ 1m ]⊢ F α B
+    Ffunc D =  FL (FR 1m (·1-unit-l ·2 !·1-unit-r) D)
+
+    Ufunc : ∀ {p q : Mode} {α : p ≤ q} {A B} → A [ 1m ]⊢ B → U α A [ 1m ]⊢ U α B
+    Ufunc D =  UR (UL 1m (·1-unit-r ·2 !·1-unit-l) D)
 
     -- adjoints are actually adjoint
     UFadjunction1 : ∀ {p q} {A B} {α : p ≤ q} → F α A [ 1m ]⊢ B → A [ 1m ]⊢ U α B
@@ -168,37 +185,74 @@ module metatheory.CohesiveTT4 where
     badunit : {p q : Mode} {A : Tp p} {α : p ≤ q} → A [ 1m ]⊢ □ α A
     badunit = FR {!!} {!NO!} (UR {!!})
 
-    postulate
-      c : Mode
-      s : Mode
-      ∇m : s ≤ c
-      Δm : c ≤ s
-      ∇Δunit : 1m ⇒ (∇m ·1 Δm)
-      Δ∇counit : (Δm ·1 ∇m) ⇒ 1m 
+  module TripleAdjunction where
 
-    mergeUF : ∀ {A : Tp c} → U Δm A [ 1m ]⊢ F ∇m A
-    mergeUF = UL ∇m ∇Δunit (FR 1m !·1-unit-r hyp)
+      data Mode : Type where
+        c : Mode
+        s : Mode
+  
+      data _≤_ : Mode -> Mode -> Type where
+        1m : {m : Mode} → m ≤ m
+        _·1_ : {x y z : Mode} → x ≤ y → y ≤ z → x ≤ z
+        ∇m : s ≤ c
+        Δm : c ≤ s
+  
+      data _⇒_ : ∀ {p q} → (α β : p ≤ q) → Type where
+        1⇒ : ∀ {p q} → {α : p ≤ q} → α ⇒ α
+        _·2_ : {x y : Mode} {p q r : x ≤ y} → p ⇒ q → q ⇒ r → p ⇒ r
+        _·1cong_ : {x y z : Mode} {p p' : x ≤ y} {q q' : y ≤ z} → p ⇒ p' → q ⇒ q' → (p ·1 q) ⇒ (p' ·1 q')
+        ·1-unit-l : ∀ {x y : Mode} {α : x ≤ y} → (1m ·1 α) ⇒ α
+        !·1-unit-l : ∀ {x y : Mode} {α : x ≤ y} → α ⇒ (1m ·1 α)
+        ·1-unit-r : ∀ {x y : Mode} {α : x ≤ y} → (α ·1 1m) ⇒ α
+        !·1-unit-r : ∀ {x y : Mode} {α : x ≤ y} → α ⇒ (α ·1 1m)
+        ·1-assoc  : ∀ {x y z w : Mode} {α : x ≤ y} {β : y ≤ z} {γ : z ≤ w} → ((α ·1 β) ·1 γ) ⇒ (α ·1 (β ·1 γ))
+        !·1-assoc  : ∀ {x y z w : Mode} {α : x ≤ y} {β : y ≤ z} {γ : z ≤ w} →  (α ·1 (β ·1 γ)) ⇒ ((α ·1 β) ·1 γ)
+        ∇Δunit : 1m ⇒ (∇m ·1 Δm)
+        Δ∇counit : (Δm ·1 ∇m) ⇒ 1m 
 
-    mergeFU : ∀ {A : Tp c} → F ∇m A [ 1m ]⊢ U Δm A
-    mergeFU = FL (UR (transport⊢ ((1⇒ ·1cong ·1-unit-l) ·2 Δ∇counit) hyp))
+      module TTI = TT Mode _≤_ 1m _·1_ _⇒_ 1⇒ _·2_ _·1cong_ ·1-unit-l !·1-unit-l ·1-unit-r !·1-unit-r ·1-assoc !·1-assoc 
+      open TTI
 
-    ♭ = □ Δm
-    ♯ = ◯ ∇m
+      mergeUF : ∀ {A : Tp c} → U Δm A [ 1m ]⊢ F ∇m A
+      mergeUF = UL ∇m ∇Δunit (FR 1m !·1-unit-r hyp)
+  
+      mergeFU : ∀ {A : Tp c} → F ∇m A [ 1m ]⊢ U Δm A
+      mergeFU = FL (UR (transport⊢ ((1⇒ ·1cong ·1-unit-l) ·2 Δ∇counit) hyp))
+  
+      badmergeUF : ∀ {A : Tp s} → U ∇m A [ 1m ]⊢ F Δm A
+      badmergeUF = UL Δm {!NO!} (FR 1m !·1-unit-r hyp)
+  
+      badmergeUF' : ∀ {A : Tp s} → U ∇m A [ 1m ]⊢ F Δm A
+      badmergeUF' = FR ∇m {!NO!} (UL 1m !·1-unit-l hyp) 
+  
+      badmergeFU : ∀ {A : Tp s} → F Δm A [ 1m ]⊢ U ∇m A
+      badmergeFU = FL (UR (hyp' {!NO!}))
+  
+      ♭ = □ Δm
+      ♯ = ◯ ∇m
+  
+      badunit' : {A : Tp c}→ A [ 1m ]⊢ ♭ A
+      badunit' = FR ∇m {! NO!} (UR (transport⊢ {!!} hyp))
+  
+      badcounit' : {A : Tp c} → ♯ A [ 1m ]⊢ A
+      badcounit' = UL Δm {! NO!} (FL (transport⊢ {!!} hyp))
+  
+      adjunction1 : ∀ {A B} → ♭ A [ 1m ]⊢ B → A [ 1m ]⊢ ♯ B
+      adjunction1 {A}{B} start = UFadjunction1 step2 where
+        step1 : U Δm A [ 1m ]⊢ U Δm B
+        step1 = UFadjunction1 start
+  
+        step2 : F ∇m A [ 1m ]⊢ F ∇m B
+        step2 = cut1 (cut1 mergeFU step1) mergeUF
+  
+      adjunction2 : ∀ {A B} → A [ 1m ]⊢ ♯ B → ♭ A [ 1m ]⊢ B 
+      adjunction2 {A}{B} start = UFadjunction2 (cut1 mergeUF (cut1 (UFadjunction2 start) mergeFU))
 
-    badunit' : {A : Tp c}→ A [ 1m ]⊢ ♭ A
-    badunit' = FR ∇m {! NO!} (UR (transport⊢ {!!} hyp))
+      ♭func : ∀ {A B} → A [ 1m ]⊢ B → ♭ A [ 1m ]⊢ ♭ B
+      ♭func D = Ffunc (Ufunc D)
 
-    badcounit' : {A : Tp c} → ♯ A [ 1m ]⊢ A
-    badcounit' = UL Δm {! NO!} (FL (transport⊢ {!!} hyp))
+      pres-coprod1 : ∀ {A B} → ♭ (A ⊕ B) [ 1m ]⊢ (♭ A ⊕ ♭ B)
+      pres-coprod1 = adjunction2 (Case (adjunction1 (Inl hyp)) (adjunction1 (Inr hyp)))
 
-    adjunction1 : ∀ {A B} → ♭ A [ 1m ]⊢ B → A [ 1m ]⊢ ♯ B
-    adjunction1 {A}{B} start = UFadjunction1 step2 where
-      step1 : U Δm A [ 1m ]⊢ U Δm B
-      step1 = UFadjunction1 start
-
-      step2 : F ∇m A [ 1m ]⊢ F ∇m B
-      step2 = cut1 (cut1 mergeFU step1) mergeUF
-
-    adjunction2 : ∀ {A B} → A [ 1m ]⊢ ♯ B → ♭ A [ 1m ]⊢ B 
-    adjunction2 {A}{B} start = UFadjunction2 (cut1 mergeUF (cut1 (UFadjunction2 start) mergeFU))
-
+      pres-coprod2 : ∀ {A B} → (♭ A ⊕ ♭ B) [ 1m ]⊢ ♭ (A ⊕ B)
+      pres-coprod2 = Case (♭func (Inl hyp)) (♭func (Inr hyp))
