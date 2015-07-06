@@ -165,6 +165,12 @@ module metatheory.CohesiveTT4 where
     ◯ : ∀ {p q} (α : p ≤ q) → Tp q → Tp q 
     ◯ α A = U α (F α A)
 
+    □func : ∀ {p q : Mode} {α : p ≤ q} {A B} → A [ 1m ]⊢ B → □ α A [ 1m ]⊢ □ α B
+    □func D = Ffunc (Ufunc D)
+
+    ◯func : ∀ {p q : Mode} {α : p ≤ q} {A B} → A [ 1m ]⊢ B → ◯ α A [ 1m ]⊢ ◯ α B
+    ◯func D = Ufunc (Ffunc D)
+
     unit : {p q : Mode} {A : Tp q} {α : p ≤ q} → A [ 1m ]⊢ ◯ α A
     unit {α = α} = UR (FR 1m 1⇒ hyp)
 
@@ -184,6 +190,12 @@ module metatheory.CohesiveTT4 where
     -- need α "inverse" on the other side  α · β ⇒ 1
     badunit : {p q : Mode} {A : Tp p} {α : p ≤ q} → A [ 1m ]⊢ □ α A
     badunit = FR {!!} {!NO!} (UR {!!})
+
+    F2 : ∀ {p q} {A B : Tp q} {α β : p ≤ q} → α ⇒ β → F α A [ 1m ]⊢ F β A
+    F2 e = FL (FR 1m ((·1-unit-l ·2 e) ·2 !·1-unit-r) hyp)
+
+    U2 : ∀ {p q} {A B : Tp p} {α β : p ≤ q} → β ⇒ α → U α A [ 1m ]⊢ U β A
+    U2 e = UR (UL 1m ((·1-unit-r ·2 e) ·2 !·1-unit-l) hyp)
 
   module TripleAdjunction where
 
@@ -237,22 +249,66 @@ module metatheory.CohesiveTT4 where
       badcounit' : {A : Tp c} → ♯ A [ 1m ]⊢ A
       badcounit' = UL Δm {! NO!} (FL (transport⊢ {!!} hyp))
   
-      adjunction1 : ∀ {A B} → ♭ A [ 1m ]⊢ B → A [ 1m ]⊢ ♯ B
-      adjunction1 {A}{B} start = UFadjunction1 step2 where
+      ♭♯adjunction1 : ∀ {A B} → ♭ A [ 1m ]⊢ B → A [ 1m ]⊢ ♯ B
+      ♭♯adjunction1 {A}{B} start = UFadjunction1 step2 where
         step1 : U Δm A [ 1m ]⊢ U Δm B
         step1 = UFadjunction1 start
   
         step2 : F ∇m A [ 1m ]⊢ F ∇m B
         step2 = cut1 (cut1 mergeFU step1) mergeUF
   
-      adjunction2 : ∀ {A B} → A [ 1m ]⊢ ♯ B → ♭ A [ 1m ]⊢ B 
-      adjunction2 {A}{B} start = UFadjunction2 (cut1 mergeUF (cut1 (UFadjunction2 start) mergeFU))
-
-      ♭func : ∀ {A B} → A [ 1m ]⊢ B → ♭ A [ 1m ]⊢ ♭ B
-      ♭func D = Ffunc (Ufunc D)
+      ♭♯adjunction2 : ∀ {A B} → A [ 1m ]⊢ ♯ B → ♭ A [ 1m ]⊢ B 
+      ♭♯adjunction2 {A}{B} start = UFadjunction2 (cut1 mergeUF (cut1 (UFadjunction2 start) mergeFU))
 
       pres-coprod1 : ∀ {A B} → ♭ (A ⊕ B) [ 1m ]⊢ (♭ A ⊕ ♭ B)
-      pres-coprod1 = adjunction2 (Case (adjunction1 (Inl hyp)) (adjunction1 (Inr hyp)))
+      pres-coprod1 = ♭♯adjunction2 (Case (♭♯adjunction1 (Inl hyp)) (♭♯adjunction1 (Inr hyp)))
 
       pres-coprod2 : ∀ {A B} → (♭ A ⊕ ♭ B) [ 1m ]⊢ ♭ (A ⊕ B)
-      pres-coprod2 = Case (♭func (Inl hyp)) (♭func (Inr hyp))
+      pres-coprod2 = Case (□func (Inl hyp)) (□func (Inr hyp))
+
+
+      -- mike's rules from the pfenning-davies style
+
+      -- rule 1
+      
+      -- Δ ; · ⊢ M :~ A  
+      -- ---------------
+      -- Δ ; · ⊢ M : A
+
+      rule1 : ∀ {D A} 
+             → D [ 1m ]⊢ F ∇m A
+             → D [ 1m ]⊢ U Δm A
+      rule1 E = cut1 E mergeFU
+
+      -- ♭ ♯ A → A
+      rule1prop : ∀ {A} → ♭ (♯ A) [ 1m ]⊢ A
+      rule1prop = ♭♯adjunction2 hyp
+      
+      -- rule 2:
+      -- ♭ A ⊢ ♯ C    A valid ⊢ C lax
+      -- ---------   ----------------
+      -- A ⊢ ♯ C      A true ⊢ C lax
+
+      rule2 : ∀ {A C} 
+             → U Δm A [ 1m ]⊢ F ∇m C
+             → A [ ∇m ]⊢ F ∇m C 
+      rule2 D = cut1 (FR 1m !·1-unit-r hyp) (cut1 mergeFU D)
+
+      rule2prop : ∀ {A C} → ♭ A [ 1m ]⊢ ♯ C  →  A [ 1m ]⊢ ♯ C
+      rule2prop D = cut1 (♭♯adjunction1 D) mult
+
+      
+      -- ♭ absorbing ♯ and vice versa
+      
+      ♭absorbs♯1 : ∀ {A} → ♭ A [ 1m ]⊢ ♭ (♯ A) 
+      ♭absorbs♯1 = □func unit
+
+      ♭absorbs♯2 : ∀ {A} → ♭ (♯ A) [ 1m ]⊢ ♭ A
+      ♭absorbs♯2 = FL (transport⊢ ·1-unit-l (FR 1m !·1-unit-r (UL ∇m ∇Δunit (UL 1m !·1-unit-l mergeFU))))
+
+      ♯absorbs♭1 : ∀ {A} → ♯ A [ 1m ]⊢ ♯ (♭ A) 
+      ♯absorbs♭1 = UR (transport⊢ ·1-unit-r (UL 1m !·1-unit-l (FR Δm ∇Δunit (FR 1m !·1-unit-r mergeFU))))
+
+      ♯absorbs♭2 : ∀ {A} → ♯ (♭ A) [ 1m ]⊢ ♯ A
+      ♯absorbs♭2 = ◯func counit
+
