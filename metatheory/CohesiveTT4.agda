@@ -47,6 +47,8 @@ module metatheory.CohesiveTT4 where
       Inr : ∀ {p q} {α : p ≤ q} {C : Tp q} {A B : Tp p} → C [ α ]⊢ B → C [ α ]⊢ (A ⊕ B)
       Case : ∀ {p q} {α : p ≤ q} {C : Tp p} {A B : Tp q} → A [ α ]⊢ C → B [ α ]⊢ C → (A ⊕ B) [ α ]⊢ C
 
+    -- ----------------------------------------------------------------------
+
     transport⊢ : {p q : Mode} → {A : Tp q} → {α β : p ≤ q} {B : Tp p} 
                → β ⇒ α
                → A [ α ]⊢ B 
@@ -101,6 +103,19 @@ module metatheory.CohesiveTT4 where
     cut1' : ∀ {p q} {α : q ≤ p} {A : Tp p} {B : Tp p} {C : Tp q}
           → A [ 1m ]⊢ B → B [ α ]⊢ C → A [ α ]⊢ C
     cut1' D E = transport⊢ !·1-unit-r (cut D E)
+
+    cut-eta-right : ∀ {p q} {α : p ≤ q} {A B} → (D : A [ α ]⊢ B)
+                  → cut1 D (eta B) == D
+    cut-eta-right (hypp e) = {!!}
+    cut-eta-right (FL D) = {!!} where 
+      reduct : (transport⊢ !·1-unit-l (FL (transport⊢ ·1-assoc (cut D (eta _))))) == (FL D) 
+      reduct = ap FL (cut-eta-right D ∘ {!cut D (eta _)!})
+    cut-eta-right (FR γ e D) = {!!}
+    cut-eta-right (UL γ e D) = {!!}
+    cut-eta-right (UR D) = {!!}
+    cut-eta-right (Inl D) = {!ap Inl (cut-eta-right D)!}
+    cut-eta-right (Inr D) = {!!}
+    cut-eta-right (Case D1 D2) = {!!}
 
     -- ----------------------------------------------------------------------
     -- examples
@@ -219,8 +234,20 @@ module metatheory.CohesiveTT4 where
         !·1-unit-r : ∀ {x y : Mode} {α : x ≤ y} → α ⇒ (α ·1 1m)
         ·1-assoc  : ∀ {x y z w : Mode} {α : x ≤ y} {β : y ≤ z} {γ : z ≤ w} → ((α ·1 β) ·1 γ) ⇒ (α ·1 (β ·1 γ))
         !·1-assoc  : ∀ {x y z w : Mode} {α : x ≤ y} {β : y ≤ z} {γ : z ≤ w} →  (α ·1 (β ·1 γ)) ⇒ ((α ·1 β) ·1 γ)
-        ∇Δunit : 1m ⇒ (∇m ·1 Δm)
+        ∇Δunit   : 1m ⇒ (∇m ·1 Δm)
         Δ∇counit : (Δm ·1 ∇m) ⇒ 1m 
+
+      postulate 
+       -- η = unit
+       -- ε = counit
+       -- F = ∇ 
+       -- G = Δ
+
+       -- ηG · Gε = 1   but 1-composition is backwards so   Gη o εG
+       adjeq1 : Path {Δm ⇒ Δm} 1⇒ ((!·1-unit-r ·2 (1⇒ {_} {_} {Δm} ·1cong ∇Δunit)) ·2 (!·1-assoc ·2 ((Δ∇counit ·1cong 1⇒ {_} {_} {Δm}) ·2 ·1-unit-l)))  
+
+       -- Fη · εF = 1   but 1-composition is backwards so   ηF · Fε
+       adjeq2 : Path {∇m ⇒ ∇m} 1⇒ ((!·1-unit-l ·2 (∇Δunit ·1cong 1⇒ {_} {_} {∇m})) ·2 (·1-assoc ·2 ((1⇒ {_} {_} {∇m} ·1cong Δ∇counit) ·2 ·1-unit-r))) 
 
       module TTI = TT Mode _≤_ 1m _·1_ _⇒_ 1⇒ _·2_ _·1cong_ ·1-unit-l !·1-unit-l ·1-unit-r !·1-unit-r ·1-assoc !·1-assoc 
       open TTI
@@ -230,6 +257,12 @@ module metatheory.CohesiveTT4 where
   
       mergeFU : ∀ {A : Tp c} → F ∇m A [ 1m ]⊢ U Δm A
       mergeFU = FL (UR (transport⊢ ((1⇒ ·1cong ·1-unit-l) ·2 Δ∇counit) hyp))
+
+      test : cut1 (mergeUF{P}) (mergeFU {P}) == eta (U Δm P)
+      test = {!!}
+
+      test' : cut1 (mergeFU {P}) (mergeUF{P}) == eta (F ∇m P)
+      test' = {!!}
   
       badmergeUF : ∀ {A : Tp s} → U ∇m A [ 1m ]⊢ F Δm A
       badmergeUF = UL Δm {!NO!} (FR 1m !·1-unit-r hyp)
@@ -269,16 +302,35 @@ module metatheory.CohesiveTT4 where
 
       -- mike's rules from the pfenning-davies style
 
-      -- rule 1
-      
-      -- Δ ; · ⊢ M :~ A  
-      -- ---------------
-      -- Δ ; · ⊢ M : A
+      -- A true ⊢ C true
+      judge1 : {A C : Tp c} → A [ 1m ]⊢ C
+      judge1 = {!!}
 
-      rule1 : ∀ {D A} 
-             → D [ 1m ]⊢ F ∇m A
-             → D [ 1m ]⊢ U Δm A
-      rule1 E = cut1 E mergeFU
+      -- A valid ⊢ C true
+      judge2 : {A C : Tp c} → U Δm A [ Δm ]⊢ C
+      judge2 = {!!}
+
+      -- A true ⊢ C lax
+      judge3 : {A C : Tp c} → A [ ∇m ]⊢ F ∇m C
+      judge3 = {!!}
+
+      -- A valid ⊢ C lax
+      judge4 : {A C : Tp c} → U Δm A [ ∇m ·1 Δm ]⊢ F ∇m C 
+      judge4 = {!!}
+
+
+      -- rule 1
+        
+      -- Δ ; · ⊢ M :~ C   A valid ⊢ C lax
+      -- ---------------  ----------------
+      -- Δ ; · ⊢ M : C    A valid ⊢ C true
+
+      rule1 : {A C : Tp c } 
+             → U Δm A [ 1m ]⊢ F ∇m C
+             → U Δm A [ Δm ]⊢ C
+      rule1 {A} {C} E = cut1' fact1 (UL 1m !·1-unit-l hyp) where
+        fact1 : U Δm A [ 1m ]⊢ U Δm C
+        fact1 = cut1 E mergeFU
 
       -- ♭ ♯ A → A
       rule1prop : ∀ {A} → ♭ (♯ A) [ 1m ]⊢ A
@@ -291,7 +343,7 @@ module metatheory.CohesiveTT4 where
 
       rule2 : ∀ {A C} 
              → U Δm A [ 1m ]⊢ F ∇m C
-             → A [ ∇m ]⊢ F ∇m C 
+             → A [ ∇m ]⊢ F ∇m C
       rule2 D = cut1 (FR 1m !·1-unit-r hyp) (cut1 mergeFU D)
 
       rule2prop : ∀ {A C} → ♭ A [ 1m ]⊢ ♯ C  →  A [ 1m ]⊢ ♯ C
@@ -311,4 +363,28 @@ module metatheory.CohesiveTT4 where
 
       ♯absorbs♭2 : ∀ {A} → ♯ (♭ A) [ 1m ]⊢ ♯ A
       ♯absorbs♭2 = ◯func counit
+
+
+      -- idempotence 
+
+      ♯idempotent1 : ∀ {A} → ♯ A [ 1m ]⊢ ♯ (♯ A)
+      ♯idempotent1 = unit
+
+      ♯idempotent2 : ∀ {A} → ♯ (♯ A) [ 1m ]⊢ ♯ A
+      ♯idempotent2 = mult
+
+      ♯idempotent12 : cut1 (♯idempotent1 {P}) ♯idempotent2 == eta (♯ P)
+      ♯idempotent12 = {!!} where
+        
+        afterind : Path{ P [ 1m ]⊢ ♯ P} (cut1 unit (cut1 (♯idempotent1 {P}) ♯idempotent2)) unit
+        afterind = {!!}
+
+      ♯idempotent21 : cut1 ♯idempotent2 (♯idempotent1 {P}) == eta (♯ (♯ P))
+      ♯idempotent21 = {!!} where
+        
+        afterind : Path{ ♯ P [ 1m ]⊢ ♯ (♯ P)} (cut1 unit (cut1 (♯idempotent2 {P}) ♯idempotent1)) unit
+        afterind = {!!}
+
+      -- ♯idempotent12 : ∀ {A} → cut1 cut1 (♯idempotent1 {A}) ♯idempotent2 == eta (♯ A)
+      -- ♯idempotent12 = {!!}
 
