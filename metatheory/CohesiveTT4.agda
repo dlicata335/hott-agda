@@ -303,52 +303,64 @@ module metatheory.CohesiveTT4 where
       -- mike's rules from the pfenning-davies style
 
       -- A true ⊢ C true
-      judge1 : {A C : Tp c} → A [ 1m ]⊢ C
-      judge1 = {!!}
+      True⊢True : (A C : Tp c) -> Type
+      True⊢True A C = A [ 1m ]⊢ C
 
       -- A valid ⊢ C true
-      judge2 : {A C : Tp c} → U Δm A [ Δm ]⊢ C
-      judge2 = {!!}
+      Valid⊢True : (A C : Tp c) -> Type
+      Valid⊢True A C = U Δm A [ Δm ]⊢ C
+
+      invert-to-Valid⊢True : {A C : Tp c} → Valid⊢True A C → ♭ A [ 1m ]⊢ C
+      invert-to-Valid⊢True D = FL (transport⊢ ·1-unit-l D)
 
       -- A true ⊢ C lax
-      judge3 : {A C : Tp c} → A [ ∇m ]⊢ F ∇m C
-      judge3 = {!!}
+      True⊢Lax : (A C : Tp c) -> Type
+      True⊢Lax A C = A [ ∇m ]⊢ F ∇m C
+
+      invert-to-True⊢Lax : {A C : Tp c} → True⊢Lax A C → A [ 1m ]⊢ ♯ C
+      invert-to-True⊢Lax D = UR (transport⊢ ·1-unit-r D)
 
       -- A valid ⊢ C lax
-      judge4 : {A C : Tp c} → U Δm A [ ∇m ·1 Δm ]⊢ F ∇m C 
-      judge4 = {!!}
+      Valid⊢Lax : (A C : Tp c) -> Type
+      Valid⊢Lax A C = U Δm A [ ∇m ·1 Δm ]⊢ F ∇m C 
+
+      invert-to-Valid⊢Lax : {A C : Tp c} → Valid⊢Lax A C → ♭ A [ 1m ]⊢ ♯ C
+      invert-to-Valid⊢Lax D = FL (UR (transport⊢ (1⇒ ·1cong ·1-unit-l) D))
 
 
       -- rule 1
         
-      -- Δ ; · ⊢ M :~ C   A valid ⊢ C lax
-      -- ---------------  ----------------
-      -- Δ ; · ⊢ M : C    A valid ⊢ C true
+      -- A valid ⊢ C lax
+      -- ----------------
+      -- A valid ⊢ C true
 
       rule1 : {A C : Tp c } 
-             → U Δm A [ 1m ]⊢ F ∇m C
-             → U Δm A [ Δm ]⊢ C
-      rule1 {A} {C} E = cut1' fact1 (UL 1m !·1-unit-l hyp) where
-        fact1 : U Δm A [ 1m ]⊢ U Δm C
-        fact1 = cut1 E mergeFU
+             → Valid⊢Lax A C 
+             → Valid⊢True A C
+      rule1 {A} {C} E = transport⊢ (!·1-unit-r ·2 (1⇒ {_} {_} {Δm} ·1cong ∇Δunit) ) (cut E (FL (transport⊢ Δ∇counit hyp)))
 
-      -- ♭ ♯ A → A
-      rule1prop : ∀ {A} → ♭ (♯ A) [ 1m ]⊢ A
-      rule1prop = ♭♯adjunction2 hyp
-      
+      rule1' : {A C : Tp c } 
+             → Valid⊢True A C
+             → Valid⊢Lax A C 
+      rule1' D = FR Δm 1⇒ D
+
       -- rule 2:
-      -- ♭ A ⊢ ♯ C    A valid ⊢ C lax
-      -- ---------   ----------------
-      -- A ⊢ ♯ C      A true ⊢ C lax
+      -- A valid ⊢ C lax
+      -- ----------------
+      -- A true ⊢ C lax
 
       rule2 : ∀ {A C} 
-             → U Δm A [ 1m ]⊢ F ∇m C
-             → A [ ∇m ]⊢ F ∇m C
-      rule2 D = cut1 (FR 1m !·1-unit-r hyp) (cut1 mergeFU D)
+             → Valid⊢Lax A C
+             → True⊢Lax A C 
+      rule2 D = transport⊢ (!·1-unit-l ·2 (∇Δunit ·1cong 1⇒ {_} {_} {∇m})) (cut (UR (transport⊢ Δ∇counit hyp)) D)
 
-      rule2prop : ∀ {A C} → ♭ A [ 1m ]⊢ ♯ C  →  A [ 1m ]⊢ ♯ C
-      rule2prop D = cut1 (♭♯adjunction1 D) mult
+      rule2' : ∀ {A C} 
+             → True⊢Lax A C
+             → Valid⊢Lax A C
+      rule2' D = UL ∇m 1⇒ D
 
+      -- TODO: these should be equivalences
+      
       
       -- ♭ absorbing ♯ and vice versa
       
