@@ -174,13 +174,13 @@ module metatheory.CohesiveTTStrict2 where
   Ffunc12 : ∀ {p} {A : Tp p} → A [ 1m ]⊢ F 1m A
   Ffunc12 = FR 1m 1⇒ hyp
 
-  Ffunc·1 : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} {A : Tp _}
+  Ffunc∘1 : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} {A : Tp _}
           → F α (F β A) [ 1m ]⊢ F (β ∘1 α) A
-  Ffunc·1 = FL (FL (FR 1m 1⇒ hyp))
+  Ffunc∘1 = FL (FL (FR 1m 1⇒ hyp))
 
-  Ffunc·2 : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} {A : Tp _}
+  Ffunc∘2 : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} {A : Tp _}
           → F (β ∘1 α) A [ 1m ]⊢ F α (F β A)
-  Ffunc·2 {α = α} {β = β} = FL {α = β ∘1 α} {β = 1m} (FR β 1⇒ (FR 1m 1⇒ hyp)) 
+  Ffunc∘2 {α = α} {β = β} = FL {α = β ∘1 α} {β = 1m} (FR β 1⇒ (FR 1m 1⇒ hyp)) 
 
   Ufunc11 : ∀ {p} {A : Tp p} → U 1m A [ 1m ]⊢ A
   Ufunc11 = UL 1m 1⇒ hyp
@@ -188,13 +188,13 @@ module metatheory.CohesiveTTStrict2 where
   Ufunc12 : ∀ {p} {A : Tp p} → A [ 1m ]⊢ U 1m A
   Ufunc12 = UR {α = 1m} {β = 1m} hyp
 
-  Ufunc·1 : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} {A : Tp _}
+  Ufunc∘1 : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} {A : Tp _}
           → U β (U α A) [ 1m ]⊢ U (β ∘1 α) A
-  Ufunc·1 {α = α} {β = β} = UR {α = β ∘1 α} {β = 1m} (UL α 1⇒ (UL 1m 1⇒ hyp))
+  Ufunc∘1 {α = α} {β = β} = UR {α = β ∘1 α} {β = 1m} (UL α 1⇒ (UL 1m 1⇒ hyp))
 
-  Ufunc·2 : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} {A : Tp _}
+  Ufunc∘2 : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} {A : Tp _}
           → U (β ∘1 α) A [ 1m ]⊢ U β (U α A)
-  Ufunc·2 {α = α} {β = β} = UR {α = β} {β = 1m} (UR (UL 1m 1⇒ hyp)) 
+  Ufunc∘2 {α = α} {β = β} = UR {α = β} {β = 1m} (UR (UL 1m 1⇒ hyp)) 
 
   -- functors are actually functors
   Ffunc : ∀ {p q : Mode} {α : q ≥ p} {A B} → A [ 1m ]⊢ B → F α A [ 1m ]⊢ F α B
@@ -362,50 +362,46 @@ module metatheory.CohesiveTTStrict2 where
       s : Mode
       ∇m : c ≥ s
       Δm : s ≥ c
-      ∇Δidentity : _==_ {c ≥ c} (∇m ∘1 Δm) (1m {c}) 
-      Δ∇counit : (Δm ∘1 ∇m) ⇒ 1m
+      Δ∇identity : _==_ {s ≥ s} (Δm ∘1 ∇m) (1m {s}) 
+      ∇Δunit   : 1m ⇒ (∇m ∘1 Δm)
 
-    {-# REWRITE ∇Δidentity #-}
+    {-# REWRITE Δ∇identity #-}
     postulate
-      ∇Δidentity' : ∇Δidentity == id
+      ∇Δidentity' : Δ∇identity == id
     
+{-
     postulate
       adjeq1 : (Δ∇counit ∘1cong 1⇒{_}{_}{Δm}) == 1⇒
       adjeq2 : (1⇒{_}{_}{∇m} ∘1cong Δ∇counit) == 1⇒' (! (∘1-assoc {_} {_} {_} {_} {∇m} {Δm} {∇m}))
+-}
 
-    module A = TripleAdjunction c s ∇m Δm (1⇒' (! ∇Δidentity)) Δ∇counit {!!} {!!}
+    module A = TripleAdjunction c s ∇m Δm ∇Δunit (1⇒' (! Δ∇identity)) {!!} {!!}
     open A
 
-    ♯idempotent1 : ∀ {A} → ♯ A [ 1m ]⊢ ♯ (♯ A)
-    ♯idempotent1 = unit
+    -- we don't want the identity that collapses ♭ and ♯
+    wrongdirection : ∀ {A} → A [ 1m ]⊢ ♭ A
+    wrongdirection {A} = cut (cut {!NO!} (Ffunc∘2 {α = Δm} {β = ∇m})) (Ffunc {α = Δm} mergeFU)
 
-    ♯idempotent1' : ∀ {A} → ♯ A [ 1m ]⊢ ♯ (♯ A)
-    ♯idempotent1' = ◯func unit
+    wrongdirection2 : ∀ {A} → ♯ A [ 1m ]⊢ A
+    wrongdirection2 {A} = cut (Ufunc mergeFU) (cut Ufunc∘1 {!NO!}) 
 
-    ♯idempotent2 : ∀ {A} → ♯ (♯ A) [ 1m ]⊢ ♯ A
-    ♯idempotent2 = mult
+    -- each of these three steps should be an equivalence, so the whole thing should be
+    collapseΔ1 : ∀ {A} → ◯ Δm A [ 1m ]⊢ A
+    collapseΔ1 = cut mergeUF (cut (Ffunc∘1 {α = ∇m} {β = Δm}) Ffunc11)
 
-    ♯idempotent12 : cut (♯idempotent1 {P}) ♯idempotent2 == eta (♯ P)
-    ♯idempotent12 = id
+    -- each of these three steps should be an equivalence, so the whole thing should be
+    collapse∇1 : ∀ {A} → A [ 1m ]⊢ □ ∇m A
+    collapse∇1 = cut (cut Ufunc12 (Ufunc∘2 {α = ∇m} {β = Δm})) mergeUF
 
-    ♯idempotent21 : cut ♯idempotent2 (♯idempotent1' {P}) == eta (♯ (♯ P))
-    ♯idempotent21 = {!!}
+    -- ap of U on an equivalence, should be an equivalence
+    ♯idempotent : ∀ {A} → ♯ A [ 1m ]⊢ ♯ (♯ A)
+    ♯idempotent = Ufunc collapse∇1
 
-    ♭idempotent1 : ∀ {A} → ♭ A [ 1m ]⊢ ♭ (♭ A)
-    ♭idempotent1 = comult
+    -- ap of F on an equivalence, should be an equivalence
+    ♭idempotent : ∀ {A} → ♭ (♭ A) [ 1m ]⊢ ♭ A
+    ♭idempotent = Ffunc collapseΔ1
 
-    ♭idempotent2 : ∀ {A} → ♭ (♭ A) [ 1m ]⊢ ♭ A
-    ♭idempotent2 = counit
-
-    ♭idempotent2' : ∀ {A} → ♭ (♭ A) [ 1m ]⊢ ♭ A
-    ♭idempotent2' = □func counit
-
-    ♭idempotent21 : cut ♭idempotent2' (♭idempotent1 {P}) == eta (♭ (♭ P))
-    ♭idempotent21 = {!!}
-
-    ♭idempotent12 : cut ♭idempotent1 (♭idempotent2 {P}) == eta (♭ P)
-    ♭idempotent12 = id
-
+    -- which things are full and faithful ?
 
 {-
   module IdempotentMonad where
