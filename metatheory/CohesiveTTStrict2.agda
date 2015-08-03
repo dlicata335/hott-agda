@@ -61,12 +61,14 @@ module metatheory.CohesiveTTStrict2 where
   
   data Tp : Mode → Set where
     P : ∀ {m} → Tp m
+    Q : ∀ {m} → Tp m
     F : ∀ {p q} (α : q ≥ p) → Tp q → Tp p
     U : ∀ {p q} (α : q ≥ p) → Tp p → Tp q 
     _⊕_ : ∀ {p} (A B : Tp p) → Tp p
 
   data _[_]⊢_ : {p q : Mode} → Tp q → q ≥ p → Tp p -> Set where
     hypp : ∀ {p} {α : p ≥ p} → 1m ⇒ α → P [ α ]⊢ P 
+    hypq : ∀ {p} {α : p ≥ p} → 1m ⇒ α → Q [ α ]⊢ Q
     FL : ∀ {p q r} {α : q ≥ p} {β : p ≥ r} {A : Tp q} {C : Tp r}
        → A [ α ∘1 β ]⊢ C
        → F α A [ β ]⊢ C
@@ -90,6 +92,7 @@ module metatheory.CohesiveTTStrict2 where
              → A [ α ]⊢ B 
              → A [ β ]⊢ B 
   transport⊢ e (hypp e') = hypp (e' ·2 e)
+  transport⊢ e (hypq e') = hypq (e' ·2 e)
   transport⊢ e (FL D) = FL (transport⊢ (1⇒ ∘1cong e) D)
   transport⊢ e (FR γ e' D) = FR γ (e' ·2 e) D
   transport⊢ e (UL γ e' D) = UL γ (e' ·2 e) D
@@ -114,6 +117,7 @@ module metatheory.CohesiveTTStrict2 where
   -- seems to only work for 1m
   eta : ∀ {p} (A : Tp p) → A [ 1m ]⊢ A
   eta P = hypp 1⇒
+  eta Q = hypq 1⇒
   eta (U α A) = (UR {α = α} {β = 1m} (UL 1m 1⇒ (eta A)))  -- need to annote because it infers the wrong association
   eta (F α A) = FL (FR 1m 1⇒ (eta A)) 
   eta (A ⊕ B) = Case (Inl (eta A)) (Inr (eta B))
@@ -124,6 +128,7 @@ module metatheory.CohesiveTTStrict2 where
       → A [ β ∘1 α ]⊢ C
   -- atom
   cut (hypp p) (hypp q) = hypp (p ∘1cong q)
+  cut (hypq p) (hypq q) = hypq (p ∘1cong q)
   -- principal 
   cut {α = α} {β = β} (FR γ e D) (FL {α = α1} E) = transport⊢ (e ∘1cong 1⇒) (cut D E)
   cut {α = α} {β = β} (UR {α = α1} D) (UL γ₁ e E) = transport⊢ (1⇒ ∘1cong e) (cut D E)
@@ -173,6 +178,12 @@ module metatheory.CohesiveTTStrict2 where
 
   Ffunc12 : ∀ {p} {A : Tp p} → A [ 1m ]⊢ F 1m A
   Ffunc12 = FR 1m 1⇒ hyp
+
+  Ffunc1-composite-1 : ∀ {p} → (cut (Ffunc11 {p = p} {A = P}) Ffunc12) == hyp
+  Ffunc1-composite-1 = {!focusing? off by where FL is!}
+
+  Ffunc1-composite-2 : ∀ {p} → (cut Ffunc12 (Ffunc11 {p = p} {A = P})) == hyp
+  Ffunc1-composite-2 = id
 
   Ffunc∘1 : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} {A : Tp _}
           → F α (F β A) [ 1m ]⊢ F (β ∘1 α) A
@@ -370,6 +381,7 @@ module metatheory.CohesiveTTStrict2 where
       ∇Δidentity' : Δ∇identity == id
     
 {-
+    FIXME
     postulate
       adjeq1 : (Δ∇counit ∘1cong 1⇒{_}{_}{Δm}) == 1⇒
       adjeq2 : (1⇒{_}{_}{∇m} ∘1cong Δ∇counit) == 1⇒' (! (∘1-assoc {_} {_} {_} {_} {∇m} {Δm} {∇m}))
@@ -393,6 +405,9 @@ module metatheory.CohesiveTTStrict2 where
     collapse∇1 : ∀ {A} → A [ 1m ]⊢ □ ∇m A
     collapse∇1 = cut (cut Ufunc12 (Ufunc∘2 {α = ∇m} {β = Δm})) mergeUF
 
+    collapse∇2 : ∀ {A} → □ ∇m A [ 1m ]⊢ A
+    collapse∇2 = (cut mergeFU (cut (Ufunc∘1 {α = ∇m} {β = Δm}) Ufunc11))
+
     -- ap of U on an equivalence, should be an equivalence
     ♯idempotent : ∀ {A} → ♯ A [ 1m ]⊢ ♯ (♯ A)
     ♯idempotent = Ufunc collapse∇1
@@ -401,7 +416,41 @@ module metatheory.CohesiveTTStrict2 where
     ♭idempotent : ∀ {A} → ♭ (♭ A) [ 1m ]⊢ ♭ A
     ♭idempotent = Ffunc collapseΔ1
 
-    -- which things are full and faithful ?
+
+
+    -- seems like Δ (F Δm) and ∇ (U ∇m) are full and faithful but Γ (the other two) is not?
+
+    FΔ-fullandfaithful : ∀ {A B} → F Δm A [ 1m ]⊢ F Δm B -> A [ 1m ]⊢ B
+    FΔ-fullandfaithful D = cut {α = 1m} {β = 1m} (cut {α = 1m} {β = 1m} Ffunc12 (Ffunc∘2 {α = ∇m} {β = Δm})) (cut {α = 1m} {β = 1m} (Ffunc {α = ∇m} D) (cut (Ffunc∘1 {α = ∇m} {β = Δm}) Ffunc11))
+
+    -- seems like it works
+    FΔ-fullandfaithful-composite-1 : (D : P [ 1m ]⊢ Q) → FΔ-fullandfaithful (Ffunc D) == D
+    FΔ-fullandfaithful-composite-1 D = {!!}
+
+    -- FIXME ????
+    FΔ-fullandfaithful-composite-2 : (D : F Δm P [ 1m ]⊢ F Δm Q) → (Ffunc (FΔ-fullandfaithful D)) == D
+    FΔ-fullandfaithful-composite-2 D = {!!}
+
+
+    U∇-fullandfaithful : ∀ {A B} → U ∇m A [ 1m ]⊢ U ∇m B -> A [ 1m ]⊢ B
+    U∇-fullandfaithful D = cut collapse∇1 (cut (Ffunc {α = ∇m} D) collapse∇2)
+
+    -- seems OK
+    U∇-fullandfaithful-composite-1 : (D : P [ 1m ]⊢ Q) -> D == (U∇-fullandfaithful (Ufunc D))
+    U∇-fullandfaithful-composite-1 D = {!!}
+
+    -- ??? 
+    U∇-fullandfaithful-composite-2 : (D : U ∇m P [ 1m ]⊢ U ∇m Q) -> D == (Ufunc (U∇-fullandfaithful D))
+    U∇-fullandfaithful-composite-2 D = {!♭!}
+
+
+    -- doesn't seem like this exists?
+    F∇-fullandfaithful : ∀ {A B} → F ∇m A [ 1m ]⊢ F ∇m B -> A [ 1m ]⊢ B
+    F∇-fullandfaithful D = cut {α = 1m} {β = 1m} (cut {!F2 ∇Δunit!} (Ffunc∘2 {α = Δm} {β = ∇m})) (cut {α = 1m} {β = 1m} (Ffunc {α = Δm} D) (cut (Ffunc∘1 {α = Δm} {β = ∇m}) (cut (F2 ∇Δunit) Ffunc11)))
+      -- cut {α = 1m} {β = 1m} (cut {!NO!} (Ffunc mergeUF)) (cut {α = 1m} {β = 1m} (Ffunc {α = Δm} D) (cut (Ffunc∘1 {α = Δm} {β = ∇m}) (cut (F2 ∇Δunit) Ffunc11)))
+
+
+
 
 {-
   module IdempotentMonad where
