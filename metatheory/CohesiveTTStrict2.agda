@@ -65,7 +65,12 @@ module metatheory.CohesiveTTStrict2 where
     ·1cong-unit-r : {x z : Mode} {q q' : x ≥ z} (β : q ⇒ q') → (β ∘1cong 1⇒ {_}{_}{1m} ) == β
     ·2-unit-r : {x y : Mode} {p q : x ≥ y} (α : p ⇒ q) → (α ·2 1⇒) == α
     ·2-unit-l : {x y : Mode} {p q : x ≥ y} (α : p ⇒ q) → (1⇒ ·2 α) == α
+    ·2-assoc  : ∀ {x y : Mode} {α β γ δ : x ≥ y} {e1 : α ⇒ β} {e2 : β ⇒ γ} {e3 : γ ⇒ δ}
+              → ((e1 ·2 e2) ·2 e3) == (e1 ·2 (e2 ·2 e3))
     ·1cong-1⇒ : {x y z : Mode} {p : z ≥ y} {q : y ≥ x} → (1⇒ {_}{_}{p} ∘1cong 1⇒ {_}{_}{q}) == 1⇒
+    interchange : {x y z : Mode} {p1 p2 p3 : x ≥ y} {e1 : p1 ⇒ p2} {e2 : p2 ⇒ p3}
+                  {q1 q2 q3 : y ≥ z} {f1 : q1 ⇒ q2} {f2 : q2 ⇒ q3}
+                → ((e1 ·2 e2) ∘1cong (f1 ·2 f2))  == ((e1 ∘1cong f1) ·2 (e2 ∘1cong f2))
     -- FIXME more equations on 2-cells?
 
   {-# REWRITE ·1cong-unit-l #-}
@@ -73,6 +78,7 @@ module metatheory.CohesiveTTStrict2 where
   {-# REWRITE ·2-unit-r #-}
   {-# REWRITE ·2-unit-l #-}
   {-# REWRITE ·1cong-1⇒ #-}
+  {-# REWRITE ·2-assoc #-}
   
   data Tp : Mode → Set where
     P : ∀ {m} → Tp m
@@ -128,6 +134,19 @@ module metatheory.CohesiveTTStrict2 where
   transport⊢1 (Inl D) = ap Inl (transport⊢1 D)
   transport⊢1 (Inr D) = ap Inr (transport⊢1 D)
   transport⊢1 (Case D D₁) = ap2 Case (transport⊢1 D) (transport⊢1 D₁)
+
+  transport⊢∘ : {p q : Mode} → {A : Tp q} → {α β γ : q ≥ p} {e1 : α ⇒ β} {e2 : β ⇒ γ} {B : Tp p} 
+               (D : A [ α ]⊢ B)
+             → transport⊢ (e1 ·2 e2) D == transport⊢ e2 (transport⊢ e1 D)
+  transport⊢∘ (hypp x) = id
+  transport⊢∘ (hypq x) = id
+  transport⊢∘ {e1 = e1} {e2 = e2} (FL D) = ap FL (transport⊢∘ {e1 = 1⇒ ∘1cong e1} {e2 = 1⇒ ∘1cong e2} D ∘ ap (λ x → transport⊢ x D) (interchange {e1 = 1⇒} {e2 = 1⇒} {f1 = e1} {f2 = e2}))
+  transport⊢∘ (FR γ₁ x D) = id
+  transport⊢∘ (UL γ₁ x D) = id
+  transport⊢∘ {e1 = e1} {e2} (UR D) = ap UR (transport⊢∘ {e1 = e1 ∘1cong 1⇒} {e2 = e2 ∘1cong 1⇒} D ∘ ap (λ x → transport⊢ x D) (interchange {e1 = e1} {e2 = e2} {f1 = 1⇒} {f2 = 1⇒}))
+  transport⊢∘ (Inl D) = ap Inl (transport⊢∘ D)
+  transport⊢∘ (Inr D) = ap Inr (transport⊢∘ D)
+  transport⊢∘ (Case D D₁) = ap2 Case (transport⊢∘ D) (transport⊢∘ D₁)
 
   -- seems to only work for 1m
   ident : ∀ {p} (A : Tp p) → A [ 1m ]⊢ A
@@ -209,7 +228,7 @@ module metatheory.CohesiveTTStrict2 where
   postulate
     Fη : ∀ {p q r} {α : q ≥ p} {β : p ≥ r} {A : Tp q} {C : Tp r}
          (D : F α A [ β ]⊢ C) → 
-         D == FL (cut (FR 1m 1⇒ hyp) D) 
+         D == FL (cut {α = β} {β = α} (FR {α = α} {β = 1m ∘1 α} 1m 1⇒ hyp) D) 
 
     Uη : ∀ {p q r} {α : p ≥ q} {β : q ≥ r} {A : Tp p} {C : Tp r}
          (D : A [ α ]⊢ U β C) → 
@@ -295,26 +314,7 @@ module metatheory.CohesiveTTStrict2 where
           → U (β ∘1 α) A [ 1m ]⊢ U β (U α A)
   Ufunc∘2 {α = α} {β = β} = UR {α = β} {β = 1m} (UR (UL 1m 1⇒ hyp)) 
 
-  -- FIXME: equations for U for U
-
-
-  -- ----------------------------------------------------------------------
-  -- F and U respect 2-cells in one direction
-  -- F is contravariant; U is covariant
-
-  F2 : ∀ {p q} {A B : Tp q} {α β : q ≥ p} → β ⇒ α → F α A [ 1m ]⊢ F β A
-  F2 {α = α} e = FL {α = α} {β = 1m} (FR 1m e hyp)
-
-  F21 : ∀ {p q} {A B : Tp q} {α : q ≥ p} → F2 {A = A} {B = B} (1⇒ {α = α}) == hyp 
-  F21 = id
-
-  F2· : ∀ {p q} {A B : Tp q} {α β γ : q ≥ p} {e1 : β ⇒ α} {e2 : γ ⇒ β} → F2 {A = A} {B = B} (e2 ·2 e1) == cut (F2 {A = A} {B = B} e1) (F2 {A = A} {B = B} e2)
-  F2· = ap FL (! (ap (transport⊢ _) (cut-ident-left _)))
-
-  U2 : ∀ {p q} {A B : Tp p} {α β : q ≥ p} → α ⇒ β → U α A [ 1m ]⊢ U β A
-  U2 {α = α} {β = β} e = UR {α = β} {β = 1m} (UL 1m e hyp)
-
-  -- FIXME dually for U
+  -- FIXME: equations for U
 
 
   -- ----------------------------------------------------------------------
@@ -330,6 +330,17 @@ module metatheory.CohesiveTTStrict2 where
   Ffunc-cut {D = D} {E = E} = FL (FR 1m 1⇒ (cut D E))  =〈 ap FL (! (cutFR {D = D} {E = E})) 〉 
                               FL (cut D (FR 1m 1⇒ E)) =〈 ! (ap FL (transport⊢1 _)) 〉
                               _ ∎
+
+  -- action of F on terms is functorial in α
+
+  Ffunc-func1 : ∀ {p : Mode} {A B : Tp p} (D : A [ 1m ]⊢ B) → Ffunc {α = 1m} {A} {B} D == cut {α = 1m} {β = 1m} Ffunc11 (cut {α = 1m} {β = 1m} D Ffunc12)
+  Ffunc-func1 D = ! (ap (cut Ffunc11) (cutFR {D = D})) ∘ (! (Fη _) ∘ ap FL (ap (FR 1m 1⇒) (! (cut-assoc (FR 1m 1⇒ hyp) (FL {α = 1m} {β = 1m} hyp) (cut D hyp)) ∘ 
+                  {!  FIXME seems ok !})))
+
+  Ffunc-func∘ : ∀ {p q r : Mode} {α : p ≥ q} {β : q ≥ r} {A B : Tp p} (D : A [ 1m ]⊢ B) 
+                  → Ffunc {α = β} (Ffunc {α = α} D) == cut {α = 1m} {β = 1m} Ffunc∘1 (cut {α = 1m} {β = 1m} (Ffunc {α = α ∘1 β} D) Ffunc∘2)
+  Ffunc-func∘ D = ap FL (ap FL (! (transport⊢1 _) ∘ (! (cut-ident-left _) ∘ (! (transport⊢1 _) ∘ ( ! (cutFR {D = D}) ∘ ap (FR _ 1⇒) (((! (cutFR {D = D}) ∘ ap (FR 1m 1⇒) (! (cut-ident-right _))) ∘ cut-ident-left _) ∘ transport⊢1 _))))) ∘ Fη (FR 1m 1⇒ (Ffunc D)))
+
 
   Ufunc : ∀ {p q : Mode} {α : q ≥ p} {A B} → A [ 1m ]⊢ B → U α A [ 1m ]⊢ U α B
   Ufunc {α = α} D =  UR {α = α} {β = 1m} (UL 1m 1⇒ D)
@@ -404,9 +415,50 @@ module metatheory.CohesiveTTStrict2 where
 
 
   -- ----------------------------------------------------------------------
+  -- 2-cells induce morphisms of adjunctions (conjugate pairs of functors)
+  -- F is contravariant; U is covariant
+
+  F2 : ∀ {p q} {A : Tp q} {α β : q ≥ p} → β ⇒ α → F α A [ 1m ]⊢ F β A
+  F2 {α = α} e = FL {α = α} {β = 1m} (FR 1m e hyp)
+
+  F21 : ∀ {p q} {A : Tp q} {α : q ≥ p} → F2 {A = A} (1⇒ {α = α}) == hyp 
+  F21 = id
+
+  F2· : ∀ {p q} {A : Tp q} {α β γ : q ≥ p} {e1 : β ⇒ α} {e2 : γ ⇒ β} → F2 {A = A} (e2 ·2 e1) == cut (F2 {A = A} e1) (F2 {A = A} e2)
+  F2· = ap FL (! (ap (transport⊢ _) (cut-ident-left _)))
+
+  U2 : ∀ {p q} {A : Tp p} {α β : q ≥ p} → α ⇒ β → U α A [ 1m ]⊢ U β A
+  U2 {α = α} {β = β} e = UR {α = β} {β = 1m} (UL 1m e hyp)
+
+  -- FIXME equations for U
+
+  -- one of many ways to phrase this; see
+  -- https://unapologetic.wordpress.com/2007/07/30/transformations-of-adjoints/
+  F2U2conjugate : ∀ {p q} {A : Tp q} {α β : q ≥ p} {e : β ⇒ α}
+            → cut (◯unit  {A = A} {α = α}) (Ufunc (F2 e)) == cut (◯unit {A = A} {α = β}) (U2 {A = F β A} e)
+  F2U2conjugate {A = A} {α = α} {β = β} {e} = ap (UR {α = α} {β = 1m ∘1 1m}) ((! ({!!} ∘ ap (transport⊢ e) (cut-ident-left _ ∘ transport⊢1 _)) ∘ (cut-ident-left _ ∘ transport⊢1 _)) ∘ transport⊢1 _)
+   where 
+     lem : FR {α = β} {β = α} {A = A} {C = A} 1m (1⇒ ·2 e) hyp == FR 1m e hyp
+     lem = id
+
+  -- equivalently, 
+  F2U2conjugate' : ∀ {p q} {A : Tp p} {α β : q ≥ p} {e : β ⇒ α}
+                 → cut (Ffunc (U2 e)) (□counit {A = A} {α = α}) == cut (F2 e) (□counit {A = A} {α = β})
+  F2U2conjugate' {α = α} {β} {e} = ap (FL {α = α} {β = 1m ∘1 1m}) {!!}
+
+
+  -- action of F on terms respects 2-cells
+
+  F2-natural : ∀ {p q : Mode} {α β : p ≥ q} {A B : Tp p} (e : α ⇒ β) (D : A [ 1m ]⊢ B) →
+                     cut {α = 1m} (F2 e) (Ffunc {α = α} D) == (cut {β = 1m} (Ffunc {α = β} D) (F2 e))
+  F2-natural {β = β} e D = ap (FL {α = β} {β = 1m ∘1 1m}) (! (transport⊢1 _) ∘ (! (cutFR {D = D}) ∘ (! (ap (FR 1m e) (cut-ident-right D)) ∘ ap (transport⊢ e) (cut-ident-left (FR 1m 1⇒ D)))))
+
+
+
+  -- ----------------------------------------------------------------------
   -- rules needed for specific theories
 
-  -- FIXME do these make sense?
+  -- FIXME do these make sense? is cut well-defined on them?
   postulate
     FR2 : ∀ {p q r} {α : q ≥ p} {β : r ≥ p} {A : Tp q} {C : Tp r}
          → {γ γ' : r ≥ q} → {e : (γ ∘1 α) ⇒ β} {e' : (γ' ∘1 α) ⇒ β } {D : C [ γ ]⊢ A}  {D' : C [ γ' ]⊢ A} 
@@ -472,7 +524,7 @@ module metatheory.CohesiveTTStrict2 where
     badmergeUF' = FR ∇m {!NO!} (UL 1m 1⇒ hyp) 
   
     badmergeFU : ∀ {A : Tp s} → F Δm A [ 1m ]⊢ U ∇m A
-    badmergeFU = FL (UR (transport⊢ {!!} hyp))
+    badmergeFU = FL (UR (transport⊢ {!NO!} hyp))
   
     -- -------------------------------------------------------------------------------
 
@@ -517,13 +569,11 @@ module metatheory.CohesiveTTStrict2 where
 
     
     -- ----------------------------------------------------------------------
-    -- ♭ absorbing ♯ and vice versa
+    -- ♭ absorbing ♯ and vice versa: 
+    -- for this theory, ♭ A is a retract of ♭ (♯ A) and ♯ A is a retract of ♯ (♭ A)
     
     ♭absorbs♯1 : ∀ {A} → ♭ A [ 1m ]⊢ ♭ (♯ A) 
     ♭absorbs♯1 = □func ◯unit
-
-    ♭absorbs♯1' : ∀ {A} → ♭ A [ 1m ]⊢ ♭ (♯ A) 
-    ♭absorbs♯1' = {!!}
 
     ♭absorbs♯2 : ∀ {A} → ♭ (♯ A) [ 1m ]⊢ ♭ A
     ♭absorbs♯2 = FL {α = Δm} {β = 1m} (FR 1m 1⇒ (UL ∇m Δ∇counit (UL 1m 1⇒ mergeFU))) 
@@ -531,18 +581,14 @@ module metatheory.CohesiveTTStrict2 where
     ♭absorbs♯-composite-1 : cut (♭absorbs♯1 {P}) (♭absorbs♯2 {P}) == hyp
     ♭absorbs♯-composite-1 = ap (λ x → FL (FR 1m 1⇒ x)) (ap (UR {α = Δm} {β = 1m}) (UL2 {D = cut (UR (hypp ∇Δunit)) (UL 1m 1⇒ hyp)} {D' = ident P} ∇Δunit adjeq1 id) ∘ Uη (UL ∇m Δ∇counit (UR (hypp ∇Δunit))))
 
-    -- FIXME
-    ♭absorbs♯-composite-2 : cut (♭absorbs♯2 {P}) (♭absorbs♯1 {P}) == hyp
-    ♭absorbs♯-composite-2 = ap (λ x → FL (FR 1m 1⇒ (UR x)))
-                          (UL2 {D = cut (UL 1m 1⇒ mergeFU) (UL 1m 1⇒ ◯unit)} {D' = ident (♯ P)} ∇Δunit adjeq1
-                               (ap UR (UL2 {!!} {!!} (ap FL (FR2 {D = cut (hypp ∇Δunit) (ident P)} {D' = ident P} ∇Δunit {!!} id))) ∘ Uη (UL Δm 1⇒ (FL (UR {α = ∇m} {β = ∇m ∘1 Δm} (FR (∇m ∘1 Δm) 1⇒ (hypp ∇Δunit)))))))
-
     ♯absorbs♭1 : ∀ {A} → ♯ A [ 1m ]⊢ ♯ (♭ A) 
     ♯absorbs♭1 = UR {α = ∇m} {β = 1m} (UL 1m 1⇒ (FR Δm Δ∇counit (FR 1m 1⇒ mergeFU))) 
 
     ♯absorbs♭2 : ∀ {A} → ♯ (♭ A) [ 1m ]⊢ ♯ A
     ♯absorbs♭2 = ◯func □counit
 
+    ♯absorbs♭-composite-1 : cut (♯absorbs♭1 {P}) (♯absorbs♭2 {P}) == hyp
+    ♯absorbs♭-composite-1 = ap (λ x → UR {α = ∇m} {β = 1m} (UL 1m 1⇒ x)) (ap (FL { α = ∇m} {β = 1m}) (FR2 {D = cut (FR 1m 1⇒ hyp) (FL (hypp ∇Δunit))} {D' = ident P} ∇Δunit adjeq2 id) ∘ Fη (FR Δm Δ∇counit (FL (hypp ∇Δunit))))
   
   module Reflection where
     postulate
@@ -555,14 +601,11 @@ module metatheory.CohesiveTTStrict2 where
 
     {-# REWRITE Δ∇identity #-}
     postulate
-      ∇Δidentity' : Δ∇identity == id
+      Δ∇identity' : Δ∇identity == id
     
-{-
-    FIXME
     postulate
-      adjeq1 : (Δ∇counit ∘1cong 1⇒{_}{_}{Δm}) == 1⇒
-      adjeq2 : (1⇒{_}{_}{∇m} ∘1cong Δ∇counit) == 1⇒' (! (∘1-assoc {_} {_} {_} {_} {∇m} {Δm} {∇m}))
--}
+     adjeq1 : (∇Δunit ∘1cong 1⇒{_}{_}{∇m}) == 1⇒
+   --    adjeq2 : (1⇒{_}{_}{∇m} ∘1cong Δ∇counit) == 1⇒' (! (∘1-assoc {_} {_} {_} {_} {∇m} {Δm} {∇m}))
 
     module A = TripleAdjunction c s ∇m Δm ∇Δunit (1⇒' (! Δ∇identity)) {!!} {!!}
     open A
@@ -594,42 +637,95 @@ module metatheory.CohesiveTTStrict2 where
     ♭idempotent = Ffunc collapseΔ1
 
 
+    -- seem to need more equations... 
+
+    FIXME : ∀ {A B} → (D : A [ Δm ]⊢ F Δm B) → D == FR {α = Δm} {β = 1m ∘1 Δm} 1m 1⇒ ((cut {α = ∇m} {β = Δm} D (FL {α = Δm} {β = ∇m} hyp))) -- 1m is only endomorphism of s
+    FIXME D = {! Ffunc {α = Δm} (Ffunc {α = ∇m} (FL {α = Δm} {β = 1m} D))!}
+
+    FIXME' : ∀ {A B} → (D : U ∇m A [ ∇m ]⊢ B) → D == UL 1m 1⇒ ((cut (UR {α = ∇m} {β = Δm} hyp) D)) -- 1m is only endomorphism of s
+    FIXME' = {! !}
 
     --Δ (F Δm) and ∇ (U ∇m) are full and faithful but Γ (the other two) is not
 
-    FΔ-fullandfaithful : ∀ {A B} → F Δm A [ 1m ]⊢ F Δm B -> A [ 1m ]⊢ B
-    FΔ-fullandfaithful D = cut (cut Ffunc12 (Ffunc∘2 {α = ∇m} {β = Δm})) (cut (Ffunc {α = ∇m} D) (cut (Ffunc∘1 {α = ∇m} {β = Δm}) Ffunc11))
+    map1 : ∀ {A B} → A [ 1m ]⊢ B → F Δm A [ 1m ]⊢ F Δm B
+    map1 = Ffunc
 
-    -- seems like it works
+    F∇Δcancel1 : ∀ {A} → F ∇m (F Δm A) [ 1m ]⊢ A
+    F∇Δcancel1 = cut (Ffunc∘1 {α = ∇m} {β = Δm}) Ffunc11
+
+    F∇Δcancel2 : ∀ {A} → A [ 1m ]⊢ F ∇m (F Δm A)
+    F∇Δcancel2 = (cut Ffunc12 (Ffunc∘2 {α = ∇m} {β = Δm}))
+
+    FΔ-fullandfaithful : ∀ {A B} → F Δm A [ 1m ]⊢ F Δm B -> A [ 1m ]⊢ B
+    FΔ-fullandfaithful D = cut F∇Δcancel2 (cut (Ffunc {α = ∇m} D) F∇Δcancel1)
+
     FΔ-fullandfaithful-composite-1 : (D : P [ 1m ]⊢ Q) → FΔ-fullandfaithful (Ffunc D) == D
-    FΔ-fullandfaithful-composite-1 D = {!!}
+    FΔ-fullandfaithful-composite-1 D = (((cut-ident-right _ ∘ (transport⊢1 _ ∘ transport⊢1 _)) ∘
+                                           cut-ident-left (transport⊢ 1⇒ (transport⊢ 1⇒ (cut D (hypq 1⇒))))) ∘ transport⊢1 _) ∘ transport⊢1 _
 
     FΔ-fullandfaithful-composite-2 : (D : F Δm P [ 1m ]⊢ F Δm Q) → (Ffunc (FΔ-fullandfaithful D)) == D 
-    FΔ-fullandfaithful-composite-2 D = {!!}
+    FΔ-fullandfaithful-composite-2 D = 
+      _ =〈 {!!} 〉 
+      cut (Ffunc {α = Δm} F∇Δcancel2) (cut (Ffunc {α = Δm} (Ffunc {α = ∇m} D)) (Ffunc {α = Δm} F∇Δcancel1)) =〈 ap (λ x → cut (Ffunc {α = Δm} F∇Δcancel2) (cut x (Ffunc {α = Δm} F∇Δcancel1))) (Ffunc-func∘ D) 〉 
+      cut (Ffunc {α = Δm} F∇Δcancel2) (cut (cut Ffunc∘1 (cut (Ffunc {α = ∇m ∘1 Δm} D) Ffunc∘2)) (Ffunc {α = Δm} F∇Δcancel1)) =〈 {!F2-natural ∇Δunit D!} 〉 
+      cut (Ffunc {α = Δm} F∇Δcancel2) (cut Ffunc∘1 (cut (Ffunc {α = ∇m ∘1 Δm} D) (cut Ffunc∘2 (Ffunc {α = Δm} F∇Δcancel1)))) =〈 {!F2-natural ∇Δunit D!} 〉 
+      cut (Ffunc {α = Δm} F∇Δcancel2) (cut Ffunc∘1 (cut (Ffunc {α = ∇m ∘1 Δm} D) (cut Ffunc∘2 (cut (Ffunc {α = Δm} (Ffunc∘1 {α = ∇m} {β = Δm} { A = Q} )) (Ffunc {α = Δm} Ffunc11))))) =〈 {!F2-natural ∇Δunit D!} 〉 
+      cut (Ffunc {α = Δm} F∇Δcancel2) (cut Ffunc∘1 (cut (Ffunc {α = ∇m ∘1 Δm} D) (cut (F2 {A = F Δm Q} ∇Δunit) Ffunc11))) =〈 {!F2-natural ∇Δunit D!} 〉 
+      cut (Ffunc {α = Δm} F∇Δcancel2) (cut Ffunc∘1 (cut (cut (Ffunc {α = ∇m ∘1 Δm} D) (F2 {A = F Δm Q} ∇Δunit)) Ffunc11)) =〈 {!F2-natural ∇Δunit D!} 〉 
+      _ ∎ where
+
+      hmmmm : (cut Ffunc∘2 (cut (Ffunc {α = Δm} (Ffunc∘1 {α = ∇m} {β = Δm} { A = Q } )) (Ffunc {α = Δm} Ffunc11))) == cut (F2 {A = F Δm Q} ∇Δunit) Ffunc11
+      hmmmm = ap FL (ap FL (ap (λ x → FR 1m x (hypq 1⇒)) {!!}) ∘ Fη _)
+   
+      hmm : F2 {A = F Δm P} ∇Δunit == cut Ffunc∘2 (cut (Ffunc {α = Δm} F∇Δcancel1) Ffunc12)
+      hmm = {!!}
+
 {-
-      Ffunc (FΔ-fullandfaithful D) =〈 {! cancel some transports !} 〉 
-      FL {α = Δm} {β = 1m} (FR 1m 1⇒ (cut (FR 1m 1⇒ (hypp 1⇒)) (cut D (FL {α = Δm} {β = ∇m} (hypq 1⇒))))) =〈 {!reassociate!} 〉 
+      Ffunc (FΔ-fullandfaithful D) =〈 ap (λ x → FL (FR 1m 1⇒ x)) ( ap (cut {α = ∇m} {β = Δm} (FR 1m 1⇒ (hypp 1⇒))) (transport⊢1 (cut {α = ∇m} {β = 1m} D (FL {α = Δm} {β = ∇m} (hypq 1⇒)))) ∘ transport⊢1 (cut (FR 1m 1⇒ (hypp 1⇒)) (transport⊢ 1⇒ (cut D (FL {α = Δm} {β = ∇m}  (hypq 1⇒)))))) 〉 -- 
+      FL {α = Δm} {β = 1m} (FR 1m 1⇒ (cut (FR 1m 1⇒ (hypp 1⇒)) (cut D (FL {α = Δm} {β = ∇m} (hypq 1⇒))))) =〈 ap (λ x → FL (FR 1m 1⇒ x)) (cut-assoc (FR 1m 1⇒ (hypp 1⇒)) D (FL {α = Δm} {β = ∇m} (hypq 1⇒))) 〉 
       FL {α = Δm} {β = 1m} (FR 1m 1⇒ (cut D' (FL {α = Δm} {β = ∇m} (hypq 1⇒)))) =〈 ! (ap (FL {α = Δm} {β = 1m}) (FIXME D')) 〉 
       FL {α = Δm} {β = 1m} D' =〈 ! (Fη D) 〉 
       D ∎ where
         D' : P [ Δm ]⊢ F Δm Q
         D' = (cut (FR 1m 1⇒ (hypp 1⇒)) D)
-
-        FIXME : ∀ {A B} → (D : A [ Δm ]⊢ F Δm B) → D == FR 1m 1⇒ ((cut D (FL {α = Δm} {β = ∇m} hyp))) -- 1m is only endomorphism of s
-        FIXME = {! !}
 -}
 
     U∇-fullandfaithful : ∀ {A B} → U ∇m A [ 1m ]⊢ U ∇m B -> A [ 1m ]⊢ B
     U∇-fullandfaithful D = cut collapse∇1 (cut (Ffunc {α = ∇m} D) collapse∇2)
 
     -- seems OK
-    U∇-fullandfaithful-composite-1 : (D : P [ 1m ]⊢ Q) -> D == (U∇-fullandfaithful (Ufunc D))
+    U∇-fullandfaithful-composite-1 : (D : P [ 1m ]⊢ Q) -> (U∇-fullandfaithful (Ufunc D)) == D
     U∇-fullandfaithful-composite-1 D = {!!}
 
-    -- ??? 
-    U∇-fullandfaithful-composite-2 : (D : U ∇m P [ 1m ]⊢ U ∇m Q) -> D == (Ufunc (U∇-fullandfaithful D))
-    U∇-fullandfaithful-composite-2 D = {!♭!}
+    U∇-fullandfaithful-composite-2 : (D : U ∇m P [ 1m ]⊢ U ∇m Q) -> (Ufunc (U∇-fullandfaithful D)) == D
+    U∇-fullandfaithful-composite-2 D = ! (Uη D) ∘ ap (UR {α = ∇m} {β = 1m}) 
+      (! (FIXME' _) ∘ 
+       ap (UL 1m 1⇒) 
+          (((ap (λ x → cut {α = 1m ∘1 ((∇m ∘1 Δm) ∘1 ∇m)} {β = Δm} (UR {α = ∇m} {β = Δm} (hypp 1⇒)) (cut D x))
+                (UL2 {α = ∇m} {β = ∇m} {γ = 1m} {γ' = 1m} {e = ∇Δunit ∘1cong 1⇒} {e' = 1⇒} 1⇒ adjeq1 id) ∘ 
+                 ap (cut {α = 1m ∘1 ((∇m ∘1 Δm) ∘1 ∇m)} {β = Δm} (UR {α = ∇m} {β = Δm} (hypp 1⇒))) (transport⊢1 (cut D (UL 1m (∇Δunit ∘1cong 1⇒) (hypq 1⇒))))) ∘
+                 transport⊢1 _) ∘
+           ap (λ x → transport⊢ (1⇒' (! x)) (cut {α = 1m ∘1 ((∇m ∘1 Δm) ∘1 ∇m)} {β = Δm} (UR {α = ∇m} {β = Δm} (hypp 1⇒)) (transport⊢ 1⇒ (cut D (UL 1m (∇Δunit ∘1cong 1⇒) (hypq 1⇒)))))) Δ∇identity'))
 
+    -- ----------------------------------------------------------------------
+    -- ♭ (♯ A) is equivalent to A: above retraction is an equivalence for this theory
+
+    ♭absorbs♯-composite-2 : cut (♭absorbs♯2 {P}) (♭absorbs♯1 {P}) == hyp
+    ♭absorbs♯-composite-2 = ap (λ x → FL (FR 1m 1⇒ (UR x)))
+                          (UL2 {D = cut (UL 1m 1⇒ mergeFU) (UL 1m 1⇒ ◯unit)} {D' = ident (♯ P)} 
+                               ∇Δunit
+                               {!!}
+                               (ap (UR {α = ∇m} {β = (∇m ∘1 1m) ∘1 (Δm ∘1 1m)}) (UL2 {D = _} {D' = ident (F ∇m P)} 1⇒ (! adjeq1) (ap (FL {α = ∇m} {β = 1m}) (FR2 {α = ∇m} {β = ∇m ∘1 1m} {γ = ∇m ∘1 Δm} {γ' = 1m} {e = 1⇒} {e' = 1⇒} {D = cut (hypp ((1⇒ ·2 ∇Δunit) ∘1cong 1⇒)) (ident P)} {D' = ident P} ∇Δunit adjeq1 id))) ∘ Uη _))
+
+    ♭absorbs♯ : QEquiv (♭ P) (♭ (♯ P))
+    ♭absorbs♯ = qequiv ♭absorbs♯1 ♭absorbs♯2 ♭absorbs♯-composite-1 ♭absorbs♯-composite-2
+
+    ♯absorbs♭-composite-2 : cut (♯absorbs♭2 {P}) (♯absorbs♭1 {P}) == ident (♯ (♭ P))
+    ♯absorbs♭-composite-2 = ap (UR {α = ∇m} {β = 1m ∘1 1m}) (ap (UL 1m 1⇒) (ap (FL {α = ∇m} {β = 1m}) (FR2 (∇Δunit ·2 (1⇒ ∘1cong 1⇒' (∘1-assoc {α = Δm} {∇m} {Δm}))) {!!} (ap (FL {α = Δm} {β = (1m ∘1 ∇m) ∘1 (Δm ∘1 ((1m ∘1 ∇m) ∘1 Δm))}) (ap2 (λ x y → FR 1m x y) {!!} (ap (UR {α = Δm} {β = 1m}) (UL2 ∇Δunit {!!} id))) ∘ Fη _)) ∘ Fη _) ∘ FIXME' _)
+
+    ♯absorbs♭ : QEquiv (♯ P) (♯ (♭ P))
+    ♯absorbs♭ = qequiv ♯absorbs♭1 ♯absorbs♭2 ♯absorbs♭-composite-1 ♯absorbs♭-composite-2
+    
 
 
 {-
