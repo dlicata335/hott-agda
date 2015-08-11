@@ -26,45 +26,29 @@ module adjointlogic.Reflection where
   wrongdirection2 {A} = cut (Ufunc mergeFU) (cut Ufunc∘1 {!NO!}) 
   -}
 
-  -- each of these three steps should be an equivalence, so the whole thing should be
-  collapseΔ1 : ∀ {A} → ◯ Δm A [ 1m ]⊢ A
-  collapseΔ1 = cut mergeUF (cut (Ffunc∘1 {α = ∇m} {β = Δm}) Ffunc11)
+  F∇Δcancel : ∀ {A} → QEquiv (F ∇m (F Δm A)) A
+  F∇Δcancel = (Ffunc∘ {α = ∇m} {β = Δm}) ·qeq Ffunc1
 
-  collapseΔ1' : ∀ {A} → ◯ Δm A [ 1m ]⊢ A
-  collapseΔ1' = cut mergeUF' (cut (Ffunc∘1 {α = ∇m} {β = Δm}) Ffunc11)
+  F∇Δcancel1 : ∀ {A} → F ∇m (F Δm A) [ 1m ]⊢ A
+  F∇Δcancel1 = QEquiv.f F∇Δcancel
 
-  collapseΔ2 : ∀ {A} → A [ 1m ]⊢ ◯ Δm A
-  collapseΔ2 = cut (cut Ffunc12 (Ffunc∘2 {α = ∇m} {β = Δm})) mergeFU
+  F∇Δcancel2 : ∀ {A} → A [ 1m ]⊢ F ∇m (F Δm A)
+  F∇Δcancel2 = QEquiv.g F∇Δcancel
 
-  collapseΔ2-composite-1 : cut collapseΔ2 collapseΔ1 == ident P
-  collapseΔ2-composite-1 = {!!}
+  collapseΔ : ∀ {A} → QEquiv (◯ Δm A) A
+  collapseΔ = mergeUFqeq ·qeq F∇Δcancel 
 
-  collapseΔ2-composite-2 : cut collapseΔ1 collapseΔ2 == ident (◯ Δm P)
-  collapseΔ2-composite-2 = {!!}
+  collapse∇ : ∀ {A} → QEquiv A (□ ∇m A)
+  collapse∇ = !qeq Ufunc1 ·qeq (!qeq (Ufunc∘ {α = ∇m} {β = Δm}) ·qeq mergeUFqeq)
 
-  -- each of these three steps should be an equivalence, so the whole thing should be
-  collapse∇1 : ∀ {A} → A [ 1m ]⊢ □ ∇m A
-  collapse∇1 = cut (cut Ufunc12 (Ufunc∘2 {α = ∇m} {β = Δm})) mergeUF
+  ♯idempotent : ∀ {A} → QEquiv (♯ A) (♯ (♯ A))
+  ♯idempotent = Ufunc-qeq {α = ∇m} collapse∇
 
-  collapse∇2 : ∀ {A} → □ ∇m A [ 1m ]⊢ A
-  collapse∇2 = (cut mergeFU (cut (Ufunc∘1 {α = ∇m} {β = Δm}) Ufunc11))
-
-  -- ap of U on an equivalence, should be an equivalence
-  ♯idempotent : ∀ {A} → ♯ A [ 1m ]⊢ ♯ (♯ A)
-  ♯idempotent = Ufunc collapse∇1
-
-  -- ap of F on an equivalence, should be an equivalence
-  ♭idempotent : ∀ {A} → ♭ (♭ A) [ 1m ]⊢ ♭ A
-  ♭idempotent = Ffunc collapseΔ1
+  ♭idempotent : ∀ {A} → QEquiv (♭ (♭ A)) (♭ A)
+  ♭idempotent = Ffunc-qeq collapseΔ 
 
 
   -- Δ (F Δm) and ∇ (U ∇m) are full and faithful but Γ (the other two) is not
-
-  F∇Δcancel1 : ∀ {A} → F ∇m (F Δm A) [ 1m ]⊢ A
-  F∇Δcancel1 = cut (Ffunc∘1 {α = ∇m} {β = Δm}) Ffunc11
-
-  F∇Δcancel2 : ∀ {A} → A [ 1m ]⊢ F ∇m (F Δm A)
-  F∇Δcancel2 = (cut Ffunc12 (Ffunc∘2 {α = ∇m} {β = Δm}))
 
   FΔ-fullandfaithful : ∀ {A B} → F Δm A [ 1m ]⊢ F Δm B -> A [ 1m ]⊢ B
   FΔ-fullandfaithful D = cut F∇Δcancel2 (cut (Ffunc {α = ∇m} D) F∇Δcancel1)
@@ -73,10 +57,11 @@ module adjointlogic.Reflection where
   FΔ-fullandfaithful-composite-1 D = (((cut-ident-right _ ∘ (transport⊢1 _ ∘ transport⊢1 _)) ∘
                                          cut-ident-left (transport⊢ 1⇒ (transport⊢ 1⇒ (cut D (hypq 1⇒))))) ∘ transport⊢1 _) ∘ transport⊢1 _
 
-  -- FIXME: seems like this is an equivalence by abstract reasoning, but why can't we do it just in terms of the normal forms??
-  -- is something wrong?
+
   FΔ-fullandfaithful-composite-2 : (D : F Δm P [ 1m ]⊢ F Δm Q) → (Ffunc (FΔ-fullandfaithful D)) == D 
-  FΔ-fullandfaithful-composite-2 D = 
+  FΔ-fullandfaithful-composite-2 D = ! (Fη _) ∘ ap FL {!!}
+{-
+    abstract proof
     _ =〈 {!!} 〉 
     cut (Ffunc {α = Δm} F∇Δcancel2) (cut (Ffunc {α = Δm} (Ffunc {α = ∇m} D)) (Ffunc {α = Δm} F∇Δcancel1)) =〈 ap (λ x → cut (Ffunc {α = Δm} F∇Δcancel2) (cut x (Ffunc {α = Δm} F∇Δcancel1))) (Ffunc-func∘ D) 〉 
     cut (Ffunc {α = Δm} F∇Δcancel2) (cut (cut Ffunc∘1 (cut (Ffunc {α = ∇m ∘1 Δm} D) Ffunc∘2)) (Ffunc {α = Δm} F∇Δcancel1)) =〈 {!!} 〉 
@@ -94,11 +79,10 @@ module adjointlogic.Reflection where
     
     hmm : (cut (Ffunc {α = Δm} F∇Δcancel2) (cut (cut Ffunc∘1 (F2 {A = F Δm P} ∇Δunit)) Ffunc11)) == hyp
     hmm = ap (λ x → (FL {α = Δm} {β = 1m ∘1 ((1m ∘1 1m) ∘1 1m)}) (FR 1m x (hypp 1⇒))) adjeq2
+-}
 
 {-
-
-  FIXME : ∀ {A B} → (D : A [ Δm ]⊢ F Δm B) → D == FR {α = Δm} {β = 1m ∘1 Δm} 1m 1⇒ ((cut {α = ∇m} {β = Δm} D (FL {α = Δm} {β = ∇m} hyp))) -- 1m is only endomorphism of s
-  FIXME D = {! Ffunc {α = Δm} (Ffunc {α = ∇m} (FL {α = Δm} {β = 1m} D))!}
+  FIXME : ∀ {A B} → (D : A [ Δm ]⊢ F Δm B) → D == FR {α = Δm} {β = 1m ∘1 Δm} 1m 1⇒ ((cut {α = ∇m} {β = Δm} D (FL {α = Δm} {β = ∇m} hyp))) 
 
   FIXME' : ∀ {A B} → (D : U ∇m A [ ∇m ]⊢ B) → D == UL 1m 1⇒ ((cut (UR {α = ∇m} {β = Δm} hyp) D)) -- 1m is only endomorphism of s
   FIXME' = {! !}
@@ -116,7 +100,7 @@ module adjointlogic.Reflection where
 -}
 
   U∇-fullandfaithful : ∀ {A B} → U ∇m A [ 1m ]⊢ U ∇m B -> A [ 1m ]⊢ B
-  U∇-fullandfaithful D = cut collapse∇1 (cut (Ffunc {α = ∇m} D) collapse∇2)
+  U∇-fullandfaithful D = cut (QEquiv.f collapse∇) (cut (Ffunc {α = ∇m} D) (QEquiv.g collapse∇))
 
   -- seems OK
   U∇-fullandfaithful-composite-1 : (D : P [ 1m ]⊢ Q) -> (U∇-fullandfaithful (Ufunc D)) == D
@@ -128,11 +112,6 @@ module adjointlogic.Reflection where
   -- ----------------------------------------------------------------------
   -- ♭ (♯ A) is equivalent to A: above retraction is an equivalence for this theory
 
-  postulate
-    focus-order : ∀ {p q r s} {A B} {α : q ≥ p} {β : q ≥ r} {γ : s ≥ r} 
-                    {δ : p ≥ r} {δ' : p ≥ s} (e : (α ∘1 δ) ⇒ β) (e' : (δ' ∘1 γ) ⇒ δ) (D : A [ δ' ]⊢ B) 
-                 → FR (α ∘1 δ') ((1⇒ ∘1cong e') ·2 e) (UL δ' 1⇒ D) == UL δ e (FR δ' e' D)
-
   ♭absorbs♯-composite-2 : cut (♭absorbs♯2 {P}) (♭absorbs♯1 {P}) == hyp
   ♭absorbs♯-composite-2 = ap (λ x → FL (FR 1m 1⇒ (UR x)))
                         (UL2 {D = cut (UL 1m 1⇒ mergeFU) (UL 1m 1⇒ ◯unit)} {D' = ident (♯ P)} 
@@ -143,23 +122,25 @@ module adjointlogic.Reflection where
   ♭absorbs♯ : QEquiv (♭ P) (♭ (♯ P))
   ♭absorbs♯ = qequiv ♭absorbs♯1 ♭absorbs♯2 ♭absorbs♯-composite-1 ♭absorbs♯-composite-2
 
+{-
   ♯absorbs♭1' : ∀ {A} → ♯ A [ 1m ]⊢ ♯ (♭ A) 
-  ♯absorbs♭1' = Ufunc (cut (cut mergeFU ◯unit) mergeUF')
+  ♯absorbs♭1' = Ufunc (cut (cut mergeFU ◯unit) mergeUF)
 
   ♯absorbs♭2' : ∀ {A} → ♯ (♭ A) [ 1m ]⊢ ♯ A
   ♯absorbs♭2' = Ufunc (cut mergeFU (cut collapseΔ1 mergeUF)) 
 
   ♯absorbs♭-composite-1' : cut (♯absorbs♭1' {P}) (♯absorbs♭2' {P}) == hyp
   ♯absorbs♭-composite-1' = {!!} -- ap (λ x → UR {α = ∇m} {β = 1m} (UL 1m 1⇒ x)) (ap (FL { α = ∇m} {β = 1m}) (FR2 {D = cut (FR 1m 1⇒ hyp) (FL (hypp ∇Δunit))} {D' = ident P} ∇Δunit adjeq2 id) ∘ Fη (FR Δm Δ∇counit (FL (hypp ∇Δunit))))
+-}
 
-  ♯absorbs♭-composite-2' : cut (♯absorbs♭2' {P}) (♯absorbs♭1' {P}) == ident (♯ (♭ P))
-  ♯absorbs♭-composite-2' = ap UR {!!} -- (! (Uη _) ∘ {!!}) ∘ Uη _
+  ♯absorbs♭-composite-2 : cut (♯absorbs♭2 {P}) (♯absorbs♭1 {P}) == ident (♯ (♭ P))
+  ♯absorbs♭-composite-2 = ap UR {!!} -- (! (Uη _) ∘ {!!}) ∘ Uη _
     -- ap (UR {α = ∇m} {β = 1m ∘1 1m}) (ap (UL 1m 1⇒) (ap (FL {α = ∇m} {β = 1m}) (FR2 (∇Δunit ·2 (1⇒ ∘1cong 1⇒' (∘1-assoc {α = Δm} {∇m} {Δm}))) {!!} (ap (FL {α = Δm} {β = (1m ∘1 ∇m) ∘1 (Δm ∘1 ((1m ∘1 ∇m) ∘1 Δm))}) (ap2 (λ x y → FR 1m x y) {!!} (ap (UR {α = Δm} {β = 1m}) (UL2 ∇Δunit {!!} id))) ∘ Fη _)) ∘ Fη _) ∘ FIXME' _)
 
   -- FIXME: seems like this is an equivalence by abstract reasoning, but why can't we do it just in terms of the normal forms??
 
   ♯absorbs♭ : QEquiv (♯ P) (♯ (♭ P))
-  ♯absorbs♭ = qequiv ♯absorbs♭1' ♯absorbs♭2' ♯absorbs♭-composite-1' ♯absorbs♭-composite-2'
+  ♯absorbs♭ = qequiv ♯absorbs♭1 ♯absorbs♭2 ♯absorbs♭-composite-1 ♯absorbs♭-composite-2
     
 
 

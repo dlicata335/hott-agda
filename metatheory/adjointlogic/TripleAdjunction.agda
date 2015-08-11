@@ -35,22 +35,21 @@ module adjointlogic.TripleAdjunction where
 
     -- ----------------------------------------------------------------------
     -- F -| U so we want U Δ to be the same as F ∇
-    -- we actually get an "hiso" -- a map with both a left and a right inverse, but they're different
 
     mergeUF : ∀ {A : Tp c} → U Δm A [ 1m ]⊢ F ∇m A
     mergeUF = FR Δm Δ∇counit (UL 1m 1⇒ hyp) 
 
-    mergeUF' : ∀ {A : Tp c} → U Δm A [ 1m ]⊢ F ∇m A 
-    mergeUF' = UL ∇m Δ∇counit (FR 1m 1⇒ hyp)
-
     mergeFU : ∀ {A : Tp c} → F ∇m A [ 1m ]⊢ U Δm A
     mergeFU = FL {α = ∇m} {β = 1m} (UR (transport⊢ ∇Δunit hyp))
 
-    inv1 : cut (mergeUF{P}) (mergeFU {P}) == ident (U Δm P)
-    inv1 = ap (UR {α = Δm} {β = 1m ∘1 1m}) (UL2 {D = cut hyp (hypp ∇Δunit)} {D' = ident P} ∇Δunit adjeq1 id) 
+    mergeUF-composite-1 : ∀ {A} → cut (mergeUF{A}) (mergeFU {A}) == ident (U Δm A)
+    mergeUF-composite-1 = ap (UR {α = Δm} {β = 1m ∘1 1m}) (UL2 {α = Δm} {β = 1m ∘1 (Δm ∘1 1m)} {γ = ∇m ∘1 Δm} {γ' = 1m} {e = (1⇒ ∘1cong 1⇒) ·2 (Δ∇counit ∘1cong 1⇒)} {e' = 1⇒} {D = transport⊢ ∇Δunit hyp} {D' = hyp} ∇Δunit adjeq1 id ∘ (ap (UL (∇m ∘1 Δm) (Δ∇counit ∘1cong 1⇒)) (cut-ident-left (transport⊢ ∇Δunit hyp)) ∘ ap (transport⊢ (Δ∇counit ∘1cong 1⇒)) (cutUL {e = 1⇒} {D = hyp} (transport⊢ ∇Δunit hyp))) ) 
 
-    inv2 : cut (mergeFU {P}) (mergeUF'{P}) == ident (F ∇m P)
-    inv2 = ap (FL {α = ∇m} {β = 1m ∘1 1m}) (FR2 {D = cut (hypp ∇Δunit) hyp} {D' = ident P} ∇Δunit adjeq2 id) 
+    mergeUF-composite-2 : ∀ {A} → cut (mergeFU {A}) (mergeUF{A}) == ident (F ∇m A)
+    mergeUF-composite-2 = ap (FL {α = ∇m} {β = 1m ∘1 1m}) (FR2 ∇Δunit adjeq2 (((cut-ident-right _ ∘ transport⊢1 _) ∘ cut-ident-left _) ∘ transport⊢1 _)) ∘ Fη _ 
+
+    mergeUFqeq : ∀ {A} → QEquiv (U Δm A) (F ∇m A)
+    mergeUFqeq = qequiv mergeUF mergeFU mergeUF-composite-1 mergeUF-composite-2
 
     {- these should not be provable
     badmergeUF : ∀ {A : Tp s} → U ∇m A [ 1m ]⊢ F Δm A
@@ -89,7 +88,7 @@ module adjointlogic.TripleAdjunction where
     ♭♯adjunction2 : ∀ {A B} → A [ 1m ]⊢ ♯ B → ♭ A [ 1m ]⊢ B 
     ♭♯adjunction2 {A}{B} start = UFadjunction2 (cut mergeUF (cut (UFadjunction2 start) mergeFU))
 
-    -- one of these should be a mergeUF' and then these should be an equivalence 
+    -- these should be an equivalence 
 
     -- ----------------------------------------------------------------------
     -- ♭ preserves coproducts

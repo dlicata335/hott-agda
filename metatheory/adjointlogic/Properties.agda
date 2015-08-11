@@ -4,7 +4,6 @@ open import adjointlogic.Rules
 
 module adjointlogic.Properties where
 
- abstract
   transport⊢1 : {p q : Mode} → {A : Tp q} → {α : q ≥ p} {B : Tp p} 
                (D : A [ α ]⊢ B)
              → transport⊢ (1⇒ {α = α}) D == D
