@@ -274,9 +274,9 @@ module adjointlogic.Properties where
     -- principal rule fires
     cutUL {α = α} {β} {γ = γ} {e = e} {D = D} (UR {α = α2} E) = ! (Uη _) ∘ ap (UR {α = α2} {β = β ∘1 α}) (ap2 (UL (γ ∘1 (α ∘1 α2))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) ((cut-assoc D (UR E) (UL 1m 1⇒ hyp) ∘ ! (ap (cut D) (transport⊢1 (cut E hyp)))) ∘ ap (cut D) (! (cut-ident-right E))) ∘ cutUL {e = e} {D = D} E) 
     -- right-commutative rule fires
-    cutUL (FR γ₁ x E) = {!!}  -- FIXME need some more rules for this to be true
-    cutUL (Inl E) = {!!}
-    cutUL (Inr E) = {!!}
+    cutUL {α = α} {β} {α₁ = α₁} {γ = γ} {e} {D} (FR γ₁ x E) = (ap (UL {α = α₁} {β = β ∘1 α} (γ ∘1 α) (e ∘1cong 1⇒)) (! (cutFR D)) ∘ ! (commuteULFR {α = _} {β = γ ∘1 α} {γ = γ ∘1 γ₁} {δ1 = α₁} {δ2 = β ∘1 α} {δ3 = β ∘1 γ₁} (cut D E) (ap (λ H → H ·2 (1⇒ ∘1cong x)) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) ∘ (interchange {e1 = e} {e2 = 1⇒} {f1 = 1⇒ ∘1cong 1⇒} {f2 = x} ∘ (! (interchange {e1 = 1⇒ ∘1cong 1⇒} {e2 = e} {f1 = x} {f2 = 1⇒}) ∘ ap (λ H → H ·2 (e ∘1cong 1⇒)) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))))))) ∘ ap (FR (β ∘1 γ₁) (1⇒ ∘1cong x)) (cutUL E) 
+    cutUL {α = α} {β} {α₁ = α₁} {γ = γ} {e} {D} (Inl E) = (ap (UL (γ ∘1 α) (e ∘1cong 1⇒)) (! (cutInl D)) ∘ commuteULInl (cut D E)) ∘ ap Inl (cutUL E)
+    cutUL {α = α} {β} {α₁ = α₁} {γ = γ} {e} {D} (Inr E) = (ap (UL (γ ∘1 α) (e ∘1cong 1⇒)) (! (cutInr D)) ∘ commuteULInr (cut D E)) ∘ ap Inr (cutUL E)
 
     cut-ident-left : ∀ {p q} {α : q ≥ p} {A B} → (D : A [ α ]⊢ B)
                   → cut (ident A) D == D
@@ -288,9 +288,10 @@ module adjointlogic.Properties where
     cut-ident-left (Inl D) = ap Inl (cut-ident-left D) ∘ cutInl hyp
     cut-ident-left (Inr D) = ap Inr (cut-ident-left D) ∘ cutInr hyp
     cut-ident-left (Case D D₁) = ap2 Case (cut-ident-left _) (cut-ident-left _)
-    -- because U is negative, this is a principal cut instead of a commuting one
-    cut-ident-left (UL γ x D) = ap (UL γ x) (cut-ident-left D) ∘ ap (transport⊢ x) (cutUL {γ = 1m} {e = 1⇒} {D = hyp} D) -- lemma γ x D where
+    -- because U is negative, this reduces by a principal cut instead of a commuting one
+    cut-ident-left (UL γ x D) = ap (UL γ x) (cut-ident-left D) ∘ ap (transport⊢ x) (cutUL {γ = 1m} {e = 1⇒} {D = hyp} D) 
 {-
+         -- lemma γ x D where
          -- proving this directly seems to need the same extra rules as cutUL does
          lemma : ∀ {p q} {α : q ≥ p} {B : Tp p} {q₁} {α₁ : q ≥ q₁}
                    {A : Tp q₁} (γ : q₁ ≥ p) (x : (α₁ ∘1 γ) ⇒ α) (D : A [ γ ]⊢ B) →

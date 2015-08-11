@@ -146,6 +146,8 @@ module adjointlogic.Rules where
          (D : A [ α ]⊢ U β C) → 
          D == UR (cut D (UL 1m 1⇒ hyp))
 
+    -- properties of the functor assigning morphisms between adjunctions
+
     FR2 : ∀ {p q r} {α : q ≥ p} {β : r ≥ p} {A : Tp q} {C : Tp r}
          → {γ γ' : r ≥ q} → {e : (γ ∘1 α) ⇒ β} {e' : (γ' ∘1 α) ⇒ β } {D : C [ γ ]⊢ A}  {D' : C [ γ' ]⊢ A} 
          → (γ2 : γ' ⇒ γ) (e2 : ((γ2 ∘1cong 1⇒) ·2 e) == e') (D2 : D == transport⊢ γ2 D')
@@ -156,10 +158,25 @@ module adjointlogic.Rules where
          → (γ2 : γ' ⇒ γ) (e2 : ((1⇒ ∘1cong γ2) ·2 e) == e') (D2 : D == transport⊢ γ2  D')
          → UL γ e D == UL γ' e' D' 
 
-    -- UL2' : ∀ {p q r} {α : p ≥ r} {β : p ≥ q} {A : Tp q} {C : Tp r}
-    --      → {γ γ' : r ≥ q} → {e : (α ∘1 γ) ⇒ β } {e' : (α ∘1 γ') ⇒ β } {D : C [ γ ]⊢ A}  {D' : C [ γ' ]⊢ A} 
-    --      → (γ2 : γ ⇒ γ') (e2 : e == ((1⇒ ∘1cong γ2) ·2 e')) (D2 : transport⊢ γ2 D == D')
-    --      → UL γ e D == UL γ' e' D'
+    -- order of left vs right focus doesn't matter 
+
+    commuteULFR : ∀ {p q r s} {A : Tp q} {C : Tp r}
+                   {α : q ≥ p} {β : r ≥ p} {γ : r ≥ q} {δ1 : s ≥ r} {δ2 : s ≥ p} {δ3 : s ≥ q} 
+                   {e1 : (γ ∘1 α) ⇒ β} {e2 : (δ1 ∘1 β) ⇒ δ2}
+                   {e3 : (δ1 ∘1 γ) ⇒ δ3} {e4 : (δ3 ∘1 α) ⇒ δ2} 
+                   (D : C [ γ ]⊢ A)
+                → ((1⇒ ∘1cong e1) ·2 e2) == ((e3 ∘1cong 1⇒) ·2 e4)
+                → _==_ { U δ1 C [ δ2 ]⊢ F α A } 
+                        (UL β e2 (FR γ e1 D))
+                        (FR δ3 e4 (UL γ e3 D))
+
+    commuteULInl : ∀ {p q r} {α : p ≥ q} {β : p ≥ r} {A : Tp q} {C C' : Tp r}
+                   → {γ : q ≥ r} {e : (α ∘1 γ) ⇒ β} (D : A [ γ ]⊢ C)
+                   → Inl {B = C'} (UL γ e D) == UL γ e (Inl D)
+
+    commuteULInr : ∀ {p q r} {α : p ≥ q} {β : p ≥ r} {A : Tp q} {C C' : Tp r}
+                   → {γ : q ≥ r} {e : (α ∘1 γ) ⇒ β} (D : A [ γ ]⊢ C)
+                   → Inr {A = C'} (UL γ e D) == UL γ e (Inr  D)
 
 
   -- HACK: for some reason the rewrites only work if we define this in this file
