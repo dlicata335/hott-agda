@@ -86,39 +86,43 @@ module adjointlogic.Properties where
     transport⊢cut : ∀ {p q r} {α α' : q ≥ p} {β β' : r ≥ q} {A : Tp r} {B : Tp q} {C : Tp p}
         {e1 : β ⇒ β'} {e2 : α ⇒ α'} (D : A [ β ]⊢ B) (E : B [ α ]⊢ C)
         → transport⊢ (e1 ∘1cong e2) (cut D E) == cut (transport⊢ e1 D) (transport⊢ e2 E)
+    -- E is hyp
     transport⊢cut {e1 = e1} {e2 = e2} (hypp x) (hypp x₁) = ap hypp (! (interchange {e1 = x} {e2 = e1} {f1 = x₁} {f2 = e2}))
     transport⊢cut {e1 = e1} {e2 = e2} (FL D) (hypp x) = ap FL (transport⊢cut {e1 = 1⇒ ∘1cong e1} {e2 = e2} D (hypp x))
-    transport⊢cut {e1 = e1} {e2 = e2} (UL γ x D) (hypp x₁) = ! (UL2 (1⇒ ∘1cong e2) {!(interchange {e1 = 1⇒} {e2 = (x ·2 e1)} {f1 = (1⇒ ∘1cong e2)} {f2 = 1⇒})!} (! (transport⊢cut {e1 = 1⇒} {e2 = e2} D (hypp x₁)) ∘ ! (ap (λ x₂ → cut x₂ (hypp (x₁ ·2 e2))) (transport⊢1 D))))
+    transport⊢cut {e1 = e1} {e2 = e2} (UL γ x D) (hypp x₁) = ! (UL2 (1⇒ ∘1cong e2) (interchange {e1 = x} {e2 = e1} {f1 = 1⇒} {f2 = e2} ∘ (! (interchange {e1 = 1⇒ ∘1cong 1⇒} {e2 = x ·2 e1} {f1 = e2} {f2 = 1⇒}) ∘ ap (λ H → H ·2 ((x ·2 e1) ∘1cong 1⇒)) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {e2})))) (! (transport⊢cut {e1 = 1⇒} {e2 = e2} D (hypp x₁)) ∘ ! (ap (λ x₂ → cut x₂ (hypp (x₁ ·2 e2))) (transport⊢1 D))))
     transport⊢cut (Case D D₁) (hypp x) = ap2 Case (transport⊢cut D (hypp x)) (transport⊢cut D₁ (hypp x))
-    transport⊢cut D (hypq x) = {!!}
-    -- D2 is FL
-    transport⊢cut {e1 = e1} {e2} (FL D) (FL E) = ap FL {!transport⊢cut {e1 = 1⇒ ∘1cong e1} {e2 = e2}!}
-    transport⊢cut (FR γ x D) (FL E) = {!!}
-    transport⊢cut (UL γ x D) (FL E) = {!!}
-    transport⊢cut (Case D D₁) (FL E) = {!!}
-    -- D2 is UL
+    transport⊢cut {e1 = e1} {e2 = e2} (hypq x) (hypq x₁) = ap hypq (! (interchange {e1 = x} {e2 = e1} {f1 = x₁} {f2 = e2}))
+    transport⊢cut {e1 = e1} {e2 = e2} (FL D) (hypq x) = ap FL (transport⊢cut {e1 = 1⇒ ∘1cong e1} {e2 = e2} D (hypq x))
+    transport⊢cut {e1 = e1} {e2 = e2} (UL γ x D) (hypq x₁) = ! (UL2 (1⇒ ∘1cong e2) (interchange {e1 = x} {e2 = e1} {f1 = 1⇒} {f2 = e2} ∘ (! (interchange {e1 = 1⇒ ∘1cong 1⇒} {e2 = x ·2 e1} {f1 = e2} {f2 = 1⇒}) ∘ ap (λ H → H ·2 ((x ·2 e1) ∘1cong 1⇒)) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {e2})))) (! (transport⊢cut {e1 = 1⇒} {e2 = e2} D (hypq x₁)) ∘ ! (ap (λ x₂ → cut x₂ (hypq (x₁ ·2 e2))) (transport⊢1 D))))
+    transport⊢cut (Case D D₁) (hypq x) = ap2 Case (transport⊢cut D (hypq x)) (transport⊢cut D₁ (hypq x))
+    -- E is FL
+    transport⊢cut {e1 = e1} {e2} (FL D) (FL E) = ap FL (transport⊢cut {e1 = 1⇒ ∘1cong e1} {e2 = e2} D (FL E))
+    transport⊢cut {e1 = e1} {e2} (FR γ x D) (FL E) = (ap (transport⊢ ((x ·2 e1) ∘1cong 1⇒)) (transport⊢cut1 {e2 = 1⇒ ∘1cong e2} D E) ∘ (transport⊢∘ (cut D E) ∘ ap (λ x₁ → transport⊢ x₁ (cut D E)) (! (interchange {e1 = x} {e2 = e1} {f1 = 1⇒} {f2 = e2} ∘ (! (interchange {e1 = 1⇒ ∘1cong 1⇒} {e2 = x ·2 e1} {f1 = e2} {f2 = 1⇒}) ∘ ap (λ H → H ·2 ((x ·2 e1) ∘1cong 1⇒)) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {e2}))))))) ∘ ! (transport⊢∘ (cut D E))
+    transport⊢cut {e1 = e1} {e2} (UL γ x D) (FL E) = ! (UL2 (1⇒ ∘1cong e2) (interchange {e1 = x} {e2 = e1} {f1 = 1⇒} {f2 = e2} ∘ (! (interchange {e1 = 1⇒ ∘1cong 1⇒} {e2 = x ·2 e1} {f1 = e2} {f2 = 1⇒}) ∘ ap (λ H → H ·2 ((x ·2 e1) ∘1cong 1⇒)) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {e2})))) (! (transport⊢cut1 {e2 = e2} D (FL E))))
+    transport⊢cut (Case D D₁) (FL E) = ap2 Case (transport⊢cut D (FL E)) (transport⊢cut D₁ (FL E))
+    -- E is UL
     transport⊢cut {e1 = e1} {e2} (FL D) (UL γ x E) = ap FL (transport⊢cut {e1 = 1⇒ ∘1cong e1} {e2 = e2} D (UL γ x E))
-    transport⊢cut (UL γ x D) (UL γ₁ x₁ E) = ! (UL2 {!!} {!!} {!!})
-    transport⊢cut (UR D) (UL γ x E) = {!!}
+    transport⊢cut {e1 = e1} {e2} (UL γ x D) (UL γ₁ x₁ E) = ! (UL2 (1⇒ ∘1cong e2) (interchange {e1 = x} {e2 = e1} {f1 = 1⇒} {f2 = e2} ∘ (! (interchange {e1 = 1⇒ ∘1cong 1⇒} {e2 = x ·2 e1} {f1 = e2} {f2 = 1⇒}) ∘ ap (λ H → H ·2 ((x ·2 e1) ∘1cong 1⇒)) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {e2})))) (! (transport⊢cut1 {e2 = e2} D (UL γ₁ x₁ E))))
+    transport⊢cut {e1 = e1} {e2 = e2} (UR D) (UL γ x E) = (ap (transport⊢ (1⇒ ∘1cong (x ·2 e2))) (transport⊢cut2 {e1 = e1 ∘1cong 1⇒} D E) ∘ (transport⊢∘ (cut D E) ∘ ap (λ x₁ → transport⊢ x₁ (cut D E)) (! (interchange {e1 = 1⇒} {e2 = e1} {f1 = x} {f2 = e2} ∘ ! (interchange {e1 = e1} {e2 = 1⇒} {f1 = 1⇒ ∘1cong 1⇒} {f2 = x ·2 e2}))))) ∘ ! (transport⊢∘ (cut D E))
     transport⊢cut (Case D D₁) (UL γ x E) = ap2 Case (transport⊢cut D (UL γ x E)) (transport⊢cut D₁ (UL γ x E))
-    -- D2 is case
+    -- E is case
     transport⊢cut {e1 = e1} {e2} (FL D) (Case E E₁) = ap FL (transport⊢cut {e1 = 1⇒ ∘1cong e1} {e2} D (Case E E₁))
-    transport⊢cut {e1 = e1} {e2} (UL γ x D) (Case E E₁) = ! (UL2 (1⇒ ∘1cong e2) {!!} (! (transport⊢cut {e1 = 1⇒} {e2} D (Case E E₁)) ∘ ap (λ x₁ → cut x₁ (Case (transport⊢ e2 E) (transport⊢ e2 E₁))) (! (transport⊢1 D))))
+    transport⊢cut {e1 = e1} {e2} (UL γ x D) (Case E E₁) = ! (UL2 (1⇒ ∘1cong e2) (interchange {e1 = x} {e2 = e1} {f1 = 1⇒} {f2 = e2} ∘ (! (interchange {e1 = 1⇒ ∘1cong 1⇒} {e2 = x ·2 e1} {f1 = e2} {f2 = 1⇒}) ∘ ap (λ H → H ·2 ((x ·2 e1) ∘1cong 1⇒)) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {e2})))) (! (transport⊢cut {e1 = 1⇒} {e2} D (Case E E₁)) ∘ ap (λ x₁ → cut x₁ (Case (transport⊢ e2 E) (transport⊢ e2 E₁))) (! (transport⊢1 D))))
     transport⊢cut (Case D D₁) (Case E E₁) = ap2 Case (transport⊢cut D (Case E E₁)) (transport⊢cut D₁ (Case E E₁))
     transport⊢cut (Inl D) (Case E E₁) = transport⊢cut D E
     transport⊢cut (Inr D) (Case E E₁) = transport⊢cut D E₁
-    -- D2 is right rule
-    transport⊢cut {e1 = e1} {e2} D (FR γ x E) = (! (cutFR (transport⊢ e1 D)) ∘ ! (FR2 (e1 ∘1cong 1⇒) {! !} (! (transport⊢cut {e1 = e1} {e2 = 1⇒} D E) ∘ ap (cut (transport⊢ e1 D)) (! (transport⊢1 E))))) ∘ ap (transport⊢ (e1 ∘1cong e2)) (cutFR D)
+    -- E is a right rule
+    transport⊢cut {e1 = e1} {e2} D (FR γ x E) = (! (cutFR (transport⊢ e1 D)) ∘ ! (FR2 (e1 ∘1cong 1⇒) (interchange {e1 = 1⇒} {e2 = e1} {f1 = x} {f2 = e2} ∘ (! (interchange {e1 = e1} {e2 = 1⇒} {f1 = 1⇒ ∘1cong 1⇒} {f2 = x ·2 e2}))) (! (transport⊢cut {e1 = e1} {e2 = 1⇒} D E) ∘ ap (cut (transport⊢ e1 D)) (! (transport⊢1 E))))) ∘ ap (transport⊢ (e1 ∘1cong e2)) (cutFR D)
     transport⊢cut {α = α} {α'} {β} {β'} {e1 = e1} {e2} D (UR {α = α1} E) = (! (cutUR (transport⊢ e1 D)) ∘ ap (UR {α = α1} {β' ∘1 α'}) (transport⊢cut {α = α ∘1 α1} {α' ∘1 α1} {β} {β'} {e1 = e1} {e2 = e2 ∘1cong 1⇒} D E)) ∘ ap (transport⊢ (e1 ∘1cong e2)) (cutUR D)
     transport⊢cut {α = α} {α'} {β} {β'} {e1 = e1} {e2} D (Inl E) = (! (cutInl (transport⊢ e1 D)) ∘ ap Inl (transport⊢cut {α = α} {α'} {β} {β'} {e1 = e1} {e2 = e2} D E)) ∘ ap (transport⊢ (e1 ∘1cong e2)) (cutInl D) 
     transport⊢cut {α = α} {α'} {β} {β'} {e1 = e1} {e2} D (Inr E) =  (! (cutInr (transport⊢ e1 D)) ∘ ap Inr (transport⊢cut {α = α} {α'} {β} {β'} {e1 = e1} {e2 = e2} D E)) ∘ ap (transport⊢ (e1 ∘1cong e2)) (cutInr D) 
 
-    transport⊢cut1 : ∀ {p q r} {α α' : q ≥ p} {β β' : r ≥ q} {A : Tp r} {B : Tp q} {C : Tp p}
+    transport⊢cut1 : ∀ {p q r} {α α' : q ≥ p} {β : r ≥ q} {A : Tp r} {B : Tp q} {C : Tp p}
         {e2 : α ⇒ α'} (D : A [ β ]⊢ B) (E : B [ α ]⊢ C)
         → transport⊢ (1⇒ ∘1cong e2) (cut D E) == cut D (transport⊢ e2 E)
     transport⊢cut1 {e2 = e2} D E = ap (λ x → cut x (transport⊢ e2 E)) (transport⊢1 D) ∘ transport⊢cut {e1 = 1⇒} {e2} D E
 
-    transport⊢cut2 : ∀ {p q r} {α α' : q ≥ p} {β β' : r ≥ q} {A : Tp r} {B : Tp q} {C : Tp p}
+    transport⊢cut2 : ∀ {p q r} {α : q ≥ p} {β β' : r ≥ q} {A : Tp r} {B : Tp q} {C : Tp p}
         {e1 : β ⇒ β'} (D : A [ β ]⊢ B) (E : B [ α ]⊢ C)
         → transport⊢ (e1 ∘1cong 1⇒) (cut D E) == cut (transport⊢ e1 D) E
     transport⊢cut2 {e1 = e1} D E = ap (λ x → cut (transport⊢ e1 D) x) (transport⊢1 E) ∘ transport⊢cut {e1 = e1} {1⇒} D E
@@ -131,9 +135,8 @@ module adjointlogic.Properties where
   cut-assoc {α = α} {β} {γ} D1 D2 (UR {α = α₁} D3) =  ((! (cutUR (cut D1 D2)) ∘ ap (UR {α = α₁} {β = (α ∘1 β) ∘1 γ}) (cut-assoc D1 D2 D3)) ∘ cutUR D1) ∘ ap (cut D1) (cutUR D2) 
   cut-assoc D1 D2 (Inl D3) = ((! (cutInl (cut D1 D2)) ∘ ap Inl (cut-assoc D1 D2 D3)) ∘ cutInl D1) ∘ ap (cut D1) (cutInl D2) 
   cut-assoc D1 D2 (Inr D3) = ((! (cutInr (cut D1 D2)) ∘ ap Inr (cut-assoc D1 D2 D3)) ∘ cutInr D1) ∘ ap (cut D1) (cutInr D2)
-  -- D1 is a right rule and D3 is a left rule
-  -- this cuts down on what D2 can be 
-  -- ENH: there's a lot of copy and paste here, because case-analysis is used to get the reductions going
+  -- D1 is a right rule and D3 is a left rule; this cuts down on what D2 can be 
+  -- ENH: there's a lot of copy and paste here, because the case-analysis is used to get the reductions going
   -- is there any way to avoid that?
   cut-assoc (Inl D1) (FR γ₁ x D2) (FL D3) = ap (transport⊢ (1⇒ ∘1cong (x ∘1cong 1⇒))) (cut-assoc (Inl D1) D2 D3) ∘ (! (transport⊢cut {e1 = 1⇒} {e2 = x ∘1cong 1⇒} (Inl D1) (cut D2 D3)) ∘ ! (ap (λ H → cut (Inl H) (transport⊢ (x ∘1cong 1⇒) (cut D2 D3))) (transport⊢1 D1)))
   cut-assoc (Inl D1) (Case D2 D3) (FL D4) = cut-assoc D1 D2 (FL D4)
@@ -255,9 +258,6 @@ module adjointlogic.Properties where
     cutUL (Inl E) = {!!}
     cutUL (Inr E) = {!!}
 
-{-
--}
-
     cut-ident-left : ∀ {p q} {α : q ≥ p} {A B} → (D : A [ α ]⊢ B)
                   → cut (ident A) D == D
     cut-ident-left (hypp x) = id
@@ -269,19 +269,22 @@ module adjointlogic.Properties where
     cut-ident-left (Inr D) = ap Inr (cut-ident-left D) ∘ cutInr hyp
     cut-ident-left (Case D D₁) = ap2 Case (cut-ident-left _) (cut-ident-left _)
     -- because U is negative, this is a principal cut instead of a commuting one
-    cut-ident-left (UL γ x D) = {! lemma γ x D !} where -- ap (UL γ x) (cut-ident-left D) ∘ ap (transport⊢ x) (cutUL {γ = 1m} {e = 1⇒} {D = hyp} D) where
+    cut-ident-left (UL γ x D) = ap (UL γ x) (cut-ident-left D) ∘ ap (transport⊢ x) (cutUL {γ = 1m} {e = 1⇒} {D = hyp} D) -- lemma γ x D where
+{-
+         -- proving this directly seems to need the same extra rules as cutUL does
          lemma : ∀ {p q} {α : q ≥ p} {B : Tp p} {q₁} {α₁ : q ≥ q₁}
                    {A : Tp q₁} (γ : q₁ ≥ p) (x : (α₁ ∘1 γ) ⇒ α) (D : A [ γ ]⊢ B) →
                    transport⊢ x (cut (UL 1m 1⇒ (ident A)) D) == UL γ x D
-         lemma γ₁ e (hypp x₁) = {!!}
-         lemma γ₁ e (hypq x₁) = {!!}
-         lemma γ₁ e (FL D₁) = {!!}
+         lemma γ₁ e (hypp x₁) = id
+         lemma γ₁ e (hypq x₁) = id
+         lemma γ₁ e (FL D₁) = {!OK!}
          lemma γ₁ e (FR γ₂ x₁ D₁) = {!!}
-         lemma γ₁ e (UL γ₂ x₁ D₁) = {!!}
-         lemma γ₁ e (UR D₁) = {!!}
-         lemma γ₁ e (Inl D₁) = {!!}
-         lemma γ₁ e (Inr D₁) = {!!}
-         lemma γ₁ e (Case D₁ D₂) = {!!}
+         lemma γ₁ e (UL γ₂ x₁ D₁) = ap (UL γ₁ e) (lemma γ₂ x₁ D₁)
+         lemma γ₁ e (UR D₁) = ! (Uη _) ∘ ap UR {!? ∘ (transport⊢cut {e1 = e ∘1cong 1⇒} {1⇒} (UL 1m 1⇒ hyp) D₁ ∘ ?)!}
+         lemma γ₁ e (Inl D₁) = {!!} ∘ ap Inl (lemma γ₁ e D₁)
+         lemma γ₁ e (Inr D₁) = {!!} ∘ ap Inr (lemma γ₁ e D₁)
+         lemma γ₁ e (Case D₁ D₂) = ap (UL γ₁ e) (ap2 Case (cut-ident-left D₁) (cut-ident-left D₂))
+-}
 
     cut-ident-right : ∀ {p q} {α : q ≥ p} {A B} → (D : A [ α ]⊢ B)
                       → cut D (ident B) == D
@@ -313,7 +316,6 @@ module adjointlogic.Properties where
     cut-ident-right {B = U α₁ B} (Case D D₁) = ! (Uη _)
     cut-ident-right {B = B ⊕ B₁} (Case D D₁) = ap2 Case (cut-ident-right D) (cut-ident-right D₁)
 
-  -- needs η and assoc
   cutFL : ∀ {p q r} {α : q ≥ p} {β : r ≥ q} {B : Tp q} {C : Tp p}
           {q₁} {α1 : q₁ ≥ r} {A : Tp q₁} →
           {D : A [ α1 ∘1 β ]⊢ B} (E : B [ α ]⊢ C)
