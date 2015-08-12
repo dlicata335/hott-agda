@@ -62,12 +62,19 @@ module adjointlogic.Reflection where
   ♯absorbs♭ : ∀ {A} → QEquiv (♯ A) (♯ (♭ A))
   ♯absorbs♭ = Ufunc-qeq (!qeq mergeUFqeq ·qeq (!qeq collapseΔ ·qeq mergeUFqeq))
 
-  -- maps are the same as for TripleAdjunction?
+  -- maps are the same as for TripleAdjunction
   ♯absorbs♭-map1 : (QEquiv.f (♯absorbs♭ {P})) == ♯absorbs♭1
-  ♯absorbs♭-map1 = {!seems OK!}
+  ♯absorbs♭-map1 = ap (UR {α = ∇m} {β = 1m}) (ap (UL 1m 1⇒) (ap (FR {α = ∇m} Δm 1⇒) (ap2 (FR 1m) adjeq2 (! (Uη _)))))
 
   ♯absorbs♭-map2 : (QEquiv.g (♯absorbs♭ {P})) == ♯absorbs♭2
-  ♯absorbs♭-map2 = {! not sure!}
+  ♯absorbs♭-map2 = 
+    ap (UR {α = ∇m} {β = 1m})
+       (ap (UL {α = ∇m} {β = ∇m ∘1 1m} 1m 1⇒)
+           (ap (FL {α = ∇m} {β = 1m})
+               (FR2 {α = ∇m} {β = 1m ∘1 ∇m} {γ = ∇m ∘1 Δm} {γ' = 1m} {e = 1⇒} {e' = 1⇒} ∇Δunit adjeq1 (ap (FL {α = Δm} {β = ∇m ∘1 Δm}) (ap (λ X → UL {α = Δm} {β = Δm ∘1 (∇m ∘1 Δm)} 1m X hyp) {! calc!})))
+            ∘ Fη (QEquiv.g (!qeq mergeUFqeq ·qeq (!qeq collapseΔ ·qeq mergeUFqeq))))) where
+    calc : (((1⇒ {_} {_} {Δm} ∘1cong ∇Δunit) ∘1cong 1⇒ {_} {_} {∇m}) ∘1cong 1⇒ {_} {_} {Δm}) == (1⇒ {_}{_}{Δm} ∘1cong ∇Δunit)
+    calc = ! adjeq2 ∘ (ap (λ H → (H ∘1cong 1⇒ {_} {_} {∇m}) ∘1cong 1⇒ {_} {_} {Δm}) adjeq2)
 
   -- ----------------------------------------------------------------------
   -- Δ (F Δm) and ∇ (U ∇m) are full and faithful but Γ (the other two) is not
@@ -142,9 +149,27 @@ module adjointlogic.Reflection where
   U∇-fullandfaithful : ∀ {A B} → U ∇m A [ 1m ]⊢ U ∇m B -> A [ 1m ]⊢ B
   U∇-fullandfaithful D = cut (QEquiv.f collapse∇) (cut (Ffunc {α = ∇m} D) (QEquiv.g collapse∇))
 
-  -- seems OK
   U∇-fullandfaithful-composite-1 : (D : P [ 1m ]⊢ Q) -> (U∇-fullandfaithful (Ufunc D)) == D
-  U∇-fullandfaithful-composite-1 D = {!!}
+  U∇-fullandfaithful-composite-1 D = (((cut-ident-right D ∘ cut-ident-left (cut D (hypq 1⇒))) ∘ transport⊢1 _) ∘ ap (λ H → transport⊢ H (cut (hypp 1⇒) (cut D (hypq 1⇒)))) (ap (λ x → 1⇒ {_} {_} {Δm} ∘1cong x) adjeq1)) ∘ transport⊢1 _
+
+  unUL : ∀ {A} → A [ Δm ]⊢ U ∇m A 
+  unUL = UR {α = ∇m} {β = Δm} hyp
+
+  ULhyp : ∀ {A} → U ∇m A [ ∇m ]⊢ A
+  ULhyp = UL 1m 1⇒ hyp
+
+  unUL-ULhyp : ∀ {A} → cut (ULhyp {A}) unUL == transport⊢ ∇Δunit hyp
+  unUL-ULhyp = ap (UR {α = ∇m} {β = ∇m ∘1 Δm}) (ap2 (UL 1m) (! adjeq1) (cut-ident-left hyp) ∘ cutUL {e = 1⇒} {D = hyp} hyp)
 
   U∇-fullandfaithful-composite-2 : (D : U ∇m P [ 1m ]⊢ U ∇m Q) -> (Ufunc (U∇-fullandfaithful D)) == D
-  U∇-fullandfaithful-composite-2 D = ! (Uη _) ∘ ap UR {!!}
+  U∇-fullandfaithful-composite-2 D = ! (Uη _) ∘ ap (UR {α = ∇m} {β = 1m}) (((fact4 ∘ ap (λ H → UL 1m 1⇒ (cut {α = ∇m} {β = Δm} (UR {α = ∇m} {β = Δm} (hypp 1⇒)) (cut D H))) (ap2 (UL 1m) adjeq1 id)) ∘ ap (λ H → UL 1m 1⇒ (cut {α = ∇m} {β = Δm} (UR {α = ∇m} {β = Δm} (hypp 1⇒)) H)) (transport⊢1 (cut D (UL 1m (∇Δunit ∘1cong 1⇒) (hypq 1⇒))))) ∘ ap (UL 1m 1⇒) (transport⊢1 (cut (UR {α = ∇m} {β = Δm} (hypp 1⇒)) (transport⊢ 1⇒ (cut D (UL 1m (∇Δunit ∘1cong 1⇒) (hypq 1⇒))))))) where
+     fact3 : cut unUL (UL 1m 1⇒ (cut (UR {α = ∇m} {β = Δm} (hypp 1⇒)) (cut D (UL 1m 1⇒ (hypq 1⇒))))) == cut unUL (cut D (UL 1m 1⇒ (hypq 1⇒)))
+     fact3 = cut-ident-left _ ∘ transport⊢1 _
+
+     fact2 : {D : U ∇m P [ ∇m ]⊢ Q} → cut (ULhyp {P}) (cut unUL D) == D
+     fact2 {D} = (((cut-ident-left D ∘ (transport⊢1 (cut hyp D) ∘ ap (λ H → transport⊢ H (cut hyp D)) adjeq1)) ∘ ! (transport⊢cut2 {e1 = ∇Δunit} hyp D)) ∘ ap (λ H → cut H D) unUL-ULhyp) ∘ cut-assoc ULhyp unUL D
+
+     fact4 : UL 1m 1⇒ (cut (UR {α = ∇m} {β = Δm} (hypp 1⇒)) (cut D (UL 1m 1⇒ (hypq 1⇒)))) == cut D (UL 1m 1⇒ (hypq 1⇒))
+     fact4 = fact2 ∘ (ap (cut ULhyp) fact3 ∘ ! fact2)
+
+     
