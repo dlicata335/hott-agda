@@ -172,4 +172,89 @@ module adjointlogic.Reflection where
      fact4 : UL 1m 1⇒ (cut (UR {α = ∇m} {β = Δm} (hypp 1⇒)) (cut D (UL 1m 1⇒ (hypq 1⇒)))) == cut D (UL 1m 1⇒ (hypq 1⇒))
      fact4 = fact2 ∘ (ap (cut ULhyp) fact3 ∘ ! fact2)
 
-     
+
+  -- Mike's Pfenning-Davies style rules
+
+  -- A true ⊢ C true
+  True⊢True : (A C : Tp c) -> Set
+  True⊢True A C = A [ 1m ]⊢ C
+
+  -- A valid ⊢ C true
+  Valid⊢True : (A C : Tp c) → Set
+  Valid⊢True A C = U Δm A [ Δm ]⊢ C
+
+  -- A valid ⊢ C valid  
+  Valid⊢Valid : (A C : Tp c) → Set
+  Valid⊢Valid A C = U Δm A [ 1m ]⊢ U Δm C
+
+  -- Rules for ♯
+    
+  -- can promote true to valid when proving ♯ C
+  -- A valid ⊢ C valid
+  -- ----------------
+  -- A true  ⊢ ♯ C
+
+  ♯intro : {A C : Tp c } 
+         → Valid⊢Valid A C 
+         → True⊢True A (♯ C)
+  ♯intro {A} {C} E = cut {β = 1m} (cut (cut {α = 1m} {β = 1m} Ufunc12 (U2 ∇Δunit)) (Ufunc∘2 {α = Δm} {∇m})) (cut {α = 1m} (Ufunc {α = ∇m} E) (Ufunc mergeUF))
+
+  coerce1 : ∀ {A C} → True⊢True A C → Valid⊢True A C
+  coerce1 D = cut (UL 1m 1⇒ hyp) D
+
+  coerce2 : ∀ {A C} → Valid⊢True A C → Valid⊢Valid A C
+  coerce2 D = UR {α = Δm} {β = 1m} D
+
+  ♯elim : { A C : Tp c}
+        → Valid⊢Valid A (♯ C)
+        → Valid⊢Valid A C
+  ♯elim D = cut D (cut (Ufunc∘1 {α = ∇m} {β = Δm}) (cut Ufunc11 mergeFU))
+
+  ♯reduction : (D : Valid⊢Valid P Q) → ♯elim (coerce2 (coerce1 (♯intro D))) == D
+  ♯reduction = {!!}
+
+  ♯expansion : (D : Valid⊢Valid P (♯ Q)) → coerce2 (coerce1 (♯intro (♯elim D))) == D
+  ♯expansion D = {!mergeFU!}
+
+
+  ♯' : Tp c -> Tp c
+  ♯' A = U (∇m ∘1 Δm) A
+
+  ♯'eqv : ∀ {A} → QEquiv (♯ A) (♯' A)
+  ♯'eqv = Ufunc-qeq (!qeq mergeUFqeq) ·qeq Ufunc∘
+
+  ♯'R : { A B : Tp c} → A [ ∇m ∘1 Δm ]⊢ B → A [ 1m ]⊢ ♯' B 
+  ♯'R D = UR {α = ∇m ∘1 Δm} {β = 1m} D
+
+  -- c ≥ c has two maps, 1m and ∇m ∘m Δm, with 1m ⇒ ∇m ∘m Δm, so 
+  -- ∇m ∘m Δm gives the most freedom for D
+  ♯'L : { A B : Tp c} → A [ ∇m ∘1 Δm ]⊢ B → ♯' A [ (∇m ∘1 Δm) ]⊢ B
+  ♯'L {A}{B} D = UL (∇m ∘1 Δm) 1⇒ D 
+
+  eta♯' : ∀ {A} → ♯' A [ 1m ]⊢ ♯' A
+  eta♯' = ♯'R (♯'L (transport⊢ ∇Δunit hyp))
+
+  test : ∀ {A} → eta♯' {A} == hyp
+  test = ap UR (UL2 ∇Δunit {!!} id)
+
+{-
+  rule1' : {A C : Tp c } 
+         → Valid⊢True A C
+         → Valid⊢Lax A C 
+  rule1' D = {!!} -- FR Δm 1⇒ D
+
+  -- rule 2:
+  -- A valid ⊢ C lax
+  -- ----------------
+  -- A true ⊢ C lax
+
+  rule2 : ∀ {A C} 
+         → Valid⊢Lax A C
+         → True⊢Lax A C 
+  rule2 D = {!!} -- transport⊢ (!·1-unit-l ·2 (∇Δunit ·1cong 1⇒ {_} {_} {∇m})) (cut (UR (transport⊢ Δ∇counit hyp)) D)
+
+  rule2' : ∀ {A C} 
+         → True⊢Lax A C
+         → Valid⊢Lax A C
+  rule2' D = UL ∇m 1⇒ D
+-}
