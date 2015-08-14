@@ -89,24 +89,39 @@ module adjointlogic.TripleAdjunction where
     ♭♯adjunction2 {A}{B} start = UFadjunction2 (cut mergeUF (cut (UFadjunction2 start) mergeFU))
 
     -- these should be an equivalence 
+    -- however, there's an easier proof that they're adjoint below
+
+    -- ----------------------------------------------------------------------
+    -- alternate defintion
+
+    ♯' : Tp c -> Tp c
+    ♯' A = U (∇m ∘1 Δm) A
+  
+    ♯'eqv : ∀ {A} → QEquiv (♯ A) (♯' A)
+    ♯'eqv = Ufunc-qeq (!qeq mergeUFqeq) ·qeq Ufunc∘
+  
+    ♭' : Tp c -> Tp c
+    ♭' A = F (∇m ∘1 Δm) A
+  
+    ♭'eqv : ∀ {A} → QEquiv (♭ A) (♭' A)
+    ♭'eqv = (Ffunc-qeq mergeUFqeq) ·qeq Ffunc∘
+
+    ♭♯adjunction1' : ∀ {A B} → ♭ A [ 1m ]⊢ B → A [ 1m ]⊢ ♯ B
+    ♭♯adjunction1' D = cut (UFadjunction1 (cut (QEquiv.g ♭'eqv) D)) (QEquiv.g ♯'eqv)
+
+    ♭♯adjunction2' : ∀ {A B} → A [ 1m ]⊢ ♯ B → ♭ A [ 1m ]⊢ B
+    ♭♯adjunction2' D = cut (QEquiv.f ♭'eqv) (UFadjunction2 (cut D (QEquiv.f ♯'eqv)))
+
+    -- FIXME: follows from properties 
+    -- ♭♯adjunction-composite-1 : ∀ {A B} (D : ♭ A [ 1m ]⊢ B) → ♭♯adjunction2 (♭♯adjunction1 D) == D
+    -- ♭♯adjunction-composite-1 = {!!}
 
     -- ----------------------------------------------------------------------
     -- ♭ preserves coproducts
 
-    pres-coprod1 : ∀ {A B} → ♭ (A ⊕ B) [ 1m ]⊢ (♭ A ⊕ ♭ B)
-    pres-coprod1 = ♭♯adjunction2 (Case (♭♯adjunction1 (Inl hyp)) (♭♯adjunction1 (Inr hyp)))
+    ♭pres-coprod : ∀ {A B} → QEquiv (♭ (A ⊕ B)) (♭ A ⊕ ♭ B)
+    ♭pres-coprod = (♭'eqv) ·qeq (Fpres-coprod ·qeq ⊕qeq (!qeq ♭'eqv) (!qeq ♭'eqv))
 
-    pres-coprod2 : ∀ {A B} → (♭ A ⊕ ♭ B) [ 1m ]⊢ ♭ (A ⊕ B)
-    pres-coprod2 = Case (□func (Inl hyp)) (□func (Inr hyp))
-
-    {- FIXME 
-    pres-coprod2-composite-1 : cut (pres-coprod1 {P}{Q}) (pres-coprod2 {P}{Q}) == hyp
-    pres-coprod2-composite-1 = {!!}
-
-    pres-coprod2-composite-2 : cut (pres-coprod2 {P}{Q}) (pres-coprod1 {P}{Q}) == hyp
-    pres-coprod2-composite-2 = {!!}
-    -}
-    
     -- ----------------------------------------------------------------------
     -- ♭ absorbing ♯ and vice versa: 
     -- for this theory, ♭ A is a retract of ♭ (♯ A) and ♯ A is a retract of ♯ (♭ A)

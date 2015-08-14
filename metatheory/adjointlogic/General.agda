@@ -22,6 +22,14 @@ module adjointlogic.General where
   !qeq : {p : Mode} {A B : Tp p} → QEquiv A B → QEquiv B A
   !qeq (qequiv f g α β) = qequiv g f β α
 
+  ⊕qeq : ∀ {p : Mode} {A A' B B' : Tp p} → QEquiv A A' → QEquiv B B' → QEquiv (A ⊕ B) (A' ⊕ B')
+  ⊕qeq (qequiv f g α β) (qequiv f₁ g₁ α₁ β₁) = 
+    qequiv (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp))) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp))) 
+           (ap2 Case ((((cut-ident-left _ ∘ ap (λ x → cut x (Inl hyp)) α) ∘ cut-assoc f g (Inl hyp)) ∘ ap (cut f) (cut-ident-left _)) ∘ ! (cut-assoc f (Inl hyp) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp)))))
+                     ((((cut-ident-left _ ∘ ap (λ x → cut x (Inr hyp)) α₁) ∘ cut-assoc f₁ g₁ (Inr hyp)) ∘ ap (cut f₁) (cut-ident-left _)) ∘ ! (cut-assoc f₁ (Inr hyp) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp)))))) 
+           (ap2 Case ((((cut-ident-left _ ∘ ap (λ x → cut x (Inl hyp)) β) ∘ cut-assoc g f (Inl hyp)) ∘ ap (cut g) (cut-ident-left _)) ∘ ! (cut-assoc g (Inl hyp) (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp)))))
+                     ((((cut-ident-left _ ∘ ap (λ x → cut x (Inr hyp)) β₁) ∘ cut-assoc g₁ f₁ (Inr hyp)) ∘ ap (cut g₁) (cut-ident-left _)) ∘ ! (cut-assoc g₁ (Inr hyp) (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp))))))
+
 
   -- ----------------------------------------------------------------------
   -- F α and F β are different for two parallel but different α and β
@@ -142,10 +150,25 @@ module adjointlogic.General where
   Ffunc-qeq : ∀ {p q} {α : p ≥ q} {A B : Tp p} → QEquiv A B → QEquiv (F α A) (F α B)
   Ffunc-qeq (qequiv f g α β) = qequiv (Ffunc f) (Ffunc g) (ap FL ((ap (FR 1m 1⇒) α ∘ cutFR f) ∘ transport⊢1 (cut f (FR 1m 1⇒ g)))) (ap FL ((ap (FR 1m 1⇒) β ∘ cutFR g) ∘ transport⊢1 (cut g (FR 1m 1⇒ f))))
 
+
+
   Ufunc : ∀ {p q : Mode} {α : q ≥ p} {A B} → A [ 1m ]⊢ B → U α A [ 1m ]⊢ U α B
   Ufunc {α = α} D =  UR {α = α} {β = 1m} (UL 1m 1⇒ D)
 
-  -- FIXME equations for U
+  Ufunc-ident : ∀ {p q : Mode} {α : q ≥ p} {A} → Ufunc (ident A) == (ident (U α A))
+  Ufunc-ident = id
+
+  Ufunc-cut : ∀ {p q : Mode} {α : q ≥ p} {A B C} {D : A [ 1m ]⊢ B} {E : B [ 1m ]⊢ C} → Ufunc {α = α} (cut D E) == cut (Ufunc D) (Ufunc E)
+  Ufunc-cut {D = D} {E} = ap UR (! (transport⊢1 _) ∘ (! (cutUL E)))
+
+  Ufunc-func1 : ∀ {p : Mode} {A B : Tp p} (D : A [ 1m ]⊢ B) → Ufunc {α = 1m} {A} {B} D == cut {α = 1m} {β = 1m} Ufunc11 (cut {α = 1m} {β = 1m} D Ufunc12)
+  Ufunc-func1 {A = A} {B = B} D = ! ((ap UR (ap (UL 1m 1⇒) (((cut-ident-right D ∘ ap (cut D) (cut-ident-left _ ∘ transport⊢1 _)) ∘ ! (cut-assoc D (UR {β = 1m} hyp) (UL 1m 1⇒ (ident B)))) ∘ ap (λ x → cut x (UL 1m 1⇒ (ident B))) (cut-ident-left (cut D (UR {β = 1m} hyp))))) ∘ Uη _) ∘ cutUL (cut D (UR {α = 1m} {β = 1m} hyp)))
+
+  Ufunc-func∘ : ∀ {p q r : Mode} {α : p ≥ q} {β : q ≥ r} {A B : Tp r} (D : A [ 1m ]⊢ B) 
+                → Ufunc {α = α} (Ufunc {α = β} D) == cut {α = 1m} {β = 1m} Ufunc∘1 (cut {α = 1m} {β = 1m} (Ufunc {α = α ∘1 β} D) Ufunc∘2)
+  Ufunc-func∘ {α = α} {β = β} D = ap (UR {α = α} {β = 1m}) (ap (UR {α = β} {β = 1m ∘1 α}) (! (((ap (UL β 1⇒) ((! (transport⊢1 _) ∘ (! (cutUL hyp) ∘ ap (UL 1m 1⇒) (! (cut-ident-right D) ∘ cut-ident-left D))) ∘ cutUL D) ∘ cutUL D) ∘ transport⊢1 _) ∘ ap (cut (UR {α = α ∘1 β} {β = 1m} (UL β 1⇒ (UL 1m 1⇒ hyp)))) (cut-ident-right (UL 1m 1⇒ D) ∘ transport⊢1 (cut (UL 1m 1⇒ D) hyp))) ) ∘ Uη _)
+
+  -- functoriality preserves equivalences
 
   Ufunc-qeq : ∀ {p q} {α : p ≥ q} {A B : Tp q} → QEquiv A B → QEquiv (U α A) (U α B)
   Ufunc-qeq {α = α1} (qequiv f g α β) = qequiv (Ufunc f) (Ufunc g) (ap (UR {α = α1} {β = 1m ∘1 1m}) ((ap (UL 1m 1⇒) α ∘ cutUL g) ∘ transport⊢1 _)) (ap (UR {α = α1} {β = 1m ∘1 1m}) ((ap (UL 1m 1⇒) β ∘ cutUL f) ∘ transport⊢1 _)) 
@@ -206,7 +229,17 @@ module adjointlogic.General where
               -> _==_ {◯ α A [ 1m ]⊢ ◯ α A} (cut (◯func ◯unit) ◯mult) hyp
   ◯unit2 {α = α} = ap (λ x → UR {α = α} {β = 1m} (UL 1m 1⇒ (FL x))) (cut-ident-left _ ∘ (transport⊢1 _ ∘ (transport⊢1 _ ∘ transport⊢1 _)))
 
-  -- FIXME equations for □
+  □assoc : ∀ {p q : Mode} {A : Tp p} {α : q ≥ p} 
+          -> _==_ {□ α A [ 1m ]⊢ □ α (□ α (□ α A)) } (cut □comult (□func □comult)) (cut □comult □comult)
+  □assoc = id
+
+  □unit1 : ∀ {p q : Mode} {A : Tp p} {α : q ≥ p} 
+              -> _==_ {□ α A [ 1m ]⊢ □ α A} (cut □comult □counit) hyp
+  □unit1 {α = α} = ap (λ x → FL (FR 1m 1⇒ (UR x))) (cut-ident-right _ ∘ transport⊢1 _) 
+
+  □unit2 : ∀ {p q : Mode} {A : Tp p} {α : q ≥ p} 
+              -> _==_ {□ α A [ 1m ]⊢ □ α A} (cut □comult (□func □counit)) hyp
+  □unit2 {α = α} = ap (λ x → FL (FR 1m 1⇒ (UR x))) (((cut-ident-right _ ∘ transport⊢1 _) ∘ transport⊢1 _) ∘ transport⊢1 _)
 
   {- these should not be provable
 
@@ -240,7 +273,15 @@ module adjointlogic.General where
   U2 : ∀ {p q} {A : Tp p} {α β : q ≥ p} → α ⇒ β → U α A [ 1m ]⊢ U β A
   U2 {α = α} {β = β} e = UR {α = β} {β = 1m} (UL 1m e hyp)
 
-  -- FIXME equations for U
+  U2-natural : ∀ {p q : Mode} {α β : p ≥ q} {A B : Tp q} (e : α ⇒ β) (D : A [ 1m ]⊢ B) →
+                     cut {α = 1m} (U2 e) (Ufunc {α = β} D) == (cut {β = 1m} (Ufunc {α = α} D) (U2 e))
+  U2-natural {α = α} {β = β} e D = ap (UR {α = β} {β = 1m ∘1 1m}) ((((! (ap (transport⊢ e) (cut-ident-right (UL 1m 1⇒ D)))) ∘ ap (UL 1m e) (cut-ident-left D)) ∘ cutUL D) ∘ transport⊢1 _)
+
+  U21 : ∀ {p q} {A : Tp p} {α : q ≥ p} → U2 {A = A} (1⇒ {α = α}) == hyp 
+  U21 = id
+
+  U2· : ∀ {p q} {A : Tp p} {α β γ : q ≥ p} {e1 : β ⇒ α} {e2 : γ ⇒ β} → U2 {A = A} (e2 ·2 e1) == cut (U2 {A = A} e2) (U2 {A = A} e1)
+  U2· {α = α} {e1 = e1} {e2} = ap (UR {α = α} {β = 1m}) (! (ap (transport⊢ e1) (cut-ident-right (UL 1m e2 hyp)))) 
 
   -- one of many ways to phrase this; see
   -- https://unapologetic.wordpress.com/2007/07/30/transformations-of-adjoints/
@@ -256,7 +297,23 @@ module adjointlogic.General where
   F2U2conjugate' {α = α} {β} {e} = ap (FL {α = α} {β = 1m ∘1 1m}) {!!}
   -}
 
-  -- action of F on terms respects 2-cells
 
+  -- ----------------------------------------------------------------------
+  -- F preserves coproducts
 
+  Fpres-coprod1 : ∀ {p q} {α : p ≥ q} {A B} → F α (A ⊕ B) [ 1m ]⊢ (F α A ⊕ F α B)
+  Fpres-coprod1 {α = α} = FL {α = α} {β = 1m} (Case (Inl (FR 1m 1⇒ hyp)) (Inr (FR 1m 1⇒ hyp)))
 
+  Fpres-coprod2 : ∀ {p q} {α : p ≥ q} {A B} → (F α A ⊕ F α B) [ 1m ]⊢ (F α (A ⊕ B))
+  Fpres-coprod2 = Case (FL (FR 1m 1⇒ (Inl hyp))) (FL (FR 1m 1⇒ (Inr hyp)))
+
+  Fpres-coprod-composite-1 : ∀ {p q} {α : p ≥ q} {A B} 
+                           → cut (Fpres-coprod2 {α = α}{A}{B}) Fpres-coprod1 == hyp
+  Fpres-coprod-composite-1 = ap2 Case (! (Fη _) ∘ ap FL (ap Inl (! (cut-ident-left _ ∘ transport⊢1 _)) ∘ (cut-ident-left _ ∘ transport⊢1 _))) (! (Fη _) ∘ ap FL (ap Inr (! (cut-ident-left _ ∘ transport⊢1 _)) ∘ (cut-ident-left _ ∘ transport⊢1 _)))
+
+  Fpres-coprod-composite-2 : ∀ {p q} {α : p ≥ q} {A B} 
+                           → cut (Fpres-coprod1 {α = α}{A}{B}) Fpres-coprod2 == hyp
+  Fpres-coprod-composite-2 {α = α} = ap (FL {α = α} {β = 1m ∘1 1m}) (! (⊕η _) ∘ ap2 Case (! (ap (FR 1m 1⇒) (cut-ident-left _)) ∘ (cut-ident-left _ ∘ transport⊢1 _)) (! (ap (FR 1m 1⇒) (cut-ident-left _)) ∘ (cut-ident-left _ ∘ transport⊢1 _)))
+
+  Fpres-coprod : ∀ {p q} {α : p ≥ q} {A B} → QEquiv (F α (A ⊕ B)) (F α A ⊕ F α B)
+  Fpres-coprod = qequiv Fpres-coprod1 Fpres-coprod2 Fpres-coprod-composite-2 Fpres-coprod-composite-1

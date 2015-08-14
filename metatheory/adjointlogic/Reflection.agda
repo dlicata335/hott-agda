@@ -9,7 +9,11 @@ module adjointlogic.Reflection where
 
   -- for some reason the rewrites only work if we define the theory in that file
   open adjointlogic.Rules.Reflection
-    
+
+  -- note that for this theory
+  -- s ≥ s has only 1m
+  -- c ≥ c has two maps, 1m and ∇m ∘m Δm, with 1m ⇒ ∇m ∘m Δm
+
   postulate
    adjeq1 : _==_ {∇m ⇒ ∇m} (∇Δunit ∘1cong 1⇒{_}{_}{∇m}) 1⇒
    adjeq2 : _==_ {Δm ⇒ Δm} (1⇒ {_} {_} {Δm} ∘1cong ∇Δunit) 1⇒
@@ -71,7 +75,7 @@ module adjointlogic.Reflection where
     ap (UR {α = ∇m} {β = 1m})
        (ap (UL {α = ∇m} {β = ∇m ∘1 1m} 1m 1⇒)
            (ap (FL {α = ∇m} {β = 1m})
-               (FR2 {α = ∇m} {β = 1m ∘1 ∇m} {γ = ∇m ∘1 Δm} {γ' = 1m} {e = 1⇒} {e' = 1⇒} ∇Δunit adjeq1 (ap (FL {α = Δm} {β = ∇m ∘1 Δm}) (ap (λ X → UL {α = Δm} {β = Δm ∘1 (∇m ∘1 Δm)} 1m X hyp) {! calc!})))
+               (FR2 {α = ∇m} {β = 1m ∘1 ∇m} {γ = ∇m ∘1 Δm} {γ' = 1m} {e = 1⇒} {e' = 1⇒} {D = _} {D' = □counit} ∇Δunit adjeq1 (ap (FL {α = Δm} {β = ∇m ∘1 Δm}) (ap (λ X → UL {α = Δm} {β = Δm ∘1 (∇m ∘1 Δm)} 1m X hyp) calc)))
             ∘ Fη (QEquiv.g (!qeq mergeUFqeq ·qeq (!qeq collapseΔ ·qeq mergeUFqeq))))) where
     calc : (((1⇒ {_} {_} {Δm} ∘1cong ∇Δunit) ∘1cong 1⇒ {_} {_} {∇m}) ∘1cong 1⇒ {_} {_} {Δm}) == (1⇒ {_}{_}{Δm} ∘1cong ∇Δunit)
     calc = ! adjeq2 ∘ (ap (λ H → (H ∘1cong 1⇒ {_} {_} {∇m}) ∘1cong 1⇒ {_} {_} {Δm}) adjeq2)
@@ -175,86 +179,71 @@ module adjointlogic.Reflection where
 
   -- Mike's Pfenning-Davies style rules
 
-  -- A true ⊢ C true
-  True⊢True : (A C : Tp c) -> Set
-  True⊢True A C = A [ 1m ]⊢ C
-
-  -- A valid ⊢ C true
-  Valid⊢True : (A C : Tp c) → Set
-  Valid⊢True A C = U Δm A [ Δm ]⊢ C
-
-  -- A valid ⊢ C valid  
-  Valid⊢Valid : (A C : Tp c) → Set
-  Valid⊢Valid A C = U Δm A [ 1m ]⊢ U Δm C
-
-  -- Rules for ♯
-    
-  -- can promote true to valid when proving ♯ C
-  -- A valid ⊢ C valid
-  -- ----------------
-  -- A true  ⊢ ♯ C
-
-  ♯intro : {A C : Tp c } 
-         → Valid⊢Valid A C 
-         → True⊢True A (♯ C)
-  ♯intro {A} {C} E = cut {β = 1m} (cut (cut {α = 1m} {β = 1m} Ufunc12 (U2 ∇Δunit)) (Ufunc∘2 {α = Δm} {∇m})) (cut {α = 1m} (Ufunc {α = ∇m} E) (Ufunc mergeUF))
-
-  coerce1 : ∀ {A C} → True⊢True A C → Valid⊢True A C
-  coerce1 D = cut (UL 1m 1⇒ hyp) D
-
-  coerce2 : ∀ {A C} → Valid⊢True A C → Valid⊢Valid A C
-  coerce2 D = UR {α = Δm} {β = 1m} D
-
-  ♯elim : { A C : Tp c}
-        → Valid⊢Valid A (♯ C)
-        → Valid⊢Valid A C
-  ♯elim D = cut D (cut (Ufunc∘1 {α = ∇m} {β = Δm}) (cut Ufunc11 mergeFU))
-
-  ♯reduction : (D : Valid⊢Valid P Q) → ♯elim (coerce2 (coerce1 (♯intro D))) == D
-  ♯reduction = {!!}
-
-  ♯expansion : (D : Valid⊢Valid P (♯ Q)) → coerce2 (coerce1 (♯intro (♯elim D))) == D
-  ♯expansion D = {!mergeFU!}
-
-
-  ♯' : Tp c -> Tp c
-  ♯' A = U (∇m ∘1 Δm) A
-
-  ♯'eqv : ∀ {A} → QEquiv (♯ A) (♯' A)
-  ♯'eqv = Ufunc-qeq (!qeq mergeUFqeq) ·qeq Ufunc∘
+  copy : {A : Tp c} → A [ ∇m ∘1 Δm ]⊢ A
+  copy = (transport⊢ ∇Δunit hyp)
 
   ♯'R : { A B : Tp c} → A [ ∇m ∘1 Δm ]⊢ B → A [ 1m ]⊢ ♯' B 
   ♯'R D = UR {α = ∇m ∘1 Δm} {β = 1m} D
 
-  -- c ≥ c has two maps, 1m and ∇m ∘m Δm, with 1m ⇒ ∇m ∘m Δm, so 
-  -- ∇m ∘m Δm gives the most freedom for D
   ♯'L : { A B : Tp c} → A [ ∇m ∘1 Δm ]⊢ B → ♯' A [ (∇m ∘1 Δm) ]⊢ B
   ♯'L {A}{B} D = UL (∇m ∘1 Δm) 1⇒ D 
 
+  ♭'R : {A B : Tp c} → A [ (∇m ∘1 Δm) ]⊢ B → A [ (∇m ∘1 Δm) ]⊢ ♭' B
+  ♭'R D = FR {α = ∇m ∘1 Δm} {β = ∇m ∘1 Δm} (∇m ∘1 Δm) 1⇒ D 
+
+  ♭'L : {A B : Tp c} → A [ ∇m ∘1 Δm ]⊢ B → ♭' A [ 1m ]⊢ B
+  ♭'L D = FL {α = ∇m ∘1 Δm} {β = 1m} D
+
   eta♯' : ∀ {A} → ♯' A [ 1m ]⊢ ♯' A
-  eta♯' = ♯'R (♯'L (transport⊢ ∇Δunit hyp))
+  eta♯' = ♯'R (♯'L copy)
 
-  test : ∀ {A} → eta♯' {A} == hyp
-  test = ap UR (UL2 ∇Δunit {!!} id)
+  -- A cohesive ⊢ C cohesive
+  Coh⊢Coh : (A C : Tp c) -> Set
+  Coh⊢Coh A C = A [ 1m ]⊢ C
 
-{-
-  rule1' : {A C : Tp c } 
-         → Valid⊢True A C
-         → Valid⊢Lax A C 
-  rule1' D = {!!} -- FR Δm 1⇒ D
+  -- A crisp ⊢ C cohesive
+  Crisp⊢Coh : (A C : Tp c) → Set
+  Crisp⊢Coh A C = A [ ∇m ∘1 Δm ]⊢ C
 
-  -- rule 2:
-  -- A valid ⊢ C lax
-  -- ----------------
-  -- A true ⊢ C lax
+  strengthen : ∀ {A C} → Coh⊢Coh A C → Crisp⊢Coh A C
+  strengthen paste = cut copy paste
 
-  rule2 : ∀ {A C} 
-         → Valid⊢Lax A C
-         → True⊢Lax A C 
-  rule2 D = {!!} -- transport⊢ (!·1-unit-l ·2 (∇Δunit ·1cong 1⇒ {_} {_} {∇m})) (cut (UR (transport⊢ Δ∇counit hyp)) D)
+  -- Rules for ♯
+    
+  -- A crisp ⊢ C cohesive
+  -- -------------------------
+  -- A cohesive ⊢ ♯ C cohesive
 
-  rule2' : ∀ {A C} 
-         → True⊢Lax A C
-         → Valid⊢Lax A C
-  rule2' D = UL ∇m 1⇒ D
--}
+  ♯'intro : {A C : Tp c } 
+         → Crisp⊢Coh A C 
+         → Coh⊢Coh A (♯' C)
+  ♯'intro {A} {C} E = ♯'R E
+
+  -- A crisp ⊢ ♯ C cohesive
+  -- -------------------------
+  -- A crisp ⊢ C cohesive
+
+  ♯'elim : { A C : Tp c}
+        → Crisp⊢Coh A (♯' C)
+        → Crisp⊢Coh A C
+  ♯'elim D = cut {α = ∇m ∘1 Δm} {β = ∇m ∘1 Δm} D (♯'L copy)
+
+  ♯'reduction : ∀ {A C} (D : Crisp⊢Coh A C) 
+              → ♯'elim (strengthen (♯'intro D)) == D
+  ♯'reduction D = {!!} ∘ ! (cut-assoc (transport⊢ ∇Δunit hyp) (♯'R D) (UL (∇m ∘1 Δm) 1⇒ (transport⊢ ∇Δunit hyp)))
+
+  -- Δ ; Γ ⊢ M : ♯ A
+  -- --------------------------
+  -- Δ,Γ ; · ⊢ M [copy Γ] : ♯ A
+  -- ---------------------------------
+  -- Δ,Γ ; · ⊢ ♯elim (M [copy Γ]) : A
+  -- ----------------------------------------
+  -- Δ ; Γ ⊢ ♯intro (♯elim (M [copy Γ])) : ♯ A
+
+  ♯'expansion : ∀ {A C} (D : Coh⊢Coh A (♯' C) )
+              → ♯'intro (♯'elim (strengthen D)) == D
+  ♯'expansion {A}{C} D = ! (Uη _) ∘ ap (UR {α = ∇m ∘1 Δm} {β = 1m}) ((ap (cut D) foo ∘ {!!}) ∘ ! (cut-assoc copy D (UL (∇m ∘1 Δm) 1⇒ copy))) where 
+    foo : (UL {A = C} {C = C} (∇m ∘1 Δm) 1⇒ (transport⊢ ∇Δunit hyp)) == (UL 1m 1⇒ hyp)
+    foo = UL2 ∇Δunit {!adjeq2!} id
+
+
