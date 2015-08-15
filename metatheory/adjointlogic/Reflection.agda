@@ -244,6 +244,6 @@ module adjointlogic.Reflection where
               → ♯'intro (♯'elim (strengthen D)) == D
   ♯'expansion {A}{C} D = ! (Uη _) ∘ ap (UR {α = ∇m ∘1 Δm} {β = 1m}) ((ap (cut D) foo ∘ {!!}) ∘ ! (cut-assoc copy D (UL (∇m ∘1 Δm) 1⇒ copy))) where 
     foo : (UL {A = C} {C = C} (∇m ∘1 Δm) 1⇒ (transport⊢ ∇Δunit hyp)) == (UL 1m 1⇒ hyp)
-    foo = UL2 ∇Δunit {!adjeq2!} id
+    foo = UL2 ∇Δunit {!!} id
 
 

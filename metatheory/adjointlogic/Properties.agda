@@ -82,7 +82,10 @@ module adjointlogic.Properties where
   cutUR (Inr D) = id
   cutUR (Case D D₁) = id
 
+  -- everything above here is true without ≈ (the propositional axioms)
+
   mutual
+    -- FIXME: needs to be mutual with ap (transport⊢ e) - preserving ≈ 
     transport⊢cut : ∀ {p q r} {α α' : q ≥ p} {β β' : r ≥ q} {A : Tp r} {B : Tp q} {C : Tp p}
         {e1 : β ⇒ β'} {e2 : α ⇒ α'} (D : A [ β ]⊢ B) (E : B [ α ]⊢ C)
         → transport⊢ (e1 ∘1cong e2) (cut D E) == cut (transport⊢ e1 D) (transport⊢ e2 E)
@@ -127,6 +130,7 @@ module adjointlogic.Properties where
         → transport⊢ (e1 ∘1cong 1⇒) (cut D E) == cut (transport⊢ e1 D) E
     transport⊢cut2 {e1 = e1} D E = ap (λ x → cut (transport⊢ e1 D) x) (transport⊢1 E) ∘ transport⊢cut {e1 = e1} {1⇒} D E
 
+  -- doesn't need ap cut on ≈ 
   cut-assoc : ∀ {p q r s} {α : p ≥ q} {β : q ≥ r} {γ : r ≥ s} {A : Tp p} {B : Tp q} {C : Tp r} {D : Tp s}
                 (D1 : A [ α ]⊢ B) (D2 : B [ β ]⊢ C) (D3 : C [ γ ]⊢ D) →
                 cut D1 (cut D2 D3) == cut (cut D1 D2) D3
@@ -259,7 +263,7 @@ module adjointlogic.Properties where
   cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (Case D2 D3) (hypq x) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (Case D2 D3) (hypq x))
 
   mutual
-    -- needs η and associativity
+    -- FIXME: uses ap cut on ≈
     -- requires a bunch of commutation because the right-commutative cuts take precedence
     cutUL : ∀ {p q r} {α : q ≥ p} {β : r ≥ q} {B : Tp q} {C : Tp p}
             {q₁} {α₁ : r ≥ q₁} {A : Tp q₁} {γ : q₁ ≥ q}
@@ -271,7 +275,12 @@ module adjointlogic.Properties where
     cutUL (UL γ₁ x E) = id
     cutUL (Case E E₁) = id
     -- principal rule fires
-    cutUL {α = α} {β} {γ = γ} {e = e} {D = D} (UR {α = α2} E) = ! (Uη _) ∘ ap (UR {α = α2} {β = β ∘1 α}) (ap2 (UL (γ ∘1 (α ∘1 α2))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) ((cut-assoc D (UR E) (UL 1m 1⇒ hyp) ∘ ! (ap (cut D) (transport⊢1 (cut E hyp)))) ∘ ap (cut D) (! (cut-ident-right E))) ∘ cutUL {e = e} {D = D} E) 
+    cutUL {α = α} {β} {γ = γ} {e = e} {D = D} (UR {α = α2} E) = 
+      ! (Uη _) ∘ ap (UR {α = α2} {β = β ∘1 α}) (ap2 (UL (γ ∘1 (α ∘1 α2))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒}))
+            ((cut-assoc D (UR E) (UL 1m 1⇒ hyp) ∘ ! (ap (cut D) (transport⊢1 (cut E hyp))))
+               -- FIXME: would be nice if we could get rid of this
+             ∘ ap (cut D) (! (cut-ident-right E)))
+            ∘ cutUL {e = e} {D = D} E) 
     -- right-commutative rule fires
     cutUL {α = α} {β} {α₁ = α₁} {γ = γ} {e} {D} (FR γ₁ x E) = (ap (UL {α = α₁} {β = β ∘1 α} (γ ∘1 α) (e ∘1cong 1⇒)) (! (cutFR D)) ∘ ! (commuteULFR {α = _} {β = γ ∘1 α} {γ = γ ∘1 γ₁} {δ1 = α₁} {δ2 = β ∘1 α} {δ3 = β ∘1 γ₁} (cut D E) (ap (λ H → H ·2 (1⇒ ∘1cong x)) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) ∘ (interchange {e1 = e} {e2 = 1⇒} {f1 = 1⇒ ∘1cong 1⇒} {f2 = x} ∘ (! (interchange {e1 = 1⇒ ∘1cong 1⇒} {e2 = e} {f1 = x} {f2 = 1⇒}) ∘ ap (λ H → H ·2 (e ∘1cong 1⇒)) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))))))) ∘ ap (FR (β ∘1 γ₁) (1⇒ ∘1cong x)) (cutUL E) 
     cutUL {α = α} {β} {α₁ = α₁} {γ = γ} {e} {D} (Inl E) = (ap (UL (γ ∘1 α) (e ∘1cong 1⇒)) (! (cutInl D)) ∘ commuteULInl (cut D E)) ∘ ap Inl (cutUL E)
@@ -336,8 +345,25 @@ module adjointlogic.Properties where
     cut-ident-right {B = U α₁ B} (Case D D₁) = ! (Uη _)
     cut-ident-right {B = B ⊕ B₁} (Case D D₁) = ap2 Case (cut-ident-right D) (cut-ident-right D₁)
 
+  -- FIXME: uses cut-ident-left, which usues ap cut on ≈
   cutFL : ∀ {p q r} {α : q ≥ p} {β : r ≥ q} {B : Tp q} {C : Tp p}
           {q₁} {α1 : q₁ ≥ r} {A : Tp q₁} →
           {D : A [ α1 ∘1 β ]⊢ B} (E : B [ α ]⊢ C)
           → cut (FL D) E == FL {α = α1} {β = β ∘1 α} (cut D E) 
   cutFL {D = D} E = ap FL ((ap (λ x → cut x E) (cut-ident-left D) ∘ ap (λ x → cut x E) (transport⊢1 (cut hyp D))) ∘ cut-assoc (FR 1m 1⇒ hyp) (FL D) E) ∘ Fη _
+{-
+  still seem to need cut-ident-left 
+  cutFL (hypp x) = id
+  cutFL (hypq x) = id
+  cutFL (FL E) = id
+  cutFL {α = α} {β} {α1 = α1} {D = D}  (FR γ x E) = {!ap (FR (β ∘1 γ) (1⇒ ∘1cong x))!}
+  cutFL (UL γ x E) = id
+  cutFL {α = α} {β} {α1 = α1} {D = D} (UR {α = α2} E) = ! (ap FL (cutUR D)) ∘ ((ap FL (ap UR (cut-ident-left _ ∘ transport⊢1 _)) ∘ Fη _) ∘ ap (UR {α = α2} {β = β ∘1 α}) (cutFL {D = D} E))
+  cutFL (Inl E) = {!!}
+  cutFL (Inr E) = {!!}
+  cutFL (Case E E₁) = {!!}
+-}
+
+  cutCase : ∀ {p q r} {α : q ≥ p} {C : Tp p} {A B : Tp q} {C' : Tp r} {β : p ≥ r} {D1 : A [ α ]⊢ C} {D2 : B [ α ]⊢ C} (E : C [ β ]⊢ C')
+          → cut (Case D1 D2) E == Case (cut D1 E) (cut D2 E)
+  cutCase D = ap2 Case (ap (λ x → cut x D) (cut-ident-left _) ∘ cut-assoc (Inl hyp) (Case _ _) D) (ap (λ x → cut x D) (cut-ident-left _) ∘ cut-assoc (Inr hyp) (Case _ _) D) ∘ ⊕η _

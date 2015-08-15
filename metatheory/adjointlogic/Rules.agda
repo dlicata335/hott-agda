@@ -134,19 +134,19 @@ module adjointlogic.Rules where
   cut {α = α} (UL γ e D) E = UL (γ ∘1 α) (e ∘1cong 1⇒) (cut D E) 
   cut (Case D1 D2) E = Case (cut D1 E) (cut D2 E)
 
-  -- FIXME: show that transport⊢ and cut are well-defined on these
+  -- FIXME: show cut is well-defined on these
   postulate
-    -- FIXME: focusing? 
+    -- the η rules could maybe be made to hold on the nose 
+    -- with focusing
+
     Fη : ∀ {p q r} {α : q ≥ p} {β : p ≥ r} {A : Tp q} {C : Tp r}
          (D : F α A [ β ]⊢ C) → 
          D == FL (cut {α = β} {β = α} (FR {α = α} {β = 1m ∘1 α} 1m 1⇒ hyp) D) 
 
-    -- FIXME: focusing? 
     Uη : ∀ {p q r} {α : p ≥ q} {β : q ≥ r} {A : Tp p} {C : Tp r}
          (D : A [ α ]⊢ U β C) → 
          D == UR (cut D (UL 1m 1⇒ hyp))
 
-    -- FIXME: focusing? 
     ⊕η : ∀ {p q} {α : p ≥ q} {A B : Tp p} {C : Tp q} (D : (A ⊕ B) [ α ]⊢ C) 
        → D == Case (cut (Inl hyp) D) (cut (Inr hyp) D)
 
