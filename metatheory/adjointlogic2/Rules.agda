@@ -204,6 +204,11 @@ module adjointlogic2.Rules where
   eq : ∀ {p q} {α : p ≥ q} {A : Tp p} {B : Tp q} {D1 D2 : A [ α ]⊢ B} → D1 == D2 → D1 ≈ D2
   eq id = id
 
+  UL≈' : ∀ {p q r} {α : p ≥ q} {β : p ≥ r} {A : Tp q} {C : Tp r}
+       → {γ : q ≥ r} {e1 e2 : (α ∘1 γ) ⇒ β}
+          {D1 D2 : A [ γ ]⊢ C} → e1 == e2 → D1 ≈ D2 → UL γ e1 D1 ≈ UL γ e2 D2
+  UL≈' id q = UL≈ q 
+
   -- HACK: for some reason the rewrites only work if we define this in this file
   module Reflection where
     postulate

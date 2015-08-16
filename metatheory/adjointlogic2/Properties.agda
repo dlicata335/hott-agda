@@ -156,136 +156,133 @@ module adjointlogic2.Properties where
   cut-assoc : ∀ {p q r s} {α : p ≥ q} {β : q ≥ r} {γ : r ≥ s} {A : Tp p} {B : Tp q} {C : Tp r} {D : Tp s}
                 (D1 : A [ α ]⊢ B) (D2 : B [ β ]⊢ C) (D3 : C [ γ ]⊢ D) →
                 cut D1 (cut D2 D3) ≈ cut (cut D1 D2) D3
-  cut-assoc = {!!}
-{-
   -- D3 is a right rule
-  cut-assoc {α = α} {β} D1 D2 (FR γ₁ x D3) = ((! (cutFR (cut D1 D2)) ∘ ap2 (FR (α ∘1 (β ∘1 γ₁))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x})) (cut-assoc D1 D2 D3)) ∘ cutFR D1) ∘ ap (cut D1) (cutFR D2)
-  cut-assoc {α = α} {β} {γ} D1 D2 (UR {α = α₁} D3) =  ((! (cutUR (cut D1 D2)) ∘ ap (UR {α = α₁} {β = (α ∘1 β) ∘1 γ}) (cut-assoc D1 D2 D3)) ∘ cutUR D1) ∘ ap (cut D1) (cutUR D2) 
-  cut-assoc D1 D2 (Inl D3) = ((! (cutInl (cut D1 D2)) ∘ ap Inl (cut-assoc D1 D2 D3)) ∘ cutInl D1) ∘ ap (cut D1) (cutInl D2) 
-  cut-assoc D1 D2 (Inr D3) = ((! (cutInr (cut D1 D2)) ∘ ap Inr (cut-assoc D1 D2 D3)) ∘ cutInr D1) ∘ ap (cut D1) (cutInr D2)
+  cut-assoc {α = α} {β} D1 D2 (FR γ₁ x D3) = ((eq (! (cutFR (cut D1 D2))) ∘≈ (eq (ap (\ x → FR (α ∘1 (β ∘1 γ₁)) x _) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))) ∘≈ FR≈ (cut-assoc D1 D2 D3))) ∘≈ eq (cutFR D1)) ∘≈ eq (ap (cut D1) (cutFR D2))
+  cut-assoc {α = α} {β} {γ} D1 D2 (UR {α = α₁} D3) =  ((eq (! (cutUR (cut D1 D2))) ∘≈ UR≈ {α = α₁} {β = (α ∘1 β) ∘1 γ} (cut-assoc D1 D2 D3)) ∘≈ eq (cutUR D1)) ∘≈ eq (ap (cut D1) (cutUR D2))
+  cut-assoc D1 D2 (Inl D3) = ((eq (! (cutInl (cut D1 D2))) ∘≈ Inl≈ (cut-assoc D1 D2 D3)) ∘≈ eq (cutInl D1)) ∘≈ eq (ap (cut D1) (cutInl D2))
+  cut-assoc D1 D2 (Inr D3) = ((eq (! (cutInr (cut D1 D2))) ∘≈ Inr≈ (cut-assoc D1 D2 D3)) ∘≈ eq (cutInr D1)) ∘≈ eq (ap (cut D1) (cutInr D2))
   -- D1 is a right rule and D3 is a left rule; this cuts down on what D2 can be 
   -- ENH: there's a lot of copy and paste here, because the case-analysis is used to get the reductions going
   -- is there any way to avoid that?
-  cut-assoc (Inl D1) (FR γ₁ x D2) (FL D3) = ap (transport⊢ (1⇒ ∘1cong (x ∘1cong 1⇒))) (cut-assoc (Inl D1) D2 D3) ∘ (! (transport⊢cut {e1 = 1⇒} {e2 = x ∘1cong 1⇒} (Inl D1) (cut D2 D3)) ∘ ! (ap (λ H → cut (Inl H) (transport⊢ (x ∘1cong 1⇒) (cut D2 D3))) (transport⊢1 D1)))
+  cut-assoc (Inl D1) (FR γ₁ x D2) (FL D3) = transport⊢≈ _ (cut-assoc (Inl D1) D2 D3) ∘≈ (!≈ (transport⊢cut {e1 = 1⇒} {e2 = x ∘1cong 1⇒} (Inl D1) (cut D2 D3)) ∘≈ eq (! (ap (λ H → cut (Inl H) (transport⊢ (x ∘1cong 1⇒) (cut D2 D3))) (transport⊢1 D1))))
   cut-assoc (Inl D1) (Case D2 D3) (FL D4) = cut-assoc D1 D2 (FL D4)
-  cut-assoc (Inl D1) (UR D2) (UL γ₁ x D3) = ap (transport⊢ _) (cut-assoc (Inl D1) D2 D3) ∘ (ap (λ H → transport⊢ H (cut (Inl D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x})) ∘ (! (transport⊢cut {e1 = 1⇒} {e2 = 1⇒ ∘1cong x} (Inl D1) (cut D2 D3)) ∘ ap (λ H → cut (Inl H) (transport⊢ (1⇒ ∘1cong x) (cut D2 D3))) (! (transport⊢1 D1))))
+  cut-assoc (Inl D1) (UR D2) (UL γ₁ x D3) = transport⊢≈ _ (cut-assoc (Inl D1) D2 D3) ∘≈ (eq (ap (λ H → transport⊢ H (cut (Inl D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))) ∘≈ (!≈ (transport⊢cut {e1 = 1⇒} {e2 = 1⇒ ∘1cong x} (Inl D1) (cut D2 D3)) ∘≈ eq (ap (λ H → cut (Inl H) (transport⊢ (1⇒ ∘1cong x) (cut D2 D3))) (! (transport⊢1 D1)))))
   cut-assoc (Inl D1) (Case D2 D3) (UL γ₁ x D4) = cut-assoc D1 D2 (UL γ₁ x D4)
   cut-assoc (Inl D1) (Inl D2) (Case D3 D4) = cut-assoc (Inl D1) D2 D3
   cut-assoc (Inl D1) (Inr D2) (Case D3 D4) = cut-assoc (Inl D1) D2 D4
   cut-assoc (Inl D1) (Case D2 D3) (Case D4 D5) = cut-assoc D1 D2 (Case D4 D5)
-  cut-assoc (Inr D1) (FR γ₁ x D2) (FL D3) = ap (transport⊢ (1⇒ ∘1cong (x ∘1cong 1⇒))) (cut-assoc (Inr D1) D2 D3) ∘ (! (transport⊢cut {e1 = 1⇒} {e2 = x ∘1cong 1⇒} (Inr D1) (cut D2 D3)) ∘ ap (λ H → cut (Inr H) (transport⊢ (x ∘1cong 1⇒) (cut D2 D3))) (! (transport⊢1 D1)))
+  cut-assoc (Inr D1) (FR γ₁ x D2) (FL D3) = transport⊢≈ _ (cut-assoc (Inr D1) D2 D3) ∘≈ (!≈ (transport⊢cut {e1 = 1⇒} {e2 = x ∘1cong 1⇒} (Inr D1) (cut D2 D3)) ∘≈ eq (ap (λ H → cut (Inr H) (transport⊢ (x ∘1cong 1⇒) (cut D2 D3))) (! (transport⊢1 D1))))
   cut-assoc (Inr D1) (Case D2 D3) (FL D4) = cut-assoc D1 D3 (FL D4) 
-  cut-assoc (Inr D1) (UR D2) (UL γ₁ x D3) = ap (transport⊢ _) (cut-assoc (Inr D1) D2 D3) ∘ (ap (λ H → transport⊢ H (cut (Inr D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x})) ∘ (! (transport⊢cut {e1 = 1⇒} {e2 = 1⇒ ∘1cong x} (Inr D1) (cut D2 D3)) ∘ ap (λ H → cut (Inr H) (transport⊢ (1⇒ ∘1cong x) (cut D2 D3))) (! (transport⊢1 D1))))
+  cut-assoc (Inr D1) (UR D2) (UL γ₁ x D3) = transport⊢≈ _ (cut-assoc (Inr D1) D2 D3) ∘≈ (eq (ap (λ H → transport⊢ H (cut (Inr D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))) ∘≈ (!≈ (transport⊢cut {e1 = 1⇒} {e2 = 1⇒ ∘1cong x} (Inr D1) (cut D2 D3)) ∘≈ eq (ap (λ H → cut (Inr H) (transport⊢ (1⇒ ∘1cong x) (cut D2 D3))) (! (transport⊢1 D1)))))
   cut-assoc (Inr D1) (Case D2 D3) (UL γ₁ x D4) = cut-assoc D1 D3 (UL γ₁ x D4)
   cut-assoc (Inr D1) (Inl D2) (Case D3 D4) = cut-assoc (Inr D1) D2 D3
   cut-assoc (Inr D1) (Inr D2) (Case D3 D4) = cut-assoc (Inr D1) D2 D4
   cut-assoc (Inr D1) (Case D2 D3) (Case D4 D5) = cut-assoc D1 D3 (Case D4 D5)
-  cut-assoc (UR D1) (FR γ₁ x D2) (FL D3) = ap (transport⊢ ((1⇒ ∘1cong x) ∘1cong 1⇒)) (cut-assoc (UR D1) D2 D3) ∘ ! (transport⊢cut1 {e2 = x ∘1cong 1⇒} (UR D1) (cut D2 D3))
-  cut-assoc (UR D1) (UL γ₁ x D2) (FL D3) = transport⊢cut2 {e1 = 1⇒ ∘1cong x} (cut D1 D2) (FL D3) ∘ ap (transport⊢ ((1⇒ ∘1cong x) ∘1cong 1⇒)) (cut-assoc D1 D2 (FL D3))
-  cut-assoc (UR D1) (UL γ₁ x D2) (UL γ₂ x₁ D3) = transport⊢cut2 {e1 = 1⇒ ∘1cong x} (cut D1 D2) (UL γ₂ x₁ D3) ∘ ap (transport⊢ ((1⇒ ∘1cong x) ∘1cong 1⇒)) (cut-assoc D1 D2 (UL γ₂ x₁ D3))
-  cut-assoc (UR D1) (UR D2) (UL γ₁ x D3) = ap (transport⊢ ((1⇒ ∘1cong 1⇒) ∘1cong x)) (cut-assoc (UR D1) D2 D3) ∘ (ap (λ H → transport⊢ H (cut (UR D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x})) ∘ ! (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (UR D1) (cut D2 D3)))
-  cut-assoc (UR D1) (UL γ₁ x D2) (Case D3 D4) = transport⊢cut2 {e1 = 1⇒ ∘1cong x} (cut D1 D2) (Case D3 D4) ∘ ap (transport⊢ ((1⇒ ∘1cong x) ∘1cong 1⇒)) (cut-assoc D1 D2 (Case D3 D4))
+  cut-assoc (UR D1) (FR γ₁ x D2) (FL D3) = transport⊢≈ _ (cut-assoc (UR D1) D2 D3) ∘≈ !≈ (transport⊢cut1 {e2 = x ∘1cong 1⇒} (UR D1) (cut D2 D3))
+  cut-assoc (UR D1) (UL γ₁ x D2) (FL D3) = transport⊢cut2 {e1 = 1⇒ ∘1cong x} (cut D1 D2) (FL D3) ∘≈ transport⊢≈ _ (cut-assoc D1 D2 (FL D3))
+  cut-assoc (UR D1) (UL γ₁ x D2) (UL γ₂ x₁ D3) = transport⊢cut2 {e1 = 1⇒ ∘1cong x} (cut D1 D2) (UL γ₂ x₁ D3) ∘≈  transport⊢≈ _ (cut-assoc D1 D2 (UL γ₂ x₁ D3))
+  cut-assoc (UR D1) (UR D2) (UL γ₁ x D3) =  transport⊢≈ _ (cut-assoc (UR D1) D2 D3) ∘≈ (eq (ap (λ H → transport⊢ H (cut (UR D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))) ∘≈ !≈ (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (UR D1) (cut D2 D3)))
+  cut-assoc (UR D1) (UL γ₁ x D2) (Case D3 D4) = transport⊢cut2 {e1 = 1⇒ ∘1cong x} (cut D1 D2) (Case D3 D4) ∘≈ transport⊢≈ _ (cut-assoc D1 D2 (Case D3 D4))
   cut-assoc (UR D1) (Inl D2) (Case D3 D4) = cut-assoc (UR D1) D2 D3
   cut-assoc (UR D1) (Inr D2) (Case D3 D4) = cut-assoc (UR D1) D2 D4
-  cut-assoc (FR γ₁ e D1) (FL D2) (FL D3) = (transport⊢cut2 {e1 = e ∘1cong 1⇒} (cut D1 D2) (FL D3) ∘ ap (λ H → transport⊢ H (cut (cut D1 D2) (FL D3))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒}))) ∘ ap (transport⊢ (e ∘1cong 1⇒)) (cut-assoc D1 D2 (FL D3))
-  cut-assoc (FR γ₁ e D1) (FR γ₂ x D2) (FL D3) = ap (transport⊢ ((1⇒ ∘1cong x) ∘1cong 1⇒)) (cut-assoc (FR γ₁ e D1) D2 D3) ∘ (! (transport⊢cut1 {e2 = x ∘1cong 1⇒} (FR γ₁ e D1) (cut D2 D3)))
-  cut-assoc (FR γ₁ e D1) (FL D2) (UL γ₂ x D3) = (transport⊢cut2 {e1 = e ∘1cong 1⇒} (cut D1 D2) (UL γ₂ x D3) ∘ ap (λ H → transport⊢ H (cut (cut D1 D2) (UL γ₂ x D3))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒}))) ∘ ap (transport⊢ (e ∘1cong 1⇒)) (cut-assoc D1 D2 (UL γ₂ x D3))
-  cut-assoc (FR γ₁ e D1) (UR D2) (UL γ₂ x D3) = (ap (transport⊢ ((1⇒ ∘1cong 1⇒) ∘1cong x)) (cut-assoc (FR γ₁ e D1) D2 D3) ∘ ap (λ H → transport⊢ H (cut (FR γ₁ e D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))) ∘ ! (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (FR γ₁ e D1) (cut D2 D3))
-  cut-assoc (FR γ₁ e D1) (FL D2) (Case D3 D4) = (transport⊢cut2 {e1 = e ∘1cong 1⇒} (cut D1 D2) (Case D3 D4) ∘ ap (λ H → transport⊢ H (cut (cut D1 D2) (Case D3 D4))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒}))) ∘ ap (transport⊢ (e ∘1cong 1⇒)) (cut-assoc D1 D2 (Case D3 D4))
+  cut-assoc (FR γ₁ e D1) (FL D2) (FL D3) = (transport⊢cut2 {e1 = e ∘1cong 1⇒} (cut D1 D2) (FL D3) ∘≈ (eq (ap (λ H → transport⊢ H (cut (cut D1 D2) (FL D3))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒}))))) ∘≈ transport⊢≈ _ (cut-assoc D1 D2 (FL D3))
+  cut-assoc (FR γ₁ e D1) (FR γ₂ x D2) (FL D3) = transport⊢≈ _  (cut-assoc (FR γ₁ e D1) D2 D3) ∘≈ (!≈ (transport⊢cut1 {e2 = x ∘1cong 1⇒} (FR γ₁ e D1) (cut D2 D3)))
+  cut-assoc (FR γ₁ e D1) (FL D2) (UL γ₂ x D3) = (transport⊢cut2 {e1 = e ∘1cong 1⇒} (cut D1 D2) (UL γ₂ x D3) ∘≈ eq (ap (λ H → transport⊢ H (cut (cut D1 D2) (UL γ₂ x D3))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})))) ∘≈ transport⊢≈ _ (cut-assoc D1 D2 (UL γ₂ x D3))
+  cut-assoc (FR γ₁ e D1) (UR D2) (UL γ₂ x D3) = (transport⊢≈ _ (cut-assoc (FR γ₁ e D1) D2 D3) ∘≈ eq (ap (λ H → transport⊢ H (cut (FR γ₁ e D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x})))) ∘≈ !≈ (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (FR γ₁ e D1) (cut D2 D3))
+  cut-assoc (FR γ₁ e D1) (FL D2) (Case D3 D4) = (transport⊢cut2 {e1 = e ∘1cong 1⇒} (cut D1 D2) (Case D3 D4) ∘≈ eq (ap (λ H → transport⊢ H (cut (cut D1 D2) (Case D3 D4))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})))) ∘≈ transport⊢≈ _ (cut-assoc D1 D2 (Case D3 D4))
   cut-assoc (FR γ₁ e D1) (Inl D2) (Case D3 D4) = cut-assoc (FR γ₁ e D1) D2 D3
   cut-assoc (FR γ₁ e D1) (Inr D2) (Case D3 D4) = cut-assoc (FR γ₁ e D1) D2 D4
   -- D1 is a left rule and D3 is a left rule
   --    D1 is FL
-  cut-assoc (FL D1) (FL D2) (FL D3) = ap FL (cut-assoc D1 (FL D2) (FL D3))
-  cut-assoc {α = α} {β = β} (FL {α = α1} D1) (FR γ₁ x D2) (FL {α = α2} D3) = ap (transport⊢ (1⇒ ∘1cong (x ∘1cong 1⇒))) (cut-assoc (FL D1) D2 D3) ∘ (! (transport⊢cut1 (FL D1) (cut D2 D3)))
-  cut-assoc (FL D1) (UL γ₁ x D2) (FL D3) = ap FL (cut-assoc D1 (UL γ₁ x D2) (FL D3))
-  cut-assoc (FL D1) (Case D2 D3) (FL D4) = ap FL (cut-assoc D1 (Case D2 D3) (FL D4))
-  cut-assoc (FL D1) (FL D2) (UL γ₁ x D3) = ap FL (cut-assoc D1 (FL D2) (UL γ₁ x D3))
-  cut-assoc (FL D1) (UL γ₁ x D2) (UL γ₂ x₁ D3) = ap FL (cut-assoc D1 (UL γ₁ x D2) (UL γ₂ x₁ D3))
-  cut-assoc (FL D1) (UR D2) (UL γ₁ x D3) = (ap (transport⊢ ((1⇒ ∘1cong 1⇒) ∘1cong x)) (cut-assoc (FL D1) D2 D3) ∘ ap (λ H → transport⊢ H (cut (FL D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))) ∘ ! (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (FL D1) (cut D2 D3))
-  cut-assoc (FL D1) (Case D2 D3) (UL γ₁ x D4) = ap FL (cut-assoc D1 (Case D2 D3) (UL γ₁ x D4))
-  cut-assoc (FL D1) (FL D2) (Case D3 D4) = ap FL (cut-assoc D1 (FL D2) (Case D3 D4))
-  cut-assoc (FL D1) (UL γ₁ x D2) (Case D3 D4) = ap FL (cut-assoc D1 (UL γ₁ x D2) (Case D3 D4))
+  cut-assoc (FL D1) (FL D2) (FL D3) = FL≈ (cut-assoc D1 (FL D2) (FL D3))
+  cut-assoc {α = α} {β = β} (FL {α = α1} D1) (FR γ₁ x D2) (FL {α = α2} D3) = transport⊢≈ _ (cut-assoc (FL D1) D2 D3) ∘≈ (!≈ (transport⊢cut1 (FL D1) (cut D2 D3)))
+  cut-assoc (FL D1) (UL γ₁ x D2) (FL D3) = FL≈ (cut-assoc D1 (UL γ₁ x D2) (FL D3))
+  cut-assoc (FL D1) (Case D2 D3) (FL D4) = FL≈ (cut-assoc D1 (Case D2 D3) (FL D4))
+  cut-assoc (FL D1) (FL D2) (UL γ₁ x D3) = FL≈ (cut-assoc D1 (FL D2) (UL γ₁ x D3))
+  cut-assoc (FL D1) (UL γ₁ x D2) (UL γ₂ x₁ D3) = FL≈ (cut-assoc D1 (UL γ₁ x D2) (UL γ₂ x₁ D3))
+  cut-assoc (FL D1) (UR D2) (UL γ₁ x D3) = (transport⊢≈ _ (cut-assoc (FL D1) D2 D3) ∘≈ (eq (ap (λ H → transport⊢ H (cut (FL D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))))) ∘≈ !≈ (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (FL D1) (cut D2 D3))
+  cut-assoc (FL D1) (Case D2 D3) (UL γ₁ x D4) = FL≈ (cut-assoc D1 (Case D2 D3) (UL γ₁ x D4))
+  cut-assoc (FL D1) (FL D2) (Case D3 D4) = FL≈ (cut-assoc D1 (FL D2) (Case D3 D4))
+  cut-assoc (FL D1) (UL γ₁ x D2) (Case D3 D4) = FL≈ (cut-assoc D1 (UL γ₁ x D2) (Case D3 D4))
   cut-assoc (FL D1) (Inl D2) (Case D3 D4) = cut-assoc (FL D1) D2 D3
   cut-assoc (FL D1) (Inr D2) (Case D3 D4) = cut-assoc (FL D1) D2 D4
-  cut-assoc (FL D1) (Case D2 D3) (Case D4 D5) = ap FL (cut-assoc D1 (Case D2 D3) (Case D4 D5)) 
+  cut-assoc (FL D1) (Case D2 D3) (Case D4 D5) = FL≈ (cut-assoc D1 (Case D2 D3) (Case D4 D5)) 
   --    D1 is Case
-  cut-assoc (Case D1 D1') (FL D2) (FL D3) = ap2 Case (cut-assoc D1 (FL D2) (FL D3)) (cut-assoc D1' (FL D2) (FL D3))
-  cut-assoc (Case D1 D1') (FL D2) (UL γ₁ x D3) = ap2 Case (cut-assoc D1 (FL D2) (UL γ₁ x D3)) (cut-assoc D1' (FL D2) (UL γ₁ x D3))
-  cut-assoc (Case D1 D1') (FL D2) (Case D3 D4) = ap2 Case (cut-assoc D1 (FL D2) (Case D3 D4)) (cut-assoc D1' (FL D2) (Case D3 D4))
-  cut-assoc (Case D1 D1') (FR γ₁ x D2) (FL D3) = ap (transport⊢ (1⇒ ∘1cong (x ∘1cong 1⇒))) (cut-assoc (Case D1 D1') D2 D3) ∘ (! (transport⊢cut1 (Case D1 D1') (cut D2 D3)))
-  cut-assoc (Case D1 D1') (UL γ₁ x D2) (FL D3) = ap2 Case (cut-assoc D1 (UL γ₁ x D2) (FL D3)) (cut-assoc D1' (UL γ₁ x D2) (FL D3))
-  cut-assoc (Case D1 D1') (UL γ₁ x D2) (UL γ₂ x₁ D3) = ap2 Case (cut-assoc D1 (UL γ₁ x D2) (UL γ₂ x₁ D3)) (cut-assoc D1' (UL γ₁ x D2) (UL γ₂ x₁ D3))
-  cut-assoc (Case D1 D1') (UL γ₁ x D2) (Case D3 D4) = ap2 Case (cut-assoc D1 (UL γ₁ x D2) (Case D3 D4)) (cut-assoc D1' (UL γ₁ x D2) (Case D3 D4))
-  cut-assoc (Case D1 D1') (UR D2) (UL γ₁ x D3) = (ap (transport⊢ ((1⇒ ∘1cong 1⇒) ∘1cong x)) (cut-assoc (Case D1 D1') D2 D3) ∘ ap (λ H → transport⊢ H (cut (Case D1 D1') (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))) ∘ ! (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (Case D1 D1') (cut D2 D3))
+  cut-assoc (Case D1 D1') (FL D2) (FL D3) = Case≈ (cut-assoc D1 (FL D2) (FL D3)) (cut-assoc D1' (FL D2) (FL D3))
+  cut-assoc (Case D1 D1') (FL D2) (UL γ₁ x D3) = Case≈ (cut-assoc D1 (FL D2) (UL γ₁ x D3)) (cut-assoc D1' (FL D2) (UL γ₁ x D3))
+  cut-assoc (Case D1 D1') (FL D2) (Case D3 D4) = Case≈ (cut-assoc D1 (FL D2) (Case D3 D4)) (cut-assoc D1' (FL D2) (Case D3 D4))
+  cut-assoc (Case D1 D1') (FR γ₁ x D2) (FL D3) = transport⊢≈ _ (cut-assoc (Case D1 D1') D2 D3) ∘≈ (!≈ (transport⊢cut1 (Case D1 D1') (cut D2 D3)))
+  cut-assoc (Case D1 D1') (UL γ₁ x D2) (FL D3) = Case≈ (cut-assoc D1 (UL γ₁ x D2) (FL D3)) (cut-assoc D1' (UL γ₁ x D2) (FL D3))
+  cut-assoc (Case D1 D1') (UL γ₁ x D2) (UL γ₂ x₁ D3) = Case≈ (cut-assoc D1 (UL γ₁ x D2) (UL γ₂ x₁ D3)) (cut-assoc D1' (UL γ₁ x D2) (UL γ₂ x₁ D3))
+  cut-assoc (Case D1 D1') (UL γ₁ x D2) (Case D3 D4) = Case≈ (cut-assoc D1 (UL γ₁ x D2) (Case D3 D4)) (cut-assoc D1' (UL γ₁ x D2) (Case D3 D4))
+  cut-assoc (Case D1 D1') (UR D2) (UL γ₁ x D3) = ( transport⊢≈ _ (cut-assoc (Case D1 D1') D2 D3) ∘≈ (eq (ap (λ H → transport⊢ H (cut (Case D1 D1') (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))))) ∘≈ !≈ (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (Case D1 D1') (cut D2 D3))
   cut-assoc (Case D1 D1') (Inl D2) (Case D3 D4) = cut-assoc (Case D1 D1') D2 D3
   cut-assoc (Case D1 D1') (Inr D2) (Case D3 D4) = cut-assoc (Case D1 D1') D2 D4
-  cut-assoc (Case D1 D1') (Case D2 D3) (FL D4) = ap2 Case (cut-assoc D1 (Case D2 D3) (FL D4)) (cut-assoc D1' (Case D2 D3) (FL D4))
-  cut-assoc (Case D1 D1') (Case D2 D3) (UL γ₁ x D4) = ap2 Case (cut-assoc D1 (Case D2 D3) (UL γ₁ x D4)) (cut-assoc D1' (Case D2 D3) (UL γ₁ x D4))
-  cut-assoc (Case D1 D1') (Case D2 D3) (Case D4 D5) = ap2 Case (cut-assoc D1 (Case D2 D3) (Case D4 D5)) (cut-assoc D1' (Case D2 D3) (Case D4 D5))
+  cut-assoc (Case D1 D1') (Case D2 D3) (FL D4) = Case≈ (cut-assoc D1 (Case D2 D3) (FL D4)) (cut-assoc D1' (Case D2 D3) (FL D4))
+  cut-assoc (Case D1 D1') (Case D2 D3) (UL γ₁ x D4) = Case≈ (cut-assoc D1 (Case D2 D3) (UL γ₁ x D4)) (cut-assoc D1' (Case D2 D3) (UL γ₁ x D4))
+  cut-assoc (Case D1 D1') (Case D2 D3) (Case D4 D5) = Case≈ (cut-assoc D1 (Case D2 D3) (Case D4 D5)) (cut-assoc D1' (Case D2 D3) (Case D4 D5))
   --    D1 is UL
-  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (FL D2) (FL D3) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (FL D2) (FL D3))
-  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (FL D2) (UL γ₁ x D3) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (FL D2) (UL γ₁ x D3))
-  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (FL D2) (Case D3 D4) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (FL D2) (Case D3 D4))
-  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (FR γ₁ x D2) (FL D3) = ap (transport⊢ (1⇒ ∘1cong (x ∘1cong 1⇒))) (cut-assoc (UL γ1 e D1) D2 D3) ∘ (! (transport⊢cut1 (UL γ1 e D1) (cut D2 D3)))
-  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (UL γ₁ x D2) (FL D3) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (UL γ₁ x D2) (FL D3))
-  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (UL γ₁ x D2) (UL γ₂ x₁ D3) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (UL γ₁ x D2) (UL γ₂ x₁ D3))
-  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (UL γ₁ x D2) (Case D3 D4) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (UL γ₁ x D2) (Case D3 D4))
-  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (UR D2) (UL γ₁ x D3) = (ap (transport⊢ ((1⇒ ∘1cong 1⇒) ∘1cong x)) (cut-assoc (UL γ1 e D1) D2 D3) ∘ ap (λ H → transport⊢ H (cut (UL γ1 e D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))) ∘ ! (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (UL γ1 e D1) (cut D2 D3))
+  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (FL D2) (FL D3) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (FL D2) (FL D3))
+  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (FL D2) (UL γ₁ x D3) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (FL D2) (UL γ₁ x D3))
+  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (FL D2) (Case D3 D4) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (FL D2) (Case D3 D4))
+  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (FR γ₁ x D2) (FL D3) = transport⊢≈ _ (cut-assoc (UL γ1 e D1) D2 D3) ∘≈ (!≈ (transport⊢cut1 (UL γ1 e D1) (cut D2 D3)))
+  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (UL γ₁ x D2) (FL D3) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (UL γ₁ x D2) (FL D3))
+  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (UL γ₁ x D2) (UL γ₂ x₁ D3) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (UL γ₁ x D2) (UL γ₂ x₁ D3))
+  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (UL γ₁ x D2) (Case D3 D4) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (UL γ₁ x D2) (Case D3 D4))
+  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (UR D2) (UL γ₁ x D3) = (transport⊢≈ _ (cut-assoc (UL γ1 e D1) D2 D3) ∘≈ (eq (ap (λ H → transport⊢ H (cut (UL γ1 e D1) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))))) ∘≈ !≈ (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (UL γ1 e D1) (cut D2 D3))
   cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (Inl D2) (Case D3 D4) = cut-assoc (UL γ1 e D1) D2 D3
   cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (Inr D2) (Case D3 D4) = cut-assoc (UL γ1 e D1) D2 D4
-  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (Case D2 D3) (FL D4) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (Case D2 D3) (FL D4))
-  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (Case D2 D3) (UL γ₁ x D4) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (Case D2 D3) (UL γ₁ x D4))
-  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (Case D2 D3) (Case D4 D5) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (Case D2 D3) (Case D4 D5))
+  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (Case D2 D3) (FL D4) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (Case D2 D3) (FL D4))
+  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (Case D2 D3) (UL γ₁ x D4) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (Case D2 D3) (UL γ₁ x D4))
+  cut-assoc {α = α} {β} {γ} (UL γ1 e D1) (Case D2 D3) (Case D4 D5) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (Case D2 D3) (Case D4 D5))
   -- D1 is an identity
   --   P
-  cut-assoc (hypp e) (hypp x) (hypp x₁) = ap hypp (! (∘1cong-assoc {e1 = e} {x} {x₁}))
-  cut-assoc (hypp e) (FR γ x D2) (FL D3) = ap (transport⊢ ((1⇒ ∘1cong x) ∘1cong 1⇒)) (cut-assoc (hypp e) D2 D3) ∘ (! (transport⊢cut1 {e2 = x ∘1cong 1⇒} (hypp e) (cut D2 D3)))
-  cut-assoc (hypp e) (UR D2) (UL γ₁ x D3) = ap (transport⊢ ((1⇒ ∘1cong 1⇒) ∘1cong x)) (cut-assoc (hypp e) D2 D3) ∘ (ap (λ H → transport⊢ H (cut (hypp e) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x})) ∘ ! (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (hypp e) (cut D2 D3)))
+  cut-assoc (hypp e) (hypp x) (hypp x₁) = eq (ap hypp (! (∘1cong-assoc {e1 = e} {x} {x₁})))
+  cut-assoc (hypp e) (FR γ x D2) (FL D3) = transport⊢≈ _  (cut-assoc (hypp e) D2 D3) ∘≈ (!≈ (transport⊢cut1 {e2 = x ∘1cong 1⇒} (hypp e) (cut D2 D3)))
+  cut-assoc (hypp e) (UR D2) (UL γ₁ x D3) = transport⊢≈ _  (cut-assoc (hypp e) D2 D3) ∘≈ (eq (ap (λ H → transport⊢ H (cut (hypp e) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))) ∘≈ !≈ (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (hypp e) (cut D2 D3)))
   cut-assoc (hypp e) (Inl D2) (Case D3 D4) = cut-assoc (hypp e) D2 D3
   cut-assoc (hypp e) (Inr D2) (Case D3 D4) = cut-assoc (hypp e) D2 D4
   --   Q
-  cut-assoc (hypq e) (hypq x) (hypq x₁) = ap hypq (! (∘1cong-assoc {e1 = e} {x} {x₁}))
-  cut-assoc (hypq e) (FR γ x D2) (FL D3) = ap (transport⊢ ((1⇒ ∘1cong x) ∘1cong 1⇒)) (cut-assoc (hypq e) D2 D3) ∘ (! (transport⊢cut1 {e2 = x ∘1cong 1⇒} (hypq e) (cut D2 D3)))
-  cut-assoc (hypq e) (UR D2) (UL γ₁ x D3) = ap (transport⊢ ((1⇒ ∘1cong 1⇒) ∘1cong x)) (cut-assoc (hypq e) D2 D3) ∘ (ap (λ H → transport⊢ H (cut (hypq e) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x})) ∘ ! (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (hypq e) (cut D2 D3)))
+  cut-assoc (hypq e) (hypq x) (hypq x₁) = eq (ap hypq (! (∘1cong-assoc {e1 = e} {x} {x₁})))
+  cut-assoc (hypq e) (FR γ x D2) (FL D3) = transport⊢≈ _ (cut-assoc (hypq e) D2 D3) ∘≈ (!≈ (transport⊢cut1 {e2 = x ∘1cong 1⇒} (hypq e) (cut D2 D3)))
+  cut-assoc (hypq e) (UR D2) (UL γ₁ x D3) = transport⊢≈ _ (cut-assoc (hypq e) D2 D3) ∘≈ (eq (ap (λ H → transport⊢ H (cut (hypq e) (cut D2 D3))) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))) ∘≈ !≈ (transport⊢cut1 {e2 = 1⇒ ∘1cong x} (hypq e) (cut D2 D3)))
   cut-assoc (hypq e) (Inl D2) (Case D3 D4) = cut-assoc (hypq e) D2 D3
   cut-assoc (hypq e) (Inr D2) (Case D3 D4) = cut-assoc (hypq e) D2 D4
   -- D3 is an identity
   --   P
-  cut-assoc (FL D1) (hypp x) (hypp e') = ap FL (cut-assoc D1 (hypp x) (hypp e'))
-  cut-assoc (FL D1) (FL D2) (hypp e') = ap FL (cut-assoc D1 (FL D2) (hypp e'))
-  cut-assoc (FL D1) (UL γ₁ x D2) (hypp e') = ap FL (cut-assoc D1 (UL γ₁ x D2) (hypp e'))
-  cut-assoc (FL D1) (Case D2 D3) (hypp e') = ap FL (cut-assoc D1 (Case D2 D3) (hypp e'))
-  cut-assoc (FR γ₁ x D1) (FL D2) (hypp e') = (transport⊢cut2 {e1 = x ∘1cong 1⇒} (cut D1 D2) (hypp e') ∘ ap (λ H → transport⊢ H (cut (cut D1 D2) (hypp e'))) (! (∘1cong-assoc {e1 = x} {1⇒} {1⇒}))) ∘ ap (transport⊢ (x ∘1cong 1⇒)) (cut-assoc D1 D2 (hypp e'))
-  cut-assoc (UR D1) (UL γ₁ x D2) (hypp e') = (transport⊢cut2 {e1 = 1⇒ ∘1cong x} (cut D1 D2) (hypp e')) ∘ ap (transport⊢ (1⇒ ∘1cong (x ∘1cong 1⇒))) (cut-assoc D1 D2 (hypp e'))
+  cut-assoc (FL D1) (hypp x) (hypp e') = FL≈ (cut-assoc D1 (hypp x) (hypp e'))
+  cut-assoc (FL D1) (FL D2) (hypp e') = FL≈ (cut-assoc D1 (FL D2) (hypp e'))
+  cut-assoc (FL D1) (UL γ₁ x D2) (hypp e') = FL≈ (cut-assoc D1 (UL γ₁ x D2) (hypp e'))
+  cut-assoc (FL D1) (Case D2 D3) (hypp e') = FL≈ (cut-assoc D1 (Case D2 D3) (hypp e'))
+  cut-assoc (FR γ₁ x D1) (FL D2) (hypp e') = (transport⊢cut2 {e1 = x ∘1cong 1⇒} (cut D1 D2) (hypp e') ∘≈ (eq (ap (λ H → transport⊢ H (cut (cut D1 D2) (hypp e'))) (! (∘1cong-assoc {e1 = x} {1⇒} {1⇒}))))) ∘≈ transport⊢≈ _ (cut-assoc D1 D2 (hypp e'))
+  cut-assoc (UR D1) (UL γ₁ x D2) (hypp e') = (transport⊢cut2 {e1 = 1⇒ ∘1cong x} (cut D1 D2) (hypp e')) ∘≈ (transport⊢≈ _  (cut-assoc D1 D2 (hypp e')))
   cut-assoc (Inl D1) (Case D2 D3) (hypp e') = cut-assoc D1 D2 (hypp e')
   cut-assoc (Inr D1) (Case D2 D3) (hypp e') = cut-assoc D1 D3 (hypp e')
-  cut-assoc (Case D1 D2) (hypp x) (hypp e') = ap2 Case (cut-assoc D1 (hypp x) (hypp e')) (cut-assoc D2 (hypp x) (hypp e'))
-  cut-assoc (Case D1 D2) (FL D3) (hypp e') = ap2 Case (cut-assoc D1 (FL D3) (hypp e')) (cut-assoc D2 (FL D3) (hypp e'))
-  cut-assoc (Case D1 D2) (UL γ₁ x D3) (hypp e') = ap2 Case (cut-assoc D1 (UL γ₁ x D3) (hypp e')) (cut-assoc D2 (UL γ₁ x D3) (hypp e'))
-  cut-assoc (Case D1 D2) (Case D3 D4) (hypp e') = ap2 Case (cut-assoc D1 (Case D3 D4) (hypp e')) (cut-assoc D2 (Case D3 D4) (hypp e'))
-  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (hypp x) (hypp x₁) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (hypp x) (hypp x₁))
-  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (FL D2) (hypp x) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (FL D2) (hypp x))
-  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (UL γ₁ x D2) (hypp x₁) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (UL γ₁ x D2) (hypp x₁))
-  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (Case D2 D3) (hypp x) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (Case D2 D3) (hypp x))
+  cut-assoc (Case D1 D2) (hypp x) (hypp e') = Case≈ (cut-assoc D1 (hypp x) (hypp e')) (cut-assoc D2 (hypp x) (hypp e'))
+  cut-assoc (Case D1 D2) (FL D3) (hypp e') = Case≈ (cut-assoc D1 (FL D3) (hypp e')) (cut-assoc D2 (FL D3) (hypp e'))
+  cut-assoc (Case D1 D2) (UL γ₁ x D3) (hypp e') = Case≈ (cut-assoc D1 (UL γ₁ x D3) (hypp e')) (cut-assoc D2 (UL γ₁ x D3) (hypp e'))
+  cut-assoc (Case D1 D2) (Case D3 D4) (hypp e') = Case≈ (cut-assoc D1 (Case D3 D4) (hypp e')) (cut-assoc D2 (Case D3 D4) (hypp e'))
+  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (hypp x) (hypp x₁) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (hypp x) (hypp x₁))
+  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (FL D2) (hypp x) =  UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (FL D2) (hypp x))
+  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (UL γ₁ x D2) (hypp x₁) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (UL γ₁ x D2) (hypp x₁))
+  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (Case D2 D3) (hypp x) =  UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (Case D2 D3) (hypp x))
   --   Q
-  cut-assoc (FL D1) (hypq x) (hypq e') = ap FL (cut-assoc D1 (hypq x) (hypq e'))
-  cut-assoc (FL D1) (FL D2) (hypq e') = ap FL (cut-assoc D1 (FL D2) (hypq e'))
-  cut-assoc (FL D1) (UL γ₁ x D2) (hypq e') = ap FL (cut-assoc D1 (UL γ₁ x D2) (hypq e'))
-  cut-assoc (FL D1) (Case D2 D3) (hypq e') = ap FL (cut-assoc D1 (Case D2 D3) (hypq e'))
-  cut-assoc (FR γ₁ x D1) (FL D2) (hypq e') = (transport⊢cut2 {e1 = x ∘1cong 1⇒} (cut D1 D2) (hypq e') ∘ ap (λ H → transport⊢ H (cut (cut D1 D2) (hypq e'))) (! (∘1cong-assoc {e1 = x} {1⇒} {1⇒}))) ∘ ap (transport⊢ (x ∘1cong 1⇒)) (cut-assoc D1 D2 (hypq e'))
-  cut-assoc (UR D1) (UL γ₁ x D2) (hypq e') = (transport⊢cut2 {e1 = 1⇒ ∘1cong x} (cut D1 D2) (hypq e')) ∘ ap (transport⊢ (1⇒ ∘1cong (x ∘1cong 1⇒))) (cut-assoc D1 D2 (hypq e'))
+  cut-assoc (FL D1) (hypq x) (hypq e') = FL≈ (cut-assoc D1 (hypq x) (hypq e'))
+  cut-assoc (FL D1) (FL D2) (hypq e') = FL≈ (cut-assoc D1 (FL D2) (hypq e'))
+  cut-assoc (FL D1) (UL γ₁ x D2) (hypq e') = FL≈ (cut-assoc D1 (UL γ₁ x D2) (hypq e'))
+  cut-assoc (FL D1) (Case D2 D3) (hypq e') = FL≈ (cut-assoc D1 (Case D2 D3) (hypq e'))
+  cut-assoc (FR γ₁ x D1) (FL D2) (hypq e') = (transport⊢cut2 {e1 = x ∘1cong 1⇒} (cut D1 D2) (hypq e') ∘≈ (eq (ap (λ H → transport⊢ H (cut (cut D1 D2) (hypq e'))) (! (∘1cong-assoc {e1 = x} {1⇒} {1⇒}))))) ∘≈ transport⊢≈ _ (cut-assoc D1 D2 (hypq e'))
+  cut-assoc (UR D1) (UL γ₁ x D2) (hypq e') = (transport⊢cut2 {e1 = 1⇒ ∘1cong x} (cut D1 D2) (hypq e')) ∘≈ (transport⊢≈ _  (cut-assoc D1 D2 (hypq e')))
   cut-assoc (Inl D1) (Case D2 D3) (hypq e') = cut-assoc D1 D2 (hypq e')
   cut-assoc (Inr D1) (Case D2 D3) (hypq e') = cut-assoc D1 D3 (hypq e')
-  cut-assoc (Case D1 D2) (hypq x) (hypq e') = ap2 Case (cut-assoc D1 (hypq x) (hypq e')) (cut-assoc D2 (hypq x) (hypq e'))
-  cut-assoc (Case D1 D2) (FL D3) (hypq e') = ap2 Case (cut-assoc D1 (FL D3) (hypq e')) (cut-assoc D2 (FL D3) (hypq e'))
-  cut-assoc (Case D1 D2) (UL γ₁ x D3) (hypq e') = ap2 Case (cut-assoc D1 (UL γ₁ x D3) (hypq e')) (cut-assoc D2 (UL γ₁ x D3) (hypq e'))
-  cut-assoc (Case D1 D2) (Case D3 D4) (hypq e') = ap2 Case (cut-assoc D1 (Case D3 D4) (hypq e')) (cut-assoc D2 (Case D3 D4) (hypq e'))
-  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (hypq x) (hypq x₁) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (hypq x) (hypq x₁))
-  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (FL D2) (hypq x) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (FL D2) (hypq x))
-  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (UL γ₁ x D2) (hypq x₁) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (UL γ₁ x D2) (hypq x₁))
-  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (Case D2 D3) (hypq x) = ap2 (UL (γ1 ∘1 (β ∘1 γ))) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (Case D2 D3) (hypq x))
--}
+  cut-assoc (Case D1 D2) (hypq x) (hypq e') = Case≈ (cut-assoc D1 (hypq x) (hypq e')) (cut-assoc D2 (hypq x) (hypq e'))
+  cut-assoc (Case D1 D2) (FL D3) (hypq e') = Case≈ (cut-assoc D1 (FL D3) (hypq e')) (cut-assoc D2 (FL D3) (hypq e'))
+  cut-assoc (Case D1 D2) (UL γ₁ x D3) (hypq e') = Case≈ (cut-assoc D1 (UL γ₁ x D3) (hypq e')) (cut-assoc D2 (UL γ₁ x D3) (hypq e'))
+  cut-assoc (Case D1 D2) (Case D3 D4) (hypq e') = Case≈ (cut-assoc D1 (Case D3 D4) (hypq e')) (cut-assoc D2 (Case D3 D4) (hypq e'))
+  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (hypq x) (hypq x₁) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (hypq x) (hypq x₁))
+  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (FL D2) (hypq x) =  UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (FL D2) (hypq x))
+  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (UL γ₁ x D2) (hypq x₁) = UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (UL γ₁ x D2) (hypq x₁))
+  cut-assoc {α = α} {β = β} {γ = γ} (UL γ1 e D1) (Case D2 D3) (hypq x) =  UL≈' (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) (cut-assoc D1 (Case D2 D3) (hypq x))
 
   mutual
     cut≈1 : ∀ {p q r} {α : q ≥ p} {β : r ≥ q} {A : Tp r} {B : Tp q} {C : Tp p}
@@ -332,21 +329,37 @@ module adjointlogic2.Properties where
     cut≈1 (Uη D) (Inr E) = Inr≈ (cut≈1 (Uη D) E) ∘≈ (eq (cutInr D))
     --   for Uη on UL need to induct on D
     cut≈1 {B = U α₁ B} (Uη (FL D)) (UL γ x E) = !≈ (Fη _) ∘≈ FL≈ ((!≈ (cut-assoc (FR 1m 1⇒ hyp) (UR (cut (FL D) (UL 1m 1⇒ hyp))) (UL γ x E)) ∘≈ transport⊢≈ _ (cut≈1 (!≈ (cut-ident-left (cut D (UL 1m 1⇒ (ident B))) ∘≈ eq (transport⊢1 _))) E)) ∘≈ cut≈1 (Uη D) (UL γ x E))
-    cut≈1 {B = U α₁ B} (Uη (UL γ x D)) (UL γ₁ x₁ E) = (!≈ (transport⊢≈ (1⇒ ∘1cong x₁) (cutUL {e = x ∘1cong 1⇒} {D = cut D (UL 1m 1⇒ (ident B))} E)) ∘≈ UL2 (1⇒ ∘1cong x₁) {!!} id) ∘≈ UL≈ (cut≈1 (Uη D) (UL γ₁ x₁ E))
+    cut≈1 {B = U α₁ B} (Uη (UL γ x D)) (UL γ₁ x₁ E) = (!≈ (transport⊢≈ (1⇒ ∘1cong x₁) (cutUL {e = x ∘1cong 1⇒} {D = cut D (UL 1m 1⇒ (ident B))} E)) ∘≈ UL2 (1⇒ ∘1cong x₁) ((! (ap (λ x₂ → x₂ ·2 (1⇒ ∘1cong x₁)) (∘1cong-assoc {e1 = x} {1⇒} {1⇒})) ∘ interchange {e1 = x} {e2 = 1⇒} {f1 = 1⇒ ∘1cong 1⇒} {f2 = x₁}) ∘ (! (interchange {e1 = 1⇒} {e2 = x} {f1 = x₁} {f2 = 1⇒}) ∘ ap (λ y → y ·2 (x ∘1cong 1⇒)) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x₁})))) id) ∘≈ UL≈ (cut≈1 (Uη D) (UL γ₁ x₁ E))
     cut≈1 {B = U α₁ B} (Uη (UR D)) (UL γ x E) = transport⊢≈ _ (cut≈1 (!≈ (cut-ident-right D ∘≈ eq (transport⊢1 _))) E)
     cut≈1 {B = U α₁ B} (Uη (Case D D₁)) (UL γ x E) = !≈ (⊕η _) ∘≈ Case≈ ((transport⊢cut1 {e2 = 1⇒ ∘1cong x} (Inl hyp) (cut (Case (cut D (UL 1m 1⇒ (ident B))) (cut D₁ (UL 1m 1⇒ (ident B)))) E) ∘≈ transport⊢≈ _ (!≈ (cut-assoc (Inl hyp) (Case (cut D (UL 1m 1⇒ (ident B))) (cut D₁ (UL 1m 1⇒ (ident B)))) E) ∘≈ cut≈1 (!≈ (cut-ident-left (cut D (UL 1m 1⇒ hyp)))) E)) ∘≈ cut≈1 (Uη D) (UL γ x E)) ((transport⊢cut1 {e2 = 1⇒ ∘1cong x} (Inr hyp) (cut (Case (cut D (UL 1m 1⇒ (ident B))) (cut D₁ (UL 1m 1⇒ (ident B)))) E) ∘≈ transport⊢≈ _ (!≈ (cut-assoc (Inr hyp) (Case (cut D (UL 1m 1⇒ (ident B))) (cut D₁ (UL 1m 1⇒ (ident B)))) E) ∘≈ cut≈1 (!≈ (cut-ident-left (cut D₁ (UL 1m 1⇒ hyp)))) E)) ∘≈ cut≈1 (Uη D₁) (UL γ x E)) 
     -- ⊕η
     cut≈1 (⊕η D) E = !≈ (cutCase E) ∘≈ (Case≈ (cut-assoc (Inl hyp) D E) (cut-assoc (Inr hyp) D E) ∘≈ ⊕η _)
     -- FR2
-    cut≈1 (FR2 γ2 e2 q₁) E = {!!}
+    cut≈1 (FR2 {e = e} {D' = D'} γ2 id q₂) (FL E) = ((eq (ap (λ x → transport⊢ x (cut D' E)) (! (interchange {e1 = γ2 ∘1cong 1⇒} {e2 = e} {f1 = 1⇒} {f2 = 1⇒}))) ∘≈ !≈ (eq (transport⊢∘ (cut D' E)))) ∘≈ transport⊢≈ _ (!≈ (transport⊢cut2 {e1 = γ2} D' E))) ∘≈ transport⊢≈ _ (cut≈1 q₂ E)
+    cut≈1 (FR2 γ2 e2 q₂) (FR γ₁ x E) = FR≈ (cut≈1 (FR2 γ2 e2 q₂) E)
+    cut≈1 (FR2 γ2 e2 q₂) (UR {α = α} {β = β} E) = UR≈ {α = α} {β = _ ∘1 β} (cut≈1 (FR2 γ2 e2 q₂) E)
+    cut≈1 (FR2 γ2 e2 q₂) (Inl E) = Inl≈ (cut≈1 (FR2 γ2 e2 q₂) E)
+    cut≈1 (FR2 γ2 e2 q₂) (Inr E) = Inr≈ (cut≈1 (FR2 γ2 e2 q₂) E)
     -- UL2
-    cut≈1 (UL2 γ2 e2 q₁) E = {!!}
+    cut≈1 (UL2 {e = e} {D = D} {D' = D'} γ2 id q₁) E = !≈ (cutUL E) ∘≈ (UL2 (γ2 ∘1cong 1⇒) (! (interchange {e1 = 1⇒ ∘1cong γ2} {e2 = e} {f1 = 1⇒} {f2 = 1⇒})) (!≈ (transport⊢cut2 {e1 = γ2} D' E) ∘≈ cut≈1 q₁ E) ∘≈ cutUL E)
     -- commuteULFR
-    cut≈1 (commuteULFR D x) E = {!!}
+    cut≈1 (commuteULFR {e1 = e1}{e2}{e3}{e4} D x) (FL E) = !≈ (transport⊢≈ _ (cutUL E)) ∘≈ UL2 (e1 ∘1cong 1⇒) (((ap (λ x₁ → x₁ ·2 (e4 ∘1cong 1⇒)) (∘1cong-assoc {e1 = e3} {1⇒} {1⇒}) ∘ interchange {e1 = e3 ∘1cong 1⇒} {e2 = e4} {f1 = 1⇒} {f2 = 1⇒}) ∘ ap (λ x₁ → x₁ ∘1cong 1⇒) x) ∘ ! (interchange {e1 = 1⇒ ∘1cong e1} {e2 = e2} {f1 = 1⇒} {f2 = 1⇒})) id
+    cut≈1 (commuteULFR D x) (FR γ₁ x₁ E) = FR≈ (cut≈1 (commuteULFR D x) E)
+    cut≈1 (commuteULFR D x) (UR {α = α} {β = β}  E) = UR≈ {α = α} {β = _ ∘1 β} (cut≈1 (commuteULFR D x) E)
+    cut≈1 (commuteULFR D x) (Inl E) = Inl≈ (cut≈1 (commuteULFR D x) E)
+    cut≈1 (commuteULFR D x) (Inr E) = Inr≈ (cut≈1 (commuteULFR D x) E)
     -- commuteULInl
-    cut≈1 (commuteULInl D) E = {!!}
+    cut≈1 (commuteULInl D) (FR γ₁ x E) = FR≈ (cut≈1 (commuteULInl D) E)
+    cut≈1 (commuteULInl D) (UR {α = α} {β = β} E) = UR≈ {α = α} {β = _ ∘1 β} (cut≈1 (commuteULInl D) E)
+    cut≈1 (commuteULInl D) (Inl E) = Inl≈ (cut≈1 (commuteULInl D) E)
+    cut≈1 (commuteULInl D) (Inr E) = Inr≈ (cut≈1 (commuteULInl D) E)
+    cut≈1 (commuteULInl D) (Case E E₁) = cutUL E
     -- commuteULInr
-    cut≈1 (commuteULInr D) E = {!!}
+    cut≈1 (commuteULInr D) (FR γ₁ x E) = FR≈ (cut≈1 (commuteULInr D) E)
+    cut≈1 (commuteULInr D) (UR {α = α} {β = β} E) = UR≈ {α = α} {β = _ ∘1 β} (cut≈1 (commuteULInr D) E)
+    cut≈1 (commuteULInr D) (Inl E) = Inl≈ (cut≈1 (commuteULInr D) E)
+    cut≈1 (commuteULInr D) (Inr E) = Inr≈ (cut≈1 (commuteULInr D) E)
+    cut≈1 (commuteULInr D) (Case E E₁) = cutUL E₁
 
     cut≈2 : ∀ {p q r} {α : q ≥ p} {β : r ≥ q} {A : Tp r} {B : Tp q} {C : Tp p}
               (D : A [ β ]⊢ B) {E E' : B [ α ]⊢ C} → E ≈ E' → cut D E ≈ cut D E'
@@ -379,7 +392,7 @@ module adjointlogic2.Properties where
     -- interesting cases
     -- Fη  
     cut≈2 (FL D) (Fη E) = FL≈ (cut≈2 D (Fη E)) ∘≈ cutFL E
-    -- for the corresponding Uη case, it was possible to split E and avoid using cut≈2
+    -- for the corresponding Uη case of cut≈1, it was possible to split E and avoid using cut≈2
     -- so we could probably do something similar here and avoid using cut≈1 if necessary
     cut≈2 {A = A} {B = F α B} {C = C} (FR γ x D) (Fη E) = !≈ (transport⊢≈ (x ∘1cong 1⇒) (cut-assoc D (FR 1m 1⇒ hyp) E)) ∘≈ (!≈ (transport⊢cut2 {e1 = x} (cut D (FR 1m 1⇒ hyp)) E) ∘≈ cut≈1 {A = A} {B = F α B} {C = C} (eq (ap (transport⊢ x) (! (cutFR {γ = 1m} {e = 1⇒} D))) ∘≈ FR≈ (!≈ (cut-ident-right D))) E)
     cut≈2 (UL γ x D) (Fη E) = UL≈ (cut≈2 D (Fη E)) ∘≈ cutUL E
@@ -387,23 +400,24 @@ module adjointlogic2.Properties where
     -- Uη
     cut≈2 {α = α}{β} D (Uη {β = β2} E) = !≈ (eq (cutUR D)) ∘≈ (UR≈ {α = β2} {β = β ∘1 α} (!≈ (cut-assoc D E (UL 1m 1⇒ hyp))) ∘≈ Uη _)
     -- ⊕η 
-    cut≈2 (FL D) (⊕η E) = {!!}
-    cut≈2 (UL γ x D) (⊕η E) = {!!}
-    cut≈2 (Inl D) (⊕η E) = {!!}
-    cut≈2 (Inr D) (⊕η E) = {!!}
-    cut≈2 (Case D D₁) (⊕η E) = {!!}
+    cut≈2 (FL D) (⊕η E) = FL≈ (cut≈2 D (⊕η E)) ∘≈ cutFL E
+    cut≈2 (UL γ x D) (⊕η E) = UL≈ (cut≈2 D (⊕η E)) ∘≈ cutUL E
+    -- for the corresponding Uη case of cut≈1, it was possible to split E and avoid using cut≈2
+    -- so we could probably do something similar here and avoid using cut≈1 if necessary
+    cut≈2 (Inl D) (⊕η E) = !≈ (cut-assoc D (Inl hyp) E) ∘≈ (eq (! (ap (λ x → cut x E) (cutInl D {E = hyp}))) ∘≈ !≈ (cut≈1 (Inl≈ (cut-ident-right D)) E)) 
+    cut≈2 (Inr D) (⊕η E) = !≈ (cut-assoc D (Inr hyp) E) ∘≈ (eq (! (ap (λ x → cut x E) (cutInr D {E = hyp}))) ∘≈ !≈ (cut≈1 (Inr≈ (cut-ident-right D)) E))
+    cut≈2 (Case D D₁) (⊕η E) = Case≈ (cut≈2 D (⊕η E)) (cut≈2 D₁ (⊕η E)) ∘≈ cutCase E
     -- FR2
     cut≈2 D (FR2 {e = e} {D = D1} {D' = D2} γ2 e2 q₁) = !≈ (eq (cutFR D)) ∘≈ (FR2 (1⇒ ∘1cong γ2) (ap (λ x → 1⇒ ∘1cong x) e2 ∘ ! (interchange {e1 = 1⇒} {e2 = 1⇒} {f1 = γ2 ∘1cong 1⇒} {f2 = e})) (!≈ (transport⊢cut1 {e2 = γ2} D D2) ∘≈ cut≈2 D q₁) ∘≈ eq (cutFR D))
-    -- UL2
     cut≈2 (FL D) (UL2 γ2 e2 q₂) = FL≈ (cut≈2 D (UL2 γ2 e2 q₂))
     cut≈2 (UL γ x D) (UL2 γ2 e2 q₁) = UL≈ (cut≈2 D (UL2 γ2 e2 q₁))
     cut≈2 (UR D) (UL2 {e = e} {D' = D'} γ2 id q₂) = ((eq (ap (λ x → transport⊢ x (cut D D')) (! (interchange {e1 = 1⇒} {e2 = 1⇒} {f1 = 1⇒ ∘1cong γ2} {f2 = e}) ∘ ap (λ x → x ·2 (1⇒ ∘1cong e)) (∘1cong-assoc {e1 = 1⇒} {1⇒} {γ2}))) ∘≈ eq (! (transport⊢∘ (cut D D')))) ∘≈ !≈ (transport⊢≈ _ (transport⊢cut1 {e2 = γ2} D D'))) ∘≈ transport⊢≈ _ (cut≈2 D q₂)
     cut≈2 (Case D D₁) (UL2 γ2 e2 q₁) = Case≈ (cut≈2 D (UL2 γ2 e2 q₁)) (cut≈2 D₁ (UL2 γ2 e2 q₁))
     -- commuteULFR
-    cut≈2 (FL D) (commuteULFR {e4 = e4} D₁ x) = {!!} -- !≈ (Fη _) ∘≈ FL≈ (((FR≈ {! (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) !} ∘≈ eq (ap (λ x₁ → FR _ x₁ _) (∘1cong-assoc {e1 = 1⇒} {e2 = 1⇒} {e3 = e4}))) ∘≈ eq (cutFR D)) ∘≈ cut≈2 D (commuteULFR D₁ x))
-    cut≈2 (UL γ₁ x D) (commuteULFR D₁ x₁) = {!!}
-    cut≈2 (UR D) (commuteULFR D₁ x) = {!!}
-    cut≈2 (Case D D₁) (commuteULFR D₂ x) = {!!}
+    cut≈2 {α = α'} (FL {α = α} {β = β} D) (commuteULFR {δ3 = δ3} {e4 = e4} D₁ x) = ((!≈ (Fη _) ∘≈ FL≈ {α = α} {β = β ∘1 α'} (FR≈ (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) ∘≈ eq (ap (λ x₁ → FR (α ∘1 (β ∘1 δ3)) x₁ (cut D (UL _ _ D₁))) (∘1cong-assoc {e1 = 1⇒} {1⇒} {e4})))) ∘≈ FL≈ (eq (cutFR D))) ∘≈ FL≈ (cut≈2 D (commuteULFR {e4 = e4} D₁ x)) 
+    cut≈2 {α = α}{β = β} (UL {α = α''} γ₁ x D) (commuteULFR {α = α'} {β = β'} {γ = γ} {δ1 = δ1} {δ2 = ._} {δ3 = δ3} {e1 = e1}{e2}{e3}{e4} D₁ x₁) = (commuteULFR {α = α'} {β = γ₁ ∘1 α} {γ = γ₁ ∘1 δ3} {δ1 = α''} {δ2 = β ∘1 α} {δ3 = β ∘1 δ3} {e1 = 1⇒ ∘1cong e4}{e2 = x ∘1cong 1⇒}{e3 = x ∘1cong 1⇒}{e4 = 1⇒ ∘1cong e4} (cut D (UL _ e3 D₁)) ((ap (λ y → y ·2 (1⇒ ∘1cong e4)) (! (∘1cong-assoc {e1 = x} {1⇒} {1⇒})) ∘ interchange {e1 = x} {e2 = 1⇒} {f1 = 1⇒} {f2 = e4}) ∘ (! (interchange {e1 = 1⇒ ∘1cong 1⇒} {e2 = x} {f1 = e4} {f2 = 1⇒}) ∘ ! (ap (λ y → y ·2 (x ∘1cong 1⇒)) (∘1cong-assoc {e1 = 1⇒} {1⇒} {e4})))) ∘≈ UL≈ {γ = γ₁ ∘1 α} {e = x ∘1cong 1⇒} (eq (cutFR D))) ∘≈ UL≈ {γ = γ₁ ∘1 α} {e = x ∘1cong 1⇒} (cut≈2 D (commuteULFR D₁ x₁))
+    cut≈2 (UR D) (commuteULFR {e1 = e1}{e2}{e3}{e4} D₁ x) = !≈ (FR2 (1⇒ ∘1cong e3) ((ap (λ x₁ → x₁ ·2 (1⇒ ∘1cong e2)) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {e1})) ∘ interchange {e1 = 1⇒} {e2 = 1⇒} {f1 = 1⇒ ∘1cong e1} {f2 = e2}) ∘ (! (interchange {e1 = 1⇒} {e2 = 1⇒} {f1 = 1⇒ ∘1cong e1} {f2 = e2}) ∘ (interchange {e1 = 1⇒} {e2 = 1⇒} {f1 = 1⇒ ∘1cong e1} {f2 = e2} ∘ (ap (λ x₁ → 1⇒ ∘1cong x₁) (! x) ∘ (! (interchange {e1 = 1⇒} {e2 = 1⇒} {f1 = e3 ∘1cong 1⇒} {f2 = e4})))))) id) ∘≈ transport⊢≈ _ (eq (cutFR D))
+    cut≈2 (Case D D₁) (commuteULFR D₂ x) = (!≈ (⊕η _) ∘≈ Case≈ (FR≈ (!≈ (cut-ident-left _)) ∘≈ eq (cutFR D)) (FR≈ (!≈ (cut-ident-left _)) ∘≈ eq (cutFR D₁))) ∘≈ Case≈ (cut≈2 D (commuteULFR D₂ x)) (cut≈2 D₁ (commuteULFR D₂ x))
     -- commuteULInl
     cut≈2 (FL D) (commuteULInl D₁) = FL≈ ((cut≈2 D (commuteULInl D₁) ∘≈ eq (! (cutInl D))) ∘≈ Inl≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) ∘≈ Fη _
     cut≈2 (UL γ x D) (commuteULInl D₁) = UL≈ (cut≈2 D (commuteULInl D₁) ∘≈ eq (! (cutInl D))) ∘≈ commuteULInl _
@@ -484,5 +498,4 @@ module adjointlogic2.Properties where
     cut-ident-right {B = F α₁ B} (Case D D₁) = Case≈ (cut-ident-right D) (cut-ident-right D₁)
     cut-ident-right {B = U α₁ B} (Case D D₁) = !≈ (Uη _)
     cut-ident-right {B = B ⊕ B₁} (Case D D₁) = Case≈ (cut-ident-right D) (cut-ident-right D₁)
-
 
