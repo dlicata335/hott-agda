@@ -31,6 +31,4 @@ module adjointlogic2.Lib where
   infix  2 _∎
   infixr 2 _=〈_〉_ 
 
-
-      
-
+  infixr 10 _∘_ 

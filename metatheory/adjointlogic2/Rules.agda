@@ -201,6 +201,8 @@ module adjointlogic2.Rules where
                    → {γ : q ≥ r} {e : (α ∘1 γ) ⇒ β} (D : A [ γ ]⊢ C)
                    → Inr {A = C'} (UL γ e D) ≈ UL γ e (Inr  D)
 
+  infixr 10 _∘≈_ 
+
   eq : ∀ {p q} {α : p ≥ q} {A : Tp p} {B : Tp q} {D1 D2 : A [ α ]⊢ B} → D1 == D2 → D1 ≈ D2
   eq id = id
 
