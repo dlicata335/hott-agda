@@ -201,7 +201,10 @@ module adjointlogic2.Reflection where
 
   ♯'reduction : ∀ {A C} (D : Crisp⊢Coh A C) 
               → ♯'elim (strengthen (♯'intro D)) ≈ D
-  ♯'reduction D = {!!} ∘≈ !≈ (cut-assoc (transport⊢ ∇Δunit hyp) (♯'R D) (UL (∇m ∘1 Δm) 1⇒ (transport⊢ ∇Δunit hyp)))
+  ♯'reduction D = ((((((eq (transport⊢1 _) ∘≈ eq (ap (λ x → transport⊢ x D) {! !})) ∘≈ transport⊢≈ _ (cut-ident-right D)) ∘≈ eq (! (transport⊢∘ (cut D hyp)))) ∘≈ !≈ (transport⊢≈ _ (transport⊢cut1 {e2 = ∇Δunit} D hyp))) ∘≈ transport⊢≈ _ (cut-ident-left _)) ∘≈
+                     !≈
+                     (transport⊢cut {e1 = ∇Δunit} {e2 = 1⇒} hyp
+                      (cut D (transport⊢ ∇Δunit hyp)))) ∘≈ !≈ (cut-assoc (transport⊢ ∇Δunit hyp) (♯'R D) (UL (∇m ∘1 Δm) 1⇒ (transport⊢ ∇Δunit hyp)))
 
   -- Δ ; Γ ⊢ M : ♯ A
   -- --------------------------

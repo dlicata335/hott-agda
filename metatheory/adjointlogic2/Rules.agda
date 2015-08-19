@@ -37,23 +37,23 @@ module adjointlogic2.Rules where
   1⇒' id = 1⇒
 
   postulate
-    ·1cong-unit-l : {x z : Mode} {q q' : x ≥ z} (β : q ⇒ q') → (1⇒ {_}{_}{1m} ∘1cong β) == β
-    ·1cong-unit-r : {x z : Mode} {q q' : x ≥ z} (β : q ⇒ q') → (β ∘1cong 1⇒ {_}{_}{1m} ) == β
+    ∘1cong-unit-l : {x z : Mode} {q q' : x ≥ z} (β : q ⇒ q') → (1⇒ {_}{_}{1m} ∘1cong β) == β
+    ∘1cong-unit-r : {x z : Mode} {q q' : x ≥ z} (β : q ⇒ q') → (β ∘1cong 1⇒ {_}{_}{1m} ) == β
+    -- FIXME: doesn't always seem to be working as a rewrite
+    ∘1cong-assoc : {x y z w : Mode} {p p' : x ≥ y} {q q' : y ≥ z} {r r' : z ≥ w} {e1 : p ⇒ p'} {e2 : q ⇒ q'} {e3 : r ⇒ r'} 
+                 → ((e1 ∘1cong e2) ∘1cong e3) == (e1 ∘1cong (e2 ∘1cong e3))
     ·2-unit-r : {x y : Mode} {p q : x ≥ y} (α : p ⇒ q) → (α ·2 1⇒) == α
     ·2-unit-l : {x y : Mode} {p q : x ≥ y} (α : p ⇒ q) → (1⇒ ·2 α) == α
     ·2-assoc  : ∀ {x y : Mode} {α β γ δ : x ≥ y} {e1 : α ⇒ β} {e2 : β ⇒ γ} {e3 : γ ⇒ δ}
               → ((e1 ·2 e2) ·2 e3) == (e1 ·2 (e2 ·2 e3))
-    ·1cong-1⇒ : {x y z : Mode} {p : z ≥ y} {q : y ≥ x} → (1⇒ {_}{_}{p} ∘1cong 1⇒ {_}{_}{q}) == 1⇒
     interchange : {x y z : Mode} {p1 p2 p3 : x ≥ y} {e1 : p1 ⇒ p2} {e2 : p2 ⇒ p3}
                   {q1 q2 q3 : y ≥ z} {f1 : q1 ⇒ q2} {f2 : q2 ⇒ q3}
                 → ((e1 ·2 e2) ∘1cong (f1 ·2 f2))  == ((e1 ∘1cong f1) ·2 (e2 ∘1cong f2))
-    -- FIXME: doesn't always seem to be working as a rewrite
-    ∘1cong-assoc : {x y z w : Mode} {p p' : x ≥ y} {q q' : y ≥ z} {r r' : z ≥ w} {e1 : p ⇒ p'} {e2 : q ⇒ q'} {e3 : r ⇒ r'} 
-                   → ((e1 ∘1cong e2) ∘1cong e3) == (e1 ∘1cong (e2 ∘1cong e3))
-    -- FIXME more equations on 2-cells?
+    -- FIXME: shouldn't this be provable from the others?
+    ·1cong-1⇒ : {x y z : Mode} {p : z ≥ y} {q : y ≥ x} → (1⇒ {_}{_}{p} ∘1cong 1⇒ {_}{_}{q}) == 1⇒
 
-  {-# REWRITE ·1cong-unit-l #-}
-  {-# REWRITE ·1cong-unit-r #-}
+  {-# REWRITE ∘1cong-unit-l #-}
+  {-# REWRITE ∘1cong-unit-r #-}
   {-# REWRITE ·2-unit-r #-}
   {-# REWRITE ·2-unit-l #-}
   {-# REWRITE ·1cong-1⇒ #-}
@@ -70,18 +70,18 @@ module adjointlogic2.Rules where
   data _[_]⊢_ : {p q : Mode} → Tp q → q ≥ p → Tp p -> Set where
     hypp : ∀ {p} {α : p ≥ p} → 1m ⇒ α → P [ α ]⊢ P 
     hypq : ∀ {p} {α : p ≥ p} → 1m ⇒ α → Q [ α ]⊢ Q
-    FL : ∀ {p q r} {α : q ≥ p} {β : p ≥ r} {A : Tp q} {C : Tp r}
+    FL : ∀ {p q r} {α : r ≥ q} {β : q ≥ p} {A : Tp r} {C : Tp p}
        → A [ α ∘1 β ]⊢ C
        → F α A [ β ]⊢ C
     FR : ∀ {p q r} {α : q ≥ p} {β : r ≥ p} {A : Tp q} {C : Tp r}
        → (γ : r ≥ q) → (γ ∘1 α) ⇒ β
        → C [ γ ]⊢ A
        → C [ β ]⊢ F α A
-    UL : ∀ {p q r} {α : p ≥ q} {β : p ≥ r} {A : Tp q} {C : Tp r}
-       → (γ : q ≥ r) → (α ∘1 γ) ⇒ β 
+    UL : ∀ {p q r} {α : r ≥ q} {β : r ≥ p} {A : Tp q} {C : Tp p}
+       → (γ : q ≥ p) → (α ∘1 γ) ⇒ β 
        → A [ γ ]⊢ C
        → U α A [ β ]⊢ C
-    UR : ∀ {p q r} {α : p ≥ q} {β : r ≥ p} {A : Tp q} {C : Tp r}
+    UR : ∀ {p q r} {α : q ≥ p} {β : r ≥ q} {A : Tp p} {C : Tp r}
        → C [ β ∘1 α ]⊢ A
        → C [ β ]⊢ U α A
     Inl : ∀ {p q} {α : q ≥ p} {C : Tp q} {A B : Tp p} → C [ α ]⊢ A → C [ α ]⊢ (A ⊕ B)
@@ -106,7 +106,7 @@ module adjointlogic2.Rules where
   ident P = hypp 1⇒
   ident Q = hypq 1⇒
   ident (U α A) = (UR {α = α} {β = 1m} (UL 1m 1⇒ (ident A)))  -- need to annote because it infers the wrong association
-  ident (F α A) = FL (FR 1m 1⇒ (ident A)) 
+  ident (F α A) = FL (FR 1m {!!} (ident A)) 
   ident (A ⊕ B) = Case (Inl (ident A)) (Inr (ident B))
 
   hyp : ∀ {p} {A : Tp p} → A [ 1m ]⊢ A
@@ -163,7 +163,8 @@ module adjointlogic2.Rules where
     -- with focusing
     Fη : ∀ {p q r} {α : q ≥ p} {β : p ≥ r} {A : Tp q} {C : Tp r}
          (D : F α A [ β ]⊢ C) → 
-         D ≈ FL (cut {α = β} {β = α} (FR {α = α} {β = 1m ∘1 α} 1m 1⇒ hyp) D) 
+         D ≈ FL (cut {α = β} {β = α} (FR {α = α} {β = 1m ∘1 α} 1m {!!} hyp) D) 
+
     Uη : ∀ {p q r} {α : p ≥ q} {β : q ≥ r} {A : Tp p} {C : Tp r}
          (D : A [ α ]⊢ U β C) → 
          D ≈ UR (cut D (UL 1m 1⇒ hyp))
