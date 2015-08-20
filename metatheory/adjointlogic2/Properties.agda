@@ -439,9 +439,8 @@ module adjointlogic2.Properties where
     cutUL (FL E) = id
     cutUL (UL γ₁ x E) = id
     cutUL (Case E E₁) = id
-    -- principal rule fires
-    cutUL {α = α} {β} {γ = γ} {e = e} {D = D} (UR {α = α2} E) = !≈ (Uη _) ∘≈ UR≈ {α = α2} {β = β ∘1 α} ((UL≈ (cut-assoc D (UR E) (UL 1m 1⇒ hyp) ∘≈ (eq (! (ap (cut D) (transport⊢1 (cut E hyp)))) ∘≈ cut≈2 D (!≈ (cut-ident-right _)))) ∘≈ eq (ap (λ x → UL (γ ∘1 (α ∘1 α2)) x _) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})))) ∘≈ cutUL E)
     -- right-commutative rule fires
+    cutUL {α = α} {β} {γ = γ} {e = e} {D = D} (UR {α = α2} E) = !≈ (Uη _) ∘≈ UR≈ {α = α2} {β = β ∘1 α} ((UL≈ (cut-assoc D (UR E) (UL 1m 1⇒ hyp) ∘≈ (eq (! (ap (cut D) (transport⊢1 (cut E hyp)))) ∘≈ cut≈2 D (!≈ (cut-ident-right _)))) ∘≈ eq (ap (λ x → UL (γ ∘1 (α ∘1 α2)) x _) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})))) ∘≈ cutUL E)
     cutUL {α = α} {β} {α₁ = α₁} {γ = γ} {e} {D} (FR γ₁ x E) = (eq (ap (UL {α = α₁} {β = β ∘1 α} (γ ∘1 α) (e ∘1cong 1⇒)) (! (cutFR D))) ∘≈ !≈ (commuteULFR {α = _} {β = γ ∘1 α} {γ = γ ∘1 γ₁} {δ1 = α₁} {δ2 = β ∘1 α} {δ3 = β ∘1 γ₁} (cut D E) (ap (λ H → H ·2 (1⇒ ∘1cong x)) (! (∘1cong-assoc {e1 = e} {1⇒} {1⇒})) ∘ (interchange {e1 = e} {e2 = 1⇒} {f1 = 1⇒ ∘1cong 1⇒} {f2 = x} ∘ (! (interchange {e1 = 1⇒ ∘1cong 1⇒} {e2 = e} {f1 = x} {f2 = 1⇒}) ∘ ap (λ H → H ·2 (e ∘1cong 1⇒)) (! (∘1cong-assoc {e1 = 1⇒} {1⇒} {x}))))))) ∘≈ FR≈ (cutUL E) 
     cutUL {α = α} {β} {α₁ = α₁} {γ = γ} {e} {D} (Inl E) = (UL≈ (eq (! (cutInl D))) ∘≈ commuteULInl (cut D E)) ∘≈ Inl≈ (cutUL E)
     cutUL {α = α} {β} {α₁ = α₁} {γ = γ} {e} {D} (Inr E) = (eq (ap (UL (γ ∘1 α) (e ∘1cong 1⇒)) (! (cutInr D))) ∘≈ commuteULInr (cut D E)) ∘≈ Inr≈ (cutUL E)

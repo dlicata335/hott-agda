@@ -178,6 +178,18 @@ module adjointlogic2.General where
   UFadj-composite1 : ∀ {p q} {A B} {α : q ≥ p} (D : A [ 1m ]⊢ U α B) -> UFadjunction1 (UFadjunction2 D) ≈ D
   UFadj-composite1 D = !≈ (Uη D) ∘≈ UR≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))
 
+  UFadjunction-nat1 : ∀ {p q} {A A' B B'} {α : q ≥ p} 
+                      (D1 : A' [ 1m ]⊢ A) (D : F α A [ 1m ]⊢ B) (D2 : B [ 1m ]⊢ B')
+                    → UFadjunction1 (cut (Ffunc D1) (cut D D2))
+                    ≈ cut D1 (cut (UFadjunction1 D) (Ufunc D2))
+  UFadjunction-nat1 D1 D D2 = !≈ (eq (cutUR D1)) ∘≈ UR≈ {β = 1m} ((((!≈ (cut≈2 D1 (eq (transport⊢1 (cut (cut (FR 1m 1⇒ hyp) D) D2)))) ∘≈ !≈ (cut-assoc D1 (cut (FR 1m 1⇒ hyp) D) D2) ∘≈ !≈ (cut≈1 (cut-assoc D1 (FR 1m 1⇒ hyp) D) D2) ∘≈ !≈ (cut≈1 (cut≈1 (eq (cutFR D1)) D) D2) ∘≈ !≈ (cut≈1 (cut≈1 (FR≈ (cut-ident-right D1)) D) D2) ∘≈ cut-assoc (FR 1m 1⇒ D1) D D2) ∘≈ cut≈1 (cut-ident-left (FR 1m 1⇒ D1)) (cut D D2)) ∘≈ cut≈1 (eq (transport⊢1 (cut hyp (FR 1m 1⇒ D1)))) (cut D D2)) ∘≈ cut-assoc (FR 1m 1⇒ hyp) (Ffunc D1) (cut D D2))
+
+  UFadjunction-nat2 : ∀ {p q} {A A' B B'} {α : q ≥ p} 
+                      (D1 : A' [ 1m ]⊢ A) (D : A [ 1m ]⊢ U α B) (D2 : B [ 1m ]⊢ B')
+                    → UFadjunction2 (cut D1 (cut D (Ufunc D2)))
+                    ≈ cut (Ffunc D1) (cut (UFadjunction2 D) D2)
+  UFadjunction-nat2 {α = α} D1 D D2 = !≈ (cutFL {α = 1m} (cut (FL {α = α} {β = 1m} (cut D (UL 1m 1⇒ hyp))) D2)) ∘≈ FL≈ {α = α} {β = 1m} (!≈ (cut-assoc (FR 1m 1⇒ D1) (FL {α = α} {β = 1m} (cut D (UL 1m 1⇒ hyp))) D2) ∘≈ (((cut≈1 (eq (! (transport⊢1 (cut D1 (cut D (UL 1m 1⇒ hyp)))))) D2 ∘≈ cut-assoc D1 (cut D (UL 1m 1⇒ hyp)) D2 ∘≈ cut≈2 D1 (cut-assoc D (UL 1m 1⇒ hyp) D2) ∘≈ cut≈2 D1 (cut≈2 D (!≈ (cutUL D2))) ∘≈ cut≈2 D1 (cut≈2 D (UL≈ (!≈ (cut-ident-left D2))))) ∘≈ cut≈2 D1 (cut≈2 D (cut-ident-right (UL 1m 1⇒ D2) ∘≈ eq (transport⊢1 _)))) ∘≈ !≈ (cut≈2 D1 (cut-assoc D (UR {α = α} {β = 1m} (UL 1m 1⇒ D2)) (UL 1m 1⇒ hyp)))) ∘≈ !≈ (cut-assoc D1 (cut D (UR {α = α} {β = 1m} (UL 1m 1⇒ D2))) (UL 1m 1⇒ hyp)))
+
 
   ----------------------------------------------------------------------
   -- monads
@@ -206,6 +218,14 @@ module adjointlogic2.General where
   ◯mult : {p q : Mode} {A : Tp q} {α : q ≥ p} → ◯ α (◯ α A) [ 1m ]⊢ ◯ α A
   ◯mult {α = α} = UR {α = α} {β = 1m} (UL 1m 1⇒ (FL (UL 1m 1⇒ hyp))) 
 
+  ◯unit-nat : {p q : Mode} {A A' : Tp q} {α : q ≥ p} (D : A [ 1m ]⊢ A')
+             → cut D (◯unit {α = α}) ≈ cut ◯unit (◯func D)
+  ◯unit-nat D = UR≈ (((eq (! (transport⊢1 _)) ∘≈ eq (! (transport⊢1 _)) ∘≈ !≈ (cut-ident-left (FR 1m 1⇒ D))) ∘≈ FR≈ (cut-ident-right D)) ∘≈ eq (cutFR D)) ∘≈ eq (cutUR D)
+
+  ◯mult-nat : {p q : Mode} {A A' : Tp q} {α : q ≥ p} (D : A [ 1m ]⊢ A') 
+            → cut (◯mult {α = α}) (◯func D) ≈ cut (◯func (◯func D)) ◯mult 
+  ◯mult-nat D = UR≈ (UL≈ (FL≈ (UL≈ (FL≈ (transport⊢≈ 1⇒ ((eq (! (cutFR D)) ∘≈ FR≈ (!≈ (cut-ident-right _))) ∘≈ cut-ident-left _))))))
+
   ◯assoc : ∀ {p q : Mode} {A : Tp q} {α : q ≥ p} 
           -> (cut {A = ◯ α (◯ α (◯ α A))} {C = ◯ α A} (◯func ◯mult) ◯mult) ≈ (cut ◯mult ◯mult)
   ◯assoc = id
@@ -218,6 +238,14 @@ module adjointlogic2.General where
               -> (cut {A = ◯ α A} {C = ◯ α A} (◯func ◯unit) ◯mult) ≈ hyp
   ◯unit2 {α = α} = UR≈ {α = α} {β = 1m} (UL≈ {γ = 1m} {e = 1⇒} (FL≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _ ∘ (transport⊢1 _ ∘ transport⊢1 _)))))
 
+  □counit-nat : {p q : Mode} {A A' : Tp p} {α : q ≥ p} (D : A [ 1m ]⊢ A') 
+              → cut (□counit {α = α}) D ≈ cut (□func D) □counit
+  □counit-nat D = (FL≈ (!≈ (eq (transport⊢1 _)) ∘≈ !≈ (eq (transport⊢1 _)) ∘≈ !≈ (cut-ident-right (UL 1m 1⇒ D)) ∘≈ UL≈ (cut-ident-left D)) ∘≈ FL≈ (cutUL D)) ∘≈ cutFL D
+
+  □comult-nat : {p q : Mode} {A A' : Tp p} {α : q ≥ p} (D : A [ 1m ]⊢ A')
+              → cut (□func D) (□comult {α = α}) ≈ cut □comult (□func (□func D))
+  □comult-nat D = FL≈ (FR≈ (UR≈ (FR≈ (UR≈ (transport⊢≈ 1⇒ ((!≈ (cutUL D) ∘≈ UL≈ (!≈ (cut-ident-left _) ∘≈ cut-ident-right _)) ∘≈ cutUL hyp))))))
+  
   □assoc : ∀ {p q : Mode} {A : Tp p} {α : q ≥ p} 
           -> (cut {A = □ α A} {C = □ α (□ α (□ α A)) } □comult (□func □comult)) ≈ (cut □comult □comult)
   □assoc = id
@@ -229,6 +257,10 @@ module adjointlogic2.General where
   □unit2 : ∀ {p q : Mode} {A : Tp p} {α : q ≥ p} 
           -> (cut {A = □ α A} {C = □ α A} □comult (□func □counit)) ≈ hyp
   □unit2 {α = α} = FL≈ (FR≈ {γ = 1m} {e = 1⇒} (UR≈ (((cut-ident-right _ ∘≈ eq (transport⊢1 _)) ∘≈ eq (transport⊢1 _)) ∘≈ eq (transport⊢1 _))))
+
+
+  
+
 
   {- these should not be provable
 

@@ -106,7 +106,7 @@ module adjointlogic2.Rules where
   ident P = hypp 1⇒
   ident Q = hypq 1⇒
   ident (U α A) = (UR {α = α} {β = 1m} (UL 1m 1⇒ (ident A)))  -- need to annote because it infers the wrong association
-  ident (F α A) = FL (FR 1m {!!} (ident A)) 
+  ident (F α A) = FL (FR 1m 1⇒ (ident A)) 
   ident (A ⊕ B) = Case (Inl (ident A)) (Inr (ident B))
 
   hyp : ∀ {p} {A : Tp p} → A [ 1m ]⊢ A
@@ -163,7 +163,7 @@ module adjointlogic2.Rules where
     -- with focusing
     Fη : ∀ {p q r} {α : q ≥ p} {β : p ≥ r} {A : Tp q} {C : Tp r}
          (D : F α A [ β ]⊢ C) → 
-         D ≈ FL (cut {α = β} {β = α} (FR {α = α} {β = 1m ∘1 α} 1m {!!} hyp) D) 
+         D ≈ FL (cut {α = β} {β = α} (FR {α = α} {β = 1m ∘1 α} 1m 1⇒ hyp) D) 
 
     Uη : ∀ {p q r} {α : p ≥ q} {β : q ≥ r} {A : Tp p} {C : Tp r}
          (D : A [ α ]⊢ U β C) → 
