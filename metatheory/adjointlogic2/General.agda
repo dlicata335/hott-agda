@@ -5,6 +5,8 @@ open import adjointlogic2.Properties
 
 module adjointlogic2.General where
 
+  -- a bunch of category theory definitions specialized to the categories used here
+
   record Iso {p : Mode} (A B : Tp p) : Set where
     constructor iso
     field
@@ -28,7 +30,94 @@ module adjointlogic2.General where
         (Case≈ ((((cut-ident-left _ ∘≈  cut≈1 α (Inl hyp)) ∘≈ cut-assoc f g (Inl hyp)) ∘≈ (cut≈2 f (cut-ident-left _))) ∘≈ !≈ (cut-assoc f (Inl hyp) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp))))) ((((cut-ident-left _ ∘≈ cut≈1 α₁ (Inr hyp)) ∘≈ cut-assoc f₁ g₁ (Inr hyp)) ∘≈ cut≈2 f₁ (cut-ident-left _)) ∘≈ !≈ (cut-assoc f₁ (Inr hyp) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp))))))
         (Case≈ ((((cut-ident-left _ ∘≈ cut≈1 β (Inl hyp)) ∘≈ cut-assoc g f (Inl hyp)) ∘≈ cut≈2 g (cut-ident-left _)) ∘≈ !≈ (cut-assoc g (Inl hyp) (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp))))) ((((cut-ident-left _ ∘≈ cut≈1 β₁ (Inr hyp)) ∘≈ cut-assoc g₁ f₁ (Inr hyp)) ∘≈ cut≈2 g₁ (cut-ident-left _)) ∘≈ !≈ (cut-assoc g₁ (Inr hyp) (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp))))))
 
+  record Functor (p q : Mode) : Set where 
+    constructor func
+    field
+     ob : Tp p -> Tp q  
+     ar : ∀ {A B : Tp p} → A [ 1m ]⊢ B → ob A [ 1m ]⊢ ob B
+     presid  : ∀ {A : Tp p} → ar (ident A) ≈ ident (ob A)
+     prescut : ∀ {A B C : Tp p} (D1 : A [ 1m ]⊢ B) (D2 : B [ 1m ]⊢ C)
+             → ar (cut D1 D2) ≈ cut (ar D1) (ar D2)
 
+  record NatTrans {p q : Mode} (G1 G2 : Functor p q) : Set where
+    constructor nat
+    field
+      mor    : {A : Tp p} → Functor.ob G1 A [ 1m ]⊢ Functor.ob G2 A
+      square : {A B : Tp p} (D : A [ 1m ]⊢ B)
+             → cut (mor {A}) (Functor.ar G2 D) ≈ cut (Functor.ar G1 D) (mor {B})
+
+  1NatTrans : ∀ {p q : Mode} {G : Functor p q} → NatTrans G G 
+  1NatTrans {G = G} = nat hyp (λ D → !≈ (cut-ident-right (Functor.ar G D)) ∘≈ cut-ident-left (Functor.ar G D))
+
+  _·NatTrans_ : ∀ {p q : Mode} {G1 G2 G3 : Functor p q} → NatTrans G1 G2 → NatTrans G2 G3 → NatTrans G1 G3
+  _·NatTrans_ {G1 = G1}{G2}{G3} n1 n2 = nat (cut (NatTrans.mor n1) (NatTrans.mor n2)) (λ D → !≈ (cut-assoc (Functor.ar G1 D) (NatTrans.mor n1) (NatTrans.mor n2)) ∘≈ cut≈1 (NatTrans.square n1 D) (NatTrans.mor n2) ∘≈ cut-assoc (NatTrans.mor n1) (Functor.ar G2 D) (NatTrans.mor n2) ∘≈ cut≈2 (NatTrans.mor n1) (NatTrans.square n2 D) ∘≈ !≈ (cut-assoc (NatTrans.mor n1) (NatTrans.mor n2) (Functor.ar G3 D)))
+
+  -- it's a theorem that a natural isomorphism is the same as an isomorphism of natural transformations
+  record NatIso {p q : Mode} (G1 G2 : Functor p q) : Set where
+    constructor natiso
+    field
+      mor    : {A : Tp p} → Iso (Functor.ob G1 A) (Functor.ob G2 A) 
+      square : {A B : Tp p} (D : A [ 1m ]⊢ B)
+             → cut (Iso.f (mor {A})) (Functor.ar G2 D) ≈ cut (Functor.ar G1 D) (Iso.f (mor {B}))
+
+  -- natural bijection on hom sets
+  record Adjunction (p q : Mode) : Set where
+    constructor adj
+    field 
+      L : Functor p q
+      R : Functor q p
+      LtoR : ∀ {A B} → Functor.ob L A [ 1m ]⊢ B → A [ 1m ]⊢ Functor.ob R B
+      RtoL : ∀ {A B} → A [ 1m ]⊢ Functor.ob R B → Functor.ob L A [ 1m ]⊢ B
+      LtoRtoL : ∀ {A B} → (D : Functor.ob L A [ 1m ]⊢ B) 
+                        → RtoL (LtoR D) ≈ D
+      RtoLtoR : ∀ {A B} → (D : A [ 1m ]⊢ Functor.ob R B) 
+                        → LtoR (RtoL D) ≈ D
+      LtoRnat : ∀ {A A' B B'} 
+                → (D1 : A' [ 1m ]⊢ A) (D : Functor.ob L A [ 1m ]⊢ B) (D2 : B [ 1m ]⊢ B')
+                →   LtoR (cut (Functor.ar L D1) (cut D D2))
+                  ≈ cut D1 (cut (LtoR D) (Functor.ar R D2))
+      RtoLnat : ∀ {A A' B B'} 
+                → (D1 : A' [ 1m ]⊢ A) (D : A [ 1m ]⊢ Functor.ob R B) (D2 : B [ 1m ]⊢ B')
+                →   RtoL (cut D1 (cut D (Functor.ar R D2)))
+                  ≈ cut (Functor.ar L D1) (cut (RtoL D) D2)
+
+  record AdjMor {p q : Mode} (a1 : Adjunction p q) (a2 : Adjunction p q) : Set where
+    constructor adjmor
+    field
+      LL        : NatTrans (Adjunction.L a1) (Adjunction.L a2)
+      RR        : NatTrans (Adjunction.R a2) (Adjunction.R a1)
+      -- one of many ways to phrase this; see
+      -- https://unapologetic.wordpress.com/2007/07/30/transformations-of-adjoints/
+      conjugate : ∀ {A} → cut (Adjunction.LtoR a1 hyp) (Functor.ar (Adjunction.R a1) (NatTrans.mor LL {A})) ≈ cut (Adjunction.LtoR a2 hyp) (NatTrans.mor RR {Functor.ob (Adjunction.L a2) A})
+
+  record _==AdjMor_ {p q : Mode} {a1 : Adjunction p q} {a2 : Adjunction p q} (mor1 : AdjMor a1 a2) (mor2 : AdjMor a1 a2) : Set where
+    constructor eqadjmor
+    field 
+      eq1 : ∀ {A} → NatTrans.mor (AdjMor.LL mor1) {A = A} ≈ NatTrans.mor (AdjMor.LL mor2)
+      eq2 : ∀ {A} → NatTrans.mor (AdjMor.RR mor1) {A = A} ≈ NatTrans.mor (AdjMor.RR mor2)
+
+  1AdjMor : {p q : Mode} {a : Adjunction p q}
+          → AdjMor a a 
+  1AdjMor {a = a} = adjmor 1NatTrans 1NatTrans (cut≈2 (Adjunction.LtoR a hyp) (Functor.presid (Adjunction.R a)))
+
+  _·AdjMor_ : {p q : Mode} {a1 : Adjunction p q} {a2 : Adjunction p q} {a3 : Adjunction p q}
+          → AdjMor a1 a2
+          → AdjMor a2 a3
+          → AdjMor a1 a3
+  _·AdjMor_ {a1 = a1}{a2}{a3} mor1 mor2 = 
+    adjmor (AdjMor.LL mor1 ·NatTrans AdjMor.LL mor2)
+           (AdjMor.RR mor2 ·NatTrans AdjMor.RR mor1) 
+           {!AdjMor.conjugate mor1!}
+
+
+  record AdjIso {p q : Mode} (a1 : Adjunction p q) (a2 : Adjunction p q) : Set where
+    constructor iso
+    field
+      LL        : NatIso (Adjunction.L a1) (Adjunction.L a2)
+      RR        : NatIso (Adjunction.R a2) (Adjunction.R a1)
+      conjugate : ∀ {A} → cut (Adjunction.LtoR a1 hyp) (Functor.ar (Adjunction.R a1) (Iso.f (NatIso.mor LL {A}))) ≈ cut (Adjunction.LtoR a2 hyp) (Iso.f (NatIso.mor RR {Functor.ob (Adjunction.L a2) A}))
+
+            
   -- ----------------------------------------------------------------------
   -- F α and F β are different for two parallel but different α and β
 
@@ -122,8 +211,8 @@ module adjointlogic2.General where
   Ffunc-ident : ∀ {p q : Mode} {α : q ≥ p} {A} → Ffunc (ident A) ≈ (ident (F α A))
   Ffunc-ident = id
 
-  Ffunc-cut : ∀ {p q : Mode} {α : q ≥ p} {A B C} {D : A [ 1m ]⊢ B} {E : B [ 1m ]⊢ C} → Ffunc {α = α} (cut D E) ≈ cut (Ffunc D) (Ffunc E)
-  Ffunc-cut {D = D} {E = E} = eq (! (ap FL (transport⊢1 _)) ∘ ap FL (! (cutFR D)) )
+  Ffunc-cut : ∀ {p q : Mode} {α : q ≥ p} {A B C} (D : A [ 1m ]⊢ B) (E : B [ 1m ]⊢ C) → Ffunc {α = α} (cut D E) ≈ cut (Ffunc D) (Ffunc E)
+  Ffunc-cut D E = eq (! (ap FL (transport⊢1 _)) ∘ ap FL (! (cutFR D)) )
 
   -- action of F on terms is functorial in α
 
@@ -147,8 +236,8 @@ module adjointlogic2.General where
   Ufunc-ident : ∀ {p q : Mode} {α : q ≥ p} {A} → Ufunc (ident A) ≈ (ident (U α A))
   Ufunc-ident = id
 
-  Ufunc-cut : ∀ {p q : Mode} {α : q ≥ p} {A B C} {D : A [ 1m ]⊢ B} {E : B [ 1m ]⊢ C} → Ufunc {α = α} (cut D E) ≈ cut (Ufunc D) (Ufunc E)
-  Ufunc-cut {D = D} {E} = UR≈ (eq (! (transport⊢1 _)) ∘≈ (!≈ (cutUL E)))
+  Ufunc-cut : ∀ {p q : Mode} {α : q ≥ p} {A B C} (D : A [ 1m ]⊢ B) (E : B [ 1m ]⊢ C) → Ufunc {α = α} (cut D E) ≈ cut (Ufunc D) (Ufunc E)
+  Ufunc-cut D E = UR≈ (eq (! (transport⊢1 _)) ∘≈ (!≈ (cutUL E)))
 
   Ufunc-func1 : ∀ {p : Mode} {A B : Tp p} (D : A [ 1m ]⊢ B) → Ufunc {α = 1m} {A} {B} D ≈ cut {α = 1m} {β = 1m} Ufunc11 (cut {α = 1m} {β = 1m} D Ufunc12)
   Ufunc-func1 {A = A} {B = B} D = !≈ ((UR≈ (UL≈ (((cut-ident-right D ∘≈ (cut≈2 D (cut-ident-left _ ∘≈ eq (transport⊢1 _)))) ∘≈ !≈ (cut-assoc D (UR {β = 1m} hyp) (UL 1m 1⇒ (ident B)))) ∘≈ cut≈1 (cut-ident-left (cut D (UR {β = 1m} hyp))) (UL 1m 1⇒ (ident B)))) ∘≈ Uη _) ∘≈ cutUL (cut D (UR {α = 1m} {β = 1m} hyp)))
@@ -304,8 +393,6 @@ module adjointlogic2.General where
   U2· : ∀ {p q} {A : Tp p} {α β γ : q ≥ p} {e1 : β ⇒ α} {e2 : γ ⇒ β} → U2 {A = A} (e2 ·2 e1) ≈ cut (U2 {A = A} e2) (U2 {A = A} e1)
   U2· {α = α} {e1 = e1} {e2} = UR≈ {α = α} {β = 1m} (!≈ (transport⊢≈ e1 (cut-ident-right (UL 1m e2 hyp))))
 
-  -- one of many ways to phrase this; see
-  -- https://unapologetic.wordpress.com/2007/07/30/transformations-of-adjoints/
   F2U2conjugate : ∀ {p q} {A : Tp q} {α β : q ≥ p} {e : β ⇒ α}
             → cut (◯unit  {A = A} {α = α}) (Ufunc (F2 e)) ≈ cut (◯unit {A = A} {α = β}) (U2 {A = F β A} e)
   F2U2conjugate {A = A} {α = α} {β = β} {e} = 
@@ -331,3 +418,42 @@ module adjointlogic2.General where
   Fpres-coprod : ∀ {p q} {α : p ≥ q} {A B} → Iso (F α (A ⊕ B)) (F α A ⊕ F α B)
   Fpres-coprod = iso Fpres-coprod1 Fpres-coprod2 Fpres-coprod-composite-2 Fpres-coprod-composite-1
 
+
+  -- ----------------------------------------------------------------------
+  -- pseudofunctor from M into Adj
+
+  Ffunctor : ∀ {p q} (α : q ≥ p) → Functor q p 
+  Ffunctor α = func (F α) Ffunc Ffunc-ident Ffunc-cut
+
+  Ufunctor : ∀ {p q} (α : q ≥ p) → Functor p q
+  Ufunctor α = func (U α) Ufunc Ufunc-ident Ufunc-cut
+
+  F2-nattrans : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → NatTrans (Ffunctor β) (Ffunctor α)
+  F2-nattrans e = nat (F2 e) (F2-natural e)
+
+  U2-nattrans : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → NatTrans (Ufunctor α) (Ufunctor β)
+  U2-nattrans e = nat (U2 e) (U2-natural e)
+
+  -- (1) each object of M determines a category:
+  --     objects of p are A : Tp p
+  --     morphisms are D : A [ 1m ]⊢ B mod ≈ 
+  --               id and comp are ident and cut, which are associative and unital up to ≈
+
+  -- (2) functor from each hom category q ≥ p to category of Adjunction q p and AdjMor's 
+  
+  pseudofunctor2-ob : ∀ {p q} → q ≥ p → Adjunction q p
+  pseudofunctor2-ob α = adj (Ffunctor α) (Ufunctor α) UFadjunction1 UFadjunction2 UFadj-composite2 UFadj-composite1 UFadjunction-nat1 UFadjunction-nat2
+  
+  pseudofunctor2-mor : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → 
+                      AdjMor (pseudofunctor2-ob β) (pseudofunctor2-ob α)
+  pseudofunctor2-mor e = adjmor (F2-nattrans e) (U2-nattrans e) (λ {A} → {!!≈ (F2U2conjugate {A = A} {e = e})!})
+
+  pseudofunctor2-1 : ∀ {p q} {α : q ≥ p}
+                         → pseudofunctor2-mor (1⇒{_}{_}{α}) ==AdjMor 1AdjMor
+  pseudofunctor2-1 = eqadjmor F21 U21
+
+  pseudofunctor2-∘ : ∀ {p q} {α β γ : q ≥ p} (e1 : α ⇒ β) (e2 : β ⇒ γ)
+                   → (pseudofunctor2-mor (e1 ·2 e2)) ==AdjMor ((pseudofunctor2-mor e2) ·AdjMor (pseudofunctor2-mor e1))
+  pseudofunctor2-∘ e1 e2 = eqadjmor F2· U2·
+
+  -- (3) 
