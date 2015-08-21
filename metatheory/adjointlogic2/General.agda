@@ -542,10 +542,21 @@ module adjointlogic2.General where
   P1-ob-1 : ∀ {p} → AdjIso (P1-ob 1m) (1Adj {p}) 
   P1-ob-1 = adjiso F1-natiso (!natiso U1-natiso) FU1-conjugate
 
-  -- (3) for composable α and β, a 2-cell isomorphism between P1-ob(α ∘1 β) and the composite of P1-ob(α) and P1-ob(β) 
+  -- (3) for composable α and β, a 2-cell natural isomorphism between P1-ob(α ∘1 β) and the composite of P1-ob(α) and P1-ob(β) 
 
   P1-ob-∘ : ∀ {p q r} {α : r ≥ q} {β : q ≥ p} → AdjIso (P1-ob (α ∘1 β)) (P1-ob α ·Adj P1-ob β)
   P1-ob-∘ = adjiso F∘-natiso (!natiso U∘-natiso) FU∘-conjugate
+
+  -- P1(α ∘1 β) is a functor (r ≥ q × q ≥ p -> Adjunction r p)
+  --    it's really P1 o (\ α β → (α ∘1 β))
+  --    so it's functorial action is P1-mor o _∘1cong_
+  -- 
+  -- P1(α) ·Adj P1(β) is also a functor (r ≥ q × q ≥ p -> Adjunction r p)
+  --    it's really P1 × P1 : r ≥ q × q ≥ p → Adjunction r q × Adjunction q p
+  --    composed with ·Adj : Adjunction r q × Adjunction q p → Adjunction r p
+  --    so it's functorial action is _·Adj-cong_ o (P1-mor × P1-mor)
+  -- 
+  -- so the naturality we want is as follows:
 
   P1-ob-∘-nat : ∀ {p q r} {α α' : r ≥ q} {β β' : q ≥ p} (e1 : α ⇒ α') (e2 : β ⇒ β')
               → (P1-mor (e1 ∘1cong e2) ·AdjMor AdjIso-forward (P1-ob-∘ {α = α} {β = β})) ==AdjMor (AdjIso-forward (P1-ob-∘ {α = α'} {β = β'}) ·AdjMor (P1-mor e1 ·Adj-cong P1-mor e2))
