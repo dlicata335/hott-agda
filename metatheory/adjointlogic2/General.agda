@@ -160,6 +160,20 @@ module adjointlogic2.General where
                 → AdjIso a1 a2 → AdjMor a1 a2
   AdjIso-forward i = adjmor (NatIso-forward (AdjIso.LL i)) (NatIso-forward (AdjIso.RR i)) (AdjIso.conjugate i)
 
+  AdjIso-backward : {p q : Mode} {a1 : Adjunction p q} {a2 : Adjunction p q}
+                → AdjIso a1 a2 → AdjMor a2 a1
+  AdjIso-backward i = adjmor (NatIso-forward (!natiso (AdjIso.LL i))) (NatIso-forward (!natiso (AdjIso.RR i))) {!!}
+
+  -- note: Adj is really be a strict 2-category,
+  --       but since we didn't make ≈ proof-irrelevant (or us a quotient)
+  --       this isn't true up to Agda propositional equality.
+  --       however, rather than fixing this, it's easier to use the weaker bifunctor law below.
+  ·Adj-unit-l : ∀ {p q : Mode} (a1 : Adjunction p q)  → AdjIso (1Adj ·Adj a1) a1
+  ·Adj-unit-l a1 = adjiso (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (cut≈2 (Adjunction.LtoR a1 (ident (Functor.ob (Adjunction.L a1) _))) (Functor.presid (Adjunction.R (1Adj ·Adj a1))))
+
+  ·Adj-unit-r : ∀ {p q : Mode} (a1 : Adjunction p q)  → AdjIso a1 (a1 ·Adj 1Adj)
+  ·Adj-unit-r a1 = adjiso (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (cut≈2 (Adjunction.LtoR a1 (ident (Functor.ob (Adjunction.L a1) _))) (Functor.presid (Adjunction.R a1)))
+
             
   -- ----------------------------------------------------------------------
   -- F α and F β are different for two parallel but different α and β
@@ -539,13 +553,13 @@ module adjointlogic2.General where
   --     i.e. P1 preserves 1 up to isomorphism
   --     in this case, the identity 1-cell is the 1 -| 1 adjunction
 
-  P1-ob-1 : ∀ {p} → AdjIso (P1-ob 1m) (1Adj {p}) 
-  P1-ob-1 = adjiso F1-natiso (!natiso U1-natiso) FU1-conjugate
+  P1-1 : ∀ {p} → AdjIso (P1-ob 1m) (1Adj {p}) 
+  P1-1 = adjiso F1-natiso (!natiso U1-natiso) FU1-conjugate
 
   -- (3) for composable α and β, a 2-cell natural isomorphism between P1-ob(α ∘1 β) and the composite of P1-ob(α) and P1-ob(β) 
 
-  P1-ob-∘ : ∀ {p q r} {α : r ≥ q} {β : q ≥ p} → AdjIso (P1-ob (α ∘1 β)) (P1-ob α ·Adj P1-ob β)
-  P1-ob-∘ = adjiso F∘-natiso (!natiso U∘-natiso) FU∘-conjugate
+  P1-∘ : ∀ {p q r} {α : r ≥ q} {β : q ≥ p} → AdjIso (P1-ob (α ∘1 β)) (P1-ob α ·Adj P1-ob β)
+  P1-∘ = adjiso F∘-natiso (!natiso U∘-natiso) FU∘-conjugate
 
   -- P1(α ∘1 β) is a functor (r ≥ q × q ≥ p -> Adjunction r p)
   --    it's really P1 o (\ α β → (α ∘1 β))
@@ -558,8 +572,28 @@ module adjointlogic2.General where
   -- 
   -- so the naturality we want is as follows:
 
-  P1-ob-∘-nat : ∀ {p q r} {α α' : r ≥ q} {β β' : q ≥ p} (e1 : α ⇒ α') (e2 : β ⇒ β')
-              → (P1-mor (e1 ∘1cong e2) ·AdjMor AdjIso-forward (P1-ob-∘ {α = α} {β = β})) ==AdjMor (AdjIso-forward (P1-ob-∘ {α = α'} {β = β'}) ·AdjMor (P1-mor e1 ·Adj-cong P1-mor e2))
-  P1-ob-∘-nat {α = α}{α'}{β}{β'} e1 e2 = 
+  P1-∘-nat : ∀ {p q r} {α α' : r ≥ q} {β β' : q ≥ p} (e1 : α ⇒ α') (e2 : β ⇒ β')
+              → (P1-mor (e1 ∘1cong e2) ·AdjMor AdjIso-forward (P1-∘ {α = α} {β = β})) ==AdjMor (AdjIso-forward (P1-∘ {α = α'} {β = β'}) ·AdjMor (P1-mor e1 ·Adj-cong P1-mor e2))
+  P1-∘-nat {α = α}{α'}{β}{β'} e1 e2 = 
     eqadjmor (FL≈ {α = α' ∘1 β'} {β = 1m} (!≈ (FR2 {α = β} {β = α' ∘1 β'} {γ = α'} {γ' = α} {e = _} {e' = e1 ∘1cong e2} {D = cut (FR 1m 1⇒ hyp) (cut (FL {α = α'} {β = 1m} (FR 1m e1 hyp)) hyp)} {D' = FR 1m 1⇒ hyp} e1 (! (interchange {e1 = e1} {e2 = 1⇒} {f1 = 1⇒} {f2 = e2})) ((( transport⊢≈ e1 (cut-ident-left (FR 1m 1⇒ hyp))) ∘≈ cut-ident-left _) ∘≈ eq (transport⊢1 _))) ∘≈ transport⊢≈ _ (cut-ident-left (FR α 1⇒ (FR 1m 1⇒ hyp)))))
              (UR≈ {α = α' ∘1 β'} {β = 1m} (!≈ (cut-ident-right (UL β' (e1 ∘1cong 1⇒) (transport⊢ 1⇒ (cut (UL 1m e2 hyp) hyp))) ∘≈ eq (transport⊢1 _) ∘≈ eq (transport⊢1 _)) ∘≈ !≈ (UL2 {e = e1 ∘1cong 1⇒} {e' = 1⇒ ·2 (e1 ∘1cong e2)} {D = transport⊢ 1⇒ (cut (UL 1m e2 hyp) hyp)} {D' = UL 1m 1⇒ hyp} e2 (! (interchange {e1 = 1⇒} {e2 = e1} {f1 = e2} {f2 = 1⇒})) (cut-ident-right (UL 1m e2 hyp) ∘≈ eq (transport⊢1 _))) ∘≈ transport⊢≈ (e1 ∘1cong e2) (cut-ident-right (UL β 1⇒ (UL 1m 1⇒ hyp))) ))
+
+  -- (4) parts (2) and (3) are coherent
+
+  -- P1-∘(1 ∘ α) is related to P1-1 (congruenced with P1(α) and adjusted by the unitor for Adj, which is not an equality
+  -- because we didn't squash ≈, so we use the weak 2-category formulation)
+
+  P1-1-∘-l : ∀ {p q} {α : q ≥ p} 
+           → AdjIso-forward (P1-∘ {α = 1m} {β = α}) 
+             ==AdjMor 
+             (AdjIso-backward (·Adj-unit-l (P1-ob α)) ·AdjMor (AdjIso-backward P1-1 ·Adj-cong 1AdjMor {a = P1-ob α})) 
+  P1-1-∘-l {α = α} = eqadjmor (FL≈ {α = α} {β = 1m} (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _)) ∘≈ FR≈ {α = α} {β = 1m ∘1 α} (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))))) (UR≈ {α = α} {β = 1m} (!≈ (cut-ident-right (UL {α = 1m} {β = α} α 1⇒ (transport⊢ 1⇒ (cut (UL {α = α} {β = α} 1m 1⇒ hyp) hyp))) ∘≈ eq (transport⊢1 (cut (UL {α = 1m} {β = α} α 1⇒ (transport⊢ 1⇒ (cut (UL 1m 1⇒ hyp) hyp))) hyp))) ∘≈ UL≈ (!≈ (cut-ident-right _ ∘≈ eq (transport⊢1 _)))))
+
+  -- P1-∘(α ∘ 1) is related to P1-1 (congruenced with P1(α) and adjusted by the unitor for Adj)
+
+  P1-1-∘-r : ∀ {p q} {α : q ≥ p} 
+           → AdjIso-forward (P1-∘ {α = α} {β = 1m}) 
+             ==AdjMor 
+             (AdjIso-forward (·Adj-unit-r (P1-ob α)) ·AdjMor (1AdjMor {a = P1-ob α} ·Adj-cong AdjIso-backward P1-1)) -- (AdjIso-backward (·Adj-unit-l (P1-ob α)) ·AdjMor (AdjIso-backward P1-1 ·Adj-cong 1AdjMor {a = P1-ob α})) 
+  P1-1-∘-r {α = α} = eqadjmor (!≈ (Fη _) ∘≈ FL≈ {α = α ∘1 1m} {β = 1m} (FR≈ (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _) ∘≈ cut-ident-left _ ∘≈ eq (transport⊢1 _) ∘≈ cut-ident-left _ ∘≈ eq (transport⊢1 _))))) 
+                             (UR≈ (!≈ (cut-ident-right _ ∘≈ eq (transport⊢1 _) ∘≈ cut-ident-right _ ∘≈ eq (transport⊢1 _))))
