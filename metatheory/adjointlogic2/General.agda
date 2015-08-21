@@ -174,6 +174,9 @@ module adjointlogic2.General where
   ·Adj-unit-r : ∀ {p q : Mode} (a1 : Adjunction p q)  → AdjIso a1 (a1 ·Adj 1Adj)
   ·Adj-unit-r a1 = adjiso (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (cut≈2 (Adjunction.LtoR a1 (ident (Functor.ob (Adjunction.L a1) _))) (Functor.presid (Adjunction.R a1)))
 
+  ·Adj-assoc : ∀ {p q r s : Mode} (a1 : Adjunction p q) (a2 : Adjunction q r) (a3 : Adjunction r s) 
+             → AdjIso ((a1 ·Adj a2) ·Adj a3) (a1 ·Adj (a2 ·Adj a3))
+  ·Adj-assoc a1 a2 a3 = adjiso (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (cut≈2 (Adjunction.LtoR a1 (Adjunction.LtoR a2 (Adjunction.LtoR a3 (ident (Functor.ob (Adjunction.L a3) (Functor.ob (Adjunction.L a2) (Functor.ob (Adjunction.L a1) _))))))) (Functor.presid (Adjunction.R ((a1 ·Adj a2) ·Adj a3))))
             
   -- ----------------------------------------------------------------------
   -- F α and F β are different for two parallel but different α and β
@@ -580,20 +583,28 @@ module adjointlogic2.General where
 
   -- (4) parts (2) and (3) are coherent
 
-  -- P1-∘(1 ∘ α) is related to P1-1 (congruenced with P1(α) and adjusted by the unitor for Adj, which is not an equality
+  -- P1-∘(1 , α) is related to P1-1 (congruenced with P1(α) and adjusted by the unitor for Adj, which is not an equality
   -- because we didn't squash ≈, so we use the weak 2-category formulation)
-
   P1-1-∘-l : ∀ {p q} {α : q ≥ p} 
            → AdjIso-forward (P1-∘ {α = 1m} {β = α}) 
              ==AdjMor 
              (AdjIso-backward (·Adj-unit-l (P1-ob α)) ·AdjMor (AdjIso-backward P1-1 ·Adj-cong 1AdjMor {a = P1-ob α})) 
   P1-1-∘-l {α = α} = eqadjmor (FL≈ {α = α} {β = 1m} (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _)) ∘≈ FR≈ {α = α} {β = 1m ∘1 α} (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))))) (UR≈ {α = α} {β = 1m} (!≈ (cut-ident-right (UL {α = 1m} {β = α} α 1⇒ (transport⊢ 1⇒ (cut (UL {α = α} {β = α} 1m 1⇒ hyp) hyp))) ∘≈ eq (transport⊢1 (cut (UL {α = 1m} {β = α} α 1⇒ (transport⊢ 1⇒ (cut (UL 1m 1⇒ hyp) hyp))) hyp))) ∘≈ UL≈ (!≈ (cut-ident-right _ ∘≈ eq (transport⊢1 _)))))
 
-  -- P1-∘(α ∘ 1) is related to P1-1 (congruenced with P1(α) and adjusted by the unitor for Adj)
-
+  -- P1-∘(α , 1) is related to P1-1 (congruenced with P1(α) and adjusted by the unitor for Adj)
   P1-1-∘-r : ∀ {p q} {α : q ≥ p} 
            → AdjIso-forward (P1-∘ {α = α} {β = 1m}) 
              ==AdjMor 
-             (AdjIso-forward (·Adj-unit-r (P1-ob α)) ·AdjMor (1AdjMor {a = P1-ob α} ·Adj-cong AdjIso-backward P1-1)) -- (AdjIso-backward (·Adj-unit-l (P1-ob α)) ·AdjMor (AdjIso-backward P1-1 ·Adj-cong 1AdjMor {a = P1-ob α})) 
+             (AdjIso-forward (·Adj-unit-r (P1-ob α)) ·AdjMor (1AdjMor {a = P1-ob α} ·Adj-cong AdjIso-backward P1-1)) 
   P1-1-∘-r {α = α} = eqadjmor (!≈ (Fη _) ∘≈ FL≈ {α = α ∘1 1m} {β = 1m} (FR≈ (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _) ∘≈ cut-ident-left _ ∘≈ eq (transport⊢1 _) ∘≈ cut-ident-left _ ∘≈ eq (transport⊢1 _))))) 
                              (UR≈ (!≈ (cut-ident-right _ ∘≈ eq (transport⊢1 _) ∘≈ cut-ident-right _ ∘≈ eq (transport⊢1 _))))
+
+  -- P-∘(γ, β ∘ α) and P-∘(β,α)  is the same as  P-∘(γ ∘ β, α) and P-∘(γ,β)  up to the associator
+  P1-∘-assoc : ∀ {p q r s} {α : q ≥ p} {β : r ≥ q} {γ : s ≥ r}
+             → ((1AdjMor {a = P1-ob γ} ·Adj-cong AdjIso-backward (P1-∘ {α = β} {β = α})) ·AdjMor AdjIso-backward (P1-∘ {α = γ} {β = β ∘1 α}))
+                ==AdjMor 
+                (AdjIso-backward (·Adj-assoc (P1-ob γ) (P1-ob β) (P1-ob α)) ·AdjMor
+                 ((AdjIso-backward (P1-∘ {α = γ} {β = β}) ·Adj-cong 1AdjMor {a = P1-ob α}) ·AdjMor
+                 AdjIso-backward (P1-∘ {α = γ ∘1 β} {β = α})))
+  P1-∘-assoc {α = α} {β}{γ} = eqadjmor (FL≈ {α = α} {β = 1m} (FL≈ {α = β} {β = α ∘1 1m} (FL≈ {α = γ} {β = β ∘1 (α ∘1 1m)} ((!≈ (((((cut-ident-left _ ∘≈ eq (transport⊢1 _)) ∘≈ cut≈1 (cut-ident-left (FR 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _)) (FL {α = γ ∘1 β} {β = α} (FR 1m 1⇒ hyp))) ∘≈ eq (transport⊢1 _)) ∘≈ cut-ident-left _) ∘≈ eq (transport⊢1 _ ∘ transport⊢1 _ ∘ transport⊢1 _)) ∘≈ cut-ident-left (FR 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _)) ∘≈ cut≈1 (cut-ident-left _ ∘≈ eq (transport⊢1 _)) (FL (FR 1m 1⇒ hyp)) ∘≈ eq (transport⊢1 _)))))
+                                      (UR≈ {α = γ} {β = 1m}(UR≈ {α = β} {β = 1m ∘1 γ}(UR≈ {α = α} {β = (1m ∘1 γ) ∘1 β} (((!≈ (((((cut-ident-right _ ∘≈ eq (transport⊢1 _)) ∘≈ cut≈2 (UR {α = α} {β = γ ∘1 β} (UL 1m 1⇒ hyp)) (cut-ident-right (UL 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _))) ∘≈ eq (transport⊢1 _)) ∘≈ cut-ident-right (transport⊢ 1⇒ (cut (UR {α = α} {β = γ ∘1 β} (UL 1m 1⇒ hyp)) (transport⊢ 1⇒ (cut (UL 1m 1⇒ hyp) hyp))))) ∘≈ eq (transport⊢1 _ ∘ transport⊢1 _ ∘ transport⊢1 _)) ∘≈ cut-ident-right (UL 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _)) ∘≈ cut≈2 (UR {α = β ∘1 α} {β = γ} (UL 1m 1⇒ hyp)) (cut-ident-right (UL 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _) ∘≈ eq (transport⊢1 _))) ∘≈ eq (transport⊢1 _)))))
