@@ -35,15 +35,16 @@ module adjointlogic2.General where
     field
      ob : Tp p -> Tp q  
      ar : ∀ {A B : Tp p} → A [ 1m ]⊢ B → ob A [ 1m ]⊢ ob B
+     ar≈ : ∀ {A B : Tp p} {D1 D2 : A [ 1m ]⊢ B} → D1 ≈ D2 → ar D1 ≈ ar D2
      presid  : ∀ {A : Tp p} → ar (ident A) ≈ ident (ob A)
      prescut : ∀ {A B C : Tp p} (D1 : A [ 1m ]⊢ B) (D2 : B [ 1m ]⊢ C)
              → ar (cut D1 D2) ≈ cut (ar D1) (ar D2)
 
   1Func : ∀ {p} → Functor p p
-  1Func = func (\ x -> x) (\ D -> D) id (\ _ _ -> id)
+  1Func = func (\ x -> x) (\ D -> D) (\ x -> x) id (\ _ _ -> id)
 
   _∘Func_ : ∀ {p q r} → Functor q r → Functor p q → Functor p r 
-  _∘Func_ H G = func (λ X → Functor.ob H (Functor.ob G X)) (λ D → Functor.ar H (Functor.ar G D)) {!!} {!!}
+  _∘Func_ H G = func (λ X → Functor.ob H (Functor.ob G X)) (λ D → Functor.ar H (Functor.ar G D)) (λ q → Functor.ar≈ H (Functor.ar≈ G q)) (Functor.presid H ∘≈ Functor.ar≈ H (Functor.presid G)) (λ D1 D2 → Functor.prescut H _ _ ∘≈ Functor.ar≈ H (Functor.prescut G D1 D2))
 
   record NatTrans {p q : Mode} (G1 G2 : Functor p q) : Set where
     constructor nat
@@ -67,7 +68,7 @@ module adjointlogic2.General where
              → cut (Iso.f (mor {A})) (Functor.ar G2 D) ≈ cut (Functor.ar G1 D) (Iso.f (mor {B}))
 
   !natiso : {p q : Mode} {G1 G2 : Functor p q} → NatIso G1 G2 → NatIso G2 G1
-  !natiso i = natiso (!i (NatIso.mor i)) {!!}
+  !natiso i = natiso (!i (NatIso.mor i)) (λ D → {!NatIso.square i D!})
 
   square' : {p q : Mode} {G1 G2 : Functor p q} {A B : Tp p} 
           → (i : NatIso G1 G2) (D : A [ 1m ]⊢ B)
@@ -85,6 +86,8 @@ module adjointlogic2.General where
       R : Functor q p
       LtoR : ∀ {A B} → Functor.ob L A [ 1m ]⊢ B → A [ 1m ]⊢ Functor.ob R B
       RtoL : ∀ {A B} → A [ 1m ]⊢ Functor.ob R B → Functor.ob L A [ 1m ]⊢ B
+      LtoR≈ : ∀ {A B} → {D1 D2 : Functor.ob L A [ 1m ]⊢ B} → D1 ≈ D2 → LtoR D1 ≈ LtoR D2
+      RtoL≈ : ∀ {A B} → {D1 D2 : A [ 1m ]⊢ Functor.ob R B} → D1 ≈ D2 → RtoL D1 ≈ RtoL D2
       LtoRtoL : ∀ {A B} → (D : Functor.ob L A [ 1m ]⊢ B) 
                         → RtoL (LtoR D) ≈ D
       RtoLtoR : ∀ {A B} → (D : A [ 1m ]⊢ Functor.ob R B) 
@@ -99,13 +102,17 @@ module adjointlogic2.General where
                   ≈ cut (Functor.ar L D1) (cut (RtoL D) D2)
 
   1Adj : ∀ {p} → Adjunction p p
-  1Adj = adj 1Func 1Func (λ D → D) (λ D → D) (λ _ → id) (λ _ → id) (λ _ _ _ → id) (λ _ _ _ → id)
+  1Adj = adj 1Func 1Func (λ D → D) (λ D → D) (\ q -> q) (\ q -> q) (λ _ → id) (λ _ → id) (λ _ _ _ → id) (λ _ _ _ → id)
 
   _·Adj_ : ∀ {p q r} → Adjunction p q → Adjunction q r → Adjunction p r 
   _·Adj_ a1 a2 = adj (Adjunction.L a2 ∘Func Adjunction.L a1) (Adjunction.R a1 ∘Func Adjunction.R a2)
                    (λ D → Adjunction.LtoR a1 (Adjunction.LtoR a2 D)) 
                    (λ D → Adjunction.RtoL a2 (Adjunction.RtoL a1 D))
-                   {!!} {!!} {!!} {!!}
+                   (λ q → Adjunction.LtoR≈ a1 (Adjunction.LtoR≈ a2 q)) 
+                   (λ q → Adjunction.RtoL≈ a2 (Adjunction.RtoL≈ a1 q))
+                   (λ D → Adjunction.LtoRtoL a2 D ∘≈ Adjunction.RtoL≈ a2 (Adjunction.LtoRtoL a1 _))
+                   (λ D → Adjunction.RtoLtoR a1 D ∘≈ Adjunction.LtoR≈ a1 (Adjunction.RtoLtoR a2 _))
+                   (λ D1 D D2 → {!Adjunction.LtoRnat a2 D1 D D2!}) {!!}
 
   record AdjMor {p q : Mode} (a1 : Adjunction p q) (a2 : Adjunction p q) : Set where
     constructor adjmor
@@ -196,10 +203,10 @@ module adjointlogic2.General where
   Ufunc-i {α = α1} (iso f g α β) = iso (Ufunc f) (Ufunc g) (UR≈ {α = α1} {β = 1m ∘1 1m} ((UL≈ {e = 1⇒} α ∘≈ cutUL g) ∘≈ eq (transport⊢1 _))) (UR≈ {α = α1} {β = 1m ∘1 1m} ((UL≈ {e = 1⇒} β ∘≈ cutUL f) ∘≈ eq (transport⊢1 _)) )
 
   Ffunctor : ∀ {p q} (α : q ≥ p) → Functor q p 
-  Ffunctor α = func (F α) Ffunc Ffunc-ident Ffunc-cut
+  Ffunctor α = func (F α) Ffunc (λ D → FL≈ (FR≈ D)) Ffunc-ident Ffunc-cut
 
   Ufunctor : ∀ {p q} (α : q ≥ p) → Functor p q
-  Ufunctor α = func (U α) Ufunc Ufunc-ident Ufunc-cut
+  Ufunctor α = func (U α) Ufunc (λ D → UR≈ (UL≈ D)) Ufunc-ident Ufunc-cut
 
   -- ----------------------------------------------------------------------
   -- F -| U
@@ -467,9 +474,14 @@ module adjointlogic2.General where
   U2· {α = α} {e1 = e1} {e2} = UR≈ {α = α} {β = 1m} (!≈ (transport⊢≈ e1 (cut-ident-right (UL 1m e2 hyp))))
 
   F2U2conjugate : ∀ {p q} {A : Tp q} {α β : q ≥ p} {e : β ⇒ α}
-            → cut (◯unit  {A = A} {α = α}) (Ufunc (F2 e)) ≈ cut (◯unit {A = A} {α = β}) (U2 {A = F β A} e)
+            → cut (UFadjunction1 (ident (F _ A))) (Ufunc (F2 e))
+            ≈ cut (UFadjunction1 hyp) (U2 e)
   F2U2conjugate {A = A} {α = α} {β = β} {e} = 
-     UR≈ {α = α} {β = 1m} (!≈ (transport⊢≈ e (cut-ident-left _ ∘≈ eq (transport⊢1 (cut (ident A) (FR 1m 1⇒ (ident A)))))) ∘≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) ∘≈ eq (transport⊢1 _)
+    UR≈ {α = α} {β = 1m} (((!≈ (transport⊢≈ e (cut≈1 (cut-ident-left _ ∘≈ eq (transport⊢1 _)) (FL {α = β} {β = 1m} (FR 1m 1⇒ (ident A)))))
+                            ∘≈ !≈ (transport⊢≈ e (cut-ident-left (FR 1m 1⇒ (ident A)) ∘≈ eq (transport⊢1 (cut (ident A) (FR 1m 1⇒ (ident A)))))) )
+                            ∘≈ cut-ident-left (FR 1m e (ident A)) ∘≈ eq (transport⊢1 (cut (ident A) (FR 1m e (ident A)))))
+                            ∘≈ cut≈1 (cut-ident-left (FR 1m 1⇒ (ident A)) 
+                            ∘≈ eq (transport⊢1 _)) (FL {α = α} {β = 1m} (FR 1m e (ident A))) ∘≈ eq (transport⊢1 _))
 
   -- ----------------------------------------------------------------------
   -- F preserves coproducts
@@ -509,11 +521,11 @@ module adjointlogic2.General where
   -- (1) functor from each hom category q ≥ p to category of Adjunction q p and AdjMor's 
   
   P1-ob : ∀ {p q} → q ≥ p → Adjunction q p
-  P1-ob α = adj (Ffunctor α) (Ufunctor α) UFadjunction1 UFadjunction2 UFadj-composite2 UFadj-composite1 UFadjunction-nat1 UFadjunction-nat2
+  P1-ob α = adj (Ffunctor α) (Ufunctor α) UFadjunction1 UFadjunction2 (λ q → UR≈ {α = α} {β = 1m} (cut≈2 (FR 1m 1⇒ hyp) q)) (λ q → FL≈ {α = α} {β = 1m} (cut≈1 q (UL 1m 1⇒ hyp))) UFadj-composite2 UFadj-composite1 UFadjunction-nat1 UFadjunction-nat2
   
   P1-mor : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → 
                       AdjMor (P1-ob β) (P1-ob α)
-  P1-mor e = adjmor (F2-nattrans e) (U2-nattrans e) (λ {A} → {!!≈ (F2U2conjugate {A = A} {e = e})!})
+  P1-mor e = adjmor (F2-nattrans e) (U2-nattrans e) F2U2conjugate
 
   P1-mor-1 : ∀ {p q} {α : q ≥ p}
          → P1-mor (1⇒{_}{_}{α}) ==AdjMor 1AdjMor
