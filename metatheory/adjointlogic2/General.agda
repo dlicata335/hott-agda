@@ -202,6 +202,9 @@ module adjointlogic2.General where
   Ffunc-cut : ∀ {p q : Mode} {α : q ≥ p} {A B C} (D : A [ 1m ]⊢ B) (E : B [ 1m ]⊢ C) → Ffunc {α = α} (cut D E) ≈ cut (Ffunc D) (Ffunc E)
   Ffunc-cut D E = eq (! (ap FL (transport⊢1 _)) ∘ ap FL (! (cutFR D)) )
 
+  Ffunctor : ∀ {p q} (α : q ≥ p) → Functor q p 
+  Ffunctor α = func (F α) Ffunc (λ D → FL≈ (FR≈ D)) Ffunc-ident Ffunc-cut
+
   Ufunc : ∀ {p q : Mode} {α : q ≥ p} {A B} → A [ 1m ]⊢ B → U α A [ 1m ]⊢ U α B
   Ufunc {α = α} D =  UR {α = α} {β = 1m} (UL 1m 1⇒ D)
 
@@ -211,6 +214,9 @@ module adjointlogic2.General where
   Ufunc-cut : ∀ {p q : Mode} {α : q ≥ p} {A B C} (D : A [ 1m ]⊢ B) (E : B [ 1m ]⊢ C) → Ufunc {α = α} (cut D E) ≈ cut (Ufunc D) (Ufunc E)
   Ufunc-cut D E = UR≈ (eq (! (transport⊢1 _)) ∘≈ (!≈ (cutUL E)))
 
+  Ufunctor : ∀ {p q} (α : q ≥ p) → Functor p q
+  Ufunctor α = func (U α) Ufunc (λ D → UR≈ (UL≈ D)) Ufunc-ident Ufunc-cut
+
   -- functoriality preserves equivalence
   
   Ffunc-i : ∀ {p q} {α : p ≥ q} {A B : Tp p} → Iso A B → Iso (F α A) (F α B)
@@ -219,39 +225,132 @@ module adjointlogic2.General where
   Ufunc-i : ∀ {p q} {α : p ≥ q} {A B : Tp q} → Iso A B → Iso (U α A) (U α B)
   Ufunc-i {α = α1} (iso f g α β) = iso (Ufunc f) (Ufunc g) (UR≈ {α = α1} {β = 1m ∘1 1m} ((UL≈ {e = 1⇒} α ∘≈ cutUL g) ∘≈ eq (transport⊢1 _))) (UR≈ {α = α1} {β = 1m ∘1 1m} ((UL≈ {e = 1⇒} β ∘≈ cutUL f) ∘≈ eq (transport⊢1 _)) )
 
-  Ffunctor : ∀ {p q} (α : q ≥ p) → Functor q p 
-  Ffunctor α = func (F α) Ffunc (λ D → FL≈ (FR≈ D)) Ffunc-ident Ffunc-cut
+  ----------------------------------------------------------------------
+  -- monads
 
-  Ufunctor : ∀ {p q} (α : q ≥ p) → Functor p q
-  Ufunctor α = func (U α) Ufunc (λ D → UR≈ (UL≈ D)) Ufunc-ident Ufunc-cut
+  □ : ∀ {p q} (α : q ≥ p) → Tp p → Tp p 
+  □ α A = F α (U α A)
+
+  ◯ : ∀ {p q} (α : q ≥ p) → Tp q → Tp q 
+  ◯ α A = U α (F α A)
+
+  □func : ∀ {p q : Mode} {α : q ≥ p} {A B} → A [ 1m ]⊢ B → □ α A [ 1m ]⊢ □ α B
+  □func D = Ffunc (Ufunc D)
+
+  □functor : ∀ {p q : Mode} (α : q ≥ p) → Functor p p
+  □functor α = Ffunctor α ∘Func Ufunctor α
+
+  ◯func : ∀ {p q : Mode} {α : q ≥ p} {A B} → A [ 1m ]⊢ B → ◯ α A [ 1m ]⊢ ◯ α B
+  ◯func D = Ufunc (Ffunc D)
+
+  ◯functor : ∀ {p q : Mode} (α : q ≥ p) → Functor q q
+  ◯functor α = Ufunctor α ∘Func Ffunctor α
+
+  □counit : {p q : Mode} {A : Tp p} {α : q ≥ p} → □ α A [ 1m ]⊢ A
+  □counit {α = α} = FL {α = α} {β = 1m} (UL 1m 1⇒ hyp)
+
+  □counit-nattrans : ∀ {p q} {α : q ≥ p} → NatTrans (□functor α) 1Func
+  □counit-nattrans = nat □counit (λ D → FL≈ ((!≈ (cut-ident-right (UL 1m 1⇒ D) ∘≈ eq (transport⊢1 _ ∘ transport⊢1 _)) ∘≈ UL≈ (cut-ident-left D)) ∘≈ cutUL D) ∘≈ cutFL D)
+
+  □comult : {p q : Mode} {A : Tp p} {α : q ≥ p} → □ α A [ 1m ]⊢ □ α (□ α A)
+  □comult {α = α} = FL {α = α} {β = 1m} (FR 1m 1⇒ (UR (FR 1m 1⇒ hyp))) 
+
+  □comult-nattrans : ∀ {p q} {α : q ≥ p} → NatTrans (□functor α) (□functor α ∘Func □functor α)
+  □comult-nattrans = nat □comult (λ D → FL≈ (FR≈ (UR≈ (FR≈ (UR≈ (transport⊢≈ 1⇒ (!≈ (cut-ident-right _) ∘≈ UL≈ (cut-ident-left D) ∘≈ cutUL D)))))))
+
+  ◯unit : {p q : Mode} {A : Tp q} {α : q ≥ p} → A [ 1m ]⊢ ◯ α A
+  ◯unit {α = α} = UR (FR 1m 1⇒ hyp)
+
+  ◯unit-nat : {p q : Mode} {A A' : Tp q} {α : q ≥ p} (D : A [ 1m ]⊢ A')
+             → cut D (◯unit {α = α}) ≈ cut ◯unit (◯func D)
+  ◯unit-nat D = UR≈ (((eq (! (transport⊢1 _)) ∘≈ eq (! (transport⊢1 _)) ∘≈ !≈ (cut-ident-left (FR 1m 1⇒ D))) ∘≈ FR≈ (cut-ident-right D)) ∘≈ eq (cutFR D)) ∘≈ eq (cutUR D)
+
+  ◯unit-nattrans : ∀ {p q} {α : q ≥ p} → NatTrans 1Func (◯functor α)
+  ◯unit-nattrans = nat ◯unit (\ D -> !≈ (◯unit-nat D))
+
+  ◯mult : {p q : Mode} {A : Tp q} {α : q ≥ p} → ◯ α (◯ α A) [ 1m ]⊢ ◯ α A
+  ◯mult {α = α} = UR {α = α} {β = 1m} (UL 1m 1⇒ (FL (UL 1m 1⇒ hyp))) 
+
+  ◯mult-nat : {p q : Mode} {A A' : Tp q} {α : q ≥ p} (D : A [ 1m ]⊢ A') 
+            → cut (◯mult {α = α}) (◯func D) ≈ cut (◯func (◯func D)) ◯mult 
+  ◯mult-nat D = UR≈ (UL≈ (FL≈ (UL≈ (FL≈ (transport⊢≈ 1⇒ ((eq (! (cutFR D)) ∘≈ FR≈ (!≈ (cut-ident-right _))) ∘≈ cut-ident-left _))))))
+
+  ◯mult-nattrans : ∀ {p q} {α : q ≥ p} → NatTrans (◯functor α ∘Func ◯functor α) (◯functor α)
+  ◯mult-nattrans = nat ◯mult (\ D -> (◯mult-nat D))
+
+  ◯assoc : ∀ {p q : Mode} {A : Tp q} {α : q ≥ p} 
+          -> (cut {A = ◯ α (◯ α (◯ α A))} {C = ◯ α A} (◯func ◯mult) ◯mult) ≈ (cut ◯mult ◯mult)
+  ◯assoc = id
+
+  ◯unit1 : ∀ {p q : Mode} {A : Tp q} {α : q ≥ p} 
+              -> (cut {A = ◯ α A} {C = ◯ α A}◯unit ◯mult) ≈ hyp
+  ◯unit1 {α = α} = UR≈ {α = α} {β = 1m} (UL≈ {γ = 1m} {e = 1⇒} (FL≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))))
+
+  ◯unit2 : ∀ {p q : Mode} {A : Tp q} {α : q ≥ p} 
+              -> (cut {A = ◯ α A} {C = ◯ α A} (◯func ◯unit) ◯mult) ≈ hyp
+  ◯unit2 {α = α} = UR≈ {α = α} {β = 1m} (UL≈ {γ = 1m} {e = 1⇒} (FL≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _ ∘ (transport⊢1 _ ∘ transport⊢1 _)))))
+
+  □counit-nat : {p q : Mode} {A A' : Tp p} {α : q ≥ p} (D : A [ 1m ]⊢ A') 
+              → cut (□counit {α = α}) D ≈ cut (□func D) □counit
+  □counit-nat D = (FL≈ (!≈ (eq (transport⊢1 _)) ∘≈ !≈ (eq (transport⊢1 _)) ∘≈ !≈ (cut-ident-right (UL 1m 1⇒ D)) ∘≈ UL≈ (cut-ident-left D)) ∘≈ FL≈ (cutUL D)) ∘≈ cutFL D
+
+  □comult-nat : {p q : Mode} {A A' : Tp p} {α : q ≥ p} (D : A [ 1m ]⊢ A')
+              → cut (□func D) (□comult {α = α}) ≈ cut □comult (□func (□func D))
+  □comult-nat D = FL≈ (FR≈ (UR≈ (FR≈ (UR≈ (transport⊢≈ 1⇒ ((!≈ (cutUL D) ∘≈ UL≈ (!≈ (cut-ident-left _) ∘≈ cut-ident-right _)) ∘≈ cutUL hyp))))))
+  
+  □assoc : ∀ {p q : Mode} {A : Tp p} {α : q ≥ p} 
+          -> (cut {A = □ α A} {C = □ α (□ α (□ α A)) } □comult (□func □comult)) ≈ (cut □comult □comult)
+  □assoc = id
+
+  □unit1 : ∀ {p q : Mode} {A : Tp p} {α : q ≥ p} 
+          -> (cut {A = □ α A} {C = □ α A} □comult □counit) ≈ hyp
+  □unit1 {α = α} = FL≈ (FR≈ {γ = 1m} {e = 1⇒} (UR≈ (cut-ident-right _ ∘≈ eq (transport⊢1 _))))
+
+  □unit2 : ∀ {p q : Mode} {A : Tp p} {α : q ≥ p} 
+          -> (cut {A = □ α A} {C = □ α A} □comult (□func □counit)) ≈ hyp
+  □unit2 {α = α} = FL≈ (FR≈ {γ = 1m} {e = 1⇒} (UR≈ (((cut-ident-right _ ∘≈ eq (transport⊢1 _)) ∘≈ eq (transport⊢1 _)) ∘≈ eq (transport⊢1 _))))
+
+  {- these should not be provable
+
+  -- need β such that 1m ⇒ α ∘1 β 
+  badcounit : {p q : Mode} {A : Tp q} {α : q ≥ p} → ◯ α A [ 1m ]⊢ A
+  badcounit = UL {!!} {!NO!} (FL {!!}) 
+
+  -- need β such that 
+  badunit : {p q : Mode} {A : Tp p} {α : q ≥ p} → A [ 1m ]⊢ □ α A
+  badunit = FR {!!} {!NO!} (UR {!!})
+
+  -}
 
   -- ----------------------------------------------------------------------
   -- F -| U
 
-  UFadjunction1 : ∀ {p q} {A B} {α : q ≥ p} → F α A [ 1m ]⊢ B → A [ 1m ]⊢ U α B
-  UFadjunction1 {α = α} D = UR {α = α} {β = 1m} (cut (FR 1m 1⇒ hyp) D) 
+  FUadjunction1 : ∀ {p q} {A B} {α : q ≥ p} → F α A [ 1m ]⊢ B → A [ 1m ]⊢ U α B
+  FUadjunction1 {α = α} D = UR {α = α} {β = 1m} (cut (FR 1m 1⇒ hyp) D) 
 
-  UFadjunction2 : ∀ {p q} {A B} {α : q ≥ p} → A [ 1m ]⊢ U α B → F α A [ 1m ]⊢ B 
-  UFadjunction2 {α = α} D = FL {α = α} {β = 1m} (cut D (UL 1m 1⇒ hyp)) 
+  FUadjunction2 : ∀ {p q} {A B} {α : q ≥ p} → A [ 1m ]⊢ U α B → F α A [ 1m ]⊢ B 
+  FUadjunction2 {α = α} D = FL {α = α} {β = 1m} (cut D (UL 1m 1⇒ hyp)) 
 
-  UFadj-composite2 : ∀ {p q} {A B} {α : q ≥ p} (D : F α A [ 1m ]⊢ B ) -> UFadjunction2 (UFadjunction1 D) ≈ D
-  UFadj-composite2 D = (!≈ (Fη D) ∘≈ FL≈ (cut-ident-right _ ∘≈ eq (transport⊢1 _)))
+  FUadj-composite2 : ∀ {p q} {A B} {α : q ≥ p} (D : F α A [ 1m ]⊢ B ) -> FUadjunction2 (FUadjunction1 D) ≈ D
+  FUadj-composite2 D = (!≈ (Fη D) ∘≈ FL≈ (cut-ident-right _ ∘≈ eq (transport⊢1 _)))
 
-  UFadj-composite1 : ∀ {p q} {A B} {α : q ≥ p} (D : A [ 1m ]⊢ U α B) -> UFadjunction1 (UFadjunction2 D) ≈ D
-  UFadj-composite1 D = !≈ (Uη D) ∘≈ UR≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))
+  FUadj-composite1 : ∀ {p q} {A B} {α : q ≥ p} (D : A [ 1m ]⊢ U α B) -> FUadjunction1 (FUadjunction2 D) ≈ D
+  FUadj-composite1 D = !≈ (Uη D) ∘≈ UR≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))
 
-  UFadjunction-nat1 : ∀ {p q} {A A' B B'} {α : q ≥ p} 
+  FUadjunction-nat1 : ∀ {p q} {A A' B B'} {α : q ≥ p} 
                       (D1 : A' [ 1m ]⊢ A) (D : F α A [ 1m ]⊢ B) (D2 : B [ 1m ]⊢ B')
-                    → UFadjunction1 (cut (Ffunc D1) (cut D D2))
-                    ≈ cut D1 (cut (UFadjunction1 D) (Ufunc D2))
-  UFadjunction-nat1 D1 D D2 = !≈ (eq (cutUR D1)) ∘≈ UR≈ {β = 1m} ((((!≈ (cut≈2 D1 (eq (transport⊢1 (cut (cut (FR 1m 1⇒ hyp) D) D2)))) ∘≈ !≈ (cut-assoc D1 (cut (FR 1m 1⇒ hyp) D) D2) ∘≈ !≈ (cut≈1 (cut-assoc D1 (FR 1m 1⇒ hyp) D) D2) ∘≈ !≈ (cut≈1 (cut≈1 (eq (cutFR D1)) D) D2) ∘≈ !≈ (cut≈1 (cut≈1 (FR≈ (cut-ident-right D1)) D) D2) ∘≈ cut-assoc (FR 1m 1⇒ D1) D D2) ∘≈ cut≈1 (cut-ident-left (FR 1m 1⇒ D1)) (cut D D2)) ∘≈ cut≈1 (eq (transport⊢1 (cut hyp (FR 1m 1⇒ D1)))) (cut D D2)) ∘≈ cut-assoc (FR 1m 1⇒ hyp) (Ffunc D1) (cut D D2))
+                    → FUadjunction1 (cut (Ffunc D1) (cut D D2))
+                    ≈ cut D1 (cut (FUadjunction1 D) (Ufunc D2))
+  FUadjunction-nat1 D1 D D2 = !≈ (eq (cutUR D1)) ∘≈ UR≈ {β = 1m} ((((!≈ (cut≈2 D1 (eq (transport⊢1 (cut (cut (FR 1m 1⇒ hyp) D) D2)))) ∘≈ !≈ (cut-assoc D1 (cut (FR 1m 1⇒ hyp) D) D2) ∘≈ !≈ (cut≈1 (cut-assoc D1 (FR 1m 1⇒ hyp) D) D2) ∘≈ !≈ (cut≈1 (cut≈1 (eq (cutFR D1)) D) D2) ∘≈ !≈ (cut≈1 (cut≈1 (FR≈ (cut-ident-right D1)) D) D2) ∘≈ cut-assoc (FR 1m 1⇒ D1) D D2) ∘≈ cut≈1 (cut-ident-left (FR 1m 1⇒ D1)) (cut D D2)) ∘≈ cut≈1 (eq (transport⊢1 (cut hyp (FR 1m 1⇒ D1)))) (cut D D2)) ∘≈ cut-assoc (FR 1m 1⇒ hyp) (Ffunc D1) (cut D D2))
 
-  UFadjunction-nat2 : ∀ {p q} {A A' B B'} {α : q ≥ p} 
+  FUadjunction-nat2 : ∀ {p q} {A A' B B'} {α : q ≥ p} 
                       (D1 : A' [ 1m ]⊢ A) (D : A [ 1m ]⊢ U α B) (D2 : B [ 1m ]⊢ B')
-                    → UFadjunction2 (cut D1 (cut D (Ufunc D2)))
-                    ≈ cut (Ffunc D1) (cut (UFadjunction2 D) D2)
-  UFadjunction-nat2 {α = α} D1 D D2 = !≈ (cutFL {α = 1m} (cut (FL {α = α} {β = 1m} (cut D (UL 1m 1⇒ hyp))) D2)) ∘≈ FL≈ {α = α} {β = 1m} (!≈ (cut-assoc (FR 1m 1⇒ D1) (FL {α = α} {β = 1m} (cut D (UL 1m 1⇒ hyp))) D2) ∘≈ (((cut≈1 (eq (! (transport⊢1 (cut D1 (cut D (UL 1m 1⇒ hyp)))))) D2 ∘≈ cut-assoc D1 (cut D (UL 1m 1⇒ hyp)) D2 ∘≈ cut≈2 D1 (cut-assoc D (UL 1m 1⇒ hyp) D2) ∘≈ cut≈2 D1 (cut≈2 D (!≈ (cutUL D2))) ∘≈ cut≈2 D1 (cut≈2 D (UL≈ (!≈ (cut-ident-left D2))))) ∘≈ cut≈2 D1 (cut≈2 D (cut-ident-right (UL 1m 1⇒ D2) ∘≈ eq (transport⊢1 _)))) ∘≈ !≈ (cut≈2 D1 (cut-assoc D (UR {α = α} {β = 1m} (UL 1m 1⇒ D2)) (UL 1m 1⇒ hyp)))) ∘≈ !≈ (cut-assoc D1 (cut D (UR {α = α} {β = 1m} (UL 1m 1⇒ D2))) (UL 1m 1⇒ hyp)))
+                    → FUadjunction2 (cut D1 (cut D (Ufunc D2)))
+                    ≈ cut (Ffunc D1) (cut (FUadjunction2 D) D2)
+  FUadjunction-nat2 {α = α} D1 D D2 = !≈ (cutFL {α = 1m} (cut (FL {α = α} {β = 1m} (cut D (UL 1m 1⇒ hyp))) D2)) ∘≈ FL≈ {α = α} {β = 1m} (!≈ (cut-assoc (FR 1m 1⇒ D1) (FL {α = α} {β = 1m} (cut D (UL 1m 1⇒ hyp))) D2) ∘≈ (((cut≈1 (eq (! (transport⊢1 (cut D1 (cut D (UL 1m 1⇒ hyp)))))) D2 ∘≈ cut-assoc D1 (cut D (UL 1m 1⇒ hyp)) D2 ∘≈ cut≈2 D1 (cut-assoc D (UL 1m 1⇒ hyp) D2) ∘≈ cut≈2 D1 (cut≈2 D (!≈ (cutUL D2))) ∘≈ cut≈2 D1 (cut≈2 D (UL≈ (!≈ (cut-ident-left D2))))) ∘≈ cut≈2 D1 (cut≈2 D (cut-ident-right (UL 1m 1⇒ D2) ∘≈ eq (transport⊢1 _)))) ∘≈ !≈ (cut≈2 D1 (cut-assoc D (UR {α = α} {β = 1m} (UL 1m 1⇒ D2)) (UL 1m 1⇒ hyp)))) ∘≈ !≈ (cut-assoc D1 (cut D (UR {α = α} {β = 1m} (UL 1m 1⇒ D2))) (UL 1m 1⇒ hyp)))
 
+  FUadjunction : ∀ {p q} → q ≥ p → Adjunction q p
+  FUadjunction α = adj (Ffunctor α) (Ufunctor α) FUadjunction1 FUadjunction2 (λ q → UR≈ {α = α} {β = 1m} (cut≈2 (FR 1m 1⇒ hyp) q)) (λ q → FL≈ {α = α} {β = 1m} (cut≈1 q (UL 1m 1⇒ hyp))) FUadj-composite2 FUadj-composite1 FUadjunction-nat1 FUadjunction-nat2
 
   -- ----------------------------------------------------------------------
   -- functoriality of F and U on 1-cells in the diagrams
@@ -304,8 +403,11 @@ module adjointlogic2.General where
   U1-natiso = !natiso (natiso (!i U1-iso) U12-nat)
 
   FU1-conjugate : ∀ {p} {A : Tp p}
-                    → cut (UFadjunction1 hyp) (Ufunc F11) ≈ cut (ident A) U12
+                    → cut (FUadjunction1 hyp) (Ufunc F11) ≈ cut (ident A) U12
   FU1-conjugate = !≈ (cut-ident-left U12) ∘≈ UR≈ {α = 1m} {β = 1m} (((cut-ident-right hyp ∘≈ eq (transport⊢1 _)) ∘≈ cut≈1 (cut-ident-left (FR 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _)) F11) ∘≈ eq (transport⊢1 _))
+
+  FU1-adjiso : ∀ {p} → AdjIso (FUadjunction 1m) (1Adj {p}) 
+  FU1-adjiso = adjiso F1-natiso (!natiso U1-natiso) FU1-conjugate
 
   -- F/U on ∘
 
@@ -354,8 +456,12 @@ module adjointlogic2.General where
   U∘-natiso {α = α}{β} = natiso U∘-iso (λ D → UR≈ (UR≈ (transport⊢≈ 1⇒ (((!≈ (cut-ident-right (UL 1m 1⇒ D)) ∘≈ UL≈ (cut-ident-left D)) ∘≈ cutUL D) ∘≈ eq (transport⊢1 _)))))
 
   FU∘-conjugate : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} {A : Tp _} →
-        cut (UFadjunction1 (ident (F (β ∘1 α) A))) (Ufunc F∘1) ≈ cut (UFadjunction1 (UFadjunction1 hyp)) U∘2
+        cut (FUadjunction1 (ident (F (β ∘1 α) A))) (Ufunc F∘1) ≈ cut (FUadjunction1 (FUadjunction1 hyp)) U∘2
   FU∘-conjugate {α = α}{β = β} {A = A} = UR≈ {α = β ∘1 α} {β = 1m ∘1 1m} ((!≈ (eq (transport⊢1 _ ∘ transport⊢1 _ ∘ transport⊢1 _)) ∘≈ !≈ (cut≈1 (cut-ident-left (FR 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _) ∘≈ cut-ident-left _ ∘≈ eq (transport⊢1 _)) (FR 1m 1⇒ (FL (FR 1m 1⇒ hyp)))) ∘≈ !≈ (FR≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) ∘≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _)) ∘≈ cut≈1 (cut-ident-left _ ∘≈ eq (transport⊢1 _)) (FL {α = β ∘1 α} {β = 1m} (FR β 1⇒ (FR 1m 1⇒ (ident A))))) ∘≈ eq (transport⊢1 _))
+
+  FU∘-adjiso : ∀ {p q r} {α : r ≥ q} {β : q ≥ p} → AdjIso (FUadjunction (α ∘1 β)) (FUadjunction α ·Adj FUadjunction β)
+  FU∘-adjiso = adjiso F∘-natiso (!natiso U∘-natiso) FU∘-conjugate
+
 
   -- action of F and U on terms is functorial in α
   -- corollaries of naturality
@@ -376,90 +482,6 @@ module adjointlogic2.General where
                 → (Ufunc {α = α ∘1 β} D) ≈ cut {α = 1m} {β = 1m} U∘1 (cut {α = 1m} {β = 1m} (Ufunc {α = α} (Ufunc {α = β} D)) U∘2)
   U∘-func {α = α} {β = β} D = square' (U∘-natiso) D
 
-
-  ----------------------------------------------------------------------
-  -- monads
-
-  □ : ∀ {p q} (α : q ≥ p) → Tp p → Tp p 
-  □ α A = F α (U α A)
-
-  ◯ : ∀ {p q} (α : q ≥ p) → Tp q → Tp q 
-  ◯ α A = U α (F α A)
-
-  □func : ∀ {p q : Mode} {α : q ≥ p} {A B} → A [ 1m ]⊢ B → □ α A [ 1m ]⊢ □ α B
-  □func D = Ffunc (Ufunc D)
-
-  ◯func : ∀ {p q : Mode} {α : q ≥ p} {A B} → A [ 1m ]⊢ B → ◯ α A [ 1m ]⊢ ◯ α B
-  ◯func D = Ufunc (Ffunc D)
-
-  □counit : {p q : Mode} {A : Tp p} {α : q ≥ p} → □ α A [ 1m ]⊢ A
-  □counit {α = α} = FL {α = α} {β = 1m} (UL 1m 1⇒ hyp)
-
-  □comult : {p q : Mode} {A : Tp p} {α : q ≥ p} → □ α A [ 1m ]⊢ □ α (□ α A)
-  □comult {α = α} = FL {α = α} {β = 1m} (FR 1m 1⇒ (UR (FR 1m 1⇒ hyp))) 
-
-  ◯unit : {p q : Mode} {A : Tp q} {α : q ≥ p} → A [ 1m ]⊢ ◯ α A
-  ◯unit {α = α} = UR (FR 1m 1⇒ hyp)
-
-  ◯mult : {p q : Mode} {A : Tp q} {α : q ≥ p} → ◯ α (◯ α A) [ 1m ]⊢ ◯ α A
-  ◯mult {α = α} = UR {α = α} {β = 1m} (UL 1m 1⇒ (FL (UL 1m 1⇒ hyp))) 
-
-  ◯unit-nat : {p q : Mode} {A A' : Tp q} {α : q ≥ p} (D : A [ 1m ]⊢ A')
-             → cut D (◯unit {α = α}) ≈ cut ◯unit (◯func D)
-  ◯unit-nat D = UR≈ (((eq (! (transport⊢1 _)) ∘≈ eq (! (transport⊢1 _)) ∘≈ !≈ (cut-ident-left (FR 1m 1⇒ D))) ∘≈ FR≈ (cut-ident-right D)) ∘≈ eq (cutFR D)) ∘≈ eq (cutUR D)
-
-  ◯mult-nat : {p q : Mode} {A A' : Tp q} {α : q ≥ p} (D : A [ 1m ]⊢ A') 
-            → cut (◯mult {α = α}) (◯func D) ≈ cut (◯func (◯func D)) ◯mult 
-  ◯mult-nat D = UR≈ (UL≈ (FL≈ (UL≈ (FL≈ (transport⊢≈ 1⇒ ((eq (! (cutFR D)) ∘≈ FR≈ (!≈ (cut-ident-right _))) ∘≈ cut-ident-left _))))))
-
-  ◯assoc : ∀ {p q : Mode} {A : Tp q} {α : q ≥ p} 
-          -> (cut {A = ◯ α (◯ α (◯ α A))} {C = ◯ α A} (◯func ◯mult) ◯mult) ≈ (cut ◯mult ◯mult)
-  ◯assoc = id
-
-  ◯unit1 : ∀ {p q : Mode} {A : Tp q} {α : q ≥ p} 
-              -> (cut {A = ◯ α A} {C = ◯ α A}◯unit ◯mult) ≈ hyp
-  ◯unit1 {α = α} = UR≈ {α = α} {β = 1m} (UL≈ {γ = 1m} {e = 1⇒} (FL≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))))
-
-  ◯unit2 : ∀ {p q : Mode} {A : Tp q} {α : q ≥ p} 
-              -> (cut {A = ◯ α A} {C = ◯ α A} (◯func ◯unit) ◯mult) ≈ hyp
-  ◯unit2 {α = α} = UR≈ {α = α} {β = 1m} (UL≈ {γ = 1m} {e = 1⇒} (FL≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _ ∘ (transport⊢1 _ ∘ transport⊢1 _)))))
-
-  □counit-nat : {p q : Mode} {A A' : Tp p} {α : q ≥ p} (D : A [ 1m ]⊢ A') 
-              → cut (□counit {α = α}) D ≈ cut (□func D) □counit
-  □counit-nat D = (FL≈ (!≈ (eq (transport⊢1 _)) ∘≈ !≈ (eq (transport⊢1 _)) ∘≈ !≈ (cut-ident-right (UL 1m 1⇒ D)) ∘≈ UL≈ (cut-ident-left D)) ∘≈ FL≈ (cutUL D)) ∘≈ cutFL D
-
-  □comult-nat : {p q : Mode} {A A' : Tp p} {α : q ≥ p} (D : A [ 1m ]⊢ A')
-              → cut (□func D) (□comult {α = α}) ≈ cut □comult (□func (□func D))
-  □comult-nat D = FL≈ (FR≈ (UR≈ (FR≈ (UR≈ (transport⊢≈ 1⇒ ((!≈ (cutUL D) ∘≈ UL≈ (!≈ (cut-ident-left _) ∘≈ cut-ident-right _)) ∘≈ cutUL hyp))))))
-  
-  □assoc : ∀ {p q : Mode} {A : Tp p} {α : q ≥ p} 
-          -> (cut {A = □ α A} {C = □ α (□ α (□ α A)) } □comult (□func □comult)) ≈ (cut □comult □comult)
-  □assoc = id
-
-  □unit1 : ∀ {p q : Mode} {A : Tp p} {α : q ≥ p} 
-          -> (cut {A = □ α A} {C = □ α A} □comult □counit) ≈ hyp
-  □unit1 {α = α} = FL≈ (FR≈ {γ = 1m} {e = 1⇒} (UR≈ (cut-ident-right _ ∘≈ eq (transport⊢1 _))))
-
-  □unit2 : ∀ {p q : Mode} {A : Tp p} {α : q ≥ p} 
-          -> (cut {A = □ α A} {C = □ α A} □comult (□func □counit)) ≈ hyp
-  □unit2 {α = α} = FL≈ (FR≈ {γ = 1m} {e = 1⇒} (UR≈ (((cut-ident-right _ ∘≈ eq (transport⊢1 _)) ∘≈ eq (transport⊢1 _)) ∘≈ eq (transport⊢1 _))))
-
-
-  
-
-
-  {- these should not be provable
-
-  -- need β such that 1m ⇒ α ∘1 β 
-  badcounit : {p q : Mode} {A : Tp q} {α : q ≥ p} → ◯ α A [ 1m ]⊢ A
-  badcounit = UL {!!} {!NO!} (FL {!!}) 
-
-  -- need β such that 
-  badunit : {p q : Mode} {A : Tp p} {α : q ≥ p} → A [ 1m ]⊢ □ α A
-  badunit = FR {!!} {!NO!} (UR {!!})
-
-  -}
-
   -- ----------------------------------------------------------------------
   -- 2-cells induce morphisms of adjunctions (conjugate pairs of functors)
   -- F is contravariant; U is covariant
@@ -467,22 +489,21 @@ module adjointlogic2.General where
   F2 : ∀ {p q} {A : Tp q} {α β : q ≥ p} → β ⇒ α → F α A [ 1m ]⊢ F β A
   F2 {α = α} e = FL {α = α} {β = 1m} (FR 1m e hyp)
 
-  F2-natural : ∀ {p q : Mode} {α β : p ≥ q} {A B : Tp p} (e : α ⇒ β) (D : A [ 1m ]⊢ B) →
-                     cut {α = 1m} (F2 e) (Ffunc {α = α} D) ≈ (cut {β = 1m} (Ffunc {α = β} D) (F2 e))
-  F2-natural {β = β} e D = FL≈ {α = β} {β = 1m ∘1 1m} (!≈ (eq (transport⊢1 _)) ∘≈ (!≈ (eq (cutFR D)) ∘≈ (!≈ (FR≈ {γ = 1m} {e = e} (cut-ident-right D)) ∘≈ transport⊢≈ e (cut-ident-left (FR 1m 1⇒ D)))))
-
   F21 : ∀ {p q} {A : Tp q} {α : q ≥ p} → F2 {A = A} (1⇒ {α = α}) ≈ hyp 
   F21 = id
 
   F2· : ∀ {p q} {A : Tp q} {α β γ : q ≥ p} {e1 : β ⇒ α} {e2 : γ ⇒ β} → F2 {A = A} (e2 ·2 e1) ≈ cut (F2 {A = A} e1) (F2 {A = A} e2)
   F2· = FL≈ (!≈ (transport⊢≈ _ (cut-ident-left _)))
 
+  F2-natural : ∀ {p q : Mode} {α β : p ≥ q} {A B : Tp p} (e : α ⇒ β) (D : A [ 1m ]⊢ B) →
+                     cut {α = 1m} (F2 e) (Ffunc {α = α} D) ≈ (cut {β = 1m} (Ffunc {α = β} D) (F2 e))
+  F2-natural {β = β} e D = FL≈ {α = β} {β = 1m ∘1 1m} (!≈ (eq (transport⊢1 _)) ∘≈ (!≈ (eq (cutFR D)) ∘≈ (!≈ (FR≈ {γ = 1m} {e = e} (cut-ident-right D)) ∘≈ transport⊢≈ e (cut-ident-left (FR 1m 1⇒ D)))))
+
+  F2-nattrans : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → NatTrans (Ffunctor β) (Ffunctor α)
+  F2-nattrans e = nat (F2 e) (F2-natural e)
+
   U2 : ∀ {p q} {A : Tp p} {α β : q ≥ p} → α ⇒ β → U α A [ 1m ]⊢ U β A
   U2 {α = α} {β = β} e = UR {α = β} {β = 1m} (UL 1m e hyp)
-
-  U2-natural : ∀ {p q : Mode} {α β : p ≥ q} {A B : Tp q} (e : α ⇒ β) (D : A [ 1m ]⊢ B) →
-                     cut {α = 1m} (U2 e) (Ufunc {α = β} D) ≈ (cut {β = 1m} (Ufunc {α = α} D) (U2 e))
-  U2-natural {α = α} {β = β} e D = UR≈ {α = β} {β = 1m ∘1 1m} ((((!≈ (transport⊢≈ e (cut-ident-right (UL 1m 1⇒ D)))) ∘≈ UL≈ {γ = 1m}{e = e} (cut-ident-left D)) ∘≈ cutUL D) ∘≈ eq (transport⊢1 _))
 
   U21 : ∀ {p q} {A : Tp p} {α : q ≥ p} → U2 {A = A} (1⇒ {α = α}) ≈ hyp 
   U21 = id
@@ -490,45 +511,24 @@ module adjointlogic2.General where
   U2· : ∀ {p q} {A : Tp p} {α β γ : q ≥ p} {e1 : β ⇒ α} {e2 : γ ⇒ β} → U2 {A = A} (e2 ·2 e1) ≈ cut (U2 {A = A} e2) (U2 {A = A} e1)
   U2· {α = α} {e1 = e1} {e2} = UR≈ {α = α} {β = 1m} (!≈ (transport⊢≈ e1 (cut-ident-right (UL 1m e2 hyp))))
 
+  U2-natural : ∀ {p q : Mode} {α β : p ≥ q} {A B : Tp q} (e : α ⇒ β) (D : A [ 1m ]⊢ B) →
+                     cut {α = 1m} (U2 e) (Ufunc {α = β} D) ≈ (cut {β = 1m} (Ufunc {α = α} D) (U2 e))
+  U2-natural {α = α} {β = β} e D = UR≈ {α = β} {β = 1m ∘1 1m} ((((!≈ (transport⊢≈ e (cut-ident-right (UL 1m 1⇒ D)))) ∘≈ UL≈ {γ = 1m}{e = e} (cut-ident-left D)) ∘≈ cutUL D) ∘≈ eq (transport⊢1 _))
+
+  U2-nattrans : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → NatTrans (Ufunctor α) (Ufunctor β)
+  U2-nattrans e = nat (U2 e) (U2-natural e)
+
   F2U2conjugate : ∀ {p q} {A : Tp q} {α β : q ≥ p} {e : β ⇒ α}
-            → cut (UFadjunction1 (ident (F _ A))) (Ufunc (F2 e))
-            ≈ cut (UFadjunction1 hyp) (U2 e)
-  F2U2conjugate {A = A} {α = α} {β = β} {e} = 
-    UR≈ {α = α} {β = 1m} (((!≈ (transport⊢≈ e (cut≈1 (cut-ident-left _ ∘≈ eq (transport⊢1 _)) (FL {α = β} {β = 1m} (FR 1m 1⇒ (ident A)))))
-                            ∘≈ !≈ (transport⊢≈ e (cut-ident-left (FR 1m 1⇒ (ident A)) ∘≈ eq (transport⊢1 (cut (ident A) (FR 1m 1⇒ (ident A)))))) )
-                            ∘≈ cut-ident-left (FR 1m e (ident A)) ∘≈ eq (transport⊢1 (cut (ident A) (FR 1m e (ident A)))))
-                            ∘≈ cut≈1 (cut-ident-left (FR 1m 1⇒ (ident A)) 
-                            ∘≈ eq (transport⊢1 _)) (FL {α = α} {β = 1m} (FR 1m e (ident A))) ∘≈ eq (transport⊢1 _))
+            → cut (FUadjunction1 (ident (F _ A))) (Ufunc (F2 e))
+            ≈ cut (FUadjunction1 hyp) (U2 e)
+  F2U2conjugate {A = A} {α = α} {β = β} {e} = UR≈ {α = α} {β = 1m} (((!≈ (transport⊢≈ e (cut≈1 (cut-ident-left _ ∘≈ eq (transport⊢1 _)) (FL {α = β} {β = 1m} (FR 1m 1⇒ (ident A))))) ∘≈ !≈ (transport⊢≈ e (cut-ident-left (FR 1m 1⇒ (ident A)) ∘≈ eq (transport⊢1 (cut (ident A) (FR 1m 1⇒ (ident A)))))) ) ∘≈ cut-ident-left (FR 1m e (ident A)) ∘≈ eq (transport⊢1 (cut (ident A) (FR 1m e (ident A))))) ∘≈ cut≈1 (cut-ident-left (FR 1m 1⇒ (ident A)) ∘≈ eq (transport⊢1 _)) (FL {α = α} {β = 1m} (FR 1m e (ident A))) ∘≈ eq (transport⊢1 _))
 
-  -- ----------------------------------------------------------------------
-  -- F preserves coproducts
-
-  Fpres-coprod1 : ∀ {p q} {α : p ≥ q} {A B} → F α (A ⊕ B) [ 1m ]⊢ (F α A ⊕ F α B)
-  Fpres-coprod1 {α = α} = FL {α = α} {β = 1m} (Case (Inl (FR 1m 1⇒ hyp)) (Inr (FR 1m 1⇒ hyp)))
-
-  Fpres-coprod2 : ∀ {p q} {α : p ≥ q} {A B} → (F α A ⊕ F α B) [ 1m ]⊢ (F α (A ⊕ B))
-  Fpres-coprod2 = Case (FL (FR 1m 1⇒ (Inl hyp))) (FL (FR 1m 1⇒ (Inr hyp)))
-
-  Fpres-coprod-composite-1 : ∀ {p q} {α : p ≥ q} {A B} 
-                           → cut (Fpres-coprod2 {α = α}{A}{B}) Fpres-coprod1 ≈ hyp
-  Fpres-coprod-composite-1 = Case≈ (!≈ (Fη _) ∘≈ FL≈ (Inl≈ (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) ∘≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _)))) (!≈ (Fη _) ∘≈ FL≈ (Inr≈ (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) ∘≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))))
-
-  Fpres-coprod-composite-2 : ∀ {p q} {α : p ≥ q} {A B} 
-                           → cut (Fpres-coprod1 {α = α}{A}{B}) Fpres-coprod2 ≈ hyp
-  Fpres-coprod-composite-2 {α = α} = FL≈ {α = α} {β = 1m ∘1 1m} (!≈ (⊕η _) ∘≈ Case≈ (!≈ (FR≈ {γ = 1m} {e = 1⇒} (cut-ident-left _)) ∘≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) (!≈ (FR≈ {γ = 1m} {e = 1⇒} (cut-ident-left _)) ∘≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))))
-
-  Fpres-coprod : ∀ {p q} {α : p ≥ q} {A B} → Iso (F α (A ⊕ B)) (F α A ⊕ F α B)
-  Fpres-coprod = iso Fpres-coprod1 Fpres-coprod2 Fpres-coprod-composite-2 Fpres-coprod-composite-1
-
+  FUadjunction-mor : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → AdjMor (FUadjunction β) (FUadjunction α)
+  FUadjunction-mor e = adjmor (F2-nattrans e) (U2-nattrans e) F2U2conjugate
 
   -- ----------------------------------------------------------------------
   -- pseudofunctor from M into Adj
 
-  F2-nattrans : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → NatTrans (Ffunctor β) (Ffunctor α)
-  F2-nattrans e = nat (F2 e) (F2-natural e)
-
-  U2-nattrans : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → NatTrans (Ufunctor α) (Ufunctor β)
-  U2-nattrans e = nat (U2 e) (U2-natural e)
 
   -- (0) each object of M determines a category:
   --     objects of p are A : Tp p
@@ -538,18 +538,16 @@ module adjointlogic2.General where
   -- (1) functor from each hom category q ≥ p to category of Adjunction q p and AdjMor's 
   
   P1-ob : ∀ {p q} → q ≥ p → Adjunction q p
-  P1-ob α = adj (Ffunctor α) (Ufunctor α) UFadjunction1 UFadjunction2 (λ q → UR≈ {α = α} {β = 1m} (cut≈2 (FR 1m 1⇒ hyp) q)) (λ q → FL≈ {α = α} {β = 1m} (cut≈1 q (UL 1m 1⇒ hyp))) UFadj-composite2 UFadj-composite1 UFadjunction-nat1 UFadjunction-nat2
-  
-  P1-mor : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → 
-                      AdjMor (P1-ob β) (P1-ob α)
-  P1-mor e = adjmor (F2-nattrans e) (U2-nattrans e) F2U2conjugate
+  P1-ob = FUadjunction
 
-  P1-mor-1 : ∀ {p q} {α : q ≥ p}
-         → P1-mor (1⇒{_}{_}{α}) ==AdjMor 1AdjMor
+  P1-mor : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → AdjMor (P1-ob β) (P1-ob α)
+  P1-mor e = FUadjunction-mor e
+
+  P1-mor-1 : ∀ {p q} {α : q ≥ p} → P1-mor (1⇒{_}{_}{α}) ==AdjMor 1AdjMor
   P1-mor-1 = eqadjmor F21 U21
 
   P1-mor-· : ∀ {p q} {α β γ : q ≥ p} (e1 : α ⇒ β) (e2 : β ⇒ γ)
-       → (P1-mor (e1 ·2 e2)) ==AdjMor ((P1-mor e2) ·AdjMor (P1-mor e1))
+           → (P1-mor (e1 ·2 e2)) ==AdjMor ((P1-mor e2) ·AdjMor (P1-mor e1))
   P1-mor-· e1 e2 = eqadjmor F2· U2·
 
   -- (2) for each p, a 2-cell isomorphism between P1-ob(1m:p≥p) and the identity 1-cell on P0(p)
@@ -557,12 +555,12 @@ module adjointlogic2.General where
   --     in this case, the identity 1-cell is the 1 -| 1 adjunction
 
   P1-1 : ∀ {p} → AdjIso (P1-ob 1m) (1Adj {p}) 
-  P1-1 = adjiso F1-natiso (!natiso U1-natiso) FU1-conjugate
+  P1-1 = FU1-adjiso
 
   -- (3) for composable α and β, a 2-cell natural isomorphism between P1-ob(α ∘1 β) and the composite of P1-ob(α) and P1-ob(β) 
 
   P1-∘ : ∀ {p q r} {α : r ≥ q} {β : q ≥ p} → AdjIso (P1-ob (α ∘1 β)) (P1-ob α ·Adj P1-ob β)
-  P1-∘ = adjiso F∘-natiso (!natiso U∘-natiso) FU∘-conjugate
+  P1-∘ = FU∘-adjiso
 
   -- P1(α ∘1 β) is a functor (r ≥ q × q ≥ p -> Adjunction r p)
   --    it's really P1 o (\ α β → (α ∘1 β))
