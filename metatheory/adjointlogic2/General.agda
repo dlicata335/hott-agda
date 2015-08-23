@@ -24,12 +24,6 @@ module adjointlogic2.General where
   !i : {p : Mode} {A B : Tp p} → Iso A B → Iso B A
   !i (iso f g α β) = iso g f β α
 
-  ⊕i : ∀ {p : Mode} {A A' B B' : Tp p} → Iso A A' → Iso B B' → Iso (A ⊕ B) (A' ⊕ B')
-  ⊕i (iso f g α β) (iso f₁ g₁ α₁ β₁) = 
-    iso (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp))) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp))) 
-        (Case≈ ((((cut-ident-left _ ∘≈  cut≈1 α (Inl hyp)) ∘≈ cut-assoc f g (Inl hyp)) ∘≈ (cut≈2 f (cut-ident-left _))) ∘≈ !≈ (cut-assoc f (Inl hyp) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp))))) ((((cut-ident-left _ ∘≈ cut≈1 α₁ (Inr hyp)) ∘≈ cut-assoc f₁ g₁ (Inr hyp)) ∘≈ cut≈2 f₁ (cut-ident-left _)) ∘≈ !≈ (cut-assoc f₁ (Inr hyp) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp))))))
-        (Case≈ ((((cut-ident-left _ ∘≈ cut≈1 β (Inl hyp)) ∘≈ cut-assoc g f (Inl hyp)) ∘≈ cut≈2 g (cut-ident-left _)) ∘≈ !≈ (cut-assoc g (Inl hyp) (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp))))) ((((cut-ident-left _ ∘≈ cut≈1 β₁ (Inr hyp)) ∘≈ cut-assoc g₁ f₁ (Inr hyp)) ∘≈ cut≈2 g₁ (cut-ident-left _)) ∘≈ !≈ (cut-assoc g₁ (Inr hyp) (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp))))))
-
   record Functor (p q : Mode) : Set where 
     constructor func
     field
@@ -96,13 +90,14 @@ module adjointlogic2.General where
                 → (D1 : A' [ 1m ]⊢ A) (D : Functor.ob L A [ 1m ]⊢ B) (D2 : B [ 1m ]⊢ B')
                 →   LtoR (cut (Functor.ar L D1) (cut D D2))
                   ≈ cut D1 (cut (LtoR D) (Functor.ar R D2))
-      RtoLnat : ∀ {A A' B B'} 
+    RtoLnat : ∀ {A A' B B'} 
                 → (D1 : A' [ 1m ]⊢ A) (D : A [ 1m ]⊢ Functor.ob R B) (D2 : B [ 1m ]⊢ B')
                 →   RtoL (cut D1 (cut D (Functor.ar R D2)))
                   ≈ cut (Functor.ar L D1) (cut (RtoL D) D2)
+    RtoLnat = {!!}
 
   1Adj : ∀ {p} → Adjunction p p
-  1Adj = adj 1Func 1Func (λ D → D) (λ D → D) (\ q -> q) (\ q -> q) (λ _ → id) (λ _ → id) (λ _ _ _ → id) (λ _ _ _ → id)
+  1Adj = adj 1Func 1Func (λ D → D) (λ D → D) (\ q -> q) (\ q -> q) (λ _ → id) (λ _ → id) (λ _ _ _ → id) 
 
   _·Adj_ : ∀ {p q r} → Adjunction p q → Adjunction q r → Adjunction p r 
   _·Adj_ a1 a2 = adj (Adjunction.L a2 ∘Func Adjunction.L a1) (Adjunction.R a1 ∘Func Adjunction.R a2)
@@ -112,7 +107,7 @@ module adjointlogic2.General where
                    (λ q → Adjunction.RtoL≈ a2 (Adjunction.RtoL≈ a1 q))
                    (λ D → Adjunction.LtoRtoL a2 D ∘≈ Adjunction.RtoL≈ a2 (Adjunction.LtoRtoL a1 _))
                    (λ D → Adjunction.RtoLtoR a1 D ∘≈ Adjunction.LtoR≈ a1 (Adjunction.RtoLtoR a2 _))
-                   (λ D1 D D2 → {!Adjunction.LtoRnat a2 D1 D D2!}) {!!}
+                   (λ D1 D D2 → {!Adjunction.LtoRnat a2 D1 D D2!}) 
 
   record AdjMor {p q : Mode} (a1 : Adjunction p q) (a2 : Adjunction p q) : Set where
     constructor adjmor
@@ -190,8 +185,14 @@ module adjointlogic2.General where
   diff2 = UR (UL 1m {!NO!} hyp)
   -}
 
+
   -- ----------------------------------------------------------------------
-  -- functoriality of F and U on terms
+  -- functoriality of type constructors
+
+  ⊕func : ∀ {p : Mode} {A A' B B' : Tp p} → A [ 1m ]⊢ A' → B [ 1m ]⊢ B' → (A ⊕ B) [ 1m ]⊢ (A' ⊕ B')
+  ⊕func f f₁ = (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp)))
+
+  -- ENH: check equations
 
   Ffunc : ∀ {p q : Mode} {α : q ≥ p} {A B} → A [ 1m ]⊢ B → F α A [ 1m ]⊢ F α B
   Ffunc {α = α} D =  FL {α = α} {β = 1m} (FR 1m 1⇒ D)
@@ -219,11 +220,43 @@ module adjointlogic2.General where
 
   -- functoriality preserves equivalence
   
+  ⊕func-i : ∀ {p : Mode} {A A' B B' : Tp p} → Iso A A' → Iso B B' → Iso (A ⊕ B) (A' ⊕ B')
+  ⊕func-i (iso f g α β) (iso f₁ g₁ α₁ β₁) = 
+    iso (⊕func f f₁) (⊕func g g₁) 
+        (Case≈ ((((cut-ident-left _ ∘≈  cut≈1 α (Inl hyp)) ∘≈ cut-assoc f g (Inl hyp)) ∘≈ (cut≈2 f (cut-ident-left _))) ∘≈ !≈ (cut-assoc f (Inl hyp) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp))))) ((((cut-ident-left _ ∘≈ cut≈1 α₁ (Inr hyp)) ∘≈ cut-assoc f₁ g₁ (Inr hyp)) ∘≈ cut≈2 f₁ (cut-ident-left _)) ∘≈ !≈ (cut-assoc f₁ (Inr hyp) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp))))))
+        (Case≈ ((((cut-ident-left _ ∘≈ cut≈1 β (Inl hyp)) ∘≈ cut-assoc g f (Inl hyp)) ∘≈ cut≈2 g (cut-ident-left _)) ∘≈ !≈ (cut-assoc g (Inl hyp) (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp))))) ((((cut-ident-left _ ∘≈ cut≈1 β₁ (Inr hyp)) ∘≈ cut-assoc g₁ f₁ (Inr hyp)) ∘≈ cut≈2 g₁ (cut-ident-left _)) ∘≈ !≈ (cut-assoc g₁ (Inr hyp) (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp))))))
+
   Ffunc-i : ∀ {p q} {α : p ≥ q} {A B : Tp p} → Iso A B → Iso (F α A) (F α B)
   Ffunc-i (iso f g α β) = iso (Ffunc f) (Ffunc g) (FL≈ ((FR≈ α ∘≈ eq (cutFR f)) ∘≈ eq (transport⊢1 (cut f (FR 1m 1⇒ g))))) (FL≈ ((FR≈ β ∘≈ eq (cutFR g)) ∘≈ eq (transport⊢1 (cut g (FR 1m 1⇒ f)))))
 
   Ufunc-i : ∀ {p q} {α : p ≥ q} {A B : Tp q} → Iso A B → Iso (U α A) (U α B)
   Ufunc-i {α = α1} (iso f g α β) = iso (Ufunc f) (Ufunc g) (UR≈ {α = α1} {β = 1m ∘1 1m} ((UL≈ {e = 1⇒} α ∘≈ cutUL g) ∘≈ eq (transport⊢1 _))) (UR≈ {α = α1} {β = 1m ∘1 1m} ((UL≈ {e = 1⇒} β ∘≈ cutUL f) ∘≈ eq (transport⊢1 _)) )
+
+    -- ----------------------------------------------------------------------
+  -- F preserves coproducts
+
+  Fpres-coprod1 : ∀ {p q} {α : p ≥ q} {A B} → F α (A ⊕ B) [ 1m ]⊢ (F α A ⊕ F α B)
+  Fpres-coprod1 {α = α} = FL {α = α} {β = 1m} (Case (Inl (FR 1m 1⇒ hyp)) (Inr (FR 1m 1⇒ hyp)))
+
+  Fpres-coprod2 : ∀ {p q} {α : p ≥ q} {A B} → (F α A ⊕ F α B) [ 1m ]⊢ (F α (A ⊕ B))
+  Fpres-coprod2 = Case (FL (FR 1m 1⇒ (Inl hyp))) (FL (FR 1m 1⇒ (Inr hyp)))
+
+  Fpres-coprod-composite-1 : ∀ {p q} {α : p ≥ q} {A B} 
+                           → cut (Fpres-coprod2 {α = α}{A}{B}) Fpres-coprod1 ≈ hyp
+  Fpres-coprod-composite-1 = Case≈ (!≈ (Fη _) ∘≈ FL≈ (Inl≈ (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) ∘≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _)))) (!≈ (Fη _) ∘≈ FL≈ (Inr≈ (!≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) ∘≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))))
+
+  Fpres-coprod-composite-2 : ∀ {p q} {α : p ≥ q} {A B} 
+                           → cut (Fpres-coprod1 {α = α}{A}{B}) Fpres-coprod2 ≈ hyp
+  Fpres-coprod-composite-2 {α = α} = FL≈ {α = α} {β = 1m ∘1 1m} (!≈ (⊕η _) ∘≈ Case≈ (!≈ (FR≈ {γ = 1m} {e = 1⇒} (cut-ident-left _)) ∘≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) (!≈ (FR≈ {γ = 1m} {e = 1⇒} (cut-ident-left _)) ∘≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))))
+
+  Fpres-coprod : ∀ {p q} {α : p ≥ q} {A B} → Iso (F α (A ⊕ B)) (F α A ⊕ F α B)
+  Fpres-coprod = iso Fpres-coprod1 Fpres-coprod2 Fpres-coprod-composite-2 Fpres-coprod-composite-1  
+
+  Fpres-coprod1-nat : ∀ {p q} {α : p ≥ q} {A B A' B'} 
+                    → (D1 : A [ 1m ]⊢ A') (D2 : B [ 1m ]⊢ B')
+                    → cut Fpres-coprod1 (⊕func (Ffunc {α = α} D1) (Ffunc D2))
+                     ≈ cut (Ffunc (⊕func D1 D2)) Fpres-coprod1 
+  Fpres-coprod1-nat D1 D2 = FL≈ (Case≈ ((!≈ (!≈ (cut-assoc D1 (Inl hyp) (Case (Inl (FR 1m 1⇒ hyp)) (Inr (FR 1m 1⇒ hyp)))) ∘≈ eq (transport⊢1 _)) ∘≈ !≈ (cut≈2 D1 (cut-ident-left (Inl (FR 1m 1⇒ hyp)))) ∘≈ !≈ (eq (ap Inl (cutFR D1) ∘ cutInl D1))) ∘≈ Inl≈ (eq (cutFR D1) ∘≈ eq (transport⊢1 _) ∘≈ cut-ident-left _ ∘≈ eq (transport⊢1 _))) ((!≈ (!≈ (cut-assoc D2 (Inr hyp) (Case (Inl (FR 1m 1⇒ hyp)) (Inr (FR 1m 1⇒ hyp)))) ∘≈ eq (transport⊢1 _)) ∘≈ !≈ (cut≈2 D2 (cut-ident-left (Inr (FR 1m 1⇒ hyp)))) ∘≈ !≈ (eq (ap Inr (cutFR D2) ∘ cutInr D2))) ∘≈ Inr≈ (eq (cutFR D2) ∘≈ eq (transport⊢1 _) ∘≈ cut-ident-left _ ∘≈ eq (transport⊢1 _))))
 
   ----------------------------------------------------------------------
   -- monads
@@ -350,7 +383,7 @@ module adjointlogic2.General where
   FUadjunction-nat2 {α = α} D1 D D2 = !≈ (cutFL {α = 1m} (cut (FL {α = α} {β = 1m} (cut D (UL 1m 1⇒ hyp))) D2)) ∘≈ FL≈ {α = α} {β = 1m} (!≈ (cut-assoc (FR 1m 1⇒ D1) (FL {α = α} {β = 1m} (cut D (UL 1m 1⇒ hyp))) D2) ∘≈ (((cut≈1 (eq (! (transport⊢1 (cut D1 (cut D (UL 1m 1⇒ hyp)))))) D2 ∘≈ cut-assoc D1 (cut D (UL 1m 1⇒ hyp)) D2 ∘≈ cut≈2 D1 (cut-assoc D (UL 1m 1⇒ hyp) D2) ∘≈ cut≈2 D1 (cut≈2 D (!≈ (cutUL D2))) ∘≈ cut≈2 D1 (cut≈2 D (UL≈ (!≈ (cut-ident-left D2))))) ∘≈ cut≈2 D1 (cut≈2 D (cut-ident-right (UL 1m 1⇒ D2) ∘≈ eq (transport⊢1 _)))) ∘≈ !≈ (cut≈2 D1 (cut-assoc D (UR {α = α} {β = 1m} (UL 1m 1⇒ D2)) (UL 1m 1⇒ hyp)))) ∘≈ !≈ (cut-assoc D1 (cut D (UR {α = α} {β = 1m} (UL 1m 1⇒ D2))) (UL 1m 1⇒ hyp)))
 
   FUadjunction : ∀ {p q} → q ≥ p → Adjunction q p
-  FUadjunction α = adj (Ffunctor α) (Ufunctor α) FUadjunction1 FUadjunction2 (λ q → UR≈ {α = α} {β = 1m} (cut≈2 (FR 1m 1⇒ hyp) q)) (λ q → FL≈ {α = α} {β = 1m} (cut≈1 q (UL 1m 1⇒ hyp))) FUadj-composite2 FUadj-composite1 FUadjunction-nat1 FUadjunction-nat2
+  FUadjunction α = adj (Ffunctor α) (Ufunctor α) FUadjunction1 FUadjunction2 (λ q → UR≈ {α = α} {β = 1m} (cut≈2 (FR 1m 1⇒ hyp) q)) (λ q → FL≈ {α = α} {β = 1m} (cut≈1 q (UL 1m 1⇒ hyp))) FUadj-composite2 FUadj-composite1 FUadjunction-nat1 
 
   -- ----------------------------------------------------------------------
   -- functoriality of F and U on 1-cells in the diagrams
