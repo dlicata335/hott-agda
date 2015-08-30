@@ -88,10 +88,10 @@ module adjointlogic2.Rules where
     Inr : ∀ {p q} {α : q ≥ p} {C : Tp q} {A B : Tp p} → C [ α ]⊢ B → C [ α ]⊢ (A ⊕ B)
     Case : ∀ {p q} {α : q ≥ p} {C : Tp p} {A B : Tp q} → A [ α ]⊢ C → B [ α ]⊢ C → (A ⊕ B) [ α ]⊢ C
 
-  transport⊢ : {p q : Mode} → {A : Tp q} → {α β : q ≥ p} {B : Tp p} 
-             → α ⇒ β
-             → A [ α ]⊢ B 
+  transport⊢ : {p q : Mode} → {A : Tp q} → {β β' : q ≥ p} {B : Tp p} 
+             → β ⇒ β'
              → A [ β ]⊢ B 
+             → A [ β' ]⊢ B 
   transport⊢ e (hypp e') = hypp (e' ·2 e)
   transport⊢ e (hypq e') = hypq (e' ·2 e)
   transport⊢ e (FL D) = FL (transport⊢ (1⇒ ∘1cong e) D)
@@ -120,17 +120,17 @@ module adjointlogic2.Rules where
   cut (hypp p) (hypp q) = hypp (p ∘1cong q)
   cut (hypq p) (hypq q) = hypq (p ∘1cong q)
   -- principal 
-  cut (FR γ e D) (FL E) = transport⊢ (e ∘1cong 1⇒) (cut D E)
-  cut (UR {α = α1} D) (UL γ₁ e E) = transport⊢ (1⇒ ∘1cong e) (cut D E)
+  cut (FR γ e D) (FL {α = α} E) = transport⊢ (e ∘1cong 1⇒) (cut D E)
+  cut (UR D) (UL γ₁ e E) = transport⊢ (1⇒ ∘1cong e) (cut D E)
   cut (Inl D) (Case E1 E2) = cut D E1
   cut (Inr D) (Case E1 E2) = cut D E2
   -- right commutative
-  cut {α = α} {β = β} D (FR {α = α'} γ e E) = FR (β ∘1 γ) (1⇒ ∘1cong e) (cut D E)
-  cut {α = α} {β = β} D (UR {α = α1} E) = UR {α = α1} {β = β ∘1 α} (cut D E) 
+  cut {β = β} D (FR  γ e E) = FR (β ∘1 γ) (1⇒ ∘1cong e) (cut D E)
+  cut {α = α} {β = β} D (UR {α = α1} E) = UR {α = α1} {β = β ∘1 α} (cut {α = α ∘1 α1} {β = β} D E) 
   cut D (Inl E) = Inl (cut D E) 
   cut D (Inr E) = Inr (cut D E)
   -- left commutative
-  cut {α = α} {β = β} (FL {α = α1} D) E = FL {α = α1} {β = β ∘1 α} (cut D E) 
+  cut {α = β'} {β = β} (FL {α = α} D) E = FL {α = α} {β = β ∘1 β'} (cut D E)
   cut {α = α} (UL γ e D) E = UL (γ ∘1 α) (e ∘1cong 1⇒) (cut D E) 
   cut (Case D1 D2) E = Case (cut D1 E) (cut D2 E)
 
@@ -192,7 +192,7 @@ module adjointlogic2.Rules where
                    {e3 : (δ1 ∘1 γ) ⇒ δ3} {e4 : (δ3 ∘1 α) ⇒ δ2} 
                    (D : C [ γ ]⊢ A)
                 → ((1⇒ ∘1cong e1) ·2 e2) == ((e3 ∘1cong 1⇒) ·2 e4)
-                → (UL β e2 (FR γ e1 D)) ≈ (FR δ3 e4 (UL γ e3 D))
+                → UL β e2 (FR γ e1 D) ≈ (FR δ3 e4 (UL γ e3 D))
 
     commuteULInl : ∀ {p q r} {α : p ≥ q} {β : p ≥ r} {A : Tp q} {C C' : Tp r}
                    → {γ : q ≥ r} {e : (α ∘1 γ) ⇒ β} (D : A [ γ ]⊢ C)

@@ -62,12 +62,13 @@ module adjointlogic2.General where
              → cut (Iso.f (mor {A})) (Functor.ar G2 D) ≈ cut (Functor.ar G1 D) (Iso.f (mor {B}))
 
   !natiso : {p q : Mode} {G1 G2 : Functor p q} → NatIso G1 G2 → NatIso G2 G1
-  !natiso i = natiso (!i (NatIso.mor i)) (λ D → {!NatIso.square i D!})
+  !natiso {G1 = G1} {G2 = G2} i = 
+    natiso (!i (NatIso.mor i)) (λ D → cut≈1 ((cut-ident-left (Functor.ar G2 D) ∘≈ cut≈1 (Iso.β (NatIso.mor i)) (Functor.ar G2 D)) ∘≈ cut-assoc (Iso.g (NatIso.mor i)) (Iso.f (NatIso.mor i)) (Functor.ar G2 D)) (Iso.g (NatIso.mor i)) ∘≈ !≈ (cut≈1 (cut≈2 (Iso.g (NatIso.mor i)) (NatIso.square i D)) (Iso.g (NatIso.mor i))) ∘≈ !≈ (cut≈2 (Iso.g (NatIso.mor i)) ((cut-ident-right (Functor.ar G1 D) ∘≈ cut≈2 (Functor.ar G1 D) (Iso.α (NatIso.mor i))) ∘≈ !≈ (cut-assoc (Functor.ar G1 D) (Iso.f (NatIso.mor i)) (Iso.g (NatIso.mor i)))) ∘≈ !≈ (cut-assoc (Iso.g (NatIso.mor i)) (cut (Functor.ar G1 D) (Iso.f (NatIso.mor i))) (Iso.g (NatIso.mor i)))))
 
   square' : {p q : Mode} {G1 G2 : Functor p q} {A B : Tp p} 
           → (i : NatIso G1 G2) (D : A [ 1m ]⊢ B)
           → (Functor.ar G1 D) ≈ cut (Iso.f (NatIso.mor i {A})) (cut (Functor.ar G2 D) (Iso.g (NatIso.mor i {B})))
-  square' = {!!}
+  square' {G1 = G1} {G2 = G2} i D = !≈ (cut-assoc (Iso.f (NatIso.mor i)) (Functor.ar G2 D) (Iso.g (NatIso.mor i))) ∘≈ !≈ (cut≈1 (NatIso.square i D) (Iso.g (NatIso.mor i))) ∘≈ !≈ ((cut-ident-right (Functor.ar G1 D) ∘≈ cut≈2 (Functor.ar G1 D) (Iso.α (NatIso.mor i))) ∘≈ !≈ (cut-assoc (Functor.ar G1 D) (Iso.f (NatIso.mor i)) (Iso.g (NatIso.mor i))))
 
   NatIso-forward : ∀ {p q : Mode} {G1 G2 : Functor p q} → NatIso G1 G2 → NatTrans G1 G2
   NatIso-forward i = nat (Iso.f (NatIso.mor i)) (NatIso.square i)
@@ -94,7 +95,9 @@ module adjointlogic2.General where
                 → (D1 : A' [ 1m ]⊢ A) (D : A [ 1m ]⊢ Functor.ob R B) (D2 : B [ 1m ]⊢ B')
                 →   RtoL (cut D1 (cut D (Functor.ar R D2)))
                   ≈ cut (Functor.ar L D1) (cut (RtoL D) D2)
-    RtoLnat = {!!}
+    RtoLnat D1 D D2 = LtoRtoL _ ∘≈ RtoL≈ goal1 ∘≈ !≈ (LtoRtoL _) where 
+      goal1 : LtoR (RtoL (cut D1 (cut D (Functor.ar R D2)))) ≈ LtoR (cut (Functor.ar L D1) (cut (RtoL D) D2))
+      goal1 = (!≈ (LtoRnat D1 (RtoL D) D2) ∘≈ cut≈2 D1 (cut≈1 (!≈ (RtoLtoR D)) (Functor.ar R D2))) ∘≈ RtoLtoR _
 
   1Adj : ∀ {p} → Adjunction p p
   1Adj = adj 1Func 1Func (λ D → D) (λ D → D) (\ q -> q) (\ q -> q) (λ _ → id) (λ _ → id) (λ _ _ _ → id) 
@@ -107,16 +110,15 @@ module adjointlogic2.General where
                    (λ q → Adjunction.RtoL≈ a2 (Adjunction.RtoL≈ a1 q))
                    (λ D → Adjunction.LtoRtoL a2 D ∘≈ Adjunction.RtoL≈ a2 (Adjunction.LtoRtoL a1 _))
                    (λ D → Adjunction.RtoLtoR a1 D ∘≈ Adjunction.LtoR≈ a1 (Adjunction.RtoLtoR a2 _))
-                   (λ D1 D D2 → {!Adjunction.LtoRnat a2 D1 D D2!}) 
+                   (λ D1 D D2 → (Adjunction.LtoRnat a1 D1 (Adjunction.LtoR a2 D) (Functor.ar (Adjunction.R a2) D2)) ∘≈ Adjunction.LtoR≈ a1 (Adjunction.LtoRnat a2 (Functor.ar (Adjunction.L a1) D1) D D2)) 
 
   record AdjMor {p q : Mode} (a1 : Adjunction p q) (a2 : Adjunction p q) : Set where
     constructor adjmor
     field
       LL        : NatTrans (Adjunction.L a1) (Adjunction.L a2)
       RR        : NatTrans (Adjunction.R a2) (Adjunction.R a1)
-      -- one of many ways to phrase this; see
-      -- https://unapologetic.wordpress.com/2007/07/30/transformations-of-adjoints/
-      conjugate : ∀ {A} → cut (Adjunction.LtoR a1 hyp) (Functor.ar (Adjunction.R a1) (NatTrans.mor LL {A})) ≈ cut (Adjunction.LtoR a2 hyp) (NatTrans.mor RR {Functor.ob (Adjunction.L a2) A})
+      conjugate : ∀ {A B} {D : Functor.ob (Adjunction.L a2) A [ 1m ]⊢ B}
+                → Adjunction.LtoR a1 (cut (NatTrans.mor LL) D) ≈ cut (Adjunction.LtoR a2 D) (NatTrans.mor RR)
 
   record _==AdjMor_ {p q : Mode} {a1 : Adjunction p q} {a2 : Adjunction p q} (mor1 : AdjMor a1 a2) (mor2 : AdjMor a1 a2) : Set where
     constructor eqadjmor
@@ -126,7 +128,7 @@ module adjointlogic2.General where
 
   1AdjMor : {p q : Mode} {a : Adjunction p q}
           → AdjMor a a 
-  1AdjMor {a = a} = adjmor 1NatTrans 1NatTrans (cut≈2 (Adjunction.LtoR a hyp) (Functor.presid (Adjunction.R a)))
+  1AdjMor {a = a} = adjmor 1NatTrans 1NatTrans (!≈ (cut-ident-right _) ∘≈ Adjunction.LtoR≈ a (cut-ident-left _)) 
 
   _·AdjMor_ : {p q : Mode} {a1 : Adjunction p q} {a2 : Adjunction p q} {a3 : Adjunction p q}
           → AdjMor a1 a2
@@ -135,44 +137,61 @@ module adjointlogic2.General where
   _·AdjMor_ {a1 = a1}{a2}{a3} mor1 mor2 = 
     adjmor (AdjMor.LL mor1 ·NatTrans AdjMor.LL mor2)
            (AdjMor.RR mor2 ·NatTrans AdjMor.RR mor1) 
-           {!AdjMor.conjugate mor1!}
+           (λ {A} {B} {D} → ((!≈ (cut-assoc (Adjunction.LtoR a3 D) (NatTrans.mor (AdjMor.RR mor2)) (NatTrans.mor (AdjMor.RR mor1))) ∘≈ cut≈1 (AdjMor.conjugate mor2) (NatTrans.mor (AdjMor.RR mor1))) ∘≈ AdjMor.conjugate mor1) ∘≈ Adjunction.LtoR≈ a1 (!≈ (cut-assoc (NatTrans.mor (AdjMor.LL mor1)) (NatTrans.mor (AdjMor.LL mor2)) D)))
+
+  _∘Func-cong_ : ∀ {p q r} {G G' : Functor p q} {H H' :  Functor q r}
+                → NatTrans H H'
+                → NatTrans G G'
+                → NatTrans (H ∘Func G) (H' ∘Func G')
+  _∘Func-cong_ {G = G} {G'} {H} {H'} nh ng = nat (cut (Functor.ar H (NatTrans.mor ng)) (NatTrans.mor nh)) (λ D → !≈ (cut-assoc (Functor.ar H (Functor.ar G D)) (Functor.ar H (NatTrans.mor ng)) (NatTrans.mor nh)) ∘≈ cut≈1 (Functor.prescut H (Functor.ar G D) (NatTrans.mor ng) ∘≈ Functor.ar≈ H (NatTrans.square ng D)) (NatTrans.mor nh) ∘≈ (cut≈1 (!≈ (Functor.prescut H (NatTrans.mor ng) (Functor.ar G' D))) (NatTrans.mor nh) ∘≈ cut-assoc (Functor.ar H (NatTrans.mor ng)) (Functor.ar H (Functor.ar G' D)) (NatTrans.mor nh)) ∘≈ cut≈2 (Functor.ar H (NatTrans.mor ng)) (NatTrans.square nh (Functor.ar G' D)) ∘≈ !≈ (cut-assoc (Functor.ar H (NatTrans.mor ng)) (NatTrans.mor nh) (Functor.ar (H' ∘Func G') D)))
 
   _·Adj-cong_ : ∀ {p q r} {a1 a1' : Adjunction p q} {a2 a2' :  Adjunction q r}
                 → AdjMor a1 a1'
                 → AdjMor a2 a2'
                 → AdjMor (a1 ·Adj a2) (a1' ·Adj a2')
-  _·Adj-cong_ {a1 = a1}{a1'}{a2}{a2'} mor1 mor2 = adjmor (nat (cut (Functor.ar (Adjunction.L a2) (NatTrans.mor (AdjMor.LL mor1))) (NatTrans.mor (AdjMor.LL mor2))) {!!}) (nat (cut (Functor.ar (Adjunction.R a1') (NatTrans.mor (AdjMor.RR mor2))) (NatTrans.mor (AdjMor.RR mor1))) {!!}) {!!}
-
+  _·Adj-cong_ {a1 = a1}{a1'}{a2}{a2'} mor1 mor2 = 
+    adjmor (AdjMor.LL mor2 ∘Func-cong AdjMor.LL mor1) 
+           (AdjMor.RR mor1 ∘Func-cong AdjMor.RR mor2) 
+           (λ {A}{B}{D} → (((((!≈ (cut-assoc (Adjunction.LtoR a1' (Adjunction.LtoR a2' D)) (Functor.ar (Adjunction.R a1') (NatTrans.mor (AdjMor.RR mor2))) (NatTrans.mor (AdjMor.RR mor1))) ∘≈ cut≈1 (cut-ident-left _ ∘≈ Adjunction.LtoRnat a1' hyp (Adjunction.LtoR a2' D) (NatTrans.mor (AdjMor.RR mor2)) ∘≈ Adjunction.LtoR≈ a1' (!≈ (cut-ident-left _ ∘≈ cut≈1 (Functor.presid (Adjunction.L a1')) (cut (Adjunction.LtoR a2' D) (NatTrans.mor (AdjMor.RR mor2)))) ∘≈ cut≈2 (Adjunction.LtoR a2' D) (cut-ident-left _ ∘≈ cut≈1 (Functor.presid (Adjunction.R a2')) (NatTrans.mor (AdjMor.RR mor2)))) ∘≈ !≈ (Adjunction.LtoR≈ a1' (cut-assoc (Adjunction.LtoR a2' D) (Functor.ar (Adjunction.R a2') hyp) (NatTrans.mor (AdjMor.RR mor2))))) (NatTrans.mor (AdjMor.RR mor1))) ∘≈ AdjMor.conjugate mor1) ∘≈ !≈ (Adjunction.LtoR≈ a1 (cut-assoc (NatTrans.mor (AdjMor.LL mor1)) (cut (Adjunction.LtoR a2' D) (Functor.ar (Adjunction.R a2') hyp)) (NatTrans.mor (AdjMor.RR mor2))))) ∘≈ Adjunction.LtoR≈ a1 (cut≈1 (Adjunction.LtoRnat a2' (NatTrans.mor (AdjMor.LL mor1)) D hyp) (NatTrans.mor (AdjMor.RR mor2))) ∘≈ !≈ (Adjunction.LtoR≈ a1 (cut≈1 (Adjunction.LtoR≈ a2' (cut≈2 (Functor.ar (Adjunction.L a2') (NatTrans.mor (AdjMor.LL mor1))) (cut-ident-right D))) (NatTrans.mor (AdjMor.RR mor2))))) ∘≈ Adjunction.LtoR≈ a1 (AdjMor.conjugate mor2)) ∘≈ Adjunction.LtoR≈ a1 (Adjunction.LtoR≈ a2 (!≈ (cut-assoc (NatTrans.mor (AdjMor.LL mor2)) (Functor.ar (Adjunction.L a2') (NatTrans.mor (AdjMor.LL mor1))) D) ∘≈ cut≈1 (!≈ (NatTrans.square (AdjMor.LL mor2) (NatTrans.mor (AdjMor.LL mor1)))) D)))
 
   record AdjIso {p q : Mode} (a1 : Adjunction p q) (a2 : Adjunction p q) : Set where
     constructor adjiso
     field
       LL        : NatIso (Adjunction.L a1) (Adjunction.L a2)
       RR        : NatIso (Adjunction.R a2) (Adjunction.R a1)
-      conjugate : ∀ {A} → cut (Adjunction.LtoR a1 hyp) (Functor.ar (Adjunction.R a1) (Iso.f (NatIso.mor LL {A}))) ≈ cut (Adjunction.LtoR a2 hyp) (Iso.f (NatIso.mor RR {Functor.ob (Adjunction.L a2) A}))
+      conjugate : ∀ {A B} {D : Functor.ob (Adjunction.L a2) A [ 1m ]⊢ B}
+                → Adjunction.LtoR a1 (cut (Iso.f (NatIso.mor LL)) D) ≈ cut (Adjunction.LtoR a2 D) (Iso.f (NatIso.mor RR))
 
   AdjIso-forward : {p q : Mode} {a1 : Adjunction p q} {a2 : Adjunction p q}
                 → AdjIso a1 a2 → AdjMor a1 a2
-  AdjIso-forward i = adjmor (NatIso-forward (AdjIso.LL i)) (NatIso-forward (AdjIso.RR i)) (AdjIso.conjugate i)
+  AdjIso-forward i = adjmor (NatIso-forward (AdjIso.LL i)) (NatIso-forward (AdjIso.RR i)) (AdjIso.conjugate i) 
 
   AdjIso-backward : {p q : Mode} {a1 : Adjunction p q} {a2 : Adjunction p q}
                 → AdjIso a1 a2 → AdjMor a2 a1
-  AdjIso-backward i = adjmor (NatIso-forward (!natiso (AdjIso.LL i))) (NatIso-forward (!natiso (AdjIso.RR i))) {!!}
+  AdjIso-backward {a1 = a1}{a2} i = adjmor (NatIso-forward (!natiso (AdjIso.LL i)))
+                                           (NatIso-forward (!natiso (AdjIso.RR i))) 
+                                           (λ {A}{B}{D} → Adjunction.RtoLtoR a2 _ ∘≈ Adjunction.LtoR≈ a2 goal1) where
+    goal1 : ∀ {A}{B}{D : Functor.ob (Adjunction.L a1) A [ 1m ]⊢ B} → 
+              (cut (NatTrans.mor (NatIso-forward (!natiso (AdjIso.LL i)))) D) 
+            ≈ Adjunction.RtoL a2
+                (cut (Adjunction.LtoR a1 D)
+                 (NatTrans.mor (NatIso-forward (!natiso (AdjIso.RR i)))))
+    goal1 {D = D} = !≈ (Adjunction.RtoL≈ a2 (cut≈1 (AdjIso.conjugate i {D = cut (Iso.g (NatIso.mor (AdjIso.LL i))) D} ∘≈ Adjunction.LtoR≈ a1 (!≈ (cut-assoc (Iso.f (NatIso.mor (AdjIso.LL i))) (Iso.g (NatIso.mor (AdjIso.LL i))) D) ∘≈ cut≈1 (!≈ (Iso.α (NatIso.mor (AdjIso.LL i)))) D ∘≈ !≈ (cut-ident-left D))) (NatTrans.mor (NatIso-forward (!natiso (AdjIso.RR i)))))) ∘≈ !≈ (Adjunction.LtoRtoL a2 _ ∘≈ Adjunction.RtoL≈ a2 ((cut-ident-right (Adjunction.LtoR a2 (cut (Iso.g (NatIso.mor (AdjIso.LL i))) D)) ∘≈ cut≈2 (Adjunction.LtoR a2 (cut (Iso.g (NatIso.mor (AdjIso.LL i))) D)) (Iso.α (NatIso.mor (AdjIso.RR i)))) ∘≈ !≈ (cut-assoc (Adjunction.LtoR a2 (cut (Iso.g (NatIso.mor (AdjIso.LL i))) D)) (Iso.f (NatIso.mor (AdjIso.RR i))) (Iso.g (NatIso.mor (AdjIso.RR i))))))
 
   -- note: Adj is really be a strict 2-category,
   --       but since we didn't make ≈ proof-irrelevant (or us a quotient)
   --       this isn't true up to Agda propositional equality.
   --       however, rather than fixing this, it's easier to use the weaker bifunctor law below.
   ·Adj-unit-l : ∀ {p q : Mode} (a1 : Adjunction p q)  → AdjIso (1Adj ·Adj a1) a1
-  ·Adj-unit-l a1 = adjiso (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (cut≈2 (Adjunction.LtoR a1 (ident (Functor.ob (Adjunction.L a1) _))) (Functor.presid (Adjunction.R (1Adj ·Adj a1))))
+  ·Adj-unit-l a1 = adjiso (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (!≈ (cut-ident-right _) ∘≈ Adjunction.LtoR≈ a1 (cut-ident-left _))
 
   ·Adj-unit-r : ∀ {p q : Mode} (a1 : Adjunction p q)  → AdjIso a1 (a1 ·Adj 1Adj)
-  ·Adj-unit-r a1 = adjiso (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (cut≈2 (Adjunction.LtoR a1 (ident (Functor.ob (Adjunction.L a1) _))) (Functor.presid (Adjunction.R a1)))
+  ·Adj-unit-r a1 = adjiso (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (!≈ (cut-ident-right _) ∘≈ Adjunction.LtoR≈ a1 (cut-ident-left _))
 
   ·Adj-assoc : ∀ {p q r s : Mode} (a1 : Adjunction p q) (a2 : Adjunction q r) (a3 : Adjunction r s) 
              → AdjIso ((a1 ·Adj a2) ·Adj a3) (a1 ·Adj (a2 ·Adj a3))
-  ·Adj-assoc a1 a2 a3 = adjiso (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (cut≈2 (Adjunction.LtoR a1 (Adjunction.LtoR a2 (Adjunction.LtoR a3 (ident (Functor.ob (Adjunction.L a3) (Functor.ob (Adjunction.L a2) (Functor.ob (Adjunction.L a1) _))))))) (Functor.presid (Adjunction.R ((a1 ·Adj a2) ·Adj a3))))
-            
+  ·Adj-assoc a1 a2 a3 = adjiso (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (!≈ (cut-ident-right _) ∘≈ Adjunction.LtoR≈ (a1 ·Adj (a2 ·Adj a3)) (cut-ident-left _))
+
   -- ----------------------------------------------------------------------
   -- F α and F β are different for two parallel but different α and β
 
@@ -435,12 +454,13 @@ module adjointlogic2.General where
   U1-natiso : {p : Mode} → NatIso {p = p} (Ufunctor 1m) 1Func
   U1-natiso = !natiso (natiso (!i U1-iso) U12-nat)
 
-  FU1-conjugate : ∀ {p} {A : Tp p}
-                    → cut (FUadjunction1 hyp) (Ufunc F11) ≈ cut (ident A) U12
-  FU1-conjugate = !≈ (cut-ident-left U12) ∘≈ UR≈ {α = 1m} {β = 1m} (((cut-ident-right hyp ∘≈ eq (transport⊢1 _)) ∘≈ cut≈1 (cut-ident-left (FR 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _)) F11) ∘≈ eq (transport⊢1 _))
+  FU1-conjugate : ∀ {p} {A B : Tp p}
+                  {D : A [ 1m ]⊢ B} →
+                  Adjunction.LtoR (FUadjunction 1m) (cut F11 D) ≈ cut D U12
+  FU1-conjugate {D = D} = !≈ (eq (cutUR D)) ∘≈ UR≈ {α = 1m} {β = 1m ∘1 1m} (!≈ (cut-ident-right D) ∘≈ (cut-ident-left D ∘≈ cut≈1 (cut-ident-left hyp ∘≈ eq (transport⊢1 _)) D) ∘≈ cut-assoc (FR 1m 1⇒ hyp) (FL {α = 1m} hyp) D)
 
   FU1-adjiso : ∀ {p} → AdjIso (FUadjunction 1m) (1Adj {p}) 
-  FU1-adjiso = adjiso F1-natiso (!natiso U1-natiso) FU1-conjugate
+  FU1-adjiso = adjiso F1-natiso (!natiso U1-natiso) (\ {A}{B}{D} → FU1-conjugate {D = D})
 
   -- F/U on ∘
 
@@ -488,13 +508,8 @@ module adjointlogic2.General where
   U∘-natiso : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} → NatIso (Ufunctor (β ∘1 α)) (Ufunctor β ∘Func Ufunctor α)
   U∘-natiso {α = α}{β} = natiso U∘-iso (λ D → UR≈ (UR≈ (transport⊢≈ 1⇒ (((!≈ (cut-ident-right (UL 1m 1⇒ D)) ∘≈ UL≈ (cut-ident-left D)) ∘≈ cutUL D) ∘≈ eq (transport⊢1 _)))))
 
-  FU∘-conjugate : ∀ {x y z : Mode} {α : y ≥ x} {β : z ≥ y} {A : Tp _} →
-        cut (FUadjunction1 (ident (F (β ∘1 α) A))) (Ufunc F∘1) ≈ cut (FUadjunction1 (FUadjunction1 hyp)) U∘2
-  FU∘-conjugate {α = α}{β = β} {A = A} = UR≈ {α = β ∘1 α} {β = 1m ∘1 1m} ((!≈ (eq (transport⊢1 _ ∘ transport⊢1 _ ∘ transport⊢1 _)) ∘≈ !≈ (cut≈1 (cut-ident-left (FR 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _) ∘≈ cut-ident-left _ ∘≈ eq (transport⊢1 _)) (FR 1m 1⇒ (FL (FR 1m 1⇒ hyp)))) ∘≈ !≈ (FR≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _))) ∘≈ (cut-ident-left _ ∘≈ eq (transport⊢1 _)) ∘≈ cut≈1 (cut-ident-left _ ∘≈ eq (transport⊢1 _)) (FL {α = β ∘1 α} {β = 1m} (FR β 1⇒ (FR 1m 1⇒ (ident A))))) ∘≈ eq (transport⊢1 _))
-
   FU∘-adjiso : ∀ {p q r} {α : r ≥ q} {β : q ≥ p} → AdjIso (FUadjunction (α ∘1 β)) (FUadjunction α ·Adj FUadjunction β)
-  FU∘-adjiso = adjiso F∘-natiso (!natiso U∘-natiso) FU∘-conjugate
-
+  FU∘-adjiso {α = α} {β = β} = adjiso F∘-natiso (!natiso U∘-natiso) (\ {A}{B}{D} → UR≈ {α = α ∘1 β} {β = 1m} (((!≈ (eq (transport⊢1 _ ∘ transport⊢1 _)) ∘≈ !≈ (cut-ident-right (cut (FR 1m 1⇒ hyp) (cut (FR 1m 1⇒ hyp) D))) ∘≈ !≈ (cut-assoc (FR 1m 1⇒ hyp) (FR 1m 1⇒ hyp) D) ∘≈ cut≈1 (FR≈ {α = β} {β = (1m ∘1 α) ∘1 ((1m ∘1 β) ∘1 1m)} (!≈ (cut-ident-left (FR 1m 1⇒ (ident A)) ∘≈ eq (transport⊢1 _)))) D) ∘≈ cut≈1 (cut-ident-left _ ∘≈ eq (transport⊢1 _)) D) ∘≈ cut-assoc (FR 1m 1⇒ (ident A)) (FL {α = α ∘1 β} {β = 1m} (FR α 1⇒ (FR 1m 1⇒ (ident A)))) D))
 
   -- action of F and U on terms is functorial in α
   -- corollaries of naturality
@@ -551,13 +566,8 @@ module adjointlogic2.General where
   U2-nattrans : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → NatTrans (Ufunctor α) (Ufunctor β)
   U2-nattrans e = nat (U2 e) (U2-natural e)
 
-  F2U2conjugate : ∀ {p q} {A : Tp q} {α β : q ≥ p} {e : β ⇒ α}
-            → cut (FUadjunction1 (ident (F _ A))) (Ufunc (F2 e))
-            ≈ cut (FUadjunction1 hyp) (U2 e)
-  F2U2conjugate {A = A} {α = α} {β = β} {e} = UR≈ {α = α} {β = 1m} (((!≈ (transport⊢≈ e (cut≈1 (cut-ident-left _ ∘≈ eq (transport⊢1 _)) (FL {α = β} {β = 1m} (FR 1m 1⇒ (ident A))))) ∘≈ !≈ (transport⊢≈ e (cut-ident-left (FR 1m 1⇒ (ident A)) ∘≈ eq (transport⊢1 (cut (ident A) (FR 1m 1⇒ (ident A)))))) ) ∘≈ cut-ident-left (FR 1m e (ident A)) ∘≈ eq (transport⊢1 (cut (ident A) (FR 1m e (ident A))))) ∘≈ cut≈1 (cut-ident-left (FR 1m 1⇒ (ident A)) ∘≈ eq (transport⊢1 _)) (FL {α = α} {β = 1m} (FR 1m e (ident A))) ∘≈ eq (transport⊢1 _))
-
   FUadjunction-mor : ∀ {p q} {α β : q ≥ p} (e : α ⇒ β) → AdjMor (FUadjunction β) (FUadjunction α)
-  FUadjunction-mor e = adjmor (F2-nattrans e) (U2-nattrans e) F2U2conjugate
+  FUadjunction-mor {α = α}{β} e = adjmor (F2-nattrans e) (U2-nattrans e) (λ {A} {B} {D} → UR≈ {α = β} {β = 1m} (((!≈ (transport⊢≈ e (cut-ident-right (cut (FR 1m 1⇒ hyp) D))) ∘≈ !≈ (transport⊢cut2 {e1 = e} (FR 1m 1⇒ (ident A)) D)) ∘≈ cut≈1 (cut-ident-left (FR 1m e (ident A)) ∘≈ eq (transport⊢1 _)) D) ∘≈ cut-assoc (FR 1m 1⇒ (ident A)) (FL {β = 1m} (FR 1m e (ident A))) D)) 
 
   -- ----------------------------------------------------------------------
   -- pseudofunctor from M into Adj
@@ -639,3 +649,4 @@ module adjointlogic2.General where
                  AdjIso-backward (P1-∘ {α = γ ∘1 β} {β = α})))
   P1-∘-assoc {α = α} {β}{γ} = eqadjmor (FL≈ {α = α} {β = 1m} (FL≈ {α = β} {β = α ∘1 1m} (FL≈ {α = γ} {β = β ∘1 (α ∘1 1m)} ((!≈ (((((cut-ident-left _ ∘≈ eq (transport⊢1 _)) ∘≈ cut≈1 (cut-ident-left (FR 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _)) (FL {α = γ ∘1 β} {β = α} (FR 1m 1⇒ hyp))) ∘≈ eq (transport⊢1 _)) ∘≈ cut-ident-left _) ∘≈ eq (transport⊢1 _ ∘ transport⊢1 _ ∘ transport⊢1 _)) ∘≈ cut-ident-left (FR 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _)) ∘≈ cut≈1 (cut-ident-left _ ∘≈ eq (transport⊢1 _)) (FL (FR 1m 1⇒ hyp)) ∘≈ eq (transport⊢1 _)))))
                                       (UR≈ {α = γ} {β = 1m}(UR≈ {α = β} {β = 1m ∘1 γ}(UR≈ {α = α} {β = (1m ∘1 γ) ∘1 β} (((!≈ (((((cut-ident-right _ ∘≈ eq (transport⊢1 _)) ∘≈ cut≈2 (UR {α = α} {β = γ ∘1 β} (UL 1m 1⇒ hyp)) (cut-ident-right (UL 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _))) ∘≈ eq (transport⊢1 _)) ∘≈ cut-ident-right (transport⊢ 1⇒ (cut (UR {α = α} {β = γ ∘1 β} (UL 1m 1⇒ hyp)) (transport⊢ 1⇒ (cut (UL 1m 1⇒ hyp) hyp))))) ∘≈ eq (transport⊢1 _ ∘ transport⊢1 _ ∘ transport⊢1 _)) ∘≈ cut-ident-right (UL 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _)) ∘≈ cut≈2 (UR {α = β ∘1 α} {β = γ} (UL 1m 1⇒ hyp)) (cut-ident-right (UL 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _) ∘≈ eq (transport⊢1 _))) ∘≈ eq (transport⊢1 _)))))
+
