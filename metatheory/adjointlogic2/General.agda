@@ -15,6 +15,9 @@ module adjointlogic2.General where
       α : cut f g ≈ hyp
       β : cut g f ≈ hyp
 
+  1i : ∀ {p : Mode} {A : Tp p} → Iso A A
+  1i = iso hyp hyp (cut-ident-left hyp) (cut-ident-left hyp) 
+
   _·i_ : {p : Mode} {A B C : Tp p} → Iso A B → Iso B C → Iso A C
   iso f g α β ·i iso f' g' α' β' = 
       iso (cut f f') (cut g' g) 
@@ -33,6 +36,8 @@ module adjointlogic2.General where
      presid  : ∀ {A : Tp p} → ar (ident A) ≈ ident (ob A)
      prescut : ∀ {A B C : Tp p} (D1 : A [ 1m ]⊢ B) (D2 : B [ 1m ]⊢ C)
              → ar (cut D1 D2) ≈ cut (ar D1) (ar D2)
+    ar-iso : ∀ {A B : Tp p} → Iso A B → Iso (ob A) (ob B)
+    ar-iso i = iso (ar (Iso.f i)) (ar (Iso.g i)) ((presid ∘≈ ar≈ (Iso.α i)) ∘≈ !≈ (prescut _ _)) ((presid ∘≈ ar≈ (Iso.β i)) ∘≈ !≈ (prescut _ _))
 
   1Func : ∀ {p} → Functor p p
   1Func = func (\ x -> x) (\ D -> D) (\ x -> x) id (\ _ _ -> id)
@@ -53,6 +58,12 @@ module adjointlogic2.General where
   _·NatTrans_ : ∀ {p q : Mode} {G1 G2 G3 : Functor p q} → NatTrans G1 G2 → NatTrans G2 G3 → NatTrans G1 G3
   _·NatTrans_ {G1 = G1}{G2}{G3} n1 n2 = nat (cut (NatTrans.mor n1) (NatTrans.mor n2)) (λ D → !≈ (cut-assoc (Functor.ar G1 D) (NatTrans.mor n1) (NatTrans.mor n2)) ∘≈ cut≈1 (NatTrans.square n1 D) (NatTrans.mor n2) ∘≈ cut-assoc (NatTrans.mor n1) (Functor.ar G2 D) (NatTrans.mor n2) ∘≈ cut≈2 (NatTrans.mor n1) (NatTrans.square n2 D) ∘≈ !≈ (cut-assoc (NatTrans.mor n1) (NatTrans.mor n2) (Functor.ar G3 D)))
 
+  _∘Func-cong_ : ∀ {p q r} {G G' : Functor p q} {H H' :  Functor q r}
+                → NatTrans H H'
+                → NatTrans G G'
+                → NatTrans (H ∘Func G) (H' ∘Func G')
+  _∘Func-cong_ {G = G} {G'} {H} {H'} nh ng = nat (cut (Functor.ar H (NatTrans.mor ng)) (NatTrans.mor nh)) (λ D → !≈ (cut-assoc (Functor.ar H (Functor.ar G D)) (Functor.ar H (NatTrans.mor ng)) (NatTrans.mor nh)) ∘≈ cut≈1 (Functor.prescut H (Functor.ar G D) (NatTrans.mor ng) ∘≈ Functor.ar≈ H (NatTrans.square ng D)) (NatTrans.mor nh) ∘≈ (cut≈1 (!≈ (Functor.prescut H (NatTrans.mor ng) (Functor.ar G' D))) (NatTrans.mor nh) ∘≈ cut-assoc (Functor.ar H (NatTrans.mor ng)) (Functor.ar H (Functor.ar G' D)) (NatTrans.mor nh)) ∘≈ cut≈2 (Functor.ar H (NatTrans.mor ng)) (NatTrans.square nh (Functor.ar G' D)) ∘≈ !≈ (cut-assoc (Functor.ar H (NatTrans.mor ng)) (NatTrans.mor nh) (Functor.ar (H' ∘Func G') D)))
+
   -- it's a theorem that a natural isomorphism is the same as an isomorphism of natural transformations
   record NatIso {p q : Mode} (G1 G2 : Functor p q) : Set where
     constructor natiso
@@ -61,17 +72,63 @@ module adjointlogic2.General where
       square : {A B : Tp p} (D : A [ 1m ]⊢ B)
              → cut (Iso.f (mor {A})) (Functor.ar G2 D) ≈ cut (Functor.ar G1 D) (Iso.f (mor {B}))
 
-  !natiso : {p q : Mode} {G1 G2 : Functor p q} → NatIso G1 G2 → NatIso G2 G1
-  !natiso {G1 = G1} {G2 = G2} i = 
-    natiso (!i (NatIso.mor i)) (λ D → cut≈1 ((cut-ident-left (Functor.ar G2 D) ∘≈ cut≈1 (Iso.β (NatIso.mor i)) (Functor.ar G2 D)) ∘≈ cut-assoc (Iso.g (NatIso.mor i)) (Iso.f (NatIso.mor i)) (Functor.ar G2 D)) (Iso.g (NatIso.mor i)) ∘≈ !≈ (cut≈1 (cut≈2 (Iso.g (NatIso.mor i)) (NatIso.square i D)) (Iso.g (NatIso.mor i))) ∘≈ !≈ (cut≈2 (Iso.g (NatIso.mor i)) ((cut-ident-right (Functor.ar G1 D) ∘≈ cut≈2 (Functor.ar G1 D) (Iso.α (NatIso.mor i))) ∘≈ !≈ (cut-assoc (Functor.ar G1 D) (Iso.f (NatIso.mor i)) (Iso.g (NatIso.mor i)))) ∘≈ !≈ (cut-assoc (Iso.g (NatIso.mor i)) (cut (Functor.ar G1 D) (Iso.f (NatIso.mor i))) (Iso.g (NatIso.mor i)))))
-
+  
   square' : {p q : Mode} {G1 G2 : Functor p q} {A B : Tp p} 
           → (i : NatIso G1 G2) (D : A [ 1m ]⊢ B)
           → (Functor.ar G1 D) ≈ cut (Iso.f (NatIso.mor i {A})) (cut (Functor.ar G2 D) (Iso.g (NatIso.mor i {B})))
   square' {G1 = G1} {G2 = G2} i D = !≈ (cut-assoc (Iso.f (NatIso.mor i)) (Functor.ar G2 D) (Iso.g (NatIso.mor i))) ∘≈ !≈ (cut≈1 (NatIso.square i D) (Iso.g (NatIso.mor i))) ∘≈ !≈ ((cut-ident-right (Functor.ar G1 D) ∘≈ cut≈2 (Functor.ar G1 D) (Iso.α (NatIso.mor i))) ∘≈ !≈ (cut-assoc (Functor.ar G1 D) (Iso.f (NatIso.mor i)) (Iso.g (NatIso.mor i))))
 
+  flipsquare : {p q : Mode} (G1 G2 : Functor p q) (i : {A : Tp p} → Iso (Functor.ob G1 A) (Functor.ob G2 A) ) →
+               (∀ {A B} (D : A [ 1m ]⊢ B) → cut (Iso.f (i {A})) (Functor.ar G2 D) ≈ cut (Functor.ar G1 D) (Iso.f (i {B}))) 
+             → (∀ {A B} (D : A [ 1m ]⊢ B) → cut (Iso.g i) (Functor.ar G1 D) ≈ cut (Functor.ar G2 D) (Iso.g i))
+  flipsquare G1 G2 i sq1 D = 
+    cut≈1 ((cut-ident-left (Functor.ar G2 D) ∘≈ cut≈1 (Iso.β (i)) (Functor.ar G2 D)) ∘≈ cut-assoc (Iso.g (i)) (Iso.f (i)) (Functor.ar G2 D)) (Iso.g (i)) ∘≈ !≈ (cut≈1 (cut≈2 (Iso.g (i)) (sq1 D)) (Iso.g (i))) ∘≈ !≈ (cut≈2 (Iso.g (i)) ((cut-ident-right (Functor.ar G1 D) ∘≈ cut≈2 (Functor.ar G1 D) (Iso.α (i))) ∘≈ !≈ (cut-assoc (Functor.ar G1 D) (Iso.f (i)) (Iso.g (i)))) ∘≈ !≈ (cut-assoc (Iso.g (i)) (cut (Functor.ar G1 D) (Iso.f (i))) (Iso.g (i))))
+
+  1NatIso : {p q : Mode} (G : Functor p q) → NatIso G G
+  1NatIso G = natiso 1i (NatTrans.square (1NatTrans { G = G }))
+
+  !natiso : {p q : Mode} {G1 G2 : Functor p q} → NatIso G1 G2 → NatIso G2 G1
+  !natiso {G1 = G1} {G2 = G2} i = natiso (!i (NatIso.mor i)) (flipsquare G1 G2 (NatIso.mor i) (NatIso.square i))
+
   NatIso-forward : ∀ {p q : Mode} {G1 G2 : Functor p q} → NatIso G1 G2 → NatTrans G1 G2
   NatIso-forward i = nat (Iso.f (NatIso.mor i)) (NatIso.square i)
+
+  _·NatIso_ : ∀ {p q : Mode} {G1 G2 G3 : Functor p q} → NatIso G1 G2 → NatIso G2 G3 → NatIso G1 G3
+  _·NatIso_ {G1 = G1}{G2}{G3} n1 n2 = natiso (NatIso.mor n1 ·i NatIso.mor n2) (NatTrans.square (NatIso-forward n1 ·NatTrans NatIso-forward n2))
+
+  _∘Func-cong-iso_ : ∀ {p q r} {G G' : Functor p q} {H H' :  Functor q r}
+                → NatIso H H'
+                → NatIso G G'
+                → NatIso (H ∘Func G) (H' ∘Func G')
+  _∘Func-cong-iso_ {G = G} {G'} {H} {H'} nh ng = natiso (Functor.ar-iso H (NatIso.mor ng) ·i (NatIso.mor nh)) (NatTrans.square (NatIso-forward nh ∘Func-cong NatIso-forward ng))
+
+  ∘Func-unit-r-natiso : ∀ {p q} {G : Functor p q} → NatIso G (G ∘Func 1Func)
+  ∘Func-unit-r-natiso = (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _))
+
+  ∘Func-unit-l-natiso : ∀ {p q} {G : Functor p q} → NatIso (1Func ∘Func G) G
+  ∘Func-unit-l-natiso = (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _))
+
+  ∘Func-assoc-natiso : ∀ {p q r s : Mode} (G1 : Functor p q) (G2 : Functor q r) (G3 : Functor r s) 
+                     → NatIso ((G3 ∘Func G2) ∘Func G1) (G3 ∘Func (G2 ∘Func G1))
+  ∘Func-assoc-natiso G1 G2 G3 = (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _))
+
+  record FullAndFaithfull {p q : Mode} (G : Functor p q) : Set where
+    constructor ff 
+    field
+      back : ∀ {A B} → Functor.ob G A [ 1m ]⊢ Functor.ob G B → A [ 1m ]⊢ B
+      composite1 : ∀ {A B} → (D : A [ 1m ]⊢ B) → back (Functor.ar G D) ≈ D
+      composite2 : ∀ {A B} → (D : Functor.ob G A [ 1m ]⊢ Functor.ob G B) → (Functor.ar G (back D)) ≈ D
+
+  retraction-ff : {p q : Mode} {G : Functor p q}
+                → (H : Functor q p) (i : NatIso (H ∘Func G) 1Func)
+                → (∀ {A B} (D : Functor.ob G A [ 1m ]⊢ Functor.ob G B) →
+                     cut (Functor.ar G (Functor.ar H D)) (Functor.ar G (Iso.f (NatIso.mor i)))
+                     ≈ cut (Functor.ar G (Iso.f (NatIso.mor i))) D)
+                → FullAndFaithfull G
+  retraction-ff {G = G} H i s = ff (λ D → cut (Iso.g (NatIso.mor i)) (cut (Functor.ar H D) (Iso.f (NatIso.mor i)))) 
+                                   (λ D → ((cut-ident-left D ∘≈ cut≈1 (Iso.β (NatIso.mor i)) D) ∘≈ cut-assoc (Iso.g (NatIso.mor i)) (Iso.f (NatIso.mor i)) (Functor.ar 1Func D)) ∘≈ !≈ (cut≈2 (Iso.g (NatIso.mor i)) (NatIso.square i D))) 
+                                   (λ D → ((((cut-ident-left D ∘≈ cut≈1 (Functor.presid G ∘≈ Functor.ar≈ G (Iso.β (NatIso.mor i)) ∘≈ !≈ (Functor.prescut G (Iso.g (NatIso.mor i)) (Iso.f (NatIso.mor i)))) D) ∘≈ cut-assoc (Functor.ar G (Iso.g (NatIso.mor i))) (Functor.ar G (Iso.f (NatIso.mor i))) D) ∘≈ cut≈2 (Functor.ar G (Iso.g (NatIso.mor i))) (s D)) ∘≈ cut≈2 (Functor.ar G (Iso.g (NatIso.mor i))) (Functor.prescut G (Functor.ar H D) (Iso.f (NatIso.mor i)))) ∘≈ Functor.prescut G (Iso.g (NatIso.mor i)) (cut (Functor.ar H D) (Iso.f (NatIso.mor i))))
+
 
   -- natural bijection on hom sets
   record Adjunction (p q : Mode) : Set where
@@ -139,12 +196,6 @@ module adjointlogic2.General where
            (AdjMor.RR mor2 ·NatTrans AdjMor.RR mor1) 
            (λ {A} {B} {D} → ((!≈ (cut-assoc (Adjunction.LtoR a3 D) (NatTrans.mor (AdjMor.RR mor2)) (NatTrans.mor (AdjMor.RR mor1))) ∘≈ cut≈1 (AdjMor.conjugate mor2) (NatTrans.mor (AdjMor.RR mor1))) ∘≈ AdjMor.conjugate mor1) ∘≈ Adjunction.LtoR≈ a1 (!≈ (cut-assoc (NatTrans.mor (AdjMor.LL mor1)) (NatTrans.mor (AdjMor.LL mor2)) D)))
 
-  _∘Func-cong_ : ∀ {p q r} {G G' : Functor p q} {H H' :  Functor q r}
-                → NatTrans H H'
-                → NatTrans G G'
-                → NatTrans (H ∘Func G) (H' ∘Func G')
-  _∘Func-cong_ {G = G} {G'} {H} {H'} nh ng = nat (cut (Functor.ar H (NatTrans.mor ng)) (NatTrans.mor nh)) (λ D → !≈ (cut-assoc (Functor.ar H (Functor.ar G D)) (Functor.ar H (NatTrans.mor ng)) (NatTrans.mor nh)) ∘≈ cut≈1 (Functor.prescut H (Functor.ar G D) (NatTrans.mor ng) ∘≈ Functor.ar≈ H (NatTrans.square ng D)) (NatTrans.mor nh) ∘≈ (cut≈1 (!≈ (Functor.prescut H (NatTrans.mor ng) (Functor.ar G' D))) (NatTrans.mor nh) ∘≈ cut-assoc (Functor.ar H (NatTrans.mor ng)) (Functor.ar H (Functor.ar G' D)) (NatTrans.mor nh)) ∘≈ cut≈2 (Functor.ar H (NatTrans.mor ng)) (NatTrans.square nh (Functor.ar G' D)) ∘≈ !≈ (cut-assoc (Functor.ar H (NatTrans.mor ng)) (NatTrans.mor nh) (Functor.ar (H' ∘Func G') D)))
-
   _·Adj-cong_ : ∀ {p q r} {a1 a1' : Adjunction p q} {a2 a2' :  Adjunction q r}
                 → AdjMor a1 a1'
                 → AdjMor a2 a2'
@@ -191,6 +242,7 @@ module adjointlogic2.General where
   ·Adj-assoc : ∀ {p q r s : Mode} (a1 : Adjunction p q) (a2 : Adjunction q r) (a3 : Adjunction r s) 
              → AdjIso ((a1 ·Adj a2) ·Adj a3) (a1 ·Adj (a2 ·Adj a3))
   ·Adj-assoc a1 a2 a3 = adjiso (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (natiso (iso hyp hyp (cut-ident-left _) (cut-ident-left _)) (λ D → !≈ (cut-ident-right _) ∘≈ cut-ident-left _)) (!≈ (cut-ident-right _) ∘≈ Adjunction.LtoR≈ (a1 ·Adj (a2 ·Adj a3)) (cut-ident-left _))
+
 
   -- ----------------------------------------------------------------------
   -- F α and F β are different for two parallel but different α and β
@@ -245,13 +297,7 @@ module adjointlogic2.General where
         (Case≈ ((((cut-ident-left _ ∘≈  cut≈1 α (Inl hyp)) ∘≈ cut-assoc f g (Inl hyp)) ∘≈ (cut≈2 f (cut-ident-left _))) ∘≈ !≈ (cut-assoc f (Inl hyp) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp))))) ((((cut-ident-left _ ∘≈ cut≈1 α₁ (Inr hyp)) ∘≈ cut-assoc f₁ g₁ (Inr hyp)) ∘≈ cut≈2 f₁ (cut-ident-left _)) ∘≈ !≈ (cut-assoc f₁ (Inr hyp) (Case (cut g (Inl hyp)) (cut g₁ (Inr hyp))))))
         (Case≈ ((((cut-ident-left _ ∘≈ cut≈1 β (Inl hyp)) ∘≈ cut-assoc g f (Inl hyp)) ∘≈ cut≈2 g (cut-ident-left _)) ∘≈ !≈ (cut-assoc g (Inl hyp) (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp))))) ((((cut-ident-left _ ∘≈ cut≈1 β₁ (Inr hyp)) ∘≈ cut-assoc g₁ f₁ (Inr hyp)) ∘≈ cut≈2 g₁ (cut-ident-left _)) ∘≈ !≈ (cut-assoc g₁ (Inr hyp) (Case (cut f (Inl hyp)) (cut f₁ (Inr hyp))))))
 
-  Ffunc-i : ∀ {p q} {α : p ≥ q} {A B : Tp p} → Iso A B → Iso (F α A) (F α B)
-  Ffunc-i (iso f g α β) = iso (Ffunc f) (Ffunc g) (FL≈ ((FR≈ α ∘≈ eq (cutFR f)) ∘≈ eq (transport⊢1 (cut f (FR 1m 1⇒ g))))) (FL≈ ((FR≈ β ∘≈ eq (cutFR g)) ∘≈ eq (transport⊢1 (cut g (FR 1m 1⇒ f)))))
-
-  Ufunc-i : ∀ {p q} {α : p ≥ q} {A B : Tp q} → Iso A B → Iso (U α A) (U α B)
-  Ufunc-i {α = α1} (iso f g α β) = iso (Ufunc f) (Ufunc g) (UR≈ {α = α1} {β = 1m ∘1 1m} ((UL≈ {e = 1⇒} α ∘≈ cutUL g) ∘≈ eq (transport⊢1 _))) (UR≈ {α = α1} {β = 1m ∘1 1m} ((UL≈ {e = 1⇒} β ∘≈ cutUL f) ∘≈ eq (transport⊢1 _)) )
-
-    -- ----------------------------------------------------------------------
+  -- ----------------------------------------------------------------------
   -- F preserves coproducts
 
   Fpres-coprod1 : ∀ {p q} {α : p ≥ q} {A B} → F α (A ⊕ B) [ 1m ]⊢ (F α A ⊕ F α B)

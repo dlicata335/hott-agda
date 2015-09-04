@@ -51,6 +51,9 @@ module adjointlogic2.TripleAdjunction where
     mergeUFi : ∀ {A} → Iso (U Δm A) (F ∇m A)
     mergeUFi = iso mergeUF mergeFU mergeUF-composite-1 mergeUF-composite-2
 
+    mergeUF-natiso : NatIso (Ufunctor Δm) (Ffunctor ∇m)
+    mergeUF-natiso = natiso mergeUFi (λ D → FR≈ ((!≈ (eq (transport⊢1 (cut (UL 1m 1⇒ D) hyp))) ∘≈ !≈ (cut-ident-right (UL 1m 1⇒ D)) ∘≈ UL≈ (cut-ident-left D)) ∘≈ cutUL D))
+
     {- these should not be provable
     badmergeUF : ∀ {A : Tp s} → U ∇m A [ 1m ]⊢ F Δm A
     badmergeUF = UL Δm {!NO!} (FR 1m 1⇒ hyp)
@@ -67,6 +70,9 @@ module adjointlogic2.TripleAdjunction where
     ♭ = □ Δm
     ♯ = ◯ ∇m
 
+    ♭functor = □functor Δm
+    ♯functor = ◯functor ∇m
+
     {- these should not be provable
     badunit' : {A : Tp c}→ A [ 1m ]⊢ ♭ A
     badunit' = FR ∇m {! NO!} (UR (transport⊢ {!!} hyp))
@@ -78,15 +84,15 @@ module adjointlogic2.TripleAdjunction where
     -- they are adjoint
 
     ♭♯adjunction1 : ∀ {A B} → ♭ A [ 1m ]⊢ B → A [ 1m ]⊢ ♯ B
-    ♭♯adjunction1 {A}{B} start = UFadjunction1 step2 where
+    ♭♯adjunction1 {A}{B} start = FUadjunction1 step2 where
       step1 : U Δm A [ 1m ]⊢ U Δm B
-      step1 = UFadjunction1 start
+      step1 = FUadjunction1 start
   
       step2 : F ∇m A [ 1m ]⊢ F ∇m B
       step2 = cut (cut mergeFU step1) mergeUF
 
     ♭♯adjunction2 : ∀ {A B} → A [ 1m ]⊢ ♯ B → ♭ A [ 1m ]⊢ B 
-    ♭♯adjunction2 {A}{B} start = UFadjunction2 (cut mergeUF (cut (UFadjunction2 start) mergeFU))
+    ♭♯adjunction2 {A}{B} start = FUadjunction2 (cut mergeUF (cut (FUadjunction2 start) mergeFU))
 
     -- these should be an equivalence 
     -- however, there's an easier proof that they're adjoint below
@@ -96,51 +102,56 @@ module adjointlogic2.TripleAdjunction where
 
     ♯' : Tp c -> Tp c
     ♯' A = U (∇m ∘1 Δm) A
+
+    ♯'functor : Functor c c
+    ♯'functor = (Ufunctor (∇m ∘1 Δm))
   
-    ♯'eqv : ∀ {A} → Iso (♯ A) (♯' A)
-    ♯'eqv = Ufunc-i (!i mergeUFi) ·i Ufunc∘
+    ♯'natiso : NatIso ♯functor ♯'functor
+    ♯'natiso = (1NatIso (Ufunctor _) ∘Func-cong-iso !natiso mergeUF-natiso) ·NatIso !natiso U∘-natiso 
   
     ♭' : Tp c -> Tp c
     ♭' A = F (∇m ∘1 Δm) A
+
+    ♭'functor : Functor c c
+    ♭'functor = (Ffunctor (∇m ∘1 Δm))
   
-    ♭'eqv : ∀ {A} → Iso (♭ A) (♭' A)
-    ♭'eqv = (Ffunc-i mergeUFi) ·i Ffunc∘
+    ♭'natiso : NatIso ♭functor ♭'functor
+    ♭'natiso = (1NatIso (Ffunctor _) ∘Func-cong-iso mergeUF-natiso) ·NatIso !natiso F∘-natiso 
+
+    -- adjunctions respect NatIso's... 
 
     ♭♯adjunction1' : ∀ {A B} → ♭ A [ 1m ]⊢ B → A [ 1m ]⊢ ♯ B
-    ♭♯adjunction1' D = cut (UFadjunction1 (cut (Iso.g ♭'eqv) D)) (Iso.g ♯'eqv)
+    ♭♯adjunction1' D = cut (FUadjunction1 (cut (Iso.g (NatIso.mor ♭'natiso)) D)) (Iso.g (NatIso.mor ♯'natiso))
 
     ♭♯adjunction2' : ∀ {A B} → A [ 1m ]⊢ ♯ B → ♭ A [ 1m ]⊢ B
-    ♭♯adjunction2' D = cut (Iso.f ♭'eqv) (UFadjunction2 (cut D (Iso.f ♯'eqv)))
-
-    -- FIXME: follows from properties 
-    -- ♭♯adjunction-composite-1 : ∀ {A B} (D : ♭ A [ 1m ]⊢ B) → ♭♯adjunction2 (♭♯adjunction1 D) == D
-    -- ♭♯adjunction-composite-1 = {!!}
+    ♭♯adjunction2' D = cut (Iso.f (NatIso.mor ♭'natiso)) (FUadjunction2 (cut D (Iso.f (NatIso.mor ♯'natiso))))
 
     -- ----------------------------------------------------------------------
     -- ♭ preserves coproducts
 
     ♭pres-coprod : ∀ {A B} → Iso (♭ (A ⊕ B)) (♭ A ⊕ ♭ B)
-    ♭pres-coprod = (♭'eqv) ·i (Fpres-coprod ·i ⊕i (!i ♭'eqv) (!i ♭'eqv))
+    ♭pres-coprod = (NatIso.mor ♭'natiso) ·i (Fpres-coprod ·i ⊕func-i (NatIso.mor (!natiso ♭'natiso)) (NatIso.mor (!natiso ♭'natiso)))
+
+    -- this is natural in A and B for general reasons, but to say that we'd need to define product categories
 
     -- ----------------------------------------------------------------------
     -- ♭ absorbing ♯ and vice versa: 
     -- for this theory, ♭ A is a retract of ♭ (♯ A) and ♯ A is a retract of ♯ (♭ A)
     
-    ♭absorbs♯1 : ∀ {A} → ♭ A [ 1m ]⊢ ♭ (♯ A) 
-    ♭absorbs♯1 = □func ◯unit
+    ♭absorbs♯1-nattrans : NatTrans ♭functor (♭functor ∘Func ♯functor)
+    ♭absorbs♯1-nattrans = NatIso-forward (∘Func-unit-r-natiso {_} {_} {♭functor}) ·NatTrans (1NatTrans {_} {_} {♭functor} ∘Func-cong ◯unit-nattrans) 
 
     ♭absorbs♯2 : ∀ {A} → ♭ (♯ A) [ 1m ]⊢ ♭ A
     ♭absorbs♯2 = FL {α = Δm} {β = 1m} (FR 1m 1⇒ (UL ∇m Δ∇counit (UL 1m 1⇒ mergeFU))) 
 
-    ♭absorbs♯-composite-1 : cut (♭absorbs♯1 {P}) (♭absorbs♯2 {P}) ≈ hyp
-    ♭absorbs♯-composite-1 = FL≈ (FR≈ {γ = 1m} {e = 1⇒} (UR≈ {α = Δm} {β = 1m} (UL2 {D = cut (UR (hypp ∇Δunit)) (UL 1m 1⇒ hyp)} {D' = ident P} ∇Δunit adjeq1 id) ∘≈ Uη (UL ∇m Δ∇counit (UR (hypp ∇Δunit)))))
+    ♭absorbs♯-composite-1 : ∀ {A} → cut (NatTrans.mor ♭absorbs♯1-nattrans {A}) (♭absorbs♯2 {A}) ≈ hyp
+    ♭absorbs♯-composite-1 {A} =  FL≈ {α = Δm} {β = 1m} (FR≈ {α = Δm} {β = 1m ∘1 Δm} {γ = 1m} {e = 1⇒} (UR≈ {α = Δm} {β = 1m} (UL2 {α = Δm} {β = 1m ∘1 Δm} {γ = ∇m ∘1 Δm} {γ' = 1m} {e = (1⇒ ∘1cong 1⇒) ·2 (Δ∇counit ∘1cong 1⇒)} {e' = 1⇒} {D = cut hyp (transport⊢ ∇Δunit hyp)} {D' = hyp} ∇Δunit adjeq1 (cut-ident-left (transport⊢ ∇Δunit hyp))) ∘≈ transport⊢≈ {α = 1m ∘1 (Δm ∘1 ∇m)} {α' = 1m{s} ∘1 1m} {D1 = transport⊢ 1⇒ (cut (transport⊢ 1⇒ (cut (UL 1m 1⇒ hyp) (transport⊢ 1⇒ (transport⊢ 1⇒ (cut hyp (FR 1m 1⇒ hyp)))))) mergeFU)} {D2 = UR {α = Δm} {β = 1m ∘1 (Δm ∘1 ∇m)} (UL (1m ∘1 (∇m ∘1 Δm)) (1⇒ ∘1cong 1⇒) (cut hyp (transport⊢ ∇Δunit hyp)))} (1⇒{_}{_}{1m {s}} ∘1cong Δ∇counit) ((((UR≈ {α = Δm} {β = Δm ∘1 ∇m} (cutUL {α = ∇m ∘1 Δm} {β = Δm} {γ = 1m} {e = 1⇒} (transport⊢ ∇Δunit hyp)) ∘≈ cut≈1 (cut-ident-right (UL 1m 1⇒ hyp)) (UR (transport⊢ ∇Δunit hyp))) ∘≈ eq (transport⊢1 _)) ∘≈ cut≈1 (cut≈2 (UL 1m 1⇒ hyp) (cut-ident-left (FR 1m 1⇒ hyp) ∘≈ eq (transport⊢1 _ ∘ transport⊢1 _))) mergeFU) ∘≈ cut≈1 (eq (transport⊢1 (cut (UL 1m 1⇒ hyp) (transport⊢ 1⇒ (transport⊢ 1⇒ (cut hyp (FR 1m 1⇒ hyp))))))) mergeFU ∘≈ eq (transport⊢1 (cut (transport⊢ 1⇒ (cut (UL 1m 1⇒ hyp) (transport⊢ 1⇒ (transport⊢ 1⇒ (cut hyp (FR 1m 1⇒ hyp)))))) mergeFU)))))
 
     ♯absorbs♭1 : ∀ {A} → ♯ A [ 1m ]⊢ ♯ (♭ A) 
     ♯absorbs♭1 = UR {α = ∇m} {β = 1m} (UL 1m 1⇒ (FR Δm Δ∇counit (FR 1m 1⇒ mergeFU))) 
 
-    ♯absorbs♭2 : ∀ {A} → ♯ (♭ A) [ 1m ]⊢ ♯ A
-    ♯absorbs♭2 = ◯func □counit
+    ♯absorbs♭2-nattrans : NatTrans (♯functor ∘Func ♭functor) ♯functor
+    ♯absorbs♭2-nattrans = (1NatTrans {_} {_} {♯functor} ∘Func-cong □counit-nattrans) ·NatTrans NatIso-forward (!natiso (∘Func-unit-r-natiso {_} {_} {♯functor}))
 
-    ♯absorbs♭-composite-1 : cut (♯absorbs♭1 {P}) (♯absorbs♭2 {P}) ≈ hyp
-    ♯absorbs♭-composite-1 = (UR≈ {α = ∇m} {β = 1m} (UL≈ {γ = 1m} {e = 1⇒} (FL≈ { α = ∇m} {β = 1m} (FR2 {D = cut (FR 1m 1⇒ hyp) (FL (hypp ∇Δunit))} {D' = ident P} ∇Δunit adjeq2 id) ∘≈ Fη (FR Δm Δ∇counit (FL (hypp ∇Δunit))))))
-
+    ♯absorbs♭-composite-1 : ∀ {A} → cut (♯absorbs♭1 {A}) (NatTrans.mor ♯absorbs♭2-nattrans {A}) ≈ hyp
+    ♯absorbs♭-composite-1 = UR≈ {α = ∇m} {β = 1m} (UL≈ {γ = 1m} {e = 1⇒} ((FL≈ {α = ∇m} {β = 1m} (FR2 {α = ∇m} {β = ∇m ∘1 1m} {γ = ∇m ∘1 ((1m ∘1 Δm) ∘1 (1m ∘1 1m))} {γ' = 1m} {e = _} {e' = 1⇒} {D = _} {D' = hyp} ∇Δunit adjeq2 (((cut-ident-right _ ∘≈ eq (transport⊢1 _ ∘ transport⊢1 _)) ∘≈ cut-ident-left _) ∘≈ eq (transport⊢1 _))) ∘≈ Fη _) ∘≈ transport⊢≈ Δ∇counit (FR≈ {α = ∇m} {β = (1m ∘1 Δm) ∘1 ((1m ∘1 1m) ∘1 (1m ∘1 ∇m))} (cut≈2 (FR 1m 1⇒ mergeFU) (cut-ident-right (FL {α = Δm} {β = 1m} (UL {α = Δm} {β = Δm} 1m 1⇒ hyp)))) ∘≈ cut≈2 (FR 1m 1⇒ mergeFU) (cut≈1 (cut-ident-right (FL {α = Δm} {β = 1m} (UL {α = Δm} {β = Δm} 1m 1⇒ hyp))) (FR 1m 1⇒ hyp) ∘≈ eq (transport⊢1 (cut (cut (FL {α = Δm} {β = 1m} (UL {α = Δm} {β = Δm} 1m 1⇒ hyp)) hyp) (FR 1m 1⇒ hyp))))))) 
