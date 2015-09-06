@@ -9,6 +9,9 @@ module adjointlogic2.Lib where
   data _==_ {A : Set} (M : A) : A → Set where
     id : M == M
 
+  transport : ∀ {A : Set} (C : A →  Set) {M N : A} (P : M == N) → C M → C N
+  transport C id x = x
+
   ap :  {A B : Set} {M N : A}
        (f : A → B) → M == N → (f M) == (f N)
   ap f id = id
@@ -32,3 +35,9 @@ module adjointlogic2.Lib where
   infixr 2 _=〈_〉_ 
 
   infixr 10 _∘_ 
+
+  data Either (A : Set) (B : Set) : Set where
+    Inl : A → Either A B
+    Inr : B → Either A B
+
+

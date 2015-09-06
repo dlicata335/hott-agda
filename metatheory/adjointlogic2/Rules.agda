@@ -217,7 +217,11 @@ module adjointlogic2.Rules where
        → {D1 D2 : C [ γ ]⊢ A} → e1 == e2 → D1 ≈ D2 → FR γ e1 D1 ≈ FR γ e2 D2
   FR≈' id q = FR≈ q
 
+
+
   -- HACK: for some reason the rewrites only work if we define this in this file
+  -- Be sure to only use one of these at once!
+
   module Reflection where
     postulate
       c : Mode
@@ -235,4 +239,41 @@ module adjointlogic2.Rules where
     -- otherwise right-associating makes things get stuck sometimes;
     -- no idea if this makes sense or not as a rewriting theory
     {-# REWRITE Δ∇identity-prefix #-}
+
+  module IdempotentMonad where
+    postulate
+      c : Mode
+      r : c ≥ c
+      ridentity : _==_ {c ≥ c} (r ∘1 r) r
+      runit   : 1m ⇒ r
   
+    {-# REWRITE ridentity #-}
+  
+    ridentity-prefix : {α : c ≥ c} → (r ∘1 (r ∘1 α)) == (r ∘1 α)
+    ridentity-prefix {α = α} = ! (∘1-assoc {α = r} {r} {α}) 
+  
+    {-# REWRITE ridentity-prefix #-}
+
+    -- It's necessary to make Mode a postulated type (rather than a parameter to this module) 
+    -- in order to use the rewrite stuff to get associativity, etc. definitionally.
+    -- Because of that, we can't instantiate Mode with a datatype for specific theories,
+    -- which is what we really want here, so that we can analyze all possible 0,1,2-cells.
+    -- I'm working around that by adding the relevant elimination principles as postulates.
+  
+    postulate
+      -- the only 0-cell is c
+      0-cell-case : {m : Mode} → m == c
+      0-cell-case-c : _==_ {_==_ {Mode} c c } (0-cell-case {c}) (id {_}{c})
+      
+      -- the only 1-cells are 1 and r
+      1-cell-case   : ∀ (α : c ≥ c) → Either (α == 1m) (α == r)
+      1-cell-case-1 : _==_ {Either (_==_ {c ≥ c} (1m{c}) (1m{c})) (_==_ { c ≥ c } (1m{c}) r)} (1-cell-case 1m) (Inl id)
+      1-cell-case-r : _==_ {Either (_==_ {c ≥ c} r (1m{c})) (_==_ { c ≥ c } r r)} (1-cell-case r) (Inr id)
+      
+      1≠r : {C : Set} → 1m == r → C
+    
+      r⇒/1 : ∀ {C : Set} → r ⇒ 1m → C
+
+    {-# REWRITE 0-cell-case-c #-}
+    {-# REWRITE 1-cell-case-1 #-}
+    {-# REWRITE 1-cell-case-r #-}

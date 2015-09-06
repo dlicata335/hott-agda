@@ -130,6 +130,9 @@ module adjointlogic2.Reflection where
   ♯'R : { A B : Tp c} → A [ ∇m ∘1 Δm ]⊢ B → A [ 1m ]⊢ ♯' B 
   ♯'R D = UR {α = ∇m ∘1 Δm} {β = 1m} D
 
+  ♯'R2 : { A B : Tp c} → A [ ∇m ∘1 Δm ]⊢ B → A [ ∇m ∘1 Δm ]⊢ ♯' B 
+  ♯'R2 D = UR {α = ∇m ∘1 Δm} {β = ∇m ∘1 Δm } D
+
   ♯'L : { A B : Tp c} → A [ ∇m ∘1 Δm ]⊢ B → ♯' A [ (∇m ∘1 Δm) ]⊢ B
   ♯'L {A}{B} D = UL (∇m ∘1 Δm) 1⇒ D 
 
