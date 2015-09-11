@@ -10,7 +10,7 @@ module adjointlogic2.Idempotent-Subcalculus3 where
   open IdempotentMonad
 
   -- ----------------------------------------------------------------------
-  -- restricted rules
+  -- restricted sequent calculus
 
   data _[_]⊢'_ : Tp c → (c ≥ c) → Tp c → Set where
     copy' : ∀ {A} → A [ r ]⊢' A
@@ -99,6 +99,7 @@ module adjointlogic2.Idempotent-Subcalculus3 where
   cut' (♯L' D) copy' = ♯L' D
   cut' (♭L' D D₁) copy' = ♭L' D (cut' D₁ copy')
   cut' (♭R' D) copy' = ♭R' D
+  -- copy right
   cut' (Inl' D) copy' = Inl' (cut' D copy')
   cut' (Inr' D) copy' = Inr' (cut' D copy')
   cut' (Case' D₁ D₂ D₃) copy' = Case' D₁ D₂ (cut' D₃ copy')
@@ -173,178 +174,129 @@ module adjointlogic2.Idempotent-Subcalculus3 where
   wlog (Case D D₁) | Inl id = Case' (wlog D) (wlog D₁) ident'
   wlog (Case D D₁) | Inr id = Case'r (wlog D) (wlog D₁) copy'
 
-{-
-  wlog-forget : ∀ {A B α} → (D : A [ α ]⊢' B) → wlog (forget D) == D
-  wlog-forget {α = α} hypp' with 1-cell-case α
-  wlog-forget hypp' | Inl id = id
-  wlog-forget hypp' | Inr id = id
-  wlog-forget {α = α} hypq' with 1-cell-case α
-  wlog-forget hypq' | Inl id = id
-  wlog-forget hypq' | Inr id = id
-  wlog-forget (Inl' D) = ap Inl' (wlog-forget D)
-  wlog-forget (Inr' D) = ap Inr' (wlog-forget D)
-  wlog-forget (Case' D D₁) = ap2 Case' (wlog-forget D) (wlog-forget D₁)
-  -- CASE
-  wlog-forget {α = α} (♯R' D) with 1-cell-case α
-  wlog-forget (♯R' D) | Inl id with 0-cell-case {c} -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  wlog-forget (♯R' D) | Inl id | id with 1-cell-case r 
-  ... | Inl x = 1≠r (! x)
-  wlog-forget (♯R' D) | Inl id | id | Inr id with 1-cell-case r 
-  ... | Inl p = 1≠r (! p)
-  ... | Inr id = ap ♯R' (wlog-forget D)
-  wlog-forget (♯R' D) | Inr id with 0-cell-case {c} 
-  ... | id with 1-cell-case r
-  ...         | Inl p = 1≠r (! p)
-  wlog-forget (♯R' D) | Inr id | id | Inr id with 1-cell-case r 
-  ... | Inl p = 1≠r (! p)
-  wlog-forget (♯R' D) | Inr id | id | Inr id | Inr id = ap ♯R' (wlog-forget D)
-  -- CASE
-  wlog-forget (♯L' D) with 0-cell-case {c} -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ... | id with 1-cell-case r 
-  ...         | Inr id = ap ♯L' (wlog-forget D)
-  ...         | Inl p = 1≠r (! p)
-  wlog-forget {α = α} (♭L' D) with 1-cell-case α
-  -- CASE
-  wlog-forget (♭L' D) | Inl id with 0-cell-case {c} -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ... | id with 1-cell-case r 
-  ...         | Inl p = 1≠r (! p)
-  ...         | Inr id with 1-cell-case r 
-  ...                     | Inl p = 1≠r (! p)
-  ...                     | Inr id = ap ♭L' (wlog-forget D)
-  wlog-forget (♭L' D) | Inr id with 0-cell-case {c} -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case 
-  ... | id with 1-cell-case r 
-  ...         | Inl p = 1≠r (! p)
-  wlog-forget (♭L' D) | Inr id | id | Inr id with 1-cell-case r 
-  ...      | Inl p = 1≠r (! p) 
-  ...      | Inr id = ap ♭L' (wlog-forget D)
-  -- CASE
-  wlog-forget (♭R' D) with 0-cell-case {c} -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ...      | id with 1-cell-case r 
-  ...              | Inl p = 1≠r (! p)
-  ...              | Inr id = ap ♭R' (wlog-forget D)
-  -- CASE
-  wlog-forget {α = α} (U1R' D) with 1-cell-case α
-  wlog-forget (U1R' D) | Inl id with 1-cell-case 1m -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ... | Inl id = ap U1R' (wlog-forget D)
-  ... | Inr p = 1≠r p
-  wlog-forget (U1R' D) | Inr id with 1-cell-case 1m -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ... | Inl id = ap U1R' (wlog-forget D)
-  ... | Inr p = 1≠r p
-  -- CASE
-  wlog-forget {α = α} (U1L' D) with 0-cell-case {c} -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ... | id with 1-cell-case α | 1-cell-case 1m
-  wlog-forget (U1L' D) | id | Inl id | Inl id = ap U1L' (wlog-forget D) -- K alert
-  wlog-forget (U1L' D) | id | Inl x | Inr x₁ = 1≠r x₁
-  wlog-forget (U1L' D) | id | Inr id | Inl id = ap U1L' (wlog-forget D) -- K alert
-  wlog-forget (U1L' D) | id | Inr id | Inr x₁ = 1≠r x₁
-  -- CASE
-  wlog-forget (F1L' D) with 0-cell-case{c}  -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ... | id with 1-cell-case 1m
-  ...         | Inl id = ap F1L' (wlog-forget D)
-  ...         | Inr p = 1≠r p
-  -- CASE
-  wlog-forget {α = α} (F1R' D) with 0-cell-case{c} -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ... | id with 1-cell-case α | 1-cell-case 1m 
-  wlog-forget (F1R' D) | id | Inl id | Inl id = ap F1R' (wlog-forget D) -- K alert
-  wlog-forget (F1R' D) | id | Inl id | Inr x₁ = 1≠r x₁
-  wlog-forget (F1R' D) | id | Inr id | Inl id = ap F1R' (wlog-forget D) -- K alert
-  wlog-forget (F1R' D) | id | Inr id | Inr x₁ = 1≠r x₁
+  -- ----------------------------------------------------------------------
+  -- canonical/atomic natural deduction
 
-  forget-trunit' : ∀ {A B α} (p : α == 1m) (D : A [ α ]⊢' B) → forget (trunit' p D) ≈ transport⊢ runit (transport (λ x → _ [ x ]⊢ _) p (forget D))
-  forget-trunit' p hypp' with p 
-  forget-trunit' p hypp' | id with 1-cell-case 1m -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ... | Inl id = id
-  ... | Inr q = 1≠r q
-  forget-trunit' p hypq' with p 
-  forget-trunit' p hypq' | id with 1-cell-case 1m -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ... | Inl id = id
-  ... | Inr q = 1≠r q
-  forget-trunit' p (♯R' D) with p 
-  ... | id with 1-cell-case 1m -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ...         | Inl id = UR≈ {α = r} {β = r} (!≈ (eq (ap (λ x → transport⊢ x (forget D)) adjeq1)) ∘≈ !≈ (eq (transport⊢1 (forget D))))
-  ...         | Inr q = 1≠r q
-  forget-trunit' p (♯L' D) = 1≠r (! p)
-  forget-trunit' p (♭L' D) with p 
-  ... | id with 1-cell-case 1m -- these withs shouldn't be necessary, but it looks like Agda isn't applying the REWRITEs for 0-cell-case/1-cell-case
-  ...         | Inl id = FL≈ {α = r} {β = r} (!≈ (eq (ap (λ x → transport⊢ x (forget D)) adjeq2)) ∘≈ !≈ (eq (transport⊢1 (forget D))))
-  ...         | Inr q = 1≠r q
-  forget-trunit' p (♭R' D) = 1≠r (! p)
-  forget-trunit' p (Inl' D) with p 
-  ... | id = Inl≈ (forget-trunit' id D)
-  forget-trunit' p (Inr' D) with p 
-  ... | id = Inr≈ (forget-trunit' id D)
-  forget-trunit' p (Case' D D₁) with p 
-  ... | id = Case≈ (forget-trunit' id D) (forget-trunit' id D₁)
-  forget-trunit' p (U1R' D) with p 
-  ... | id = UR≈ {α = 1m} {β = r} (forget-trunit' id D)
-  -- not syntactically identical
-  forget-trunit' p (U1L' D) with p 
-  ... | id = UL2 {α = 1m} {β = r} {γ = r} {γ' = 1m} {e = 1⇒} {e' = 1⇒ ·2 runit} {D = forget (trunit' id D)} {D' = forget D} 
-                 runit id (forget-trunit' id D)
-  forget-trunit' p (F1L' D) with p 
-  ... | id = FL≈ {α = 1m} {β = r} (forget-trunit' id D)
-  -- not syntactically identical
-  forget-trunit' p (F1R' D) with p 
-  ... | id = FR2 {α = 1m} {β = r} {γ = r} {γ' = 1m} {e = 1⇒} {e' = 1⇒ ·2 runit} {D = forget (trunit' id D)} {D' = forget D} 
-                 runit id (forget-trunit' id D)
+  mutual
+    data _[_]⇓_ : Tp c → (c ≥ c) → Tp c → Set where
+      cv : ∀ {A} → A [ r ]⇓ A
+      v  : ∀ {A} → A [ 1m ]⇓ A
+      ♯E : ∀ { A C} → C [ r ]⇓ ♯ A → C [ r ]⇓ A
+      ♭rec : ∀ {A B C α} → C [ α ]⇓ ♭ A → A [ r ]⇑ B → C [ α ]⇓ B -- substituting crisp var for var breaks if we don't have the α here
+      Case : ∀ {C D A B α} → C [ α ]⇓ (A ⊕ B) → A [ 1m ]⇑ D → B [ 1m ]⇑ D → C [ α ]⇓ D -- substituting crisp var for var breaks if we don't have the α here
 
-  forget-wlog : ∀ {A B α} (D : A [ α ]⊢ B) → forget (wlog D) ≈ D
-  forget-wlog {α = α} (hypp x) with 1-cell-case α
-  forget-wlog (hypp x) | Inl id = !≈ (eq (ap hypp (2-cell-case-loop x)))
-  forget-wlog (hypp x) | Inr id = !≈ (eq (ap hypp (2-cell-case1r x)))
-  forget-wlog {α = α} (hypq x) with 1-cell-case α
-  forget-wlog (hypq x) | Inl id = !≈ (eq (ap hypq (2-cell-case-loop x)))
-  forget-wlog (hypq x) | Inr id = !≈ (eq (ap hypq (2-cell-case1r x)))
-  forget-wlog (Inl D) = Inl≈ (forget-wlog D)
-  forget-wlog (Inr D) = Inr≈ (forget-wlog D)
-  forget-wlog (Case D D₁) = Case≈ (forget-wlog D) (forget-wlog D₁)
-  -- CASE
-  forget-wlog {α = α} (FL {r = m} {α = α1} D) with 0-cell-case {m}
-  forget-wlog {α = α} (FL {α = α1} D) | id with 1-cell-case α1
-  forget-wlog {α = α} (FL D) | id | Inl id = FL≈ {α = 1m} {β = α} (forget-wlog D)
-  forget-wlog {α = α} (FL D) | id | Inr id with 1-cell-case α
-  forget-wlog (FL D) | id | Inr id | Inl id = FL≈ {α = r} {β = 1m} (forget-wlog D)
-  forget-wlog (FL D) | id | Inr id | Inr id = FL≈ {α = r} {β = r} (forget-wlog D)
-  -- CASE
-  forget-wlog {α = α} (FR {q = q} {α = α1} γ e D) with 0-cell-case {q}
-  forget-wlog {α = α} (FR {α = α1} γ e D) | id with 1-cell-case α1 | 1-cell-case γ | 1-cell-case α
-  forget-wlog (FR .1m e D) | id | Inl id | Inl id | Inl id = eq (ap (λ x → FR 1m x D) (! (2-cell-case-loop e))) ∘≈ FR≈ (forget-wlog D)
-  -- interesting case
-  forget-wlog (FR .1m e D) | id | Inl id | Inl id | Inr id = eq (ap (λ x → FR 1m x D) (! (2-cell-case1r e))) ∘≈ 
-              FR2 {α = 1m} {β = r} {γ = r} {e = 1⇒} {e' = runit} {D = forget (trunit' id (wlog D))} {D' = D} 
-                  runit id (transport⊢≈ runit (forget-wlog D) ∘≈ forget-trunit' id (wlog D))
-  forget-wlog (FR .r e D) | id | Inl id | Inr id | Inl id = r⇒/1 e
-  forget-wlog (FR .r e D) | id | Inl id | Inr id | Inr id = eq (ap (λ x → FR {α = 1m} r x D) (! (2-cell-case-loop e))) ∘≈ FR≈ (forget-wlog D)
-  forget-wlog (FR .1m e D) | id | Inr id | Inl id | Inl id = r⇒/1 e
-  -- interesting case
-  forget-wlog (FR .1m e D) | id | Inr id | Inl id | Inr id = eq (ap (λ x → FR {α = r} 1m x D) (! (2-cell-case-loop e))) ∘≈ 
-              FR2 {α = r} {β = 1m ∘1 r} {γ = r} {γ' = 1m} {e = 1⇒} {e' = 1⇒} {D = forget (trunit' id (wlog D))} {D' = D} 
-                  runit adjeq1 
-                  (transport⊢≈ runit (forget-wlog D) ∘≈ forget-trunit' id (wlog D))
-  forget-wlog (FR .r e D) | id | Inr id | Inr id | Inl id = r⇒/1 e
-  forget-wlog (FR .r e D) | id | Inr id | Inr id | Inr id = eq (ap (λ x → FR {α = r} r x D) (! (2-cell-case-loop e))) ∘≈ FR≈ (forget-wlog D)
-  -- CASE
-  forget-wlog {α = α} (UL {q = q} {α = α1} γ e D) with 0-cell-case {q} 
-  forget-wlog {α = α} (UL {α = α1} γ e D) | id with 1-cell-case α | 1-cell-case α1 | 1-cell-case γ 
-  forget-wlog (UL .1m e D) | id | Inl id | Inl id | Inl id = eq (ap (λ x → UL {α = 1m} 1m x D) (! (2-cell-case-loop e))) ∘≈ UL≈ (forget-wlog D)
-  forget-wlog (UL .r e D) | id | Inl id | Inl id | Inr id = r⇒/1 e
-  forget-wlog (UL .1m e D) | id | Inl id | Inr id | Inl id = r⇒/1 e
-  forget-wlog (UL .r e D) | id | Inl id | Inr id | Inr id = r⇒/1 e
-  -- interesting case
-  forget-wlog (UL .1m e D) | id | Inr id | Inl id | Inl id = eq (ap (λ x → UL {α = 1m} 1m x D) (! (2-cell-case1r e))) ∘≈ 
-              UL2 {α = 1m} {β = r} {γ = r} {γ' = 1m} {e = 1⇒} {e' = runit} {D = forget (trunit' id (wlog D))} {D' = D}
-                  runit id (transport⊢≈ runit (forget-wlog D) ∘≈ forget-trunit' id (wlog D))
-  forget-wlog (UL .r e D) | id | Inr id | Inl id | Inr id = eq (ap (λ x → UL {α = 1m} r x D) (! (2-cell-case-loop e))) ∘≈ UL≈ (forget-wlog D)
-  -- interesting case
-  forget-wlog (UL .1m e D) | id | Inr id | Inr id | Inl id = eq (ap (λ x → UL {α = r} 1m x D) (! (2-cell-case-loop e))) ∘≈ 
-           UL2 {α = r} {β = r ∘1 1m} {γ = r} {γ' = 1m} {e = 1⇒} {e' = 1⇒} {D = forget (trunit' id (wlog D))} {D' = D}
-               runit adjeq2 (transport⊢≈ runit (forget-wlog D) ∘≈ forget-trunit' id (wlog D)) 
-  forget-wlog (UL .r e D) | id | Inr id | Inr id | Inr id = eq (ap (λ x → UL {α = r} r x D) (! (2-cell-case-loop e))) ∘≈ UL≈ (forget-wlog D)
-  -- CASE
-  forget-wlog (UR {p = p} {α = α} D) with 0-cell-case {p}
-  forget-wlog (UR {α = α₁} D) | id with 1-cell-case α₁ 
-  forget-wlog (UR D) | id | Inl id = UR≈ {α = 1m} (forget-wlog D)
-  forget-wlog {α = α} (UR D) | id | Inr id with 1-cell-case α
-  forget-wlog (UR D) | id | Inr id | Inl id = UR≈ {α = r} {β = 1m} (forget-wlog D)
-  forget-wlog (UR D) | id | Inr id | Inr id = UR≈ {α = r} {β = r} (forget-wlog D)
--}
+    data _[_]⇑_ : Tp c → (c ≥ c) → Tp c → Set where
+      ⇓⇑ : ∀ {A C α} → A [ α ]⇓ C → A [ α ]⇑ C
+      ♯I : ∀ { A B α } → A [ r ]⇑ B → A [ α ]⇑ ♯ B -- not restricted
+      ♭I : ∀ {A B} → A [ r ]⇑ B → A [ r ]⇑ ♭ B
+      Inl : ∀ {α C A B} → C [ α ]⇑ A → C [ α ]⇑ (A ⊕ B)
+      Inr : ∀ {α C A B} → C [ α ]⇑ B → C [ α ]⇑ (A ⊕ B)
+
+  Caser : ∀ {C D A B} → C [ r ]⇓ (A ⊕ B) → A [ r ]⇑ D → B [ r ]⇑ D → C [ r ]⇓ D
+  Caser D D1 D2 = ♯E (Case D (♯I D1) (♯I D2))
+
+  -- substituting a crisp var for a cohesive one
+  substvva : ∀ {α A B} → α == 1m → A [ α ]⇓ B → A [ r ]⇓ B
+  substvva p cv = 1≠r (! p)
+  substvva p v = cv
+  substvva p (♯E D) = 1≠r (! p)
+  substvva p (♭rec D D1) = ♭rec (substvva p D) D1
+  substvva p (Case D D1 D2) = Case (substvva p D) D1 D2
+
+  substvvc : ∀ {α A B} → α == 1m → A [ α ]⇑ B → A [ r ]⇑ B
+  substvvc p (⇓⇑ x) = ⇓⇑ (substvva p x)
+  substvvc p (♯I D) = ♯I D
+  substvvc p (♭I D) = ♭I D
+  substvvc p (Inl D) = Inl (substvvc p D)
+  substvvc p (Inr D) = Inr (substvvc p D)
+
+  -- substituting an atomic term for a variable
+  substaa : ∀ {α : c ≥ c} {β : c ≥ c} {A : Tp c} {B : Tp c} {C : Tp c}
+            → A [ β ]⇓ B
+            → B [ α ]⇓ C
+            → A [ β ∘1 α ]⇓ C
+  substaa {β = β} D cv with 1-cell-case β 
+  substaa D cv | Inl id = substvva id D
+  substaa D cv | Inr id = D
+  substaa D v = D
+  substaa D (♯E E) = transport (λ x → _ [ x ]⇓ _) (! (∘r _)) (♯E (transport (λ x → _ [ x ]⇓ _) (∘r _) (substaa D E)))
+  substaa D (♭rec E E') = ♭rec (substaa D E) E'
+  substaa D (Case E E1 E2) = Case (substaa D E) E1 E2
+
+  substac : ∀ {α : c ≥ c} {β : c ≥ c} {A : Tp c} {B : Tp c} {C : Tp c}
+            → A [ β ]⇓ B
+            → B [ α ]⇑ C
+            → A [ β ∘1 α ]⇑ C
+  substac D (⇓⇑ E) = ⇓⇑ (substaa D E)
+  substac {α = α} D (♯I E) = ♯I (transport (λ x → _ [ x ]⇑ _) (∘r _) (substac D E))
+  substac D (♭I E) = transport (λ x → _ [ x ]⇑ _) (! (∘r _)) (♭I (transport (λ x → _ [ x ]⇑ _) (∘r _) (substac D E)))
+  substac D (Inl E) = Inl (substac D E)
+  substac D (Inr E) = Inr (substac D E)
+
+  ♭R1inv : ∀ {C A α} → α == 1m → C [ α ]⇑ ♭ A → C [ α ]⇓ ♭ A
+  ♭R1inv p (⇓⇑ D) = D
+  ♭R1inv p (♭I D) = 1≠r (! p)
+
+  mutual
+    hsubstca : ∀ {α : c ≥ c} {β : c ≥ c} {A : Tp c} {B : Tp c} {C : Tp c}
+            → A [ β ]⇑ B
+            → B [ α ]⇓ C
+            → A [ β ∘1 α ]⇑ C
+    hsubstca {β = β} D cv with 1-cell-case β 
+    hsubstca D cv | Inl id = substvvc id D
+    hsubstca D cv | Inr id = D
+    hsubstca D v = D
+    hsubstca D (♯E E) with hsubstca D E
+    ... | ⇓⇑ D' = transport (λ x → _ [ x ]⇑ _) (! (∘r _)) (⇓⇑ (♯E (transport (λ x → _ [ x ]⇓ _) (∘r _) D')))
+    ... | ♯I D' = transport (λ x → _ [ x ]⇑ _) (! (∘r _)) D'
+    hsubstca {α = α} {β = β} D (♭rec E E1) with 1-cell-case α | 1-cell-case β | hsubstca D E
+    hsubstca D (♭rec E E1) | Inl id | Inl id | E' = ⇓⇑ (♭rec (♭R1inv id E') E1) 
+    hsubstca D (♭rec E E1) | Inl id | Inr id | ⇓⇑ E' = ⇓⇑ (♭rec E' E1) -- FIXME: could use a lemma to avoid the code duplication
+    hsubstca D (♭rec E E1) | Inl id | Inr id | ♭I E' = hsubstcc E' E1
+    hsubstca D (♭rec E E1) | Inr id | Inl id | ⇓⇑ E' = ⇓⇑ (♭rec E' E1)
+    hsubstca D (♭rec E E1) | Inr id | Inl id | ♭I E' = hsubstcc E' E1
+    hsubstca D (♭rec E E1) | Inr id | Inr id | ⇓⇑ E' = ⇓⇑ (♭rec E' E1)
+    hsubstca D (♭rec E E1) | Inr id | Inr id | ♭I E' = hsubstcc E' E1
+    hsubstca D (Case E E1 E2) with hsubstca D E
+    ... | ⇓⇑ E' = ⇓⇑ (Case E' E1 E2)
+    ... | Inl E' = hsubstcc E' E1
+    ... | Inr E' = hsubstcc E' E2
+
+    hsubstcc : ∀ {α : c ≥ c} {β : c ≥ c} {A : Tp c} {B : Tp c} {C : Tp c}
+            → A [ β ]⇑ B
+            → B [ α ]⇑ C
+            → A [ β ∘1 α ]⇑ C
+    hsubstcc D (⇓⇑ E) = hsubstca D E
+    hsubstcc D (♯I E) = ♯I (transport (λ x → _ [ x ]⇑ _) (∘r _) (hsubstcc D E))
+    hsubstcc D (♭I E) = transport (λ x → _ [ x ]⇑ _) (! (∘r _)) (♭I (transport (λ x → _ [ x ]⇑ _) (∘r _) (hsubstcc D E)))
+    hsubstcc D (Inl E) = Inl (hsubstcc D E)
+    hsubstcc D (Inr E) = Inr (hsubstcc D E)
+
+  -- ----------------------------------------------------------------------
+  -- translations between sequent calc and natural deduction
+
+  mutual
+    toseqa : ∀ {α A B} → A [ α ]⇓ B → A [ α ]⊢' B
+    toseqa cv = copy'
+    toseqa v = ident'
+    toseqa (♯E D) = cut' (toseqa D) (♯L' copy') -- FIXME how bad are these cuts?
+    toseqa (♭rec D D1) = cut' {α = 1m} (toseqa D) (♭L' (toseqc D1) ident')
+    toseqa (Case D D1 D2) = cut' (toseqa D) (Case' (toseqc D1) (toseqc D2) ident')
+
+    toseqc : ∀ {α A B} → A [ α ]⇑ B → A [ α ]⊢' B
+    toseqc (⇓⇑ D) = toseqa D
+    toseqc (♯I D) = ♯R' (toseqc D)
+    toseqc (♭I D) = ♭R' (toseqc D)
+    toseqc (Inl D) = Inl' (toseqc D)
+    toseqc (Inr D) = Inr' (toseqc D) 
+
+  tond : ∀ {α A B} → A [ α ]⊢' B → A [ α ]⇑ B 
+  tond copy' = ⇓⇑ cv
+  tond ident' = ⇓⇑ v
+  tond (♯R' D) = ♯I (tond D)
+  tond (♭R' D) = ♭I (tond D)
+  tond (Inl' D) = Inl (tond D)
+  tond (Inr' D) = Inr (tond D)
+  tond (♯L' D) = substac (♯E cv) (tond D) 
+  tond (♭L' D1 E) = substac (♭rec v (tond D1)) (tond E)
+  tond {A = A1 ⊕ A2} {B = B} (Case' D1 D2 E) = substac (Case v (tond D1) (tond D2)) (tond E) 
