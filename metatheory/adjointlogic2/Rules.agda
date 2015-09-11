@@ -274,6 +274,9 @@ module adjointlogic2.Rules where
     
       r⇒/1 : ∀ {C : Set} → r ⇒ 1m → C
 
+      2-cell-case-loop : ∀ {α : c ≥ c} (e : α ⇒ α) → e == 1⇒
+      2-cell-case1r : ∀ (e : 1m{c} ⇒ r) → e == runit
+
     {-# REWRITE 0-cell-case-c #-}
     {-# REWRITE 1-cell-case-1 #-}
     {-# REWRITE 1-cell-case-r #-}
