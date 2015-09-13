@@ -59,7 +59,7 @@ module adjointlogic2.Idempotent-Subcalculus3 where
   -- principal 
   cut' (♭R' D) (♭L' E E') = cut' (cut' D E) E'
   cut' (♯R' D) (♯L' E) = transport (λ x → _ [ x ]⊢' _) (! (∘r _)) (cut' D E)
-  cut' (Inl' D) (Case' E1 E2 E) = cut' (cut' D E1) E
+  cut' (Inl' D) (Case' E1 E2 E) = cut' (cut' D E1) E -- FIXME: would this work if we needed the subformula order?
   cut' (Inr' D) (Case' E1 E2 E) = cut' (cut' D E2) E
   -- ident
   cut' ident' E = E
@@ -181,7 +181,6 @@ module adjointlogic2.Idempotent-Subcalculus3 where
   unrestrict-cut' : ∀ {α : c ≥ c} {β : c ≥ c} {A : Tp c} {B : Tp c} {C : Tp c}
        (D : A [ β ]⊢' B) (E : B [ α ]⊢' C) →
        unrestrict (cut' D E) ≈ cut (unrestrict D) (unrestrict E)
-{-
   -- quadratic case split to get things to reduce, but a lot of overlap
   -- copy cases 
   unrestrict-cut' copy' copy' = !≈ copy-idempotent
@@ -301,46 +300,82 @@ module adjointlogic2.Idempotent-Subcalculus3 where
   unrestrict-cut' {α = α} (♯L' D₁) (Case' E E₁ E₂) with 1-cell-case α 
   unrestrict-cut' (♯L' D₁) (Case' E E₁ E₂) | Inl id = (!≈ (cutUL {α = 1m} {β = r} {γ = r} {e = _} {D = unrestrict D₁} (cut {α = 1m} {β = 1m} (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)))) ∘≈ UL≈ {α = r} {β = r} {γ = r} {e = 1⇒} (unrestrict-cut' {α = 1m} {β = r} D₁ (Case' E E₁ E₂))
   unrestrict-cut' (♯L' D₁) (Case' E E₁ E₂) | Inr id = !≈ (cutUL {α = r} {β = r} {α₁ = r} {γ = r} {e = 1⇒} {D = unrestrict D₁} (cut {α = r} {β = 1m} (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂))) ∘≈ UL≈ {α = r} {β = r} {γ = r} {e = 1⇒} (unrestrict-cut' {α = r} {β = r} D₁ (Case' E E₁ E₂))
--}
-  unrestrict-cut' _ _ = {!!}
-{- 
   -- ♭L and something
-  unrestrict-cut' (♭L' D D₁) (♯R' E) = {!!}
-  unrestrict-cut' (♭L' D D₁) (♯L' E) = {!!}
-  unrestrict-cut' (♭L' D D₁) (♭L' E E₁) = {!!}
-  unrestrict-cut' (♭L' D D₁) (♭R' E) = {!!≈ (eq (cutFR (unrestrict (♭L' D D₁)))) ∘≈ FR≈ {α = 1m} {β = r} (unrestrict-cut' (♭L' D D₁) E)!}
+  unrestrict-cut' {α = α} {β} (♭L' D D₁) (♯R' E) with 1-cell-case α | 1-cell-case β 
+  unrestrict-cut' (♭L' D D₁) (♯R' E) | Inl id | Inl id = (!≈ (eq (cutUR (cut (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict D₁)))) ∘≈ UR≈ {α = r} {β = 1m} ( cut≈1 unrestrict♭L1 (unrestrict E) ∘≈ unrestrict-cut' (♭L' D D₁) E)) ∘≈ unrestrict♯R1
+  unrestrict-cut' (♭L' D D₁) (♯R' E) | Inl id | Inr id = (!≈ (eq (cutUR {α = r} (cut (FL {α = r} {β = r} (unrestrict D)) (unrestrict D₁))) ∘≈ !≈ (eq (cutUR {α = r} (cut (FL {α = r} {β = r} (unrestrict D)) (unrestrict D₁)))) ∘≈ eq (cutUR {α = 1m} {β = r} (cut (FL {α = r} {β = r} (unrestrict D)) (unrestrict D₁)))) ∘≈ UR≈ {α = r} {β = r} (cut≈1 unrestrict♭Lr (unrestrict E) ∘≈ unrestrict-cut' (♭L' D D₁) E)) ∘≈ unrestrict♯Rr
+  unrestrict-cut' (♭L' D D₁) (♯R' E) | Inr id | Inl id = ((!≈ (eq (cutUR {α = r} (cut (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict D₁))))) ∘≈ UR≈ {α = r} {β = r} (cut≈1 unrestrict♭L1 (unrestrict E) ∘≈ unrestrict-cut' (♭L' D D₁) E)) ∘≈ unrestrict♯Rr
+  unrestrict-cut' (♭L' D D₁) (♯R' E) | Inr id | Inr id = ((!≈ (eq (cutUR {α = r} (cut (FL {α = r} {β = r} (unrestrict D)) (unrestrict D₁)))) ∘≈ id) ∘≈ UR≈ {α = r} {β = r} (cut≈1 unrestrict♭Lr (unrestrict E) ∘≈ unrestrict-cut' (♭L' D D₁) E)) ∘≈ unrestrict♯Rr
+  unrestrict-cut' {β = β} (♭L' D D₁) (♯L' E) with 1-cell-case β
+  unrestrict-cut' (♭L' D D₁) (♯L' E) | Inl id = (cut-assoc (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict D₁) (UL r 1⇒ (unrestrict E)) ∘≈ cut≈2 (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict-cut' D₁ (♯L' E)) ∘≈ !≈ (cutFL {β = 1m} (unrestrict (cut' D₁ (♯L' E)))) ∘≈ cutFL {β = r} (unrestrict (cut' D₁ (♯L' E)))) ∘≈ unrestrict♭Lr
+  unrestrict-cut' (♭L' D D₁) (♯L' E) | Inr id = ((cut-assoc (FL {α = r} {β = r} (unrestrict D)) (unrestrict D₁) (UL r 1⇒ (unrestrict E)) ∘≈ !≈ (cutFL {β = r} (cut (unrestrict D₁) (UL r 1⇒ (unrestrict E)))) ∘≈ FL≈ {α = r} {β = r} (cut≈2 (unrestrict D) (unrestrict-cut' D₁ (♯L' E)))) ∘≈ cutFL {β = r} (unrestrict (cut' D₁ (♯L' E)))) ∘≈ unrestrict♭Lr
+  unrestrict-cut' {α = α} {β = β} (♭L' D D₁) (♭L' E E₁) with 1-cell-case α | 1-cell-case β 
+  unrestrict-cut' (♭L' D D₁) (♭L' E E₁) | Inl id | Inl id = (cut-assoc (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict D₁) (cut (FL {α = r} {β = 1m} (unrestrict E)) (unrestrict E₁)) ∘≈ cut≈2 (FL {α = r} {β = 1m} (unrestrict D)) (cut≈2 (unrestrict D₁) unrestrict♭L1 ∘≈ unrestrict-cut' D₁ (♭L' E E₁))) ∘≈ unrestrict♭L1
+  unrestrict-cut' (♭L' D D₁) (♭L' E E₁) | Inl id | Inr id = (cut-assoc (FL {α = r} {β = r} (unrestrict D)) (unrestrict D₁) (cut (FL {α = r} {β = 1m} (unrestrict E)) (unrestrict E₁)) ∘≈ cut≈2 (FL {α = r} {β = r} (unrestrict D)) (cut≈2 (unrestrict D₁) unrestrict♭L1 ∘≈ unrestrict-cut' {α = 1m} {β = r} D₁ (♭L' E E₁))) ∘≈ unrestrict♭Lr
+  unrestrict-cut' (♭L' D D₁) (♭L' E E₁) | Inr id | Inl id = (cut-assoc (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict D₁) (cut (FL {α = r} {β = r} (unrestrict E)) (unrestrict E₁)) ∘≈ !≈ (cutFL {α = r} {β = 1m} {D = unrestrict D} (cut (unrestrict D₁) (cut (FL {α = r} {β = r} (unrestrict E)) (unrestrict E₁)))) ∘≈ FL≈ {α = r} {β = r} (cut≈2 (unrestrict D) (cut≈2 (unrestrict D₁) unrestrict♭Lr ∘≈ unrestrict-cut' D₁ (♭L' E E₁))) ∘≈ cutFL {α = r} {β = r} {D = _} (unrestrict (cut' D₁ (♭L' E E₁)))) ∘≈ unrestrict♭Lr
+  unrestrict-cut' (♭L' D D₁) (♭L' E E₁) | Inr id | Inr id = (cut-assoc (FL {α = r} {β = r} (unrestrict D)) (unrestrict D₁) (cut (FL {α = r} {β = r} (unrestrict E)) (unrestrict E₁)) ∘≈ cut≈2 (FL {α = r} {β = r} (unrestrict D)) (cut≈2 (unrestrict D₁) unrestrict♭Lr ∘≈ unrestrict-cut' {α = r} {β = r} D₁ (♭L' E E₁))) ∘≈ unrestrict♭Lr
+  unrestrict-cut' {β = β} (♭L' D D₁) (♭R' E) with 1-cell-case β 
+  unrestrict-cut' (♭L' D D₁) (♭R' E) | Inl id = (!≈ (eq (cutFR {α = r} {β = 1m} {α' = r} {γ = r} {e = 1⇒ {_} {_} {r}} (cut (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict D₁)) {E = unrestrict E})) ∘≈ FR≈ (cut≈1 unrestrict♭L1 (unrestrict E))) ∘≈ FR≈ (unrestrict-cut' (♭L' D D₁) E)
+  unrestrict-cut' (♭L' D D₁) (♭R' E) | Inr id = !≈ (eq (cutFR {α = r} {β = r} {α' = r} {γ = r} {e = 1⇒ {_} {_} {r}} (cut (FL {α = r} {β = r} (unrestrict D)) (unrestrict D₁)) {E = unrestrict E})) ∘≈ FR≈ (cut≈1 unrestrict♭Lr (unrestrict E)) ∘≈ FR≈ (unrestrict-cut' (♭L' D D₁) E)
   unrestrict-cut' (♭L' D D₁) (Inl' E) = !≈ (eq (cutInl (unrestrict (♭L' D D₁)))) ∘≈ Inl≈ (unrestrict-cut' (♭L' D D₁) E)
   unrestrict-cut' (♭L' D D₁) (Inr' E) = !≈ (eq (cutInr (unrestrict (♭L' D D₁)))) ∘≈ Inr≈ (unrestrict-cut' (♭L' D D₁) E)
-  unrestrict-cut' (♭L' D D₂) (Case' E E₁ E₂) = {!!}
+  unrestrict-cut' {α = α}{β} (♭L' D D₂) (Case' E E₁ E₂) with 1-cell-case α | 1-cell-case β  
+  unrestrict-cut' (♭L' D D₂) (Case' E E₁ E₂) | Inl id | Inl id = (cut-assoc (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict D₂) (cut (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ cut≈2 (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict-cut' D₂ (Case' E E₁ E₂))) ∘≈ unrestrict♭L1
+  unrestrict-cut' (♭L' D D₂) (Case' E E₁ E₂) | Inl id | Inr id = (cut-assoc (FL {α = r} {β = r} (unrestrict D)) (unrestrict D₂) (cut (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ cut≈2 (FL {α = r} {β = r} (unrestrict D)) (unrestrict-cut' D₂ (Case' E E₁ E₂))) ∘≈ unrestrict♭Lr
+  unrestrict-cut' (♭L' D D₂) (Case' E E₁ E₂) | Inr id | Inl id = (cut-assoc (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict D₂) (cut (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ (!≈ (cutFL {α = r} {β = 1m} (cut (unrestrict D₂) (cut (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)))) ∘≈ cutFL {α = r} {β = r} (cut (unrestrict D₂) (cut (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)))) ∘≈ cut≈2 (FL {α = r} {β = r} (unrestrict D)) (unrestrict-cut' D₂ (Case' E E₁ E₂))) ∘≈ unrestrict♭Lr
+  unrestrict-cut' (♭L' D D₂) (Case' E E₁ E₂) | Inr id | Inr id = (cut-assoc (FL {α = r} {β = r} (unrestrict D)) (unrestrict D₂) (cut (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ cut≈2 (FL {α = r} {β = r} (unrestrict D)) (unrestrict-cut' D₂ (Case' E E₁ E₂))) ∘≈ unrestrict♭Lr
   -- ♭R and something
-  unrestrict-cut' (♭R' D) (♯R' E) = {!!}
-  unrestrict-cut' (♭R' D) (♭L' E E₁) = {!!}
-  unrestrict-cut' (♭R' D) (♭R' E) = {!!}
+  unrestrict-cut' {α = α} (♭R' D) (♯R' E) with 1-cell-case α 
+  unrestrict-cut' (♭R' D) (♯R' E) | Inl id = UR≈ {α = r} {β = r} (unrestrict-cut' (♭R' D) E) ∘≈ unrestrict♯Rr
+  unrestrict-cut' (♭R' D) (♯R' E) | Inr id = UR≈ {α = r} {β = r} (unrestrict-cut' (♭R' D) E) ∘≈ unrestrict♯Rr
+  unrestrict-cut' {α = α} (♭R' D) (♭L' E E₁) with 1-cell-case α 
+  unrestrict-cut' (♭R' D) (♭L' E E₁) | Inl id = !≈ (cut-assoc (FR r 1⇒ (unrestrict D)) (♭L1 (unrestrict E)) (unrestrict E₁)) ∘≈ !≈ (cut≈1 (eq (transport⊢1 (cut (unrestrict D) (unrestrict E)))) (unrestrict E₁)) ∘≈ cut≈1 (unrestrict-cut' D E) (unrestrict E₁) ∘≈ unrestrict-cut' (cut' D E) E₁
+  unrestrict-cut' (♭R' D) (♭L' E E₁) | Inr id = !≈ (cut-assoc (FR r 1⇒ (unrestrict D)) (♭Lr (unrestrict E)) (unrestrict E₁)) ∘≈ !≈ (cut≈1 (eq (transport⊢1 (cut (unrestrict D) (unrestrict E)))) (unrestrict E₁)) ∘≈ cut≈1 (unrestrict-cut' D E) (unrestrict E₁) ∘≈ unrestrict-cut' (cut' D E) E₁
+  unrestrict-cut' (♭R' D) (♭R' E) with 1-cell-case r 
+  ... | Inl q = 1≠r (! q)
+  ... | Inr id = FR≈ (unrestrict-cut' (♭R' D) E)
   unrestrict-cut' (♭R' D) (Inl' E) = Inl≈ (unrestrict-cut' (♭R' D) E)
   unrestrict-cut' (♭R' D) (Inr' E) = Inr≈ (unrestrict-cut' (♭R' D) E)
   -- Inl 
-  unrestrict-cut' (Inl' D) (♯R' E) = {!!}
-  unrestrict-cut' (Inl' D) (♭R' E) = {!!}
+  unrestrict-cut' {α = α} {β = β} (Inl' D) (♯R' E) with 1-cell-case α | 1-cell-case β 
+  unrestrict-cut' (Inl' D) (♯R' E) | Inl id | Inl id = UR≈ {α = r} {β = 1m} (unrestrict-cut' (Inl' D) E) ∘≈ unrestrict♯R1
+  unrestrict-cut' (Inl' D) (♯R' E) | Inl id | Inr id = UR≈ {α = r} {β = r} (unrestrict-cut' (Inl' D) E) ∘≈ unrestrict♯Rr
+  unrestrict-cut' (Inl' D) (♯R' E) | Inr id | Inl id = UR≈ {α = r} {β = r} (unrestrict-cut' (Inl' D) E) ∘≈ unrestrict♯Rr
+  unrestrict-cut' (Inl' D) (♯R' E) | Inr id | Inr id = UR≈ {α = r} {β = r} (unrestrict-cut' (Inl' D) E) ∘≈ unrestrict♯Rr
+  unrestrict-cut' {β = β} (Inl' D) (♭R' E) with 1-cell-case β 
+  unrestrict-cut' (Inl' D) (♭R' E) | Inl id = FR≈ (unrestrict-cut' (Inl' D) E)
+  unrestrict-cut' (Inl' D) (♭R' E) | Inr id = FR≈ (unrestrict-cut' (Inl' D) E)
   unrestrict-cut' (Inl' D) (Inl' E) = Inl≈ (unrestrict-cut' (Inl' D) E)
   unrestrict-cut' (Inl' D) (Inr' E) = Inr≈ (unrestrict-cut' (Inl' D) E)
   unrestrict-cut' (Inl' D₁) (Case' E E₁ E₂) = (!≈ (cut-assoc (Inl (unrestrict D₁)) (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ cut≈1 (unrestrict-cut' D₁ E) (unrestrict E₂)) ∘≈ unrestrict-cut' (cut' D₁ E) E₂
   -- Inr 
-  unrestrict-cut' (Inr' D) (♯R' E) = {!!}
-  unrestrict-cut' (Inr' D) (♭R' E) = {!!}
+  unrestrict-cut' {α = α} {β = β} (Inr' D) (♯R' E) with 1-cell-case α | 1-cell-case β 
+  unrestrict-cut' (Inr' D) (♯R' E) | Inl id | Inl id = UR≈ {α = r} {β = 1m} (unrestrict-cut' (Inr' D) E) ∘≈ unrestrict♯R1
+  unrestrict-cut' (Inr' D) (♯R' E) | Inl id | Inr id = UR≈ {α = r} {β = r} (unrestrict-cut' (Inr' D) E) ∘≈ unrestrict♯Rr
+  unrestrict-cut' (Inr' D) (♯R' E) | Inr id | Inl id = UR≈ {α = r} {β = r} (unrestrict-cut' (Inr' D) E) ∘≈ unrestrict♯Rr
+  unrestrict-cut' (Inr' D) (♯R' E) | Inr id | Inr id = UR≈ {α = r} {β = r} (unrestrict-cut' (Inr' D) E) ∘≈ unrestrict♯Rr
+  unrestrict-cut' {β = β} (Inr' D) (♭R' E) with 1-cell-case β 
+  unrestrict-cut' (Inr' D) (♭R' E) | Inl id = FR≈ (unrestrict-cut' (Inr' D) E)
+  unrestrict-cut' (Inr' D) (♭R' E) | Inr id = FR≈ (unrestrict-cut' (Inr' D) E)
   unrestrict-cut' (Inr' D) (Inl' E) = Inl≈ (unrestrict-cut' (Inr' D) E)
   unrestrict-cut' (Inr' D) (Inr' E) = Inr≈ (unrestrict-cut' (Inr' D) E)
   unrestrict-cut' (Inr' D) (Case' E E₁ E₂) = (!≈ (cut-assoc (Inr (unrestrict D)) (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ cut≈1 (unrestrict-cut' D E₁) (unrestrict E₂)) ∘≈ unrestrict-cut' (cut' D E₁) E₂
   -- Case
-  unrestrict-cut' (Case' D D₁ D₂) (♯R' E) = {!!}
-  unrestrict-cut' (Case' D D₁ D₂) (♯L' E) = {!!}
-  unrestrict-cut' (Case' D D₁ D₂) (♭L' E E₁) = {!!}
-  unrestrict-cut' (Case' D D₁ D₂) (♭R' E) = {!!}
+  unrestrict-cut' {α = α} {β = β} (Case' D D₁ D₂) (♯R' E) with 1-cell-case α | 1-cell-case β
+  unrestrict-cut' (Case' D D₁ D₂) (♯R' E) | Inl id | Inl id = (!≈ (eq (cutUR (cut (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂)))) ∘≈ UR≈ {α = r} {β = (1m ∘1 1m) ∘1 1m} (unrestrict-cut' (Case' D D₁ D₂) E)) ∘≈ unrestrict♯R1
+  unrestrict-cut' (Case' D D₁ D₂) (♯R' E) | Inl id | Inr id = (!≈ (eq (cutUR {α = 1m} (cut (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂)))) ∘≈ UR≈ {α = r} {β = r} (unrestrict-cut' (Case' D D₁ D₂) E)) ∘≈ unrestrict♯Rr
+  unrestrict-cut' (Case' D D₁ D₂) (♯R' E) | Inr id | Inl id = (!≈ (eq (cutUR {α = r} (cut (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂)))) ∘≈ UR≈ {α = r} {β = r} (unrestrict-cut' (Case' D D₁ D₂) E)) ∘≈ unrestrict♯Rr
+  unrestrict-cut' (Case' D D₁ D₂) (♯R' E) | Inr id | Inr id = (!≈ (eq (cutUR {α = r} (cut (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂)))) ∘≈ UR≈ {α = r} {β = r} (unrestrict-cut' (Case' D D₁ D₂) E)) ∘≈ unrestrict♯Rr
+  unrestrict-cut' (Case' D D₁ D₂) (♯L' E) = cut-assoc (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂) (♯L (unrestrict E)) ∘≈ cut≈2 (Case (unrestrict D) (unrestrict D₁)) (unrestrict-cut' D₂ (♯L' E))
+  unrestrict-cut' {α = α} (Case' D D₁ D₂) (♭L' E E₁) with 1-cell-case α 
+  unrestrict-cut' (Case' D D₁ D₂) (♭L' E E₁) | Inl id = cut-assoc (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂) (cut (FL {α = r} {β = 1m} (unrestrict E)) (unrestrict E₁)) ∘≈ cut≈2 (Case (unrestrict D) (unrestrict D₁)) (cut≈2 (unrestrict D₂) unrestrict♭L1 ∘≈ unrestrict-cut' D₂ (♭L' E E₁))
+  unrestrict-cut' (Case' D D₁ D₂) (♭L' E E₁) | Inr id = cut-assoc (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂) (cut (FL {α = r} {β = r} (unrestrict E)) (unrestrict E₁)) ∘≈ cut≈2 (Case (unrestrict D) (unrestrict D₁)) (cut≈2 (unrestrict D₂) unrestrict♭Lr ∘≈ unrestrict-cut' D₂ (♭L' E E₁))
+  unrestrict-cut' {β = β} (Case' D D₁ D₂) (♭R' E) with 1-cell-case β
+  unrestrict-cut' (Case' D D₁ D₂) (♭R' E) | Inl id = !≈ (eq (cutFR (cut (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂)))) ∘≈ FR≈ (unrestrict-cut' (Case' D D₁ D₂) E)
+  unrestrict-cut' (Case' D D₁ D₂) (♭R' E) | Inr id = !≈ (eq (cutFR {α = r} {β = r} {α' = r} {γ = r} {e = 1⇒} (cut (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂)))) ∘≈ FR≈ {α = r} {β = r} {γ = r} {e = 1⇒} (unrestrict-cut' (Case' D D₁ D₂) E)
   unrestrict-cut' (Case' D₁ D₂ D₃) (Inl' E) = !≈ (eq (cutInl (cut (Case (unrestrict D₁) (unrestrict D₂)) (unrestrict D₃)))) ∘≈ Inl≈ (unrestrict-cut' (Case' D₁ D₂ D₃) E)
   unrestrict-cut' (Case' D₁ D₂ D₃) (Inr' E) = !≈ (eq (cutInr (cut (Case (unrestrict D₁) (unrestrict D₂)) (unrestrict D₃)))) ∘≈ Inr≈ (unrestrict-cut' (Case' D₁ D₂ D₃) E)
   unrestrict-cut' (Case' D D₁ D₂) (Case' E E₁ E₂) = cut-assoc (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂) (cut (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ cut≈2 (Case (unrestrict D) (unrestrict D₁)) (unrestrict-cut' D₂ (Case' E E₁ E₂))
--}
-
-{-
 
   unrest-wlog : ∀ {A B α} → (D : A [ α ]⊢ B) → unrestrict (wlog D) ≈ D
   unrest-wlog {α = α} (hypp x) with 1-cell-case α
@@ -617,4 +652,4 @@ module adjointlogic2.Idempotent-Subcalculus3 where
   ... | Inr q = 1≠r q
   example'' | Inr q = 1≠r q
 
--}
+
