@@ -156,82 +156,191 @@ module adjointlogic2.Idempotent-Subcalculus3 where
   wlog (Case D D₁) | Inl id = Case' (wlog D) (wlog D₁) ident'
   wlog (Case D D₁) | Inr id = Case'r (wlog D) (wlog D₁) copy'
 
+  unrestrict♯R1 : ∀ {A B} {D : A [ r ]⊢' B} → unrestrict (♯R' {α = 1m} D) ≈ UR {α = r} {β = 1m} (unrestrict D)
+  unrestrict♯R1 with 1-cell-case 1m
+  ...   | Inl id = id
+  ...   | Inr q = 1≠r q 
+
+  unrestrict♯Rr : ∀ {A B} {D : A [ r ]⊢' B} → unrestrict (♯R' {α = r} D) ≈ UR {α = r} {β = r} (unrestrict D)
+  unrestrict♯Rr with 1-cell-case r
+  ...   | Inl q = 1≠r (! q)
+  ...   | Inr id = id
+
+  unrestrict♭L1 : ∀ {A B C} {D : A [ r ]⊢' B} {E : B [ 1m ]⊢' C} 
+               → unrestrict (♭L' {α = 1m} D E) ≈ cut (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict E)
+  unrestrict♭L1 with 1-cell-case 1m
+  ...   | Inl id = id
+  ...   | Inr q = 1≠r q 
+
+  unrestrict♭Lr : ∀ {A B C} {D : A [ r ]⊢' B} {E : B [ r ]⊢' C} 
+               → unrestrict (♭L' {α = r} D E) ≈ cut (FL {α = r} {β = r} (unrestrict D)) (unrestrict E)
+  unrestrict♭Lr with 1-cell-case 1m
+  ...   | Inl id = id
+  ...   | Inr q = 1≠r q 
+
   unrestrict-cut' : ∀ {α : c ≥ c} {β : c ≥ c} {A : Tp c} {B : Tp c} {C : Tp c}
        (D : A [ β ]⊢' B) (E : B [ α ]⊢' C) →
        unrestrict (cut' D E) ≈ cut (unrestrict D) (unrestrict E)
+{-
+  -- quadratic case split to get things to reduce, but a lot of overlap
+  -- copy cases 
   unrestrict-cut' copy' copy' = !≈ copy-idempotent
   unrestrict-cut' copy' ident' = !≈ (cut-ident-right copy)
-  unrestrict-cut' copy' (♯R' E) = {!!}
-  unrestrict-cut' copy' (♯L' E) = {!!}
-  unrestrict-cut' copy' (♭L' E E₁) = {!!}
-  unrestrict-cut' copy' (♭R' E) = {!!}
-  unrestrict-cut' copy' (Inl' E) = {!!}
-  unrestrict-cut' copy' (Inr' E) = {!!}
-  unrestrict-cut' copy' (Case' E E₁ E₂) = {!!}
+  unrestrict-cut' {α = α} copy' (♯R' E) with 1-cell-case α | 1-cell-case (r ∘1 α)
+  unrestrict-cut' copy' (♯R' E) | Inl id | Inl q = 1≠r (! q)
+  unrestrict-cut' copy' (♯R' E) | Inl id | Inr id = !≈ (eq (cutUR {α = 1m} {β = r} copy {E = unrestrict E})) ∘≈ UR≈ {α = r} {β = r} (!≈ (cut-copy-r (unrestrict E)))
+  unrestrict-cut' copy' (♯R' E) | Inr id | Inl q = 1≠r (! q)
+  unrestrict-cut' copy' (♯R' E) | Inr id | Inr id = !≈ (cut-copy-r (UR {α = r} {β = r} (unrestrict E)))
+  unrestrict-cut' copy' (♯L' E) = !≈ (((UL≈ (cut-ident-left (unrestrict E)) ∘≈ eq (ap (λ x → UL {α = r} {β = r} r x (cut hyp (unrestrict E))) (ap (λ x → x ∘1cong 1⇒ {_} {_} {r}) adjeq1))) ∘≈ cutUL {α = r} {β = r} {α₁ = r} {γ = 1m} (unrestrict E)) ∘≈ eq (transport⊢1 _))
+  unrestrict-cut' {α = α} copy' (♭L' E E₁) with 1-cell-case α
+  unrestrict-cut' copy' (♭L' E E₁) | Inl id = (!≈ (cutFL {D = FR 1m (1⇒ ∘1cong runit) hyp} (cut (FL {α = r} {β = 1m} (unrestrict E)) (unrestrict E₁))) ∘≈ FL≈ {α = r} {β = r ∘1 (1m ∘1 1m)} (((!≈ (cut-assoc (FR 1m (1⇒ ∘1cong runit) hyp) (FL {α = r} {β = 1m} (unrestrict E)) (unrestrict E₁)) ∘≈ !≈ (cut≈1 (cut-ident-left (unrestrict E) ∘≈ eq (transport⊢1 _) ∘≈ eq (ap (λ x → transport⊢ x (cut hyp (unrestrict E))) adjeq2)) (unrestrict E₁)) ∘≈ (cut≈1 (cut-r-copy (unrestrict E)) (unrestrict E₁) ∘≈ cut-assoc (unrestrict E) copy (unrestrict E₁)) ∘≈ cut≈2 (unrestrict E) (unrestrict-cut' copy' E₁)) ∘≈ eq (transport⊢1 _)) ∘≈ cut≈1 unrestrict♯Rr (UL r 1⇒ (unrestrict (cut' copy' E₁))))) ∘≈ unrestrict♭Lr
+  unrestrict-cut' copy' (♭L' E E₁) | Inr id = (!≈ (cut-assoc (FL (FR 1m (1⇒ ∘1cong runit) hyp)) (FL {α = r} {β = r} (unrestrict E)) (unrestrict E₁)) ∘≈ cut≈1 (!≈ (FL≈ {α = r} {β = r} (cut-ident-left (unrestrict E) ∘≈ eq (transport⊢1 _) ∘≈ eq (ap (λ x → transport⊢ x (cut hyp (unrestrict E))) (ap (λ x → x ∘1cong 1⇒ {_} {_} {r}) adjeq2))))) (unrestrict E₁)) ∘≈ unrestrict♭Lr
+  unrestrict-cut' copy' (♭R' E) = !≈ (cut-copy-r _)
+  unrestrict-cut' copy' (Inl' E) = !≈ (eq (cutInl copy)) ∘≈ Inl≈ (unrestrict-cut' copy' E)
+  unrestrict-cut' copy' (Inr' E) = !≈ (eq (cutInr copy)) ∘≈ Inr≈ (unrestrict-cut' copy' E)
+  unrestrict-cut' {α = α} copy' (Case' E E₁ E₂) with 1-cell-case α 
+  unrestrict-cut' copy' (Case' E E₁ E₂) | Inl id = !≈ (cutCase (cut (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂))) ∘≈ !≈ (Case≈ (cut-assoc (Inl copy) (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) (cut-assoc (Inr copy) (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂))) ∘≈ (Case≈ ((cut≈1 (cut-r-copy (cut copy (unrestrict E))) (unrestrict E₂) ∘≈ cut-assoc (cut copy (unrestrict E)) copy (unrestrict E₂)) ∘≈ cut≈1 (unrestrict-cut' copy' E) (cut copy (unrestrict E₂))) ((cut≈1 (cut-r-copy (cut copy (unrestrict E₁))) (unrestrict E₂) ∘≈ cut-assoc (cut copy (unrestrict E₁)) copy (unrestrict E₂)) ∘≈ cut≈1 (unrestrict-cut' copy' E₁) (cut copy (unrestrict E₂))) ∘≈ Case≈ (cut≈2 (unrestrict (cut' copy' E)) (unrestrict-cut' copy' E₂) ∘≈ eq (transport⊢1 _)) (cut≈2 (unrestrict (cut' copy' E₁)) (unrestrict-cut' copy' E₂) ∘≈ eq (transport⊢1 _))) ∘≈ Case≈ (cut≈1 unrestrict♯R1 (UL r 1⇒ (unrestrict (cut' copy' E₂)))) (cut≈1 unrestrict♯R1 (UL r 1⇒ (unrestrict (cut' copy' E₂))))
+  unrestrict-cut' copy' (Case' E E₁ E₂) | Inr id = (!≈ (cutCase {D1 = Inl copy} {D2 = Inr copy} (cut (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂))) ∘≈ Case≈ (!≈ (cut-assoc (Inl copy) (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ cut≈1 (unrestrict-cut' copy' E) (unrestrict E₂)) (!≈ (cut-assoc (Inr copy) (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ cut≈1 (unrestrict-cut' copy' E₁) (unrestrict E₂))) ∘≈ Case≈ (eq (transport⊢1 _) ∘≈ cut≈1 unrestrict♯R1 (UL r 1⇒ (unrestrict E₂))) (eq (transport⊢1 _) ∘≈ cut≈1 unrestrict♯R1 (UL r 1⇒ (unrestrict E₂)))
+  unrestrict-cut' (♯L' D) copy' = !≈ (cut-r-copy (♯L (unrestrict D)))
+  unrestrict-cut' {β = β} (♭L' D D₁) copy' with 1-cell-case β
+  unrestrict-cut' (♭L' D D₁) copy' | Inl id = (cut-assoc (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict D₁) copy ∘≈ cut≈2 (FL {α = r} {β = 1m} (unrestrict D)) (unrestrict-cut' {α = r} {β = 1m} D₁ copy') ∘≈ !≈ (cutFL {α = r} {β = 1m} (unrestrict (cut' D₁ copy'))) ∘≈ cutFL {β = r} (unrestrict (cut' D₁ copy'))) ∘≈ unrestrict♭Lr
+  unrestrict-cut' (♭L' D D₁) copy' | Inr id = (cut-assoc (♭Lr (unrestrict D)) (unrestrict D₁) copy ∘≈ cut≈2 (FL {α = r} {β = r} (unrestrict D)) (unrestrict-cut' D₁ copy')) ∘≈ unrestrict♭Lr
+  unrestrict-cut' (Inl' D) copy' = !≈ (eq (cutInl (unrestrict D))) ∘≈ Inl≈ (unrestrict-cut' D copy')
+  unrestrict-cut' (Inr' D) copy' = !≈ (eq (cutInr (unrestrict D))) ∘≈ Inr≈ (unrestrict-cut' D copy')
+  unrestrict-cut' (Case' D D₁ D₂) copy' = cut-assoc (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂) copy ∘≈ cut≈2 (Case (unrestrict D) (unrestrict D₁)) (unrestrict-cut' D₂ copy')
+  unrestrict-cut' (♭R' D) copy' = !≈ (((FR≈ (cut-ident-right (unrestrict D)) ∘≈ eq (ap (λ x → FR {α = r} {β = r ∘1 r} r x (cut (unrestrict D) hyp)) (ap (λ x → 1⇒ {_} {_} {r} ∘1cong x) adjeq2))) ∘≈ eq (cutFR {α = r} {β = r} {γ = 1m} (unrestrict D))) ∘≈ eq (transport⊢1 _))
+  unrestrict-cut' {β = β} (♯R' D) copy' with 1-cell-case β 
+  unrestrict-cut' (♯R' D) copy' | Inl id = UR≈ {α = r} {β = r} (!≈ (cut-ident-right (unrestrict D) ∘≈ eq (transport⊢1 _) ∘≈ eq (ap (λ x → transport⊢ x (cut {α = 1m} {β = r} (unrestrict D) hyp)) adjeq1))) ∘≈ unrestrict♯Rr
+  unrestrict-cut' (♯R' D) copy' | Inr id = UR≈ {α = r} {β = r} (!≈ (cut-ident-right (unrestrict D) ∘≈ eq (transport⊢1 _) ∘≈ eq (ap (λ x → transport⊢ x (cut {α = 1m} {β = r} (unrestrict D) hyp)) (ap (λ x → 1⇒ {_} {_} {r} ∘1cong x) adjeq1)))) ∘≈ unrestrict♯Rr
+  -- identity: same to cancel early or late
   unrestrict-cut' ident' copy' = !≈ (cut-ident-left copy)
   unrestrict-cut' ident' ident' = !≈ (cut-ident-left hyp)
-  unrestrict-cut' ident' (♯R' E) = {!!}
-  unrestrict-cut' ident' (♯L' E) = {!!}
-  unrestrict-cut' ident' (♭L' E E₁) = {!!}
-  unrestrict-cut' ident' (♭R' E) = {!!}
-  unrestrict-cut' ident' (Inl' E) = {!!}
-  unrestrict-cut' ident' (Inr' E) = {!!}
-  unrestrict-cut' ident' (Case' E E₁ E₂) = {!!}
-  unrestrict-cut' (♯R' D) copy' = {!!}
-  unrestrict-cut' (♯R' D) ident' = {!!}
-  unrestrict-cut' (♯R' D) (♯R' E) = {!!}
-  unrestrict-cut' (♯R' D) (♯L' E) = {!!}
-  unrestrict-cut' (♯R' D) (♭R' E) = {!!}
-  unrestrict-cut' (♯R' D) (Inl' E) = {!!}
-  unrestrict-cut' (♯R' D) (Inr' E) = {!!}
-  unrestrict-cut' (♯L' D) copy' = {!!}
-  unrestrict-cut' (♯L' D) ident' = {!!}
-  unrestrict-cut' (♯L' D) (♯R' E) = {!!}
-  unrestrict-cut' (♯L' D) (♯L' E) = {!!}
-  unrestrict-cut' (♯L' D) (♭L' E E₁) = {!!}
-  unrestrict-cut' (♯L' D) (♭R' E) = {!!}
-  unrestrict-cut' (♯L' D) (Inl' E) = {!!}
-  unrestrict-cut' (♯L' D) (Inr' E) = {!!}
-  unrestrict-cut' (♯L' D₁) (Case' E E₁ E₂) = {!!}
-  unrestrict-cut' (♭L' D D₁) copy' = {!!}
-  unrestrict-cut' (♭L' D D₁) ident' = {!!}
+  unrestrict-cut' {α = α} ident' (♯R' E) with 1-cell-case α
+  unrestrict-cut' ident' (♯R' E) | Inl id = !≈ (cut-ident-left _) 
+  unrestrict-cut' ident' (♯R' E) | Inr id = !≈ (cut-ident-left _)
+  unrestrict-cut' ident' (♯L' E) = !≈ (cut-ident-left _)
+  unrestrict-cut' {α} ident' (♭L' E E₁) with 1-cell-case α -- (UL≈ {α = ?} {β = ?} {γ = ?} {e = ?} ? ∘≈ {! cutUL {α = r} {β = r} {γ = 1m} {e = 1⇒} {D = hyp} (unrestrict E)!}) ∘≈ eq (transport⊢1 _))
+  unrestrict-cut' ident' (♭L' E E₁) | Inl id = !≈ (cut-ident-left _)
+  unrestrict-cut' ident' (♭L' E E₁) | Inr id = !≈ (cut-ident-left _)
+  unrestrict-cut' ident' (♭R' E) = !≈ (cut-ident-left _)
+  unrestrict-cut' ident' (Inl' E) = !≈ (cut-ident-left _)
+  unrestrict-cut' ident' (Inr' E) = !≈ (cut-ident-left _)
+  unrestrict-cut' ident' (Case' E E₁ E₂) = !≈ (cut-ident-left _)
+  unrestrict-cut' {β = β} (♯R' D) ident' with 1-cell-case β
+  unrestrict-cut' (♯R' D) ident' | Inl id = !≈ (cut-ident-right _)
+  unrestrict-cut' (♯R' D) ident' | Inr id = !≈ (cut-ident-right _)
+  unrestrict-cut' (♯L' D) ident' = !≈ (cut-ident-right _)
+  unrestrict-cut' (♭L' D D₁) ident' = !≈ (cut-ident-right _)
+  unrestrict-cut' (♭R' D) ident' = !≈ (cut-ident-right _)
+  unrestrict-cut' (Inl' D) ident' = !≈ (cut-ident-right _)
+  unrestrict-cut' (Inr' D) ident' = !≈ (cut-ident-right _)
+  unrestrict-cut' (Case' D D₁ D₂) ident' = !≈ (cut-ident-right _)
+  -- #R and something
+  unrestrict-cut' {α = α}{β} (♯R' D) (♯R' E) with 1-cell-case α | 1-cell-case β | 1-cell-case (β ∘1 α) 
+  unrestrict-cut' (♯R' D) (♯R' E) | Inl id | Inl id | Inl id = UR≈{α = r} {β = 1m} (cut≈1 unrestrict♯R1 (unrestrict E) ∘≈ unrestrict-cut' {β = 1m} (♯R' D) E)
+  unrestrict-cut' (♯R' D) (♯R' E) | Inl id | Inl id | Inr x₂ = 1≠r x₂
+  unrestrict-cut' (♯R' D) (♯R' E) | Inl id | Inr id | Inl x₂ = 1≠r (! x₂)
+  unrestrict-cut' (♯R' D) (♯R' E) | Inl id | Inr id | Inr id = UR≈ {α = r} {β = r} (cut≈1 unrestrict♯Rr (unrestrict E) ∘≈ unrestrict-cut' {β = r} (♯R' D) E)
+  unrestrict-cut' (♯R' D) (♯R' E) | Inr id | Inl id | Inl x₂ = 1≠r (! x₂)
+  unrestrict-cut' (♯R' D) (♯R' E) | Inr id | Inl id | Inr id = UR≈ {α = r} {β = r} (cut≈1 unrestrict♯R1 (unrestrict E) ∘≈ unrestrict-cut' {β = 1m} (♯R' D) E)
+  unrestrict-cut' (♯R' D) (♯R' E) | Inr id | Inr id | Inl x₂ = 1≠r (! x₂)
+  unrestrict-cut' (♯R' D) (♯R' E) | Inr id | Inr id | Inr id = UR≈ {α = r} {β = r} (cut≈1 unrestrict♯Rr (unrestrict E) ∘≈ unrestrict-cut' {β = r} (♯R' D) E)
+  unrestrict-cut' {β = β} (♯R' D) (♯L' E) with 1-cell-case β
+  unrestrict-cut' (♯R' D) (♯L' E) | Inl id = !≈ (eq (transport⊢1 _)) ∘≈ unrestrict-cut' D E
+  unrestrict-cut' (♯R' D) (♯L' E) | Inr id = !≈ (eq (transport⊢1 _)) ∘≈ unrestrict-cut' D E
+  unrestrict-cut' {β = β} (♯R' D) (♭R' E) with 1-cell-case β
+  unrestrict-cut' (♯R' D) (♭R' E) | Inl id = FR≈ (sg ∘≈ unrestrict-cut' (♯R' {α = 1m} D) E) where
+    sg : cut {α = r} {β = 1m} (unrestrict (♯R' D)) (unrestrict E) ≈ _
+    sg with 1-cell-case 1m
+    ...   | Inl id = id
+    ...   | Inr q = 1≠r q
+  unrestrict-cut' (♯R' D) (♭R' E) | Inr id = FR≈ (sg ∘≈ unrestrict-cut' (♯R' {α = r} D) E) where
+    sg : cut {α = r} {β = r} (unrestrict (♯R' D)) (unrestrict E) ≈ _
+    sg with 1-cell-case 1m
+    ...   | Inl id = id
+    ...   | Inr q = 1≠r q
+  unrestrict-cut' {β = β} (♯R' D) (Inl' E) with 1-cell-case β
+  unrestrict-cut' (♯R' D) (Inl' E) | Inl id = Inl≈ (cut≈1 sg (unrestrict E) ∘≈ unrestrict-cut' {β = 1m} (♯R' D) E) where
+    sg : unrestrict (♯R' D) ≈ UR {α = r} {β = 1m} (unrestrict D)
+    sg with 1-cell-case 1m
+    ...   | Inl id = id
+    ...   | Inr q = 1≠r q 
+  unrestrict-cut' (♯R' D) (Inl' E) | Inr id = Inl≈ (cut≈1 sg (unrestrict E) ∘≈ unrestrict-cut' {β = r} (♯R' D) E) where
+    sg : unrestrict (♯R' D) ≈ UR {α = r} {β = r} (unrestrict D)
+    sg with 1-cell-case 1m
+    ...   | Inl id = id
+    ...   | Inr q = 1≠r q 
+  unrestrict-cut' {β = β} (♯R' D) (Inr' E) with 1-cell-case β
+  unrestrict-cut' (♯R' D) (Inr' E) | Inl id = Inr≈ (cut≈1 sg (unrestrict E) ∘≈ unrestrict-cut' {β = 1m} (♯R' D) E) where
+    sg : unrestrict (♯R' D) ≈ UR {α = r} {β = 1m} (unrestrict D)
+    sg with 1-cell-case 1m
+    ...   | Inl id = id
+    ...   | Inr q = 1≠r q 
+  unrestrict-cut' (♯R' D) (Inr' E) | Inr id = Inr≈ (cut≈1 sg (unrestrict E) ∘≈ unrestrict-cut' {β = r} (♯R' D) E) where
+    sg : unrestrict (♯R' D) ≈ UR {α = r} {β = r} (unrestrict D)
+    sg with 1-cell-case 1m
+    ...   | Inl id = id
+    ...   | Inr q = 1≠r q 
+  -- #L and something
+  unrestrict-cut' {α = α} (♯L' D) (♯R' E) with 1-cell-case (r ∘1 α) | 1-cell-case α
+  unrestrict-cut' (♯L' D) (♯R' E) | Inl x | Inl id = 1≠r (! x)
+  unrestrict-cut' (♯L' D) (♯R' E) | Inl x | Inr id = 1≠r (! x)
+  unrestrict-cut' (♯L' D) (♯R' E) | Inr id | Inl id = UR≈ {α = r} {β = r} (unrestrict-cut' (♯L' D) E)
+  unrestrict-cut' (♯L' D) (♯R' E) | Inr id | Inr id = UR≈ {α = r} {β = r} (unrestrict-cut' (♯L' D) E)
+  unrestrict-cut' (♯L' D) (♯L' E) with 1-cell-case r 
+  ... | Inl p = 1≠r (! p)
+  ... | Inr id = UL≈ {α = r} {β = r} {γ = r} {e = 1⇒} (unrestrict-cut' D (♯L' E))
+  unrestrict-cut' {α = α} (♯L' D) (♭L' E E₁) with 1-cell-case α
+  unrestrict-cut' (♯L' D) (♭L' E E₁) | Inl id = ((!≈ (cutUL {α = 1m} {β = r} {α₁ = r} {γ = r} {e = 1⇒} (cut (♭L1 (unrestrict E)) (unrestrict E₁)))) ∘≈ UL≈ {α = r} {β = r} {γ = r} {e = 1⇒} (cut≈2 (unrestrict D) unrestrict♭L1)) ∘≈ UL≈ {α = r} {γ = r} {e = 1⇒} (unrestrict-cut' D (♭L' E E₁))
+  unrestrict-cut' (♯L' D) (♭L' E E₁) | Inr id = (!≈ (cutUL {α = r} {β = r} {α₁ = r} {γ = r} {e = 1⇒} (cut (♭Lr (unrestrict E)) (unrestrict E₁))) ∘≈ UL≈ {α = r} {β = r} {γ = r} {e = 1⇒} (cut≈2 (unrestrict D) unrestrict♭Lr)) ∘≈ UL≈ {α = r} {γ = r} {e = 1⇒} (unrestrict-cut' D (♭L' E E₁))
+  unrestrict-cut' (♯L' D) (♭R' E) with 1-cell-case r 
+  ...                               | Inl q = 1≠r (! q)
+  ...                               | Inr id = FR≈ {α = r} {β = r} {γ = r} {e = 1⇒} (unrestrict-cut' (♯L' D) E)
+  unrestrict-cut' (♯L' D) (Inl' E) = Inl≈ (unrestrict-cut' (♯L' D) E)
+  unrestrict-cut' (♯L' D) (Inr' E) = Inr≈ (unrestrict-cut' (♯L' D) E)
+  unrestrict-cut' {α = α} (♯L' D₁) (Case' E E₁ E₂) with 1-cell-case α 
+  unrestrict-cut' (♯L' D₁) (Case' E E₁ E₂) | Inl id = (!≈ (cutUL {α = 1m} {β = r} {γ = r} {e = _} {D = unrestrict D₁} (cut {α = 1m} {β = 1m} (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)))) ∘≈ UL≈ {α = r} {β = r} {γ = r} {e = 1⇒} (unrestrict-cut' {α = 1m} {β = r} D₁ (Case' E E₁ E₂))
+  unrestrict-cut' (♯L' D₁) (Case' E E₁ E₂) | Inr id = !≈ (cutUL {α = r} {β = r} {α₁ = r} {γ = r} {e = 1⇒} {D = unrestrict D₁} (cut {α = r} {β = 1m} (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂))) ∘≈ UL≈ {α = r} {β = r} {γ = r} {e = 1⇒} (unrestrict-cut' {α = r} {β = r} D₁ (Case' E E₁ E₂))
+-}
+  unrestrict-cut' _ _ = {!!}
+{- 
+  -- ♭L and something
   unrestrict-cut' (♭L' D D₁) (♯R' E) = {!!}
   unrestrict-cut' (♭L' D D₁) (♯L' E) = {!!}
   unrestrict-cut' (♭L' D D₁) (♭L' E E₁) = {!!}
-  unrestrict-cut' (♭L' D D₁) (♭R' E) = {!!}
-  unrestrict-cut' (♭L' D D₁) (Inl' E) = {!!}
-  unrestrict-cut' (♭L' D D₁) (Inr' E) = {!!}
+  unrestrict-cut' (♭L' D D₁) (♭R' E) = {!!≈ (eq (cutFR (unrestrict (♭L' D D₁)))) ∘≈ FR≈ {α = 1m} {β = r} (unrestrict-cut' (♭L' D D₁) E)!}
+  unrestrict-cut' (♭L' D D₁) (Inl' E) = !≈ (eq (cutInl (unrestrict (♭L' D D₁)))) ∘≈ Inl≈ (unrestrict-cut' (♭L' D D₁) E)
+  unrestrict-cut' (♭L' D D₁) (Inr' E) = !≈ (eq (cutInr (unrestrict (♭L' D D₁)))) ∘≈ Inr≈ (unrestrict-cut' (♭L' D D₁) E)
   unrestrict-cut' (♭L' D D₂) (Case' E E₁ E₂) = {!!}
-  unrestrict-cut' (♭R' D) copy' = {!!}
-  unrestrict-cut' (♭R' D) ident' = {!!}
+  -- ♭R and something
   unrestrict-cut' (♭R' D) (♯R' E) = {!!}
   unrestrict-cut' (♭R' D) (♭L' E E₁) = {!!}
   unrestrict-cut' (♭R' D) (♭R' E) = {!!}
-  unrestrict-cut' (♭R' D) (Inl' E) = {!!}
-  unrestrict-cut' (♭R' D) (Inr' E) = {!!}
-  unrestrict-cut' (Inl' D) copy' = {!!}
-  unrestrict-cut' (Inl' D) ident' = {!!}
+  unrestrict-cut' (♭R' D) (Inl' E) = Inl≈ (unrestrict-cut' (♭R' D) E)
+  unrestrict-cut' (♭R' D) (Inr' E) = Inr≈ (unrestrict-cut' (♭R' D) E)
+  -- Inl 
   unrestrict-cut' (Inl' D) (♯R' E) = {!!}
   unrestrict-cut' (Inl' D) (♭R' E) = {!!}
-  unrestrict-cut' (Inl' D) (Inl' E) = {!!}
-  unrestrict-cut' (Inl' D) (Inr' E) = {!!}
-  unrestrict-cut' (Inl' D₁) (Case' E E₁ E₂) = {!!}
-  unrestrict-cut' (Inr' D) copy' = {!!}
-  unrestrict-cut' (Inr' D) ident' = {!!}
+  unrestrict-cut' (Inl' D) (Inl' E) = Inl≈ (unrestrict-cut' (Inl' D) E)
+  unrestrict-cut' (Inl' D) (Inr' E) = Inr≈ (unrestrict-cut' (Inl' D) E)
+  unrestrict-cut' (Inl' D₁) (Case' E E₁ E₂) = (!≈ (cut-assoc (Inl (unrestrict D₁)) (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ cut≈1 (unrestrict-cut' D₁ E) (unrestrict E₂)) ∘≈ unrestrict-cut' (cut' D₁ E) E₂
+  -- Inr 
   unrestrict-cut' (Inr' D) (♯R' E) = {!!}
   unrestrict-cut' (Inr' D) (♭R' E) = {!!}
-  unrestrict-cut' (Inr' D) (Inl' E) = {!!}
-  unrestrict-cut' (Inr' D) (Inr' E) = {!!}
-  unrestrict-cut' (Inr' D) (Case' E E₁ E₂) = {!!}
-  unrestrict-cut' (Case' D D₁ D₂) copy' = {!!}
-  unrestrict-cut' (Case' D D₁ D₂) ident' = {!!}
+  unrestrict-cut' (Inr' D) (Inl' E) = Inl≈ (unrestrict-cut' (Inr' D) E)
+  unrestrict-cut' (Inr' D) (Inr' E) = Inr≈ (unrestrict-cut' (Inr' D) E)
+  unrestrict-cut' (Inr' D) (Case' E E₁ E₂) = (!≈ (cut-assoc (Inr (unrestrict D)) (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ cut≈1 (unrestrict-cut' D E₁) (unrestrict E₂)) ∘≈ unrestrict-cut' (cut' D E₁) E₂
+  -- Case
   unrestrict-cut' (Case' D D₁ D₂) (♯R' E) = {!!}
   unrestrict-cut' (Case' D D₁ D₂) (♯L' E) = {!!}
   unrestrict-cut' (Case' D D₁ D₂) (♭L' E E₁) = {!!}
   unrestrict-cut' (Case' D D₁ D₂) (♭R' E) = {!!}
-  unrestrict-cut' (Case' D₁ D₂ D₃) (Inl' E) = {!!}
-  unrestrict-cut' (Case' D₁ D₂ D₃) (Inr' E) = {!!}
-  unrestrict-cut' (Case' D D₁ D₂) (Case' E E₁ E₂) = {!!}
+  unrestrict-cut' (Case' D₁ D₂ D₃) (Inl' E) = !≈ (eq (cutInl (cut (Case (unrestrict D₁) (unrestrict D₂)) (unrestrict D₃)))) ∘≈ Inl≈ (unrestrict-cut' (Case' D₁ D₂ D₃) E)
+  unrestrict-cut' (Case' D₁ D₂ D₃) (Inr' E) = !≈ (eq (cutInr (cut (Case (unrestrict D₁) (unrestrict D₂)) (unrestrict D₃)))) ∘≈ Inr≈ (unrestrict-cut' (Case' D₁ D₂ D₃) E)
+  unrestrict-cut' (Case' D D₁ D₂) (Case' E E₁ E₂) = cut-assoc (Case (unrestrict D) (unrestrict D₁)) (unrestrict D₂) (cut (Case (unrestrict E) (unrestrict E₁)) (unrestrict E₂)) ∘≈ cut≈2 (Case (unrestrict D) (unrestrict D₁)) (unrestrict-cut' D₂ (Case' E E₁ E₂))
+-}
+
+{-
 
   unrest-wlog : ∀ {A B α} → (D : A [ α ]⊢ B) → unrestrict (wlog D) ≈ D
   unrest-wlog {α = α} (hypp x) with 1-cell-case α
@@ -250,20 +359,17 @@ module adjointlogic2.Idempotent-Subcalculus3 where
   -- CASE
   unrest-wlog {α = α} (FL {r = m} {α = α1} D) with 0-cell-case {m}
   unrest-wlog {α = α} (FL {α = α1} D) | id with 1-cell-case α1
-  unrest-wlog {α = α} (FL D) | id | Inl id = {! LATER !}
+  unrest-wlog {α = α} (FL D) | id | Inl id = {! F1U1 !}
   unrest-wlog {α = α} (FL D) | id | Inr id with 1-cell-case α
   unrest-wlog (FL D) | id | Inr id | Inl id = FL≈ {α = r} {β = 1m} (unrest-wlog D) ∘≈ cut-ident-right (♭L1 (unrestrict (wlog D))) 
   unrest-wlog (FL D) | id | Inr id | Inr id = FL≈ {α = r} {β = r} (unrest-wlog D) ∘≈ cut-r-copy _
   -- CASE
   unrest-wlog {α = α} (FR {q = q} {α = α1} γ e D) with 0-cell-case {q}
   unrest-wlog {α = α} (FR {α = α1} γ e D) | id with 1-cell-case α1 | 1-cell-case γ | 1-cell-case α
-  unrest-wlog (FR .1m e D) | id | Inl id | Inl id | Inl id = {! eq (ap (λ x → FR 1m x D) (! (2-cell-case-loop e))) ∘≈ FR≈ (unrest-wlog D) !}
-  unrest-wlog (FR .1m e D) | id | Inl id | Inl id | Inr id = {!!}
--- eq (ap (λ x → FR 1m x D) (! (2-cell-case1r e))) ∘≈ 
---               FR2 {α = 1m} {β = r} {γ = r} {e = 1⇒} {e' = runit} {D = forget (trunit' id (wlog D))} {D' = D} 
---                   runit id (transport⊢≈ runit (unrest-wlog D) ∘≈ forget-trunit' id (wlog D))
+  unrest-wlog (FR .1m e D) | id | Inl id | Inl id | Inl id = {!F1U1 !}
+  unrest-wlog (FR .1m e D) | id | Inl id | Inl id | Inr id = {!F1U1!}
   unrest-wlog (FR .r e D) | id | Inl id | Inr id | Inl id = r⇒/1 e
-  unrest-wlog (FR .r e D) | id | Inl id | Inr id | Inr id = {! eq (ap (λ x → FR {α = 1m} r x D) (! (2-cell-case-loop e))) ∘≈ FR≈ (unrest-wlog D) !}
+  unrest-wlog (FR .r e D) | id | Inl id | Inr id | Inr id = {! F1U1 !}
   unrest-wlog (FR .1m e D) | id | Inr id | Inl id | Inl id = r⇒/1 e
   -- interesting case
   unrest-wlog (FR .1m e D) | id | Inr id | Inl id | Inr id = FR2 {α = r} {β = r} {γ = r} {γ' = 1m} {e = 1⇒} {e' = e} {D = unrestrict (cut' copy' (wlog D))}
@@ -273,20 +379,20 @@ module adjointlogic2.Idempotent-Subcalculus3 where
   -- CASE
   unrest-wlog {α = α} (UL {q = q} {α = α1} γ e D) with 0-cell-case {q} 
   unrest-wlog {α = α} (UL {α = α1} γ e D) | id with 1-cell-case α | 1-cell-case α1 | 1-cell-case γ 
-  unrest-wlog (UL .1m e D) | id | Inl id | Inl id | Inl id = {! eq (ap (λ x → UL {α = 1m} 1m x D) (! (2-cell-case-loop e))) ∘≈ UL≈ (unrest-wlog D) !}
+  unrest-wlog (UL .1m e D) | id | Inl id | Inl id | Inl id = {! F1U1 !}
   unrest-wlog (UL .r e D) | id | Inl id | Inl id | Inr id = r⇒/1 e
   unrest-wlog (UL .1m e D) | id | Inl id | Inr id | Inl id = r⇒/1 e
   unrest-wlog (UL .r e D) | id | Inl id | Inr id | Inr id = r⇒/1 e
   -- interesting case
-  unrest-wlog (UL .1m e D) | id | Inr id | Inl id | Inl id = {!!}
-  unrest-wlog (UL .r e D) | id | Inr id | Inl id | Inr id = {! eq (ap (λ x → UL {α = 1m} r x D) (! (2-cell-case-loop e))) ∘≈ UL≈ (unrest-wlog D) !}
+  unrest-wlog (UL .1m e D) | id | Inr id | Inl id | Inl id = {!F1U1!}
+  unrest-wlog (UL .r e D) | id | Inr id | Inl id | Inr id = {!F1U1 !}
   -- interesting case
   unrest-wlog (UL .1m e D) | id | Inr id | Inr id | Inl id = UL2 {α = r} {β = r} {γ = r} {γ' = 1m} {e = 1⇒} {e' = e} {D = unrestrict (cut' copy' (wlog D))} {D' = D} runit (! (2-cell-case-loop e) ∘ adjeq2) (((transport⊢≈ runit (cut-ident-left D) ∘≈ !≈ (transport⊢cut2 {e1 = runit} hyp D)) ∘≈ cut≈2 copy (unrest-wlog D)) ∘≈ unrestrict-cut' copy' (wlog D))
   unrest-wlog (UL .r e D) | id | Inr id | Inr id | Inr id = eq (ap (λ x → UL {α = r} r x D) (! (2-cell-case-loop e))) ∘≈ UL≈ (unrest-wlog D)
   -- CASE
   unrest-wlog (UR {p = p} {α = α} D) with 0-cell-case {p}
   unrest-wlog (UR {α = α₁} D) | id with 1-cell-case α₁ 
-  unrest-wlog (UR D) | id | Inl id = {! UR≈ {α = 1m} (unrest-wlog D) !}
+  unrest-wlog (UR D) | id | Inl id = {! F1U1 !}
   unrest-wlog {α = α} (UR D) | id | Inr id with 1-cell-case α
   unrest-wlog (UR D) | id | Inr id | Inl id = UR≈ {α = r} {β = 1m} (unrest-wlog D)
   unrest-wlog (UR D) | id | Inr id | Inr id = UR≈ {α = r} {β = r} (unrest-wlog D)
@@ -422,38 +528,45 @@ module adjointlogic2.Idempotent-Subcalculus3 where
   tond (♭L' D1 E) = substac (♭rec v (tond D1)) (tond E)
   tond {A = A1 ⊕ A2} {B = B} (Case' D1 D2 E) = substac (Case v (tond D1) (tond D2)) (tond E) 
 
-  example : (P ⊕ Q) [ r ]⇑ (Q ⊕ P)
-  example = ⇓⇑ (Case cv (Inr (⇓⇑ v)) (Inl (⇓⇑ v)))
-
-  example' : toseqc example == Case' (♯R' (Inr' copy')) (♯R' (Inl' copy')) (♯L' copy')
-  example' with 1-cell-case 1m 
-  example' | Inl id = id
-  example' | Inr q = 1≠r q
-  
-  example'' : unrestrict (toseqc example) ≈ Case (Inr (hypp runit)) (Inl (hypq runit))
-  example'' with 1-cell-case 1m 
-  example'' | Inl id with 1-cell-case 1m
-  example'' | Inl id | Inl id = Case≈ (Inr≈ (eq (ap hypp runit-idemp))) (Inl≈ (eq (ap hypq runit-idemp)))
-  ... | Inr q = 1≠r q
-  example'' | Inr q = 1≠r q
+  toseqa-substvva : ∀ {A B α} (D : A [ α ]⇓ B) (p : α == 1m) 
+                  → unrestrict (toseqa (substvva p D)) ≈ transport⊢ runit (transport (λ x → _ [ x ]⊢ _) p (unrestrict (toseqa D)))
+  toseqa-substvva cv p = 1≠r (! p)
+  toseqa-substvva v id = id
+  toseqa-substvva (♯E D) p = 1≠r (! p)
+  toseqa-substvva (♭rec D D') id = (!≈ (transport⊢≈ runit (unrestrict-cut' (toseqa D) (♭L' (toseqc D') ident'))) ∘≈ !≈ (transport⊢cut2 {e1 = runit} (unrestrict (toseqa D)) (unrestrict (♭L' (toseqc D') ident'))) ∘≈ cut≈1 (toseqa-substvva D id) (unrestrict (♭L' (toseqc D') ident'))) ∘≈ unrestrict-cut' (toseqa (substvva id D)) (♭L' (toseqc D') ident')
+  toseqa-substvva (Case D1 D2 D) id = (!≈ (transport⊢≈ runit (unrestrict-cut' (toseqa D1) (Case' (toseqc D2) (toseqc D) ident'))) ∘≈ !≈ (transport⊢cut2 {e1 = runit} (unrestrict (toseqa D1)) (cut (Case (unrestrict (toseqc D2)) (unrestrict (toseqc D))) hyp)) ∘≈ cut≈1 (toseqa-substvva D1 id) (cut (Case (unrestrict (toseqc D2)) (unrestrict (toseqc D))) hyp)) ∘≈ unrestrict-cut' (toseqa (substvva id D1)) (Case' (toseqc D2) (toseqc D) ident')
 
   toseq-substaa : ∀ {α : c ≥ c} {β : c ≥ c} {A : Tp c} {B : Tp c} {C : Tp c}
             (D : A [ β ]⇓ B) (E : B [ α ]⇓ C) →
             unrestrict (toseqa (substaa D E)) ≈ unrestrict(cut' (toseqa D) (toseqa E))
-  toseq-substaa D cv = {!!}
+  toseq-substaa {β = β} D cv with 1-cell-case β
+  toseq-substaa D cv | Inl id = !≈ (!≈ ((transport⊢cut1 {e2 = runit} (unrestrict (toseqa D)) hyp ∘≈ transport⊢≈ runit (!≈ (cut-ident-right (unrestrict (toseqa D))))) ∘≈ toseqa-substvva D id) ∘≈ unrestrict-cut' (toseqa D) copy')
+  toseq-substaa D cv | Inr id = !≈ (cut-r-copy _ ∘≈ unrestrict-cut' (toseqa D) copy')
   toseq-substaa D v = !≈ (unrestrict-cut' (toseqa D) ident') ∘≈ !≈ (cut-ident-right _)
   toseq-substaa {β = β} D (♯E E) with 1-cell-case β 
   toseq-substaa D (♯E E) | Inl id = (!≈ (unrestrict-cut' (toseqa D) (cut' (toseqa E) (♯L' copy'))) ∘≈ !≈ (cut≈2 (unrestrict (toseqa D)) (unrestrict-cut' (toseqa E) (♯L' copy'))) ∘≈ !≈ (cut-assoc (unrestrict (toseqa D)) (unrestrict (toseqa E)) (♯L copy)) ∘≈ cut≈1 (unrestrict-cut' (toseqa D) (toseqa E) ∘≈ toseq-substaa D E) (♯L copy)) ∘≈ unrestrict-cut' (toseqa (substaa D E)) (♯L' copy')
-  toseq-substaa D (♯E E) | Inr id = {!!}
-  toseq-substaa D (♭rec E E') = {!!}
-  toseq-substaa D (Case E1 E2 E') = {!!}
+  toseq-substaa D (♯E E) | Inr id = !≈ ((((cut≈1 (!≈ (toseq-substaa D E)) (♯L copy) ∘≈ cut≈1 (!≈ (unrestrict-cut' (toseqa D) (toseqa E))) (♯L copy)) ∘≈ cut-assoc (unrestrict (toseqa D)) (unrestrict (toseqa E)) (♯L copy)) ∘≈ cut≈2 (unrestrict (toseqa D)) (unrestrict-cut' (toseqa E) (♯L' copy'))) ∘≈ unrestrict-cut' (toseqa D) (cut' (toseqa E) (♯L' copy'))) ∘≈ unrestrict-cut' (toseqa (substaa D E)) (♯L' copy')
+  toseq-substaa D (♭rec E E') = (!≈ (unrestrict-cut' (toseqa D) (cut' (toseqa E) (♭L' (toseqc E') ident'))) ∘≈ !≈ (cut≈2 (unrestrict (toseqa D)) (unrestrict-cut' (toseqa E) (♭L' (toseqc E') ident'))) ∘≈ !≈ (cut-assoc (unrestrict (toseqa D)) (unrestrict (toseqa E)) (unrestrict (♭L' (toseqc E') ident'))) ∘≈ cut≈1 (unrestrict-cut' (toseqa D) (toseqa E) ∘≈ toseq-substaa D E) (unrestrict (♭L' (toseqc E') ident'))) ∘≈ unrestrict-cut' (toseqa (substaa D E)) (♭L' (toseqc E') ident')
+  toseq-substaa D (Case E1 E2 E') = (!≈ (unrestrict-cut' (toseqa D) (cut' (toseqa E1) (Case' (toseqc E2) (toseqc E') ident'))) ∘≈ cut≈2 (unrestrict (toseqa D)) (!≈ (unrestrict-cut' (toseqa E1) (Case' (toseqc E2) (toseqc E') ident'))) ∘≈ !≈ (cut-assoc (unrestrict (toseqa D)) (unrestrict (toseqa E1)) (cut (Case (unrestrict (toseqc E2)) (unrestrict (toseqc E'))) hyp)) ∘≈ cut≈1 (unrestrict-cut' (toseqa D) (toseqa E1) ∘≈ toseq-substaa D E1) (cut (Case (unrestrict (toseqc E2)) (unrestrict (toseqc E'))) hyp)) ∘≈ unrestrict-cut' (toseqa (substaa D E1)) (Case' (toseqc E2) (toseqc E') ident')
 
   toseq-substac : ∀ {α : c ≥ c} {β : c ≥ c} {A : Tp c} {B : Tp c} {C : Tp c}
             (D : A [ β ]⇓ B) (E : B [ α ]⇑ C) →
             unrestrict (toseqc (substac D E)) ≈ unrestrict(cut' (toseqa D) (toseqc E))
   toseq-substac D (⇓⇑ E) = toseq-substaa D E
-  toseq-substac D (♯I E) = {!!}
-  toseq-substac D (♭I E) = {!!}
+  toseq-substac {α = α} {β = β} D (♯I E) with 1-cell-case β | 1-cell-case α | 1-cell-case (β ∘1 α) 
+  toseq-substac D (♯I E) | Inl id | Inl id | Inl id = !≈ (unrestrict-cut' (toseqa D) (♯R' (toseqc E))) ∘≈ !≈ (cut≈2 (unrestrict (toseqa D)) unrestrict♯R1) ∘≈ !≈ (eq (cutUR (unrestrict (toseqa D)))) ∘≈ UR≈ {α = r} {β = 1m ∘1 1m} (unrestrict-cut' (toseqa D) (toseqc E) ∘≈ toseq-substac D E)
+  toseq-substac D (♯I E) | Inl id | Inr id | Inl p = 1≠r (! p)
+  toseq-substac D (♯I E) | Inr id | Inl id | Inl p = 1≠r (! p)
+  toseq-substac D (♯I E) | Inr id | Inr id | Inl p = 1≠r (! p)
+  toseq-substac D (♯I E) | Inl id | Inl id | Inr p = 1≠r p
+  toseq-substac D (♯I E) | Inl id | Inr id | Inr id = !≈ (unrestrict-cut' (toseqa D) (♯R' (toseqc E))) ∘≈ !≈ (cut≈2 (unrestrict (toseqa D)) unrestrict♯Rr) ∘≈ !≈ (eq (cutUR (unrestrict (toseqa D)))) ∘≈ UR≈ {α = r} {β = r} (unrestrict-cut' (toseqa D) (toseqc E) ∘≈ toseq-substac D E)
+  toseq-substac D (♯I E) | Inr id | Inl id | Inr id = !≈ (unrestrict-cut' {α = 1m} {β = r} (toseqa D) (♯R' (toseqc E))) ∘≈ !≈ (cut≈2 (unrestrict (toseqa D)) unrestrict♯R1) ∘≈ !≈ (eq (cutUR {α = 1m} {β = r} (unrestrict (toseqa D)))) ∘≈ UR≈ {α = r} {β = r} (unrestrict-cut' (toseqa D) (toseqc E) ∘≈ toseq-substac D E)
+  toseq-substac D (♯I E) | Inr id | Inr id | Inr id = !≈ (unrestrict-cut' {α = r} {β = r} (toseqa D) (♯R' (toseqc E))) ∘≈ !≈ (cut≈2 (unrestrict (toseqa D)) unrestrict♯Rr) ∘≈ !≈ (eq (cutUR {α = r} {β = r} (unrestrict (toseqa D)))) ∘≈ UR≈ {α = r} {β = r} (unrestrict-cut' (toseqa D) (toseqc E) ∘≈ toseq-substac D E)
+  toseq-substac {β = β} D (♭I E) with 1-cell-case β 
+  toseq-substac D (♭I E) | Inl id = !≈ ((FR≈ (!≈ (toseq-substac D E) ∘≈ !≈ (unrestrict-cut' (toseqa D) (toseqc E))) ∘≈ eq (cutFR (unrestrict (toseqa D)))) ∘≈ unrestrict-cut' (toseqa D) (♭R' (toseqc E)))
+  toseq-substac D (♭I E) | Inr id with 1-cell-case r 
+  ... | Inl q = 1≠r (! q)
+  ... | Inr id = !≈ (unrestrict-cut' (toseqa D) (♭R' (toseqc E))) ∘≈ !≈ (eq (cutFR {α = r} {β = r} {α' = r} {γ = r} {e = 1⇒} (unrestrict (toseqa D)))) ∘≈ FR≈ (unrestrict-cut' (toseqa D) (toseqc E) ∘≈ toseq-substac D E)
   toseq-substac D (Inl E) = !≈ (unrestrict-cut' (toseqa D) (Inl' (toseqc E))) ∘≈ !≈ (eq (cutInl (unrestrict (toseqa D)))) ∘≈ Inl≈ (unrestrict-cut' (toseqa D) (toseqc E) ∘≈ toseq-substac D E)
   toseq-substac D (Inr E) = !≈ (unrestrict-cut' (toseqa D) (Inr' (toseqc E))) ∘≈ !≈ (eq (cutInr (unrestrict (toseqa D)))) ∘≈ Inr≈ (unrestrict-cut' (toseqa D) (toseqc E) ∘≈ toseq-substac D E)
 
@@ -485,3 +598,23 @@ module adjointlogic2.Idempotent-Subcalculus3 where
 
   overall-nd : ∀ {A B α} (D : A [ α ]⊢ B) → nd-to-orig (orig-to-nd D) ≈ D
   overall-nd D = unrest-wlog D ∘≈ tond-toseq (wlog D)
+
+
+  -- examples
+
+  example : (P ⊕ Q) [ r ]⇑ (Q ⊕ P)
+  example = ⇓⇑ (Case cv (Inr (⇓⇑ v)) (Inl (⇓⇑ v)))
+
+  example' : toseqc example == Case' (♯R' (Inr' copy')) (♯R' (Inl' copy')) (♯L' copy')
+  example' with 1-cell-case 1m 
+  example' | Inl id = id
+  example' | Inr q = 1≠r q
+  
+  example'' : unrestrict (toseqc example) ≈ Case (Inr (hypp runit)) (Inl (hypq runit))
+  example'' with 1-cell-case 1m 
+  example'' | Inl id with 1-cell-case 1m
+  example'' | Inl id | Inl id = Case≈ (Inr≈ (eq (ap hypp runit-idemp))) (Inl≈ (eq (ap hypq runit-idemp)))
+  ... | Inr q = 1≠r q
+  example'' | Inr q = 1≠r q
+
+-}
