@@ -1,8 +1,8 @@
 
-open import adjointlogic2.Lib
-open import adjointlogic2.Rules
+open import adjointlogic.Lib
+open import adjointlogic.Rules
 
-module adjointlogic2.Properties where
+module adjointlogic.Properties where
 
   transport⊢1 : {p q : Mode} → {A : Tp q} → {α : q ≥ p} {B : Tp p} 
                (D : A [ α ]⊢ B)

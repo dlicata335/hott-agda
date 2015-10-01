@@ -1,11 +1,11 @@
 
-open import adjointlogic2.Lib
-open import adjointlogic2.Rules
-open import adjointlogic2.Properties
-open import adjointlogic2.General
-open import adjointlogic2.Idempotent
+open import adjointlogic.Lib
+open import adjointlogic.Rules
+open import adjointlogic.Properties
+open import adjointlogic.General
+open import adjointlogic.Idempotent
 
-module adjointlogic2.Idempotent-Subcalculus1 where
+module adjointlogic.Idempotent-Subcalculus1 where
 
   open IdempotentMonad
 

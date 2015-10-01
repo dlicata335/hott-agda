@@ -1,11 +1,13 @@
 
-open import adjointlogic2.Lib
-open import adjointlogic2.Rules
-open import adjointlogic2.Properties
-open import adjointlogic2.General
-open import adjointlogic2.Idempotent
+-- cut is admissible here, but this wouldn't work with ->
 
-module adjointlogic2.Idempotent-Subcalculus3 where
+open import adjointlogic.Lib
+open import adjointlogic.Rules
+open import adjointlogic.Properties
+open import adjointlogic.General
+open import adjointlogic.Idempotent
+
+module adjointlogic.Idempotent-Subcalculus3 where
 
   open IdempotentMonad
 

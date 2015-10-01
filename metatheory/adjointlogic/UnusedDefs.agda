@@ -1,11 +1,11 @@
 
-open import adjointlogic2.Lib
-open import adjointlogic2.Rules
-open import adjointlogic2.Properties
-open import adjointlogic2.General
+open import adjointlogic.Lib
+open import adjointlogic.Rules
+open import adjointlogic.Properties
+open import adjointlogic.General
 
 
-module adjointlogic2.UnusedDefs where
+module adjointlogic.UnusedDefs where
 
   -- justification for the definition of adjunction isomorphism; not fully formalized
 

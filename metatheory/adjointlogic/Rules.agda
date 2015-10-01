@@ -1,8 +1,8 @@
 
 
-open import adjointlogic2.Lib
+open import adjointlogic.Lib
 
-module adjointlogic2.Rules where
+module adjointlogic.Rules where
 
   -- use postulates rather than variables so the rewrite mechanism works
   -- don't want a datatype because we don't want elims
@@ -280,3 +280,34 @@ module adjointlogic2.Rules where
     {-# REWRITE 0-cell-case-c #-}
     {-# REWRITE 1-cell-case-1 #-}
     {-# REWRITE 1-cell-case-r #-}
+
+  
+  module Directed where
+    -- walking coreflection
+    postulate
+      g : Mode
+      c : Mode
+      corem : g ≥ c
+      locm : c ≥ g
+      coreloc : _==_ { g ≥ g} (corem ∘1 locm) (1m{g})
+      lccounit : (locm ∘1 corem) ⇒ 1m
+
+      opm : c ≥ c
+      opinvol : _==_ {c ≥ c} (opm ∘1 opm) (1m{c})
+
+      opcore : _==_ {g ≥ c} (corem ∘1 opm) (corem)
+      oploc : _==_ {c ≥ g} (opm ∘1 locm) (locm)
+
+    {-# REWRITE coreloc #-}
+    {-# REWRITE opinvol #-}
+    {-# REWRITE opcore #-}
+    {-# REWRITE oploc #-}
+  
+    coreloc-prefix : {m : Mode} {α : g ≥ m} → (corem ∘1 (locm ∘1 α)) == α
+    coreloc-prefix {α = α} = ! (∘1-assoc {α = corem} { locm } {α}) 
+
+    opinvol-prefix : {m : Mode} {α : c ≥ m} → (opm ∘1 (opm ∘1 α)) == α
+    opinvol-prefix {α = α} = ! (∘1-assoc {α = opm} { opm } {α}) 
+
+    {-# REWRITE coreloc-prefix #-}
+    {-# REWRITE opinvol-prefix #-}

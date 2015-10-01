@@ -3,7 +3,7 @@
 
 open import Agda.Primitive
 
-module adjointlogic2.Lib where
+module adjointlogic.Lib where
 
   -- REWRITE seems not to work with type-in-type
   data _==_ {A : Set} (M : A) : A → Set where

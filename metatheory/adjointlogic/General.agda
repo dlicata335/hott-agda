@@ -1,9 +1,9 @@
 
-open import adjointlogic2.Lib
-open import adjointlogic2.Rules
-open import adjointlogic2.Properties
+open import adjointlogic.Lib
+open import adjointlogic.Rules
+open import adjointlogic.Properties
 
-module adjointlogic2.General where
+module adjointlogic.General where
 
   -- a bunch of category theory definitions specialized to the categories used here
 

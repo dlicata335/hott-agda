@@ -1,14 +1,14 @@
 
-open import adjointlogic2.Lib
-open import adjointlogic2.Rules
-open import adjointlogic2.Properties
-open import adjointlogic2.General
-open import adjointlogic2.TripleAdjunction 
+open import adjointlogic.Lib
+open import adjointlogic.Rules
+open import adjointlogic.Properties
+open import adjointlogic.General
+open import adjointlogic.TripleAdjunction 
 
-module adjointlogic2.Reflection where
+module adjointlogic.Reflection where
 
   -- for some reason the rewrites only work if we define the theory in that file
-  open adjointlogic2.Rules.Reflection
+  open adjointlogic.Rules.Reflection
 
   -- note that for this theory
   -- s ≥ s has only 1m
