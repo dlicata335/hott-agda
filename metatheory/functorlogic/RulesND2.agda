@@ -124,11 +124,17 @@ module functorlogic.RulesND2 where
           → A [ δ ∘1 γ ]⇑ B [ δ' ∘1 γ' ]
   SimpleFunc e D = Func 1⇒ D e 1⇒ 
 
-  NatR⇓ : ∀ {p q s} {α α' : q ≥ p} {γ : q ≥ s} {A : Tp p} {C : Tp s}
+  Natr : ∀ {p q s} {α α' : q ≥ p} {γ : q ≥ s} {A : Tp p} {C : Tp s}
          → C [ γ ]⇓ A [ α ]
          → (e : α ⇒ α')
          → C [ γ ]⇑ A [ α' ]
-  NatR⇓ {α = α}{α'}{γ} D e = Func {γ = γ} {γ' = α}  {δ = 1m} {δ' = 1m} 1⇒ D 1⇒ e
+  Natr {α = α}{α'}{γ} D e = Func {γ = γ} {γ' = α}  {δ = 1m} {δ' = 1m} 1⇒ D 1⇒ e
+
+  Natl : ∀ {p q s} {α : q ≥ p} {γ γ' : q ≥ s} {A : Tp p} {C : Tp s}
+           → C [ γ ]⇓ A [ α ]
+           → (e : γ' ⇒ γ)
+           → C [ γ' ]⇑ A [ α ]
+  Natl {α = α} {γ} {γ'} D e = Func {γ = γ} {γ' = α} {δ = 1m} {δ' = 1m} e D 1⇒ 1⇒
 
   natr : ∀ {p q s} {α α' : q ≥ p} {γ : q ≥ s} {A : Tp p} {C : Tp s}
            → C [ γ ]⇑ A [ α ]
