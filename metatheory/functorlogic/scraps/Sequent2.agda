@@ -1,8 +1,9 @@
 
+-- functoriality as a rule
 
 open import functorlogic.Lib
 open import functorlogic.Modes
-open import functorlogic.Sequent
+open import functorlogic.SequentHypOnly
 
 module functorlogic.Sequent2 where
 

@@ -22,16 +22,15 @@
 \usepackage{tikz}
 \usetikzlibrary{decorations.pathmorphing}
 
-\usepackage{ucs}
-\usepackage[utf8x]{inputenc}
-\usepackage[T1]{fontenc}
-
-\newcommand{\noagda}[0]{}
                                                                                                                                                  
 \usepackage{graphicx}                                                                                                                                          
 \newcommand\Shamrock{\includegraphics[width=0.6em]{sham}}                                                                                                      
 \newcommand\Shamrockv[1]{\ensuremath{\includegraphics[width=0.6em]{sham}_{#1}}}  
 
+\newcommand{\noagda}[0]{}
+\usepackage{ucs}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
 \DeclareUnicodeCharacter{8594}{$\shortrightarrow$}
 \DeclareUnicodeCharacter{9001}{$\langle$}
 \DeclareUnicodeCharacter{9002}{$\rangle$}
@@ -77,7 +76,6 @@
 \newcommand\textdelta{$\delta$}
 
 \usepackage{fancyvrb}
-
 \newcommand{\ttt}[1]{\texttt{#1}}
 
 \usepackage{drl-common/code}
@@ -93,6 +91,7 @@
 {\end{tightcode}
 \end{small}
 \smallskip}
+
 
 \input{macros}
 

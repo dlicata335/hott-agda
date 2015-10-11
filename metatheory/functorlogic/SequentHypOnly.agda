@@ -3,7 +3,7 @@
 open import functorlogic.Lib
 open import functorlogic.Modes
 
-module functorlogic.Sequent where
+module functorlogic.SequentHypOnly where
 
   data Tp : Mode → Set where
     P : ∀ {m} → Tp m
@@ -51,4 +51,32 @@ module functorlogic.Sequent where
   cut {β = β} D (FR  γ e E) = FR (β ∘1 γ) (1⇒ ∘1cong e) (cut D E)
   -- left commutative
   cut {α = β'} {β = β} (FL {α = α} D) E = FL {α = α} {β = β ∘1 β'} (cut D E)
+
+
+  data _≈_ : ∀ {p q} {α : p ≥ q} {A : Tp p} {B : Tp q} (D1 D2 : A [ α ]⊢ B) → Set where
+
+    -- congruence
+    id  : ∀ {p q} {α : p ≥ q} {A : Tp p} {B : Tp q} {D1 : A [ α ]⊢ B} → D1 ≈ D1
+    _∘≈_ : ∀ {p q} {α : p ≥ q} {A : Tp p} {B : Tp q} {D1 D2 D3 : A [ α ]⊢ B} 
+         → D2 ≈ D3 → (D1 ≈ D2) → D1 ≈ D3 
+    !≈ : ∀ {p q} {α : p ≥ q} {A : Tp p} {B : Tp q} {D1 D2 : A [ α ]⊢ B} 
+         → D1 ≈ D2 → D2 ≈ D1
+    FL≈ : ∀ {p q r} {α : q ≥ p} {β : p ≥ r} {A : Tp q} {C : Tp r}
+       → {D1 D2 : A [ α ∘1 β ]⊢ C} → D1 ≈ D2 → FL D1 ≈ FL D2
+    FR≈ : ∀ {p q r} {α : q ≥ p} {β : r ≥ p} {A : Tp q} {C : Tp r}
+       → {γ : r ≥ q} {e : (γ ∘1 α) ⇒ β}
+       → {D1 D2 : C [ γ ]⊢ A} → D1 ≈ D2 → FR γ e D1 ≈ FR γ e D2
+
+    -- the η rules could maybe be made to hold on the nose 
+    -- with focusing
+    Fη : ∀ {p q r} {α : q ≥ p} {β : p ≥ r} {A : Tp q} {C : Tp r}
+         (D : F α A [ β ]⊢ C) → 
+         D ≈ FL (cut {α = β} {β = α} (FR {α = α} {β = 1m ∘1 α} 1m 1⇒ hyp) D) 
+
+    -- properties of the functor assigning morphisms between adjunctions
+
+    FR2 : ∀ {p q r} {α : q ≥ p} {β : r ≥ p} {A : Tp q} {C : Tp r}
+         → {γ γ' : r ≥ q} → {e : (γ ∘1 α) ⇒ β} {e' : (γ' ∘1 α) ⇒ β } {D : C [ γ ]⊢ A}  {D' : C [ γ' ]⊢ A} 
+         → (γ2 : γ' ⇒ γ) (e2 : ((γ2 ∘1cong 1⇒) ·2 e) == e') (D2 : D ≈ transport⊢ γ2 D')
+         → FR γ e D ≈ FR γ' e' D' 
 

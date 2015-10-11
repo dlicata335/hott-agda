@@ -7,7 +7,7 @@ open import lib.cubical.Cubical
 
 module lib.REquiv where
 
-  record REquiv {A0 A1 : Type} (f : A0 → A1) : Type where
+  record IsREquiv {A0 A1 : Type} (f : A0 → A1) : Type where
     constructor requiv
     field
       _~_  : A0 → A1 → Type
@@ -16,75 +16,54 @@ module lib.REquiv where
       het1 : (y : A1) → g y ~ y
       hom0 : ∀ {x y} → x ~ y → x == g y
       hom1 : ∀ {x y} → x ~ y → f x == y
-      homhet01 : ∀ {x y} (e : x ~ y) → PathOver (\ p → _~_ (fst p) (snd p)) (pair×≃ (hom0 e) (hom1 e)) (het0 x) (het1 y)
+      homhet0 : ∀ {x y} {e : x ~ y} → PathOver (λ z → z ~ y) (hom0 e) e (het1 y)
+      homhet1 : ∀ {x y} {e : x ~ y} → PathOver (λ z → x ~ z) (hom1 e) (het0 x) e
 
-  open BoolM
+  IsREquiv' : {A0 A1 : Type} (f : A0 → A1) → Set
+  IsREquiv' {A0}{A1} f = Σ (λ (R : A0 → A1 → Set) → (x : A0) (y : A1) → Equiv (R x y) (Id (f x) y))
 
-  not : Bool → Bool
-  not = (Bool-elim _ False True)
+  module IsREquiv-IsREquiv' {A0 A1 : Type} (f : A0 → A1) where
+    het0' : (R : IsREquiv f) {x : A0} {y : A1} → Id (f x) y → IsREquiv._~_ R x y
+    het0' R id = IsREquiv.het0 R _
+    
+    to : IsREquiv f → IsREquiv' f
+    to (requiv _~_ g het0 het1 hom0 hom1 homhet0 homhet1) = _~_ , (λ x y → hom1 , (isequiv (het0' (requiv _~_ g het0 het1 hom0 hom1 homhet0 homhet1)) {!!} {!!} {!!}))
 
-  Not : Bool -> Bool -> Set
-  Not = Bool-elim _ (Bool-elim _ Void Unit) (Bool-elim _ Unit Void)
+    from : IsREquiv' f → IsREquiv f
+    from (R , f) = requiv R {!!} {!!} {!!} {!!} {!!} {!!} {!!}
 
-  example : REquiv not
-  example = requiv Not
-                   not
-                   (Bool-elim _ <> <>)
-                   (Bool-elim _ <> <>) 
-                   (λ {x} {y} →
-                        Bool-elim (λ x₁ → (y₁ : Bool) → Not x₁ y₁ → x₁ == not y₁) 
-                                  (Bool-elim _ Sums.abort (λ _ → id))
-                                  (Bool-elim _ (λ _ → id) Sums.abort) x y) 
-                   (λ {x} {y} →
-                        Bool-elim (λ x₁ → (y₁ : Bool) → Not x₁ y₁ → not x₁ == y₁)
-                        (Bool-elim _ Sums.abort (λ _ → id))
-                        (Bool-elim _ (λ _ → id) Sums.abort) x y)
-                   sq  where
-          sq : {x y : Bool} (e : Not x y) → PathOver (λ p → Not (fst p) (snd p)) (pair×≃ (Bool-elim (λ x₁ → (y₁ : Bool) → Not x₁ y₁ → x₁ == not y₁) (Bool-elim (λ z → Not True z → True == not z) Sums.abort (λ _ → id)) (Bool-elim (λ z → Not False z → False == not z) (λ _ → id) Sums.abort) x y e) (Bool-elim (λ x₁ → (y₁ : Bool) → Not x₁ y₁ → not x₁ == y₁) (Bool-elim (λ z → Not True z → not True == z) Sums.abort (λ _ → id)) (Bool-elim (λ z → Not False z → not False == z) (λ _ → id) Sums.abort) x y e)) (Bool-elim (λ z → Not z (not z)) <> <> x) (Bool-elim (λ z → Not (not z) z) <> <> y)
-          sq {True} {True} e = Sums.abort e
-          sq {True} {False} e = {!basically id!}
-          sq {False} {True} e = {!basically id!}
-          sq {False} {False} e = Sums.abort e
 
-  module Foo {A0 A1} (f : A0 → A1) where
-    to' : IsEquiv f → REquiv f
-    to' (isequiv g α β γ) = record
-                             { _~_ = λ a0 a1 → Σ \ (p : (f a0 == a1)) → Σ \ (q : a0 == g a1) → p == β _ ∘ ap f q
-                             ; g = g
-                             ; het0 = λ x → id , ! (α x) , {!γ!}
-                             ; het1 = λ x → β x , α (g x) ∘ ap g (! (β x)) , {!other triangle!}
-                             ; hom0 = λ x → fst (snd x)
-                             ; hom1 = fst
-                             ; homhet01 = {!!}
-                             } where 
-       sq : ∀ {x y} (e : f x == y) → Square id (ap f (ap g e ∘ (! (α x)))) e (β y)
-       sq {x} id = {!γ x!}
+  -- FIXME: prove REquiv f == IsEquiv f
 
-    to : IsEquiv f → REquiv f
-    to (isequiv g α β γ) = record
-                             { _~_ = λ a0 a1 → f a0 == a1
-                             ; g = g
-                             ; het0 = λ _ → id
-                             ; het1 = β
-                             ; hom0 = λ e → ap g e ∘ ! (α _)
-                             ; hom1 = λ e → e
-                             ; homhet01 = λ e → PathOver=.in-PathOver-= (whisker-square id {!!} {!!} id (sq e))
-                             } where 
-       sq : ∀ {x y} (e : f x == y) → Square id (ap f (ap g e ∘ (! (α x)))) e (β y)
-       sq {x} id = {!γ x!}
+  REquiv-to-IsEquiv : ∀ {A0 A1} (f : A0 → A1) → IsREquiv f → IsEquiv f
+  REquiv-to-IsEquiv f (requiv _~_ g het0 het1 hom0 hom1 homhet0 homhet1) = isequiv g (λ x → ! (hom0 (het0 x))) (λ x → hom1 (het1 x)) {!!}
 
-    from : REquiv f → IsEquiv f
-    from (requiv _~_ g het0 het1 hom0 hom1 homhet01) = 
-      isequiv g (λ x → ! (hom0 (het0 x))) (λ x → hom1 (het1 x)) (λ x → {!!})
+  IsEquiv-to-REquiv : ∀ {A0 A1} (f : A0 → A1) → IsEquiv f → IsREquiv f
+  IsEquiv-to-REquiv f (isequiv g α β γ) = requiv (λ a0 a1 → f a0 == a1) g (λ _ → id) β (λ p → ap g p ∘ ! (α _)) (λ p → p) {!!} {!!}
 
--- Goal: Path (hom1 (het1 (f x))) (ap f (! (hom0 (het0 x))))
--- PathOver (λ p → fst p ~ snd p) (pair×≃ (hom0 (het0 x)) (hom1 (het0 x))) (het0 x) (het1 (f x))
--- Have: PathOver (λ p → fst p ~ snd p)
-    --   (pair×≃ (hom0 (het1 (f x))) (hom1 (het1 (f x)))) (het0 (g (f x)))
-    --   (het1 (f x))
+  -- compose to the identity?  
+  -- or is it easier to show REquiv is a prop directly?  
 
-    to-from : ∀ e → from (to e) == e
-    to-from (isequiv g α β γ) = {!!}
+  record RHEquiv (A0 A1 : Type) : Type where
+    constructor requiv
+    field
+      _~_  : A0 → A1 → Type
+      f : A0 → A1
+      g    : A1 → A0
+      het0 : (x : A0) → x ~ f x
+      het1 : (y : A1) → g y ~ y
+      hom0 : ∀ {x y} → x ~ y → x == g y
+      hom1 : ∀ {x y} → x ~ y → f x == y
+  
+  rhequiv-to-hequiv : ∀ {A0 A1} → RHEquiv A0 A1 → HEquiv A0 A1
+  rhequiv-to-hequiv (requiv _~_ f g het0 het1 hom0 hom1) = hequiv f g (λ x → ! (hom0 (het0 x))) (λ x → hom1 (het1 x))
 
-    from-to : ∀ e → to (from e) == e
-    from-to (requiv _~_ g het0 het1 hom0 hom1 homhet01) = {!!}
+  hequiv-to-rhequiv : ∀ {A0 A1} → HEquiv A0 A1 → RHEquiv A0 A1
+  hequiv-to-rhequiv (f , ishequiv g α β) = requiv (λ a0 a1 → f a0 == a1) f g (λ _ → id) β (λ p → ap g p ∘ ! (α _)) (λ p → p)
+
+  rhequiv-to-hequiv-c1 : ∀ {A0 A1} (h : HEquiv A0 A1) → h == rhequiv-to-hequiv (hequiv-to-rhequiv h)
+  rhequiv-to-hequiv-c1 (f , ishequiv g α β) = {!OK!}
+
+  rhequiv-to-hequiv-c2 : ∀ {A0 A1} (r : RHEquiv A0 A1) → r == hequiv-to-rhequiv (rhequiv-to-hequiv r)
+  rhequiv-to-hequiv-c2 (requiv _~_ f g het0 het1 hom0 hom1) = {!!}
+    -- requires (a0 ~ a1) == (f a0 == a1), which is probably not true for the incoherent definition?
