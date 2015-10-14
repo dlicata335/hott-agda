@@ -59,41 +59,81 @@ module functorlogic.ND-NonNormal1 where
   fromseq {α1 = α1} (FR {α = α} γ e D) = FI {β = 1m} {α = α} (LetFunc α (Nat e v) (fromseq D))
 
 
-{-
-  data _≈_ {p : Mode} {Γ : Ctx p} : {q : Mode} {A : Tp q} {α : q ≥ p} → (D1 D2 : Γ ⊢ A [ α ]) → Set where
+  data _≈'_ {p0 p : Mode} {A0 : Tp p0} {α0 : p0 ≥ p} : {q : Mode} {A : Tp q} {α : q ≥ p} → (D1 D2 : A0 [ α0 ]⊢ A [ α ]) → Set where
     -- FIXME: congruence rules
+    id  : ∀ {q : Mode} {A2 : Tp q} {α2 : q ≥ p}
+        → {D : A0 [ α0 ]⊢ A2 [ α2 ]}
+        → D ≈' D
+    !≈' : ∀ {q : Mode} {A2 : Tp q} {α2 : q ≥ p}
+        → {D D' : A0 [ α0 ]⊢ A2 [ α2 ]}
+        → D ≈' D'
+        → D' ≈' D
+    _∘≈'_ : ∀ {q : Mode} {A2 : Tp q} {α2 : q ≥ p}
+        → {D1 D2 D3 : A0 [ α0 ]⊢ A2 [ α2 ]}
+        → D2 ≈' D3
+        → D1 ≈' D2 
+        → D1 ≈' D3
+    Nat≈ : {q : Mode} {A : Tp q} {α α' : q ≥ p} 
+        → (e : α' ⇒ α) → {D D' : A0 [ α0 ]⊢ A [ α ] }
+        → D ≈' D' → Nat e D ≈' Nat e D
+    LetFunc≈ : {q r s : Mode} {C : Tp r} {A2 : Tp s} {α2 : s ≥ q} (α : q ≥ p) {γ : r ≥ q}
+            → {D1 D2 : A0 [ α0 ]⊢ A2 [ α2 ∘1 α ]} → {E1 E2 : A2 [ α2 ]⊢ C [ γ ] }
+            → D1 ≈' D2 → E1 ≈' E2 → LetFunc α D1 E1 ≈' LetFunc α D2 E2 
+    FE≈ : {q r : Mode} {A : Tp r} {β : q ≥ p} {α : r ≥ q} 
+      → {D1 D2 : A0 [ α0 ]⊢ F α A [ β ]}
+      → D1 ≈' D2 
+      → FE D1 ≈' FE D2 
+    FI≈ : {q r : Mode} {A : Tp r} {β : q ≥ p} {α : r ≥ q}
+         {D1 D2 : A0 [ α0 ]⊢ A [ α ∘1 β ]}
+         → D1 ≈' D2
+         → (FI D1) ≈' (FI D2)
 
     Fβ : {q r : Mode} {A : Tp r} {β : q ≥ p} {α : r ≥ q}
-         (D : Γ ⊢ A [ α ∘1 β ])
-         → FE (FI D) ≈ D
-    Fη : {q r : Mode} {A : Tp r} {β : q ≥ p} {α : r ≥ q} 
-         (D : Γ ⊢ F α A [ β ]) → 
-         FI (FE D) ≈ D
-    ⊃β : {A B : Tp p} (D : (Γ , A [ 1m ]) ⊢ B [ 1m ]) (E : Γ ⊢ A [ 1m ])
-       → App (Lam D) E ≈ LetFunc (Γ , A [ 1m ]) 1m (1s ,, E) D
+         (D : A0 [ α0 ]⊢ A [ α ∘1 β ])
+         → FE (FI D) ≈' D
+    Fη' : {q r : Mode} {A : Tp r} {β : q ≥ p} {α : r ≥ q} 
+         (D : A0 [ α0 ]⊢ F α A [ β ]) → 
+         FI (FE D) ≈' D
     NatNat : ∀ {q} {A : Tp q} {α α₁ : q ≥ p}
-               {e : α ⇒ α₁} {α₂ : q ≥ p} {e₁ : α₁ ⇒ α₂} {D : Γ ⊢ A [ α₂ ]} →
-               (Nat e (Nat e₁ D)) ≈ Nat (e ·2 e₁) D
+               {e : α ⇒ α₁} {α₂ : q ≥ p} {e₁ : α₁ ⇒ α₂} {D : A0 [ α0 ]⊢ A [ α₂ ]} →
+               (Nat e (Nat e₁ D)) ≈' Nat (e ·2 e₁) D
     Nat1 : {q : Mode} {A : Tp q} {α : q ≥ p} 
-         → (D : Γ ⊢ A [ α ] )
-         → Nat 1⇒ D ≈ D
+         → (D : A0 [ α0 ]⊢ A [ α ] )
+         → Nat 1⇒ D ≈' D
     NatFI : ∀ {q} {α α₁ : q ≥ p} {e : α ⇒ α₁} {r}
-            {A : Tp r} {α₂ : r ≥ q} {D : Γ ⊢ A [ α₂ ∘1 α₁ ]} →
-            (Nat e (FI D)) ≈ FI (Nat (1⇒ ∘1cong e) D)
+            {A : Tp r} {α₂ : r ≥ q} {D : A0 [ α0 ]⊢ A [ α₂ ∘1 α₁ ]} →
+            (Nat e (FI D)) ≈' FI (Nat (1⇒ ∘1cong e) D)
     NatFE : ∀ {q} {A : Tp q} {α : q ≥ p} {q₁}
             {β β' : q₁ ≥ p} {α₁ α₁' : q ≥ q₁} {e₁ : α₁' ⇒ α₁} {e : β' ⇒ β}
-            {D : Γ ⊢ F α₁ A [ β ]} →
-            (Nat (e₁ ∘1cong e) (FE D)) ≈ Nat (e₁ ∘1cong 1⇒) (FE (Nat e D))
-    NatLetFunc : ∀ {q} {A : Tp q} {α : q ≥ p} {q₁}
-               {Γ' : Ctx q₁} {α₁ α₁' : q₁ ≥ p} {γ γ' : q ≥ q₁} {e : γ' ⇒ γ} {e₁ : α₁' ⇒ α₁}
-               {θ : Γ ⊢ (Γ' ∘c α₁)}
-               {D : Γ' ⊢ A [ γ ]} → 
-               (Nat (e ∘1cong e₁) (LetFunc Γ' α₁ θ D)) ≈ (LetFunc Γ' α₁' (subst∘c (λ x → Nat (1⇒ ∘1cong e₁) (θ (∈∘ x)))) (Nat e D))
+            {D : A0 [ α0 ]⊢ F α₁ A [ β ]} →
+            (Nat (e₁ ∘1cong e) (FE D)) ≈' Nat (e₁ ∘1cong 1⇒) (FE (Nat e D))
+    NatLetFunc : ∀ {q q2} {A : Tp q} {α : q ≥ p} {q₁}
+               {A2 : Tp q2} {α2 : q2 ≥ q₁} {α₁ α₁' : q₁ ≥ p} {γ γ' : q ≥ q₁} {e : γ' ⇒ γ} {e₁ : α₁' ⇒ α₁}
+               {θ : A0 [ α0 ]⊢ A2 [ α2 ∘1 α₁ ]}
+               {D : A2 [ α2 ]⊢ A [ γ ]} → 
+               (Nat (e ∘1cong e₁) (LetFunc α₁ θ D)) ≈' (LetFunc α₁' (Nat (1⇒ ∘1cong e₁) θ) (Nat e D))
+    LetFuncCompose : {q r s t : Mode} {C : Tp r} (α : q ≥ p) {γ : r ≥ q} 
+                   → {A2 : Tp t} {α2 : t ≥ q} {A3 : Tp s} {α3 : s ≥ q} → (D :  A0 [ α0 ]⊢ A2 [ α2 ∘1 α ]) 
+                   → (E1 :  A2 [ α2 ]⊢ A3 [ α3 ]) 
+                   → (E2 :  A3 [ α3 ]⊢ C [ γ ]) 
+                   → LetFunc α (LetFunc α D E1) E2 ≈' LetFunc α D (subst E1 E2)
+    LetFuncIdent : {q t : Mode} {α : q ≥ p} 
+                   → {A2 : Tp t} {α2 : t ≥ q} → {D :  A0 [ α0 ]⊢ A2 [ α2 ∘1 α ]}
+                   → (LetFunc α D v) ≈' D
 
-    -- FIXME more general
-    LetFuncLetFunc : {q r s : Mode} {C : Tp r} (α : q ≥ p) {γ : r ≥ q} {α1 : s ≥ q} {A : Tp s}
-                      {Γ' : Ctx q} {θ : Γ ⊢ (Γ' ∘c α)} 
-                      (E : (· , A [ α1 ]) ⊢ C [ γ ]) (D : Γ' ⊢ A [ α1 ])
-                   → LetFunc1 α (LetFunc Γ' α θ D) E ≈ LetFunc Γ' α θ {!!}
--}
                 
+  fromseq-hyp : ∀ {p  : Mode} (A : Tp p) → fromseq (ident A) ≈' v
+  fromseq-hyp P = Nat1 v
+  fromseq-hyp Q = Nat1 v
+  fromseq-hyp (F α A) = Fη' v ∘≈' FI≈  {β = 1m}{α = α}(LetFuncIdent {α0 = 1m} {α = α}{α2 = 1m} {D = FE v} ∘≈' LetFunc≈ {α0 = 1m} α {D1 = Nat 1⇒ (FE v)} {D2 = FE v} {E1 = fromseq (ident A)} {E2 = v} (Nat1 _) (fromseq-hyp A)) 
+
+  fromseq≈ : ∀ {p r : Mode} {A1 : Tp r} {α1 : r ≥ p} {A : Tp p} 
+           {D D' : A1 [ α1 ]⊢ A}
+           → D ≈ D' → fromseq D ≈' fromseq D'
+  fromseq≈ id = {!!}
+  fromseq≈ (eq ∘≈ eq₁) = {!!}
+  fromseq≈ (!≈ eq) = {!!}
+  fromseq≈ (FL≈ eq) = {!!}
+  fromseq≈ (FR≈ eq) = {!!}
+  fromseq≈ (Fη D) = {!!}
+  fromseq≈ {α1 = α1} (FR2 {α = α} γ2 e2 eq) = FI≈ {!!}
