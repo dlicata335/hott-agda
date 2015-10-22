@@ -7,6 +7,13 @@ open import lib.cubical.Cubical
 
 module lib.REquiv where
 
+  record REquiv (A0 A1 : Type) : Type where
+    constructor requiv
+    field
+      _~_  : A0 → A1 → Type
+      total1 : (a0 : A0) → Contractible (Σ \ (a1 : A1) → a0 ~ a1)
+      total2 : (a1 : A1) → Contractible (Σ \ (a0 : A0) → a0 ~ a1)
+
   record IsREquiv {A0 A1 : Type} (f : A0 → A1) : Type where
     constructor requiv
     field

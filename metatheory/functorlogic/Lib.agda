@@ -41,3 +41,23 @@ module functorlogic.Lib where
     Inr : B → Either A B
 
 
+  -- ----------------------------------------------------------------------
+  -- products
+  
+  record Σe (A : Set) (B : A -> Set) : Set where
+     constructor _,_
+     field
+       fst : A
+       snd : B fst
+  open Σe public
+  
+  infixr 0 _,_
+
+  Σ : {A : Set} -> (B : A -> Set) -> Set
+  Σ {A} B = Σe A B
+
+  _×_ : Set → Set → Set
+  A × B = Σe A (\ _ -> B)
+
+  infixr 10 _×_
+
