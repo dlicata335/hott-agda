@@ -4,7 +4,7 @@
 open import functorlogic.Lib
 open import functorlogic.Modes
 
-module functorlogic.ND-NonNormal where
+module functorlogic.NDConc where
 
   data Tp : Mode → Set where
     P : ∀ {m} → Tp m
@@ -96,7 +96,7 @@ module functorlogic.ND-NonNormal where
   ·· : ∀ {p} {Γ : Ctx p} → Γ ⊢ · 
   ·· ()
 
-  _,,_ : ∀ {p q} {Γ Γ' : Ctx p} {A : Tp q} {α : q ≥ p} → Γ ⊢ Γ' → Γ ⊢ A [ α ] → Γ ⊢ Γ' , A [ α ]
+  _,,_ : ∀ {p q} {Γ Γ' : Ctx p} {A : Tp q} {α : q ≥ p} → Γ ⊢ Γ' → Γ ⊢ A [ α ] → Γ ⊢ (Γ' , A [ α ])
   _,,_ θ e i0 = e 
   _,,_ θ e (iS x) = θ x
 

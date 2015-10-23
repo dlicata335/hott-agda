@@ -3,7 +3,7 @@
 open import functorlogic.Lib
 open import functorlogic.Modes
 
-module functorlogic.NDNonStructural where
+module functorlogic.NDBI-1 where
 
   data Tp : Mode → Set where
     P : ∀ {m} → Tp m

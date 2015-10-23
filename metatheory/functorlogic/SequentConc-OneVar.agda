@@ -5,7 +5,7 @@ open import functorlogic.Lib
 open import functorlogic.Modes
 open import functorlogic.SequentHypOnly
 
-module functorlogic.SequentAdmissibleNoConnectives where
+module functorlogic.SequentConc-OneVar where
 
   data _[_]⊢_[_] : {p q r : Mode} → Tp p → p ≥ r → Tp q -> q ≥ r → Set where
     hypp : ∀ {p q} {α β : p ≥ q} → β ⇒ α → P [ α ]⊢ P [ β ]

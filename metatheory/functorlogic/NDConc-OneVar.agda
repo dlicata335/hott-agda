@@ -3,9 +3,9 @@
 
 open import functorlogic.Lib
 open import functorlogic.Modes
-open import functorlogic.SequentHypOnly
+open import functorlogic.SequentHypOnly-OneVar
 
-module functorlogic.ND-NonNormal1 where
+module functorlogic.NDConc-OneVar where
 
 
   data _[_]⊢_[_] {p r : Mode} (A1 : Tp r) (α1 : r ≥ p) : {q : Mode} → Tp q -> q ≥ p → Set where
