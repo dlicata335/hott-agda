@@ -61,3 +61,89 @@ module functorlogic.Lib where
 
   infixr 10 _×_
 
+  record Unit : Set where
+    constructor <>
+
+  ----------------------------------------------------------------------
+
+  data List (a : Set) : Set where
+    []  : List a
+    _::_ : a -> List a -> List a 
+
+  data _∈_ {A : Set} : A -> List A -> Set where
+      i0 : {x : A}   {xs : List A} -> x ∈ (x :: xs)
+      iS : {x y : A} {xs : List A} -> y ∈ xs -> y ∈ (x :: xs)
+  infix 10 _∈_
+
+  All : ∀ {A} → (A → Set) → List A → Set
+  All {A} P [] = Unit
+  All {A} P (x :: xs) = P x × All P xs 
+
+  mapAll : ∀ {A} {P Q : A → Set} {xs : List A}
+           → ({x : A} → P x → Q x) 
+           → All P xs 
+           → All Q xs 
+  mapAll {xs = []} f ps = <>
+  mapAll {xs = x :: xs} f (p , ps) = f p , mapAll f ps
+
+  allList : ∀ {A} {P : A → Set} {l : List A} → All P l → List (Σ P)
+  allList {l = []} x = []
+  allList {l = x :: xs} (a , as) = (x , a) :: allList as
+
+  allZip : ∀ {A} {P Q : A → Set} {l : List A} → All P l → All Q l → All (\x → P x × Q x) l
+  allZip {l = []} a1 a2 = <>
+  allZip {l = x :: xs} (a1 , as1) (a2 , as2) = (a1 , a2) , allZip as1 as2
+
+  AllAll2 : ∀ {A} {P Q : A → Set} {xs : List A}
+           → ({x : A} → P x → Q x → Set) 
+           → All P xs 
+           → All Q xs 
+           → Set
+  AllAll2 F ps qs = All (λ p → F (fst (snd p)) (snd (snd p))) (allList (allZip ps qs))
+
+  makeAllAll2 : ∀ {A} {P Q R : A → Set} {xs : List A}
+           → (f : {x : A} → P x → Q x) 
+           → (g : {x : A} → P x → R x) 
+           → (H : {x : A} → Q x → R x → Set)
+           → ({x : A} (p : P x) → H (f p) (g p))
+           → (a : All P xs)
+           → AllAll2 H (mapAll f a) (mapAll g a)
+  makeAllAll2 {xs = []} f g H mkH a = <>
+  makeAllAll2 {xs = x :: xs} f g H mkH a = mkH (fst a) , makeAllAll2 f g H mkH (snd a)
+
+{-
+  allAll2map : ∀ {A} {P Q P' Q' : A → Set} {xs : List A}
+               (F : {x : A} → P x → Q x → Set) 
+               (F' : {x : A} → P' x → Q' x → Set) 
+               → (f : {x : A} (p : P x) → P' x)
+               → (g : {x : A} (p : Q x) → Q' x)
+               → {a1 : All P xs} {a2 : All Q xs}
+               → (∀ {x} {p : P x} {q : Q x} → F p q → F' (f p) (g q))
+               → AllAll2 F a1 a2
+               → AllAll2 F' (mapAll f a1) (mapAll g a2)
+  allAll2map {xs = []} F F' f g FF'  a = <>
+  allAll2map {xs = x :: xs} F F' f g FF' (a , as) = FF' a , allAll2map F F' f g  FF' as
+-}
+
+  allAll2refl : ∀ {A} {P : A → Set} {xs : List A}
+               (F : {x : A} → P x → P x → Set) 
+               → ({x : A} (p : P x) → F p p)
+               → (a : All P xs)
+               → AllAll2 F a a 
+  allAll2refl {xs = []} F r a = <>
+  allAll2refl {xs = x :: xs} F r (a , as) = r a , allAll2refl F r as
+
+  allAll2Trans : ∀ {A} {P Q R : A → Set} {xs : List A}
+               (F : {x : A} → P x → Q x → Set) 
+               (G : {x : A} → Q x → R x → Set) 
+               (H : {x : A} → P x → R x → Set) 
+               {a1 : All P xs}
+               {a2 : All Q xs}
+               {a3 : All R xs}
+               (fgh : ∀ {x} {p : P x} {q r} → F p q → G q r → H p r)
+               → AllAll2 F a1 a2
+               → AllAll2 G a2 a3
+               → AllAll2 H a1 a3
+  allAll2Trans {xs = []} F G H fgh aa1 aa2 = <>
+  allAll2Trans {xs = x :: xs} F G H fgh aa1 aa2 = fgh (fst aa1) (fst aa2) , allAll2Trans F G H fgh (snd aa1) (snd aa2)
+  
