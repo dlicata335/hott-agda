@@ -136,10 +136,7 @@ module homotopy.Pi1S1 where
 
   all-loops : (α : Path base base) → Path α (loop^ (encode α))
   all-loops α = ! (decode-encode α)
-  
-  
-  -- equivalence for loop spaces
-  
+
   Ω₁[S¹]-Equiv-Int : Equiv (Path base base) Int
   Ω₁[S¹]-Equiv-Int = 
      improve (hequiv encode decode decode-encode encode-loop^)

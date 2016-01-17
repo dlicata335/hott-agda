@@ -48,7 +48,7 @@ module homotopy.blakersmassey.ooToposCodes (X Y : Type) (P : X → Y → Type)
     -×WZ = Σ \ (p : Z) → Path{W} (inm p0) (inm (snd p))
     -×XZ = (Σ \ y → P x0 y)
     -×YZ = (Σ \ x → P x y0)
-    Z×X-∨-×YZ = Pushout.Wedge { -×XZ } { -×YZ } (_ , p0) (_ , p0)
+    Z×X-∨-×YZ = Pushout.Wedge { -×XZ } { -×YZ } (y0 , p0) (x0 , p0)
 
     gluem : Z×X-∨-×YZ → -×WZ
     gluem = Wedge.Pushout-rec (λ ppx0y → (_ , snd ppx0y) , ! (gluel (snd ppx0y)) ∘ gluel p0)
@@ -84,8 +84,8 @@ module homotopy.blakersmassey.ooToposCodes (X Y : Type) (P : X → Y → Type)
     -- ENH: figure out where this is hiding in the ooTopos version
 
     switchr : (Σ \ (z : Z) → Z×X-∨-×YZ (snd z)) → (Σ \ (z : Z) → Z×X-∨-×YZ (snd z))
-    switchr (z , w) = Wedge.Pushout-rec (λ xp → z , Wedge.inl xp)
-                                        (λ yp → (_ , snd yp) , Wedge.inr (_ , snd z))
+    switchr (z , w) = Wedge.Pushout-rec (λ yp → z , Wedge.inl yp)
+                                        (λ xp → ((fst xp , snd (fst z)) , snd xp) , Wedge.inr (fst (fst z) , snd z))
                                         (λ _ → ap (λ Z₁ → z , Z₁) (Wedge.glue _)) 
                                         w
     
@@ -120,7 +120,7 @@ module homotopy.blakersmassey.ooToposCodes (X Y : Type) (P : X → Y → Type)
     switchl-equiv = improve (hequiv switchl switchl (\ p → switchl-twice (fst p) (snd p)) (\ p → switchl-twice (fst p) (snd p)))
 
     gluem-total : Σ (λ z → Z×X-∨-×YZ (snd z)) → Z×WZ
-    gluem-total = fiberwise-to-total (\ (z : Z) → gluem (snd z))
+    gluem-total = fiberwise-to-total (λ (z : Z) → gluem (snd z))
 
     glueml-total : 〈Z×Z〉×〈YX〉Z → Z×WZ
     glueml-total = (fiberwise-to-total (\ (ppp0 : Z) → (fiberwise-to-total (\ (ppxy : Z) → glueml (snd ppp0) (snd ppxy)))))
@@ -205,11 +205,11 @@ module homotopy.blakersmassey.ooToposCodes (X Y : Type) (P : X → Y → Type)
 
     module _ {x y} (pxy : P x y) {α : Path (inm p0) (inm pxy)} where
       glue-m-m-total : Equiv (HFiber gluem ((_ , pxy) , α)) 
-                             (HFiber gluem-total ((_ , p0) , (_ , pxy) , α))
+                             (HFiber gluem-total (((x0 , y0) , p0) , ((x , y) , pxy) , α))
       glue-m-m-total = HFiber-fiberwise-to-total-eqv (λ x₁ z → OverZMaps.gluem (snd x₁) z)
 
       glue-ml-ml-total : Equiv (HFiber (glueml pxy) α) 
-                       (HFiber glueml-total ((_ , p0) , (_ , pxy) , α))
+                               (HFiber glueml-total (((x0 , y0) , p0) , ((x , y) , pxy) , α))
       glue-ml-ml-total = (HFiber-fiberwise-to-total-eqv (λ x₁ z → fiberwise-to-total (λ ppxy → OverZMaps.glueml (snd x₁) (snd ppxy)) z))
                          ∘equiv (HFiber-fiberwise-to-total-eqv (λ x₁ z → glueml (snd x₁) z))
       
@@ -226,6 +226,7 @@ module homotopy.blakersmassey.ooToposCodes (X Y : Type) (P : X → Y → Type)
       glue-m-ml : Equiv (Trunc i+j (HFiber (gluem) ((_ , pxy) , α))) (Trunc i+j (HFiber (glueml pxy) α))
       glue-m-ml = apTrunc' (!equiv glue-ml-ml-total) ∘equiv glue-m-ml-total ∘equiv apTrunc' glue-m-m-total
 
+    -- done
     glue-m-l : ∀ {x y} (pxy : P x y) {αm : Path (inm p0) (inm pxy)} {αl : Path (inm p0) (inl x)} (d : PathOver (Path (inm p0)) (gluel pxy) αm αl)
              → Equiv (Trunc i+j (HFiber gluem ((_ , pxy) , αm))) (Trunc i+j (HFiber (gluel0) αl))
     glue-m-l pxy d = (!equiv (glue-l-ml pxy (square-to-disc (PathOverPathFrom.out-PathOver-= d))) ∘equiv glue-m-ml pxy)
@@ -265,9 +266,9 @@ module homotopy.blakersmassey.ooToposCodes (X Y : Type) (P : X → Y → Type)
     -- equivalences are what you need to show that the squares are pullbacks
     CodesFor : (w : W) (p : Path{W} (inm p0) w) → Type 
     CodesFor = Pushout-elim _ (λ x α → Trunc i+j (HFiber gluel0 α)) 
-                              (λ x y p α → Trunc i+j (HFiber gluem ( (_ , p) , α)))
+                              (λ x y p α → Trunc i+j (HFiber gluem ( ((x , y) , p) , α)))
                               (λ y α → Trunc i+j (HFiber gluer0 α))
-                              (λ x y pxy → coe (! PathOverΠ-NDrange) (λ αm αl d → ua (glue-m-l pxy d )))
+                              (λ x y pxy → coe (! PathOverΠ-NDrange) (λ αm αl d → ua (glue-m-l pxy d)))
                               (λ x y pxy → coe (! PathOverΠ-NDrange) (λ αm αl d → ua (glue-m-r pxy d )))
 
     CodesFor' : (Σ \ (w : W) → Path{W} (inm p0) w) → Type 

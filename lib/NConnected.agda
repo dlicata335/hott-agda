@@ -4,6 +4,7 @@
 open import lib.First
 open import lib.Paths 
 open import lib.AdjointEquiv
+open import lib.WEq
 open import lib.Functions
 open import lib.Prods
 open import lib.NType
@@ -270,6 +271,46 @@ module lib.NConnected where
                                               (λ b sndhf → Path (Trunc-rec Trunc-level (λ hg → [ f (fst hg) , snd hg ∘ tri _ ]) (Trunc-rec Trunc-level (λ hf₁ → [ fst hf₁ , sndhf ∘ ap h (snd hf₁) ∘ ! (tri _) ]) (fst (use-level (cf (fst hf)))))) [ fst hf , sndhf ])
                                               ( lemma {a' = fst hf} ∘ ap (λ Z₁ → Trunc-rec Trunc-level Z₁ (fst (use-level (cf (fst hf))))) (λ≃ (λ x → ap (λ Z₁ → [ f (fst x) , Z₁ ]) (coh2 {α = tri _} {β = ap h (snd x)}))) ∘ Trunc-rec-cconv _ Trunc-level (λ hf₁ → [ fst hf₁ , id ∘ ap h (snd hf₁) ∘ ! (tri _) ]) (λ hg → [ f (fst hg) , snd hg ∘ tri _ ]) (fst (use-level (cf (fst hf)))))
                                               (snd hf)))
+
+    lower-map : ∀ {k1 k2} {A B} {f : A → B} → k1 <=tl k2 → ConnectedMap k2 f -> ConnectedMap k1 f
+    lower-map {k1}{k2} lt c = λ y → Connected.lower lt (c y)
+
+    -- examples that are helpful for exposition of the definition of ConnectedMap:
+    --   in general, if f is n-connected, then it is a surjection on k-cells for k <= n+1
+    --   and an equivalence on <=n-cells.
+    -- specific case for 0:
+    module ConnectedMap0SurjEmbed where
+      -- 0-connected is a surjection on points
+
+      surjection0 : ∀ {A B} (f : A → B) → ConnectedMap (tl 0) f → (b : B) → Trunc -1 (Σ (λ (a : A) → f a == b))
+      surjection0 f c b = fst (use-level (lower-map (Inl (ltSCong (-2< _))) c b))
+
+      -- 0-connected is a surjection on paths
+
+      surjection1 : ∀ {A B} (f : A → B) → ConnectedMap (tl 0) f → (a0 a1 : A) (q : f a0 == f a1)
+                  → Trunc -1 (Σ (λ (p : a0 == a1) → ap f p == q))
+      surjection1 f cf a0 a1 q = Trunc-rec Trunc-level 
+                                   (λ p → [ fst≃ p , ! (move-right-!-right q (ap f (fst≃ p)) id (snd≃ p ∘ ! (transport-Path-pre' f (fst≃ p) q))) ∘ ! (∘-unit-l (ap f (fst≃ p))) ])
+                                   (coe (! (TruncPath.path _)) (HProp-unique (increment-level (cf (f a1))) [ a0 , q ] [ a1 , id ]))
+
+      -- embedding on 0-cells
+
+      -- need an induct-along-equivalence for q
+      embedding0' : ∀ {A B} (f : A → B) → ConnectedMap (tl 0) f → (a0 a1 : A) 
+                 → IsWEq {Path {Trunc (tl 0) A} [ a0 ] [ a1 ]} {[ f a0 ] == [ f a1 ]} (ap (Trunc-func f))
+      embedding0' f cf a0 a1 q = elim-along-equiv
+                                   (λ q₁ → Contractible (HFiber (ap (Trunc-func f)) q₁))
+                                   (TruncPath.eqv _) (Trunc-elim _ (λ _ → Contractible-is-HProp _) (λ q → Trunc-rec (Contractible-is-HProp _)
+                                                                                                            (λ c →
+                                                                                                               (ap [_] (fst c) , (ap (ap [_]) (snd c) ∘ ap-o [_] f (fst c)) ∘ ! (ap-o (Trunc-func f) [_] (fst c))) ,
+                                                                                                               (λ y →
+                                                                                                                  pair≃ (HSet-UIP Trunc-level _ _ _ _)
+                                                                                                                  (HSet-UIP (path-preserves-level Trunc-level) _ _ _ _)))
+                                                                                                            (surjection1 f cf a0 a1 q))) q 
+
+      embedding0 : ∀ {A B} (f : A → B) → ConnectedMap (tl 0) f → (a0 a1 : Trunc (tl 0) A) 
+                 → IsWEq {a0 == a1} {Trunc-func f a0 == Trunc-func f a1} (ap (Trunc-func f))
+      embedding0 f cf = Trunc-elim _ (λ _ → Πlevel (λ _ → Πlevel (λ _ → increment-level (Contractible-is-HProp _)))) (\ a0 → Trunc-elim _ (λ _ → Πlevel (λ _ → increment-level (Contractible-is-HProp _))) (λ a1 → embedding0' f cf a0 a1))
 
   {- -- should be a special case of the above if we ever want it.  ended up not using it.
     unfiberwise-to-total-connected : (n : TLevel) → ∀ {A} {B1 B2 : A → Type} → (f : (x : A) → B1 x → B2 x) → 

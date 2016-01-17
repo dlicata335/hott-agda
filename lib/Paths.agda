@@ -81,6 +81,12 @@ module lib.Paths where
                     → Path (β ∘ α) γ
                     → Path β (γ ∘ ! α)
  move-right-right id id γ x = x
+
+ move-right-!-right :  {A : Type} {M N P : A}
+                       (β : Path N P) (α : Path N M) (γ : Path M P)
+                    → Path (β ∘ ! α) γ
+                    → Path β (γ ∘ α)
+ move-right-!-right id id γ x = x
  
  assoc-131->212 : ∀ {A} {M1 M2 M3 M4 M5 M6 : A}
                 (a56 : Path M5 M6) (a45 : Path M4 M5) (a34 : Path M3 M4) (a23 : Path M2 M3) (a12 : Path M1 M2)
