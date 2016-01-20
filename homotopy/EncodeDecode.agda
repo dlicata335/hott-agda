@@ -120,3 +120,29 @@ module homotopy.EncodeDecode where
                     (a : A) (c : Codes a) -> transport Codes (decode a c) c0 == c)
                  == (Σ \ (c : Contractible (Σ Codes)) → fst (fst c) == a0)
      prespoint a0 = prespoint1 a0 ∘ ua (hfiber-fst-eqv a0)
+
+  -- strengthened assumptions, for all a, more abstract proof
+  module ForLoopSpace3 (A : Type) (a0 : A)
+                       (Codes : A → Type) 
+                       (encode : (x : A) -> Path a0 x → Codes x)
+                       (decode : (x : A) -> Codes x -> Path a0 x)
+                       (encode-decode : (a : A) (c : Codes a) -> encode a (decode a c) ≃ c)
+                       where
+           
+         -- could be more abstract: fiberwise retract induces retraction on total spaces, retraction of 1 is equivalence
+         fact1 : IsEquiv {Σ (Path a0)} {(Σ Codes)} (fiberwise-to-total encode)
+         fact1 = snd (improve (hequiv (fiberwise-to-total encode) (fiberwise-to-total decode) (λ x → HProp-unique (increment-level singleton-contractible) _ _) (λ p → ap (\ h → fst p , h) (encode-decode _ _))))
+
+         fact2 : (a : A) → IsEquiv {(Path a0 a)} {(Codes a)} (encode a)
+         fact2 = λ a → total-space-equiv-to-fiberwise _ fact1 a 
+
+         -- or you can keep the other map
+
+         fact1b : IsEquiv {(Σ Codes)} {Σ (Path a0)} (fiberwise-to-total decode)
+         fact1b = snd (improve (hequiv (fiberwise-to-total decode) (fiberwise-to-total encode) (λ p → ap (\ h → fst p , h) (encode-decode _ _)) (λ x → HProp-unique (increment-level singleton-contractible) _ _)))
+
+         fact2b : (a : A) → IsEquiv {(Codes a)} {(Path a0 a)} (decode a)
+         fact2b = λ a → total-space-equiv-to-fiberwise _ fact1b a 
+
+         -- but can you get encode is inverse to decode from this?
+

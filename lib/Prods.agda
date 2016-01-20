@@ -344,6 +344,23 @@ module lib.Prods where
   fiberwise-equiv-to-total : ∀ {A} {B B' : A → Type} → ((x : A) → B x == B' x) → (Σ B) == (Σ B')
   fiberwise-equiv-to-total h = ua (improve (hequiv (fiberwise-to-total (\ x -> coe (h x))) (fiberwise-to-total (λ x → coe (! (h x)))) (λ x → pair≃ id (ap≃ (transport-inv-1 (λ x₁ → x₁) (h (fst x))))) (λ y → pair≃ id (ap≃ (transport-inv-2 (λ x → x) (h (fst y)))))))
 
+  total-space-equiv-to-fiberwise : {A : Type} {B C : A → Type} 
+          (f : (x : A) → B x → C x) 
+        → IsEquiv (fiberwise-to-total f)
+        → (a : A) → IsEquiv (f a)
+  total-space-equiv-to-fiberwise {A}{B}{C} f e a = snd (improve (hequiv (f a) 
+                                       (λ c → transport B (pres a c) (snd (IsEquiv.g e (a , c))))
+                                       (λ x → snd≃ (IsEquiv.α e (a , x)) ∘ ap {M = ap (λ r → fst r) (IsEquiv.β e (a , f a x))}
+                                                                             {N = ap (λ r → fst r) (IsEquiv.α e (a , x))}
+                                                                             (λ p → transport B p (snd (IsEquiv.g e (a , f a x)))) 
+                                               ((! (ap-o fst (fiberwise-to-total f) (IsEquiv.α e (a , x)))) ∘ ap (ap fst) (IsEquiv.γ e (a , x))))
+                                       (λ y → snd≃ (IsEquiv.β e (a , y)) ∘ nat (pres a y)) ))  where 
+    pres : (a : A) (c : C a) → fst (IsEquiv.g e (a , c)) == a
+    pres a c = fst≃ (IsEquiv.β e (a , c))
+
+    nat : ∀ {a} {a'} {b : B a} (p : a == a') → f a' (transport B p b) == transport C p (f a b)
+    nat id = id
+
   -- with η for Σ, you don't need funext
   AC : {A : Type} {B : A → Type} {C : (x : A) → B x → Type} 
      → Equiv ((x : A) → Σ \ y -> C x y)
