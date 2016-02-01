@@ -136,13 +136,8 @@ module homotopy.EncodeDecode where
          fact2 : (a : A) → IsEquiv {(Path a0 a)} {(Codes a)} (encode a)
          fact2 = λ a → total-space-equiv-to-fiberwise _ fact1 a 
 
-         -- or you can keep the other map
+         -- then fix it so you get both maps
+         eqv : ∀ {a} → Σ \ (e : Equiv (a0 == a) (Codes a)) → (fst e == encode a) × (IsEquiv.g (snd e) == decode a)
+         eqv {a} = right-inverse-of-equiv-is-inverse {f = encode a} (fact2 a) (decode a) (encode-decode a)
 
-         fact1b : IsEquiv {(Σ Codes)} {Σ (Path a0)} (fiberwise-to-total decode)
-         fact1b = snd (improve (hequiv (fiberwise-to-total decode) (fiberwise-to-total encode) (λ p → ap (\ h → fst p , h) (encode-decode _ _)) (λ x → HProp-unique (increment-level singleton-contractible) _ _)))
-
-         fact2b : (a : A) → IsEquiv {(Codes a)} {(Path a0 a)} (decode a)
-         fact2b = λ a → total-space-equiv-to-fiberwise _ fact1b a 
-
-         -- but can you get encode is inverse to decode from this?
-
+ 

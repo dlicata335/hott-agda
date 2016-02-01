@@ -53,6 +53,7 @@ module functorlogic.ModesProduct2 where
     1⇒ : ∀ {p q} → {α : p ≤ q} → α ⇒ α
     _·2_ : {x y : Mode} {p q r : x ≤ y} → p ⇒ q → q ⇒ r → p ⇒ r
     _·1cong_ : {x y z : Mode} {p p' : x ≤ y} {q q' : y ≤ z} → p ⇒ p' → q ⇒ q' → (p ·1 q) ⇒ (p' ·1 q')
+    _,cong_ : ∀ {p q r} {α α' : p ≤ q} {β β' : p ≤ r} → α ⇒ α' → β ⇒ β' → (α ,m β) ⇒ (α' ,m β')
 
   1⇒' : ∀ {p q} → {α β : p ≤ q} → α == β -> α ⇒ β
   1⇒' id = 1⇒

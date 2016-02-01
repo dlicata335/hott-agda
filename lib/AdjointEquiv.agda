@@ -139,3 +139,18 @@ module lib.AdjointEquiv where
                             (ap (fst (!equiv e)) (IsEquiv.α (snd (!equiv e)) b))
                             (IsEquiv.β (snd (!equiv e)) (fst (!equiv e) b))))
                           (! (IsEquiv.γ (snd (!equiv e)) b)))))
+
+ left-inverse-of-equiv-is-inverse : ∀ {A B} {f : A → B} (e : IsEquiv f) 
+                                    (g : B → A) → ( (a : A) → g (f a) == a)
+                                    → Σ \ (e : Equiv A B) → (fst e == f) × (IsEquiv.g (snd e) == g)
+ left-inverse-of-equiv-is-inverse {f = f} e g li = 
+   improve (hequiv f g li (elim-along-equiv (λ y → f (g y) == y) (f , e) (λ x → ap f (li _)))) , id , id
+
+ right-inverse-of-equiv-is-inverse : ∀ {A B} {f : A → B} (e : IsEquiv f) 
+                                    (g : B → A) → ( (y : B) → f (g y) == y)
+                                    → Σ \ (e : Equiv A B) → (fst e == f) × (IsEquiv.g (snd e) == g)
+ right-inverse-of-equiv-is-inverse {f = f} e g ri = 
+   improve (hequiv f g (elim-along-equiv (λ y → g (f y) == y) (!equiv (f , e)) (λ x → IsEquiv.α e _ ∘ ap (IsEquiv.g e) lemma ∘ ! (IsEquiv.α e _))) ri) , id , id where
+     lemma : ∀ {x} → (f (g (f (IsEquiv.g e x)))) == (f (IsEquiv.g e x))
+     lemma = (! (IsEquiv.β e _) ∘ IsEquiv.β e _) ∘ ri _
+

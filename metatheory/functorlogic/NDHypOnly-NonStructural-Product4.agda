@@ -149,9 +149,9 @@ module functorlogic.NDHypOnly-NonStructural-Product4 where
   θ ·sr idc = θ
   θ ·sr (ρ ·c ρ₁) = (θ ·sr ρ) ·sr ρ₁
   subst[] ρ1 θ ·sr nt e ρ = subst[] (ρ1 ·c nt e idc) (θ ·sr ρ)
-  substeq θ d ·sr nt e ρ = {!!}
+  substeq θ d ·sr nt e ρ = θ ·sr {!(eq d ·c nt e ρ)!}
   subst, θ1 θ2 ·sr (_,c_ {Δ1 = Δ1}{Δ2 = Δ2} ρ1 ρ2) = subst, (θ1 ·sr ρ1) (θ2 ·sr ρ2) 
-  substeq θ d ·sr (_,c_ {Δ1 = Δ1}{Δ2 = Δ2} ρ1 ρ2) = {!!}
+  substeq θ d ·sr (_,c_ {Δ1 = Δ1}{Δ2 = Δ2} ρ1 ρ2) = subst, {!!} {!!}
   θ ·sr eq d = substeq θ d
 
 {-
