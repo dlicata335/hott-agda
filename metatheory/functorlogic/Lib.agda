@@ -70,6 +70,10 @@ module functorlogic.Lib where
     []  : List a
     _::_ : a -> List a -> List a 
 
+  _++_ : ∀ {A : Set} → List A → List A → List A
+  [] ++ ys = ys
+  (x :: xs) ++ ys = x :: (xs ++ ys)
+
   data _∈_ {A : Set} : A -> List A -> Set where
       i0 : {x : A}   {xs : List A} -> x ∈ (x :: xs)
       iS : {x y : A} {xs : List A} -> y ∈ xs -> y ∈ (x :: xs)
@@ -78,6 +82,41 @@ module functorlogic.Lib where
   All : ∀ {A} → (A → Set) → List A → Set
   All {A} P [] = Unit
   All {A} P (x :: xs) = P x × All P xs 
+
+  append-All : ∀ {A} {P : A → Set} {xs ys} → All P xs → All P ys → All P (xs ++ ys)
+  append-All {xs = []} axs ays = ays
+  append-All {xs = x :: xs} axs ays = fst axs , append-All (snd axs) ays
+
+  all-from-in : ∀ {A} {P : A → Set} → (xs : List A) → ({x : A} → x ∈ xs → P x) → All P xs
+  all-from-in [] f = <>
+  all-from-in (x :: xs) f = f i0 , all-from-in xs (λ x₁ → f (iS x₁))
+
+  lookup : ∀ {A : Set} {l : List A} {P : A → Set} {x : A}
+         → All P l → x ∈ l
+         → P x
+  lookup a i0 = fst a
+  lookup a (iS i) = lookup (snd a) i
+
+
+  replace : ∀ {A} {xs} (ys : List A) {a : A} (i : a ∈ xs) → List A
+  replace {xs = _ :: xs} ys i0 = ys ++ xs
+  replace {xs = x :: _} ys (iS i) = x :: replace ys i
+
+  addright : ∀ {A} {x} {xs ys : List A} → x ∈ xs → x ∈ xs ++ ys
+  addright i0 = i0
+  addright (iS i) = iS (addright i)
+
+  addleft : ∀ {A} {x} {xs : List A} (ys : List A) → x ∈ xs → x ∈ ys ++ xs
+  addleft [] i = i
+  addleft (y :: ys) i = iS (addleft ys i)
+
+  all-replace : ∀ {A} {P : A → Set} {xs} 
+                  (axs : All P xs)
+                  {ys : List A} (ays : All P ys)
+                  {a : A} 
+                  (i : a ∈ xs) → All P (replace ys i)
+  all-replace axs ays i0 = append-All ays (snd axs)
+  all-replace axs ays (iS i) = fst axs , all-replace (snd axs) ays i
 
   mapAll : ∀ {A} {P Q : A → Set} {xs : List A}
            → ({x : A} → P x → Q x) 
