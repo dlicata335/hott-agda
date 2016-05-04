@@ -7,6 +7,9 @@ open import lib.Prelude hiding (wrap)
 
 module misc.Retraction3g2 where
 
+ ------------------------------------------------------------------------
+ -- some abstractions 
+
  record Retraction (A B : Type) : Type where
    constructor retraction
    field
@@ -28,30 +31,6 @@ module misc.Retraction3g2 where
      _>>=_  : ∀ {A B} → T A → (A → T B) → T B
      -- laws
 
- RStable : ∀ {A B} → Retraction A B → A → Type
- RStable r a = Retraction.g r (Retraction.f r a) == a
-
- r→ : ∀ {A A' B B'} → Retraction A A' → Retraction B B' → Retraction (A → B) (A' → B')
- r→ (retraction fa ga βa) (retraction fb gb βb) = 
-   retraction (λ f a' → fb (f (ga a'))) 
-              (λ f' a → gb (f' (fa a)))
-              (λ f' → λ≃ (λ a' → ap f' (βa a') ∘ βb _))
-
- r× : ∀ {A A' B B'} → Retraction A A' → Retraction B B' → Retraction (A × B) (A' × B')
- r× (retraction fa ga βa) (retraction fb gb βb) = 
-   retraction (λ p → fa (fst p) , fb (snd p)) (λ p → ga (fst p) , gb (snd p)) (λ p → pair×≃ (βa (fst p)) (βb (snd p)))
-
- rid : ∀ {A} → Retraction A A
- rid = retraction (λ x → x) (λ x → x) (λ _ → id)
-
- r· : ∀ {A B C} → Retraction A B → Retraction B C → Retraction A C
- r· (retraction fa ga βa) (retraction fb gb βb) = 
-   retraction (fb o fa) (ga o gb) (λ y → βb _ ∘ ap fb (βa (gb y)))
-
- rfunc : ∀ {A B T} → Functor T → Retraction A B → Retraction (T A) (T B)
- rfunc (functor farr fid fcomp) (retraction f g β) = 
-   retraction (farr f) (farr g) (λ y → (ap≃ fid ∘ ap (λ h → farr h y) (λ≃ β)) ∘ ap≃ fcomp {y})
-
  module C× (C : Type) (c0 : C) (c1 : C) (mc : C → C → C) where
 
   T : Type → Type
@@ -69,49 +48,56 @@ module misc.Retraction3g2 where
   addc : T Unit
   addc = (c1 , <>)
 
- module Monadic (B : Type) (b0 : B)
-                (C : Type) (c0 : C) (c1 : C) (mc : C → C → C)
-                where
+
+ ------------------------------------------------------------------------
+ -- syntax
+
+ {- de Bruijn indices are representd as proofs that 
+    an element is in a list -}
+ data _∈_ {A : Set} : (x : A) (l : List A) → Set where -- type \in
+   i0 : {x : A} {xs : List A} → x ∈ x :: xs
+   iS : {x y : A} {xs : List A} → x ∈ xs → x ∈ y :: xs
+
+ {- types of the STLC -}
+ data Tp : Set where
+   b : Tp             -- uninterpreted base type
+   _⇒_ : Tp → Tp → Tp -- type \=>
+
+ {- contexts are lists of Tp's -}
+ Ctx = List Tp
+ _,,_ : Ctx → Tp → Ctx
+ Γ ,, τ = τ :: Γ
+
+ infixr 10 _⇒_
+ infixr 9 _,,_
+ infixr 8 _⊢_ -- type \entails
+
+ {- Γ ⊢ τ represents a term of type τ in context Γ -}
+ data _⊢_ (Γ : Ctx) : Tp → Set where
+   c   : Γ ⊢ b -- some constant of the base type
+   v   : {τ : Tp} 
+       → τ ∈ Γ
+       → Γ ⊢ τ 
+   lam : {τ1 τ2 : Tp} 
+       → Γ ,, τ1 ⊢ τ2
+       → Γ ⊢ τ1 ⇒ τ2
+   app : {τ1 τ2 : Tp} 
+       → Γ ⊢ τ1 ⇒ τ2 
+       → Γ ⊢ τ1 
+       → Γ ⊢ τ2
+
+ 
+ module Semantics 
+        -- fix a pointed type B to be the image of the base type
+        (B : Type) (b0 : B)
+        -- fix a monoid for costs
+        (C : Type) (c0 : C) (c1 : C) (mc : C → C → C) where
 
   open C× C c0 c1 mc
   open Monad TM
 
-  {- de Bruijn indices are representd as proofs that 
-     an element is in a list -}
-  data _∈_ {A : Set} : (x : A) (l : List A) → Set where -- type \in
-    i0 : {x : A} {xs : List A} → x ∈ x :: xs
-    iS : {x y : A} {xs : List A} → x ∈ xs → x ∈ y :: xs
-
-  {- types of the STLC -}
-  data Tp : Set where
-    b : Tp             -- uninterpreted base type
-    _⇒_ : Tp → Tp → Tp -- type \=>
-
-  {- contexts are lists of Tp's -}
-  Ctx = List Tp
-  _,,_ : Ctx → Tp → Ctx
-  Γ ,, τ = τ :: Γ
-
-  infixr 10 _⇒_
-  infixr 9 _,,_
-  infixr 8 _⊢_ -- type \entails
-
-  {- Γ ⊢ τ represents a term of type τ in context Γ -}
-  data _⊢_ (Γ : Ctx) : Tp → Set where
-    c   : Γ ⊢ b -- some constant of the base type
-    v   : {τ : Tp} 
-        → τ ∈ Γ
-        → Γ ⊢ τ 
-    lam : {τ1 τ2 : Tp} 
-        → Γ ,, τ1 ⊢ τ2
-        → Γ ⊢ τ1 ⇒ τ2
-    app : {τ1 τ2 : Tp} 
-        → Γ ⊢ τ1 ⇒ τ2 
-        → Γ ⊢ τ1 
-        → Γ ⊢ τ2
-
-
-  -- direct semantics
+  -- --------------------------------------------------------------------------------
+  -- direct semantics (potential only)
 
   [[_]] : Tp → Type
   [[ b ]] = B
@@ -128,8 +114,8 @@ module misc.Retraction3g2 where
   [[_]]e (lam e) θ = λ x → [[ e ]]e (θ , x)
   [[_]]e (app e1 e2) θ = [[ e1 ]]e θ ([[ e2 ]]e θ)
 
-
-  -- monadic semantics
+  -- --------------------------------------------------------------------------------
+  -- monadic semantics (cost and potentials together)
 
   mutual
     <<_>> : Tp → Type
@@ -143,6 +129,7 @@ module misc.Retraction3g2 where
   << [] >>c = Unit
   << τ :: Γ >>c = << Γ >>c × << τ >>
 
+  -- monadic interpretation of the judgement
   _⊢m_ : Ctx → Tp → Set
   Γ ⊢m τ = << Γ >>c → T << τ >>
 
@@ -153,8 +140,8 @@ module misc.Retraction3g2 where
   <<_>>e (lam e) θ = return (λ x → << e >>e (θ , x))
   <<_>>e (app e1 e2) θ = addc >>= (\ _ → (<< e1 >>e θ) >>= (λ f →(<< e2 >>e θ) >>= (λ x → f x)))
 
-
-  -- just the cost part
+  -- --------------------------------------------------------------------------------
+  -- cost only (refers to potentials)
 
   <<_>>cst : Tp → Type
   << b >>cst = Unit
@@ -175,19 +162,26 @@ module misc.Retraction3g2 where
     (<< e2 >>cste (θ , θc)) >>= (λ ce2 → 
     ce1 ([[ e2 ]]e θ , ce2))))
 
-
-  _⇒split_ : Tp → Tp → Set
-  τ1 ⇒split τ2 = ([[ τ1 ]] → [[ τ2 ]]) × (([[ τ1 ]] × << τ1 >>cst) → T << τ2 >>cst)
-
-  _⊢split_ : Ctx → Tp → Set
-  Γ ⊢split τ = ([[ Γ ]]c → [[ τ ]]) × (([[ Γ ]]c × << Γ >>cstc) → T << τ >>cst)
-  
-
+  -- there are default costs
   default : ∀ τ → << τ >>cst 
   default b = <>
   default (τ1 ⇒ τ2) = λ _ → {!!} , default τ2 -- arbitrary
 
-  -- relationship between the two
+  defaultc : ∀ Γ → << Γ >>cstc
+  defaultc [] = <>
+  defaultc (τ :: Γ) = defaultc Γ , default τ
+
+  -- split interpretation of ⇒ : pair of a potential function and a cost function
+  _⇒split_ : Tp → Tp → Set
+  τ1 ⇒split τ2 = ([[ τ1 ]] → [[ τ2 ]]) × (([[ τ1 ]] × << τ1 >>cst) → T << τ2 >>cst)
+
+  -- split interpretation of the judgement
+  _⊢split_ : Ctx → Tp → Set
+  Γ ⊢split τ = ([[ Γ ]]c → [[ τ ]]) × (([[ Γ ]]c × << Γ >>cstc) → T << τ >>cst)
+  
+
+  -- ----------------------------------------------------------------------
+  -- retraction between the two interpretations
 
   -- FIXME: there's probably a nicer way to write these retractions
   -- using the combinators for retractions for →, ×, swapping iso, etc.
@@ -214,7 +208,6 @@ module misc.Retraction3g2 where
         (λ x → fst (cost (split τ1 x)) , 
                merge τ2 (pot (fst (split τ1 x)) , (snd (cost (split τ1 x)))))
 
-
   mutual
     split-merge : (τ : Tp) (pc : [[ τ ]] × << τ >>cst) → (split τ (merge τ pc)) == pc
     split-merge b _ = id
@@ -238,6 +231,8 @@ module misc.Retraction3g2 where
   ret⇒ : (τ1 τ2 : Tp) → Retraction (τ1 ⇒m τ2) (τ1 ⇒split τ2)
   ret⇒ τ1 τ2 = retraction (split⇒ τ1 τ2) (merge⇒ τ1 τ2) (split-merge⇒ τ1 τ2)
 
+  -- same for contexts
+
   splitc : ∀ Γ → << Γ >>c → [[ Γ ]]c × << Γ >>cstc 
   splitc [] θ = <> , <>
   splitc (τ :: Γ) θ = ((fst (splitc Γ (fst θ))) , (fst (split τ (snd θ)))) , 
@@ -246,10 +241,6 @@ module misc.Retraction3g2 where
   mergec : ∀ Γ → [[ Γ ]]c × << Γ >>cstc → << Γ >>c 
   mergec [] _ = <>
   mergec (τ :: Γ) (pot , cst) = mergec Γ (fst pot , fst cst) , merge τ (snd pot , snd cst)
-
-  defaultc : ∀ Γ → << Γ >>cstc
-  defaultc [] = <>
-  defaultc (τ :: Γ) = defaultc Γ , default τ
 
   mergedc : ∀ Γ → [[ Γ ]]c  → << Γ >>c 
   mergedc Γ p = mergec Γ (p , defaultc Γ)
@@ -264,7 +255,7 @@ module misc.Retraction3g2 where
   retc : (Γ : Ctx) → Retraction << Γ >>c ([[ Γ ]]c × << Γ >>cstc)
   retc Γ = retraction (splitc Γ) (mergec Γ) (split-mergec Γ)
 
-
+  -- same for judgements
   -- FIXME: avoid the copy and paste
 
   split⊢ : (Γ : Ctx) (τ : Tp) → Γ ⊢m τ → Γ ⊢split τ
@@ -292,18 +283,24 @@ module misc.Retraction3g2 where
   ret⊢ : (Γ : Ctx) (τ : Tp) → Retraction (Γ ⊢m τ) (Γ ⊢split τ)
   ret⊢ Γ τ = retraction (split⊢ Γ τ) (merge⊢ Γ τ) (split-merge⊢ Γ τ)
 
+  -- ----------------------------------------------------------------------
+  -- logical relation expressing the extra invariants of the << >> translation that not all << τ >>'s have 
 
   Good : (τ : Tp) → << τ >> → Type
   Good b _ = Unit
   Good (τ1 ⇒ τ2) r = 
     (( x : << τ1 >>) → Good τ1 x → 
-      -- reduction of split τ2 (snd (merge⇒ τ1 τ2 (split⇒ τ1 τ2 r) x)) == split τ2 (snd (r x)) FIXME plus some stuff??
-      ((fst (split τ2 (snd (r (merge τ1 (fst (split τ1 x) , default τ1))))) == fst (split τ2 (snd (r x)))) × 
+      (-- potential is equal on the default cost
+       (fst (split τ2 (snd (r (merge τ1 (fst (split τ1 x) , default τ1))))) == fst (split τ2 (snd (r x)))) × 
+       -- potential and costs are normalization-stable
        (split τ2 (snd (r (merge τ1 (split τ1 x)))) == (split τ2 (snd (r x)))) ×
        -- and the costs are equal
        (fst (r (merge τ1 (split τ1 x))) == fst (r x))) ×
       Good τ2 (snd (r x)))
 
+  use-Good⇒ : (τ1 τ2 : Tp) (r : _) → Good (τ1 ⇒ τ2) r → (x : _) → Good τ1 x 
+            → split τ2 (snd (merge⇒ τ1 τ2 (split⇒ τ1 τ2 r) x)) == split τ2 (snd (r x))
+  use-Good⇒ τ1 τ2 r gr x gx = ap2 _,_ (fst (fst (gr x gx))) (ap snd (fst (snd (fst (gr x gx))))) ∘ split-merge τ2 _
 
   GoodC : (Γ : Ctx) → << Γ >>c → Type
   GoodC [] _ = Unit
@@ -390,6 +387,9 @@ module misc.Retraction3g2 where
       -- part 4
       ((snd (ih1rec _ ih2rec)))  
 
+  -- ----------------------------------------------------------------------
+  -- splitting the old translation gives the new translation
+
   thm : ∀ {Γ} {τ} (e : Γ ⊢ τ) → split⊢ Γ τ << e >>e == ([[ e ]]e , << e >>cste)
   thm c = id
   thm {τ = τ} (v i0) = ap2 _,_ (λ≃ (λ x → ap fst (split-merge τ (snd x , default τ)))) 
@@ -398,16 +398,24 @@ module misc.Retraction3g2 where
   thm (lam e) = ap2 _,_ (λ≃ (λ θ → λ≃ (λ x → ap≃ (ap fst (thm e)))))
                         (λ≃ (λ pc1 → ap (λ h → c0 , h) (λ≃ (λ x → ap≃ (ap snd (thm e))))))
   thm {Γ = Γ} (app{τ1}{τ2} e1 e2) with ap fst (thm e1) | ap snd (thm e1) | ap fst (thm e2) | ap snd (thm e2)
-  ... | ih1 | ih2 | ih3 | ih4 = {!!}
-{-
-
-ap2 _,_ (λ≃ (λ pot → ap2 (λ h1 h2 → h1 pot (h2 pot)) ih1 ih3 ∘ {!!})) 
-    (λ≃ (\ pc1 → ap2 (λ h1 h2 → mc c1 (mc (fst (h1 pc1)) (mc (fst (h2 pc1)) (fst (snd (h1 pc1) ([[ e2 ]]e (fst pc1) , snd (h2 pc1)))))) , snd (snd (h1 pc1) ([[ e2 ]]e (fst pc1) , snd (h2 pc1))))
-                        ih2 ih4
-                ∘ ap (λ h2 → mc c1 (mc (fst (<< e1 >>e (mergec Γ pc1))) (mc (fst (<< e2 >>e (mergec Γ pc1))) (fst (snd (<< e1 >>e (mergec Γ pc1)) (merge τ1 (h2 (fst pc1) , snd (split τ1 (snd (<< e2 >>e (mergec Γ pc1)))))))))) , snd (split τ2 (snd (snd (<< e1 >>e (mergec Γ pc1)) (merge τ1 (h2 (fst pc1) , snd (split τ1 (snd (<< e2 >>e (mergec Γ pc1))))))))))
+  ... | ih1 | ih2 | ih3 | ih4 = 
+   ap2 _,_ (λ≃ (λ pot → ap2 (λ h1 h2 → h1 pot (h2 pot)) ih1 ih3 ∘ 
+                        ! (fst (fst (snd (allgood e1 _ (GoodC-merge Γ _)) _ (snd (allgood e2 _ (GoodC-merge Γ _)))))))) -- first part
+           (λ≃ (\ pc1 → ap2 (λ h1 h2 → mc c1 (mc (fst (h1 pc1)) (mc (fst (h2 pc1)) (fst (snd (h1 pc1) ([[ e2 ]]e (fst pc1) , snd (h2 pc1)))))) , snd (snd (h1 pc1) ([[ e2 ]]e (fst pc1) , snd (h2 pc1))))
+                          ih2 ih4
+                 ∘ ap (λ h2 → mc c1 (mc (fst (<< e1 >>e (mergec Γ pc1))) (mc (fst (<< e2 >>e (mergec Γ pc1))) (fst (snd (<< e1 >>e (mergec Γ pc1)) (merge τ1 (h2 (fst pc1) , snd (split τ1 (snd (<< e2 >>e (mergec Γ pc1)))))))))) , snd (split τ2 (snd (snd (<< e1 >>e (mergec Γ pc1)) (merge τ1 (h2 (fst pc1) , snd (split τ1 (snd (<< e2 >>e (mergec Γ pc1))))))))))
                      ih3
-                ∘ ap2 _,_ 
-                  (ap (λ h → mc c1 (mc (fst (<< e1 >>e (mergec Γ pc1))) (mc (fst (<< e2 >>e (mergec Γ pc1))) h)))
-                      {!fst (snd (allgood e1 (mergec Γ pc1) ?) ? ?) !})
-                  ({!!} ∘ ! (ap snd (fst (snd (allgood e1 (mergec Γ pc1) {!!}) (snd (<< e2 >>e (mergec Γ pc1))) {!!}))))))
--}
+                 ∘ ap2 _,_ 
+                   (ap (λ h → mc c1 (mc (fst (<< e1 >>e (mergec Γ pc1))) (mc (fst (<< e2 >>e (mergec Γ pc1))) h)))
+                        ((ap (λ h → fst (snd (<< e1 >>e (mergec Γ pc1)) (merge τ1 (h , snd (split τ1 (snd (<< e2 >>e (mergec Γ pc1))))))))
+                             (ap (λ h → fst (split τ1 (snd (<< e2 >>e (mergec Γ (h , defaultc Γ))))))
+                                 (ap fst (split-mergec Γ _)) ∘ 
+                              ! (fst (fst (allgood e2 (mergec Γ pc1) (GoodC-merge Γ _))))) -- first part
+                         ) ∘
+                         ! (snd (snd (fst (snd (allgood e1 _ (GoodC-merge Γ _)) _ (snd (allgood e2 _ (GoodC-merge Γ _))))))))) -- third part
+                   (ap (λ h → snd (split τ2 (snd (snd (<< e1 >>e (mergec Γ pc1)) (merge τ1 (h , snd (split τ1 (snd (<< e2 >>e (mergec Γ pc1))))))))))
+                       (ap (λ h → fst (split τ1 (snd (<< e2 >>e (mergec Γ (fst h , defaultc Γ))))))
+                           (split-mergec Γ pc1) ∘ ! (fst (fst (allgood e2 (mergec Γ pc1) (GoodC-merge Γ _))))) -- first part
+                    ∘ ap snd (! (fst (snd (fst (snd (allgood e1 _ (GoodC-merge Γ _)) _ (snd (allgood e2 _ (GoodC-merge Γ _))))))))))) -- second part
+
+  -- the converse doesn't seem likely to me, but I haven't disproved it.  
