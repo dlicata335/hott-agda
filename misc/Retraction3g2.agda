@@ -5,7 +5,7 @@
 
 open import lib.Prelude hiding (wrap)
 
-module misc.Retraction3g where
+module misc.Retraction3g2 where
 
  record Retraction (A B : Type) : Type where
    constructor retraction
@@ -297,9 +297,9 @@ module misc.Retraction3g where
   Good b _ = Unit
   Good (τ1 ⇒ τ2) r = 
     (( x : << τ1 >>) → Good τ1 x → 
-      -- reduction of split τ2 (snd (merge⇒ τ1 τ2 (split⇒ τ1 τ2 r) x)) == split τ2 (snd (r x))
+      -- reduction of split τ2 (snd (merge⇒ τ1 τ2 (split⇒ τ1 τ2 r) x)) == split τ2 (snd (r x)) FIXME plus some stuff??
       ((fst (split τ2 (snd (r (merge τ1 (fst (split τ1 x) , default τ1))))) == fst (split τ2 (snd (r x)))) × 
-       (snd (split τ2 (snd (r (merge τ1 (split τ1 x))))) == snd (split τ2 (snd (r x)))) ×
+       (split τ2 (snd (r (merge τ1 (split τ1 x)))) == (split τ2 (snd (r x)))) ×
        -- and the costs are equal
        (fst (r (merge τ1 (split τ1 x))) == fst (r x))) ×
       Good τ2 (snd (r x)))
@@ -311,7 +311,10 @@ module misc.Retraction3g where
 
   Good-merge : ∀ τ (x : _) → Good τ (merge τ x)
   Good-merge b x = <>
-  Good-merge (τ ⇒ τ₁) r x gx = ({!OK!} , {!OK!} , {!OK!}) , (Good-merge τ₁ _)
+  Good-merge (τ1 ⇒ τ2) r x gx = (ap fst (! (split-merge τ2 _)) ∘ ap (fst r o fst) (split-merge τ1 _) ∘ ap fst (split-merge τ2 _) , 
+                                ap (split τ2 o merge τ2) (ap (λ h → fst r (fst h) , snd (snd r h)) (split-merge τ1 _)) , 
+                                ap (fst o snd r) (split-merge τ1 _)) , 
+                                (Good-merge τ2 _)
 
   GoodC-merge : ∀ Γ (θ : _) → GoodC Γ (mergec Γ θ)
   GoodC-merge [] x = <>
@@ -321,48 +324,71 @@ module misc.Retraction3g where
             → ( (θ : << Γ >>c) → GoodC Γ θ → 
                  ((fst (split τ (snd (<< e >>e (mergec Γ (fst (splitc Γ θ) , defaultc Γ))))) 
                   == fst (split τ (snd (<< e >>e θ)))) ×
-                 (snd (split τ (snd (<< e >>e (mergec Γ (splitc Γ θ))))) == snd (split τ (snd (<< e >>e θ)))) × 
+                 (split τ (snd (<< e >>e (mergec Γ (splitc Γ θ)))) == (split τ (snd (<< e >>e θ)))) × 
                  (fst (<< e >>e (mergec Γ (splitc Γ θ))) == fst (<< e >>e θ))) ×
                  Good τ (snd (<< e >>e θ)))
   allgood c θ gθ = (id , id , id) , <> 
-  allgood (v i0) θ gθ = ({!OK!} , ({!OK!} , id)) , snd gθ
+  allgood {τ = τ} (v i0) θ gθ = (ap fst (split-merge τ _) , (split-merge τ _ , id)) , snd gθ
   allgood (v (iS x)) θ gθ = allgood (v x) (fst θ) (fst gθ)
-  allgood (lam{τ1} e) θ gθ = 
-          (λ≃ (λ pot → fst (fst (allgood e (θ , merge τ1 (pot , default τ1)) (gθ , Good-merge τ1 (pot , default τ1)))) ∘ {!OK!}) , 
-          ((λ≃ (λ pc1 → ap2 _,_ 
-                         (snd (snd (fst (allgood e (θ , merge τ1 pc1) (gθ , Good-merge τ1 pc1)))) ∘ {!OK!}) 
-                         (fst (snd (fst (allgood e (θ , merge τ1 pc1) (gθ , Good-merge τ1 pc1)))) ∘ {!OK!}))) , 
-          id)) , 
-          (λ x gx → (fst (fst (allgood e (θ , x) (gθ , gx))) ∘ {!OK!} ∘ ! (fst (fst (allgood e (θ , merge τ1 (fst (split τ1 x) , default τ1)) (gθ , Good-merge τ1 _)))) , 
-                     fst (snd (fst (allgood e (θ , x) (gθ , gx)))) ∘ {! same trick!} , 
-                     (snd (snd (fst (allgood e (θ , x) (gθ , gx)))) ∘ {! same trick!})) , snd (allgood e (θ , x) (gθ , gx)))
+  allgood {Γ} (lam{τ1}{τ2} e) θ gθ = 
+          (λ≃ (λ pot → fst (fst (allgood e (θ , merge τ1 (pot , default τ1)) (gθ , Good-merge τ1 (pot , default τ1)))) ∘ 
+                        ap (λ h → fst (split τ2 (snd (<< e >>e (mergec Γ (fst (splitc Γ θ) , defaultc Γ) , merge τ1 (h , default τ1))))))
+                           (ap fst (! (split-merge τ1 _)))) , 
+          (ap2 _,_ (λ≃ (λ pc1 → ap fst (fst (snd (fst (allgood e (θ , merged τ1 pc1) (gθ , Good-merge τ1 _))))) ∘ 
+                                 ap (λ h → fst (split τ2 (snd (<< e >>e (mergec Γ (fst (splitc Γ θ) , snd (splitc Γ θ)) , merge τ1 h)))))
+                                    (! (split-merge τ1 _))))
+                   (λ≃ (λ pc1 → ap2 _,_ (snd (snd (fst (allgood e (θ , merge τ1 pc1) (gθ , Good-merge τ1 pc1)))) ∘ 
+                                          ap (λ h → fst (<< e >>e (mergec Γ (fst (splitc Γ θ) , snd (splitc Γ θ)) , merge τ1 h)))
+                                             (! (split-merge τ1 _)))
+                                         (ap snd (fst (snd (fst (allgood e (θ , merge τ1 pc1) (gθ , Good-merge τ1 pc1))))) ∘ 
+                                          ap (λ h → snd (split τ2 (snd (<< e >>e (mergec Γ (fst (splitc Γ θ) , snd (splitc Γ θ)) , merge τ1 h)))))
+                                             (! (split-merge τ1 _)))))) , 
+          id) , 
+          (λ x gx → (-- part 1
+                      fst (fst (allgood e (θ , x) (gθ , gx))) ∘ 
+                      ap (λ h → fst (split τ2 (snd (<< e >>e (mergec Γ (fst (splitc Γ θ) , defaultc Γ) , merge τ1 (h , default τ1))))))
+                         (ap fst (split-merge τ1 _)) ∘ 
+                      ! (fst (fst (allgood e (θ , merge τ1 (fst (split τ1 x) , default τ1)) (gθ , Good-merge τ1 _)))) , 
+                      -- part 2
+                      fst (snd (fst (allgood e (θ , x) (gθ , gx)))) ∘ 
+                      ap (λ h → split τ2 (snd (<< e >>e (mergec Γ (fst (splitc Γ θ) , snd (splitc Γ θ)) , merge τ1 h)))) 
+                         (split-merge τ1 _) ∘ 
+                      ! (fst (snd (fst (allgood e (θ , merge τ1 (split τ1 x)) (gθ , Good-merge τ1 _))))) , 
+                      -- part 3
+                      (snd (snd (fst (allgood e (θ , x) (gθ , gx)))) ∘ 
+                       ap (λ h → fst (<< e >>e (mergec Γ (fst (splitc Γ θ) , snd (splitc Γ θ)) , merge τ1 h)))
+                          (split-merge τ1 _) ∘
+                       ! (snd (snd (fst (allgood e (θ , merge τ1 (split τ1 x)) (gθ , Good-merge τ1 _))))))) , 
+                      -- part 4
+                      snd (allgood e (θ , x) (gθ , gx)))
   allgood {Γ} (app{τ1}{τ2} e1 e2) θ gθ with allgood e1 θ gθ | allgood e2 θ gθ | allgood e1 (mergec Γ (fst (splitc Γ θ) , defaultc Γ)) (GoodC-merge Γ _) | allgood e2 (mergec Γ (fst (splitc Γ θ) , defaultc Γ)) (GoodC-merge Γ _) | allgood e1 (mergec Γ (splitc Γ θ)) (GoodC-merge Γ _) | allgood e2 (mergec Γ (splitc Γ θ)) (GoodC-merge Γ _)
-  ... | (ih1pot , ih1cst , ih1c) , ih1rec | (ih2pot , ih2cst , ih2c) , ih2rec | (ih1pot' , _ , _) , ih1rec' | (ih2pot' , _ , _) , ih2rec' |  (_ , ih1cst'' , _) , ih1rec'' | (ih2pot'' , ih2cst'' , _) , ih2rec''
-    = (fst (fst (ih1rec _ ih2rec)) ∘ 
-         ap≃ ih1pot {fst (split τ1 (snd (<< e2 >>e θ)))} ∘ 
-         ap (λ h → fst (split τ2 (snd (snd (<< e1 >>e (mergec Γ (fst (splitc Γ θ) , defaultc Γ))) (merge τ1 (h , default τ1))))))
-           ih2pot ∘ 
-         ! (fst (fst (ih1rec' (snd (<< e2 >>e (mergec Γ (fst (splitc Γ θ) , defaultc Γ)))) ih2rec'))) , 
+  ... | (ih1pot , ih1cst , ih1c) , ih1rec | (ih2pot , ih2cst , ih2c) , ih2rec | (ih1pot' , _ , _) , ih1rec' | (ih2pot' , _ , _) , ih2rec' |  (_ , ih1cst'' , _) , ih1rec'' | (ih2pot'' , ih2cst'' , _) , ih2rec'' =  
+      (-- part 1
+       fst (fst (ih1rec _ ih2rec)) ∘ 
+       ap≃ ih1pot {fst (split τ1 (snd (<< e2 >>e θ)))} ∘ 
+       ap (λ h → fst (split τ2 (snd (snd (<< e1 >>e (mergec Γ (fst (splitc Γ θ) , defaultc Γ))) (merge τ1 (h , default τ1))))))
+          ih2pot ∘ 
+       ! (fst (fst (ih1rec' (snd (<< e2 >>e (mergec Γ (fst (splitc Γ θ) , defaultc Γ)))) ih2rec'))) , 
+       -- part 2
        fst (snd (fst (ih1rec _ ih2rec))) ∘ 
-         ap snd (ap≃ ih1cst {split τ1 (snd (<< e2 >>e θ))}) ∘ 
-         ap (λ h → snd (split τ2 (snd (snd (<< e1 >>e (mergec Γ (splitc Γ θ))) (merge τ1 h))))) foo ∘
-         -- ap (λ h → snd (split τ2 (snd (snd (<< e1 >>e (mergec Γ (splitc Γ θ))) (merge τ1 h))))) (ap2 _,_ ih2pot ih2cst) ∘ -- FIXME one option
-         ! (fst (snd (fst (ih1rec'' _ ih2rec'')))) , 
-       ap
-         (λ h → mc c1 (mc (fst (<< e1 >>e θ)) (mc (fst (<< e2 >>e θ)) h))) (snd (snd (fst (ih1rec (snd (<< e2 >>e θ)) ih2rec))) ∘ 
-                ap (λ x → fst (snd (<< e1 >>e θ) (merge τ1 x))) foo ∘ ap fst (ap≃ ih1cst) ∘ ! (snd (snd (fst (ih1rec'' _ ih2rec'')))) ) ∘
-         ap2
-         (λ h1 h2 →
-            mc c1
-            (mc h1
-             (mc h2
-              (fst
-               (snd (<< e1 >>e (mergec Γ (splitc Γ θ)))
-                (snd (<< e2 >>e (mergec Γ (splitc Γ θ)))))))))
-         ih1c ih2c) , 
-      ((snd (ih1rec _ ih2rec)))  where
-      foo : (split τ1 (snd (<< e2 >>e (mergec Γ (splitc Γ θ)))) == split τ1 (snd (<< e2 >>e θ)))
-      foo = ap2 _,_ {!ih2pot''!} ih2cst 
+       ap2 _,_ (fst (fst (ih1rec _ (Good-merge τ1 _))) ∘ 
+                ap (λ h → fst (split τ2 (snd (snd (<< e1 >>e θ) (merge τ1 (fst h , default τ1))))))
+                   (! (split-merge τ1 _)) ∘
+                ap≃ (ap fst ih1cst) {fst (split τ1 (snd (<< e2 >>e θ)))} ∘ 
+                ap (λ h → fst (split τ2 (snd (snd (<< e1 >>e (mergec Γ (splitc Γ θ))) (merge τ1 (fst h , default τ1))))))
+                   (split-merge τ1 _) ∘ 
+                ! (fst (fst (ih1rec'' (merge τ1 (split τ1 (snd (<< e2 >>e θ)))) (Good-merge τ1 _)))))
+               (ap snd (ap≃ (ap snd ih1cst) {split τ1 (snd (<< e2 >>e θ))})) ∘ 
+       ap (λ h → split τ2 (snd (snd (<< e1 >>e (mergec Γ (splitc Γ θ))) (merge τ1 h)))) ih2cst ∘ 
+       ! (fst (snd (fst (ih1rec'' _ ih2rec'')))) , 
+       -- part 3
+       ap (λ h → mc c1 (mc (fst (<< e1 >>e θ)) (mc (fst (<< e2 >>e θ)) h)))
+          (snd (snd (fst (ih1rec (snd (<< e2 >>e θ)) ih2rec))) ∘ 
+               ap (λ x → fst (snd (<< e1 >>e θ) (merge τ1 x))) ih2cst ∘ ap fst (ap≃ (ap snd ih1cst)) ∘ ! (snd (snd (fst (ih1rec'' _ ih2rec''))))) ∘
+       ap2 (λ h1 h2 → mc c1 (mc h1 (mc h2 (fst (snd (<< e1 >>e (mergec Γ (splitc Γ θ))) (snd (<< e2 >>e (mergec Γ (splitc Γ θ)))))))))
+             ih1c ih2c) , 
+      -- part 4
+      ((snd (ih1rec _ ih2rec)))  
 
   thm : ∀ {Γ} {τ} (e : Γ ⊢ τ) → split⊢ Γ τ << e >>e == ([[ e ]]e , << e >>cste)
   thm c = id
