@@ -2,7 +2,7 @@
 
 open import lib.Prelude
 
-module misc.Retraction2 where
+module metatheory.printingretractions.RetractionPotSimultaneous where
 
  record Retraction (A B : Type) : Type where
    constructor retraction

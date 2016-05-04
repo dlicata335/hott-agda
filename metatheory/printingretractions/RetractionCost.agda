@@ -5,7 +5,7 @@
 
 open import lib.Prelude hiding (wrap)
 
-module misc.Retraction3g2 where
+module metatheory.printingretractions.RetractionCost where
 
  ------------------------------------------------------------------------
  -- some abstractions 
