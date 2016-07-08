@@ -203,10 +203,15 @@ module lib.Functions where
     Πlevel {A} { -2} a = ntype ((λ x → fst (use-level (a x))) , (λ f → λ≃ (λ x → snd (use-level (a x)) (f x))))
     Πlevel {A} {S n} a = ntype (λ f g → transport (NType n) (ua ΠPath.eqv) (Πlevel {A} {n} (λ x → use-level (a x) _ _)))
 
+  uncurry-eqv : (A : Type) (B : A -> Type) (C : Σ B -> Type)
+           -> Equiv ((p : Σ B) → C p)
+                    ((x : A) (y : B x) -> C (x , y))
+  uncurry-eqv _ _ _ = (equiv (λ f x y → f (x , y)) (λ f p → f (fst p) (snd p)) (λ _ → id) (λ _ → id) (λ _ → id))
+
   uncurry≃ : (A : Type) (B : A -> Type) (C : Σ B -> Type)
            -> ((p : Σ B) → C p)
            ≃  ((x : A) (y : B x) -> C (x , y))
-  uncurry≃ _ _ _ = ua (equiv (λ f x y → f (x , y)) (λ f p → f (fst p) (snd p)) (λ _ → id) (λ _ → id) (λ _ → id))
+  uncurry≃ _ _ _ = ua (uncurry-eqv _ _ _)
  
   exchange≃ : {A : Type} {B : Type} {C : A → B → Type}
             -> ((x : A) (y : B) → C x y)
@@ -235,6 +240,9 @@ module lib.Functions where
        (b : (x' : A') → B (IsEquiv.g (snd a) x') ≃ B' x')
      → ((x : A) → B x) ≃ ((x' : A') → B' x')
   apΠ' {A = A} {B = B} {B' = B'}  a b = apΠ (ua a) (λ≃ (λ x' → ap B' (! (ap≃ (type≃β a))) ∘ b (fst a x') ∘ ap B (! (IsEquiv.α (snd a) _)))) 
+
+  ap→-range-eqv : ∀ {A B B'} → (Equiv B B') → Equiv (A → B) (A → B')
+  ap→-range-eqv e = improve (hequiv (_o_ (fst e)) (_o_ (IsEquiv.g (snd e))) (λ f → λ≃ (λ x → IsEquiv.α (snd e) (f x))) (λ f → λ≃ (λ x → IsEquiv.β (snd e) (f x))))
 
   -- also comes up in UA implies funext, but easier to do it with funext
   postcomp-equiv-is-equiv : ∀ {A B C} → (e : Equiv B C) → IsEquiv {A → B} {A → C} (\ f -> (fst e o f))

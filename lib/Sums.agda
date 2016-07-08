@@ -25,6 +25,9 @@ module lib.Sums where
     case C l r (Inl x) = l x
     case C l r (Inr y) = r y
 
+    Either-UMP : ∀ {A B C} → Equiv ((A → C) × (B → C)) (Either A B → C)
+    Either-UMP = improve (hequiv (λ fg → case _ (fst fg) (snd fg)) (λ f → (λ x → f (Inl x)) , (λ x → f (Inr x))) (λ _ → id) (λ y → λ≃ (λ { (Inl x) → id ; (Inr y) → id })))
+
     casest : {A B C : Type} 
              → (A → C)
              → (B → C)

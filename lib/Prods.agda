@@ -267,6 +267,10 @@ module lib.Prods where
        → Σ B ≃ Σ B'
   apΣ' {A = A} {B = B} {B' = B'}  a b = apΣ (ua a) (λ≃ (λ x' → ap B' (! (ap≃ (type≃β a))) ∘ b (fst a x') ∘ ap B (! (IsEquiv.α (snd a) _)))) -- (λ≃ (λ x → ap B' (! (ap≃ (type≃β a))) ∘ b x))
 
+  ap×-eqv : ∀ {A B A' B'} → Equiv A A' → Equiv B B' → Equiv (A × B) (A' × B')
+  ap×-eqv e1 e2 = improve (hequiv (λ p → fst e1 (fst p) , fst e2 (snd p)) (λ p → IsEquiv.g (snd e1) (fst p) , IsEquiv.g (snd e2) (snd p)) 
+                                  (λ x → ap2 _,_ (IsEquiv.α (snd e1) _) (IsEquiv.α (snd e2) _))
+                                  (λ x → ap2 _,_ (IsEquiv.β (snd e1) _) (IsEquiv.β (snd e2) _)))
 
   -- non-dependent pairs
 
