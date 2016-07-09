@@ -76,7 +76,7 @@ module misc.Reflective where
                                                               (λ≃ (λ a → β _ ∘ ap (λ h → <>rec (isP _) (λ b → << a , b >>) h) (ap snd (β _))))
                                                               (ap fst (β _)))))
 
-   -- also can do it using a lemma like what's in the book, but 
+   -- also can do it using a lemma like Corollary 7.7.3 in the book, but 
    -- *** need to show M is in P ! ***
    suffices-to-show-universal-property : ∀ {M A} → 
            (p : fst (P M))
