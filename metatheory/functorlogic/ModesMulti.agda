@@ -1,4 +1,6 @@
 
+-- multicategory as postulates
+
 open import functorlogic.Lib 
 
 module functorlogic.ModesMulti where

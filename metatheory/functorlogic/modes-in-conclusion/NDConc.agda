@@ -1,4 +1,6 @@
 
+-- mode morphisms on the conclusion as well as the hypotheses
+
 -- non-normal and definitional equality
 
 open import functorlogic.Lib

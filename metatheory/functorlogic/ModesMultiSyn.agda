@@ -1,10 +1,9 @@
 
+-- multicategory with term syntax
+
 open import functorlogic.Lib 
 
 module functorlogic.ModesMultiSyn where
-
-  -- use postulates rather than variables so the rewrite mechanism works
-  -- don't want a datatype because we don't want elims
 
   {-# BUILTIN REWRITE _==_ #-}
 

@@ -3,7 +3,7 @@
 
 open import functorlogic.Lib
 open import functorlogic.Modes
-open import functorlogic.SequentHypOnly
+-- open import functorlogic.SequentHypOnly
 
 module functorlogic.SequentConc-OneVar where
 

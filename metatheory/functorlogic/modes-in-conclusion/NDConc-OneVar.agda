@@ -1,12 +1,11 @@
 
--- non-normal and definitional equality
+-- mode morphsims on the conclusion as well as the assumptions
 
 open import functorlogic.Lib
 open import functorlogic.Modes
 open import functorlogic.SequentHypOnly-OneVar
 
 module functorlogic.NDConc-OneVar where
-
 
   data _[_]⊢_[_] {p r : Mode} (A1 : Tp r) (α1 : r ≥ p) : {q : Mode} → Tp q -> q ≥ p → Set where
       v   : A1 [ α1 ]⊢ A1 [ α1 ]
