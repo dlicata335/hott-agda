@@ -4,7 +4,7 @@ open import lib.Prelude
 open ListM
 open Index
 
-module metatheory.SimplexOp where
+module metatheory.SimplexOpRight where
 
   split-∈++-≤ : ∀ {A} {xs ys : List A} (i j : Pos (xs ++ ys))
                  → i ≤ j
@@ -144,9 +144,12 @@ module metatheory.SimplexOp where
   + opv = -
   - opv = +
 
+  _op : Ctx → Ctx
+  (Ψ , v) op = (rev Ψ , v opv)
+
   data _⊢_ : Ctx → Ctx → Set where
     co  : ∀ {Ψ1 Ψ2 v} → (⊥ v :: (Ψ1 ++ [ ⊤ v ])) ⊩ Ψ2 → (Ψ1 , v) ⊢ (Ψ2 , v) 
-    con : ∀ {Ψ1 Ψ2 v} → (⊥ v :: (rev Ψ1 ++ [ ⊤ v ])) ⊩ Ψ2 → (Ψ1 , v opv) ⊢ (Ψ2 , v) 
+    con : ∀ {Ψ1 Ψ2 v} → (⊥ v :: (Ψ1 ++ [ ⊤ v ])) ⊩ Ψ2 → (Ψ1 , v) ⊢ (Ψ2 , v) op
 
   ident' : ∀ {x y} Ψ → (x :: (Ψ ++ [ y ])) ⊩ Ψ
   ident' {x} Ψ = rweaken (lweaken {Ψ0 = [ x ]} ident⊩ )
@@ -166,36 +169,29 @@ module metatheory.SimplexOp where
   opv-flip' {+} = id
   opv-flip' { - } = id
 
-  compose : ∀ {Ψ Ψ' Ψ''} → Ψ ⊢ Ψ' → Ψ' ⊢ Ψ'' → Ψ ⊢ Ψ''
-  compose {Ψ , v} {Ψ' , .v} {Ψ'' , .v} (co ρ) (co ρ') = co (compose' {Ψ = Ψ} {Ψ' = Ψ'} {Ψ'' = Ψ''} {x = ⊥ v} {y = ⊤ v} {x' = ⊥ v} {y' = ⊤ v} ρ ρ')
-  compose {Ψ , .(v opv)} {Ψ' , v} {Ψ'' , .v} (con ρ) (co ρ') = con (compose' {Ψ = rev Ψ} {Ψ' = Ψ'} {Ψ'' = Ψ''} {x = ⊥ v} {y = ⊤ v} {x' = ⊥ v} {y' = ⊤ v} ρ ρ')
-  compose {Ψ , .(v opv)} {Ψ' , .(v opv)} {Ψ'' , v} (co ρ) (con ρ') = 
-    con (transport (λ h → h :: (rev Ψ ++ [ ⊤ v ]) ⊩ Ψ'') 
-                   (opv-flip {v})
-           (transport (λ h → (⊤ (v opv)) :: (rev Ψ ++ [ h ]) ⊩ Ψ'') 
-                      (opv-flip' {v}) 
-             (compose' {Ψ = rev Ψ} {x = ⊤ (v opv)} {y = ⊥ (v opv)} {x' = ⊥ v} {y' = ⊤ v}
-               (transport (λ h → h ⊩ _) (ap (λ h → h ++ [ ⊥ (v opv) ]) (rev-append Ψ [ ⊤ (v opv) ]))
-                          (reflect ρ))
-               ρ')))
-  compose {Ψ , .((v opv) opv)} {Ψ' , .(v opv)} {Ψ'' , v} (con ρ) (con ρ') = 
-    transport (λ h → (Ψ , h) ⊢ (Ψ'' , v)) (! (opv-invol {v})) 
-              (co (compose' {Ψ = Ψ} {x = ⊥ v} {y = ⊤ v} {x' = ⊥ v} {y' = ⊤ v }
-                     (transport (λ h → h ⊩ _)
-                      (ap2 _::_ (opv-flip {v}) (ap2 _++_ (rev-rev Ψ) (ap [_] (opv-flip' {v}))) ∘
-                       ap (λ h → h ++ [ ⊥ (v opv) ]) (rev-append (rev Ψ) [ ⊤ (v opv) ]))
-                      (reflect ρ))
-                     ρ'))
-  
-  _op : Ctx → Ctx
-  (Ψ , v) op = (rev Ψ , v opv)
-
   op-invol : ∀ {Ψ} → (Ψ op) op == Ψ
   op-invol {Ψ , v} = ap2 _,_ (rev-rev Ψ) (opv-invol {v})
 
+  compose : ∀ {Ψ Ψ' Ψ''} → Ψ ⊢ Ψ' → Ψ' ⊢ Ψ'' → Ψ ⊢ Ψ''
+  compose {Ψ , v} {Ψ' , .v} {Ψ'' , .v} (co ρ) (co ρ') = co (compose' {Ψ = Ψ} {Ψ' = Ψ'} {Ψ'' = Ψ''} ρ ρ')
+  compose {Ψ , v} {.(rev Ψ') , .(v opv)} {Ψ'' , .(v opv)} (con {Ψ2 = Ψ'} ρ) (co ρ') = 
+    transport (\ h → (Ψ , v) ⊢ h) (ap2 _,_ (rev-rev Ψ'') id) 
+              (con {Ψ2 = rev Ψ''} 
+                (compose' {Ψ = Ψ} {x = ⊥ v} {y = ⊤ v} {x' = ⊤ (v opv)} {y' = ⊥ (v opv)} 
+                          ρ 
+                          (transport (λ h → h ⊩ rev Ψ'') (ap (λ h → _ :: (h ++ _)) (rev-rev Ψ') ∘ ap (λ h → h ++ [ ⊥ (v opv) ]) (rev-append (rev Ψ') [ ⊤ (v opv) ]))
+                                     (reflect ρ'))))
+
+  compose (co {Ψ1 = Ψ} ρ) (con {Ψ1 = Ψ'} {Ψ2 = Ψ''} ρ') = con (compose' {Ψ = Ψ} {Ψ' = Ψ'} {Ψ'' = Ψ''} ρ ρ')
+  compose (con {Ψ1 = Ψ} {Ψ2 = Ψ'} {v = v} ρ) (con {Ψ2 = Ψ''} ρ') = 
+    transport (λ h → (Ψ , v) ⊢ (rev Ψ'' , h)) (! (opv-invol {v})) 
+    (co (compose' {Ψ = Ψ} {x = ⊥ v} {y = ⊤ v} {x' = ⊤ (v opv)} {y' = ⊥ (v opv)} ρ 
+                     (transport (λ h → h ⊩ rev Ψ'') 
+                                (ap (λ h → _ :: (h ++ _)) (rev-rev Ψ') ∘ ap (λ h → h ++ [ ⊥ (v opv) ]) (rev-append (rev Ψ') [ ⊤ (v opv) ]))
+                                (reflect ρ'))))
+
   r : ∀ {Ψ} → Ψ ⊢ Ψ op
-  r {Ψ , + } = con (ident' _) 
-  r {Ψ , - } = con (ident' _) 
+  r {Ψ} = con (ident' (fst Ψ))
 
   ----------------------------------------------------------------------
   -- 0 and 1 simplices
@@ -203,7 +199,7 @@ module metatheory.SimplexOp where
   ·co : ∀ {v} → ([ "x" ] , v) ⊢ ([] , v)
   ·co = co Nil
 
-  ·con : ∀ {v} → ([ "x" ] , v opv) ⊢ ([] , v)
+  ·con : ∀ {v} → ([ "x" ] , v) ⊢ ([] , v opv)
   ·con = con Nil
 
   0/x+1 : ([] , +) ⊢ ([ "x" ] , +)
@@ -247,28 +243,23 @@ module metatheory.SimplexOp where
   1/y+1 : ([] , +) ⊢ ([ "y" ] , +)
   1/y+1 = co (Cons [ "0" ] "1" "y" id Nil)
 
-  test1 : ([ "y" ] , +) ⊢ ("y" :: "x" :: [] , -)
-  test1 = compose 0/x+2 r2+
+  test1a : ([ "y" ] , +) ⊢ ("y" :: "x" :: [] , -)
+  test1a = (compose 0/x+2 r2+)
+
+  test1 : ([ "y" ] , -) ⊢ ("y" :: "x" :: [] , -)
+  test1 = compose r (compose 0/x+2 r2+)
 
   test2 : ([] , +) ⊢ ("x" :: "y" :: [] , +)
   test2 = compose 1/y+1 0/x+2
 
-  test3 : ([ "y" ] , -) ⊢ ("y" :: "x" :: [] , -)
-  test3 = compose r (compose 0/x+2 r2+)
-
   ----------------------------------------------------------------------
-
-  run : ∀ {Ψ} {Ψ'} {x} → Ψ ⊢ Ψ' → x ∈ fst Ψ' → String
-  run (co ρ) i = fst (fst ρ (_ , i))
-  run (con ρ) i = fst (fst ρ (_ , i))
 
   data _⊢'_ : Ctx → Ctx → Set where
     co  : ∀ {Ψ1 Ψ2 v} → (⊥ v :: (Ψ1 ++ [ ⊤ v ])) ⊩' Ψ2 → (Ψ1 , v) ⊢' (Ψ2 , v) 
-    con : ∀ {Ψ1 Ψ2 v} → (⊥ v :: (rev Ψ1 ++ [ ⊤ v ])) ⊩' Ψ2 → (Ψ1 , v opv) ⊢' (Ψ2 , v) 
+    con : ∀ {Ψ1 Ψ2 v} → (⊥ v :: (Ψ1 ++ [ ⊤ v ])) ⊩' Ψ2 → (Ψ1 , v) ⊢' (Ψ2 , v) op
 
   run2 : ∀ {Ψ} {Ψ'}→ Ψ ⊢ Ψ' → Ψ ⊢' Ψ'
   run2 (co ρ) = co (reify ρ)
   run2 (con ρ) = con (reify ρ)
-
 
   
