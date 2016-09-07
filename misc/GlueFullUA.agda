@@ -5,6 +5,25 @@ open import lib.cubical.Cubical
 
 module misc.GlueFullUA where
 
+  self-double : ∀ {A} {x : A} {α : x == x} → α == α ∘ α → α == id
+  self-double {α = α} p = ! (!-inv-l-front α α ∘ ap (_∘_ (! α)) p ∘ ! (!-inv-l α))
+
+  endo-path-naturality : ∀ {A} (f : {x y : A} → x == y -> x == y) → { x y : A} (p : x == y) → f p == p ∘ f id 
+  endo-path-naturality f id = ! (∘-unit-l (f id))
+
+  retract-of-Id-is-Id : ∀ {A} {R : A → A → Type} → 
+                  (r : {x y : A} → x == y -> R x y)
+                  (s : {x y : A} → R x y → x == y)
+                  (comp1 : {x y : A} (c : R x y) → r (s c) == c) -- r is a retract of s 
+                → {x y : A} → IsEquiv {x == y} {R x y} (r {x}{y})
+  retract-of-Id-is-Id r s comp1 = snd (improve (hequiv r s comp2 comp1)) where
+
+    s-r-idempotent : ∀ {x y} p → s{x}{y} (r{x}{y} (s{x}{y} (r{x}{y} p))) == s (r p)
+    s-r-idempotent p = ap s (comp1 (r p))
+  
+    comp2 : ∀ {x y} (p : x == y) → s (r p) == p
+    comp2 id = self-double (endo-path-naturality (λ x → s (r x)) (s (r id)) ∘ ! (s-r-idempotent id)) 
+
   -- read α : A == B as a line in type, and PathOver α as a line as a classifier
 
   postulate
