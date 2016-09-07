@@ -102,7 +102,7 @@ module misc.UABetaOnly-SelfContained where
     Equiv : {l1 l2 : Level} → Set l1 → Set l2 → Set (l1 ⊔ l2)
     Equiv A B = Σ (IsEquiv{A = A}{B})
 
-    -- from Martin Escardo on HoTT book list
+    -- from Martin Escardo on HoTT book list https://github.com/HoTT/book/issues/718
     retract-of-Id-is-Id : ∀ {l1 l2 : Level} {A : Set l1} {R : A → A → Set l2} → 
                         (r : {x y : A} → x == y -> R x y)
                         (s : {x y : A} → R x y → x == y)
@@ -129,9 +129,8 @@ module misc.UABetaOnly-SelfContained where
     full : ∀ {B X} → IsEquiv {_}{_} {B == X} {Equiv B X} (coe-equiv)
     full = retract-of-Id-is-Id coe-equiv ua (λ c → pair≃ (uaβ c) ((IsEquiv-HProp _) _ _))
 
-
     module TheCanonicalMap (λ=  : ∀ {l1 l2 : Level} {A : Set l1} {B : A -> Set l2} {f g : (x : A) -> B x} -> ((x : A) -> Path (f x) (g x)) -> Path f g) where
-      -- assuming we have function extensionality (or using the above to get it),
+      -- assuming we have function extensionality (if not we can use the above to get it?),
       -- we can show that this is the same map as VV canonical map
   
       id-equiv : {l : Level} {A : Set l} -> Equiv A A
