@@ -4,8 +4,6 @@ open import Agda.Primitive
 
 module misc.UABetaOnly-SelfContained where
 
- -- SKIP TO LINE 188 for the interesting part
-
  -- -------------------------------------------------------------------------------
  -- LIBRARY CODE, copied here to make sure I'm not using UA/funext
  -- -------------------------------------------------------------------------------
