@@ -123,10 +123,10 @@ module misc.UABetaOnly-SelfContained where
     coe-equiv p = (coe p , coe-is-equiv p)
 
     postulate
-      ua : ∀ {A B : Set} → Equiv A B → A == B
-      uaβ : ∀ {A B} (e : Equiv A B) → coe (ua e) == fst e
+      ua : ∀ {l : Level} {A B : Set l} → Equiv A B → A == B
+      uaβ : ∀ {l : Level} {A B : Set l} (e : Equiv A B) → coe (ua e) == fst e
 
-    full : ∀ {B X} → IsEquiv {_}{_} {B == X} {Equiv B X} (coe-equiv)
+    full : ∀ {l : Level} {A B : Set l} → IsEquiv {_}{_} {A == B} {Equiv A B} (coe-equiv)
     full = retract-of-Id-is-Id coe-equiv ua (λ c → pair≃ (uaβ c) ((IsEquiv-HProp _) _ _))
 
     module TheCanonicalMap (λ=  : ∀ {l1 l2 : Level} {A : Set l1} {B : A -> Set l2} {f g : (x : A) -> B x} -> ((x : A) -> Path (f x) (g x)) -> Path f g) where
@@ -142,5 +142,5 @@ module misc.UABetaOnly-SelfContained where
       pathToEquiv-is-coe-equiv : ∀ {l : Level} {A B : Set l} (α : Path A B) → coe-equiv α == pathToEquiv α
       pathToEquiv-is-coe-equiv id = id
   
-      full' : ∀ {B X} → IsEquiv {_}{_} {B == X} {Equiv B X} pathToEquiv
+      full' : ∀ {l : Level} {A B : Set l} → IsEquiv {_}{_} {A == B} {Equiv A B} pathToEquiv
       full' = transport IsEquiv (λ= pathToEquiv-is-coe-equiv) full
