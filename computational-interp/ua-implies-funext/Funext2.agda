@@ -46,5 +46,4 @@ module Funext2 where
 
   funext-ap= : {A B : Type} {f g : A → B} (α : f == g) → fst (funext f g) α == \ x -> ap= α {x}
   funext-ap= id = funext-id _
-
-
+    

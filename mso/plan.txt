@@ -2,7 +2,7 @@
 
    types for individuals
 
-   signatures Σ ::= · | Σ, R : τ1...τn → *, Σ, x:τ 
+   signatures Σ ::= · | Σ, R : τ1...τn → * | Σ, x:τ 
 
    Structure Σ is a set (subset of universe?) with interpretations for everything in the signature
    
