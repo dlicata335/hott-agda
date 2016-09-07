@@ -1,0 +1,81 @@
+1) Define structures
+
+   types for individuals
+
+   signatures Σ ::= · | Σ, R : τ1...τn → *, Σ, x:τ 
+
+   Structure Σ is a set (subset of universe?) with interpretations for everything in the signature
+   
+   Q: how to represent subsets?  
+      P : Elt τ → Set with enumeration?  
+      list? 
+
+   closed: value for every individual variables
+   open: individuals can none
+   --> different possible representations (index Structure Σ by Open/Closed and have NONE force Open?)
+   
+   need notion of extension/compatible/union
+
+2) Define formulas 
+   φ ::= R(t) | ¬R(t) | ∀/∃ x:τ. φ | ∀/∃ R:τ->*. φ | ∧/∨
+   * flips connectives
+
+3) Define 
+
+   A ⊧c φ true for closed structures only
+   A ⊧c φ false := A ⊧ φ* true
+
+   A ⊧ φ true 
+   A ⊧ φ false := A ⊧ φ* true
+   A ⊧ φ undet -- partial game
+
+4) eval : for all A,φ (A ⊧ φ true) + (A ⊧ φ false) + (A ⊧ φ undet)
+
+5) weakening: suppose B is A plus a new element and some facts about it
+   (A ⊧ φ true) -> (B ⊧ φ true)
+   (A ⊧ φ undet) -> (B ⊧ φ undet?) [ can it become determined? ]
+
+6) join: suppose A and B are compatible, then 
+   (A ⊧ φ true) and (B ⊧ φ true) -> (A ∪ B ⊧ φ true)
+   (A ⊧ φ undet) and (B ⊧ φ undet) -> (A ∪ B ⊧ φ undet?)
+
+7) tree decomposition for a fixed structure A = (B,...) is a Tree X B 
+
+   Tree X B -- X nodes at root, B all nodes at and below (or could compute B from a tree...)
+
+   Leaf X : Tree X X
+
+   Add x (t : Tree X B) where x#B : Tree (X + {x}) (B + {x})
+       when for all R in Σ, if [[R]] A xs and x ∈ xs then xs ⊆ X+{x}
+
+   Forget x (t : Tree X B) where x ∈ X : Tree (X - {x}) B
+
+   Join (t1 : Tree X B1) (t2 : Tree X B2) : Tree X (B1 ∪ B2) where
+        - if a ∈ B1 and a ∈ B2 then a ∈ X
+        - if [[R]] A xs with a1 ∈ B1 and a2 ∈ B2 and a1,a2 ∈ xs, 
+          then xs ⊆ X
+
+8) 
+
+   Write A[B] for A restricted to B.  
+   Write (A[B] ⊧ φ ?) for (A[B] ⊢ φ true) + (A[B] ⊢ φ false) + (A[B] ⊢ φ undet) 
+
+   Tree X B -> (A[B] ⊢ φ ?)
+
+   Key point for Add: 
+       A[B + {x}] = A[B] ∪ A[X + {x}] by definition of tree
+       
+   Key point for Join:
+       A[B1 ∪ B2] = A[B1] ∪ A[B2] because all interactions are in X ⊆ B1,B2
+
+
+
+== Things to think about ==
+
+
+above story ignores the isomorphism classes; what do those mean here?
+
+deduction? e.g. ∀X.∀x. X(x) ∨ ¬X(x) is undetermined here
+           any examples where this would be useful?
+        
+

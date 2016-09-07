@@ -80,6 +80,8 @@ module lib.AdjointEquiv where
                         → IsEquiv.g (transport IsEquiv α e) ≃ IsEquiv.g e
  transport-IsEquiv-g id e = id
 
+ !equiv-equiv : ∀ {A B} → Equiv (Equiv A B) (Equiv B A)
+ !equiv-equiv = improve (hequiv !equiv !equiv (λ x → pair≃ id (HProp-unique (IsEquiv-HProp _) _ _)) (λ x → pair≃ id (HProp-unique (IsEquiv-HProp _) _ _)))
 
  module ApEquiv where
     apPath : {A B : Type} → (α : A == B) → {M N : A} → Path M N == Path (coe α M) (coe α N)

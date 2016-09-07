@@ -288,6 +288,25 @@ module lib.cubical.PathOver where
             → (PathOver A δ M1 M2)
   hom-to-over/right id id = id
 
+  hom-to-over-to-hom/right : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} (δ : θ1 == θ2) → ∀ {M1 M2} 
+            → ( p : (M1 == (transport A (! δ) M2)) )
+            → over-to-hom/right (hom-to-over/right δ p) == p
+  hom-to-over-to-hom/right id id = id
+
+  over-to-hom-to-over/right : {Δ : Type} {A : Δ → Type}
+            → ∀ {θ1 θ2} {δ : θ1 == θ2} → ∀ {M1 M2} 
+            → (p : PathOver A δ M1 M2)
+            → hom-to-over/right δ (over-to-hom/right p) == p
+  over-to-hom-to-over/right id = id
+
+  hom-to-over/right-eqv : {Δ : Type} {A : Δ → Type}
+                          → ∀ {θ1 θ2} (δ : θ1 == θ2) → ∀ {M1 M2} 
+                          → Equiv (M1 == (transport A (! δ) M2)) (PathOver A δ M1 M2)
+  hom-to-over/right-eqv δ = improve
+                                  (hequiv (hom-to-over/right δ) over-to-hom/right
+                                   (hom-to-over-to-hom/right δ) over-to-hom-to-over/right)
+
   over-to-hom : {Δ : Type} {A : Δ → Type}
             → ∀ {θ1} → ∀ {M1 M2 : A θ1} 
             →  (δ : PathOver A id M1 M2)
