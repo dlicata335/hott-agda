@@ -109,6 +109,12 @@ module misc.UABetaOnly-SelfContained where
     id-equiv : ∀ {l} {A : Set l} -> Equiv A A
     id-equiv = ( (\ x -> x) , improve (qinv (λ x → x) (\ _ -> id) (\ _ -> id)))
 
+    coe-is-equiv : ∀ {l : Level} {A B : Set l} (p : Path A B) → IsEquiv (coe p)
+    coe-is-equiv {A}{B} p = improve (qinv (coe (! p)) (λ _ → coe-inv-1 p) (λ _ → coe-inv-2 p))
+
+    coe-equiv : ∀ {l : Level} {A B : Set l} (p : Path A B) → Equiv A B
+    coe-equiv p = (coe p , coe-is-equiv p)
+
     -- ----------------------------------------------------------------------
     -- INTERESTING STUFF STARTS HERE! 
     -- ----------------------------------------------------------------------
@@ -126,12 +132,6 @@ module misc.UABetaOnly-SelfContained where
  
        comp2 : ∀ {x y} (p : x == y) → s (r p) == p
        comp2 id = self-double-id (endo-path-naturality (λ x → s (r x)) (s (r id)) ∘ ! (s-r-idempotent id)) 
-
-    coe-is-equiv : ∀ {l : Level} {A B : Set l} (p : Path A B) → IsEquiv (coe p)
-    coe-is-equiv {A}{B} p = improve (qinv (coe (! p)) (λ _ → coe-inv-1 p) (λ _ → coe-inv-2 p))
-
-    coe-equiv : ∀ {l : Level} {A B : Set l} (p : Path A B) → Equiv A B
-    coe-equiv p = (coe p , coe-is-equiv p)
 
     postulate
       ua : ∀ {l : Level} {A B : Set l} → Equiv A B → A == B
