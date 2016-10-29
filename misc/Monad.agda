@@ -50,8 +50,12 @@ module misc.Monad where
         ap (λ (h : ∀ {A B C} {f : T (A → B)} {g : T (B → C)} {c : T A} → ((pure _o_ <*> g) <*> f) <*> c == g <*> (f <*> c)) → applicative pure _<*>_ _ h _ _) (λ≃i (λ _ → λ≃i (λ _ → λ≃i (λ _ → λ≃i (λ _ → λ≃i (λ _ → λ≃i (λ _ → HSet-UIP (sT _) _ _ _ _)))))))) ∘
         ap (λ (h : ∀ {A} {c : T A} → pure (λ x → x) <*> c == c) → applicative pure _<*>_ h _ _ _) (λ≃i (λ _ → λ≃i (λ _ → HSet-UIP (sT _) _ _ _ _)))
       
-    record Monad (T : Type → Type) : Type where
+    record App⇒Monad (T : Type → Type) : Type where
+      constructor monad
+      field
         AT : Applicative T
+      open Applicative AT
+      field
         return : ∀ {A} → A → T A
         _>>=_  : ∀ {A B} → T A → (A → T B) → T B
         lunit  : ∀ {A B} {a : A} {f : A → T B} → (return a >>= f) == f a
@@ -65,9 +69,9 @@ module misc.Monad where
                                    return (f' a'))
 
     monad-hset= : ∀ {T : Type → Type} (sT : (A : Type) → HSet (T A))
-                     → {m1 m2 : Monad T}
-                     → (\ {A : Type} → Monad.return m1 {A}) == Monad.return m2
-                     → (\ {A} {B} → Monad._>>=_ m1 {A}{B}) == Monad._>>=_ m2
+                     → {m1 m2 : App⇒Monad T}
+                     → (\ {A : Type} → App⇒Monad.return m1 {A}) == App⇒Monad.return m2
+                     → (\ {A} {B} → App⇒Monad._>>=_ m1 {A}{B}) == App⇒Monad._>>=_ m2
                      → m1 == m2
     monad-hset= sT {monad AT return _>>=_ lunit runit assoc return-pure <*>-ap} {monad AT₁ .return ._>>=_ lunit₁ runit₁ assoc₁ return-pure₁ <*>-ap₁} id id with applicative-hset= sT {AT} {AT₁} (λ≃i (λ _ → λ≃ (λ x → ! return-pure₁ ∘ return-pure))) (λ≃i (λ _ → λ≃i (λ _ → λ≃ (λ _ → λ≃ (λ _ → ! <*>-ap₁ ∘ <*>-ap)))))
     monad-hset= {T} sT {monad AT return _>>=_ lunit runit assoc return-pure <*>-ap} {monad .AT .return ._>>=_ lunit₁ runit₁ assoc₁ return-pure₁ <*>-ap₁} id id | id = 
@@ -91,7 +95,7 @@ module misc.Monad where
                             ; apply-to-pure = ! lunit ∘ ap (_>>=_ _) (λ≃ (λ f' → lunit))
                             }
 
-    new-monad : New.Monad T
+    new-monad : New.App⇒Monad T
     new-monad = record
                   { AT = default-applicative
                   ; return = return
@@ -103,9 +107,9 @@ module misc.Monad where
                   ; <*>-ap = id
                   }
     
-  module NewToOld {T : Type → Type} (MT : New.Monad T) where
+  module NewToOld {T : Type → Type} (MT : New.App⇒Monad T) where
     
-    open New.Monad MT
+    open New.App⇒Monad MT
 
     old-monad : Old.Monad T
     old-monad = record { return = return ; _>>=_ = _>>=_ ; lunit = lunit ; runit = runit ; assoc = assoc }
@@ -114,12 +118,12 @@ module misc.Monad where
   oldnewold : {T : Type → Type} (MT : Old.Monad T) → NewToOld.old-monad (OldToNew.new-monad MT) == MT
   oldnewold MT = id
 
-  newoldnew : {T : Type → Type} (sT : (A : Type) → HSet (T A)) (MT : New.Monad T) → OldToNew.new-monad (NewToOld.old-monad MT) == MT
+  newoldnew : {T : Type → Type} (sT : (A : Type) → HSet (T A)) (MT : New.App⇒Monad T) → OldToNew.new-monad (NewToOld.old-monad MT) == MT
   newoldnew sT MT = New.monad-hset= sT id id
 
 
   eqv : {T : Type → Type} (sT : (A : Type) → HSet (T A))
-        → Equiv (Old.Monad T) (New.Monad T)
+        → Equiv (Old.Monad T) (New.App⇒Monad T)
   eqv sT = improve (hequiv OldToNew.new-monad NewToOld.old-monad oldnewold (newoldnew sT))
 
   

@@ -131,3 +131,12 @@ module programming.Database where
                       (key , name , (day , month) , year)})               ≃〈 id 〉 
 
         ByHand.convert ∎
+
+
+    data _≤_ : Nat → Nat → Set where
+
+    thm : (p : Nat × Nat) → Either (fst p ≤ snd p) (snd p ≤ fst p)
+    thm = {!!}
+
+    thm' : (p : Nat × Nat) → Either (fst p ≤ snd p) (snd p ≤ fst p)
+    thm' = {!apd thm swap≃!}
