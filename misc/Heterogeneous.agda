@@ -35,3 +35,21 @@ module Heterogeneous where
 
   het-to-hom-to-het : {A B : Set} {a : A} {b : B} → (p : HId a b) → Id (hom-to-het (het-to-hom1 p) (het-to-hom2 p)) p
   het-to-hom-to-het HRefl = Refl
+
+{-
+  fortunately, without-K stops you from proving J
+
+  hJ : {A : Set} {a : A} → (P : (a' : A) → HId{A} a {A} a' → Set) → (b : P a HRefl) → {a' : A} (p : HId{A} a {A} a') → P a' p
+  hJ P b HRefl = {!p!}
+-}
+
+  module UIP (hJ : {A : Set} {a : A} → (P : (a' : A) → HId{A} a {A} a' → Set) → (b : P a HRefl) → {a' : A} (p : HId{A} a {A} a') → P a' p) where
+    het-to-hom-no-coe : {A : Set} {x y : A} → HId x y → Id x y
+    het-to-hom-no-coe {A} {x} = hJ (\ y _ → Id x y) Refl
+
+    UIP1' : {A B : Set} {x : A} {y : B} (p : HId {A} x {B} y) → HId {HId x x} HRefl {HId x y} p 
+    UIP1' HRefl = HRefl
+
+    UIP : {A : Set} {x : A} {y : A} (p : HId x y) (q : HId x y) → Id p q
+    UIP {A}{x} = hJ {A} (\ _ p → (q : _) → Id p q) (\ q → het-to-hom-no-coe (UIP1' q))
+
