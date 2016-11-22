@@ -47,8 +47,8 @@ module Heterogeneous where
     het-to-hom-no-coe : {A : Set} {x y : A} → HId x y → Id x y
     het-to-hom-no-coe {A} {x} = hJ (\ y _ → Id x y) Refl
 
-    UIP1' : {A B : Set} {x : A} {y : B} (p : HId {A} x {B} y) → HId {HId x x} HRefl {HId x y} p 
-    UIP1' HRefl = HRefl
+    UIP1' : {A : Set} {x : A} {y : A} (p : HId {A} x {A} y) → HId {HId x x} HRefl {HId x y} p 
+    UIP1' {A}{x} = hJ {A}{x} (\ y p → HId HRefl p) HRefl
 
     UIP : {A : Set} {x : A} {y : A} (p : HId x y) (q : HId x y) → Id p q
     UIP {A}{x} = hJ {A} (\ _ p → (q : _) → Id p q) (\ q → het-to-hom-no-coe (UIP1' q))
