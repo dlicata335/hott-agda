@@ -121,11 +121,8 @@ module mso.Signatures where
   subINL : ∀ {A B : Subset} → (Sub (A) (union A B )) --fill out!!
   subINL {A} {B} = sub (λ x x1 → Inl x1) --is this right??
 
-  subINR : ∀ {A B : Subset} → (Sub (B) (union A B ))
-  subINR {A} {B} = sub (λ x x1 → Inr x1)
-
   subtrans : ∀ {A B C : Subset } → (Sub A B) → (Sub B C) → Sub A C
-  subtrans {A} {B} {C} (sub x1) (sub x2) = sub {!  promoteIndividS ?? (sub x1) --want to get an individ to sent through promoteIndivid!}
+  subtrans subab subbc = {!!}
 
   mutual
     positionEquiv : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) (X : Subset) (XinA1 : Sub X (fst A1)) (XinA2 : Sub X (fst A2)) → Type
@@ -150,19 +147,18 @@ module mso.Signatures where
 
     --first define on const A1 -> const A2, then extend to X with id, then pointwise extend to individsS (map)
     positionEquiv-fn :  ∀ {Σ oc1 oc2} {A1 : Structure oc1 Σ} {A2 : Structure oc2 Σ} {X : Subset} {x1 : Sub X (fst A1)} {x2 : Sub X (fst A2)} →  positionEquiv A1 A2 X x1 x2  →
-                                                                     ∀ {τ} → IndividS (union (constants A1) (X)) τ → IndividS (union (constants A2) (X)) τ
-    positionEquiv-fn {A1 = A1} {A2} poseq (x , Inl x1) = fst (positionEquiv-fnHelp poseq (x , x1)) ,
-                                                           Inl (snd (positionEquiv-fnHelp poseq (x , x1)))
-    positionEquiv-fn {A1 = A1} {A2} poseq (x , Inr x1) = x , Inr x1
+                                                                      Sub (union (constants A1) (X)) (union (constants A2) (X))
+    positionEquiv-fn poseq = subLUB {!subINL!} {!!}
 
     --promoteIndividS subINL (positionEquiv-fnHelp poseq ind) --does this work in one go like that or do I need to case split again? also help with im args?
+
 
     positionEquiv-fnS :  ∀ {Σ oc1 oc2} {A1 : Structure oc1 Σ} {A2 : Structure oc2 Σ} {X : Subset} {x1 : Sub X (fst A1)} {x2 : Sub X (fst A2)} →  positionEquiv A1 A2 X x1 x2  →
                                                                      ∀ {τ} → IndividsS (union (constants A1) (X)) τ → IndividsS (union (constants A2) (X)) τ
     positionEquiv-fnS poseq {[]} ind = ind
-    positionEquiv-fnS {A1 = A1} {A2 = A2} poseq {x :: τ} ind = (positionEquiv-fnS {A1 = A1} {A2} poseq {τ} (fst ind)) , positionEquiv-fn {A1 = A1} {A2} poseq (snd ind)
+    positionEquiv-fnS {A1 = A1} {A2 = A2} poseq {x :: τ} ind = (positionEquiv-fnS {A1 = A1} {A2} poseq {τ} (fst ind)) , promoteIndividS (positionEquiv-fn {A1 = A1} {A2} poseq) (snd ind)
 
     data EquivInd {Σ oc1 oc2 τ} {A1 : Structure oc1 Σ} {A2 : Structure oc2 Σ} {X : Subset} {XinA1 : Sub X (fst A1)} {XinA2 : Sub X (fst A2)}
                                 (poseq : positionEquiv A1 A2 X XinA1 XinA2) (a1 : IndividS (fst A1) τ) (a2 : IndividS (fst A2) τ) : Type where
        eqindX : X τ (fst a1) → X τ (fst a2) → (fst a1) == (fst  a2) → EquivInd poseq a1 a2
-       eqindC : ( ca1 : constants A1 τ (fst a1)) → constants A2 τ (fst a2) → _==_ {Individ τ}  (fst ((positionEquiv-fn {A1 = A1} {A2 = A2} {X = X} {XinA1} {XinA2} poseq) {!!} )) (fst  a2) → EquivInd poseq a1 a2
+       eqindC : ( ca1 : constants A1 τ (fst a1)) → constants A2 τ (fst a2) → _==_ {Individ τ} (fst (promoteIndividS (positionEquiv-fn {A1 = A1} {A2 = A2} {X = X} {XinA1} {XinA2} poseq) {!!} )) (fst  a2) → EquivInd poseq a1 a2
