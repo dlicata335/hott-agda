@@ -219,3 +219,17 @@ module mso.Signatures where
        eqindX : X τ (fst a1) → X τ (fst a2) → (fst a1) == (fst  a2) → EquivInd poseq a1 a2
        eqindC : ( ca1 : constants A1 τ (fst a1)) → constants A2 τ (fst a2) → _==_ {Individ τ}  (fst ((positionEquiv-fn {A1 = A1} {A2 = A2} {X = X} {XinA1} {XinA2} poseq) {!!} )) (fst  a2) → EquivInd poseq a1 a2
 -}
+
+  -- sometimes helpful to factor things this way
+
+  Branch : ∀ {oc} {Σ : Signature} (A : Structure oc Σ) → (s : SigThing) → Type
+  Branch A (r τs) = IndividsS (fst A) τs → Type
+  Branch {Open} A (i τ) = Either (IndividS (fst A) τ) Unit
+  Branch {Closed} A (i τ) = (IndividS (fst A) τ) 
+
+  extend : ∀ {oc} {Σ : Signature} (A : Structure oc Σ) {s : SigThing} → Branch A s → Structure oc (s :: Σ)
+  extend {Open} (A , AA) {i x} (Inl a) = A , AA ,is a
+  extend {Open} (A , AA) {i x} (Inr p) = A , AA ,none
+  extend {Closed} (A , AA) {i x} a = A , AA ,is a
+  extend (A , AA) {r x} b = A , AA ,rs b
+
