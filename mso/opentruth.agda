@@ -99,7 +99,13 @@ module mso.opentruth where
   isUndecided A (R U vs) <> = getsOpen vs A == None
   isUndecided A (¬R U vs) <> = getsOpen vs A == None
 
+  -- TODO: define equivalence on ⊩s 
+
+  -- TODO : isReduced
+
+
+
+
   -- naive : ∀ {Σ φ} {A : Structure Closed Σ} → Either (A ⊩c φ) (A ⊩c φ false)
   -- naive = {!!}
-  
   
