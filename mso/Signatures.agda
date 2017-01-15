@@ -4,13 +4,20 @@ open import lib.Prelude
 
 module mso.Signatures where
 
+  Dec : Type → Type
+  Dec A = Either A (A → Void)
+
   data Tp : Type where
     node : Tp
     edge : Tp
 
+  -- all supposed to have decidable equality
   Individ : Tp → Type
   Individ node = String
   Individ edge = String
+
+  postulate 
+    IndividDec : ∀ {τ} (p q : Individ τ) → Dec (p == q)
 
   Args : Type
   Args = List Tp
@@ -41,6 +48,9 @@ module mso.Signatures where
      --predicate on elements of certain type, diffent
      --types can have different stipulatons
 
+  DecidableSub : (S1 : Subset) → Type
+  DecidableSub S1  = ∀ {τ} (x : Individ τ) → Dec (S1 τ x)
+
   example1 : Subset
   example1 node x = x == "a"
   example1 edge x = x == "7"
@@ -54,8 +64,9 @@ module mso.Signatures where
   IndividsS A (τ :: τs) = IndividsS A τs × IndividS A τ
       --relation type thats in subset (all args are in)
 
-  mapIndividS : ∀ (A1 : Subset) (A2 : Subset) → (∀ {τ} → IndividS A1 τ → IndividS A2 τ) →  (∀ {τ} → IndividsS A1 τ → IndividsS A2 τ)
-  mapIndividS = {!!}
+  mapIndividS : ∀ {A1 A2 : Subset} → (∀ {τ} → IndividS A1 τ → IndividS A2 τ) →  (∀ {τ} → IndividsS A1 τ → IndividsS A2 τ)
+  mapIndividS f {[]} x = <>
+  mapIndividS f {x :: τ} (a , b) = mapIndividS f a , f b
 
   data OC : Type where
     Open : OC
@@ -93,6 +104,10 @@ module mso.Signatures where
   constants (A1 , s1 ,none) = constants (A1 , s1)                                                         -- and we're forgetting about the set. subset is just predicate!
   constants (A , s1 ,rs x) = constants (A , s1)
 
+  postulate 
+    constantsDec : ∀ {Σ oc} (A1 : Structure oc Σ) → DecidableSub (constants A1)
+    unionDec : ∀ {S1 S2} → DecidableSub S1 → DecidableSub S2 → DecidableSub (union S1  S2)
+
   data Sub (S1 : Subset)  (S2 : Subset) : Type where  --datatypes are injective type constructors so easier for agda to parse pieces of
     sub : (∀ {τ} x → S1 τ x → S2 τ x) → Sub S1 S2
 
@@ -103,21 +118,20 @@ module mso.Signatures where
   promoteIndividS {τ} {S1} {S2} pf ind = fst(ind) , unsub pf (fst ind) (snd ind)
 
   promoteIndividsS : ∀ {τs} {S1 S2 : Subset} (proof : Sub S1 S2) (ind : IndividsS S1 τs  ) -> IndividsS S2 τs --takes an individs of a Subset to a larger set
-  promoteIndividsS {[]} pf2 ind2 = ind2
-  promoteIndividsS {x :: τs} pf2 ind2 = (promoteIndividsS {τs} pf2 (fst ind2)) , (fst (snd ind2) , unsub pf2 (fst (snd ind2)) (snd (snd ind2)))
+  promoteIndividsS pf2 ind2 = mapIndividS (promoteIndividS pf2) ind2
 
    -- Lemma: if A is Sub C, B is Sub C, then A union B is Sub C
   subLUB : ∀ {A B C : Subset} → (pf1 : Sub A C) (pf2 : Sub B C) → (Sub (union A B) (C))
   subLUB pf1 pf2 = sub (λ x → \ { (Inl P) → unsub pf1 x P ; (Inr P) → unsub pf2 x P } )
 
 --sublemma
-  constantSubHelp : ∀ {A} {τx} {x : IndividS A τx} {τ : Tp} (x₁ : Individ τ) →  (eek : τx == τ) → (x₁ == transport Individ eek (fst x)) → A τ x₁
-  constantSubHelp {x = x} ._ id id = snd x
+  constantSubHelp : ∀ {A} {τx} (x : IndividS A τx) {τ : Tp} (x₁ : Individ τ) →  (eek : τx == τ) → (x₁ == transport Individ eek (fst x)) → A τ x₁
+  constantSubHelp x ._ id id = snd x
 
   --Lemma : constants of A is a Subset of fst (A)
   constantSub : ∀ {Σ oc} (A : Structure oc Σ) → Sub (constants A) (fst A)
   constantSub (A , []) = sub (λ _ → λ ()) ---this shows void is subset of everything (empty subset is subset of everything; given x and evidence x is in empty set -> impossible
-  constantSub (A , struc ,is x) = subLUB (constantSub (A , struc)) (sub (λ x1 P → constantSubHelp x1 (fst P) (snd P)))
+  constantSub (A , struc ,is x) = subLUB (constantSub (A , struc)) (sub (λ x1 P → constantSubHelp x x1 (fst P) (snd P)))
   constantSub (A , struc ,none) = constantSub (A , struc) --is this right?
   constantSub (A , struc ,rs x) = constantSub (A , struc) --is this right?
 
@@ -128,8 +142,48 @@ module mso.Signatures where
   subINR {A} {B} = sub (λ x x1 → Inr x1)
 
   subtrans : ∀ {A B C : Subset } → (Sub A B) → (Sub B C) → Sub A C
-  subtrans {A} {B} {C} (sub x1) (sub x2) = sub {!  promoteIndividS ?? (sub x1) --want to get an individ to sent through promoteIndivid!}
+  subtrans {A} {B} {C} (sub x1) (sub x2) = sub (λ x → λ xinA → x2 _ (x1 x xinA))
+  preserves :  ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ)
+               (f : ∀ {τ} → IndividS (fst A1) τ → IndividS (fst A2) τ ) → Type
+  preserves (A1 , []) (A2 , []) f = Unit
+  preserves (A1 , s1 ,is x) (A2 , s2 ,is xx)  f = preserves (A1 , s1) (A2 , s2) f × (fst (f x) == fst xx)
+  preserves (A1 , s1 ,is x) (A2 , s2 ,none)  f = Void
+  preserves (A1 , s1 ,none) (A2 , s2 ,is x) f = Void
+  preserves (A1 , s1 ,none) (A2 , s2 ,none)  f = preserves (A1 , s1) (A2 , s2)  f
+  preserves (A1 , s1 ,rs U1) (A2 , s2 ,rs U2)  f = Σ (λ (p : preserves (A1 , s1) (A2 , s2)  f)
+                                                       → (v : IndividsS A1 _ ) → U1 v
+                                                       → U2 (mapIndividS f v))
 
+  iso : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) → Type
+  iso A1 A2 = Σ \ (f : ∀ {τ} → IndividS (fst A1) τ → IndividS (fst A2) τ )→ preserves A1 A2 f × (∀ τ → IsEquiv (f {τ})) --IsEquiv says that theres an inverse that composes to id with f
+
+
+  restrictionS : ∀ {Σ} {oc1} {A1} (A1' : StructureS oc1 A1  Σ) (S1 : Subset) → DecidableSub S1 → Sub S1 (A1) →  StructureS Open S1 Σ
+  restrictionS [] S1 dec sb = []
+  restrictionS (A1' ,is x) S1 dec sb with dec (fst x)
+  ... | Inl inS = restrictionS A1' S1 dec sb ,is (fst x , inS) 
+  ... | Inr out = restrictionS A1' S1 dec sb ,none
+  restrictionS (A1' ,none) S1 dec sb = restrictionS A1' S1 dec sb ,none
+  restrictionS (A1' ,rs U) S1 dec sb = restrictionS A1' S1 dec sb ,rs (λ v → U (promoteIndividsS sb v))
+
+  restriction : ∀ {Σ} {oc1} (A1 : Structure oc1  Σ) (S1 : Subset) → DecidableSub S1 → Sub S1 (fst A1) →  Structure Open Σ
+  restriction (A1' , struc) S1 dec sb = S1 , restrictionS struc S1 dec sb
+
+  positionEquiv : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) 
+                  (X : Subset)  (XinA1 : Sub X (fst A1)) (XinA2 : Sub X (fst A2)) 
+                → DecidableSub X 
+                → Type -- put in decidability stuff
+  positionEquiv A1 A2 X X⊆A1 X⊆A2 decX = iso (restriction A1 (union (constants A1) X) (unionDec {S1 = constants A1} {S2 = X} (constantsDec A1) decX) (subLUB (constantSub A1) X⊆A1)) 
+                                             (restriction A2 (union (constants A2) X) (unionDec {S1 = constants A2} {S2 = X} (constantsDec A2) decX) (subLUB (constantSub A2) X⊆A2))
+
+
+
+--(v1 : IndividS (union (constants (A1 , s1)) X) _)
+                                                     {- → x (promoteIndividS (subLUB (constantSub (A1 , s1)) x1) v1)
+                                                      -> xx (promoteIndividS (subLUB (constantSub (A2 , s2)) x2) (positionEquiv-fn {A1 = (A , s1)} {A2 = (A2 , s2)} p1 v1)))-}
+
+
+ -- OLD defintion of positionEquiv by induction on the structure; might be useful if we need something like this later
  {- mutual
     positionEquiv : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) (X : Subset) (XinA1 : Sub X (fst A1)) (XinA2 : Sub X (fst A2)) → Type
     positionEquiv (A1 , []) (A2 , []) X _ _ = Unit
@@ -170,44 +224,3 @@ module mso.Signatures where
        eqindX : X τ (fst a1) → X τ (fst a2) → (fst a1) == (fst  a2) → EquivInd poseq a1 a2
        eqindC : ( ca1 : constants A1 τ (fst a1)) → constants A2 τ (fst a2) → _==_ {Individ τ}  (fst ((positionEquiv-fn {A1 = A1} {A2 = A2} {X = X} {XinA1} {XinA2} poseq) {!!} )) (fst  a2) → EquivInd poseq a1 a2
 -}
-  preserves :  ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ)
-               (f : ∀ {τ} → IndividS (fst A1) τ → IndividS (fst A2) τ ) → Type
-  preserves (A1 , []) (A2 , []) f = Unit
-  preserves (A1 , s1 ,is x) (A2 , s2 ,is xx)  f = preserves (A1 , s1) (A2 , s2) f × (fst (f x) == fst xx)
-  preserves (A1 , s1 ,is x) (A2 , s2 ,none)  f = Void
-  preserves (A1 , s1 ,none) (A2 , s2 ,is x) f = Void
-  preserves (A1 , s1 ,none) (A2 , s2 ,none)  f = preserves (A1 , s1) (A2 , s2)  f
-  preserves (A1 , s1 ,rs U1) (A2 , s2 ,rs U2)  f = Σ (λ (p : preserves (A1 , s1) (A2 , s2)  f)
-                                                       → (v : IndividsS A1 _ ) → U1 v
-                                                       → U2 (mapIndividS A1 A2 f v))
-
-  iso : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) → Type
-  iso A1 A2 = Σ \ (f : ∀ {τ} → IndividS (fst A1) τ → IndividS (fst A2) τ )→ preserves A1 A2 f × (∀ τ → IsEquiv (f {τ})) --IsEquiv says that theres an inverse that composes to id with f
-
-  decidablesub : (S1 : Subset) → Type
-  decidablesub S1  = ∀ {τ} (x : Individ τ) → Either (S1 τ x) (S1 τ x → Void)
-
-  restrictionS : ∀ {Σ} {oc1} {A1} (A1' : StructureS oc1 A1  Σ) (S1 : Subset) → decidablesub S1 → Sub S1 (A1) →  StructureS Open S1 Σ
-  restrictionS [] S1 dec sb = []
-  restrictionS (A1' ,is x) S1 dec sb = {!!} --use either (dothe ... thing) (its called with)
-  restrictionS (A1' ,none) S1 dec sb = restrictionS A1' S1 dec sb ,none
-  restrictionS (A1' ,rs U) S1 dec sb = restrictionS A1' S1 dec sb ,rs (λ v → U (promoteIndividsS sb v))
-
-  restriction : ∀ {Σ} {oc1} (A1 : Structure oc1  Σ) (S1 : Subset) → decidablesub S1 → Sub S1 (fst A1) →  Structure Open Σ
-  restriction (A1' , struc) S1 dec sb = S1 , restrictionS struc S1 dec sb
-
-  positionEquiv : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) (X : Subset)  (XinA1 : Sub X (fst A1)) (XinA2 : Sub X (fst A2)) → Type -- put in decidability stuff
-  positionEquiv A1 A2 X pf1 pf2 = iso (restriction A1 (union (constants A1) X) {!!} {!!}) (restriction A2 (union (constants A2) X) {!!} {!!})
-
-
-
---need to define restrictions on stuctures in order to define isom
-{- bijection between (constants A1 U X) <-> (constants A2 U X) ; and this isomporphism fixes X
-all relations and constants are preserved through this isomorphism
-
-comparison with paper: positionEquiv A1 A2 X iff the positions A1[cA1 U X] isom A2[cA2 U X] in their sense
--}
-
---(v1 : IndividS (union (constants (A1 , s1)) X) _)
-                                                     {- → x (promoteIndividS (subLUB (constantSub (A1 , s1)) x1) v1)
-                                                      -> xx (promoteIndividS (subLUB (constantSub (A2 , s2)) x2) (positionEquiv-fn {A1 = (A , s1)} {A2 = (A2 , s2)} p1 v1)))-}
