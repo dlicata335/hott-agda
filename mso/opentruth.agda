@@ -50,7 +50,6 @@ module mso.opentruth where
   A ⊩o (R rel xs) = Σ \ vs -> ((getsOpen xs A) == (Some vs)) × (getOpen rel A) (vs)
   A ⊩o (¬R rel xs) = Σ \ vs -> ((getsOpen xs A == (Some vs))) × (getOpen rel A) (vs) → Void
 
-
   _⊩o_false : ∀ {Σ} → Structure Open Σ → Formula Σ → Type
   A ⊩o φ false = A ⊩o (φ *)
 

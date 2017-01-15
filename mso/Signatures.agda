@@ -172,18 +172,13 @@ module mso.Signatures where
   positionEquiv : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) 
                   (X : Subset)  (XinA1 : Sub X (fst A1)) (XinA2 : Sub X (fst A2)) 
                 → DecidableSub X 
-                → Type -- put in decidability stuff
-  positionEquiv A1 A2 X X⊆A1 X⊆A2 decX = iso (restriction A1 (union (constants A1) X) (unionDec {S1 = constants A1} {S2 = X} (constantsDec A1) decX) (subLUB (constantSub A1) X⊆A1)) 
-                                             (restriction A2 (union (constants A2) X) (unionDec {S1 = constants A2} {S2 = X} (constantsDec A2) decX) (subLUB (constantSub A2) X⊆A2))
-
-
-
---(v1 : IndividS (union (constants (A1 , s1)) X) _)
-                                                     {- → x (promoteIndividS (subLUB (constantSub (A1 , s1)) x1) v1)
-                                                      -> xx (promoteIndividS (subLUB (constantSub (A2 , s2)) x2) (positionEquiv-fn {A1 = (A , s1)} {A2 = (A2 , s2)} p1 v1)))-}
-
+                → Type
+  positionEquiv A1 A2 X X⊆A1 X⊆A2 decX = Σ \ (h : iso (restriction A1 (union (constants A1) X) (unionDec {S1 = constants A1} {S2 = X} (constantsDec A1) decX) (subLUB (constantSub A1) X⊆A1)) 
+                                                      (restriction A2 (union (constants A2) X) (unionDec {S1 = constants A2} {S2 = X} (constantsDec A2) decX) (subLUB (constantSub A2) X⊆A2)))
+                                         → ∀ {τ} (x : IndividS X τ) → fst h (promoteIndividS (subINR {A = constants A1} {B = X}) x) == promoteIndividS (subINR {A = constants A2} {B = X}) x
 
  -- OLD defintion of positionEquiv by induction on the structure; might be useful if we need something like this later
+ -- might need to check position equivalence at some point
  {- mutual
     positionEquiv : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) (X : Subset) (XinA1 : Sub X (fst A1)) (XinA2 : Sub X (fst A2)) → Type
     positionEquiv (A1 , []) (A2 , []) X _ _ = Unit
