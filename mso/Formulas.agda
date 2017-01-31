@@ -3,7 +3,7 @@
 open import lib.Prelude
 open import mso.Signatures
 
-open ListM 
+open ListM
 
 module mso.Formulas where
 
@@ -19,5 +19,7 @@ module mso.Formulas where
     R ¬R : ∀ {τs} → (r τs) ∈ Σ → Terms Σ τs → Formula Σ -- e.g edge : (node,node → *) ∈ Σ , x : node, y:node ∈ Σ, then R edge (x,y) is a proposition
 
   postulate
-    _* : ∀ {Σ} → Formula Σ → Formula Σ 
+    _* : ∀ {Σ} → Formula Σ → Formula Σ
   --  φ * = {!!}
+
+hi
