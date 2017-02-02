@@ -21,5 +21,3 @@ module mso.Formulas where
   postulate
     _* : ∀ {Σ} → Formula Σ → Formula Σ
   --  φ * = {!!}
-
-hi

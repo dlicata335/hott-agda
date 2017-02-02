@@ -55,7 +55,7 @@ module mso.opentruth where
   A ⊩o φ false = A ⊩o (φ *)
 
   -- raw game tree that is compatible with the formula
-  _⊩s_ : ∀ {Σ} → Structure Open Σ → Formula Σ → Type 
+  _⊩s_ : ∀ {Σ} → Structure Open Σ → Formula Σ → Type
   A ⊩s ∀i τ φ = Σ \ (bs : List (Branch A (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ)
   A ⊩s ∃i τ φ = Σ \ (bs : List (Branch A (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ)
   A ⊩s ∀p τ φ = Σ \ (bs : List (Branch A (r (τ :: [])))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ)
@@ -68,38 +68,74 @@ module mso.opentruth where
   A ⊩s (¬R rel xs) = Unit
 
   isUndecided : ∀ {Σ} (A : Structure Open Σ) (φ : Formula Σ) → A ⊩s φ → Type
-  isUndecided A (∀i τ φ) (bs , ts) = 
+  isUndecided A (∀i τ φ) (bs , ts) =
     -- (1) every extension in bs is reduced
-    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) × 
+    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) ×
     -- (2) every extension not in bs is true
     (∀ {bi} → (bi ∈ bs → Void) → (extend A bi) ⊩o φ)
-  isUndecided A (∃i τ φ) (bs , ts) = 
+  isUndecided A (∃i τ φ) (bs , ts) =
     -- (1) every extension in bs is reduced
-    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) × 
-    -- (2) every extension not in bs is true
+    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) ×
+    -- (2) every extension not in bs is false
     (∀ {bi} → (bi ∈ bs → Void) → (extend A bi) ⊩o φ false)
-  isUndecided A (∀p τ φ) (bs , ts) = 
+  isUndecided A (∀p τ φ) (bs , ts) =
     -- (1) every extension in bs is reduced
-    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) × 
+    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) ×
     -- (2) every extension not in bs is true
     (∀ {bi} → (bi ∈ bs → Void) → (extend A bi) ⊩o φ)
-  isUndecided A (∃p τ φ) (bs , ts) = 
+  isUndecided A (∃p τ φ) (bs , ts) =
     -- (1) every extension in bs is reduced
-    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) × 
-    -- (2) every extension not in bs is true
+    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) ×
+    -- (2) every extension not in bs is false
     (∀ {bi} → (bi ∈ bs → Void) → (extend A bi) ⊩o φ false)
   isUndecided A (φ1 ∧ φ2) (Inl (t1 , t2)) = isUndecided A φ1 t1 × isUndecided A φ2 t2
   isUndecided A (φ1 ∧ φ2) (Inr (Inl t)) = isUndecided A φ1 t × A ⊩o φ2
-  isUndecided A (φ1 ∧ φ2) (Inr (Inr t)) = A ⊩o φ1 × isUndecided A φ2 t 
+  isUndecided A (φ1 ∧ φ2) (Inr (Inr t)) = A ⊩o φ1 × isUndecided A φ2 t
   isUndecided A (φ1 ∨ φ2) (Inl (t1 , t2)) = isUndecided A φ1 t1 × isUndecided A φ2 t2
   isUndecided A (φ1 ∨ φ2) (Inr (Inl t)) = isUndecided A φ1 t × A ⊩o φ2 false
-  isUndecided A (φ1 ∨ φ2) (Inr (Inr t)) = A ⊩o φ1 false × isUndecided A φ2 t 
+  isUndecided A (φ1 ∨ φ2) (Inr (Inr t)) = A ⊩o φ1 false × isUndecided A φ2 t
   isUndecided A ⊤ <> = Void -- NOT Unit because we're not supposed to include winnable branches in a reduced game
   isUndecided A ⊥ ()
   isUndecided A (R U vs) <> = getsOpen vs A == None
   isUndecided A (¬R U vs) <> = getsOpen vs A == None
 
-  -- TODO: define equivalence on ⊩s 
+  -- TODO: define equivalence on ⊩s
+
+  fixed : (A1 : Subset) (A2 : Subset) → Type
+  fixed A1 A2 = Σ \ (X : Subset) → ((Sub X (A1)) × ( Sub X (A2))) × DecidableSub X
+
+  positionEquiv' : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) → fixed (fst A1) (fst A2)  → Type
+  positionEquiv' A1 A2 (X , (X⊆A1 ,  X⊆A2) ,  decX )  = positionEquiv A1 A2 X X⊆A1  X⊆A2 decX
+
+  gameEquiv : ∀ {Σ} (A1 A2 : Structure Open Σ) (φ : Formula Σ) → A1 ⊩s φ → A2 ⊩s φ → (f : fixed (fst A1) (fst A2))
+      → positionEquiv' A1 A2 f →  Type
+  gameEquiv A1 A2 (∀i τ φ) g1 g2 f peq = {!!}
+  gameEquiv A1 A2 (∃i τ φ) g1 g2 f peq = {!!}
+  gameEquiv A1 A2 (∀p τ φ) g1 g2 f peq = {!!}
+  gameEquiv A1 A2 (∃p τ φ) g1 g2 f peq = {!!}
+  gameEquiv A1 A2 (φ1 ∧ φ2) (Inl (prod1)) (Inl prod2) f peq = gameEquiv A1 A2 {!!} prod1 prod2 f peq --help with this formula!
+  --gameEquiv A1 A2 (φ1 ∧ φ2) (Inl (A1p1 , A1p2)) (Inl (A2p1 , A2p2)) f peq = gameEquiv A1 A2 φ1 A1p1 A2p1 f peq --look at all this startig here, and look at game tree
+  gameEquiv A1 A2 (φ1 ∧ φ2) (Inl (A1p1 , A1p2)) (Inr x) f peq = Void
+  gameEquiv A1 A2 (φ1 ∧ φ2) (Inr g1) (Inl x) f peq = Void
+  gameEquiv A1 A2 (φ1 ∧ φ2) (Inr (Inl A1p1)) (Inr (Inl A2p1)) f peq = gameEquiv A1 A2 φ1 A1p1 A2p1 f peq
+  gameEquiv A1 A2 (φ1 ∧ φ2) (Inr (Inl A1p1)) (Inr (Inr A2p2)) f peq = Void --is this right? the second structure goes onto a different part of the sentence...
+  gameEquiv A1 A2 (φ1 ∧ φ2) (Inr (Inr A1p2)) (Inr (Inl A2p1)) f peq = Void
+  gameEquiv A1 A2 (φ1 ∧ φ2) (Inr (Inr A1p2)) (Inr (Inr A2p2)) f peq = gameEquiv A1 A2 φ2 A1p2 A2p2 f peq
+  gameEquiv A1 A2 (φ1 ∨ φ2) (Inl prod11) (Inl prod22) f peq = gameEquiv A1 A2 {!!} prod11 prod22 f peq
+  gameEquiv A1 A2 (φ1 ∨ φ2) (Inl x) (Inr g2) f peq = Void
+  gameEquiv A1 A2 (φ1 ∨ φ2) (Inr g1) (Inl x) f peq = Void
+  gameEquiv A1 A2 (φ1 ∨ φ2) (Inr (Inl A1p1)) (Inr (Inl A2p1)) f peq = gameEquiv A1 A2 φ1 A1p1 A2p1 f peq
+  gameEquiv A1 A2 (φ1 ∨ φ2) (Inr (Inl A1p1)) (Inr (Inr A2p2)) f peq = Void
+  gameEquiv A1 A2 (φ1 ∨ φ2) (Inr (Inr A1p2)) (Inr (Inl A2p1)) f peq = Void
+  gameEquiv A1 A2 (φ1 ∨ φ2) (Inr (Inr A1p2)) (Inr (Inr A2p2)) f peq = gameEquiv A1 A2 φ2 A1p2 A2p2 f peq
+  gameEquiv A1 A2 ⊤ g1 g2 f peq = Unit
+  gameEquiv A1 A2 ⊥ () g2 f peq
+  gameEquiv A1 A2 (R x x₁) g1 g2 f peq = {!!}
+  gameEquiv A1 A2 (¬R x x₁) g1 g2 f peq = {!!}
+
+  -- do everything but foralls and exists in agda; look at for alls and exists on paper and
+  --- bijection between two lists of branches --> what information do we need given a bijection from the previous step
+  ---given a bijection between the branches, what else do we need to get an equivalence between
 
   -- TODO : isReduced
 
@@ -108,4 +144,3 @@ module mso.opentruth where
 
   -- naive : ∀ {Σ φ} {A : Structure Closed Σ} → Either (A ⊩c φ) (A ⊩c φ false)
   -- naive = {!!}
-  
