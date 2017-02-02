@@ -113,7 +113,9 @@ module mso.opentruth where
   gameEquiv A1 A2 (∃i τ φ) g1 g2 f peq = {!!}
   gameEquiv A1 A2 (∀p τ φ) g1 g2 f peq = {!!}
   gameEquiv A1 A2 (∃p τ φ) g1 g2 f peq = {!!}
-  gameEquiv A1 A2 (φ1 ∧ φ2) (Inl (prod1)) (Inl prod2) f peq = gameEquiv A1 A2 {!!} prod1 prod2 f peq --help with this formula!
+  gameEquiv A1 A2 (φ1 ∧ φ2) (Inl (prod1)) (Inl prod2) f peq = gameEquiv A1 A2 φ1 (fst prod1) (fst prod2) f peq ×
+                                                                gameEquiv A1 A2 φ2 (snd prod1) (snd prod2) f peq
+  --gameEquiv A1 A2 {!!} prod1 prod2 f peq --help with this formula!
   --gameEquiv A1 A2 (φ1 ∧ φ2) (Inl (A1p1 , A1p2)) (Inl (A2p1 , A2p2)) f peq = gameEquiv A1 A2 φ1 A1p1 A2p1 f peq --look at all this startig here, and look at game tree
   gameEquiv A1 A2 (φ1 ∧ φ2) (Inl (A1p1 , A1p2)) (Inr x) f peq = Void
   gameEquiv A1 A2 (φ1 ∧ φ2) (Inr g1) (Inl x) f peq = Void
@@ -121,7 +123,9 @@ module mso.opentruth where
   gameEquiv A1 A2 (φ1 ∧ φ2) (Inr (Inl A1p1)) (Inr (Inr A2p2)) f peq = Void --is this right? the second structure goes onto a different part of the sentence...
   gameEquiv A1 A2 (φ1 ∧ φ2) (Inr (Inr A1p2)) (Inr (Inl A2p1)) f peq = Void
   gameEquiv A1 A2 (φ1 ∧ φ2) (Inr (Inr A1p2)) (Inr (Inr A2p2)) f peq = gameEquiv A1 A2 φ2 A1p2 A2p2 f peq
-  gameEquiv A1 A2 (φ1 ∨ φ2) (Inl prod11) (Inl prod22) f peq = gameEquiv A1 A2 {!!} prod11 prod22 f peq
+  gameEquiv A1 A2 (φ1 ∨ φ2) (Inl prod11) (Inl prod22) f peq = gameEquiv A1 A2 φ1 (fst prod11) (fst prod22) f peq ×
+                                                                gameEquiv A1 A2 φ2 (snd prod11) (snd prod22) f peq
+  --gameEquiv A1 A2 {!!} prod11 prod22 f peq
   gameEquiv A1 A2 (φ1 ∨ φ2) (Inl x) (Inr g2) f peq = Void
   gameEquiv A1 A2 (φ1 ∨ φ2) (Inr g1) (Inl x) f peq = Void
   gameEquiv A1 A2 (φ1 ∨ φ2) (Inr (Inl A1p1)) (Inr (Inl A2p1)) f peq = gameEquiv A1 A2 φ1 A1p1 A2p1 f peq
@@ -130,7 +134,7 @@ module mso.opentruth where
   gameEquiv A1 A2 (φ1 ∨ φ2) (Inr (Inr A1p2)) (Inr (Inr A2p2)) f peq = gameEquiv A1 A2 φ2 A1p2 A2p2 f peq
   gameEquiv A1 A2 ⊤ g1 g2 f peq = Unit
   gameEquiv A1 A2 ⊥ () g2 f peq
-  gameEquiv A1 A2 (R x x₁) g1 g2 f peq = {!!}
+  gameEquiv A1 A2 (R x x₁) g1 g2 f peq = {!!} --Unit? Why?
   gameEquiv A1 A2 (¬R x x₁) g1 g2 f peq = {!!}
 
   -- do everything but foralls and exists in agda; look at for alls and exists on paper and
