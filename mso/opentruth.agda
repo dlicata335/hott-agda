@@ -7,6 +7,7 @@ open import mso.Formulas
 open import mso.ClosedTruth
 
 open ListM
+open Index
 
 module mso.opentruth where
 
