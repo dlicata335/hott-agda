@@ -196,9 +196,11 @@ module lib.List where
       transport≤ : ∀ {A} {Ψ Ψ' : List A} (α : Ψ == Ψ') {i i' : Pos Ψ} → i ≤ i' → transport Pos α i ≤ transport Pos α i'
       transport≤ id lt = lt
 
+      ListBijection : ∀ {A} → List A → List A → Type
+      ListBijection xs ys = Equiv (Pos xs) (Pos ys)
 
   transport-List : ∀ {A} {M N : A} (C : A -> Type) (α : M ≃  N)
                    → transport (\ x -> List (C x)) α
                    ≃ ListM.map (transport C α) 
   transport-List C id = ! (λ≃ ListM.map-idfunc)
-
+  
