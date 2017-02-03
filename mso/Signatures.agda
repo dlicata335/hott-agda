@@ -16,7 +16,7 @@ module mso.Signatures where
   Individ node = String
   Individ edge = String
 
-  postulate 
+  postulate
     IndividDec : ∀ {τ} (p q : Individ τ) → Dec (p == q)
 
   Args : Type
@@ -104,7 +104,7 @@ module mso.Signatures where
   constants (A1 , s1 ,none) = constants (A1 , s1)                                                         -- and we're forgetting about the set. subset is just predicate!
   constants (A , s1 ,rs x) = constants (A , s1)
 
-  postulate 
+  postulate
     constantsDec : ∀ {Σ oc} (A1 : Structure oc Σ) → DecidableSub (constants A1)
     unionDec : ∀ {S1 S2} → DecidableSub S1 → DecidableSub S2 → DecidableSub (union S1  S2)
 
@@ -143,6 +143,7 @@ module mso.Signatures where
 
   subtrans : ∀ {A B C : Subset } → (Sub A B) → (Sub B C) → Sub A C
   subtrans {A} {B} {C} (sub x1) (sub x2) = sub (λ x → λ xinA → x2 _ (x1 x xinA))
+
   preserves :  ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ)
                (f : ∀ {τ} → IndividS (fst A1) τ → IndividS (fst A2) τ ) → Type
   preserves (A1 , []) (A2 , []) f = Unit
@@ -161,7 +162,7 @@ module mso.Signatures where
   restrictionS : ∀ {Σ} {oc1} {A1} (A1' : StructureS oc1 A1  Σ) (S1 : Subset) → DecidableSub S1 → Sub S1 (A1) →  StructureS Open S1 Σ
   restrictionS [] S1 dec sb = []
   restrictionS (A1' ,is x) S1 dec sb with dec (fst x)
-  ... | Inl inS = restrictionS A1' S1 dec sb ,is (fst x , inS) 
+  ... | Inl inS = restrictionS A1' S1 dec sb ,is (fst x , inS)
   ... | Inr out = restrictionS A1' S1 dec sb ,none
   restrictionS (A1' ,none) S1 dec sb = restrictionS A1' S1 dec sb ,none
   restrictionS (A1' ,rs U) S1 dec sb = restrictionS A1' S1 dec sb ,rs (λ v → U (promoteIndividsS sb v))
@@ -169,11 +170,11 @@ module mso.Signatures where
   restriction : ∀ {Σ} {oc1} (A1 : Structure oc1  Σ) (S1 : Subset) → DecidableSub S1 → Sub S1 (fst A1) →  Structure Open Σ
   restriction (A1' , struc) S1 dec sb = S1 , restrictionS struc S1 dec sb
 
-  positionEquiv : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) 
-                  (X : Subset)  (XinA1 : Sub X (fst A1)) (XinA2 : Sub X (fst A2)) 
-                → DecidableSub X 
+  positionEquiv : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ)
+                  (X : Subset)  (XinA1 : Sub X (fst A1)) (XinA2 : Sub X (fst A2))
+                → DecidableSub X
                 → Type
-  positionEquiv A1 A2 X X⊆A1 X⊆A2 decX = Σ \ (h : iso (restriction A1 (union (constants A1) X) (unionDec {S1 = constants A1} {S2 = X} (constantsDec A1) decX) (subLUB (constantSub A1) X⊆A1)) 
+  positionEquiv A1 A2 X X⊆A1 X⊆A2 decX = Σ \ (h : iso (restriction A1 (union (constants A1) X) (unionDec {S1 = constants A1} {S2 = X} (constantsDec A1) decX) (subLUB (constantSub A1) X⊆A1))
                                                       (restriction A2 (union (constants A2) X) (unionDec {S1 = constants A2} {S2 = X} (constantsDec A2) decX) (subLUB (constantSub A2) X⊆A2)))
                                          → ∀ {τ} (x : IndividS X τ) → fst h (promoteIndividS (subINR {A = constants A1} {B = X}) x) == promoteIndividS (subINR {A = constants A2} {B = X}) x
 
@@ -225,11 +226,10 @@ module mso.Signatures where
   Branch : ∀ {oc} {Σ : Signature} (A : Structure oc Σ) → (s : SigThing) → Type
   Branch A (r τs) = IndividsS (fst A) τs → Type
   Branch {Open} A (i τ) = Either (IndividS (fst A) τ) Unit
-  Branch {Closed} A (i τ) = (IndividS (fst A) τ) 
+  Branch {Closed} A (i τ) = (IndividS (fst A) τ)
 
   extend : ∀ {oc} {Σ : Signature} (A : Structure oc Σ) {s : SigThing} → Branch A s → Structure oc (s :: Σ)
   extend {Open} (A , AA) {i x} (Inl a) = A , AA ,is a
   extend {Open} (A , AA) {i x} (Inr p) = A , AA ,none
   extend {Closed} (A , AA) {i x} a = A , AA ,is a
   extend (A , AA) {r x} b = A , AA ,rs b
-
