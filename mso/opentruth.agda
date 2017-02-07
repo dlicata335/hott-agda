@@ -110,15 +110,23 @@ module mso.opentruth where
 
   mutual
 
-    gameEquiv : ∀ {Σ} (A1 A2 : Structure Open Σ) (φ : Formula Σ) → A1 ⊩s φ → A2 ⊩s φ → fixed (fst A1) (fst A2) → Type
+    gameEquiv : ∀ {Σ} (A1 A2 : Structure Open Σ) (φ : Formula Σ) → A1 ⊩s φ → A2 ⊩s φ → fixed (fst A1) (fst A2) → Type --f didn't have the same type but it worked??
     gameEquiv A1 A2 φ g1 g2 f =  positionEquiv' A1 A2 f × gameEquiv' A1 A2 φ g1 g2 f
 
     gameEquiv' : ∀ {Σ} (A1 A2 : Structure Open Σ) (φ : Formula Σ) → A1 ⊩s φ → A2 ⊩s φ → fixed (fst A1) (fst A2) → Type
-    gameEquiv' A1 A2 (∀i τ φ) g1 g2 f = Σ (λ (b : ListBijection (fst g1) (fst g2)) →
-                                                    ∀ bi (x : bi ∈ fst g1) → gameEquiv (extend A1 bi) (extend A2 (fst (fst b (bi , x)))) φ (snd g1 x) (snd g2 (snd (fst b (bi , x)))) {!!}) --need notion of bijection between two lists; define this to be bijection between membership types
-    gameEquiv' A1 A2 (∃i τ φ) g1 g2 f = {!!}
-    gameEquiv' A1 A2 (∀p τ φ) g1 g2 f = {!!}
-    gameEquiv' A1 A2 (∃p τ φ) g1 g2 f = {!!}
+    gameEquiv' A1 A2 (∀i τ φ) g1 g2 f = Σ (λ (b : ListBijection (fst g1) (fst g2)) → ∀ bi (x : bi ∈ fst g1)
+                                             → gameEquiv (extend A1 bi) (extend A2 (fst (fst b (bi , x)))) φ (snd g1 x) (snd g2 (snd (fst b (bi , x)))) f) --need notion of bijection between two lists; define this to be bijection between membership types
+    gameEquiv' A1 A2 (∃i τ φ) g1 g2 f = Σ (λ (b : ListBijection (fst g1) (fst g2)) →
+                                             ∀ bi (x : bi ∈ fst g1) →
+                                             gameEquiv (extend A1 bi) (extend A2 (fst (fst b (bi , x)))) φ (snd g1 x) (snd g2 (snd (fst b (bi , x)))) f)
+    gameEquiv' A1 A2 (∀p τ φ) g1 g2 f = Σ (λ (b : ListBijection (fst g1) (fst g2)) →
+                                             ∀ bi (x : bi ∈ fst g1) →
+                                             gameEquiv (extend A1 bi) (extend A2 (fst (fst b (bi , x)))) φ
+                                             (snd g1 x) (snd g2 (snd (fst b (bi , x)))) f)
+    gameEquiv' A1 A2 (∃p τ φ) g1 g2 f = Σ (λ (b : ListBijection (fst g1) (fst g2)) →
+                                             ∀ bi (x : bi ∈ fst g1) →
+                                             gameEquiv (extend A1 bi) (extend A2 (fst (fst b (bi , x)))) φ
+                                             (snd g1 x) (snd g2 (snd (fst b (bi , x)))) f)
     gameEquiv' A1 A2 (φ1 ∧ φ2) (Inl (prod1)) (Inl prod2) f = gameEquiv A1 A2 φ1 (fst prod1) (fst prod2) f  ×
                                                                   gameEquiv A1 A2 φ2 (snd prod1) (snd prod2) f
     --gameEquiv A1 A2 {!!} prod1 prod2  --help with this formula!

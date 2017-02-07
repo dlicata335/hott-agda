@@ -235,7 +235,7 @@ module mso.Signatures where
   extend' A1 AA {r x} b = AA ,rs b
 
   extend : ∀ {oc} {Σ : Signature} (A : Structure oc Σ) {s : SigThing} → Branch A s → Structure oc (s :: Σ)
-  extend {oc} (A , AA) brnch = A , extend' {oc} (fst (A , AA)) (snd (A , AA))  brnch
+  extend {oc} (A , AA) brnch = A , extend' {oc} A AA  brnch
  -- extend {Open} (A , AA) {i x} (None) = A , AA ,none
  -- extend {Closed} (A , AA) {i x} a = A , AA ,is a
  --- extend (A , AA) {r x} b = A, AA ,rs b
