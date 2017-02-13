@@ -96,6 +96,23 @@ module mso.Signatures where
   union : (S1 : Subset) (S2 : Subset) → (Subset)
   union S1 S2 τ x = Either (S1 τ x) (S2 τ x)
 
+  intersection : (S1 : Subset) (S2 : Subset) → (Subset)
+  intersection S1 S2 τ x = S1 τ x × S2 τ x
+
+  complement : (S1 : Subset) → Subset
+  complement S1 τ x = S1 τ x → Void
+
+  empty : Subset
+  empty x iv  = Void
+
+  postulate
+    singleton : ∀ {τ} (iv : Individ τ) → Subset
+
+ {- singleton : ∀ {τ} (iv : Individ τ) → Subset
+  singleton {τ = τ} iv t1 iv1 with τ == t1
+  ... | False  = {!!}
+  ... | True  = ? -}
+
   constants : ∀ {Σ oc} → (A1 : Structure oc Σ) → (Subset)
   constants (A1 , []) τ x = Void
   constants (A , _,is_ {τ = τ} s1  x) = union (constants (A , s1))                                       --want old constants from A plus new constant x, ie all individS equal to x. eek is proof that x and y are of same individual type,
