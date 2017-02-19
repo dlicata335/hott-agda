@@ -6,7 +6,7 @@ open import lib.Prelude
 open import mso.Signatures
 open import mso.Formulas
 
-open ListM 
+open ListM
 
 module mso.ClosedTruth where
 
@@ -14,8 +14,8 @@ module mso.ClosedTruth where
   Value A (i τ) = IndividS A τ
   Value A (r τs) = (IndividsS A τs → Type)
 
-  get : ∀ {Σ} {st : SigThing} 
-      → st ∈ Σ 
+  get : ∀ {Σ} {st : SigThing}
+      → st ∈ Σ
       → (A : Structure Closed Σ)
       → Value (fst A) st
   get i0 (A , (_ ,is a)) = a
@@ -23,8 +23,8 @@ module mso.ClosedTruth where
   get (iS i1) (A , SA ,is _) = get i1 (A , SA)
   get (iS i1) (A , SA ,rs _) = get i1 (A , SA)
 
-  gets : ∀ {Σ} {τs : List Tp} 
-       → Terms Σ τs 
+  gets : ∀ {Σ} {τs : List Tp}
+       → Terms Σ τs
        → (A : Structure Closed Σ)
        → IndividsS (fst A) τs
   gets [] A = <>
@@ -45,5 +45,5 @@ module mso.ClosedTruth where
   _⊩c_false : ∀ {Σ} → Structure Closed Σ → Formula Σ → Type
   A ⊩c φ false = A ⊩c (φ *)
 
-  -- naive : ∀ {Σ φ} {A : Structure Closed Σ} → Either (A ⊩c φ) (A ⊩c φ false) 
+  -- naive : ∀ {Σ φ} {A : Structure Closed Σ} → Either (A ⊩c φ) (A ⊩c φ false)
   -- naive = {!!}
