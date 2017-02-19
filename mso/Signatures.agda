@@ -68,6 +68,22 @@ module mso.Signatures where
   mapIndividS f {[]} x = <>
   mapIndividS f {x :: τ} (a , b) = mapIndividS f a , f b
 
+  postulate
+    indIninds : ∀ τ τs → (x : Individ τ) → (xs : Individs τs) → Type
+    {-indIninds τ [] x xs = Void
+    indIninds τ (τf :: τs) x (xs , xf) with τ == τf
+    ... | true = Either ? (indIninds τ τs x xs)
+    ... | false  = Either {!!} (indIninds τ τs x xs) --types are equal, then other stuff equal -}
+
+  allin : ∀ τs → (A1 : Subset) → ( xs : Individs τs) → Type
+  allin [] A1 xs = Unit
+  allin (τ :: τs) A1 (xs , x) = A1 τ x × allin τs A1 xs
+
+  nosubset : ∀ τs → (A1 : Subset) → (xs : IndividsS A1 τs) → ( Individs τs)
+  nosubset [] A1 xs = xs
+  nosubset (τ :: τs) A1 (xs , x) = (nosubset τs A1 xs) , fst x
+
+
   data OC : Type where
     Open : OC
     Closed : OC
