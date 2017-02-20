@@ -45,7 +45,7 @@ module mso.outerlemmas where
 --open truth implies closed truth
 
   openToClosed : ∀ {Σ} → (struc : Structure Closed Σ) (φ : Formula Σ) → (otruth : struc ⊩o φ) → struc ⊩c φ
-  openToClosed (SetA , StrucA) (∀i τ φ) (fst , snd) a = {!fst a!}
+  openToClosed (SetA , StrucA) (∀i τ φ) (fst , snd) a = openToClosed (SetA , StrucA ,is a) φ (fst a)
   openToClosed (SetA , StrucA) (∃i τ φ) otruth = {!!}
   openToClosed (SetA , StrucA) (∀p τ φ) otruth P = {!!}
   openToClosed (SetA , StrucA) (∃p τ φ) (fst , snd) = fst , (openToClosed (SetA , StrucA ,rs fst) φ snd) --does this get smaller?
