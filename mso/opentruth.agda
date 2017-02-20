@@ -40,7 +40,7 @@ module mso.opentruth where
   --lets you look up a bunch of terms
 
   -- open TRUTH: i.e. the structure is open, but the formula is really provable anyway
-  _⊩o_ : ∀ {Σ} → Structure Open Σ → Formula Σ → Type
+  _⊩o_ : ∀ {oc Σ} → Structure oc Σ → Formula Σ → Type
   (A , SA) ⊩o ∀i τ φ = ((a : IndividS A τ) → (A , (SA ,is a)) ⊩o φ) × ((A , (SA ,none)) ⊩o φ)
   (A , SA) ⊩o ∃i τ φ = Either (Σ \ (a : IndividS A τ) → (A , (SA ,is a)) ⊩o φ) ((A , (SA ,none)) ⊩o φ)
   (A , SA) ⊩o ∀p τ φ = (P : Unit × IndividS A τ → Type) → (A , (SA ,rs P)) ⊩o φ
@@ -52,11 +52,11 @@ module mso.opentruth where
   A ⊩o (R rel xs) = Σ \ vs -> ((getsOpen xs A) == (Some vs)) × (getOpen rel A) (vs)
   A ⊩o (¬R rel xs) = Σ \ vs -> ((getsOpen xs A == (Some vs))) × (getOpen rel A) (vs) → Void
 
-  _⊩o_false : ∀ {Σ} → Structure Open Σ → Formula Σ → Type
+  _⊩o_false : ∀ {oc Σ} → Structure oc Σ → Formula Σ → Type
   A ⊩o φ false = A ⊩o (φ *)
 
   -- raw game tree that is compatible with the formula
-  _⊩s_ : ∀ {Σ} → Structure Open Σ → Formula Σ → Type
+  _⊩s_ : ∀ {oc Σ} → Structure oc Σ → Formula Σ → Type
   A ⊩s ∀i τ φ = Σ \ (bs : List (Branch A (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ)
   A ⊩s ∃i τ φ = Σ \ (bs : List (Branch A (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ)
   A ⊩s ∀p τ φ = Σ \ (bs : List (Branch A (r (τ :: [])))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ)
@@ -191,3 +191,22 @@ module mso.opentruth where
 
   -- naive : ∀ {Σ φ} {A : Structure Closed Σ} → Either (A ⊩c φ) (A ⊩c φ false)
   -- naive = {!!}
+
+--naive algorithm to work on the restricted bags... this is what we had on the board but I feel very wrong about this
+ --postulate
+--    naive : ∀ {Σ} → (φ : Formula Σ) (A : Structure Closed Σ) → (game : A ⊩s φ) → (X : fixed1 (fst A)) → Either (Either (A ⊩c φ) (A ⊩c φ false)) (isReduced A φ game X)
+ {- naive (∀i τ φ) A = {!!}
+  naive (∃i τ φ) A = {!!}
+  naive (∀p τ φ) A = {!!}
+  naive (∃p τ φ) A = {!!}
+  naive (φ ∧ φ₁) A = {!!}
+  naive (φ ∨ φ₁) A = {!!}
+  naive ⊤ A = Inl <>
+  naive ⊥ A = Inr {!!}
+  naive (R x x₁) A = {!!}
+  naive (¬R x x₁) A = {!!} -}
+
+{-
+  introduce : (A : Structure Open Σ) (φ : Formula Σ) (game : A ⊩s φ) (X : fixed1 (fst A)) →
+  (xnew : (Sub (singleton {τ = τ} x) (complement X)))
+-}
