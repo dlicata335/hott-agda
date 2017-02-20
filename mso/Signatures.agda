@@ -68,12 +68,13 @@ module mso.Signatures where
   mapIndividS f {[]} x = <>
   mapIndividS f {x :: τ} (a , b) = mapIndividS f a , f b
 
-  postulate
-    indIninds : ∀ τ τs → (x : Individ τ) → (xs : Individs τs) → Type
-    {-indIninds τ [] x xs = Void
-    indIninds τ (τf :: τs) x (xs , xf) with τ == τf
-    ... | true = Either ? (indIninds τ τs x xs)
-    ... | false  = Either {!!} (indIninds τ τs x xs) --types are equal, then other stuff equal -}
+  -- equality of two individs of possibly different types
+  IndividEq : ∀ τ τ' → Individ τ → Individ τ' -> Type
+  IndividEq τ τ' a b = Σ \ (p : τ == τ') → transport Individ p a == b
+
+  indIninds : ∀ τ τs → (x : Individ τ) → (xs : Individs τs) → Type
+  indIninds τ [] x xs = Void
+  indIninds τ (τf :: τs) x (xs , xf) = Either (IndividEq τ τf x xf) (indIninds τ τs x xs)
 
   allin : ∀ τs → (A1 : Subset) → ( xs : Individs τs) → Type
   allin [] A1 xs = Unit
@@ -121,13 +122,8 @@ module mso.Signatures where
   empty : Subset
   empty x iv  = Void
 
-  postulate
-    singleton : ∀ {τ} (iv : Individ τ) → Subset
-
- {- singleton : ∀ {τ} (iv : Individ τ) → Subset
-  singleton {τ = τ} iv t1 iv1 with τ == t1
-  ... | False  = {!!}
-  ... | True  = ? -}
+  singleton : ∀ {τ} (iv : Individ τ) → Subset
+  singleton {τ = τ} iv t1 iv1 = IndividEq τ t1 iv iv1
 
   constants : ∀ {Σ oc} → (A1 : Structure oc Σ) → (Subset)
   constants (A1 , []) τ x = Void

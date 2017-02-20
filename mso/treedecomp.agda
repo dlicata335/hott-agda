@@ -17,7 +17,8 @@ module mso.treedecomp {Σ : Signature} {A : Structure Closed Σ} where
       Empty : TreeDecomp empty empty
       Delete : ∀ {τ} (X : Subset) (B : Subset) (x : Individ τ) →  TreeDecomp (union X (singleton {τ = τ} x)) B → TreeDecomp X B
       Intro : ∀ {τ} (X : Subset) (B : Subset) (x : Individ τ) → (xnew : (Sub (singleton {τ = τ} x) (complement B)))
-               →  ( ∀ {τs} → (xs : IndividsS (fst A) τs) (inBandx : allin τs (union B (singleton {τ = τ} x)) (nosubset τs (fst A) xs)) -- why is agda mad at this -->(xinxs : indIninds x (nosubset τs (fst A) xs))
+               →  ( ∀ {τs} → (xs : IndividsS (fst A) τs) (inBandx : allin τs (union B (singleton {τ = τ} x)) (nosubset τs (fst A) xs)) 
+               -> (xinxs : indIninds τ τs x (nosubset τs (fst A) xs))
                (rel : r τs ∈ Σ ) (relholds : get rel A xs) →  (allin τs (union X (singleton {τ = τ} x)) (nosubset τs (fst A) xs)))
                     → TreeDecomp X B → TreeDecomp (union X (singleton {τ = τ} x)) B
       Join : ∀  (X : Subset) (B1 B2 : Subset)
