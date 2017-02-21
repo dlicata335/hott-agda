@@ -39,8 +39,10 @@ module mso.outerlemmas where
   closurehelp Σ (ostrucS ,rs xs) =  {!!} --(closurehelp ostrucS) ,rs xs -}
 
 --you can close a structure
-  closure : ∀ {oc Σ} → (ostruc :  Structure oc Σ) → Structure Closed (nonils Σ)
+  {-closure : ∀ {oc Σ} → (ostruc :  Structure oc Σ) → Structure Closed (nonils Σ)
   closure ostruc = fst ostruc , {!closurehelp (snd ostruc)!}
+
+  getOnClosed : -}
 
 --open truth implies closed truth
 

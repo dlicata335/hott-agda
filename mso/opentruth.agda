@@ -42,7 +42,7 @@ module mso.opentruth where
   -- open TRUTH: i.e. the structure is open, but the formula is really provable anyway
   _⊩o_ : ∀ {oc Σ} → Structure oc Σ → Formula Σ → Type
   (A , SA) ⊩o ∀i τ φ = ((a : IndividS A τ) → (A , (SA ,is a)) ⊩o φ) × ((A , (SA ,none)) ⊩o φ)
-  (A , SA) ⊩o ∃i τ φ = Either (Σ \ (a : IndividS A τ) → (A , (SA ,is a)) ⊩o φ) ((A , (SA ,none)) ⊩o φ)
+  (A , SA) ⊩o ∃i τ φ = (Σ \ (a : IndividS A τ) → (A , (SA ,is a)) ⊩o φ) --took out nils here
   (A , SA) ⊩o ∀p τ φ = (P : Unit × IndividS A τ → Type) → (A , (SA ,rs P)) ⊩o φ
   (A , SA) ⊩o ∃p τ φ = Σ \ (P : Unit × IndividS A τ → Type) → (A , (SA ,rs P)) ⊩o φ
   A ⊩o (φ1 ∧ φ2) = A ⊩o φ1 × A ⊩o φ2
@@ -57,10 +57,10 @@ module mso.opentruth where
 
   -- raw game tree that is compatible with the formula
   _⊩s_ : ∀ {oc Σ} → Structure oc Σ → Formula Σ → Type
-  A ⊩s ∀i τ φ = Σ \ (bs : List (Branch A (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ)
-  A ⊩s ∃i τ φ = Σ \ (bs : List (Branch A (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ)
-  A ⊩s ∀p τ φ = Σ \ (bs : List (Branch A (r (τ :: [])))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ)
-  A ⊩s ∃p τ φ = Σ \ (bs : List (Branch A (r (τ :: [])))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ)
+  A ⊩s ∀i τ φ = Σ \ (bs : List (Branch A Open (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ) --help! open?
+  A ⊩s ∃i τ φ = Σ \ (bs : List (Branch A Closed (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ) --closed?
+  A ⊩s ∀p τ φ = Σ \ (bs : List (Branch A Open (r (τ :: [])))) → (∀ {bi} → bi ∈ bs → extend {_} {Open} A bi ⊩s φ) --closed?
+  A ⊩s ∃p τ φ = Σ \ (bs : List (Branch A Open (r (τ :: [])))) → (∀ {bi} → bi ∈ bs → extend {_} {Open} A bi ⊩s φ) --closed?
   A ⊩s (φ1 ∧ φ2) = Either (A ⊩s φ1 × A ⊩s φ2) (Either (A ⊩s φ1) (A ⊩s φ2))
   A ⊩s (φ1 ∨ φ2) = Either (A ⊩s φ1 × A ⊩s φ2) (Either (A ⊩s φ1) (A ⊩s φ2))
   A ⊩s ⊤ = Unit
@@ -164,7 +164,7 @@ module mso.opentruth where
     isReduced A (∀i τ φ) game X = (bi : Maybe (IndividS (fst A) τ)) →
                                  Either (bi ∈ fst game) (Either (extend A bi ⊩o φ) (Σ (λ bj → Σ \ (pfj : bj ∈ fst game) → ((gi : extend A bi ⊩s φ)
                                    → isReduced (extend A bi) φ gi X → gameEquiv (extend A bi) (extend A bj) φ gi (snd game pfj) (lemma1 _ X)))))
-    isReduced A (∃i τ φ) game X = (bi : Maybe (IndividS (fst A) τ)) →
+    isReduced A (∃i τ φ) game X = (bi : (IndividS (fst A) τ)) →
                                     Either (bi ∈ fst game) (Either (extend A bi ⊩o φ false) (Σ (λ bj → Σ (λ (pfj : bj ∈ fst game) → (gi : extend A bi ⊩s φ) →
                                             isReduced (extend A bi) φ gi X →
                                             gameEquiv (extend A bi) (extend A bj) φ gi (snd game pfj)

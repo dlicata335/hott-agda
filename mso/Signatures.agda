@@ -252,23 +252,21 @@ module mso.Signatures where
 
   -- sometimes helpful to factor things this way
 
-  Branch : ∀ {oc} {Σ : Signature} (A : Structure oc Σ) → (s : SigThing) → Type
-  Branch A (r τs) = IndividsS (fst A) τs → Type
-  Branch {Open} A (i τ) = Maybe (IndividS (fst A) τ)
-  Branch {Closed} A (i τ) = (IndividS (fst A) τ)
+  Branch : ∀ {oc} {Σ : Signature} (A : Structure oc Σ) (oc2 : OC) → (s : SigThing) → Type
+  Branch A oc2 (r τs) = IndividsS (fst A) τs → Type
+  Branch {Open} A Open (i τ) = Maybe (IndividS (fst A) τ)
+  Branch {Open} A Closed (i τ) = IndividS (fst A) τ
+  Branch {Closed} A oc2 (i τ) = (IndividS (fst A) τ)
 
-  extend' : ∀ {oc} {Σ : Signature} (A1 : Subset) (A : StructureS oc A1 Σ) {s : SigThing} → Branch (A1 , A) s → StructureS oc A1 (s :: Σ)
-  extend' {Open} A1 AA {i x} (Some a) =  AA ,is a
-  extend' {Open} A1 AA {i x} (None) =  AA ,none
+  extend' : ∀ {oc oc2} {Σ : Signature} (A1 : Subset) (A : StructureS oc A1 Σ) {s : SigThing} → Branch (A1 , A) oc2 s → StructureS oc A1 (s :: Σ)
+  extend' {Open} {Open} A1 AA {i x} (Some a) =  AA ,is a
+  extend' {Open} {Open} A1 AA {i x} (None) =  AA ,none
+  extend' {Open} {Closed} A1 AA {i x} a = AA ,is a
   extend' {Closed} A1 AA {i x} a =  AA ,is a
   extend' A1 AA {r x} b = AA ,rs b
 
-  extend : ∀ {oc} {Σ : Signature} (A : Structure oc Σ) {s : SigThing} → Branch A s → Structure oc (s :: Σ)
+  extend : ∀ {oc oc2} {Σ : Signature} (A : Structure oc Σ) {s : SigThing} → Branch A oc2 s → Structure oc (s :: Σ)
   extend {oc} (A , AA) brnch = A , extend' {oc} A AA  brnch
- -- extend {Open} (A , AA) {i x} (None) = A , AA ,none
- -- extend {Closed} (A , AA) {i x} a = A , AA ,is a
- --- extend (A , AA) {r x} b = A, AA ,rs b
-
 
 
 ---need to change extend so that agda knows that when you extend a structure the underlying set remains the same, ie fst A1 = fst ext. A1
