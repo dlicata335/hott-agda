@@ -38,9 +38,56 @@ module mso.opentruth where
   ... | _ | _ = None  --if not it's dead to us
 
   --lets you look up a bunch of terms
+--predicate identiftying existential formulas bc we need to use uni rules for uni formulas
+  data isE {Σ : Signature} : Formula Σ → Type where
+    isEexistsi : ∀ {τ} {φ : Formula (i τ :: Σ )} → isE (∃i τ φ)
+    isEexistsr :  ∀ {τ} {φ : Formula (r (τ :: []) :: Σ )} → isE (∃p τ φ)
+    isEor :  ∀ {φ1 φ2 : Formula Σ } → isE (φ1 ∨ φ2)
+    isEfalse : ∀ {φ : Formula Σ } → isE ⊥
+
+--predicate for universal formulas
+  data isU {Σ : Signature} : Formula Σ → Type where
+    isUforalli : ∀ {τ} {φ : Formula (i τ :: Σ )} → isU (∀i τ φ)
+    isUforallr : ∀ {τ} {φ : Formula (r (τ :: []) :: Σ )} → isU (∀p τ φ)
+    isUand :  ∀ {φ1 φ2 : Formula Σ } → isU (φ1 ∧ φ2)
+    isUtrue :  ∀ {φ : Formula Σ } → isU ⊤
+
+  data ubranch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2) → Type where
+    ufstb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ubranch A1 (φ1 ∧ φ2) A1 φ1
+    usndb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ubranch A1 (φ1 ∧ φ2) A1 φ2
+    uforallb : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (i τ :: Σ1 )} (a : IndividS (fst A1) τ) → ubranch A1 (∀i τ φ) (fst A1 , (snd A1) ,is a) φ
+    uforallnil : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (i τ :: Σ1 )}  → ubranch A1 (∀i τ φ) (fst A1 , (snd A1) ,none) φ
+    uforallr : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (r (τ :: []) :: Σ1 )} (r : IndividsS (fst A1) (τ :: []) → Type) → ubranch A1 (∀p τ φ) (fst A1 , (snd A1) ,rs r) φ
+
+--make ebranch (did I do this right?)
+  data ebranch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2) → Type where
+    efstb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ebranch A1 (φ1 ∨ φ2) A1 φ1
+    esndb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ebranch A1 (φ1 ∨ φ2) A1 φ2
+    eExistsb : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (i τ :: Σ1 )} (a : IndividS (fst A1) τ) → ebranch A1 (∃i τ φ) (fst A1 , (snd A1) ,is a) φ
+    eExistsr : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (r (τ :: []) :: Σ1 )} (r : IndividsS (fst A1) (τ :: []) → Type) → ebranch A1 (∃p τ φ) (fst A1 , (snd A1) ,rs r) φ
+
+
+--overarching branch
+  data branch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2)
+                                 (pf : Either (isE φ1) (isU φ1)) (br : Either (ebranch A1 φ1 A2 φ2) (ubranch A1 φ1 A2 φ2)) → Type where
+    ebr : ∀ {Σ2} {oc1 oc2} {A1 : Structure oc1 Σ1} {φ1 : Formula Σ1} {A2 : Structure oc2 Σ2} {φ2 : Formula Σ2} {pf : isE φ1} {br : ebranch A1 φ1 A2 φ2} → branch A1 φ1 A2 φ2 (Inl pf) (Inl br)
+    ubr : ∀ {Σ2} {oc1 oc2} {A1 : Structure oc1 Σ1} {φ1 : Formula Σ1} {A2 : Structure oc2 Σ2} {φ2 : Formula Σ2} {pf : isU φ1} {br : ubranch A1 φ1 A2 φ2}→ branch A1 φ1 A2 φ2 (Inr pf) (Inr br)
 
   -- open TRUTH: i.e. the structure is open, but the formula is really provable anyway
-  _⊩o_ : ∀ {oc Σ} → Structure oc Σ → Formula Σ → Type
+  data _⊩o_ {oc : _} {Σ : _} (A : Structure oc Σ) : Formula Σ → Type where
+    provesu : {φ : Formula Σ}
+            → isU φ
+            → (∀ {Σ' oc'} {A' : Structure oc' Σ'} {φ'} → ubranch A φ A' φ' → A' ⊩o φ')
+            → A ⊩o φ
+    provese : {φ : Formula Σ}
+            → isE φ
+            → ∀ {Σ' oc'} {A' : Structure oc' Σ'} {φ'} → ebranch A φ A' φ' → A' ⊩o φ' --do I need to switch the quantifier here (at the beginning of the line)?
+            → A ⊩o φ
+    --existential case for above; just use ebranch above, take out parens, switch quant
+    provesbase : ∀ {τs} {rel} {xs : Terms _ τs} vs → ((getsOpen xs A) == (Some vs)) → (getOpen rel A) (vs) → A ⊩o (R rel xs)
+    provesnotbase : ∀ {τs} {rel} {xs : Terms _ τs} → (Σ \ vs -> ((getsOpen xs A == (Some vs))) → ((getOpen rel A) (vs) → Void)) →  A ⊩o (¬R rel xs)
+
+{-
   (A , SA) ⊩o ∀i τ φ = ((a : IndividS A τ) → (A , (SA ,is a)) ⊩o φ) × ((A , (SA ,none)) ⊩o φ)
   (A , SA) ⊩o ∃i τ φ = (Σ \ (a : IndividS A τ) → (A , (SA ,is a)) ⊩o φ) --took out nils here
   (A , SA) ⊩o ∀p τ φ = (P : Unit × IndividS A τ → Type) → (A , (SA ,rs P)) ⊩o φ
@@ -49,12 +96,12 @@ module mso.opentruth where
   A ⊩o (φ1 ∨ φ2) = Either (A ⊩o φ1) (A ⊩o φ2)
   A ⊩o ⊤ = Unit
   A ⊩o ⊥ = Void
-  A ⊩o (R rel xs) = Σ \ vs -> ((getsOpen xs A) == (Some vs)) × (getOpen rel A) (vs)
-  A ⊩o (¬R rel xs) = Σ \ vs -> ((getsOpen xs A == (Some vs))) × (getOpen rel A) (vs) → Void
+-}
 
   _⊩o_false : ∀ {oc Σ} → Structure oc Σ → Formula Σ → Type
   A ⊩o φ false = A ⊩o (φ *)
 
+-- uformula with ubranches, eform with ebranch, or rel cases
   -- raw game tree that is compatible with the formula
   _⊩s_ : ∀ {oc Σ} → Structure oc Σ → Formula Σ → Type
   A ⊩s ∀i τ φ = Σ \ (bs : List (Branch A Open (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ) --help! open?

@@ -252,6 +252,8 @@ module mso.Signatures where
 
   -- sometimes helpful to factor things this way
 
+
+
   Branch : ∀ {oc} {Σ : Signature} (A : Structure oc Σ) (oc2 : OC) → (s : SigThing) → Type
   Branch A oc2 (r τs) = IndividsS (fst A) τs → Type
   Branch {Open} A Open (i τ) = Maybe (IndividS (fst A) τ)
