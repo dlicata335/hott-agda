@@ -52,6 +52,10 @@ module mso.opentruth where
     isUand :  ∀ {φ1 φ2 : Formula Σ } → isU (φ1 ∧ φ2)
     isUtrue :  ∀ {φ : Formula Σ } → isU ⊤
 
+  data isR {Σ : Signature} : Formula Σ → Type where 
+    isr : ∀ {τs} {r : r τs ∈ Σ} {xs} → isR (R r xs)
+    isnotr : ∀ {τs} {r : r τs ∈ Σ} {xs} → isR (¬R r xs)
+
   data ubranch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2) → Type where
     ufstb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ubranch A1 (φ1 ∧ φ2) A1 φ1
     usndb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ubranch A1 (φ1 ∧ φ2) A1 φ2
@@ -59,19 +63,18 @@ module mso.opentruth where
     uforallnil : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (i τ :: Σ1 )}  → ubranch A1 (∀i τ φ) (fst A1 , (snd A1) ,none) φ
     uforallr : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (r (τ :: []) :: Σ1 )} (r : IndividsS (fst A1) (τ :: []) → Type) → ubranch A1 (∀p τ φ) (fst A1 , (snd A1) ,rs r) φ
 
---make ebranch (did I do this right?)
   data ebranch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2) → Type where
     efstb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ebranch A1 (φ1 ∨ φ2) A1 φ1
     esndb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ebranch A1 (φ1 ∨ φ2) A1 φ2
     eExistsb : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (i τ :: Σ1 )} (a : IndividS (fst A1) τ) → ebranch A1 (∃i τ φ) (fst A1 , (snd A1) ,is a) φ
     eExistsr : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (r (τ :: []) :: Σ1 )} (r : IndividsS (fst A1) (τ :: []) → Type) → ebranch A1 (∃p τ φ) (fst A1 , (snd A1) ,rs r) φ
 
-
 --overarching branch
-  data branch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2)
-                                 (pf : Either (isE φ1) (isU φ1)) (br : Either (ebranch A1 φ1 A2 φ2) (ubranch A1 φ1 A2 φ2)) → Type where
-    ebr : ∀ {Σ2} {oc1 oc2} {A1 : Structure oc1 Σ1} {φ1 : Formula Σ1} {A2 : Structure oc2 Σ2} {φ2 : Formula Σ2} {pf : isE φ1} {br : ebranch A1 φ1 A2 φ2} → branch A1 φ1 A2 φ2 (Inl pf) (Inl br)
-    ubr : ∀ {Σ2} {oc1 oc2} {A1 : Structure oc1 Σ1} {φ1 : Formula Σ1} {A2 : Structure oc2 Σ2} {φ2 : Formula Σ2} {pf : isU φ1} {br : ubranch A1 φ1 A2 φ2}→ branch A1 φ1 A2 φ2 (Inr pf) (Inr br)
+  data branch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2) → Type where
+    ebr : ∀ {Σ2} {oc1 oc2} {A1 : Structure oc1 Σ1} {φ1 : Formula Σ1} {A2 : Structure oc2 Σ2} {φ2 : Formula Σ2} 
+            → isE φ1 → ebranch A1 φ1 A2 φ2 → branch A1 φ1 A2 φ2 
+    ubr : ∀ {Σ2} {oc1 oc2} {A1 : Structure oc1 Σ1} {φ1 : Formula Σ1} {A2 : Structure oc2 Σ2} {φ2 : Formula Σ2}
+            → isU φ1 → ubranch A1 φ1 A2 φ2 → branch A1 φ1 A2 φ2 
 
   -- open TRUTH: i.e. the structure is open, but the formula is really provable anyway
   data _⊩o_ {oc : _} {Σ : _} (A : Structure oc Σ) : Formula Σ → Type where
@@ -79,13 +82,15 @@ module mso.opentruth where
             → isU φ
             → (∀ {Σ' oc'} {A' : Structure oc' Σ'} {φ'} → ubranch A φ A' φ' → A' ⊩o φ')
             → A ⊩o φ
-    provese : {φ : Formula Σ}
+    provese : ∀ {Σ' oc'} {A' : Structure oc' Σ'} {φ : Formula Σ} {φ'}
             → isE φ
-            → ∀ {Σ' oc'} {A' : Structure oc' Σ'} {φ'} → ebranch A φ A' φ' → A' ⊩o φ' --do I need to switch the quantifier here (at the beginning of the line)?
+            → ebranch A φ A' φ' → A' ⊩o φ' 
             → A ⊩o φ
-    --existential case for above; just use ebranch above, take out parens, switch quant
     provesbase : ∀ {τs} {rel} {xs : Terms _ τs} vs → ((getsOpen xs A) == (Some vs)) → (getOpen rel A) (vs) → A ⊩o (R rel xs)
-    provesnotbase : ∀ {τs} {rel} {xs : Terms _ τs} → (Σ \ vs -> ((getsOpen xs A == (Some vs))) → ((getOpen rel A) (vs) → Void)) →  A ⊩o (¬R rel xs)
+    provesnotbase : ∀ {τs} {rel} {xs : Terms _ τs} 
+                  → (vs : _) → ((getsOpen xs A == (Some vs)))  -- getsOpen actually returns Some vs for some vs
+                  → ((getOpen rel A) (vs) → Void) -- and the relation is false on those
+                  →  A ⊩o (¬R rel xs)
 
 {-
   (A , SA) ⊩o ∀i τ φ = ((a : IndividS A τ) → (A , (SA ,is a)) ⊩o φ) × ((A , (SA ,none)) ⊩o φ)
@@ -101,10 +106,22 @@ module mso.opentruth where
   _⊩o_false : ∀ {oc Σ} → Structure oc Σ → Formula Σ → Type
   A ⊩o φ false = A ⊩o (φ *)
 
--- uformula with ubranches, eform with ebranch, or rel cases
+  data branchfrom {Σ1 : Signature} {oc1} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) : Type where
+    branchto : ∀ {Σ2 : Signature} {oc2 : _} → (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2) → branch A1 φ1 A2 φ2 → branchfrom A1 φ1
+
+  Branches : {Σ1 : Signature} {oc1 : _} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) → Type
+  Branches A1 φ1 = List (branchfrom A1 φ1)
+
+  -- uformula with ubranches, eform with ebranch, or rel cases
   -- raw game tree that is compatible with the formula
-  _⊩s_ : ∀ {oc Σ} → Structure oc Σ → Formula Σ → Type
-  A ⊩s ∀i τ φ = Σ \ (bs : List (Branch A Open (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ) --help! open?
+  data _⊩s_ {oc : _} {Σ : _} (A : Structure oc Σ) (φ : Formula Σ) : Type where
+    leaf : (isR φ) → A ⊩s φ 
+    node : (bs : Branches A φ) →
+           (∀ {Σ'} {oc'} {A' : Structure Σ' oc'} {φ'} b → (branchto A' φ' b) ∈ bs → A' ⊩s φ')
+           → A ⊩s φ
+
+{-
+  = Σ \ (bs : List (Branch A Open (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ) --help! open?
   A ⊩s ∃i τ φ = Σ \ (bs : List (Branch A Closed (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ) --closed?
   A ⊩s ∀p τ φ = Σ \ (bs : List (Branch A Open (r (τ :: [])))) → (∀ {bi} → bi ∈ bs → extend {_} {Open} A bi ⊩s φ) --closed?
   A ⊩s ∃p τ φ = Σ \ (bs : List (Branch A Open (r (τ :: [])))) → (∀ {bi} → bi ∈ bs → extend {_} {Open} A bi ⊩s φ) --closed?
@@ -114,7 +131,9 @@ module mso.opentruth where
   A ⊩s ⊥ = Void
   A ⊩s (R rel xs) = Unit
   A ⊩s (¬R rel xs) = Unit
+-}
 
+{-
   isUndecided : ∀ {Σ} (A : Structure Open Σ) (φ : Formula Σ) → A ⊩s φ → Type
   isUndecided A (∀i τ φ) (bs , ts) =
     -- (1) every extension in bs is reduced
@@ -146,6 +165,7 @@ module mso.opentruth where
   isUndecided A ⊥ ()
   isUndecided A (R U vs) <> = getsOpen vs A == None
   isUndecided A (¬R U vs) <> = getsOpen vs A == None
+-}
 
   -- TODO: define equivalence on ⊩s
 
@@ -160,6 +180,15 @@ module mso.opentruth where
 
   positionEquiv' : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) → fixed (fst A1) (fst A2)  → Type
   positionEquiv' A1 A2 (X , (X⊆A1 ,  X⊆A2) ,  decX )  = positionEquiv A1 A2 X X⊆A1  X⊆A2 decX
+
+  BranchBijection : {Σ : Signature} {oc : _} (A : Structure oc Σ) (φ : Formula Σ) → Branches A φ → Branches A φ → Type
+  BranchBijection A φ branches1 branches2 = 
+                  ∀ {Σ' φ'} →
+                    Equiv (Σ (λ oc' → Σ (λ (A' : Structure oc' Σ') → Σ \ b → (branchto A' φ' b) ∈ branches1))) 
+                          (Σ (λ oc' → Σ (λ (A' : Structure oc' Σ') → Σ \ b → (branchto A' φ' b) ∈ branches2))) 
+
+{-
+  needs updating below here
 
   mutual
 
@@ -234,7 +263,7 @@ module mso.opentruth where
     isReduced A ⊥ () X
     isReduced A (R x x₁) game X = Unit
     isReduced A (¬R x x₁) game X = Unit
-
+-}
 
   -- naive : ∀ {Σ φ} {A : Structure Closed Σ} → Either (A ⊩c φ) (A ⊩c φ false)
   -- naive = {!!}
