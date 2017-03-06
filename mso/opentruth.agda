@@ -52,62 +52,53 @@ module mso.opentruth where
     isUand :  ∀ {φ1 φ2 : Formula Σ } → isU (φ1 ∧ φ2)
     isUtrue :  ∀ {φ : Formula Σ } → isU ⊤
 
-  data isR {Σ : Signature} : Formula Σ → Type where 
+  data isR {Σ : Signature} : Formula Σ → Type where
     isr : ∀ {τs} {r : r τs ∈ Σ} {xs} → isR (R r xs)
     isnotr : ∀ {τs} {r : r τs ∈ Σ} {xs} → isR (¬R r xs)
 
-  data ubranch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2) → Type where
-    ufstb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ubranch A1 (φ1 ∧ φ2) A1 φ1
-    usndb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ubranch A1 (φ1 ∧ φ2) A1 φ2
-    uforallb : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (i τ :: Σ1 )} (a : IndividS (fst A1) τ) → ubranch A1 (∀i τ φ) (fst A1 , (snd A1) ,is a) φ
-    uforallnil : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (i τ :: Σ1 )}  → ubranch A1 (∀i τ φ) (fst A1 , (snd A1) ,none) φ
-    uforallr : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (r (τ :: []) :: Σ1 )} (r : IndividsS (fst A1) (τ :: []) → Type) → ubranch A1 (∀p τ φ) (fst A1 , (snd A1) ,rs r) φ
+  data ubranch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : StructureS oc2 (fst A1) Σ2) (φ2 : Formula Σ2) → Type where
+    ufstb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ubranch A1 (φ1 ∧ φ2) (snd A1) φ1
+    usndb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ubranch A1 (φ1 ∧ φ2) (snd A1) φ2
+    uforallb : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (i τ :: Σ1 )} (a : IndividS (fst A1) τ) → ubranch A1 (∀i τ φ) ( (snd A1) ,is a) φ
+    uforallnil : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (i τ :: Σ1 )}  → ubranch A1 (∀i τ φ) ((snd A1) ,none) φ
+    uforallr : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (r (τ :: []) :: Σ1 )} (r : IndividsS (fst A1) (τ :: []) → Type) → ubranch A1 (∀p τ φ) ( (snd A1) ,rs r) φ
 
-  data ebranch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2) → Type where
-    efstb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ebranch A1 (φ1 ∨ φ2) A1 φ1
-    esndb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ebranch A1 (φ1 ∨ φ2) A1 φ2
-    eExistsb : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (i τ :: Σ1 )} (a : IndividS (fst A1) τ) → ebranch A1 (∃i τ φ) (fst A1 , (snd A1) ,is a) φ
-    eExistsr : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (r (τ :: []) :: Σ1 )} (r : IndividsS (fst A1) (τ :: []) → Type) → ebranch A1 (∃p τ φ) (fst A1 , (snd A1) ,rs r) φ
+  data ebranch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : StructureS oc2 (fst A1) Σ2) (φ2 : Formula Σ2) → Type where
+    efstb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ebranch A1 (φ1 ∨ φ2) (snd A1) φ1
+    esndb : ∀ {oc} {A1 : Structure oc Σ1} → {φ1 φ2 : Formula Σ1} → ebranch A1 (φ1 ∨ φ2) (snd A1) φ2
+    eExistsb : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (i τ :: Σ1 )} (a : IndividS (fst A1) τ) → ebranch A1 (∃i τ φ)  ((snd A1) ,is a) φ
+    eExistsr : ∀ {oc} {τ} {A1 : Structure oc Σ1} → {φ : Formula (r (τ :: []) :: Σ1 )} (r : IndividsS (fst A1) (τ :: []) → Type) → ebranch A1 (∃p τ φ) ((snd A1) ,rs r) φ
 
 --overarching branch
-  data branch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2) → Type where
-    ebr : ∀ {Σ2} {oc1 oc2} {A1 : Structure oc1 Σ1} {φ1 : Formula Σ1} {A2 : Structure oc2 Σ2} {φ2 : Formula Σ2} 
-            → isE φ1 → ebranch A1 φ1 A2 φ2 → branch A1 φ1 A2 φ2 
-    ubr : ∀ {Σ2} {oc1 oc2} {A1 : Structure oc1 Σ1} {φ1 : Formula Σ1} {A2 : Structure oc2 Σ2} {φ2 : Formula Σ2}
-            → isU φ1 → ubranch A1 φ1 A2 φ2 → branch A1 φ1 A2 φ2 
+  data branch {Σ1 : Signature} : ∀ { Σ2 : Signature} {oc1 oc2} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) (A2 : StructureS oc2 (fst A1)  Σ2) (φ2 : Formula Σ2) → Type where
+    ebr : ∀ {Σ2} {oc1 oc2} {A1 : Structure oc1 Σ1} {φ1 : Formula Σ1} {A2 : StructureS  oc2 (fst A1) Σ2} {φ2 : Formula Σ2}
+            → isE φ1 → ebranch A1 φ1 A2 φ2 → branch A1 φ1 A2 φ2
+    ubr : ∀ {Σ2} {oc1 oc2} {A1 : Structure oc1 Σ1} {φ1 : Formula Σ1} {A2 : StructureS oc2 (fst A1) Σ2} {φ2 : Formula Σ2}
+            → isU φ1 → ubranch A1 φ1 A2 φ2 → branch A1 φ1 A2 φ2
 
   -- open TRUTH: i.e. the structure is open, but the formula is really provable anyway
   data _⊩o_ {oc : _} {Σ : _} (A : Structure oc Σ) : Formula Σ → Type where
     provesu : {φ : Formula Σ}
             → isU φ
-            → (∀ {Σ' oc'} {A' : Structure oc' Σ'} {φ'} → ubranch A φ A' φ' → A' ⊩o φ')
+            → (∀ {Σ' oc'} {A' : StructureS oc' (fst A) Σ'} {φ'} → ubranch A φ A' φ' → (fst A , A') ⊩o φ')
             → A ⊩o φ
-    provese : ∀ {Σ' oc'} {A' : Structure oc' Σ'} {φ : Formula Σ} {φ'}
+    provese : ∀ {Σ' oc'} {A' : StructureS oc' (fst A) Σ'} {φ : Formula Σ} {φ'}
             → isE φ
-            → ebranch A φ A' φ' → A' ⊩o φ' 
+            → ebranch A φ A' φ' → (fst A , A') ⊩o φ'
             → A ⊩o φ
     provesbase : ∀ {τs} {rel} {xs : Terms _ τs} vs → ((getsOpen xs A) == (Some vs)) → (getOpen rel A) (vs) → A ⊩o (R rel xs)
-    provesnotbase : ∀ {τs} {rel} {xs : Terms _ τs} 
+    provesnotbase : ∀ {τs} {rel} {xs : Terms _ τs}
                   → (vs : _) → ((getsOpen xs A == (Some vs)))  -- getsOpen actually returns Some vs for some vs
                   → ((getOpen rel A) (vs) → Void) -- and the relation is false on those
                   →  A ⊩o (¬R rel xs)
-
-{-
-  (A , SA) ⊩o ∀i τ φ = ((a : IndividS A τ) → (A , (SA ,is a)) ⊩o φ) × ((A , (SA ,none)) ⊩o φ)
-  (A , SA) ⊩o ∃i τ φ = (Σ \ (a : IndividS A τ) → (A , (SA ,is a)) ⊩o φ) --took out nils here
-  (A , SA) ⊩o ∀p τ φ = (P : Unit × IndividS A τ → Type) → (A , (SA ,rs P)) ⊩o φ
-  (A , SA) ⊩o ∃p τ φ = Σ \ (P : Unit × IndividS A τ → Type) → (A , (SA ,rs P)) ⊩o φ
-  A ⊩o (φ1 ∧ φ2) = A ⊩o φ1 × A ⊩o φ2
-  A ⊩o (φ1 ∨ φ2) = Either (A ⊩o φ1) (A ⊩o φ2)
-  A ⊩o ⊤ = Unit
-  A ⊩o ⊥ = Void
--}
 
   _⊩o_false : ∀ {oc Σ} → Structure oc Σ → Formula Σ → Type
   A ⊩o φ false = A ⊩o (φ *)
 
   data branchfrom {Σ1 : Signature} {oc1} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) : Type where
-    branchto : ∀ {Σ2 : Signature} {oc2 : _} → (A2 : Structure oc2 Σ2) (φ2 : Formula Σ2) → branch A1 φ1 A2 φ2 → branchfrom A1 φ1
+    branchto : ∀ {Σ2 : Signature} {oc2 : _} → (A2 : StructureS oc2 (fst A1) Σ2) (φ2 : Formula Σ2) → branch A1 φ1 A2 φ2 → branchfrom A1 φ1
+
+  --unbranchify : ∀ {Σ1 : Signature} {oc1} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) → branchfrom A1 φ1 → Σ Σ2
 
   Branches : {Σ1 : Signature} {oc1 : _} (A1 : Structure oc1 Σ1) (φ1 : Formula Σ1) → Type
   Branches A1 φ1 = List (branchfrom A1 φ1)
@@ -115,57 +106,10 @@ module mso.opentruth where
   -- uformula with ubranches, eform with ebranch, or rel cases
   -- raw game tree that is compatible with the formula
   data _⊩s_ {oc : _} {Σ : _} (A : Structure oc Σ) (φ : Formula Σ) : Type where
-    leaf : (isR φ) → A ⊩s φ 
+    leaf : (isR φ) → A ⊩s φ
     node : (bs : Branches A φ) →
-           (∀ {Σ'} {oc'} {A' : Structure Σ' oc'} {φ'} b → (branchto A' φ' b) ∈ bs → A' ⊩s φ')
+           (∀ {Σ'} {oc'} {A' : StructureS oc' (fst A) Σ'} {φ'} b → (branchto A' φ' b) ∈ bs → ((fst A , A') ⊩s φ'))
            → A ⊩s φ
-
-{-
-  = Σ \ (bs : List (Branch A Open (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ) --help! open?
-  A ⊩s ∃i τ φ = Σ \ (bs : List (Branch A Closed (i τ))) → (∀ {bi} → bi ∈ bs → extend A bi ⊩s φ) --closed?
-  A ⊩s ∀p τ φ = Σ \ (bs : List (Branch A Open (r (τ :: [])))) → (∀ {bi} → bi ∈ bs → extend {_} {Open} A bi ⊩s φ) --closed?
-  A ⊩s ∃p τ φ = Σ \ (bs : List (Branch A Open (r (τ :: [])))) → (∀ {bi} → bi ∈ bs → extend {_} {Open} A bi ⊩s φ) --closed?
-  A ⊩s (φ1 ∧ φ2) = Either (A ⊩s φ1 × A ⊩s φ2) (Either (A ⊩s φ1) (A ⊩s φ2))
-  A ⊩s (φ1 ∨ φ2) = Either (A ⊩s φ1 × A ⊩s φ2) (Either (A ⊩s φ1) (A ⊩s φ2))
-  A ⊩s ⊤ = Unit
-  A ⊩s ⊥ = Void
-  A ⊩s (R rel xs) = Unit
-  A ⊩s (¬R rel xs) = Unit
--}
-
-{-
-  isUndecided : ∀ {Σ} (A : Structure Open Σ) (φ : Formula Σ) → A ⊩s φ → Type
-  isUndecided A (∀i τ φ) (bs , ts) =
-    -- (1) every extension in bs is reduced
-    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) ×
-    -- (2) every extension not in bs is true
-    (∀ {bi} → (bi ∈ bs → Void) → (extend A bi) ⊩o φ)
-  isUndecided A (∃i τ φ) (bs , ts) =
-    -- (1) every extension in bs is reduced
-    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) ×
-    -- (2) every extension not in bs is false
-    (∀ {bi} → (bi ∈ bs → Void) → (extend A bi) ⊩o φ false)
-  isUndecided A (∀p τ φ) (bs , ts) =
-    -- (1) every extension in bs is reduced
-    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) ×
-    -- (2) every extension not in bs is true
-    (∀ {bi} → (bi ∈ bs → Void) → (extend A bi) ⊩o φ)
-  isUndecided A (∃p τ φ) (bs , ts) =
-    -- (1) every extension in bs is reduced
-    (∀ {bi} → (i : bi ∈ bs) → isUndecided (extend A bi) φ (ts i)) ×
-    -- (2) every extension not in bs is false
-    (∀ {bi} → (bi ∈ bs → Void) → (extend A bi) ⊩o φ false)
-  isUndecided A (φ1 ∧ φ2) (Inl (t1 , t2)) = isUndecided A φ1 t1 × isUndecided A φ2 t2
-  isUndecided A (φ1 ∧ φ2) (Inr (Inl t)) = isUndecided A φ1 t × A ⊩o φ2
-  isUndecided A (φ1 ∧ φ2) (Inr (Inr t)) = A ⊩o φ1 × isUndecided A φ2 t
-  isUndecided A (φ1 ∨ φ2) (Inl (t1 , t2)) = isUndecided A φ1 t1 × isUndecided A φ2 t2
-  isUndecided A (φ1 ∨ φ2) (Inr (Inl t)) = isUndecided A φ1 t × A ⊩o φ2 false
-  isUndecided A (φ1 ∨ φ2) (Inr (Inr t)) = A ⊩o φ1 false × isUndecided A φ2 t
-  isUndecided A ⊤ <> = Void -- NOT Unit because we're not supposed to include winnable branches in a reduced game
-  isUndecided A ⊥ ()
-  isUndecided A (R U vs) <> = getsOpen vs A == None
-  isUndecided A (¬R U vs) <> = getsOpen vs A == None
--}
 
   -- TODO: define equivalence on ⊩s
 
@@ -181,21 +125,60 @@ module mso.opentruth where
   positionEquiv' : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) → fixed (fst A1) (fst A2)  → Type
   positionEquiv' A1 A2 (X , (X⊆A1 ,  X⊆A2) ,  decX )  = positionEquiv A1 A2 X X⊆A1  X⊆A2 decX
 
-  BranchBijection : {Σ : Signature} {oc : _} (A : Structure oc Σ) (φ : Formula Σ) → Branches A φ → Branches A φ → Type
-  BranchBijection A φ branches1 branches2 = 
+  BranchBijection : {Σ : Signature} {oc1 oc2 : _} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) (φ : Formula Σ) → Branches A1 φ → Branches A2 φ → Type
+  BranchBijection A1 A2 φ branches1 branches2 =
                   ∀ {Σ' φ'} →
-                    Equiv (Σ (λ oc' → Σ (λ (A' : Structure oc' Σ') → Σ \ b → (branchto A' φ' b) ∈ branches1))) 
-                          (Σ (λ oc' → Σ (λ (A' : Structure oc' Σ') → Σ \ b → (branchto A' φ' b) ∈ branches2))) 
+                    Equiv (Σ (λ oc' → Σ (λ (A' : StructureS oc' (fst A1) Σ') → Σ \ b → (branchto A' φ' b) ∈ branches1)))
+                          (Σ (λ oc' → Σ (λ (A' : StructureS oc' (fst A2) Σ') → Σ \ b → (branchto A' φ' b) ∈ branches2)))
 
-{-
-  needs updating below here
+  {-lemmaforfixed : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) → fixed (fst A1) (fst A2) → (φ : Formula Σ) →
+  (∀  {Σ' oc'} {A' : Structure oc' Σ'} {φ' : Formula Σ'} →  branch A1 φ  → branchfrom A2 φ → fixed A1)
+ you have a branch A -> A', the subset of A is the subset of A'
+
+  lemmaforfixed : ∀ {Σ Σ' oc1 oc2 oc1' oc2'} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) (φ : Formula Σ)
+                       (A1' : Structure oc1' Σ') (A2' : Structure oc2' Σ') (φ' : Formula Σ') →
+                        fixed (fst A1) (fst A2) → branchfrom  A1 φ → branchfrom A2 φ → fixed (fst A1') (fst A2')
+  lemmaforfixed A1 A2 (∀i τ φ) A1' A2' φ' fxd  = {!!}
+  lemmaforfixed A1 A2 (∃i τ φ) A1' A2' φ' fxd brnch1 brnch2 = {!!}
+  lemmaforfixed A1 A2 (∀p τ φ) A1' A2' φ' fxd brnch1 brnch2 = {!!}
+  lemmaforfixed A1 A2 (∃p τ φ) A1' A2' φ' fxd brnch1 brnch2 = {!!}
+  lemmaforfixed A1 A2 (φ ∧ φ₁) A1' A2' φ' fxd brnch1 brnch2 = {!!}
+  lemmaforfixed A1 A2 (φ ∨ φ₁) A1' A2' φ' fxd brnch1 brnch2 = {!!}
+  lemmaforfixed A1 A2 ⊤ A1' A2' φ' fxd brnch1 brnch2 = {!!}
+  lemmaforfixed A1 A2 ⊥ A1' A2' φ' fxd brnch1 brnch2 = {!!}
+  lemmaforfixed A1 A2 (R x x₁) A1' A2' φ' fxd brnch1 brnch2 = {!!}
+  lemmaforfixed A1 A2 (¬R x x₁) A1' A2' φ' fxd brnch1 brnch2 = {!!}
+
+-}
+
 
   mutual
 
-    gameEquiv : ∀ {Σ} (A1 A2 : Structure Open Σ) (φ : Formula Σ) → A1 ⊩s φ → A2 ⊩s φ → fixed (fst A1) (fst A2) → Type --f didn't have the same type but it worked??
+    gameEquiv : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) (φ : Formula Σ) → A1 ⊩s φ → A2 ⊩s φ → fixed (fst A1) (fst A2) → Type --f didn't have the same type but it worked??
     gameEquiv A1 A2 φ g1 g2 f =  positionEquiv' A1 A2 f × gameEquiv' A1 A2 φ g1 g2 f
 
-    gameEquiv' : ∀ {Σ} (A1 A2 : Structure Open Σ) (φ : Formula Σ) → A1 ⊩s φ → A2 ⊩s φ → fixed (fst A1) (fst A2) → Type
+    gameEquiv' : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) (φ : Formula Σ) → A1 ⊩s φ → A2 ⊩s φ → fixed (fst A1) (fst A2) → Type
+    gameEquiv' A1 A2 φ (leaf x1) (leaf x2) f = Unit
+    gameEquiv' A1 A2 φ (leaf x1) (node bs x2) f = Void
+    gameEquiv' A1 A2 φ (node bs1 x1) (leaf x2) f = Void
+    gameEquiv' A1 A2 φ (node bs1 x1) (node bs2 x2) f = Σ (λ (b : BranchBijection A1 A2 φ bs1 bs2) →
+                                                            ∀ {Σ' oc'} {A' : StructureS oc' (fst A1) Σ'} {φ'} bi →
+                                                            (brnchi : branchto A' φ' bi ∈ bs1) →
+                                                            gameEquiv ((fst A1) , A') ((fst A2) , (fst (snd (fst b (_ , A' , bi , brnchi))))) φ' (x1 bi brnchi)
+                                                            (x2 _ (snd (snd (snd (fst b (_ , A' , bi , brnchi))))))
+                                                            f)
+
+
+
+  isRed : ∀ {Σ} (A : Structure Open Σ) (φ : Formula Σ) → A ⊩s φ → (X : fixed1 (fst A)) → Type
+  isRed A φ (leaf x) fix = Unit
+  isRed A φ (node bs x) fix = {! ∀ {Σ' oc'} {A' : StructureS oc' (fst A) Σ'} {φ'} bi →
+                                 Either (branchto A' φ' bi ∈ bs) (Either (((fst A), A') ⊩o φ') (Σ (λ bj → Σ \ (pfj : bj ∈ bs1) → ((gi : extend A bi ⊩s φ)
+                                   → isReduced (extend A bi) φ gi X → gameEquiv (extend A bi) (extend A bj) φ gi (snd game pfj) (lemma1 _ X)))))!}
+ --isRed A φexi game fix = ?
+
+
+{-
     gameEquiv' A1 A2 (∀i τ φ) g1 g2 f = Σ (λ (b : ListBijection (fst g1) (fst g2)) → ∀ bi (x : bi ∈ fst g1)
                                              → gameEquiv (extend A1 bi) (extend A2 (fst (fst b (bi , x)))) φ (snd g1 x) (snd g2 (snd (fst b (bi , x)))) f) --need notion of bijection between two lists; define this to be bijection between membership types
     gameEquiv' A1 A2 (∃i τ φ) g1 g2 f = Σ (λ (b : ListBijection (fst g1) (fst g2)) →
@@ -229,7 +212,8 @@ module mso.opentruth where
     gameEquiv' A1 A2 ⊥ () g2 f
     gameEquiv' A1 A2 (R x x₁) g1 g2 f  = Unit --Unit because the recursive games are unit because relations are at the end of the game tree
     gameEquiv' A1 A2 (¬R x x₁) g1 g2 f = Unit
-
+-}
+{-
   -- do everything but foralls and exists in agda; look at for alls and exists on paper and
   --- bijection between two lists of branches --> what information do we need given a bijection from the previous step
   ---given a bijection between the branches, what else do we need to get an equivalence between
