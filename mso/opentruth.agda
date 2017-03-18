@@ -131,26 +131,6 @@ module mso.opentruth where
                     Equiv (Σ (λ oc' → Σ (λ (A' : StructureS oc' (fst A1) Σ') → Σ \ b → (branchto A' φ' b) ∈ branches1)))
                           (Σ (λ oc' → Σ (λ (A' : StructureS oc' (fst A2) Σ') → Σ \ b → (branchto A' φ' b) ∈ branches2)))
 
-  {-lemmaforfixed : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) → fixed (fst A1) (fst A2) → (φ : Formula Σ) →
-  (∀  {Σ' oc'} {A' : Structure oc' Σ'} {φ' : Formula Σ'} →  branch A1 φ  → branchfrom A2 φ → fixed A1)
- you have a branch A -> A', the subset of A is the subset of A'
-
-  lemmaforfixed : ∀ {Σ Σ' oc1 oc2 oc1' oc2'} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) (φ : Formula Σ)
-                       (A1' : Structure oc1' Σ') (A2' : Structure oc2' Σ') (φ' : Formula Σ') →
-                        fixed (fst A1) (fst A2) → branchfrom  A1 φ → branchfrom A2 φ → fixed (fst A1') (fst A2')
-  lemmaforfixed A1 A2 (∀i τ φ) A1' A2' φ' fxd  = {!!}
-  lemmaforfixed A1 A2 (∃i τ φ) A1' A2' φ' fxd brnch1 brnch2 = {!!}
-  lemmaforfixed A1 A2 (∀p τ φ) A1' A2' φ' fxd brnch1 brnch2 = {!!}
-  lemmaforfixed A1 A2 (∃p τ φ) A1' A2' φ' fxd brnch1 brnch2 = {!!}
-  lemmaforfixed A1 A2 (φ ∧ φ₁) A1' A2' φ' fxd brnch1 brnch2 = {!!}
-  lemmaforfixed A1 A2 (φ ∨ φ₁) A1' A2' φ' fxd brnch1 brnch2 = {!!}
-  lemmaforfixed A1 A2 ⊤ A1' A2' φ' fxd brnch1 brnch2 = {!!}
-  lemmaforfixed A1 A2 ⊥ A1' A2' φ' fxd brnch1 brnch2 = {!!}
-  lemmaforfixed A1 A2 (R x x₁) A1' A2' φ' fxd brnch1 brnch2 = {!!}
-  lemmaforfixed A1 A2 (¬R x x₁) A1' A2' φ' fxd brnch1 brnch2 = {!!}
-
--}
-
 
   mutual
 
@@ -168,103 +148,74 @@ module mso.opentruth where
                                                             (x2 _ (snd (snd (snd (fst b (_ , A' , bi , brnchi))))))
                                                             f)
 
-
-
-  isRed : ∀ {Σ} (A : Structure Open Σ) (φ : Formula Σ) → A ⊩s φ → (X : fixed1 (fst A)) → Type
+  {-# NO_TERMINATION_CHECK #-}
+ --this terminates because φ' is smaller than φ
+ --bi ∈ bs is enough if conjecture: any two reduced games for A ⊩s φ are equivalent (CHECK!!!!)
+  isRed : ∀ {Σ oc} (A : Structure oc Σ) (φ : Formula Σ) → A ⊩s φ → (X : fixed1 (fst A)) → Type
   isRed A φ (leaf x) fix = Unit
-  isRed A φ (node bs x) fix = {! ∀ {Σ' oc'} {A' : StructureS oc' (fst A) Σ'} {φ'} bi →
-                                 Either (branchto A' φ' bi ∈ bs) (Either (((fst A), A') ⊩o φ') (Σ (λ bj → Σ \ (pfj : bj ∈ bs1) → ((gi : extend A bi ⊩s φ)
-                                   → isReduced (extend A bi) φ gi X → gameEquiv (extend A bi) (extend A bj) φ gi (snd game pfj) (lemma1 _ X)))))!}
- --isRed A φexi game fix = ?
+  isRed A φ (node bs x) fix =  (∀ {Σ' oc'} {A' : StructureS oc' (fst A) Σ'} {φ'} bj → (prfbr : branchto A' φ' bj ∈ bs) →
+                                      isRed (fst A , A') φ' (x bj prfbr) fix) ×
+                               (isU φ → ∀ {Σ' oc'} {A' : StructureS oc' (fst A) Σ'} {φ'} bi →
+                                    Either (branchto A' φ' bi ∈ bs) (Either ((fst A , A') ⊩o φ')
+                                    (Σ
+                                       (λ oc'' →
+                                          Σ
+                                          (λ (A'' : StructureS oc'' (fst A) Σ') →
+                                             Σ
+                                             (λ bj →
+                                                Σ
+                                                (λ (pfbr2 : branchto A'' φ' bj ∈ bs) →
+                                                   (gi : (fst A , A') ⊩s φ') →
+                                                   isRed (fst A , A') φ' gi fix →
+                                                   gameEquiv (fst A , A') (fst A , A'') φ' gi (x bj pfbr2)
+                                                   (lemma1 _ fix)))))))) ×
+                               (isE φ → ∀ {Σ' oc'} {A' : StructureS oc' (fst A) Σ'} {φ'} bi →
+                               Either (branchto A' φ' bi ∈ bs)
+                               (Either ((fst A , A') ⊩o φ' false) (Σ
+                                                                     (λ oc'' →
+                                                                        Σ
+                                                                        (λ (A'' : StructureS oc'' (fst A) Σ') →
+                                                                           Σ
+                                                                           (λ bj →
+                                                                              Σ
+                                                                              (λ (pfbr2 : branchto A'' φ' bj ∈ bs) →
+                                                                                 (gi : (fst A , A') ⊩s φ') →
+                                                                                 isRed (fst A , A') φ' gi fix →
+                                                                                 gameEquiv (fst A , A') (fst A , A'') φ' gi (x bj pfbr2)
+                                                                                 (lemma1 _ fix))))))))
 
+  provesR : ∀ {Σ oc} (A : Structure oc Σ) (φ : Formula Σ) (game : A ⊩s φ) (X : fixed1 (fst A)) → isRed A φ game X → Type
+  provesR A φ (leaf x) X pf = Unit
+  provesR A φ (node bs x) X pf = {!!} -- do I recur here? why is this not a datatype?
 
-{-
-    gameEquiv' A1 A2 (∀i τ φ) g1 g2 f = Σ (λ (b : ListBijection (fst g1) (fst g2)) → ∀ bi (x : bi ∈ fst g1)
-                                             → gameEquiv (extend A1 bi) (extend A2 (fst (fst b (bi , x)))) φ (snd g1 x) (snd g2 (snd (fst b (bi , x)))) f) --need notion of bijection between two lists; define this to be bijection between membership types
-    gameEquiv' A1 A2 (∃i τ φ) g1 g2 f = Σ (λ (b : ListBijection (fst g1) (fst g2)) →
-                                             ∀ bi (x : bi ∈ fst g1) →
-                                             gameEquiv (extend A1 bi) (extend A2 (fst (fst b (bi , x)))) φ (snd g1 x) (snd g2 (snd (fst b (bi , x)))) f)
-    gameEquiv' A1 A2 (∀p τ φ) g1 g2 f = Σ (λ (b : ListBijection (fst g1) (fst g2)) →
-                                             ∀ bi (x : bi ∈ fst g1) →
-                                             gameEquiv (extend A1 bi) (extend A2 (fst (fst b (bi , x)))) φ
-                                             (snd g1 x) (snd g2 (snd (fst b (bi , x)))) f)
-    gameEquiv' A1 A2 (∃p τ φ) g1 g2 f = Σ (λ (b : ListBijection (fst g1) (fst g2)) →
-                                             ∀ bi (x : bi ∈ fst g1) →
-                                             gameEquiv (extend A1 bi) (extend A2 (fst (fst b (bi , x)))) φ
-                                             (snd g1 x) (snd g2 (snd (fst b (bi , x)))) f)
-    gameEquiv' A1 A2 (φ1 ∧ φ2) (Inl (prod1)) (Inl prod2) f = gameEquiv A1 A2 φ1 (fst prod1) (fst prod2) f  ×
-                                                                  gameEquiv A1 A2 φ2 (snd prod1) (snd prod2) f
-    gameEquiv' A1 A2 (φ1 ∧ φ2) (Inl (A1p1 , A1p2)) (Inr x) f = Void
-    gameEquiv' A1 A2 (φ1 ∧ φ2) (Inr g1) (Inl x) f = Void
-    gameEquiv' A1 A2 (φ1 ∧ φ2) (Inr (Inl A1p1)) (Inr (Inl A2p1)) f = gameEquiv A1 A2 φ1 A1p1 A2p1 f
-    gameEquiv' A1 A2 (φ1 ∧ φ2) (Inr (Inl A1p1)) (Inr (Inr A2p2)) f = Void
-    gameEquiv' A1 A2 (φ1 ∧ φ2) (Inr (Inr A1p2)) (Inr (Inl A2p1)) f = Void
-    gameEquiv' A1 A2 (φ1 ∧ φ2) (Inr (Inr A1p2)) (Inr (Inr A2p2)) f = gameEquiv A1 A2 φ2 A1p2 A2p2 f
-    gameEquiv' A1 A2 (φ1 ∨ φ2) (Inl prod11) (Inl prod22)  f = gameEquiv A1 A2 φ1 (fst prod11) (fst prod22) f  ×
-                                                                  gameEquiv A1 A2 φ2 (snd prod11) (snd prod22) f
-    gameEquiv' A1 A2 (φ1 ∨ φ2) (Inl x) (Inr g2) f  = Void
-    gameEquiv' A1 A2 (φ1 ∨ φ2) (Inr g1) (Inl x) f = Void
-    gameEquiv' A1 A2 (φ1 ∨ φ2) (Inr (Inl A1p1)) (Inr (Inl A2p1)) f = gameEquiv A1 A2 φ1 A1p1 A2p1 f
-    gameEquiv' A1 A2 (φ1 ∨ φ2) (Inr (Inl A1p1)) (Inr (Inr A2p2)) f = Void
-    gameEquiv' A1 A2 (φ1 ∨ φ2) (Inr (Inr A1p2)) (Inr (Inl A2p1)) f = Void
-    gameEquiv' A1 A2 (φ1 ∨ φ2) (Inr (Inr A1p2)) (Inr (Inr A2p2)) f = gameEquiv A1 A2 φ2 A1p2 A2p2 f
-    gameEquiv' A1 A2 ⊤ g1 g2 f = Unit
-    gameEquiv' A1 A2 ⊥ () g2 f
-    gameEquiv' A1 A2 (R x x₁) g1 g2 f  = Unit --Unit because the recursive games are unit because relations are at the end of the game tree
-    gameEquiv' A1 A2 (¬R x x₁) g1 g2 f = Unit
--}
-{-
-  -- do everything but foralls and exists in agda; look at for alls and exists on paper and
-  --- bijection between two lists of branches --> what information do we need given a bijection from the previous step
-  ---given a bijection between the branches, what else do we need to get an equivalence between
-
-  --relation branches are a unit cross an Individs because MSO, relation variables are a list type with one thing in it!
-  --bi ∈ bs is enough if conjecture: any two reduced games for A ⊩s φ are equivalent (CHECK!!!!)
-    isReduced : ∀ {Σ} (A : Structure Open Σ) (φ : Formula Σ) → A ⊩s φ → (X : fixed1 (fst A)) → Type --(this should be type not function,evidence that game is reduced)  right below here: this is a forall but its (by conjecture) a forall for a singleton
-    isReduced A (∀i τ φ) game X = (bi : Maybe (IndividS (fst A) τ)) →
-                                 Either (bi ∈ fst game) (Either (extend A bi ⊩o φ) (Σ (λ bj → Σ \ (pfj : bj ∈ fst game) → ((gi : extend A bi ⊩s φ)
-                                   → isReduced (extend A bi) φ gi X → gameEquiv (extend A bi) (extend A bj) φ gi (snd game pfj) (lemma1 _ X)))))
-    isReduced A (∃i τ φ) game X = (bi : (IndividS (fst A) τ)) →
-                                    Either (bi ∈ fst game) (Either (extend A bi ⊩o φ false) (Σ (λ bj → Σ (λ (pfj : bj ∈ fst game) → (gi : extend A bi ⊩s φ) →
-                                            isReduced (extend A bi) φ gi X →
-                                            gameEquiv (extend A bi) (extend A bj) φ gi (snd game pfj)
-                                            (lemma1 _ X)))))
-    isReduced A (∀p τ φ) game X = (bi : Unit × IndividS (fst A) τ → Type) → Either (bi ∈ fst game) (Either (extend A bi ⊩o φ)
-                                     (Σ (λ bj → Σ (λ (pfj : bj ∈ fst game) → (gi : extend A bi ⊩s φ) → isReduced (extend A bi) φ gi X →
-                                            gameEquiv (extend A bi) (extend A bj) φ gi (snd game pfj)
-                                            (lemma1 _ X)))))
-    isReduced A (∃p τ φ) game X = (bi : Unit × IndividS (fst A) τ → Type) → Either (bi ∈ fst game) (Either (extend A bi ⊩o φ false)
-                                     (Σ (λ bj → Σ (λ (pfj : bj ∈ fst game) → (gi : extend A bi ⊩s φ) → isReduced (extend A bi) φ gi X →
-                                            gameEquiv (extend A bi) (extend A bj) φ gi (snd game pfj)
-                                            (lemma1 _ X)))))
-    isReduced A (φ1 ∧ φ2) (Inl x) X = isReduced A φ1 (fst x) X × isReduced A φ2 (snd x) X
-    isReduced A (φ1 ∧ φ2) (Inr (Inl x)) X = isReduced A φ1 x X × A ⊩o φ2
-    isReduced A (φ1 ∧ φ2) (Inr (Inr x)) X = A ⊩o φ1 × isReduced A φ2 x X
-    isReduced A (φ1 ∨ φ2) (Inl x) X = isReduced A φ1 (fst x) X × isReduced A φ2 (snd x) X
-    isReduced A (φ1 ∨ φ2) (Inr (Inl x)) X = isReduced A φ1 x X × A ⊩o φ2 false
-    isReduced A (φ1 ∨ φ2) (Inr (Inr x)) X = A ⊩o φ1 false × isReduced A φ2 x X
-    isReduced A ⊤ game X = Unit
-    isReduced A ⊥ () X
-    isReduced A (R x x₁) game X = Unit
-    isReduced A (¬R x x₁) game X = Unit
--}
+ -- define provesR is a definition of a raw game that's reduced (define abbrev for (Σ \ (game : A ⊩s φ) game → isReduced A φ game X))
 
   -- naive : ∀ {Σ φ} {A : Structure Closed Σ} → Either (A ⊩c φ) (A ⊩c φ false)
   -- naive = {!!}
 
 --naive algorithm to work on the restricted bags... this is what we had on the board but I feel very wrong about this
  --postulate
---    naive : ∀ {Σ} → (φ : Formula Σ) (A : Structure Closed Σ) → (game : A ⊩s φ) → (X : fixed1 (fst A)) → Either (Either (A ⊩c φ) (A ⊩c φ false)) (isReduced A φ game X)
- {- naive (∀i τ φ) A = {!!}
-  naive (∃i τ φ) A = {!!}
-  naive (∀p τ φ) A = {!!}
-  naive (∃p τ φ) A = {!!}
-  naive (φ ∧ φ₁) A = {!!}
-  naive (φ ∨ φ₁) A = {!!}
-  naive ⊤ A = Inl <>
-  naive ⊥ A = Inr {!!}
-  naive (R x x₁) A = {!!}
-  naive (¬R x x₁) A = {!!} -}
+  naive : ∀ {Σ'} → (φ : Formula Σ') (A : Structure Closed Σ') → (X : fixed1 (fst A)) → Either (Either (A ⊩c φ) (A ⊩c φ false))
+    (Σ \ (game : A ⊩s φ) → Σ \ (pf : isRed A φ game X) →  provesR A φ game X pf)--(Σ \ (game : A ⊩s φ) → isRed A φ game X)
+  naive (∀i τ φ) A fix = {!!} --forall with finite domain so really just a tuple of just checking all the things in the subset
+  naive (∃i τ φ) A fix = {!!}
+  naive (∀p τ φ) A fix = {!!}
+  naive (∃p τ φ) A fix = {!!}
+  naive (φ1 ∧ φ2) A fix with naive φ1 A fix | naive φ2 A fix
+  naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inl (Inl x1) = Inl (Inl (x , x1))
+  naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inl (Inr x1) = Inl (Inr {!!}) --this game is false because one half is false
+  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inl (Inl x1) = Inl (Inr {!!}) --this game is false because one half is false
+  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inl (Inr x1) = Inl (Inr {!!}) --this game is false because both halves are false
+  naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inr x1 = Inr {!!} --the game is reduced because half of it is true and the rest is reduced
+  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inr x1 = Inl (Inr {!!}) --the formula is false because half of it is false and it's an and
+  naive (φ1 ∧ φ2) A fix | Inr x | Inl (Inl x1) = Inr {!x!} --the second part we proved true so idk what to do here?
+  naive (φ1 ∧ φ2) A fix | Inr x | Inl (Inr x1) = Inl (Inr {!!}) --the formula is false because half of it is false
+  naive (φ1 ∧ φ2) A fix | Inr x | Inr x1 = Inr ({!fst x  fst x1!} , ({!(fst (snd x) , fst (snd x1))!} , {!(snd (snd x) , snd (snd x1))!})) --how do i put the halves back together?
+  naive (φ ∨ φ₁) A fix = {!!}
+  naive ⊤ A fix = {!!}
+  naive ⊥ A fix = {!!}
+  naive (R x x₁) A fix = {!!}
+  naive (¬R x x₁) A fix = {!!}
 
 {-
   introduce : (A : Structure Open Σ) (φ : Formula Σ) (game : A ⊩s φ) (X : fixed1 (fst A)) →

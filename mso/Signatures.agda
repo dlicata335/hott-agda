@@ -51,6 +51,11 @@ module mso.Signatures where
   DecidableSub : (S1 : Subset) → Type
   DecidableSub S1  = ∀ {τ} (x : Individ τ) → Dec (S1 τ x)
 
+
+  --FiniteSub : (S1 : Subset) → Type
+  --FiniteSub
+
+
   example1 : Subset
   example1 node x = x == "a"
   example1 edge x = x == "7"
@@ -275,3 +280,6 @@ module mso.Signatures where
 --to do this we use strucureS, the underlying type of structure, to keep the subset constant and work on the stuff that depends on the subset
 ---easy tasks: change extend --> just call extend'
 ---write extend', finish gameEquiv 123 should be copy&paste
+
+
+--bigger picture issue is getting specs for outerlemmas going

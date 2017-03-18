@@ -61,7 +61,7 @@ module mso.outerlemmas where
 
 --jk dnt care
 -- A proves φ reduced -> A proves φ undecided
-  redToUndec : ∀ { Σ} (A : Structure Open Σ) (φ : Formula Σ) → (game : A ⊩s φ )→ (X : fixed1 (fst A))
+ {- redToUndec : ∀ { Σ} (A : Structure Open Σ) (φ : Formula Σ) → (game : A ⊩s φ )→ (X : fixed1 (fst A))
                → (red : isReduced A φ game X) → isUndecided A φ game
   redToUndec A (∀i τ φ) game X red = {!!} , {!!}
   redToUndec A (∃i τ φ) game X red = {!!}
@@ -72,7 +72,7 @@ module mso.outerlemmas where
   redToUndec A ⊤ game X red = {!!}
   redToUndec A ⊥ game X red = {!!}
   redToUndec A (R x x₁) game X red = {!!}
-  redToUndec A (¬R x x₁) game X red = {!!}
+  redToUndec A (¬R x x₁) game X red = {!!} -}
 
 
 --try to prove red -> closed truth
@@ -80,4 +80,4 @@ module mso.outerlemmas where
 
 --closure of A proves φ undec -> Either cl(A) proves φ true (open?) or A proves φ false (??)
 
---
+--JOIN INTRODUCE FORGET
