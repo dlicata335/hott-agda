@@ -184,9 +184,13 @@ module mso.opentruth where
                                                                                  gameEquiv (fst A , A') (fst A , A'') φ' gi (x bj pfbr2)
                                                                                  (lemma1 _ fix))))))))
 
-  provesR : ∀ {Σ oc} (A : Structure oc Σ) (φ : Formula Σ) (game : A ⊩s φ) (X : fixed1 (fst A)) → isRed A φ game X → Type
-  provesR A φ (leaf x) X pf = Unit
-  provesR A φ (node bs x) X pf = {!!} -- do I recur here? why is this not a datatype?
+  provesR : ∀ {Σ oc} (A : Structure oc Σ) (φ : Formula Σ) (X : fixed1 (fst A))  → Type
+  provesR  A φ X = Σ (λ (game : A ⊩s φ) → isRed A φ game X)
+
+  {-  provesR2 : ∀ {Σ oc} (A : Structure oc Σ) (φ : Formula Σ) (game : A ⊩s φ) (X : fixed1 (fst A)) → isRed A φ game X
+  provesR2 A φ (leaf x) X pf = Unit
+  provesR2 A φ (node bs x) X pf = {!!} -- this seems impossible
+-}
 
  -- define provesR is a definition of a raw game that's reduced (define abbrev for (Σ \ (game : A ⊩s φ) game → isReduced A φ game X))
 
@@ -195,23 +199,31 @@ module mso.opentruth where
 
 --naive algorithm to work on the restricted bags... this is what we had on the board but I feel very wrong about this
  --postulate
-  naive : ∀ {Σ'} → (φ : Formula Σ') (A : Structure Closed Σ') → (X : fixed1 (fst A)) → Either (Either (A ⊩c φ) (A ⊩c φ false))
-    (Σ \ (game : A ⊩s φ) → Σ \ (pf : isRed A φ game X) →  provesR A φ game X pf)--(Σ \ (game : A ⊩s φ) → isRed A φ game X)
+  naive : ∀ {Σ'} → (φ : Formula Σ') (A : Structure Closed Σ') → (X : fixed1 (fst A)) → Either (Either (A ⊩c φ) (A ⊩c φ false)) (provesR A φ X)
   naive (∀i τ φ) A fix = {!!} --forall with finite domain so really just a tuple of just checking all the things in the subset
   naive (∃i τ φ) A fix = {!!}
   naive (∀p τ φ) A fix = {!!}
   naive (∃p τ φ) A fix = {!!}
   naive (φ1 ∧ φ2) A fix with naive φ1 A fix | naive φ2 A fix
   naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inl (Inl x1) = Inl (Inl (x , x1))
-  naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inl (Inr x1) = Inl (Inr {!!}) --this game is false because one half is false
-  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inl (Inl x1) = Inl (Inr {!!}) --this game is false because one half is false
-  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inl (Inr x1) = Inl (Inr {!!}) --this game is false because both halves are false
+  naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inl (Inr x1) = Inl (Inr (Inr x1))
+  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inl (Inl x1) = Inl (Inr (Inl x))
+  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inl (Inr x1) = Inl (Inr (Inl x))
   naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inr x1 = Inr {!!} --the game is reduced because half of it is true and the rest is reduced
-  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inr x1 = Inl (Inr {!!}) --the formula is false because half of it is false and it's an and
+  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inr x1 = Inl (Inr (Inl x))
   naive (φ1 ∧ φ2) A fix | Inr x | Inl (Inl x1) = Inr {!x!} --the second part we proved true so idk what to do here?
-  naive (φ1 ∧ φ2) A fix | Inr x | Inl (Inr x1) = Inl (Inr {!!}) --the formula is false because half of it is false
-  naive (φ1 ∧ φ2) A fix | Inr x | Inr x1 = Inr ({!fst x  fst x1!} , ({!(fst (snd x) , fst (snd x1))!} , {!(snd (snd x) , snd (snd x1))!})) --how do i put the halves back together?
-  naive (φ ∨ φ₁) A fix = {!!}
+  naive (φ1 ∧ φ2) A fix | Inr x | Inl (Inr x1) = Inl (Inr (Inr x1))
+  naive (φ1 ∧ φ2) A fix | Inr x | Inr x1 = Inr ({! node (\ {ufstb → fstx, usndb → sndx} (fst x ,  fst x1)!} , ({!(fst (snd x) , fst (snd x1))!} , {!(snd (snd x) , snd (snd x1))!})) --how do i put the halves back together?
+  naive (φ1 ∨ φ2) A fix with naive φ1 A fix |  naive φ2 A fix
+  naive (φ1 ∨ φ2) A fix | Inl (Inl x) | Inl (Inl x₁) = Inl (Inl (Inl x))
+  naive (φ1 ∨ φ2) A fix | Inl (Inr x) | Inl (Inl x₁) = Inl (Inl (Inr x₁))
+  naive (φ1 ∨ φ2) A fix | Inl (Inl x) | Inl (Inr x₁) = Inl (Inl (Inl x))
+  naive (φ1 ∨ φ2) A fix | Inl (Inr x) | Inl (Inr x₁) = Inl (Inr (x , x₁))
+  naive (φ1 ∨ φ2) A fix | Inl (Inl x) | Inr x₁ = {!!} --what to do when one half is reduced and one half is true for existential?
+  naive (φ1 ∨ φ2) A fix | Inl (Inr x) | Inr x₁ = {!!} --this is a reduced game, how do i get there?
+  naive (φ1 ∨ φ2) A fix | Inr x | Inl (Inl x₁) = {!!}
+  naive (φ1 ∨ φ2) A fix | Inr x | Inl (Inr x₁) = {!!}
+  naive (φ1 ∨ φ2) A fix | Inr x | Inr x₁ = {!!}
   naive ⊤ A fix = {!!}
   naive ⊥ A fix = {!!}
   naive (R x x₁) A fix = {!!}

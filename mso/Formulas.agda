@@ -18,6 +18,15 @@ module mso.Formulas where
     ⊤ ⊥ : Formula Σ
     R ¬R : ∀ {τs} → (r τs) ∈ Σ → Terms Σ τs → Formula Σ -- e.g edge : (node,node → *) ∈ Σ , x : node, y:node ∈ Σ, then R edge (x,y) is a proposition
 
-  postulate
-    _* : ∀ {Σ} → Formula Σ → Formula Σ
-  --  φ * = {!!}
+
+  _* : ∀ {Σ} → Formula Σ → Formula Σ
+  ∀i τ φ * = ∃i τ (φ *)
+  ∃i τ φ * = ∀i τ (φ *)
+  ∀p τ φ * = ∃p τ (φ *)
+  ∃p τ φ * = ∀p τ (φ *)
+  (φ ∧ φ₁) * = (φ *) ∨ (φ₁ *)
+  (φ ∨ φ₁) * = (φ *) ∧ (φ₁ *)
+  ⊤ * = ⊥
+  ⊥ * = ⊤
+  R x x1 * = ¬R x x1
+  ¬R x x1 * = R x x1
