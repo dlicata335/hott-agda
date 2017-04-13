@@ -1,5 +1,5 @@
 
-{-# OPTIONS --type-in-type --without-K #-}
+{-# OPTIONS --type-in-type  #-}
 
 open import lib.Prelude
 open import mso.Signatures
@@ -197,18 +197,35 @@ module mso.opentruth where
 
   --lemmaNaive : if you have a gametree for fst A , snd A and φ1 and the same thing for φ2
   --> then you get the function required in 6 (takes a branch that was in the 2 element list and sends it to one of the gametrees
-  lemmaNaive : ∀ { Σ' : List SigThing} {oc' : OC} {A : Structure oc' Σ'} {φ1 φ2 φ' : Formula Σ'} → {A' : StructureS oc' (fst A) Σ'} →
+  lemmaNaive : ∀ { Σ' Σ'' : List SigThing} {oc' oc'' : OC} {A : Structure oc' Σ'} {φ1 φ2 : Formula Σ'} {φ' : Formula Σ'' } → {A' : StructureS oc'' (fst A) Σ''} →
                                          (game1 : A ⊩s φ1) (game2 : A ⊩s φ2) →
                                           (b : branch A (φ1 ∧ φ2) A' φ') →
                                            ((branchto A' φ' b ∈  branchto (snd A) φ1 (ubr isUand ufstb) ::  branchto (snd A) φ2 (ubr isUand usndb) :: [] →
                                                (fst A , A') ⊩s φ'))
   lemmaNaive g1 g2 (ebr () x₁)
-  lemmaNaive g1 g2 (ubr isUand x₁) = {!!}
+  lemmaNaive g1 g2 (ubr isUand ufstb) x = g1
+  lemmaNaive g1 g2 (ubr isUand usndb) x = g2
+
+  lemmaNaiveOr : ∀ { Σ' Σ'' : List SigThing} {oc' oc'' : OC} {A : Structure oc' Σ'} {φ1 φ2 : Formula Σ'} {φ' : Formula Σ''} → {A' : StructureS oc'' (fst A) Σ''} →
+                                         (game1 : A ⊩s φ1) (game2 : A ⊩s φ2) →
+                                          (b : branch A (φ1 ∨ φ2) A' φ') →
+                                           ((branchto A' φ' b ∈  branchto (snd A) φ1 (ebr isEor efstb) ::  branchto (snd A) φ2 (ebr isEor esndb) :: [] →
+                                               (fst A , A') ⊩s φ'))
+  lemmaNaiveOr g1 g2 brch = {!!}
+
+  --lemma for turning reduced halves into wholes needs to happen
+  {-lemmaNaiveRed : ∀ { Σ' : List SigThing} {oc' : OC} {A : Structure oc' Σ'} {φ1 φ2 φ' : Formula Σ'} → {A' : StructureS oc' (fst A) Σ'} →
+                                         (game1 : A ⊩s φ1) (game2 : A ⊩s φ2) →
+                                          (b : branch A (φ1 ∧ φ2) A' φ') →
+                                           ((branchto A' φ' b ∈  branchto (snd A) φ1 (ubr isUand ufstb) ::  branchto (snd A) φ2 (ubr isUand usndb) :: [] →
+                                               (fst A , A') ⊩s φ'))
+  lemmaNaiveRed g1 g2 = ? -}
+
 
 
 --naive algorithm to work on the restricted bags... this is what we had on the board but I feel very wrong about this
  --postulate
-  naive : ∀ {Σ'} → (φ : Formula Σ') (A : Structure Closed Σ') → (X : fixed1 (fst A)) → Either (Either (A ⊩c φ) (A ⊩c φ false)) (provesR A φ X)
+  naive : ∀ {Σ'} → (φ : Formula Σ') (A : Structure Closed Σ') → (X : fixed1 (fst A)) → Either (Either (A ⊩o φ) (A ⊩o φ false)) (provesR A φ X) --change to opentruth??
   naive (∀i τ φ) A fix = {!!} --forall with finite domain so really just a tuple of just checking all the things in the subset
   naive (∃i τ φ) A fix = {!!}
   naive (∀p τ φ) A fix = {!!}
@@ -222,7 +239,8 @@ module mso.opentruth where
   naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inr x1 = Inl (Inr (Inl x))
   naive (φ1 ∧ φ2) A fix | Inr x | Inl (Inl x1) = Inr {!x!} --the second part we proved true so idk what to do here?
   naive (φ1 ∧ φ2) A fix | Inr x | Inl (Inr x1) = Inl (Inr (Inr x1))
-  naive (φ1 ∧ φ2) A fix | Inr x | Inr x1 = Inr ((node (branchto _ _ (ubr isUand ufstb) :: branchto _ _ (ubr isUand usndb) :: []) {!!} )
+  naive (φ1 ∧ φ2) A fix | Inr x | Inr x1 = Inr ((node (branchto _ _ (ubr isUand ufstb) :: branchto _ _ (ubr isUand usndb) :: [])
+                                                                (λ b → lemmaNaive {A = A} {φ1 = φ1} {φ2 = φ2} (fst x) (fst x1) b) )
                                       , ({!(fst (snd x) , fst (snd x1))!} , {!(snd (snd x) , snd (snd x1))!})) --how do i put the halves back together?
   naive (φ1 ∨ φ2) A fix with naive φ1 A fix |  naive φ2 A fix
   naive (φ1 ∨ φ2) A fix | Inl (Inl x) | Inl (Inl x₁) = Inl (Inl (Inl x))
@@ -233,7 +251,10 @@ module mso.opentruth where
   naive (φ1 ∨ φ2) A fix | Inl (Inr x) | Inr x1 = Inr ({!fst x1!} , {!!}) --this is a reduced game, how do i get there?
   naive (φ1 ∨ φ2) A fix | Inr x | Inl (Inl x₁) = {!!}
   naive (φ1 ∨ φ2) A fix | Inr x | Inl (Inr x₁) = {!!}
-  naive (φ1 ∨ φ2) A fix | Inr x | Inr x₁ = {!!}
+  naive (φ1 ∨ φ2) A fix | Inr x | Inr x₁ = Inr ((node
+                                                   (branchto _ _ (ebr isEor efstb) ::
+                                                    branchto _ _ (ebr isEor esndb) :: [])
+                                                   {!!}) , {!!})
   naive ⊤ A fix = {!!}
   naive ⊥ A fix = {!!}
   naive (R x x₁) A fix = {!!}
@@ -242,4 +263,5 @@ module mso.opentruth where
 {-
   introduce : (A : Structure Open Σ) (φ : Formula Σ) (game : A ⊩s φ) (X : fixed1 (fst A)) →
   (xnew : (Sub (singleton {τ = τ} x) (complement X)))
+combine and introduce and forget
 -}

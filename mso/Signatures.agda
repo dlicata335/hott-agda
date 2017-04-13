@@ -190,7 +190,8 @@ module mso.Signatures where
                                                        → U2 (mapIndividS f v))
 
   iso : ∀ {Σ oc1 oc2} (A1 : Structure oc1 Σ) (A2 : Structure oc2 Σ) → Type
-  iso A1 A2 = Σ \ (f : ∀ {τ} → IndividS (fst A1) τ → IndividS (fst A2) τ )→ preserves A1 A2 f × (∀ τ → IsEquiv (f {τ})) --IsEquiv says that theres an inverse that composes to id with f
+  iso A1 A2 = Σ \ (f : ∀ {τ} → IndividS (fst A1) τ → IndividS (fst A2) τ )→ preserves A1 A2 f × (∀ τ → IsEquiv (f {τ}))
+  --IsEquiv says that theres an inverse that composes to id with f
 
 
   restrictionS : ∀ {Σ} {oc1} {A1} (A1' : StructureS oc1 A1  Σ) (S1 : Subset) → DecidableSub S1 → Sub S1 (A1) →  StructureS Open S1 Σ
@@ -208,9 +209,12 @@ module mso.Signatures where
                   (X : Subset)  (XinA1 : Sub X (fst A1)) (XinA2 : Sub X (fst A2))
                 → DecidableSub X
                 → Type
-  positionEquiv A1 A2 X X⊆A1 X⊆A2 decX = Σ \ (h : iso (restriction A1 (union (constants A1) X) (unionDec {S1 = constants A1} {S2 = X} (constantsDec A1) decX) (subLUB (constantSub A1) X⊆A1))
-                                                      (restriction A2 (union (constants A2) X) (unionDec {S1 = constants A2} {S2 = X} (constantsDec A2) decX) (subLUB (constantSub A2) X⊆A2)))
-                                         → ∀ {τ} (x : IndividS X τ) → fst h (promoteIndividS (subINR {A = constants A1} {B = X}) x) == promoteIndividS (subINR {A = constants A2} {B = X}) x
+  positionEquiv A1 A2 X X⊆A1 X⊆A2 decX = Σ \ (h : iso (restriction A1 (union (constants A1) X)
+                                                                   (unionDec {S1 = constants A1} {S2 = X} (constantsDec A1) decX) (subLUB (constantSub A1) X⊆A1))
+                                                      (restriction A2 (union (constants A2) X)
+                                                                   (unionDec {S1 = constants A2} {S2 = X} (constantsDec A2) decX) (subLUB (constantSub A2) X⊆A2)))
+                                         → ∀ {τ} (x : IndividS X τ) → fst h (promoteIndividS (subINR {A = constants A1} {B = X}) x) ==
+                                                      promoteIndividS (subINR {A = constants A2} {B = X}) x
 
  -- OLD defintion of positionEquiv by induction on the structure; might be useful if we need something like this later
  -- might need to check position equivalence at some point

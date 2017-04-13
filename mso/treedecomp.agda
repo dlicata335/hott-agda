@@ -20,7 +20,7 @@ module mso.treedecomp {Σ : Signature} {A : Structure Closed Σ} where
                →  ( ∀ {τs} → (xs : IndividsS (fst A) τs) (inBandx : allin τs (union B (singleton {τ = τ} x)) (nosubset τs (fst A) xs))
                → (xinxs : indIninds τ τs x (nosubset τs (fst A) xs))
                (rel : r τs ∈ Σ ) (relholds : get rel A xs) →  (allin τs (union X (singleton {τ = τ} x)) (nosubset τs (fst A) xs)))
-                    → TreeDecomp X B → TreeDecomp (union X (singleton {τ = τ} x)) B
+                    → TreeDecomp X B → TreeDecomp (union X (singleton {τ = τ} x)) (union B (singleton {τ = τ} x)) --shouldn't we have B union {x} here too?
       Join : ∀  (X : Subset) (B1 B2 : Subset)
              → (containment1 : Sub X (intersection B1 B2))
              → (containment2 : Sub (intersection B1 B2) X)

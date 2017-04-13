@@ -39,7 +39,7 @@ module mso.ClosedTruth where
   A ⊩c (φ1 ∨ φ2) = Either (A ⊩c φ1) (A ⊩c φ2)
   A ⊩c ⊤ = Unit
   A ⊩c ⊥ = Void
-  A ⊩c (R rel xs) = get rel A (gets xs A)
+  A ⊩c (R rel xs) = get rel A (gets xs A) --don't we want this to resolve to top or bottom?
   A ⊩c (¬R rel xs) = (get rel A (gets xs A)) → Void
 
   _⊩c_false : ∀ {Σ} → Structure Closed Σ → Formula Σ → Type

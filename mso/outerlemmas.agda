@@ -81,3 +81,38 @@ module mso.outerlemmas where
 --closure of A proves φ undec -> Either cl(A) proves φ true (open?) or A proves φ false (??)
 
 --JOIN INTRODUCE FORGET
+
+  algorithm : ∀ {Σ} {oc} {X B : Subset} (TD: Treedecomp X B) (A : Structure oc Σ) (φ : Formula Σ)
+              → Either (Either (A ⊩o φ) (A ⊩o φ false)) (provesR A φ X)
+  algorithm TD A φ = ? {-
+  algorithm Intro X ∪ x B ∪ x = combineIntro(algorithm(TD X B, A[B], φ), naive(φ, A[X∪x], X∪x))
+  algorithm Join X B1∪B2 = combineJoin(algorithm(TD X B1, A[B1], φ), algorithm(TD X B2, A[B2], φ))
+  algorithm Forget X\x B = combineForget(algorithm(TD X B, A[B], φ), naive(φ, A[X], X))
+  algorithm Empty empty empty = naive(φ, A[empty], empty)
+-}
+
+  combineIntro : ∀ {Σ} {oc} (Aset B X : Subset) (Astruc : StructureS oc Aset Σ)  (φ : Formula Σ) (x : IndividS A τ) (xnew : x ∉ B) (pf : Aset == union( B x) ) →
+    (recurcall: → Either (Either ((Aset, Astruc)[B] ⊩o φ) ((Aset, Astruc)[B] ⊩o φ false))) (nai : naive φ ((Aset, Astruc)[X∪x] X∪x))
+    →  Either (Either ((Aset, Astruc) ⊩o φ) ((Aset, Astruc) ⊩o φ false)) (provesR (Aset, Astruc) φ X)
+
+ combineForget : ∀ {Σ} {oc} ( B X X' : Subset) (Astruc : StructureS oc B Σ)  (φ : Formula Σ) (x : IndividS X τ) (xgone : x ∉ X') →
+    (recurcall: → Either (Either ((B, Astruc) ⊩o φ) ((B, Astruc) ⊩o φ false))) (nai : naive φ (B, Astruc)[X'] X')
+    →  Either (Either ((B, Astruc) ⊩o φ) ((B, Astruc) ⊩o φ false)) (provesR (B, Astruc) φ X')
+
+ combineJoin : ∀ {Σ} {oc} (Aset B1 B2 X : Subset) (Astruc : StructureS oc Aset Σ)  (φ : Formula Σ) (pf : Aset == union(B1 B2) ) →
+    (recurcall1: → Either (Either ((Aset, Astruc)[B1] ⊩o φ) ((Aset, Astruc)[B1] ⊩o φ false)) (provesR (Aset, Astruc)[B1] φ X))
+  (recurcall2: → Either (Either ((Aset, Astruc)[B2] ⊩o φ) ((Aset, Astruc)[B2] ⊩o φ false)) (provesR (Aset, Astruc)[B2] φ X))
+    →  Either (Either ((Aset, Astruc) ⊩o φ) ((Aset, Astruc) ⊩o φ false)) (provesR (Aset, Astruc) φ X)
+
+  provesRtoOpen : ∀ (stuff) (provesR A φ X) → A ⊩o φ
+
+--then send algo to either provesRtoOpen or OpentoClosed.
+
+--confused about: now where do we use lemma11? seems like I muddled 2 things into one.
+--do I need some wrapper that mediates between algorithm and combine that says that combine is the same as the union???
+
+--NVM?
+ --compatible :
+ --strucUnion :
+ emcUnion : ∀ {Σ} {oc1 oc2} (A1 : Structure oc1 Σ) (A1 : Structure oc2 Σ) (φ : Formula Σ) → (pf : A1 A2 compatible)
+                                → A1 ⊩o φ → A2 ⊩o φ → strucUnion (A1 A2) ⊩o φ
