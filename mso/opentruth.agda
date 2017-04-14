@@ -205,13 +205,13 @@ module mso.opentruth where
   lemmaNaive g1 g2 (ebr () x₁)
   lemmaNaive g1 g2 (ubr isUand ufstb) x = g1
   lemmaNaive g1 g2 (ubr isUand usndb) x = g2
-
+{-
   lemmaNaiveOr : ∀ { Σ' Σ'' : List SigThing} {oc' oc'' : OC} {A : Structure oc' Σ'} {φ1 φ2 : Formula Σ'} {φ' : Formula Σ''} → {A' : StructureS oc'' (fst A) Σ''} →
                                          (game1 : A ⊩s φ1) (game2 : A ⊩s φ2) →
                                           (b : branch A (φ1 ∨ φ2) A' φ') →
                                            ((branchto A' φ' b ∈  branchto (snd A) φ1 (ebr isEor efstb) ::  branchto (snd A) φ2 (ebr isEor esndb) :: [] →
                                                (fst A , A') ⊩s φ'))
-  lemmaNaiveOr g1 g2 brch = {!!}
+  lemmaNaiveOr g1 g2 brch = {!!} -}
 
   --lemma for turning reduced halves into wholes needs to happen
   {-lemmaNaiveRed : ∀ { Σ' : List SigThing} {oc' : OC} {A : Structure oc' Σ'} {φ1 φ2 φ' : Formula Σ'} → {A' : StructureS oc' (fst A) Σ'} →
@@ -224,17 +224,17 @@ module mso.opentruth where
 
 
 --naive algorithm to work on the restricted bags... this is what we had on the board but I feel very wrong about this
- --postulate
-  naive : ∀ {Σ'} → (φ : Formula Σ') (A : Structure Closed Σ') → (X : fixed1 (fst A)) → Either (Either (A ⊩o φ) (A ⊩o φ false)) (provesR A φ X) --change to opentruth??
-  naive (∀i τ φ) A fix = {!!} --forall with finite domain so really just a tuple of just checking all the things in the subset
+  postulate
+    naive : ∀ {Σ'} → (φ : Formula Σ') (A : Structure Closed Σ') → (X : fixed1 (fst A)) → Either (Either (A ⊩o φ) (A ⊩o φ false)) (provesR A φ X) --change to opentruth??
+ {- naive (∀i τ φ) A fix = {!!} --forall with finite domain so really just a tuple of just checking all the things in the subset
   naive (∃i τ φ) A fix = {!!}
   naive (∀p τ φ) A fix = {!!}
   naive (∃p τ φ) A fix = {!!}
   naive (φ1 ∧ φ2) A fix with naive φ1 A fix | naive φ2 A fix
-  naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inl (Inl x1) = Inl (Inl (x , x1))
-  naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inl (Inr x1) = Inl (Inr (Inr x1))
-  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inl (Inl x1) = Inl (Inr (Inl x))
-  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inl (Inr x1) = Inl (Inr (Inl x))
+  naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inl (Inl x1) = Inl (Inl ? )
+  naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inl (Inr x1) = Inl (Inr ?)
+  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inl (Inl x1) = Inl (Inr ?)
+  naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inl (Inr x1) = Inl (Inr ?)
   naive (φ1 ∧ φ2) A fix | Inl (Inl x) | Inr x1 = Inr {!!} --the game is reduced because half of it is true and the rest is reduced
   naive (φ1 ∧ φ2) A fix | Inl (Inr x) | Inr x1 = Inl (Inr (Inl x))
   naive (φ1 ∧ φ2) A fix | Inr x | Inl (Inl x1) = Inr {!x!} --the second part we proved true so idk what to do here?
@@ -259,7 +259,7 @@ module mso.opentruth where
   naive ⊥ A fix = {!!}
   naive (R x x₁) A fix = {!!}
   naive (¬R x x₁) A fix = {!!}
-
+-}
 {-
   introduce : (A : Structure Open Σ) (φ : Formula Σ) (game : A ⊩s φ) (X : fixed1 (fst A)) →
   (xnew : (Sub (singleton {τ = τ} x) (complement X)))
