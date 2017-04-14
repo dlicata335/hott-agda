@@ -82,7 +82,7 @@ module mso.outerlemmas where
 
 --JOIN INTRODUCE FORGET
 
-  algorithm : ∀ {Σ} {oc} {X B : Subset} (TD: Treedecomp X B) (A : Structure oc Σ) (φ : Formula Σ)
+  algorithm : ∀ {Σ} {oc} {X B : Subset} (TD : Treedecomp X B) (A : Structure oc Σ) (φ : Formula Σ)
               → Either (Either (A ⊩o φ) (A ⊩o φ false)) (provesR A φ X)
   algorithm TD A φ = ? {-
   algorithm Intro X ∪ x B ∪ x = combineIntro(algorithm(TD X B, A[B], φ), naive(φ, A[X∪x], X∪x))
