@@ -26,12 +26,12 @@ module mso.NewOuterLemmas where
                     (b1subAset : Sub B1 (fst A)) (b2subAset : Sub B2 (fst A)) →
                                (recurcall1 : (provesR (restriction A B1 decb1 b1subAset) φ (fixed2fixed1 B1 B2 X)))
                                (recurcall2 : (provesR (restriction A B2 decb2 b2subAset) φ (fixed2fixed2 B1 B2 X)))
-                               →  Either (Either ((restriction A (union B1 B2) (unionDec {S1 = B1} {B2} decb1 decb2) --uniondec bc we need to show B1UB2 is decidable for restriction
-                                                               (subLUB b1subAset b2subAset)) ⊩o φ) --need to show B1UB2 ⊂ A for restriction
-                                                 ((restriction A (union B1 B2) (unionDec {S1 = B1} {B2} decb1 decb2)
-                                                               (subLUB b1subAset b2subAset)) ⊩o φ false))
-                                         (provesR (restriction A (union B1 B2) (unionDec {S1 = B1} {B2} decb1 decb2)
-                                                  (subLUB b1subAset b2subAset)) φ (fixed2union B1 B2 X)) --subLUB to show B1UB2 ⊂ fst A, fixed2union to say that X is a bag of this union
+                            → let B1∪B2 = (restriction A (union B1 B2) (unionDec {S1 = B1} {B2} decb1 decb2) --uniondec bc we need to show B1UB2 is decidable for restriction
+                                                               (subLUB b1subAset b2subAset))
+                               in
+                                Either (Either (B1∪B2 ⊩o φ) --need to show B1UB2 ⊂ A for restriction
+                                               (B1∪B2 ⊩o φ false))
+                                               (provesR B1∪B2 φ (fixed2union B1 B2 X)) --subLUB to show B1UB2 ⊂ fst A, fixed2union to say that X is a bag of this union
   combineJoin B1 B2 A φ decb1 decb2 X b1subAset b2subAset recurcall1 recurcall2 = {!!}
 
   combineIntro : ∀ {Σ} {τ} (B : Subset) (A : Structure Closed Σ) (φ : Formula Σ) (x : IndividS (fst A) τ)
@@ -39,27 +39,25 @@ module mso.NewOuterLemmas where
                                         (decb : DecidableSub B) (bsubAset : Sub B (fst A)) (X : fixed1 B) → --B is decidable and a subset of universe of A
                                         (recurcall : provesR (restriction A B decb bsubAset) φ X) → --result of recursive call from intro
                                         (nai : provesR (restriction A (union (fst X) (singleton {τ = τ} (fst x))) --result of naive algorithm on A[X∪x] , φ
-                                                                    (unionDec {S1 = (fst X)} {singleton (fst x)} (snd (snd X)) (decSingleton (fst x)))
-                                                                     (subLUB (subtrans (fst (snd X)) bsubAset) (individSinSubset (fst A) x))) --this was all the restriction
+                                                                      (unionDec {S1 = (fst X)} {singleton (fst x)} (snd (snd X)) (decSingleton (fst x)))
+                                                                      (subLUB (subtrans (fst (snd X)) bsubAset) (individSinSubset (fst A) x))) --this was all the restriction
                                                        φ ((fst X) , (subINL , (snd (snd X))))) --formula and bag
-                       → Either (Either ((restriction A (union B (singleton {τ = τ} (fst x))) --restriction subset
+                       → let B∪x = (restriction A (union B (singleton {τ = τ} (fst x))) --restriction subset
                                                       (unionDec {S1 = B} {singleton (fst x)} decb (decSingleton (fst x))) --that subset is dec
-                                                        (subLUB bsubAset (individSinSubset (fst A) x))) ⊩o φ) -- that subset is subset of universe
-                                        ((restriction A (union B (singleton {τ = τ} (fst x)))
-                                                      (unionDec {S1 = B} {singleton (fst x)} decb (decSingleton (fst x)))
-                                                        (subLUB bsubAset (individSinSubset (fst A) x))) ⊩o φ false))
-                                (provesR (restriction A (union B (singleton {τ = τ} (fst x)))
-                                                     (unionDec {S1 = B} {singleton (fst x)} decb (decSingleton (fst x))) --restriction subset is decidable
                                                        (subLUB bsubAset (individSinSubset (fst A) x)))
-                                                       φ ((fst X) , ((subtrans (fst (snd X)) subINL) , (snd (snd X))))) --formula and bag
+                         in
+                           Either (Either (B∪x ⊩o φ) -- that subset is subset of universe
+                                          (B∪x ⊩o φ false))
+                                          (provesR B∪x φ ((fst X) , ((subtrans (fst (snd X)) subINL) , (snd (snd X))))) --formula and bag
   combineIntro B A φ x xnew decB bsubAset recurcall nai = {!!}
 
+
   combineForget : ∀ {Σ} {τ} (B : Subset) (A : Structure Closed Σ)  (φ : Formula Σ) (X : fixed1 B)
-                               (x : IndividS (fst X) τ) (decB : DecidableSub B) (bsubAset : Sub B (fst A))
-                                  (xgone : (Sub (singleton {τ = τ} (fst x))) (complement (fst X))) →
-                               (recurcall :   (provesR (restriction A (union B (singleton {τ = τ} (fst x))) (unionDec {S1 = B} {singleton (fst x)} decB (decSingleton {τ = τ} (fst x)))
-                               (subLUB bsubAset (subtrans (subtrans (individSinSubset (fst X) x) (fst (snd X))) (bsubAset)))) φ (fixed1Sub X subINL)))
-                    → (provesR (restriction A B decB bsubAset) φ X )
+                            (x : IndividS (fst X) τ) (decB : DecidableSub B) (bsubAset : Sub B (fst A))
+                            (xgone : (Sub (singleton {τ = τ} (fst x))) (complement (fst X))) →
+                            (recurcall :   (provesR (restriction A (union B (singleton {τ = τ} (fst x))) (unionDec {S1 = B} {singleton (fst x)} decB (decSingleton {τ = τ} (fst x)))
+                            (subLUB bsubAset (subtrans (subtrans (individSinSubset (fst X) x) (fst (snd X))) (bsubAset)))) φ (fixed1Sub X subINL)))
+                          → (provesR (restriction A B decB bsubAset) φ X )
   combineForget B A φ X x decB bsubAset xgone recurcall = {!!}
 
 
