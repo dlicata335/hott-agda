@@ -16,7 +16,7 @@ module mso.NewOuterLemmas where
     fixed2fixed1 : ∀ (A1 A2 : Subset) → fixed A1 A2 → fixed1 A1 --when you have a bag (fixed) that's in 2 subsets, it's in the other one. i.e. fixed -> fixed1
     fixed2fixed2 : ∀ (A1 A2 : Subset) → fixed A1 A2 → fixed1 A2 -- fixed - fixed1 (part 2)
     fixed2union : ∀ (A1 A2 : Subset) → fixed A1 A2 → fixed1 (union A1 A2) -- if you have a decidable subset that's in both A1 and A2, then it's in A1 union A2
-    fixed1Sub : ∀ (A1 A2 : Subset) → fixed1 A1 → Sub A1 A2 → fixed1 A2 --if you have X = fixed1 A for any set A, X =fixed1 A' for any superset A' of A
+    fixed1Sub : ∀ {A1 A2 : Subset} → fixed1 A1 → Sub A1 A2 → fixed1 A2 --if you have X = fixed1 A for any set A, X =fixed1 A' for any superset A' of A
   postulate
     decSingleton : ∀ {τ} → (x : Individ τ) → DecidableSub (singleton {τ = τ} x) --a singleton set is always decidable
     individSinSubset : ∀ {τ} (A : Subset) → ( x : IndividS A τ) → Sub (singleton {τ = τ} (fst x)) A --if x is an IndividS A for some subset A, then it's in A!!
@@ -52,23 +52,24 @@ module mso.NewOuterLemmas where
                                                      (unionDec {S1 = B} {singleton (fst x)} decb (decSingleton (fst x))) --restriction subset is decidable
                                                        (subLUB bsubAset (individSinSubset (fst A) x)))
                                                        φ ((fst X) , ((subtrans (fst (snd X)) subINL) , (snd (snd X))))) --formula and bag
-  combineIntro  = {!!}
+  combineIntro B A φ x xnew decB bsubAset recurcall nai = {!!}
 
   combineForget : ∀ {Σ} {τ} (B : Subset) (A : Structure Closed Σ)  (φ : Formula Σ) (X : fixed1 B)
                                (x : IndividS (fst X) τ) (decB : DecidableSub B) (bsubAset : Sub B (fst A))
                                   (xgone : (Sub (singleton {τ = τ} (fst x))) (complement (fst X))) →
-                                         (recurcall :   (provesR (restriction A B decB bsubAset) φ X ))
+                               (recurcall :   (provesR (restriction A (union B (singleton {τ = τ} (fst x))) (unionDec {S1 = B} {singleton (fst x)} decB (decSingleton {τ = τ} (fst x)))
+                               (subLUB bsubAset (subtrans (subtrans (individSinSubset (fst X) x) (fst (snd X))) (bsubAset)))) φ (fixed1Sub X subINL)))
                     → (provesR (restriction A B decB bsubAset) φ X )
-  combineForget = {!!}
+  combineForget B A φ X x decB bsubAset xgone recurcall = {!!}
 
 
-  algorithm : ∀ {Σ} (B : Subset) (X : fixed1 B) (A : Structure Closed Σ) (φ : Formula Σ) (BinA : Sub B (fst A))
+  algorithm : ∀ {Σ} (B : Subset) (X : fixed1 B) (A : Structure Closed Σ) (φ : Formula Σ) (decB : DecidableSub B)(BinA : Sub B (fst A))
                          → (TD : TreeDecomp {Σ = Σ} {A} (fst X) B)
-                           → Either (Either (A ⊩o φ) (A ⊩o φ false)) (provesR A φ (fixed1Sub B (fst A) X BinA))
-  algorithm = {!!}
+                           → Either (Either (A ⊩o φ) (A ⊩o φ false)) (provesR (restriction A B decB BinA)  φ X)
+  algorithm B X A φ decB BinA TD = {!!}
 
   openToClosed : ∀ {Σ} → (A : Structure Closed Σ) (φ : Formula Σ) → (otruth : A ⊩o φ) → A ⊩c φ --EMC -> MC i.e. Lemma 11
-  openToClosed = {!!}
+  openToClosed A φ otruth = {!!}
 
   provesRtoClosed :  ∀ {Σ} → (A : Structure Closed Σ) (φ : Formula Σ) (X : fixed1 (fst A)) → (red : provesR A φ X ) → A ⊩c φ --reducedEMC -> MC i.e. Lemma 13
-  provesRtoClosed = {!!}
+  provesRtoClosed A φ X redgame = {!!}
