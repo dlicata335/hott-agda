@@ -1,0 +1,94 @@
+% Setup {{{
+
+  % Imports and Styling {{{
+  \RequirePackage{amsmath}
+  \documentclass[11pt,final]{westhesis} % add "final" flag when finished
+  \def\textmu{}
+
+  %include agda.fmt
+  \usepackage{natbib, fullpage, textgreek, bussproofs, epigraph, color, float,
+              enumerate, url, xcolor, graphicx, hyperref, listings, xfrac}
+  \hypersetup{pdftex, backref = true, colorlinks = true, allcolors = {blue}}
+  \setcounter{tocdepth}{4}
+  \setcounter{secnumdepth}{4}
+  \renewcommand{\hscodestyle}{\small}
+  % }}}
+
+  % Editorial commands {{{
+  \newcommand{\Red}[1]{{\color{red} #1}}
+  \newcommand{\nop}[0]{} % used to reconcile vim folds and latex curly braces
+  \newcommand{\task}[1]{{\color{red} TASK: #1}}
+  \newcommand{\tocite}[1]{{\color{red} [cite #1]}\xspace}
+  %  }}}
+
+  % Math and code commands {{{
+  \renewcommand{\paragraph}[1]{\bigskip\textbf{#1}}
+  \newcommand{\figrule}{\begin{center}\hrule\end{center}}
+  \newcommand{\set}[1]{\left\{#1\right\}}
+  \DeclareRobustCommand{\shamrock}{\raisebox{-.035em}{\includegraphics[width=.75em, height=.75em]{symbols/command}}\nop}
+  \DeclareRobustCommand{\col}{\raisebox{-.035em}{\includegraphics[width=.30em, height=.75em]{symbols/colon}}\nop}
+  % }}}
+
+  % Unicode chars not supported by lhs2TeX {{{
+  \DeclareUnicodeCharacter{738}{$^\text{s}$}
+  \DeclareUnicodeCharacter{7503}{$^\text{k}$}
+  \DeclareUnicodeCharacter{739}{$^\text{x}$}
+  \DeclareUnicodeCharacter{7504}{$^\text{m}$}
+  \DeclareUnicodeCharacter{8338}{$_\text{o}$}
+  \DeclareUnicodeCharacter{8339}{$_\text{x}$}
+  \DeclareUnicodeCharacter{11388}{$_\text{j}$}
+  \DeclareUnicodeCharacter{8709}{$\varnothing$} % overwriting \emptyset
+  \DeclareUnicodeCharacter{8984}{$\shamrock$}
+  \DeclareUnicodeCharacter{10626}{$\col$}
+  \DeclareUnicodeCharacter{65307}{$;$}
+  % }}}
+
+% }}}
+
+% Title, Abstract, TOC {{{
+
+\title{Verified Compilation of ML5 to JavaScript}
+\author{Joomy Korkut}
+\advisor{Daniel R. Licata}
+\department{Mathematics and Computer Science}
+\submitdate{April 2017}
+\copyrightyear{2017}
+\pagestyle{chapsec}
+
+\makeindex
+\begin{document}
+
+\begin{acknowledgements}
+
+\end{acknowledgements}
+
+\begin{abstract}
+This is the abstract.
+\end{abstract}
+
+\frontmatter
+\maketitle
+\makededication
+\makeack
+\phantomsection
+\addcontentsline{toc}{section}{Abstract}
+\makeabstract
+\phantomsection
+\addcontentsline{toc}{section}{Table of Contents}
+\tableofcontents
+\mainmatter
+% }}}
+
+% Introduction {{{
+\section{Introduction}
+
+
+% }}}
+
+% End {{{
+\bibliographystyle{plain}
+\bibliography{paper}
+\printindex
+\backmatter
+\end{document}
+% }}}

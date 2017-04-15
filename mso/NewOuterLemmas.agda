@@ -51,12 +51,11 @@ module mso.NewOuterLemmas where
                                           (provesR B∪x φ ((fst X) , ((subtrans (fst (snd X)) subINL) , (snd (snd X))))) --formula and bag
   combineIntro B A φ x xnew decB bsubAset recurcall nai = {!!}
 
-
+--fix this: recurcall should have B not B union X
   combineForget : ∀ {Σ} {τ} (B : Subset) (A : Structure Closed Σ)  (φ : Formula Σ) (X : fixed1 B)
                             (x : IndividS (fst X) τ) (decB : DecidableSub B) (bsubAset : Sub B (fst A))
                             (xgone : (Sub (singleton {τ = τ} (fst x))) (complement (fst X))) →
-                            (recurcall :   (provesR (restriction A (union B (singleton {τ = τ} (fst x))) (unionDec {S1 = B} {singleton (fst x)} decB (decSingleton {τ = τ} (fst x)))
-                            (subLUB bsubAset (subtrans (subtrans (individSinSubset (fst X) x) (fst (snd X))) (bsubAset)))) φ (fixed1Sub X subINL)))
+                            (recurcall :   (provesR (restriction A B decB bsubAset) φ (X)))
                           → (provesR (restriction A B decB bsubAset) φ X )
   combineForget B A φ X x decB bsubAset xgone recurcall = {!!}
 
