@@ -230,9 +230,9 @@
 
 \def\ps@chapsec{
   \gdef\ps@headings{
-    %\def\@oddhead{
-    %  \normalfont\scriptsize\rlap{\leftmark{}{}}\hfill\llap{\rightmark{}{}}
-    %}
+    \def\@oddhead{
+      \normalfont\scriptsize\rlap{\leftmark{}{}}\hfill\llap{\rightmark{}{}}
+    }
     \def\@oddfoot{
       \normalfont\scriptsize\rlap{\ttfamily\WT@showdraftfoot\hfill}%
       \hfil\thepage\hfil

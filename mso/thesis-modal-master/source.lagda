@@ -7,7 +7,7 @@
   \def\textmu{}
 
   %include agda.fmt
-  \usepackage{amsmath, natbib, fullpage, textgreek, bussproofs, epigraph, color, float,
+  \usepackage{amsmath, natbib, textgreek, bussproofs, epigraph, color, float,
               enumerate, url, xcolor, graphicx, hyperref, listings, xfrac}
   \hypersetup{pdftex, backref = true, colorlinks = true, allcolors = {blue}}
   \usepackage{ dsfont }
@@ -47,7 +47,7 @@
 
 % Title, Abstract, TOC {{{
 
-\title{A Formal Verification of Courcelle's Theorem}
+\title{Towards A Formal Verification of Courcelle's Theorem}
 \author{Emily Black}
 \advisor{Daniel R. Licata}
 \department{Mathematics and Computer Science}
